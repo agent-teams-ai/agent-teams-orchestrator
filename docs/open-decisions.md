@@ -31,11 +31,11 @@ Choose the first aggregate, outbox, inbox, and projection stores. The likely loc
 and hosted choices are SQLite and PostgreSQL, but transaction boundaries,
 migrations, concurrency, and repository contracts need a dedicated decision.
 
-## OD-004: Exact AgentRuntimePort
+## OD-004: Exact runtime capability ports
 
 Complete a capability matrix against `ar`, OpenCode requirements, managed resume,
 streaming, approvals, snapshots, topology, and recovery. Method names and schemas
-must follow the matrix and a conformance test kit.
+must follow the matrix, Interface Segregation, and a conformance test kit.
 
 ## OD-005: Temporal workflow boundary
 
@@ -51,6 +51,7 @@ Temporal types to the core.
 Validate candidate aggregates with concrete invariants and concurrency scenarios:
 
 - `Team` versus `TeamRoster`;
+- `Project` versus `WorkspaceRegistration`;
 - `Task` versus dependency graph ownership;
 - `OrchestrationRun` versus `RunPlan`;
 - `Inbox`, `Conversation`, and `Delivery`.
@@ -81,3 +82,41 @@ Event sourcing remains out of scope unless accepted separately.
 Define the compatibility facade that preserves current IPC/shared DTO behavior
 while the desktop switches from legacy provisioning to the new orchestrator.
 Migration must avoid overlapping with active hosted-web refactoring where possible.
+
+## OD-011: Context-map validation
+
+Validate Project and Workspace, Identity and Access, Policy and Approvals, and the
+three core subdomains through event storming and current-system analysis. Decide
+which proposed areas are bounded contexts, supporting modules, or external
+upstreams.
+
+## OD-012: Identity, authorization, and tenant isolation
+
+Define principal types, tenant/project membership, service identities, authorization
+checks, API authentication, secret references, and hosted isolation. Authentication
+may be external, but authorization ownership cannot remain implicit.
+
+## OD-013: Partial failure and compensation
+
+Define orchestration behavior when one team member fails to start, one runtime lane
+loses ownership, a message is accepted but not observed, or a task completes after
+cancellation. One participant failure must not automatically stop unrelated
+participants unless policy requires it.
+
+## OD-014: Observability and OpenTelemetry
+
+Choose semantic conventions, redaction, metrics, tracing, logs, sampling, exporters,
+retention, and correlation propagation. Provider prompts, credentials, attachments,
+and workspace content must be private by default.
+
+## OD-015: External task-board migration
+
+Define the compatibility adapter for the current desktop board and the canonical
+Task Coordination mapping. Cover external IDs, status translation, conflicts,
+offline behavior, reconciliation, and staged migration without a deep board
+rewrite in the first phase.
+
+## OD-016: Public error model
+
+Define stable error codes, retryability, operator-action classification, validation
+details, correlation IDs, and safe diagnostics shared by APIs and generated SDKs.

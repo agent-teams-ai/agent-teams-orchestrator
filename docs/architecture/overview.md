@@ -47,18 +47,19 @@ flowchart LR
 
     SDK --> Inbound["Inbound Adapters"]
     API --> Inbound
-    Inbound --> Contexts["Bounded Contexts"]
+    Inbound --> Contexts["Bounded Context Application Ports"]
 
-    Contexts --> RuntimePort["AgentRuntimePort"]
-    Contexts --> EventPort["EventBusPort"]
+    Contexts --> RuntimePort["Runtime Capability Ports"]
     Contexts --> WorkflowPort["WorkflowEnginePort"]
-    Contexts --> RepositoryPorts["Repository Ports"]
+    Contexts --> PersistencePorts["Repository and Outbox Ports"]
 
     RuntimePort --> AR["ar Runtime"]
     AR --> Providers["Claude / Codex / OpenCode"]
-    EventPort --> NATS["NATS JetStream Adapter"]
     WorkflowPort --> Temporal["Temporal Adapter"]
-    RepositoryPorts --> Storage["SQLite / PostgreSQL Adapters"]
+    PersistencePorts --> Storage["Context-Owned SQLite / PostgreSQL Adapters"]
+    Storage --> Relay["Outbox Relay"]
+    Relay --> EventPort["Event Transport Port"]
+    EventPort --> NATS["NATS JetStream Adapter"]
 ```
 
 ## Control plane versus runtime
@@ -104,6 +105,28 @@ The initial design is not event sourced. Event journals support audit, diagnosti
 replay of projections, and simulation. Making events the authoritative source of
 aggregate state requires a separate ADR.
 
+Persistence is context-owned. Platform persistence packages may provide drivers,
+transaction primitives, migration tooling, and test harnesses, but they do not own
+context repositories, tables, migrations, inboxes, outboxes, or projections.
+
+## Scope and access
+
+Every team, task, orchestration run, message, and runtime binding belongs to one
+project. Workspace registrations belong to that project and are referenced by
+opaque workspace identities rather than arbitrary paths.
+
+Authentication may be delegated to an external identity provider. Authorization,
+tenant membership, project membership, and machine-client access require an
+explicit orchestrator boundary and must be enforced before application use cases
+execute. The exact Identity and Access context remains part of context-map
+validation.
+
+## Read models
+
+Write-side bounded contexts own their context-local projections. A query-composition
+adapter may join published read models for a client view, but it does not become an
+owner of business state and cannot write context storage.
+
 ## Evolution to services
 
 A bounded context may be extracted when there is demonstrated need for independent
@@ -118,6 +141,10 @@ Extraction readiness requires:
 - idempotent consumers;
 - explicit consistency expectations;
 - no cross-context database transactions.
+
+The initial context map remains proposed until it is validated against concrete
+use cases, current desktop behavior, event-storming scenarios, and concurrency
+boundaries.
 
 ## Non-goals
 

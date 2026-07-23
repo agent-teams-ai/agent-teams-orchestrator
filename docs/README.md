@@ -13,14 +13,15 @@ Orchestrator.
 6. [Eventing and reliability](architecture/eventing-and-reliability.md)
 7. [SDK and transports](architecture/sdk-and-transports.md)
 8. [Testing strategy](architecture/testing-strategy.md)
-9. [Architecture decisions](decisions/README.md)
-10. [Open decisions](open-decisions.md)
-11. [Glossary](glossary.md)
+9. [Extension points](architecture/extension-points.md)
+10. [Architecture decisions](decisions/README.md)
+11. [Open decisions](open-decisions.md)
+12. [Glossary](glossary.md)
 
 ## Document status
 
-Architecture documents describe the accepted baseline. An ADR records why a
-decision was made and what it supersedes. Open questions belong in
+Each architecture document declares its status. An ADR records why a decision was
+made and what it supersedes. Open questions belong in
 `open-decisions.md`; they must not be silently resolved in implementation code.
 
 Use the following status vocabulary:

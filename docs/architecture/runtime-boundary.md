@@ -10,14 +10,16 @@ Provider implementations belong behind `ar`.
 ```mermaid
 flowchart LR
     Orchestrator["Orchestrator Contexts"]
-    Port["AgentRuntimePort"]
+    Gateway["Runtime Gateway Facade"]
+    Ports["Narrow Runtime Capability Ports"]
     Adapter["ar Client Adapter"]
     AR["ar Runtime"]
     Driver["Provider Driver"]
     Provider["Claude / Codex / OpenCode"]
 
-    Orchestrator --> Port
-    Adapter -. "implements" .-> Port
+    Orchestrator --> Gateway
+    Gateway --> Ports
+    Adapter -. "implements" .-> Ports
     Adapter --> AR
     AR --> Driver
     Driver --> Provider
@@ -42,20 +44,30 @@ flowchart LR
 There must never be two writers for one runtime mutation or two supervisors for
 one agent process.
 
-## Contract capability families
+## Interface segregation
 
-Exact method names are not accepted yet. The runtime contract must cover:
+One large `AgentRuntimePort` would force providers and test doubles to implement
+capabilities they do not support. The application depends on narrow ports, for
+example:
 
-- capability discovery;
-- preflight and admission;
-- start;
-- observe and snapshot;
-- event subscription with a resumable cursor;
-- input or message delivery;
-- managed resume;
-- approval listing and answering;
-- cancellation and stop;
-- recovery after host or runtime restart.
+```text
+RuntimeCapabilitiesPort
+RuntimeAdmissionPort
+RuntimeLifecyclePort
+RuntimeObservationPort
+RuntimeEventStreamPort
+RuntimeInputPort
+RuntimeApprovalPort
+RuntimeRecoveryPort
+```
+
+Names remain proposed until OD-004 is resolved. A `RuntimeGateway` facade may
+compose these ports for convenient wiring, but consumers request only the
+capabilities they use.
+
+Capability discovery is explicit. Unsupported resume, approval, streaming, or
+recovery behavior is represented as a typed capability/result, not an absent
+optional method or provider-name branch.
 
 The contract must support different topology models:
 
@@ -76,7 +88,8 @@ Commands must carry enough identity to reject stale ownership:
 - aggregate generation or expected revision;
 - idempotency key;
 - correlation and causation IDs;
-- optional lease or fencing token.
+- orchestration-side expected generation;
+- runtime fencing token when the runtime contract requires one.
 
 Opaque runtime references must not be reconstructed from process IDs, paths, or
 provider session names.
@@ -87,16 +100,23 @@ Runtime events are facts emitted by `ar`. Orchestration projections combine thos
 facts with product state. Runtime snapshots are replaceable read models, not
 orchestration aggregates.
 
-Every snapshot needs:
+Every orchestrator-facing snapshot needs:
 
 - runtime reference and provider kind;
 - observation timestamp;
+- orchestrator observation revision;
+- source event cursor or explicit `unavailable`;
 - lifecycle and liveness state;
+- freshness state: `fresh`, `stale`, `unknown`, or `unavailable`;
 - progress evidence;
 - pending interaction state;
 - outcome or failure classification;
 - warning and diagnostic codes;
-- monotonic revision or cursor where supported.
+- desired-state correlation without overwriting desired orchestration state.
+
+If a provider cannot expose a monotonic revision, Runtime Gateway assigns an
+observation revision while preserving the absence of a provider cursor. A stale
+snapshot is never silently interpreted as current liveness.
 
 ## OpenCode target placement
 
@@ -112,7 +132,7 @@ be copied into the new core without classification.
 Use an anti-corruption adapter during migration:
 
 1. freeze legacy behavior with contract tests;
-2. implement the orchestrator runtime port against the legacy bridge;
+2. implement the narrow orchestrator runtime ports against the legacy bridge;
 3. implement the same conformance suite for the new `ar` provider adapter;
 4. permit shadow reads where useful;
 5. never permit dual writes or dual process ownership;

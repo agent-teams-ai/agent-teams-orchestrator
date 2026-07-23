@@ -40,10 +40,11 @@ packages/
 ```text
 features/task-lifecycle/
   contracts/
-    commands/
-    queries/
-    events/
     schemas/
+      commands/
+      queries/
+      events/
+      errors/
   domain/
     aggregates/
     entities/
@@ -52,6 +53,7 @@ features/task-lifecycle/
     services/
     errors/
   application/
+    models/
     use-cases/
     policies/
     ports/
@@ -61,6 +63,7 @@ features/task-lifecycle/
     in/
     out/
   composition/
+  projections/
   tests/
     domain/
     application/
@@ -70,19 +73,26 @@ features/task-lifecycle/
 Directories are created only when they contain a real artifact. Empty ceremonial
 folders are prohibited.
 
+Business features use the layers required by their behavior. A pure integration
+feature may have contracts, application ports, and adapters without a domain
+aggregate. Do not invent entities or domain services to satisfy a directory
+template.
+
 ## Layer responsibilities
 
 ### Contracts
 
-Owns stable boundary data:
+Owns stable external boundary data:
 
-- commands and query inputs;
-- query results;
+- public command and query schemas;
+- public query-result schemas;
 - integration events;
 - external error codes;
 - JSON Schemas and version metadata.
 
 Contracts do not expose aggregate instances or infrastructure types.
+Application and domain code do not import public contracts. Physical ownership by
+the feature does not make contracts an inner layer.
 
 ### Domain
 
@@ -104,6 +114,7 @@ Owns use-case coordination:
 
 - command handlers;
 - query handlers;
+- transport-independent application input and output models;
 - transaction boundaries;
 - application policies;
 - ports;
@@ -114,23 +125,40 @@ Application code must not know which adapter implements a port.
 
 ### Adapters
 
-Inbound adapters translate transport requests into application contracts.
-Outbound adapters implement application ports for storage, runtime, messaging,
-workflow, clocks, IDs, and external systems.
+Inbound adapters validate public contracts and map them into application input
+models. Outbound adapters implement application ports for storage, runtime,
+messaging, workflow, clocks, IDs, and external systems. Outbound integration-event
+adapters map domain or application publication intent into public event schemas.
+
+Application code never accepts an SDK DTO directly.
 
 Adapters may contain technology-specific recovery and mapping behavior but no
 business invariant that belongs in the domain.
 
 ### Composition
 
-Composition is the only feature-local layer allowed to instantiate concrete
-adapters and wire them to application services.
+Composition has three levels:
+
+1. A feature factory wires feature-local handlers and receives required ports.
+2. Context composition wires features and context-owned adapters.
+3. The application composition root creates process-wide resources such as
+   database pools, NATS connections, runtime clients, clocks, and telemetry.
+
+A feature must not instantiate process-wide resources. This prevents duplicate
+runtime gateways, broker clients, transaction managers, and process owners.
+
+### Projections
+
+Each context owns projections derived from its state and events. A feature may own
+projection handlers and read models for its capability. Cross-context client views
+are assembled by an edge Query Composition adapter, not a global projection
+bounded context.
 
 ## Aggregate ownership
 
 Every aggregate has one owning feature. Other features interact through:
 
-- the owner's public application API;
+- a consumer-owned port and adapter to the owner's published contract;
 - domain-neutral references;
 - integration events.
 
@@ -159,6 +187,10 @@ import { Task } from "@agent-teams/task-coordination/src/features/task-lifecycle
 The root `kernel` package is intentionally tiny. It may contain stable technical
 primitives such as identifiers, event metadata, and result types. It must not
 contain business policies, provider branches, or convenience services.
+
+Platform persistence packages may expose technical drivers and transaction
+primitives. Context-owned repository adapters, tables, migrations, inboxes,
+outboxes, and projections remain inside their owning context.
 
 Before adding shared code, ask:
 

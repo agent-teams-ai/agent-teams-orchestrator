@@ -26,6 +26,11 @@ one owner.
 A request to perform an action. Commands may be rejected and must carry an
 idempotency identity when retries are possible.
 
+## Application model
+
+A transport-independent input or output type owned by an application use case. It
+is distinct from a public SDK, transport, or integration-event contract.
+
 ## Control plane
 
 The layer that decides desired coordination state and policy. It does not perform
@@ -55,6 +60,11 @@ agent's product-level message inbox.
 A versioned public fact published for other bounded contexts or external
 consumers.
 
+## Open Host Service
+
+A DDD relationship where an upstream context exposes a documented protocol for
+multiple consumers. Often abbreviated OHS.
+
 ## Orchestration run
 
 A durable product-level coordination lifecycle. It may involve multiple runtime
@@ -70,9 +80,30 @@ transport.
 An interface declared at an architecture boundary. Inbound ports expose use cases;
 outbound ports describe required external capabilities.
 
+## Project scope
+
+The ownership boundary that contains teams, tasks, runs, messages, and workspace
+bindings for one project. Cross-project access requires explicit authorization.
+
+## Published Language
+
+A stable model or schema used by an upstream context to communicate with
+downstream consumers without exposing internal domain objects.
+
 ## Projection
 
 A query-optimized read model derived from authoritative state and events.
+
+## Public contract
+
+A versioned command, query, event, snapshot, or error schema exposed at a system or
+context boundary. Public contracts are mapped by adapters and are not application
+or domain models.
+
+## Query Composition
+
+An edge component that joins published read models for clients without owning
+aggregates or writing context storage.
 
 ## Provider
 
@@ -83,6 +114,16 @@ logic belongs in an `ar` driver.
 
 An opaque execution lifecycle owned by `ar`, referenced by the orchestrator but
 not reconstructed from provider internals.
+
+## Runtime Gateway
+
+The anti-corruption boundary that implements narrow runtime capability ports and
+translates between orchestration concepts and opaque `ar` contracts.
+
+## Workspace registration
+
+A project-owned record that identifies an approved workspace binding and its
+generation without exposing arbitrary paths as domain identity.
 
 ## Sidecar
 

@@ -8,6 +8,8 @@ ADRs record significant architecture choices and their consequences.
 - [ADR-0002: Bounded-context packages with feature-owned slices](0002-bounded-context-packages-and-feature-slices.md)
 - [ADR-0003: Runtime lifecycle belongs to ar](0003-ar-owns-runtime-lifecycle.md)
 - [ADR-0004: Broker-neutral core with NATS JetStream adapter](0004-broker-neutral-events-with-jetstream.md)
+- [ADR-0005: Public contracts are outside application and domain](0005-public-contracts-outside-application.md)
+- [ADR-0006: Ordering is declared per contract](0006-contract-specific-event-ordering.md)
 
 ## ADR process
 

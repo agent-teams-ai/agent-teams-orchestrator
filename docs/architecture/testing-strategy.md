@@ -37,8 +37,10 @@ Validate:
 - runtime-adapter conformance;
 - transport error mapping.
 
-The same `AgentRuntimePort` conformance suite must run against the fake runtime,
-legacy compatibility adapter, and `ar` adapter.
+Each narrow runtime capability port has a conformance suite. The applicable suites
+run against the fake runtime, legacy compatibility adapter, and `ar` adapter.
+Capability discovery tests verify that an adapter cannot claim unsupported resume,
+approval, streaming, or recovery behavior.
 
 ### Adapter integration tests
 
@@ -66,8 +68,11 @@ Automated checks must reject:
 - cross-context deep imports;
 - broad package exports;
 - provider branches in core;
+- public SDK/transport contract imports in application or domain;
 - transport types in domain;
 - unversioned external contracts;
+- context-owned storage or projections placed in global platform packages;
+- process-wide resources instantiated below the application composition root;
 - multiple process-owner implementations wired simultaneously.
 
 ## Replay and simulation

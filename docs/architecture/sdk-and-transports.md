@@ -55,6 +55,19 @@ Hand-authored, versioned JSON Schemas are the initial language-neutral source fo
 TypeScript types and future clients for other languages are generated from these
 schemas. Generated code is not edited manually.
 
+The owning feature stores the hand-authored schema and is its source of truth. The
+platform schema registry:
+
+- discovers exported feature schemas;
+- validates naming and compatibility;
+- builds publishable bundles;
+- generates language bindings;
+- does not define or rewrite business contracts.
+
+Inbound adapters map validated public contracts into transport-independent
+application models. Application and domain code never import generated SDK types
+or public JSON Schema types.
+
 The exact control API protocol, such as HTTP, gRPC, or JSON-RPC, remains an open
 decision. Public semantics must remain independent from that choice.
 

@@ -15,8 +15,9 @@ Read these documents before proposing or changing architecture:
 6. [Runtime boundary](docs/architecture/runtime-boundary.md)
 7. [Eventing and reliability](docs/architecture/eventing-and-reliability.md)
 8. [SDK and transports](docs/architecture/sdk-and-transports.md)
-9. [Open decisions](docs/open-decisions.md)
-10. [Accepted ADRs](docs/decisions/README.md)
+9. [Extension points](docs/architecture/extension-points.md)
+10. [Open decisions](docs/open-decisions.md)
+11. [Accepted ADRs](docs/decisions/README.md)
 
 Terminology is defined in [the glossary](docs/glossary.md).
 
@@ -38,6 +39,7 @@ When a requested change depends on an unresolved decision:
 This repository owns multi-agent coordination:
 
 - teams, members, and roles;
+- project and workspace scope;
 - tasks, assignments, and dependencies;
 - orchestration runs and completion policy;
 - messages, inboxes, and handoffs;
@@ -56,18 +58,22 @@ and provider-specific drivers.
 3. Application code depends on domain code and declared ports only.
 4. Adapters implement ports; ports never import adapters.
 5. Bounded contexts do not deep-import each other's internals.
-6. Cross-context communication uses a public application API or versioned
-   integration events.
+6. A context consumes another context through a consumer-owned port, an adapter,
+   and the provider's published contract, or through versioned integration events.
 7. Every aggregate has exactly one owning feature.
 8. Provider-specific behavior does not enter orchestration domain code.
 9. NATS, Temporal, `ar`, SQLite, PostgreSQL, Electron, and HTTP are adapters.
 10. External commands, events, and snapshots use strict versioned schemas.
 11. At-least-once delivery is assumed. Consumers must be idempotent.
-12. There is no global event ordering guarantee. Preserve ordering per aggregate.
+12. There is no global event ordering guarantee. Each public contract declares
+    its ordering scope; consumers must tolerate every ordering not declared.
 13. State persistence and outbox publication must share a transactional boundary.
 14. Event sourcing is not the default persistence model.
 15. There must be exactly one owner of each process and runtime mutation.
 16. SDKs contain transport and contract logic, never orchestration business logic.
+17. Every team, task, run, message, and runtime binding is scoped to a project.
+18. Public transport/SDK contracts never become application or domain models.
+19. Process-wide resources are created only by the application composition root.
 
 ## Planned repository shape
 
@@ -77,18 +83,21 @@ apps/
   desktop-sidecar/
 packages/
   contexts/
+    project-workspace/
+    identity-access/
     team-management/
     task-coordination/
     run-orchestration/
     messaging/
-    runtime-gateway/
     policy-approvals/
-    projections/
+  integrations/
+    runtime-gateway/
+    task-board-adapters/
   platform/
     eventing/
     persistence/
     observability/
-    schema-registry/
+    schema-registry/        # indexes feature-owned schemas; does not own them
   clients/
     sdk-typescript/
   kernel/
@@ -107,7 +116,7 @@ For architecture or implementation work:
 
 1. identify the owning bounded context and feature;
 2. confirm dependency direction;
-3. update or create contracts before adapters;
+3. define application input/output models and public contracts separately;
 4. model invariants in the domain, not in transport handlers;
 5. implement the application use case through narrow ports;
 6. add adapters at the edge;
@@ -120,6 +129,7 @@ Do not:
 
 - create a generic `shared` package for business logic;
 - expose feature internals through broad barrel exports;
+- import public SDK/transport schemas into application or domain code;
 - import Electron, NATS, Temporal, `ar`, or provider SDKs into domain/application;
 - put OpenCode, Claude, or Codex branches in orchestration domain services;
 - spawn or kill agent processes from the orchestrator core;
@@ -127,6 +137,8 @@ Do not:
 - publish unversioned events;
 - rely on exactly-once broker delivery;
 - implement distributed transactions between bounded contexts;
+- write another context's tables, projections, inbox, or outbox;
+- instantiate process-wide runtime, broker, or database clients inside a feature;
 - add a second process owner during migration;
 - copy legacy code into the core without classifying its responsibility;
 - test agent execution against real user projects.

@@ -18,8 +18,9 @@ TaskAssigned
 ### Integration events
 
 Integration events are stable, versioned contracts published for other contexts
-or external consumers. An application mapper converts domain events into
-integration events.
+or external consumers. Application code converts domain events into
+transport-independent publication intent. An outbound adapter maps that intent to
+the versioned integration-event schema and stores it in the outbox.
 
 Example:
 
@@ -48,34 +49,55 @@ not by trusting the broker to deliver exactly once.
 
 ## Ordering
 
-Ordering is guaranteed only within one aggregate stream:
+There is no universal ordering guarantee beyond broker publication order. Every
+public contract declares one of:
 
 ```text
-aggregateType + aggregateId + sequence
+ordering: none
+ordering: subject
+ordering: aggregate
+ordering: custom-key
 ```
 
-There is no global ordering guarantee. Consumers coordinate facts from different
-aggregates using explicit revisions, timestamps, dependencies, or process
-managers rather than arrival order.
+For ordered contracts, the contract declares the ordering key and sequence
+semantics. Aggregate revision is a business concurrency fact; it is not proof that
+the broker delivered every event in revision order.
+
+An adapter claiming aggregate or custom-key ordering must define:
+
+- who allocates the sequence;
+- how concurrent publishers are serialized or reconciled;
+- how retries preserve or restore order;
+- how gaps and duplicates are detected;
+- what consumers do when an out-of-order event arrives.
+
+Consumers coordinate facts from different keys using explicit revisions,
+dependencies, reconciliation, or process managers rather than arrival time.
 
 ## Event envelope
 
-Every public event must include:
+Every public event includes:
 
 ```text
 eventId
 eventType
 schemaVersion
-aggregateType
-aggregateId
-aggregateSequence
 occurredAt
 producer
 correlationId
 causationId
-tenant/project scope
+scope
 payload
 ```
+
+`scope` is a strict tagged union such as `system`, `tenant`, or `project`.
+Business events for teams, tasks, runs, messages, and runtime bindings require a
+project scope. System operational events must not fabricate tenant or project
+identities.
+
+Events include source subject, revision, ordering key, and sequence only when their
+contract semantics require them. Operational events that do not originate from an
+aggregate must not fabricate aggregate identities.
 
 Schema validation occurs at publication and consumption boundaries.
 
@@ -108,6 +130,10 @@ deployment.
 Core contracts remain broker-neutral. Subject naming, stream layout, retention,
 consumer configuration, and local desktop lifecycle belong to the JetStream
 adapter and deployment composition.
+
+JetStream preserves the order in which a stream accepts messages. It does not by
+itself provide aggregate ordering across concurrent publishers. The adapter must
+implement the ordering policy declared by each contract.
 
 ## Journal and replay
 
