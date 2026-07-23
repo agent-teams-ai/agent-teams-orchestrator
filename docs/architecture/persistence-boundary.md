@@ -1,6 +1,6 @@
 # Persistence Boundary
 
-Status: **Accepted boundaries; storage profiles remain open**
+Status: **Accepted boundaries and storage topology; driver/tooling choices remain open**
 
 ## Principle
 
@@ -108,15 +108,62 @@ ownership.
 
 ## Local and hosted profiles
 
-The concrete topology remains an open decision. The leading profile is:
+The initial production topology is:
 
-- embedded SQLite for desktop/local operation;
-- PostgreSQL for hosted and horizontally scaled operation;
+- one embedded SQLite database file per bounded context for desktop/local
+  operation;
+- one PostgreSQL database with one schema per bounded context for the initial
+  hosted deployment;
 - separate context-owned adapters and dialect migrations;
 - shared technical test harnesses plus context-owned semantic conformance suites.
 
 Alternative profiles may be added at the application composition root without
 changing domain or application behavior.
+
+### Desktop SQLite
+
+Each bounded context receives its own database file and connection lifecycle:
+
+```text
+data/
+  tenant-project-registry.sqlite3
+  team-topology.sqlite3
+  work-coordination.sqlite3
+  run-orchestration.sqlite3
+  agent-communication.sqlite3
+```
+
+Context files are not attached for cross-context joins or transactions. Query
+Composition calls published read APIs or maintains a disposable edge projection.
+
+The local persistence runtime owns WAL configuration, busy handling, checkpointing,
+integrity checks, version compatibility, and online backup primitives. A
+multi-context product backup uses a mutation barrier and manifest; it does not
+pretend that separate files share one transaction.
+
+### Hosted PostgreSQL
+
+The initial hosted deployment uses one PostgreSQL database with schema-qualified
+context namespaces:
+
+```text
+tenant_project_registry.*
+team_topology.*
+work_coordination.*
+run_orchestration.*
+agent_communication.*
+```
+
+Schemas are ownership namespaces, not permission to join contexts. Cross-schema
+foreign keys, writes, transactions, and direct query composition remain
+prohibited.
+
+SQL uses explicit schema qualification rather than relying on a broad
+`search_path`. Each context owns its migration manifest. Runtime and migration
+roles receive only the privileges required for their context schemas.
+
+Future tenant routing may move a context or tenant to another database or cluster
+without changing domain/application contracts.
 
 ## Conformance requirements
 

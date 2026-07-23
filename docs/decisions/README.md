@@ -12,6 +12,7 @@ ADRs record significant architecture choices and their consequences.
 - [ADR-0008: Consumer-owned runtime ports and stateless ACL](0008-consumer-owned-runtime-ports.md)
 - [ADR-0009: Commands and events have distinct contracts](0009-commands-and-events-are-distinct.md)
 - [ADR-0010: Broker-neutral partition ordering](0010-broker-neutral-partition-ordering.md)
+- [ADR-0011: Context-isolated SQLite and PostgreSQL topology](0011-context-isolated-sqlite-and-postgres-topology.md)
 
 ## Superseded decisions
 

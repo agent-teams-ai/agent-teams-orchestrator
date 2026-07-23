@@ -27,15 +27,13 @@ Users must not perform manual infrastructure setup for normal desktop use.
 
 ## OD-003: Persistence composition
 
-Choose the concrete persistence profiles and topology. The leading option is
-context-owned SQLite adapters for local/desktop and context-owned PostgreSQL
-adapters for hosted deployments.
+ADR-0011 selects one SQLite file per bounded context for local/desktop and one
+PostgreSQL schema per bounded context for hosted deployments.
 
-Decide:
+Remaining decisions:
 
-- one SQLite file per bounded context versus one file with context namespaces;
-- one PostgreSQL database with schema per context versus stronger separation;
-- driver and query-builder choices;
+- runtime and driver choice for SQLite and PostgreSQL;
+- Drizzle ORM versus another adapter-local query/migration tool;
 - context transaction-port shape;
 - migration manifests and dialect strategy;
 - WAL, checkpoint, busy-timeout, and supported SQLite-version policy;
