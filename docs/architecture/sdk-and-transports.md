@@ -64,6 +64,11 @@ platform schema registry:
 - generates language bindings;
 - does not define or rewrite business contracts.
 
+Client control contracts are not reused automatically as context Published
+Language or integration events. The owning feature may define each surface beside
+the same capability, but separate mappings and compatibility policies preserve
+their different audiences.
+
 Inbound adapters map validated public contracts into transport-independent
 application models. Application and domain code never import generated SDK types
 or public JSON Schema types.
@@ -78,11 +83,17 @@ Expected inbound adapters:
 - in-process adapter for tests;
 - local sidecar transport for desktop;
 - HTTP or gRPC for hosted control operations;
-- NATS for asynchronous commands and subscriptions where appropriate.
+- NATS for explicitly durable asynchronous commands and subscriptions where
+  appropriate.
 
 Not every operation should be a broker message. Immediate validation and queries
 may use request-response transports while durable work and event delivery use the
 event bus.
+
+Commands and events never share one generic envelope. A durable command has one
+logical owner, authorization, deadline, idempotency, acceptance, result-query, and
+unknown-outcome semantics. An event is an immutable fact and may have many
+consumers.
 
 ## Compatibility
 

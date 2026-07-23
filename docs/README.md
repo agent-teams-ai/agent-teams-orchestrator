@@ -6,17 +6,19 @@ Orchestrator.
 ## Reading order
 
 1. [Architecture overview](architecture/overview.md)
-2. [Context map](architecture/context-map.md)
-3. [Feature module standard](architecture/feature-module-standard.md)
-4. [Dependency rules](architecture/dependency-rules.md)
-5. [Runtime boundary](architecture/runtime-boundary.md)
-6. [Eventing and reliability](architecture/eventing-and-reliability.md)
-7. [SDK and transports](architecture/sdk-and-transports.md)
-8. [Testing strategy](architecture/testing-strategy.md)
-9. [Extension points](architecture/extension-points.md)
-10. [Architecture decisions](decisions/README.md)
-11. [Open decisions](open-decisions.md)
-12. [Glossary](glossary.md)
+2. [Full DDD modeling standard](domain/modeling-standard.md)
+3. [Context map](architecture/context-map.md)
+4. [Feature module standard](architecture/feature-module-standard.md)
+5. [Dependency rules](architecture/dependency-rules.md)
+6. [Persistence boundary](architecture/persistence-boundary.md)
+7. [Runtime boundary](architecture/runtime-boundary.md)
+8. [Eventing and reliability](architecture/eventing-and-reliability.md)
+9. [SDK and transports](architecture/sdk-and-transports.md)
+10. [Testing strategy](architecture/testing-strategy.md)
+11. [Extension points](architecture/extension-points.md)
+12. [Architecture decisions](decisions/README.md)
+13. [Open decisions](open-decisions.md)
+14. [Glossary](glossary.md)
 
 ## Document status
 

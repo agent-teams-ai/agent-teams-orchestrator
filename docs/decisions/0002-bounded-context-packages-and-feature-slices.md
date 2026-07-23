@@ -1,6 +1,6 @@
 # ADR-0002: Bounded-Context Packages and Feature-Owned Slices
 
-Status: **Accepted**
+Status: **Superseded by ADR-0007**
 
 ## Context
 

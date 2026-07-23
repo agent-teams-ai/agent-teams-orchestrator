@@ -1,6 +1,6 @@
 # ADR-0006: Event Ordering Is Declared Per Contract
 
-Status: **Accepted**
+Status: **Superseded by ADR-0010**
 
 Supersedes the per-aggregate ordering consequence in ADR-0004.
 

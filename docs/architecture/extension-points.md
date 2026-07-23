@@ -27,19 +27,27 @@ flowchart LR
 
 Placement:
 
-- workflow adapter for Run Orchestration;
-- activities call application ports;
-- signals and queries map to versioned application contracts;
+- a Temporal client adapter implements narrow Run Orchestration scheduling ports;
+- a Temporal Activity Worker is an inbound adapter that calls idempotent
+  application use cases;
+- signals and queries map through versioned workflow-boundary contracts;
+- workflow definitions orchestrate deterministic application decisions without
+  becoming domain aggregates;
 - deterministic workflow code contains no domain model duplication.
 
 Temporal owns durable workflow execution, timers, and activity retry mechanics.
 Run Orchestration owns business retry, escalation, compensation, and completion
 policy.
 
+Run Orchestration persistence remains authoritative for business run state.
+Temporal history is authoritative only for durable workflow execution. Activity
+retries cannot bypass application idempotency, authorization, optimistic
+concurrency, or aggregate invariants.
+
 ## LangGraph
 
-LangGraph is an optional agent-local workflow engine. It belongs behind Runtime
-Gateway, normally inside an `ar` worker/provider integration or a dedicated runtime
+LangGraph is an optional agent-local workflow engine. It belongs behind the Runtime
+ACL, normally inside an `ar` worker/provider integration or a dedicated runtime
 adapter.
 
 The orchestrator observes normalized run state and events. It does not depend on
@@ -50,11 +58,11 @@ OpenCode process unless the runtime driver provides that capability.
 ## External task boards
 
 Jira, todo systems, and the existing desktop task board integrate through
-Task Coordination ACL adapters. Task Coordination owns a consumer-facing
+Work Coordination ACL adapters. Work Coordination owns a consumer-facing
 `TaskBoardPort`; each external system implements it through an adapter and
 published mapping contracts.
 
-The Task Coordination model remains canonical for orchestrator behavior. Adapters
+The Work Coordination model remains canonical for orchestrator behavior. Adapters
 own:
 
 - external ID mappings;
@@ -68,15 +76,17 @@ aggregate without a separate consistency ADR.
 
 ## Agent-to-Agent protocols
 
-A2A or future agent communication protocols belong in Messaging and Handoffs
-inbound/outbound adapters. Protocol messages map to typed messages and handoffs.
-Protocol identity and authorization pass through Identity and Access.
+A2A or future agent communication protocols belong in Agent Communication
+inbound/outbound adapters. Protocol messages map to typed messages. Work handoff
+semantics remain in Work Coordination. Protocol identity and authorization pass
+through Identity Registry and Access Control.
 
 ## MCP and tool surfaces
 
 Runtime MCP/tool execution belongs in `ar` and provider drivers. The orchestrator
-may own tool policy, approval intent, and auditable decisions through Policy and
-Approvals, but it does not execute provider tools.
+may own tool policy and auditable risk decisions through Policy and Risk, and
+approval lifecycle through Approval Management, but it does not execute provider
+tools.
 
 Slash commands are public command aliases or client conveniences. They must map to
 versioned application commands and cannot bypass authorization or invariants.
@@ -109,9 +119,10 @@ contracts. A global mutable memory store is prohibited.
 
 ## Evaluation gates
 
-Eval, review, and merge gates belong to Run Orchestration policy and application
-ports. Evaluation engines are outbound adapters. Gate results are typed facts with
-evidence references, not free-form booleans hidden in prompts.
+Eval, review, and merge gates belong to explicit Run Orchestration or Work
+Coordination policies according to which lifecycle they guard. Evaluation engines
+are outbound adapters. Gate results are typed facts with evidence references, not
+free-form booleans hidden in prompts.
 
 ## Plugin system
 
@@ -119,7 +130,7 @@ A future plugin system may register:
 
 - inbound adapters;
 - outbound adapters;
-- policy implementations;
+- explicitly extensible application strategies and external policy-engine adapters;
 - projection builders;
 - SDK middleware.
 
@@ -127,8 +138,12 @@ Plugins cannot deep-import context internals, replace an aggregate, write contex
 tables directly, or acquire runtime process ownership. Plugin manifests declare
 capabilities, contract versions, permissions, and isolation requirements.
 
+Plugins cannot replace domain policies that protect aggregate invariants. Facts
+returned by a plugin remain untrusted input until the owning application and domain
+validate them.
+
 ## Provider capability tiers
 
 Lite, medium, and high tool modes are policy profiles, not provider branches in
-the domain. Policy and Approvals selects a profile; Runtime Gateway translates the
+the domain. Policy and Risk selects a profile; the Runtime ACL translates the
 profile into runtime capabilities supported by `ar`.

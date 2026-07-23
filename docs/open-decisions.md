@@ -27,9 +27,22 @@ Users must not perform manual infrastructure setup for normal desktop use.
 
 ## OD-003: Persistence composition
 
-Choose the first aggregate, outbox, inbox, and projection stores. The likely local
-and hosted choices are SQLite and PostgreSQL, but transaction boundaries,
-migrations, concurrency, and repository contracts need a dedicated decision.
+Choose the concrete persistence profiles and topology. The leading option is
+context-owned SQLite adapters for local/desktop and context-owned PostgreSQL
+adapters for hosted deployments.
+
+Decide:
+
+- one SQLite file per bounded context versus one file with context namespaces;
+- one PostgreSQL database with schema per context versus stronger separation;
+- driver and query-builder choices;
+- context transaction-port shape;
+- migration manifests and dialect strategy;
+- WAL, checkpoint, busy-timeout, and supported SQLite-version policy;
+- PostgreSQL connection, schema qualification, relay leasing, and row security;
+- desktop backup barrier and multi-context restore manifest;
+- hosted backup, point-in-time recovery, and restore drills;
+- persistence conformance-kit ownership.
 
 ## OD-004: Exact runtime capability ports
 
@@ -43,8 +56,10 @@ Define which run-orchestration responsibilities remain domain/application state
 and which operations become Temporal workflows, activities, signals, queries, and
 timers.
 
-The design must preserve deterministic workflow constraints without exposing
-Temporal types to the core.
+Run Orchestration business state remains authoritative in context persistence.
+The design must now define scheduling ports, Activity Worker inbound adapters,
+workflow contracts, deterministic execution constraints, and reconciliation
+without exposing Temporal types to domain/application code.
 
 ## OD-006: Initial aggregate boundaries
 
@@ -85,16 +100,22 @@ Migration must avoid overlapping with active hosted-web refactoring where possib
 
 ## OD-011: Context-map validation
 
-Validate Project and Workspace, Identity and Access, Policy and Approvals, and the
-three core subdomains through event storming and current-system analysis. Decide
-which proposed areas are bounded contexts, supporting modules, or external
-upstreams.
+Validate Identity Registry, Access Control, Tenant and Project Registry, Workspace
+Registry, Team Topology, Work Coordination, Run Orchestration, Agent
+Communication, Policy and Risk, and Approval Management through event storming and
+current-system analysis. Keep the accepted focused eight-to-ten-context
+granularity, but merge or split a proposed boundary when language and invariants
+prove it necessary.
 
 ## OD-012: Identity, authorization, and tenant isolation
 
-Define principal types, tenant/project membership, service identities, authorization
-checks, API authentication, secret references, and hosted isolation. Authentication
-may be external, but authorization ownership cannot remain implicit.
+Define principal types, tenant/project membership, service identities,
+authorization checks, API authentication, secret references, and hosted isolation.
+Identity Registry owns principal facts, Tenant and Project Registry owns tenant and
+project lifecycle, Access Control owns grants, and every application use case
+remains responsible for business-operation authorization. Decide which operations
+use authoritative synchronous decisions and which may use local grant projections,
+including revocation and fail-closed behavior.
 
 ## OD-013: Partial failure and compensation
 
@@ -112,7 +133,7 @@ and workspace content must be private by default.
 ## OD-015: External task-board migration
 
 Define the compatibility adapter for the current desktop board and the canonical
-Task Coordination mapping. Cover external IDs, status translation, conflicts,
+Work Coordination mapping. Cover external IDs, status translation, conflicts,
 offline behavior, reconciliation, and staged migration without a deep board
 rewrite in the first phase.
 

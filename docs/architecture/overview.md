@@ -23,15 +23,16 @@ The system is an event-driven modular monolith built with:
 
 - Clean Architecture dependency direction;
 - Hexagonal Architecture ports and adapters;
-- feature-owned vertical slices;
-- strategic and tactical Domain-Driven Design;
+- domain-capability feature slices inside focused bounded contexts;
+- strategic and tactical Full Domain-Driven Design;
 - selective CQRS read models;
 - transactional outbox and idempotent inbox processing;
 - strict versioned contracts.
 
-It starts as a modular monolith because a single deployment and transaction
-boundary is easier to operate and verify. Bounded contexts remain extraction-ready
-without paying the operational cost of premature microservices.
+It starts as a modular monolith because one deployment is easier to operate and
+verify. Each bounded context keeps its own local transaction boundary even when
+contexts share one physical database server. Bounded contexts remain
+extraction-ready without paying the operational cost of premature microservices.
 
 ```mermaid
 flowchart LR
@@ -49,17 +50,24 @@ flowchart LR
     API --> Inbound
     Inbound --> Contexts["Bounded Context Application Ports"]
 
-    Contexts --> RuntimePort["Runtime Capability Ports"]
-    Contexts --> WorkflowPort["WorkflowEnginePort"]
+    Contexts --> RuntimePort["Consumer-Owned Runtime Ports"]
+    Contexts --> WorkflowSchedule["Workflow Scheduling Ports"]
     Contexts --> PersistencePorts["Repository and Outbox Ports"]
 
-    RuntimePort --> AR["ar Runtime"]
+    RuntimeAdapter["Stateless Runtime ACL"] -. "implements" .-> RuntimePort
+    RuntimeAdapter --> AR["ar Runtime"]
     AR --> Providers["Claude / Codex / OpenCode"]
-    WorkflowPort --> Temporal["Temporal Adapter"]
-    PersistencePorts --> Storage["Context-Owned SQLite / PostgreSQL Adapters"]
-    Storage --> Relay["Outbox Relay"]
-    Relay --> EventPort["Event Transport Port"]
-    EventPort --> NATS["NATS JetStream Adapter"]
+    TemporalClient["Temporal Client Adapter"] -. "implements" .-> WorkflowSchedule
+    TemporalClient --> Temporal["Temporal"]
+    Temporal --> Activities["Activity Worker Inbound Adapter"]
+    Activities --> Contexts
+    PersistenceAdapter["Context Persistence Adapter"] -. "implements" .-> PersistencePorts
+    PersistenceAdapter --> Storage["SQLite / PostgreSQL"]
+    Relay["Context-Composed Outbox Relay"] --> OutboxSource["Context Outbox Source Port"]
+    PersistenceAdapter -. "implements" .-> OutboxSource
+    Relay --> EventPort["Broker-Neutral Event Publisher Port"]
+    JetStream["NATS JetStream Adapter"] -. "implements" .-> EventPort
+    JetStream --> NATS["NATS JetStream"]
 ```
 
 ## Control plane versus runtime
@@ -98,8 +106,9 @@ Deployment mode must not change domain behavior.
 ## Persistence model
 
 Aggregate repositories hold authoritative business state. Commands update state
-and append outbox records in one transaction. Integration-event publishers relay
-outbox records to the configured transport.
+and append required integration-event outbox and durable command-dispatch records
+in one transaction. Relays deliver those records after commit through their
+respective contracts.
 
 The initial design is not event sourced. Event journals support audit, diagnostics,
 replay of projections, and simulation. Making events the authoritative source of
@@ -109,17 +118,21 @@ Persistence is context-owned. Platform persistence packages may provide drivers,
 transaction primitives, migration tooling, and test harnesses, but they do not own
 context repositories, tables, migrations, inboxes, outboxes, or projections.
 
+A transaction changes authoritative state in one bounded context only. Cross-context
+effects use integration events and process managers even when all contexts use the
+same SQLite file or PostgreSQL cluster.
+
 ## Scope and access
 
 Every team, task, orchestration run, message, and runtime binding belongs to one
-project. Workspace registrations belong to that project and are referenced by
-opaque workspace identities rather than arbitrary paths.
+project. Workspace registrations belong to Workspace Registry and are referenced
+by opaque workspace identities rather than arbitrary paths.
 
-Authentication may be delegated to an external identity provider. Authorization,
-tenant membership, project membership, and machine-client access require an
-explicit orchestrator boundary and must be enforced before application use cases
-execute. The exact Identity and Access context remains part of context-map
-validation.
+Authentication may be delegated to an external identity provider. Inbound adapters
+authenticate and establish a principal. Access Control provides membership and
+grant facts. Every application use case authorizes its business operation before
+mutating or disclosing state; domain behavior enforces identity-dependent
+invariants from explicit facts.
 
 ## Read models
 

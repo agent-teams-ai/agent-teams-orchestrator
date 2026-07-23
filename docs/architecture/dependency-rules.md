@@ -24,9 +24,9 @@ source-code dependencies do not.
 
 | From | May depend on |
 |---|---|
-| Domain | Feature domain, minimal kernel |
-| Application | Feature domain, application models and ports, minimal kernel |
-| Contracts | Schema primitives and minimal contract kernel |
+| Domain | Owning context domain modules and explicitly exposed context-internal domain types |
+| Application | Owning context domain, application models, internal APIs, and consumer-owned ports |
+| Contracts | Narrow language-neutral schema primitives only |
 | Inbound adapters | Feature contracts and application input ports |
 | Outbound adapters | Application output ports, public event contracts when publishing, and external libraries |
 | Composition | All layers in its own package and public APIs of dependencies |
@@ -60,6 +60,25 @@ A direct in-process adapter is permitted as a deployment optimization, but it mu
 implement the same consumer-owned port and published contract used by a future
 remote adapter.
 
+Inside one bounded context, features may use explicit context-internal APIs and a
+directed module dependency graph. They do not need Published Language or ACL
+ceremony for every collaboration. They still cannot mutate another feature's
+aggregate through its repository or internals.
+
+## Contract surfaces
+
+The following surfaces are distinct:
+
+- application input/output models, private to use cases;
+- context-internal module APIs, private to one bounded context;
+- context Published Language, versioned for downstream contexts;
+- integration events, versioned asynchronous facts;
+- public control API contracts, versioned for SDK clients;
+- external dependency contracts such as `ar`.
+
+Sharing similar fields is not sufficient reason to reuse one surface as another.
+Mappings protect ownership, compatibility, authorization, and disclosure rules.
+
 ## Enforcement
 
 The implementation phase must add automated architecture tests for:
@@ -72,6 +91,9 @@ The implementation phase must add automated architecture tests for:
 - public contract imports in domain/application;
 - transport-specific symbols in contracts;
 - unversioned integration events.
+- context packages importing consumer-owned ports from an integration adapter;
+- feature dependency cycles inside a bounded context;
+- broad `spi` and package-root barrel exports.
 
 TypeScript path aliases are conveniences, not boundaries. `package.json` exports,
 workspace dependencies, lint rules, and architecture tests enforce boundaries.
@@ -89,6 +111,7 @@ interface RuntimeLifecyclePort {
 An adapter implements it using `ar`. The application never imports the `ar`
 client.
 
-The application declares an outbox publication port; a context-owned persistence
-adapter stores publication intent transactionally, and a JetStream relay publishes
-it. Replacing JetStream must not change domain or application code.
+The application creates publication intent; a context-owned persistence adapter
+stores a complete outbox record in the same local transaction as business state,
+and a JetStream relay publishes it later. Replacing JetStream must not change
+domain or application code.

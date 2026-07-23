@@ -25,13 +25,31 @@ the versioned integration-event schema and stores it in the outbox.
 Example:
 
 ```text
-agent-teams.task-coordination.task-assigned.v1
+agent-teams.work-coordination.task-assigned.v1
 ```
 
 ### Operational events
 
 Operational events describe delivery, retries, dead-letter decisions, health, and
 diagnostics. They must not be confused with business facts.
+
+## Commands are not events
+
+A command requests one owner to perform an action and may be rejected. An event
+describes a fact that already happened and may have many consumers. They use
+separate contracts, envelopes, retention, authorization, deduplication, and replay
+rules.
+
+Durable command contracts define:
+
+- the single logical owner;
+- idempotency-key scope and retention;
+- payload-hash behavior when a key is reused;
+- deadline and cancellation semantics;
+- `accepted`, `rejected`, `completed`, and unknown-outcome behavior;
+- whether and how the original result can be queried.
+
+Historical commands are never replayed as if they were facts.
 
 ## Delivery semantics
 
@@ -49,13 +67,13 @@ not by trusting the broker to deliver exactly once.
 
 ## Ordering
 
-There is no universal ordering guarantee beyond broker publication order. Every
-public contract declares one of:
+There is no broker-neutral global ordering guarantee. Every event contract declares
+one of:
 
 ```text
 ordering: none
-ordering: subject
-ordering: aggregate
+ordering: partition-key
+ordering: aggregate-key
 ordering: custom-key
 ```
 
@@ -95,31 +113,50 @@ Business events for teams, tasks, runs, messages, and runtime bindings require a
 project scope. System operational events must not fabricate tenant or project
 identities.
 
-Events include source subject, revision, ordering key, and sequence only when their
-contract semantics require them. Operational events that do not originate from an
-aggregate must not fabricate aggregate identities.
+Events include source identity, revision, partition/ordering key, and sequence only
+when their contract semantics require them. Operational events that do not
+originate from an aggregate must not fabricate aggregate identities.
 
 Schema validation occurs at publication and consumption boundaries.
 
-## Transactional outbox
+## Transactional event and command dispatch
 
 An application transaction:
 
 1. loads the aggregate;
 2. executes domain behavior;
 3. persists aggregate changes;
-4. appends integration-event outbox records;
+4. appends complete integration-event outbox records and durable command-dispatch
+   records required by the state transition;
 5. commits once.
 
-A relay publishes committed outbox records and records publication progress.
-Publishing directly from a domain entity or before persistence commits is
-prohibited.
+Relays publish committed records and record publication progress. Event outbox and
+command-dispatch records remain separate contract categories with separate
+envelopes, retention, authorization, and outcome behavior. A command-dispatch
+record does not turn a command into an event.
+
+Publishing or dispatching directly from a domain entity or before persistence
+commits is prohibited.
+
+This is one database transaction in one bounded context. It is not a distributed
+transaction between the database and NATS. The broker publication happens later
+and may be repeated safely.
+
+For horizontal scaling, each event-outbox and command-dispatch implementation
+defines claim leasing, concurrent relay ownership, publication receipts, retry
+classification, retention, and quarantine. A process-wide relay engine may
+coordinate workers through context-owned dispatch ports, but it cannot read or
+mutate context tables directly.
 
 ## Consumer inbox
 
-Durable consumers store processed event IDs or idempotency keys in the same
-transaction as their business effects. A crash between handling and acknowledgement
-must result in a safe duplicate, not a repeated effect.
+Durable consumers store handler identity/version plus processed event IDs or
+idempotency keys in the same context-local transaction as their business effects.
+A crash between handling and acknowledgement must result in a safe duplicate, not
+a repeated effect.
+
+One event handler mutates one bounded context only. Cross-context reactions are
+separate handlers and transactions.
 
 ## NATS JetStream
 
@@ -137,15 +174,17 @@ implement the ordering policy declared by each contract.
 
 ## Journal and replay
 
-The system keeps append-only operational and integration-event records for:
+The system may keep append-only operational and integration-event records for:
 
 - audit;
 - diagnostics;
-- projection rebuilding;
+- projection rebuilding when completeness and retention are guaranteed;
 - simulation;
 - migration verification.
 
 These records are not the default source of truth for rebuilding aggregates.
+Projection rebuild cannot be promised until the journal defines completeness,
+retention, schema upcasting, redaction, and replay authorization.
 
 ## Failure classification
 

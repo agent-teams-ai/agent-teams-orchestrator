@@ -1,123 +1,223 @@
 # Strategic Context Map
 
-Status: **Proposed**
+Status: **Focused Full DDD direction accepted; exact boundaries remain proposed**
 
-The scoping and ownership invariants in this document are mandatory. The precise
-bounded-context boundaries remain proposed until validated through event storming,
-current-system analysis, use cases, invariants, and concurrency scenarios.
+The target is eight to ten focused business bounded contexts. This level of
+granularity is deliberate: contexts must be independently understandable and
+extractable without turning every use case into a distributed subsystem.
 
-## Subdomain classification
+Exact boundaries remain proposed until validated through business-capability
+mapping, event storming, current-system analysis, invariants, language differences,
+and concurrency scenarios. A proposed context name is not permission to freeze its
+package, schema, or public contract prematurely.
 
-| Area | Classification | Reason |
+## Terms and mapping
+
+- A business capability describes what the product can do.
+- A subdomain classifies business value as core, supporting, or generic.
+- A bounded context owns one consistent model and Ubiquitous Language.
+- A workspace package is the physical boundary used after a bounded context is
+  accepted.
+- A feature is a cohesive domain capability inside one bounded context. It is not a
+  smaller bounded context by default.
+
+These concepts often align, but they are not interchangeable.
+
+## Proposed business contexts
+
+| Bounded context | Classification | Primary responsibility |
 |---|---|---|
-| Run Orchestration | Core | Durable coordination, retry, completion, and recovery are differentiating behavior |
-| Task Coordination | Core | Multi-agent assignment, dependency, subscription, and actual-work state are differentiating behavior |
-| Messaging and Handoffs | Core | Typed agent communication and delivery policy directly affect coordination reliability |
-| Team Management | Supporting | Teams and rosters support the core coordination model |
-| Project and Workspace | Supporting | Owns project scope, workspace registration, and binding identities |
-| Policy and Approvals | Supporting | Owns trust and execution-policy decisions |
-| Identity and Access | Supporting or Generic | Maps authenticated principals to tenants, projects, roles, and machine clients |
-| Runtime Gateway | Integration / ACL | Translates orchestration intent and `ar` runtime facts |
-| External Task Boards | Integration / ACL | Translates Jira, todo, or desktop-board models |
-| Query Composition | Edge composition | Joins published read models without owning business state |
+| Identity Registry | Generic | Human and machine principal identity |
+| Access Control | Supporting | Tenant/project membership, grants, and authorization facts |
+| Tenant and Project Registry | Supporting | Tenant/project identity, lifecycle, and ownership |
+| Workspace Registry | Supporting | Workspace registration, binding generations, and metadata |
+| Team Topology | Core | Agent-team composition, roles, capabilities, and roster invariants |
+| Work Coordination | Core | Tasks, assignments, dependencies, handoffs, and work lifecycle |
+| Run Orchestration | Core | Durable execution coordination, retries, compensation, and recovery policy |
+| Agent Communication | Core | Typed agent communication, delivery intent, inbox policy, and receipts |
+| Policy and Risk | Supporting | Execution policy, workspace trust, risk classification, and limits |
+| Approval Management | Supporting | Approval requests, decisions, expiry, and audit trail |
 
-`Runtime Gateway`, `External Task Boards`, and `Query Composition` are architectural
-modules, not automatically DDD bounded contexts. Do not invent aggregates for
-technical integration code.
+`Usage and Entitlements` is a likely future supporting context for token accounting,
+budgets, quotas, and commercial limits. It is not part of the initial package map
+until its language and invariants are discovered.
+
+## Integration modules
+
+The following are architectural integration modules, not business bounded contexts:
+
+- Runtime ACL;
+- External Task Board ACLs;
+- Query Composition;
+- transport adapters;
+- persistence drivers;
+- schema registry;
+- observability.
+
+They must not invent aggregates or become owners of business state.
 
 ## Proposed relationships
 
 ```mermaid
-flowchart TB
-    IdP["External Identity Provider"]
-    IAM["Identity and Access"]
-    Project["Project and Workspace"]
-    Team["Team Management"]
-    Tasks["Task Coordination"]
-    Runs["Run Orchestration"]
-    Messaging["Messaging and Handoffs"]
-    Policy["Policy and Approvals"]
-    Runtime["Runtime Gateway ACL"]
+flowchart LR
+    Identity["Identity Registry"]
+    Access["Access Control"]
+    Project["Tenant and Project Registry"]
+    Workspace["Workspace Registry"]
+    Team["Team Topology"]
+    Work["Work Coordination"]
+    Run["Run Orchestration"]
+    Communication["Agent Communication"]
+    Policy["Policy and Risk"]
+    Approval["Approval Management"]
+    Runtime["Stateless Runtime ACL"]
     AR["ar Runtime"]
-    Boards["External Task Boards ACL"]
-    Query["Query Composition"]
+    Boards["Task Board ACLs"]
+    Authorized["Application Use Cases in Every Business Context"]
 
-    IdP -->|"OHS + Published Language, translated by ACL"| IAM
-    IAM -->|"Authorization facts"| Project
-    Project -->|"Published Language: Project and Workspace identities"| Team
-    Project -->|"Published Language: Project scope"| Tasks
-    Project -->|"Published Language: Workspace bindings"| Runs
-    Team -->|"Published Language: Team and roster facts"| Runs
-    Tasks <-->|"Partnership: desired work and observed progress"| Runs
-    Runs -->|"Customer/Supplier: delivery intent"| Messaging
-    Policy -->|"Published Language: policy decisions"| Runs
-    Policy -->|"Published Language: approvals"| Runtime
-    Runs -->|"Consumer-owned runtime ports"| Runtime
+    Identity -->|"Principal Published Language"| Access
+    Project -->|"Tenant and project identities"| Access
+    Access -->|"Authorization facts through consumer-owned boundaries"| Authorized
+    Project -->|"Project identity"| Workspace
+    Project -->|"Project identity"| Team
+    Project -->|"Project identity"| Work
+    Project -->|"Project identity"| Run
+    Team -->|"Team topology facts"| Work
+    Team -->|"Team topology facts"| Run
+    Workspace -->|"Workspace facts"| Policy
+    Workspace -->|"Workspace identity"| Run
+
+    Work -. "Work execution requested" .-> Run
+    Run -. "Execution facts" .-> Work
+
+    Policy -->|"Policy decisions"| Run
+    Run -. "Approval requested" .-> Approval
+    Approval -. "Approval decided" .-> Run
+
+    Run -. "Delivery intent" .-> Communication
+    Communication -. "Delivery facts" .-> Run
+    Work -. "Handoff delivery intent" .-> Communication
+    Communication -. "Handoff delivery facts" .-> Work
+
+    Run -->|"Consumer-owned runtime ports"| Runtime
     Runtime -->|"Anti-Corruption Layer"| AR
-    Boards <-->|"Anti-Corruption Layer"| Tasks
-    Team -->|"Context-local read models"| Query
-    Tasks -->|"Context-local read models"| Query
-    Runs -->|"Context-local read models"| Query
-    Messaging -->|"Context-local read models"| Query
+    Work -->|"Consumer-owned board ports"| Boards
 ```
 
-The arrows describe model ownership, not direct source-code imports. A consuming
-context declares an outbound port. An adapter translates the provider's Published
-Language or integration event into the consumer's model.
+The arrows describe semantic information flow, not source-code imports. Each
+relationship must identify an upstream contract owner, a downstream translation,
+delivery semantics, consistency expectations, and allowed latency.
 
-## Project and Workspace
+`Application Use Cases in Every Business Context` is an authorization-consumption
+boundary, not another bounded context.
+
+Bidirectional event flow does not permit cyclic package imports. Each direction uses
+the producer's Published Language and a consumer-owned handler or ACL.
+
+## Identity Registry
 
 Owns:
 
+- human and machine principal identities;
+- mappings to an external identity provider;
+- principal lifecycle and status;
+- authentication identity facts exposed to Access Control.
+
+It does not decide whether a principal may perform a domain operation.
+
+## Access Control
+
+Owns:
+
+- tenant and project membership;
+- role and grant assignments;
+- machine-client grants;
+- authorization facts required by application use cases.
+
+Inbound adapters authenticate a principal. Application use cases authorize every
+business operation using Access Control facts. Domain models enforce business
+invariants using explicit actor or capability facts where identity matters.
+
+No inbound transport may bypass application authorization.
+
+Other contexts do not import Access Control application code. They consume
+authorization through a consumer-owned decision port or a context-local grant
+projection built from versioned Access Control events. Each contract defines
+freshness, revocation, fail-closed behavior, and which operations require a
+synchronous authoritative decision.
+
+## Tenant and Project Registry
+
+Owns:
+
+- tenant identity and lifecycle;
 - project identity and lifecycle;
+- project-to-tenant ownership;
+- project metadata and archival state;
+- stable tenant and project references published to downstream contexts.
+
+Other contexts own their local opaque `ProjectId` representation and do not import
+the Project aggregate.
+
+## Workspace Registry
+
+Owns:
+
 - workspace registration and binding generation;
-- the association between projects and workspaces;
-- project-scoped references used by teams, tasks, runs, and messages;
-- workspace metadata needed for policy decisions.
+- project-to-workspace association;
+- workspace location references and metadata;
+- lifecycle facts needed by policy evaluation and runtime admission.
 
-Candidate aggregates:
+It does not decide trust or enforce sandbox isolation. Policy and Risk owns the
+decision; `ar` owns runtime enforcement.
 
-- `Project`
+Candidate aggregate:
+
 - `WorkspaceRegistration`
 
-It does not decide whether execution is trusted or enforce sandbox isolation.
-Policy and Approvals owns the decision; `ar` owns enforcement.
-
-## Team Management
+## Team Topology
 
 Owns:
 
 - project-scoped team identity and lifecycle;
-- membership and roles;
-- team configuration intent;
-- membership invariants.
+- agent-member composition;
+- roles and declared capabilities;
+- roster invariants and topology versions.
 
-Candidate aggregates:
+Candidate aggregate:
 
 - `Team`
-- `TeamRoster`
 
-It does not own agent processes, task progress, or provider sessions.
+`TeamRoster` remains an entity or collection inside `Team` unless independent
+concurrency and lifecycle prove that it needs a separate aggregate.
 
-## Task Coordination
+It does not own agent processes, tasks, or provider sessions.
+
+## Work Coordination
 
 Owns:
 
-- project-scoped tasks and task lifecycle;
-- assignments and reassignment;
-- blocking and dependency relationships;
+- project-scoped task identity and lifecycle;
+- assignment and reassignment;
+- blocking and dependency semantics;
+- work handoff semantics and responsibility transfer;
 - task-event subscriptions;
-- declared work versus actual active work;
+- decisions that accept execution facts and change task state;
 - synchronization intent for external task boards.
 
-Candidate aggregates:
+Candidate aggregate:
 
 - `Task`
-- `TaskDependency`
-- `TaskSubscription`
 
-`TaskDependencyGraph` must not become one unbounded aggregate. External boards use
-an ACL and preserve external identifiers only in adapter-owned mappings.
+`TaskDependency`, `TaskSubscription`, and dependency-graph structures remain
+candidate entities, aggregates, or process state until their invariants and
+concurrency boundaries are proven.
+
+Execution activity is observed from Run Orchestration. `Actual active work` is a
+Work Coordination projection derived from execution evidence, not a second
+authoritative runtime state.
+
+External boards preserve external identifiers only in ACL-owned mappings.
 
 ## Run Orchestration
 
@@ -125,112 +225,131 @@ Owns:
 
 - project-scoped orchestration-run lifecycle;
 - desired execution plans;
-- workflow checkpoints and timers;
-- retry, escalation, completion, and compensation policy;
-- durable process-manager state across tasks, messages, and runtime runs.
+- business checkpoints and process-manager state;
+- business retry, escalation, completion, and compensation policy;
+- runtime binding between orchestration intent and opaque `ar` references;
+- desired-versus-observed reconciliation;
+- context-owned runtime observation inboxes, cursors, and projections.
 
-Candidate aggregates:
+Candidate aggregate:
 
 - `OrchestrationRun`
-- `RunPlan`
 
-It does not spawn provider processes. Temporal may implement workflow ports but
-does not become the domain model.
+`RunPlan` and `RuntimeBinding` remain entities, value objects, or separate
+aggregates until invariants and concurrency requirements prove otherwise.
 
-## Messaging and Handoffs
+Run Orchestration is authoritative for business run state. The active workflow
+engine owns durable scheduling history, wakeups, and activity retries. `ar` owns
+agent execution, sessions, processes, leases, fencing, and recovery mechanisms.
+
+## Agent Communication
 
 Owns:
 
-- typed messages and handoffs;
+- typed messages;
 - product-level agent inbox policy;
 - priority and deferred delivery;
 - attachments as references;
-- delivery intent and product-level acknowledgement.
+- delivery intent, attempts, receipts, and product-level acknowledgement.
 
 Candidate aggregates:
 
 - `Conversation`
-- `AgentInbox`
 - `MessageDelivery`
 
-Runtime Gateway owns provider submission and runtime receipt mapping, not product
-message policy. The event-consumer idempotency inbox is a separate technical
-concept.
+An inbox may be a projection or delivery queue rather than an aggregate. This must
+be decided from invariants and concurrency, not from the noun alone.
 
-## Policy and Approvals
+Agent Communication does not decide task completion, assignment, or handoff
+semantics. Work Coordination owns the handoff; Agent Communication transports its
+communication.
+
+## Policy and Risk
 
 Owns:
 
 - workspace trust decisions;
-- approval policy;
-- execution policy;
-- limits and risk classifications;
-- auditable policy decisions.
+- execution and tool policy;
+- risk classifications;
+- capability-profile selection;
+- limits that protect execution;
+- auditable policy evaluations.
 
-Workspace facts come from Project and Workspace. Runtime enforcement remains in
-`ar`. This area may split after domain discovery if trust, approvals, and usage
-limits demonstrate independent language and lifecycle.
+Domain policies that enforce invariants cannot be replaced by plugins. An external
+policy engine may supply facts or evaluate an explicitly declared outbound port,
+but the owning domain validates and applies the result.
 
-## Identity and Access
+## Approval Management
 
-Proposed ownership:
+Owns:
 
-- tenant and project membership;
-- human and machine principal mapping;
-- orchestrator roles and authorization decisions;
-- API-client identity and credential references.
+- approval-request lifecycle;
+- eligible approvers;
+- approval, rejection, expiry, and revocation;
+- auditable decision evidence.
 
-It does not store provider credentials or runtime session secrets. Authentication
-may remain an external upstream capability.
+Candidate aggregate:
 
-## Runtime Gateway
+- `ApprovalRequest`
 
-The ACL owns:
+Policy and Risk decides when approval is required. Approval Management records the
+decision. Run Orchestration decides how that fact changes a run.
 
-- narrow runtime capability ports;
-- orchestration-to-runtime command translation;
-- normalized runtime snapshots and events;
-- approval request and answer translation;
-- mapping orchestration identities to opaque runtime references.
+## Runtime ACL
 
-It contains no provider implementation. OpenCode, Claude, and Codex drivers belong
-in `ar`.
+The Runtime ACL is a stateless outbound adapter except for non-durable technical
+connection caches. Durable ingestion cursors and inbox state belong to the
+consuming context.
 
-## Projections and query composition
+It:
 
-Each write-side context owns its read models, checkpoint state, and rebuild logic.
-Query Composition can join those published read models for desktop, web, CLI, or
-third-party clients.
+- implements narrow ports owned by consuming application code;
+- translates orchestration commands to `ar` contracts;
+- translates `ar` facts into consumer-owned observation models;
+- preserves opaque runtime references;
+- contains no provider implementation.
 
-Query Composition:
+OpenCode, Claude, Codex, and other provider drivers belong in `ar`.
 
-- is disposable and rebuildable;
-- does not own aggregates;
-- does not write context tables;
-- cannot become a hidden integration database;
-- remains at an inbound/API edge.
+## Context relationship rules
 
-## Relationship rules
-
-- Synchronous collaboration uses a consumer-owned outbound port and an adapter to
-  the provider's published contract.
+- A synchronous consumer declares a narrow outbound port and translates the
+  provider's Published Language through an ACL or context bridge.
 - Asynchronous collaboration uses versioned integration events.
-- A context never writes another context's storage.
-- A context never imports another context's aggregate, repository, or application
-  implementation.
-- Cross-context identifiers are opaque value objects at the receiving boundary.
-- Eventual consistency is explicit in status, error, and reconciliation models.
-- Cyclic synchronous context dependencies are prohibited.
+- A context never writes another context's tables, inbox, outbox, or projections.
+- One event handler changes state in one bounded context transaction only.
+- A context never imports another context's aggregate, repository, application
+  implementation, or adapter.
+- Cross-context identifiers are opaque local value objects.
+- Eventual consistency is explicit in state, errors, reconciliation, and UX.
+- Cyclic synchronous context dependencies and cyclic package imports are prohibited.
 
-## Acceptance criteria
+## Aggregate and feature rules
 
-Before changing this document to Accepted:
+- Aggregate boundaries come from invariants and transactional consistency, not
+  nouns or directory names.
+- One domain capability feature owns each aggregate implementation.
+- Another feature in the same bounded context may use an explicit context-internal
+  API, stable identity, or shared Ubiquitous Language type.
+- Another feature does not mutate an aggregate through its repository or internals.
+- Cross-aggregate workflows use application coordination, domain services where
+  truly stateless, or explicit process managers.
+- Published Language and ACLs are mandatory across bounded contexts, not between
+  every pair of features inside one context.
 
-1. map the current desktop and legacy-orchestrator capabilities to owners;
-2. event-storm team creation, task assignment, handoff, cancellation, recovery,
-   approval, and partial member failure;
-3. define invariants and transaction boundaries for candidate aggregates;
-4. validate project and tenant isolation;
-5. identify upstream/downstream and consistency requirements for each relationship;
-6. verify that external boards and `ar` remain behind ACLs;
-7. record the accepted map in an ADR.
+## Full DDD acceptance criteria
+
+Before exact context packages are accepted:
+
+1. create a business-capability map and domain vision;
+2. event-storm team creation, assignment, handoff, cancellation, recovery,
+   approval, partial failure, review, and completion;
+3. define a Ubiquitous Language map for every core context;
+4. record aggregate invariants, transaction boundaries, and concurrency models;
+5. define commands, domain events, policies, process managers, and domain errors;
+6. define upstream/downstream ownership, Published Language, consistency, and
+   latency for every context relationship;
+7. validate project and tenant isolation;
+8. map current desktop and legacy-orchestrator behavior to one owner;
+9. verify that external boards and `ar` remain behind ACLs;
+10. accept the validated map through a new ADR before creating all context packages.

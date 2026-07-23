@@ -42,6 +42,19 @@ run against the fake runtime, legacy compatibility adapter, and `ar` adapter.
 Capability discovery tests verify that an adapter cannot claim unsupported resume,
 approval, streaming, or recovery behavior.
 
+Runtime conformance also covers idempotency-key reuse, unknown command outcome,
+event replay, duplicate and gap handling, runtime epochs, cursor persistence, and
+snapshot reconciliation.
+
+Each production persistence adapter runs:
+
+- platform technical harnesses for transactions, crash simulation, migrations, and
+  backup/restore;
+- its context-owned semantic suite for aggregate, repository, query, and scope
+  behavior;
+- applicable capability suites for event outbox, command dispatch, inbox, tenant
+  isolation, and projection cursors.
+
 ### Adapter integration tests
 
 Test concrete adapters against disposable infrastructure:
@@ -73,7 +86,13 @@ Automated checks must reject:
 - unversioned external contracts;
 - context-owned storage or projections placed in global platform packages;
 - process-wide resources instantiated below the application composition root;
-- multiple process-owner implementations wired simultaneously.
+- multiple process-owner implementations wired simultaneously;
+- runtime ports owned or exported by the Runtime ACL;
+- one event handler mutating multiple bounded contexts;
+- cross-context foreign keys, joins, transactions, or table writes;
+- broad `spi` or root package barrel exports;
+- feature dependency cycles inside one bounded context;
+- generic aggregate repositories or ORM entities in domain/application.
 
 ## Replay and simulation
 

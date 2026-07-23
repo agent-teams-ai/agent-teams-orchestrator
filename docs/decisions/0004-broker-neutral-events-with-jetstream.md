@@ -1,6 +1,6 @@
 # ADR-0004: Broker-Neutral Core with NATS JetStream Adapter
 
-Status: **Accepted; ordering consequence superseded by ADR-0006**
+Status: **Accepted; ordering consequence superseded by ADR-0010**
 
 ## Context
 
@@ -20,7 +20,7 @@ patterns independently of the broker.
 - JetStream-specific stream, subject, retention, and consumer policy stays in the
   adapter.
 - At-least-once delivery is part of contract semantics. The original
-  per-aggregate ordering rule is superseded by ADR-0006.
+  per-aggregate ordering rule is superseded by ADR-0010.
 - Replacing or supplementing JetStream does not rewrite business behavior.
 - Local desktop NATS lifecycle remains a deployment decision.
 

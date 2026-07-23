@@ -9,18 +9,16 @@ Provider implementations belong behind `ar`.
 
 ```mermaid
 flowchart LR
-    Orchestrator["Orchestrator Contexts"]
-    Gateway["Runtime Gateway Facade"]
-    Ports["Narrow Runtime Capability Ports"]
-    Adapter["ar Client Adapter"]
+    Run["Run Orchestration Application"]
+    Ports["Consumer-Owned Runtime Capability Ports"]
+    Gateway["Stateless Runtime ACL Adapter"]
     AR["ar Runtime"]
     Driver["Provider Driver"]
     Provider["Claude / Codex / OpenCode"]
 
-    Orchestrator --> Gateway
-    Gateway --> Ports
-    Adapter -. "implements" .-> Ports
-    Adapter --> AR
+    Run --> Ports
+    Gateway -. "implements" .-> Ports
+    Gateway --> AR
     AR --> Driver
     Driver --> Provider
 ```
@@ -35,7 +33,8 @@ flowchart LR
 | Provider capability selection policy | Orchestrator using runtime facts |
 | Runtime process and worker lifecycle | `ar` |
 | Provider session custody and resume | `ar` |
-| Cancellation, timeout, and recovery execution | `ar` |
+| Business cancellation, timeout, retry, and recovery policy | Run Orchestration |
+| Runtime cancellation, timeout, and recovery mechanism | `ar` |
 | Leases, fencing, sandbox, workspace isolation | `ar` |
 | Provider API, CLI, SSE, and protocol translation | `ar` provider driver |
 | User-facing projections | Orchestrator projections and client applications |
@@ -44,11 +43,18 @@ flowchart LR
 There must never be two writers for one runtime mutation or two supervisors for
 one agent process.
 
-## Interface segregation
+Run Orchestration owns the durable `RuntimeBinding`, desired state, observation
+projection, runtime-event inbox, and source cursor. `ar` owns the runtime run,
+session, process, lease, fencing epoch, and provider cursor.
 
-One large `AgentRuntimePort` would force providers and test doubles to implement
-capabilities they do not support. The application depends on narrow ports, for
-example:
+The Runtime ACL owns only translation and technical connection state. It must not
+become a second durable owner of a binding, observation revision, or recovery state.
+
+## Interface segregation and port ownership
+
+One large `AgentRuntimePort` would force consumers and test doubles to depend on
+capabilities they do not use. Each consuming application capability owns the
+narrowest port it requires, for example:
 
 ```text
 RuntimeCapabilitiesPort
@@ -61,9 +67,9 @@ RuntimeApprovalPort
 RuntimeRecoveryPort
 ```
 
-Names remain proposed until OD-004 is resolved. A `RuntimeGateway` facade may
-compose these ports for convenient wiring, but consumers request only the
-capabilities they use.
+Names remain proposed until OD-004 is resolved. The Runtime ACL adapter may
+implement several ports for convenient composition, but it does not own or export
+those abstractions. Consumers request only the capabilities they use.
 
 Capability discovery is explicit. Unsupported resume, approval, streaming, or
 recovery behavior is represented as a typed capability/result, not an absent
@@ -114,9 +120,49 @@ Every orchestrator-facing snapshot needs:
 - warning and diagnostic codes;
 - desired-state correlation without overwriting desired orchestration state.
 
-If a provider cannot expose a monotonic revision, Runtime Gateway assigns an
-observation revision while preserving the absence of a provider cursor. A stale
-snapshot is never silently interpreted as current liveness.
+If a provider cannot expose a monotonic revision, the Run Orchestration ingestion
+handler assigns its own observation revision while preserving the absence of a
+provider cursor. A stale snapshot is never silently interpreted as current
+liveness.
+
+## Runtime-event ingestion
+
+The `ar` published contract defines:
+
+- delivery semantics and replay support;
+- runtime instance epoch and source cursor;
+- duplicate, gap, and out-of-order signals available at the source;
+- reconnect and replay from a supplied cursor;
+- snapshot retrieval when replay is unavailable;
+- behavior when a source cursor is explicitly unavailable.
+
+The consumer-owned runtime integration contract defines normalized observation
+semantics. Run Orchestration's internal persistence protocol defines:
+
+- atomic persistence of inbox, cursor, and projection changes;
+- local duplicate and out-of-order handling;
+- observation revision allocation;
+- snapshot reconciliation and gap state;
+- the durable cursor supplied on reconnect.
+
+When the source has no replayable cursor, the observation is marked
+non-replayable. Reconciliation uses a fresh snapshot and never fabricates missing
+history.
+
+## Runtime-command idempotency
+
+Mutating runtime commands require a durable command ledger or an equivalent `ar`
+guarantee. The contract defines:
+
+- idempotency-key scope and retention;
+- payload hash validation for reused keys;
+- replay of the original accepted result;
+- unknown-outcome recovery after transport timeout;
+- fencing and runtime-epoch behavior;
+- safe retry rules for every mutation.
+
+A retry of `startRun` after an unknown transport outcome must not create a second
+runtime run.
 
 ## OpenCode target placement
 
