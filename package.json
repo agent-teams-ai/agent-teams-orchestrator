@@ -17,8 +17,10 @@
     "architecture:scaffold-package": "node scripts/architecture/scaffold-package.mjs",
     "architecture:topology": "node scripts/architecture/validate-package-topology.mjs",
     "docs:validate": "node scripts/docs/validate-docs.mjs",
+    "docs:test": "node --test scripts/docs/validate-docs.test.mjs",
+    "docs:query": "node scripts/docs/query-docs.mjs",
     "docs:lint": "markdownlint-cli2",
-    "docs:check": "pnpm run docs:validate && pnpm run docs:lint",
+    "docs:check": "pnpm run docs:validate && pnpm run docs:test && pnpm run docs:lint",
     "lint:boundaries": "oxlint --config .oxlintrc.json --ignore-pattern 'tooling/architecture-conformance/fixtures/invalid/**' --ignore-pattern 'tooling/architecture-conformance/fixtures/cycles/**' .",
     "typecheck": "tsc --project tsconfig.json --noEmit --pretty false"
   },
