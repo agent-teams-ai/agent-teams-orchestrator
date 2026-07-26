@@ -1,3 +1,11 @@
+---
+id: glossary.system
+type: glossary
+status: active
+owner: architecture/domain
+summary: Cross-system terminology shared by multiple bounded contexts and integrations.
+---
+
 # Glossary
 
 ## Agent runtime
@@ -28,6 +36,17 @@ boundary.
 A request to perform an action. Commands may be rejected and must carry an
 idempotency identity when retries are possible.
 
+## Command ID
+
+The one public idempotency identity of a durable control command. A crash-safe
+caller persists it before sending and uses it to locate the resulting operation.
+
+## Client Profile
+
+User-owned defaults that select an orchestrator Target and optional default
+tenant or project scope. A Client Profile is not a deployment, process, Workspace,
+or trust authority.
+
 ## Application model
 
 A transport-independent input or output type owned by an application use case. It
@@ -37,6 +56,12 @@ is distinct from a public SDK, transport, or integration-event contract.
 
 The layer that decides desired coordination state and policy. It does not perform
 provider execution itself.
+
+## Control Published Language
+
+The feature-owned, versioned Protobuf services and messages exposed to
+orchestrator clients. It is distinct from integration events and the `ar` Runtime
+Published Language.
 
 ## Domain event
 
@@ -53,35 +78,86 @@ bounded context by default.
 A monotonic or otherwise authoritative ownership token used to reject stale
 runtime mutations.
 
+## ETag
+
+An opaque public concurrency token representing the observed version of a
+resource. It is not a database version or public aggregate revision.
+
+## Execution epoch
+
+A non-authorizing AR observation used to distinguish technical custody
+generations. It may change while execution-attempt identity remains unchanged. It
+is not an `ExecutionFence`, capability token, or orchestrator aggregate revision.
+
 ## Inbox
 
 Durable consumer-side idempotency and delivery state. It is distinct from an
 agent's product-level message inbox.
+
+## Inbound adapter
+
+An outer adapter that translates an external trigger and invokes an application
+inbound port. Direction is relative to the application core, not network traffic.
+HTTP handlers, CLI commands, SDK entry points, broker consumers, and Temporal
+Activity Workers are typical inbound adapters.
 
 ## Integration event
 
 A versioned public fact published for other bounded contexts or external
 consumers.
 
+## Local Supervisor
+
+The small per-user technical process that discovers, ensures, monitors, drains,
+and activates versioned local orchestrator components. It owns process
+availability, not orchestration behavior, JetStream semantics, or provider
+execution.
+
 ## Open Host Service
 
 A DDD relationship where an upstream context exposes a documented protocol for
 multiple consumers. Often abbreviated OHS.
+
+## Orchestrator Host
+
+The versioned deployable process that composes orchestrator bounded contexts,
+public control adapters, persistence, Runtime ACL, and eventing adapters. The
+local Host is managed by the Local Supervisor; the hosted Host is managed by its
+deployment platform.
 
 ## Orchestration run
 
 A durable product-level coordination lifecycle. It may involve multiple runtime
 runs, tasks, messages, retries, and approvals.
 
+## Operation
+
+An addressable, durable result handle created when a long-running command is
+accepted. It survives client disconnects and has one immutable terminal outcome.
+
 ## Outbox
 
 Records written transactionally with business state and later relayed to an event
 transport.
 
+## Outbound adapter
+
+An outer adapter that implements a capability required through an application
+outbound port. Persistence, event publication, agent runtime, workflow engines,
+clocks, secret stores, and external APIs are typical outbound adapters. A
+technology used for both inbound and outbound roles is represented by separate
+adapter modules.
+
 ## Port
 
 An interface declared at an architecture boundary. Inbound ports expose use cases;
 outbound ports describe required external capabilities.
+
+## Product approval
+
+An orchestrator-owned request and decision lifecycle that applies product policy,
+selects eligible authorities, routes a decision, and records auditable evidence.
+It is distinct from an `ar` technical runtime permission request.
 
 ## Process manager
 
@@ -130,6 +206,13 @@ logic belongs in an `ar` driver.
 An opaque execution lifecycle owned by `ar`, referenced by the orchestrator but
 not reconstructed from provider internals.
 
+## Runtime permission request
+
+An `ar`-owned technical request to grant or deny a scoped runtime capability.
+`ar` owns its revision, execution fence, expiry validation, capability scope,
+decision acceptance, and provider enforcement. The orchestrator may correlate it
+to a separate product approval through an opaque authority decision reference.
+
 ## Runtime ACL
 
 The stateless anti-corruption adapter that implements consumer-owned runtime
@@ -143,11 +226,28 @@ generation without exposing arbitrary paths as domain identity.
 
 ## Sidecar
 
-A separately running local process managed by a host application. The desktop may
-run orchestrator and runtime sidecars automatically.
+A separately running process deployed beside a host application. It describes a
+deployment relationship, not business ownership.
+
+## Sidecar supervisor
+
+A generic host-owned lifecycle component for one child sidecar. ADR-0033
+superseded Desktop-owned orchestrator sidecar supervision with the shared Local
+Supervisor model.
+
+## Snapshot watermark
+
+The feed position whose effects are included in a snapshot. A matching resume
+cursor begins strictly after that position.
 
 ## Tenant
 
 The top-level hosted ownership and isolation identity for projects, principals,
 grants, and tenant-scoped policy. Tenant and Project Registry owns its lifecycle;
 other contexts hold opaque local references.
+
+## Target
+
+One concrete local or remote orchestrator deployment and its trust configuration.
+A Target is selected by a Client Profile and is independent of the current
+project directory or Workspace.

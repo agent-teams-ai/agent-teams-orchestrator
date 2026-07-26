@@ -1,6 +1,14 @@
-# ADR-0006: Event Ordering Is Declared Per Contract
+---
+id: ADR-0006
+type: adr
+status: superseded
+owner: platform/eventing
+summary: Original event ordering decision superseded by broker-neutral partition ordering.
+superseded_by:
+  - ADR-0010
+---
 
-Status: **Superseded by ADR-0010**
+# ADR-0006: Event Ordering Is Declared Per Contract
 
 Supersedes the per-aggregate ordering consequence in ADR-0004.
 

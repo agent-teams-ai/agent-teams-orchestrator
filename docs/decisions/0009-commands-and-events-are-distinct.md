@@ -1,6 +1,12 @@
-# ADR-0009: Commands and Events Have Distinct Contracts
+---
+id: ADR-0009
+type: adr
+status: accepted
+owner: platform/eventing
+summary: Model commands and events as distinct contracts with different semantics.
+---
 
-Status: **Accepted**
+# ADR-0009: Commands and Events Have Distinct Contracts
 
 Clarifies ADR-0004.
 

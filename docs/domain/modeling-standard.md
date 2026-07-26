@@ -1,6 +1,16 @@
-# Full DDD Modeling Standard
+---
+id: domain.modeling-standard
+type: domain-standard
+status: accepted
+owner: architecture/domain
+summary: Full DDD discovery and tactical modeling requirements for bounded contexts.
+related:
+  - ADR-0007
+  - OD-006
+  - OD-011
+---
 
-Status: **Accepted**
+# Full DDD Modeling Standard
 
 ## Purpose
 

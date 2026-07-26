@@ -1,3 +1,11 @@
+---
+id: docs.index
+type: index
+status: active
+owner: architecture
+summary: Canonical navigation and authority index for all technical documentation.
+---
+
 # Technical Documentation
 
 This directory is the canonical architecture knowledge base for Agent Teams
@@ -5,44 +13,43 @@ Orchestrator.
 
 ## Reading order
 
-1. [Architecture overview](architecture/overview.md)
-2. [Full DDD modeling standard](domain/modeling-standard.md)
-3. [Context map](architecture/context-map.md)
-4. [Feature module standard](architecture/feature-module-standard.md)
-5. [Dependency rules](architecture/dependency-rules.md)
-6. [Persistence boundary](architecture/persistence-boundary.md)
-7. [Runtime boundary](architecture/runtime-boundary.md)
-8. [Eventing and reliability](architecture/eventing-and-reliability.md)
-9. [SDK and transports](architecture/sdk-and-transports.md)
-10. [Testing strategy](architecture/testing-strategy.md)
-11. [Extension points](architecture/extension-points.md)
-12. [Architecture decisions](decisions/README.md)
-13. [Open decisions](open-decisions.md)
-14. [Glossary](glossary.md)
+1. [Documentation standard](standards/documentation.md)
+2. [Architecture index](architecture/README.md)
+3. [Architecture overview](architecture/overview.md)
+4. [Local Host lifecycle](architecture/local-host-lifecycle.md)
+5. [Domain documentation](domain/README.md)
+6. [Full DDD modeling standard](domain/modeling-standard.md)
+7. [Proposed bounded-context dossiers](domain/contexts/README.md)
+8. [Architecture decisions](decisions/README.md)
+9. [Open decisions](open-decisions/README.md)
+10. [Research evidence](research/README.md)
+11. [Glossary](glossary.md)
+
+For client/API work, read [SDK and transports](architecture/sdk-and-transports.md)
+and [Public control contracts](architecture/public-control-contracts.md) together.
+For desktop extraction work, read
+[Migration boundary](architecture/migration-boundary.md) before the runtime or
+board-specific open decisions.
 
 ## Document status
 
-Each architecture document declares its status. An ADR records why a decision was
-made and what it supersedes. Open questions belong in
-`open-decisions.md`; they must not be silently resolved in implementation code.
+Every document declares machine-validated metadata. An ADR records why a decision
+was made and what it supersedes. Each open question has one file under
+`open-decisions/`; it must not be silently resolved in implementation code.
 
-Use the following status vocabulary:
+The [documentation standard](standards/documentation.md) defines type-compatible
+statuses, metadata, placement, ownership, and lifecycle rules.
 
-- **Accepted**: authoritative and enforceable.
-- **Proposed**: ready for review but not binding.
-- **Exploratory**: research or a spike, not a commitment.
-- **Superseded**: retained for history; replaced by another ADR.
+## Authority model
 
-## Source-of-truth hierarchy
+Authority depends on the knowledge type: ADRs own rationale, architecture
+documents own current cross-context rules, bounded-context dossiers own domain
+language and invariants, machine-readable schemas own exact wire shape, and
+runbooks own operations. See the
+[authority matrix](standards/documentation.md#authority-by-knowledge-type).
 
-1. Accepted ADRs
-2. Architecture documents
-3. Public context and feature contracts
-4. Feature-local documentation
-5. Code comments
-
-When behavior and documentation disagree, determine whether the implementation
-is a defect or the decision has changed. Do not update only one side.
+When two artifacts of the same authority type disagree, resolve the conflict
+explicitly. Do not update only one side.
 
 ## Documentation quality bar
 
@@ -55,3 +62,8 @@ Architecture documentation must:
 - avoid references to one frontend as if it were the product;
 - include consequences and tradeoffs, not only the chosen design;
 - remain provider-neutral unless documenting an adapter.
+
+## Quality gate
+
+Run `pnpm docs:check` before committing documentation changes. CI applies the same
+metadata, ID, navigation, link, anchor, Mermaid, and Markdown checks.

@@ -1,0 +1,168 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "jsPlugins": [
+    {
+      "name": "boundaries",
+      "specifier": "eslint-plugin-boundaries"
+    }
+  ],
+  "settings": {
+    "boundaries/include": [
+      "apps/**/src/features/**/*.{ts,tsx,mts,cts}",
+      "packages/**/src/features/**/*.{ts,tsx,mts,cts}",
+      "tooling/architecture-conformance/fixtures/**/src/features/**/*.{ts,tsx,mts,cts}"
+    ],
+    "boundaries/elements": [
+      {
+        "type": "domain",
+        "pattern": "**/src/features/*/domain/**"
+      },
+      {
+        "type": "application",
+        "pattern": "**/src/features/*/application/**"
+      },
+      {
+        "type": "contracts",
+        "pattern": "**/src/features/*/contracts/**"
+      },
+      {
+        "type": "adapter-inbound",
+        "pattern": "**/src/features/*/adapters/inbound/**"
+      },
+      {
+        "type": "adapter-outbound",
+        "pattern": "**/src/features/*/adapters/outbound/**"
+      },
+      {
+        "type": "composition",
+        "pattern": "**/src/features/*/composition/**"
+      },
+      {
+        "type": "projection",
+        "pattern": "**/src/features/*/projections/**"
+      },
+      {
+        "type": "tests",
+        "pattern": "**/src/features/*/tests/**"
+      },
+      {
+        "type": "feature-other",
+        "pattern": "**/src/features/*/**"
+      }
+    ],
+    "import/resolver": {
+      "oxc": {
+        "tsconfig": {
+          "configFile": "./tsconfig.architecture.json",
+          "references": "auto"
+        }
+      }
+    }
+  },
+  "rules": {
+    "boundaries/no-unknown-dependencies": "error",
+    "boundaries/dependencies": [
+      "error",
+      {
+        "default": "allow",
+        "policies": [
+          {
+            "from": {
+              "element": {
+                "type": "domain"
+              }
+            },
+            "disallow": {
+              "to": {
+                "element": {
+                  "type": [
+                    "application",
+                    "contracts",
+                    "adapter-inbound",
+                    "adapter-outbound",
+                    "composition",
+                    "projection"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
+                "type": "application"
+              }
+            },
+            "disallow": {
+              "to": {
+                "element": {
+                  "type": [
+                    "contracts",
+                    "adapter-inbound",
+                    "adapter-outbound",
+                    "composition"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
+                "type": "contracts"
+              }
+            },
+            "disallow": {
+              "to": {
+                "element": {
+                  "type": [
+                    "domain",
+                    "application",
+                    "adapter-inbound",
+                    "adapter-outbound",
+                    "composition",
+                    "projection"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
+                "type": "adapter-inbound"
+              }
+            },
+            "disallow": {
+              "to": {
+                "element": {
+                  "type": [
+                    "adapter-outbound",
+                    "composition"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
+                "type": "adapter-outbound"
+              }
+            },
+            "disallow": {
+              "to": {
+                "element": {
+                  "type": [
+                    "adapter-inbound",
+                    "composition"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

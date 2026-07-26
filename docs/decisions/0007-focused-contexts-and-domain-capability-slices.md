@@ -1,6 +1,16 @@
-# ADR-0007: Focused Contexts and Domain-Capability Slices
+---
+id: ADR-0007
+type: adr
+status: accepted
+owner: architecture/domain
+summary: Use focused bounded contexts containing feature-owned domain-capability slices.
+supersedes:
+  - ADR-0002
+related:
+  - OD-011
+---
 
-Status: **Accepted**
+# ADR-0007: Focused Contexts and Domain-Capability Slices
 
 Supersedes ADR-0002.
 
@@ -23,14 +33,23 @@ a directed dependency graph.
 Published Language, ACLs, and versioned integration events are mandatory across
 bounded contexts, not between every pair of internal features.
 
+All other implementation packages also keep production behavior in feature-owned
+capability slices. Their package role determines the internal structure: an
+integration, platform capability, SDK client, or conformance package does not
+invent tactical DDD artifacts merely to resemble a bounded context.
+
 ## Consequences
 
 - Bounded contexts remain the strongest semantic and physical boundary.
 - Features retain vertical ownership without becoming accidental microservices.
 - Aggregate mutation still has one owner.
+- Feature ownership remains consistent across contexts, integrations, platform,
+  clients, and testing packages.
 - Internal module cycles require redesign rather than broad barrel exports.
 - Exact packages are not scaffolded before context acceptance.
 - Mapping duplication across contexts is allowed when meanings differ.
+- Package-role rules and feature-root ownership require automated enforcement
+  before implementation packages are accepted.
 
 ## Rejected alternatives
 

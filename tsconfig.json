@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "jsx": "preserve",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    "strict": true,
+    "target": "ES2024"
+  },
+  "include": [
+    "tooling/architecture-conformance/fixtures/valid/**/*.ts",
+    "tooling/architecture-conformance/fixtures/valid/**/*.tsx",
+    "tooling/architecture-conformance/fixtures/valid/**/*.mts",
+    "tooling/architecture-conformance/fixtures/valid/**/*.cts"
+  ]
+}

@@ -1,6 +1,14 @@
-# ADR-0010: Broker-Neutral Partition Ordering
+---
+id: ADR-0010
+type: adr
+status: accepted
+owner: platform/eventing
+summary: Declare broker-neutral ordering by explicit contract partition scope.
+supersedes:
+  - ADR-0006
+---
 
-Status: **Accepted**
+# ADR-0010: Broker-Neutral Partition Ordering
 
 Supersedes ADR-0006.
 

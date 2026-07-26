@@ -1,6 +1,16 @@
-# Dependency Rules
+---
+id: architecture.dependency-rules
+type: architecture
+status: accepted
+owner: architecture
+summary: Enforceable source dependency and package boundary rules.
+related:
+  - ADR-0005
+  - ADR-0008
+  - ADR-0012
+---
 
-Status: **Accepted**
+# Dependency Rules
 
 ## Dependency direction
 
@@ -20,13 +30,25 @@ flowchart LR
 Dependencies point inward. Runtime calls may flow outward through interfaces, but
 source-code dependencies do not.
 
+The words `inbound` and `outbound` are always relative to the application core:
+
+- inbound adapters call application inbound ports and initiate use cases;
+- outbound adapters implement application outbound ports and are called by use
+  cases;
+- network direction and payload flow do not classify an adapter.
+
+A streaming HTTP response remains part of an inbound HTTP adapter because the
+external client initiated the use case. A JetStream publisher is outbound, while a
+JetStream consumer that initiates a use case is inbound. Integrations that perform
+both roles expose separate modules and ports for each role.
+
 ## Allowed dependency matrix
 
 | From | May depend on |
 |---|---|
 | Domain | Owning context domain modules and explicitly exposed context-internal domain types |
 | Application | Owning context domain, application models, internal APIs, and consumer-owned ports |
-| Contracts | Narrow language-neutral schema primitives only |
+| Contracts | Narrow Protobuf or JSON Schema primitives allowed by the owning external surface |
 | Inbound adapters | Feature contracts and application input ports |
 | Outbound adapters | Application output ports, public event contracts when publishing, and external libraries |
 | Composition | All layers in its own package and public APIs of dependencies |
@@ -83,6 +105,9 @@ Mappings protect ownership, compatibility, authorization, and disclosure rules.
 
 The implementation phase must add automated architecture tests for:
 
+- production source outside approved feature or package-assembly roots;
+- packages without an explicit architectural role;
+- empty ceremonial DDD layers;
 - package export boundaries;
 - forbidden imports by layer;
 - cross-context deep imports;
@@ -91,9 +116,15 @@ The implementation phase must add automated architecture tests for:
 - public contract imports in domain/application;
 - transport-specific symbols in contracts;
 - unversioned integration events.
+- one public control contract represented by both hand-authored Protobuf and JSON
+  Schema sources;
+- public Protobuf outside the accepted cross-language profile;
 - context packages importing consumer-owned ports from an integration adapter;
 - feature dependency cycles inside a bounded context;
 - broad `spi` and package-root barrel exports.
+- adapters classified from network direction instead of application-core
+  direction;
+- one broad adapter module combining inbound and outbound responsibilities.
 
 TypeScript path aliases are conveniences, not boundaries. `package.json` exports,
 workspace dependencies, lint rules, and architecture tests enforce boundaries.

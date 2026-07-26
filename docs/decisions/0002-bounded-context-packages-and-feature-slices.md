@@ -1,6 +1,14 @@
-# ADR-0002: Bounded-Context Packages and Feature-Owned Slices
+---
+id: ADR-0002
+type: adr
+status: superseded
+owner: architecture
+summary: Original package and feature-slice boundary decision superseded by ADR-0007.
+superseded_by:
+  - ADR-0007
+---
 
-Status: **Superseded by ADR-0007**
+# ADR-0002: Bounded-Context Packages and Feature-Owned Slices
 
 ## Context
 

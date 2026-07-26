@@ -1,6 +1,12 @@
-# ADR-0005: Public Contracts Stay Outside Application and Domain
+---
+id: ADR-0005
+type: adr
+status: accepted
+owner: architecture/contracts
+summary: Keep public transport and SDK contracts outside domain and application models.
+---
 
-Status: **Accepted**
+# ADR-0005: Public Contracts Stay Outside Application and Domain
 
 ## Context
 

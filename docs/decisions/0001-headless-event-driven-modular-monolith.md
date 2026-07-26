@@ -1,6 +1,12 @@
-# ADR-0001: Headless Event-Driven Modular Monolith
+---
+id: ADR-0001
+type: adr
+status: accepted
+owner: architecture
+summary: Start as a headless event-driven modular monolith with extractable bounded contexts.
+---
 
-Status: **Accepted**
+# ADR-0001: Headless Event-Driven Modular Monolith
 
 ## Context
 

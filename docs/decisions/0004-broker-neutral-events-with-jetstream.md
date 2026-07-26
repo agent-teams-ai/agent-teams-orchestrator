@@ -1,6 +1,17 @@
+---
+id: ADR-0004
+type: adr
+status: accepted
+owner: platform/eventing
+summary: Keep core event contracts broker-neutral and use NATS JetStream as the first production adapter.
+related:
+  - ADR-0010
+  - OD-002
+---
+
 # ADR-0004: Broker-Neutral Core with NATS JetStream Adapter
 
-Status: **Accepted; ordering consequence superseded by ADR-0010**
+The original ordering consequence is superseded by ADR-0010.
 
 ## Context
 

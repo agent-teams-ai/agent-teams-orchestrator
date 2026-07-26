@@ -1,6 +1,16 @@
-# ADR-0008: Consumer-Owned Runtime Ports and Stateless ACL
+---
+id: ADR-0008
+type: adr
+status: accepted
+owner: integration/runtime
+summary: Give runtime consumers narrow ports and keep the Runtime ACL stateless.
+related:
+  - ADR-0003
+  - ADR-0028
+  - OD-004
+---
 
-Status: **Accepted**
+# ADR-0008: Consumer-Owned Runtime Ports and Stateless ACL
 
 Clarifies ADR-0003.
 

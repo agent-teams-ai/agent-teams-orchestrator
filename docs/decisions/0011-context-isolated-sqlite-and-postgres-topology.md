@@ -1,6 +1,14 @@
-# ADR-0011: Context-Isolated SQLite and PostgreSQL Topology
+---
+id: ADR-0011
+type: adr
+status: accepted
+owner: platform/persistence
+summary: Isolate local SQLite files and hosted PostgreSQL schemas by bounded context.
+related:
+  - OD-003
+---
 
-Status: **Accepted**
+# ADR-0011: Context-Isolated SQLite and PostgreSQL Topology
 
 ## Context
 

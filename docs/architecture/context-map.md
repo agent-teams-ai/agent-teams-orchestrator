@@ -1,6 +1,15 @@
-# Strategic Context Map
+---
+id: architecture.context-map
+type: architecture
+status: proposed
+owner: architecture/domain
+summary: Proposed strategic bounded contexts, responsibilities, and relationships.
+related:
+  - ADR-0007
+  - OD-011
+---
 
-Status: **Focused Full DDD direction accepted; exact boundaries remain proposed**
+# Strategic Context Map
 
 The target is eight to ten focused business bounded contexts. This level of
 granularity is deliberate: contexts must be independently understandable and
@@ -36,7 +45,7 @@ These concepts often align, but they are not interchangeable.
 | Run Orchestration | Core | Durable execution coordination, retries, compensation, and recovery policy |
 | Agent Communication | Core | Typed agent communication, delivery intent, inbox policy, and receipts |
 | Policy and Risk | Supporting | Execution policy, workspace trust, risk classification, and limits |
-| Approval Management | Supporting | Approval requests, decisions, expiry, and audit trail |
+| Approval Management | Supporting | Product approval requests, authority decision records, routing, expiry, and audit |
 
 `Usage and Entitlements` is a likely future supporting context for token accounting,
 budgets, quotas, and commercial limits. It is not part of the initial package map
@@ -101,6 +110,8 @@ flowchart LR
 
     Run -->|"Consumer-owned runtime ports"| Runtime
     Runtime -->|"Anti-Corruption Layer"| AR
+    AR -. "Runtime facts and permission requests" .-> Runtime
+    Runtime -. "Normalized runtime observations" .-> Run
     Work -->|"Consumer-owned board ports"| Boards
 ```
 
@@ -217,6 +228,10 @@ Execution activity is observed from Run Orchestration. `Actual active work` is a
 Work Coordination projection derived from execution evidence, not a second
 authoritative runtime state.
 
+Work Coordination remains the only authority that changes `Task` or `Work`
+lifecycle. It accepts versioned commands and publishes explicit work facts; it
+does not infer Run cancellation, compensation, or participant-failure policy.
+
 External boards preserve external identifiers only in ACL-owned mappings.
 
 ## Run Orchestration
@@ -225,7 +240,7 @@ Owns:
 
 - project-scoped orchestration-run lifecycle;
 - desired execution plans;
-- business checkpoints and process-manager state;
+- business checkpoints and run-specific process-manager state;
 - business retry, escalation, completion, and compensation policy;
 - runtime binding between orchestration intent and opaque `ar` references;
 - desired-versus-observed reconciliation;
@@ -241,6 +256,13 @@ aggregates until invariants and concurrency requirements prove otherwise.
 Run Orchestration is authoritative for business run state. The active workflow
 engine owns durable scheduling history, wakeups, and activity retries. `ar` owns
 agent execution, sessions, processes, leases, fencing, and recovery mechanisms.
+
+A feature-owned `WorkExecutionProcessManager` in Run Orchestration coordinates
+long-running Run-to-Work behavior. It stores stable references, expected
+revisions, checkpoints, and process policy state rather than copying the Work
+aggregate. Cross-context effects use versioned commands and facts; each context
+commits its own state, inbox or receipt, and outbox in its own Unit of Work.
+Compensation is a durable idempotent command, never a cross-context rollback.
 
 ## Agent Communication
 
@@ -262,7 +284,8 @@ be decided from invariants and concurrency, not from the noun alone.
 
 Agent Communication does not decide task completion, assignment, or handoff
 semantics. Work Coordination owns the handoff; Agent Communication transports its
-communication.
+communication. Provider output and technical runtime input belong to `ar`; this
+context owns only product-level team communication and delivery semantics.
 
 ## Policy and Risk
 
@@ -283,9 +306,10 @@ but the owning domain validates and applies the result.
 
 Owns:
 
-- approval-request lifecycle;
+- product approval-request lifecycle;
 - eligible approvers;
-- approval, rejection, expiry, and revocation;
+- decision routing;
+- approval, rejection, expiry, and revocation as product decisions;
 - auditable decision evidence.
 
 Candidate aggregate:
@@ -295,18 +319,36 @@ Candidate aggregate:
 Policy and Risk decides when approval is required. Approval Management records the
 decision. Run Orchestration decides how that fact changes a run.
 
+A technical `RuntimePermissionRequest` remains owned by `ar`. Approval Management
+may create an `ApprovalRequest` correlated to that opaque request, route it to an
+authority, and retain an opaque authority decision reference. It does not own the
+runtime request revision, execution fence, capability grant, or provider
+enforcement state.
+
+Product-level message inboxes belong to Agent Communication. Technical event
+consumer inboxes belong to the consuming bounded context's delivery
+infrastructure. They never share one type, port, table, retention policy, or
+acknowledgement state.
+
 ## Runtime ACL
 
-The Runtime ACL is a stateless outbound adapter except for non-durable technical
-connection caches. Durable ingestion cursors and inbox state belong to the
-consuming context.
+The Runtime ACL is a stateless anti-corruption integration boundary composed of
+role-specific adapters. Its outbound command adapter implements consumer-owned
+runtime capability ports. Its inbound event adapter translates `ar` events and
+invokes context-owned ingestion use cases. They may share low-level connection
+resources supplied by composition but do not form one broad bidirectional adapter.
+Durable ingestion cursors and inbox state belong to the consuming context.
 
-It:
+The boundary:
 
 - implements narrow ports owned by consuming application code;
 - translates orchestration commands to `ar` contracts;
-- translates `ar` facts into consumer-owned observation models;
+- maps `ar` facts into application inputs for consumer-owned observation models;
+- translates technical runtime permission requests and decisions without taking
+  ownership of either side's durable state;
 - preserves opaque runtime references;
+- treats runtime session, attempt, epoch, allocation, account, and custody
+  concepts as AR-owned observations rather than mirrored orchestrator entities;
 - contains no provider implementation.
 
 OpenCode, Claude, Codex, and other provider drivers belong in `ar`.

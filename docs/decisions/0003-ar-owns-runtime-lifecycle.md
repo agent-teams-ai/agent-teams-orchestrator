@@ -1,6 +1,15 @@
-# ADR-0003: ar Owns Runtime Lifecycle
+---
+id: ADR-0003
+type: adr
+status: accepted
+owner: integration/runtime
+summary: Assign technical agent execution and provider lifecycle ownership to ar.
+related:
+  - ADR-0008
+  - ADR-0028
+---
 
-Status: **Accepted**
+# ADR-0003: ar Owns Runtime Lifecycle
 
 ## Context
 

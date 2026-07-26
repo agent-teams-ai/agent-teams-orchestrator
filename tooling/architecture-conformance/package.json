@@ -1,0 +1,14 @@
+{
+  "name": "@agent-teams/architecture-conformance",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:conformance": "node scripts/check-conformance.mjs",
+    "check:graph": "node scripts/run-advisory-graph.mjs"
+  },
+  "devDependencies": {
+    "dependency-cruiser": "18.1.0",
+    "typescript": "6.0.3"
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-teams.dev/schemas/document-metadata.json",
+  "title": "Agent Teams Orchestrator document metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "type",
+    "status",
+    "owner",
+    "summary"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/documentId"
+    },
+    "type": {
+      "enum": [
+        "index",
+        "architecture",
+        "domain-standard",
+        "bounded-context",
+        "contract",
+        "adr",
+        "open-decision",
+        "glossary",
+        "template",
+        "runbook",
+        "research"
+      ]
+    },
+    "status": {
+      "enum": [
+        "active",
+        "accepted",
+        "proposed",
+        "exploratory",
+        "open",
+        "deferred",
+        "resolved",
+        "deprecated",
+        "superseded"
+      ]
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*(/[a-z][a-z0-9-]*)*$"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 180,
+      "pattern": "^[^\\r\\n]+$"
+    },
+    "approved_by": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "accepted_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "related": {
+      "$ref": "#/$defs/documentIdList"
+    },
+    "supersedes": {
+      "$ref": "#/$defs/documentIdList"
+    },
+    "superseded_by": {
+      "$ref": "#/$defs/documentIdList"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "adr"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "enum": [
+              "proposed",
+              "accepted",
+              "superseded"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "open-decision"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "enum": [
+              "open",
+              "deferred",
+              "resolved"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "index",
+              "glossary",
+              "template",
+              "runbook",
+              "research"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "enum": [
+              "active",
+              "deprecated"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "architecture",
+              "domain-standard",
+              "bounded-context",
+              "contract"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "enum": [
+              "accepted",
+              "proposed",
+              "exploratory",
+              "deprecated",
+              "superseded"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "documentId": {
+      "type": "string",
+      "pattern": "^(ADR-[0-9]{4}|OD-[0-9]{3}|[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+)$"
+    },
+    "documentIdList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/documentId"
+      },
+      "uniqueItems": true
+    }
+  }
+}

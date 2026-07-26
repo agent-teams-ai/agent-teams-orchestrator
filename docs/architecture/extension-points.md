@@ -1,6 +1,17 @@
-# Extension Points
+---
+id: architecture.extensions
+type: architecture
+status: accepted
+owner: architecture
+summary: Placement and ownership rules for deferred engines, protocols, plugins, and observability.
+related:
+  - ADR-0027
+  - OD-005
+  - OD-014
+  - OD-015
+---
 
-Status: **Accepted placement rules; implementations deferred**
+# Extension Points
 
 This document records where anticipated technologies and product capabilities
 belong. It prevents future integrations from entering the wrong layer.
@@ -43,6 +54,42 @@ Run Orchestration persistence remains authoritative for business run state.
 Temporal history is authoritative only for durable workflow execution. Activity
 retries cannot bypass application idempotency, authorization, optimistic
 concurrency, or aggregate invariants.
+
+Feature-specific process managers use deterministic transitions, explicit
+commands, durable timers, and idempotent effects. This is migration-friendly
+design, not a requirement to reproduce Temporal history or implement a generic
+workflow language locally.
+
+The first Temporal workflow is a feature-specific Run Orchestration process
+manager. Its workflow ID is stable and scoped by tenant, run, process kind, and
+workflow-contract version. Every mutating activity invokes one narrow application
+command with a stable command ID, semantic fingerprint, and expected revision or
+fence. Activity timeout, retry, and apparent success never replace the
+application receipt because overlapping or unknown activity outcomes are normal.
+
+External clients do not signal or query Temporal directly. Product commands
+commit through ordinary application inbound ports and publish outbox-backed
+workflow notifications. Temporal signals are versioned adapter contracts with
+notification identity and expected revision. Workflow queries expose scheduling
+diagnostics; authoritative product queries read the application model.
+
+Temporal cancellation remains cooperative. A workflow resolves product
+cancellation through an idempotent application command, fences late completion,
+and performs mandatory cleanup in a non-cancellable scope. Continue-as-new
+carries compact scheduling state and opaque application references after measured
+history thresholds.
+
+Long-lived workflow releases retain representative histories for replay tests,
+use pinned Worker Deployment behavior, and verify deployment-build registration
+separately from process startup. A reconciliation worker classifies
+application-ahead, Temporal-ahead, missing workflow, closed-workflow/active-run,
+and unknown activity outcomes.
+
+This accepted boundary covers Run Orchestration as the first Temporal consumer; it
+does not make Run Orchestration the owner of other contexts' process managers. If
+another bounded context later uses Temporal, that context owns its workflow
+semantics and consumer-owned scheduling ports. Shared Temporal clients, workers,
+and deployment tooling remain composition infrastructure.
 
 ## LangGraph
 

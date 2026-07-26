@@ -1,6 +1,17 @@
-# Architecture Overview
+---
+id: architecture.overview
+type: architecture
+status: accepted
+owner: architecture
+summary: System-level architectural style, responsibilities, deployment profiles, and evolution model.
+related:
+  - ADR-0001
+  - ADR-0003
+  - ADR-0030
+  - ADR-0033
+---
 
-Status: **Accepted baseline**
+# Architecture Overview
 
 ## Purpose
 
@@ -13,7 +24,8 @@ The architecture must support:
 - desktop, web, CLI, automation, and third-party clients;
 - local and hosted deployment;
 - Claude, Codex, OpenCode, and future providers through `ar`;
-- durable commands, retries, recovery, and replayable integration events;
+- durable commands, retries, recovery, and integration events with
+  contract-declared retention and replay semantics;
 - future Temporal workflows without coupling the domain to Temporal;
 - future extraction of bounded contexts into services.
 
@@ -50,12 +62,14 @@ flowchart LR
     API --> Inbound
     Inbound --> Contexts["Bounded Context Application Ports"]
 
-    Contexts --> RuntimePort["Consumer-Owned Runtime Ports"]
+    Contexts --> RuntimePort["Consumer-Owned Runtime Command Ports"]
     Contexts --> WorkflowSchedule["Workflow Scheduling Ports"]
     Contexts --> PersistencePorts["Repository and Outbox Ports"]
 
-    RuntimeAdapter["Stateless Runtime ACL"] -. "implements" .-> RuntimePort
-    RuntimeAdapter --> AR["ar Runtime"]
+    RuntimeCommandACL["Runtime Command ACL (Outbound)"] -. "implements" .-> RuntimePort
+    RuntimeCommandACL --> AR["ar Runtime"]
+    AR --> RuntimeEventACL["Runtime Event ACL (Inbound)"]
+    RuntimeEventACL --> Contexts
     AR --> Providers["Claude / Codex / OpenCode"]
     TemporalClient["Temporal Client Adapter"] -. "implements" .-> WorkflowSchedule
     TemporalClient --> Temporal["Temporal"]
@@ -95,13 +109,35 @@ The boundary is detailed in [Runtime boundary](runtime-boundary.md).
 
 The same core supports multiple compositions:
 
-- **Desktop sidecar**: the desktop application starts and monitors a local
-  orchestrator service automatically.
-- **Hosted service**: web and remote clients connect to a server deployment.
+- **Local Supervisor**: a small per-user technical deployment-control process. It
+  ensures, discovers, monitors, drains, and activates versioned local components.
+  It owns no orchestration behavior and is not on the normal SDK request path.
+- **Orchestrator Local**: a versioned local Host composition with protected local
+  control, SQLite, local runtime integration, and the JetStream adapter. CLI,
+  Desktop, and other local applications share it through the SDK.
+- **Orchestrator Server**: a hosted deployable artifact with network control,
+  PostgreSQL, hosted identity/tenancy, and JetStream adapters.
 - **Embedded testing composition**: tests use in-memory adapters and a fake
   runtime without launching real agents.
 
-Deployment mode must not change domain behavior.
+The local and server artifacts are thin composition roots, not separate product
+implementations. Deployment mode must not change domain behavior.
+
+Normal local use is zero-touch. The Local Supervisor manages the bundled
+`nats-server` process and physical store lifecycle; the Host's JetStream adapters
+own broker interaction. It may supervise AR host availability, but AR remains the
+only owner of provider sessions and processes. See
+[Local Host Lifecycle](local-host-lifecycle.md).
+
+Client configuration distinguishes:
+
+- a `Target`, which identifies one concrete deployment and trust boundary;
+- a `Client Profile`, which selects a target and optional default scope;
+- a `Workspace`, which is a project-owned domain resource.
+
+Workspace or project configuration cannot redirect a client, choose credentials,
+or lower target trust. Client exit detaches only the client; durable work requires
+an explicit cancellation command.
 
 ## Persistence model
 
@@ -111,8 +147,10 @@ in one transaction. Relays deliver those records after commit through their
 respective contracts.
 
 The initial design is not event sourced. Event journals support audit, diagnostics,
-replay of projections, and simulation. Making events the authoritative source of
-aggregate state requires a separate ADR.
+and simulation. Projection replay is supported only for contracts whose
+completeness, retention, upcasting, privacy, and replay authorization make that
+guarantee explicit. Making events the authoritative source of aggregate state
+requires a separate ADR.
 
 Persistence is context-owned. Platform persistence packages may provide drivers,
 transaction primitives, migration tooling, and test harnesses, but they do not own
@@ -120,7 +158,7 @@ context repositories, tables, migrations, inboxes, outboxes, or projections.
 
 A transaction changes authoritative state in one bounded context only. Cross-context
 effects use integration events and process managers even when all contexts use the
-same SQLite file or PostgreSQL cluster.
+same application process or PostgreSQL cluster.
 
 ## Scope and access
 
@@ -133,6 +171,11 @@ authenticate and establish a principal. Access Control provides membership and
 grant facts. Every application use case authorizes its business operation before
 mutating or disclosing state; domain behavior enforces identity-dependent
 invariants from explicit facts.
+
+The public control plane uses feature-owned Protobuf through Connect and compatible
+gRPC adapters. Integration events use separate feature-owned JSON Schemas. The
+handwritten SDK maps both remote and in-process backends to one behavioral surface
+without exposing generated wire messages.
 
 ## Read models
 

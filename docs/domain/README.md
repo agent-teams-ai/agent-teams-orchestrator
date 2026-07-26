@@ -1,7 +1,18 @@
+---
+id: domain.index
+type: index
+status: active
+owner: architecture/domain
+summary: Navigation and discovery requirements for business-domain documentation.
+---
+
 # Domain Documentation
 
 This directory contains business-domain knowledge. It is distinct from
 `docs/architecture`, which describes solution structure and technical boundaries.
+
+Start from the [bounded-context dossier index](contexts/README.md). Contexts remain
+proposed until the required discovery artifacts and acceptance gate are complete.
 
 ## Required discovery artifacts
 

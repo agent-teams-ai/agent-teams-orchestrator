@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "baseUrl": ".",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
+    "paths": {
+      "@fixture-adapter/*": [
+        "tooling/architecture-conformance/fixtures/invalid/src/features/task-model/adapters/outbound/*"
+      ]
+    },
+    "strict": true,
+    "target": "ES2024"
+  },
+  "include": [
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "tooling/architecture-conformance/fixtures/**/*.ts",
+    "tooling/architecture-conformance/fixtures/**/*.tsx",
+    "tooling/architecture-conformance/fixtures/**/*.mts",
+    "tooling/architecture-conformance/fixtures/**/*.cts"
+  ]
+}

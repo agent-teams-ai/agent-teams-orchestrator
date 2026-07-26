@@ -9,7 +9,8 @@ The project is being designed as an event-driven modular monolith with:
 - strategic and tactical Full Domain-Driven Design
 - broker-neutral messaging with a NATS JetStream production adapter
 - a provider-neutral runtime boundary backed by `ar`
-- versioned contracts suitable for SDK generation
+- Protobuf, Buf, and Connect for the public control API
+- separate JSON Schema contracts for integration events
 
 ## Project status
 
@@ -21,14 +22,21 @@ be added until the relevant boundaries and contracts are accepted in an ADR.
 - [Agent instructions](AGENTS.md)
 - [Technical documentation index](docs/README.md)
 - [Architecture overview](docs/architecture/overview.md)
+- [Local Host lifecycle](docs/architecture/local-host-lifecycle.md)
+- [Architecture index](docs/architecture/README.md)
 - [Context map](docs/architecture/context-map.md)
 - [Feature module standard](docs/architecture/feature-module-standard.md)
 - [Persistence boundary](docs/architecture/persistence-boundary.md)
+- [SDK and transports](docs/architecture/sdk-and-transports.md)
+- [Public control contracts](docs/architecture/public-control-contracts.md)
 - [Architecture decisions](docs/decisions/README.md)
-- [Open decisions](docs/open-decisions.md)
+- [Open decisions](docs/open-decisions/README.md)
 
 ## Intended clients
 
 The orchestrator is headless. Desktop, web, CLI, automation, and third-party
-applications communicate through versioned APIs and generated clients. Client
-applications must not become owners of orchestration or agent-runtime state.
+applications communicate through versioned APIs and idiomatic SDKs built over
+generated contract bindings. Client applications must not become owners of
+orchestration or agent-runtime state. Local clients share a zero-touch,
+Supervisor-managed Orchestrator Host; disconnecting a client does not stop
+durable work.

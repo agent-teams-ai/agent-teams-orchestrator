@@ -1,6 +1,20 @@
-# Eventing and Reliability
+---
+id: architecture.eventing
+type: architecture
+status: accepted
+owner: platform/eventing
+summary: Event categories, delivery, ordering, outbox, inbox, replay, and failure semantics.
+related:
+  - ADR-0004
+  - ADR-0009
+  - ADR-0010
+  - ADR-0033
+  - ADR-0035
+  - architecture.local-host-lifecycle
+  - OD-009
+---
 
-Status: **Accepted baseline**
+# Eventing and Reliability
 
 ## Event categories
 
@@ -43,13 +57,39 @@ rules.
 Durable command contracts define:
 
 - the single logical owner;
-- idempotency-key scope and retention;
+- idempotency-key scope, full-receipt retention, and reuse-detection horizon;
 - payload-hash behavior when a key is reused;
 - deadline and cancellation semantics;
 - `accepted`, `rejected`, `completed`, and unknown-outcome behavior;
 - whether and how the original result can be queried.
 
 Historical commands are never replayed as if they were facts.
+
+Idempotency retention has two distinct levels when the public contract
+distinguishes an expired result from a never-seen key:
+
+```text
+full receipt:
+  idempotency scope and key, canonicalization version,
+  canonical request fingerprint, outcome and result
+
+compact tombstone:
+  idempotency scope and key, canonicalization version,
+  canonical request fingerprint and expiry metadata
+```
+
+After the full receipt expires but while the tombstone remains, the same key and
+fingerprint returns an explicit expired-window outcome; the same key with another
+fingerprint remains a conflict. After the reuse-detection horizon expires, the
+system cannot claim to recognize historical use. Every command contract declares
+that horizon instead of implying permanent detection.
+
+The request fingerprint is calculated from the normalized semantic application
+command using versioned canonicalization rules. It is never calculated directly
+from raw JSON, Protobuf bytes, field order, unknown wire fields, or
+transport-specific metadata. A tombstone retains the canonicalization version,
+and the corresponding comparison logic remains available for at least the
+reuse-detection horizon.
 
 ## Delivery semantics
 
@@ -89,6 +129,13 @@ An adapter claiming aggregate or custom-key ordering must define:
 - how gaps and duplicates are detected;
 - what consumers do when an out-of-order event arrives.
 
+Sequence allocation and event append are one atomic semantic operation. The
+persistence adapter increments a feed-owned head using a counter row, compare and
+swap, or an equivalent database primitive and appends the event in the same
+transaction. `MAX(sequence) + 1` is prohibited. When a feed is guarded by an
+ownership fence, fence validation, sequence allocation, and append share that
+transaction.
+
 Consumers coordinate facts from different keys using explicit revisions,
 dependencies, reconciliation, or process managers rather than arrival time.
 
@@ -119,6 +166,43 @@ originate from an aggregate must not fabricate aggregate identities.
 
 Schema validation occurs at publication and consumption boundaries.
 
+Producer and consumer validation use different generated profiles:
+
+- an exact-version producer schema is strict and closed, including its payload;
+- a consumer reader declares one supported major line and accepts only additive
+  fields in the versioned payload locations selected by the contract;
+- the stable envelope remains closed unless its own compatibility policy
+  explicitly permits extension;
+- the major suffix of the routable `eventType` and the major component of
+  `schemaVersion` must agree;
+- required-field removal, incompatible type changes, and unsupported major
+  versions fail validation;
+- open string values map to an explicit unknown fallback instead of crashing an
+  older consumer.
+
+The exact producer schema is never reused blindly as an older consumer reader.
+Doing so makes a harmless additive payload field fail at runtime when
+`additionalProperties` or `unevaluatedProperties` closes the object. Reader
+schemas and compatibility fixtures are generated or maintained beside the
+canonical event schema, with their supported major line explicit.
+
+Every integration-event contract has a machine-readable manifest beside its JSON
+Schema. The manifest declares:
+
+- owning feature and stable event type;
+- schema identity, version, and compatibility policy;
+- tenant/project/system scope and consumer authorization class;
+- privacy and redaction classification;
+- ordering mode, partition key, and sequence semantics;
+- delivery, acknowledgement, retry, and terminal-failure classification;
+- retention, replay support, and cursor-expiry behavior;
+- maximum inline payload size and artifact-reference policy;
+- deprecation and consumer-migration metadata.
+
+Broker subjects, stream names, consumer names, and storage settings are generated
+or validated from the manifest by an adapter profile. They are not canonical
+business contract fields.
+
 ## Transactional event and command dispatch
 
 An application transaction:
@@ -134,6 +218,18 @@ Relays publish committed records and record publication progress. Event outbox a
 command-dispatch records remain separate contract categories with separate
 envelopes, retention, authorization, and outcome behavior. A command-dispatch
 record does not turn a command into an event.
+
+A durable command records acceptance and its addressable operation or outcome in
+the owning context transaction. Clients recover the result through operation
+lookup, a declared durable feed, or another stable destination. A duplicate
+command may therefore observe `accepted`, `in-progress`, `completed`, or `failed`
+rather than an immediate repeated final response.
+
+An ephemeral transport reply inbox is not a durable destination and does not get a
+response-outbox record merely to emulate synchronous RPC. Ordinary queries may
+return directly after a successful read. A response outbox is used only when the
+contract names a stable durable destination, such as an integration-event channel,
+registered result endpoint, or webhook.
 
 Publishing or dispatching directly from a domain entity or before persistence
 commits is prohibited.
@@ -158,19 +254,189 @@ a repeated effect.
 One event handler mutates one bounded context only. Cross-context reactions are
 separate handlers and transactions.
 
+A permanently malformed or unauthorized transport message is terminated only
+after a redacted rejection record commits. That record contains transport
+identity or fingerprint, transport route reference, safe principal and scope
+references, classification, schema or error code, occurrence time, and an approved
+safe correlation fingerprint when required. It never contains raw credentials,
+prompts, attachments, unredacted payloads, or an unkeyed digest of secret-bearing
+raw content.
+
+If rejection persistence fails, the adapter does not acknowledge or terminate the
+message. Broker-specific termination and advisory handling remain adapter
+concerns; the core contract exposes only terminal-versus-transient
+classification. OD-014 selects whether rejection correlation uses transport
+identity only, a redacted canonical fingerprint, or a versioned keyed digest.
+
 ## NATS JetStream
 
 NATS JetStream is the first production event-bus adapter because it supports
 persistence, replay, durable consumers, acknowledgements, and operationally light
 deployment.
 
-Core contracts remain broker-neutral. Subject naming, stream layout, retention,
-consumer configuration, and local desktop lifecycle belong to the JetStream
-adapter and deployment composition.
+Feature-owned JSON Schema Draft 2020-12 is canonical for integration-event
+payloads. Public control Protobuf and `ar` runtime messages are never published
+unchanged merely to reuse their wire shape.
+
+The maintained Node adapter uses the modular `@nats-io/transport-node` and
+`@nats-io/jetstream` packages. The deprecated monolithic `nats` package is not a
+new dependency.
+
+Core contracts remain broker-neutral. Responsibility is split deliberately:
+
+- feature-owned event manifests declare semantic delivery, ordering, privacy,
+  retention, replay, and payload requirements;
+- inbound and outbound JetStream adapters own subjects, streams, consumers,
+  publication, acknowledgement, topology reconciliation, and broker-specific
+  failure mapping;
+- local deployment composition supplies connection and resource policy;
+- the Local Supervisor owns the bundled `nats-server` process, pinned binary,
+  physical store path, health, restart, upgrade, and resource-limit lifecycle.
+
+Local and hosted deployments use the same JetStream adapter family and applicable
+conformance suites. The local composition is zero-touch and connects to
+Supervisor-managed NATS. The hosted composition connects to externally operated
+NATS. The user never installs, configures, or starts a broker for normal local
+use.
+
+Hosted clustered readiness verifies JetStream metadata quorum, peer placement,
+and required stream/consumer replicas rather than only a TCP connection or Core
+NATS ping. Management operations use explicit deadlines and a quorum-side control
+connection; they cannot remain attached indefinitely to an intentionally isolated
+leader.
+
+The Supervisor does not interpret subjects, provision semantic consumers, publish
+events, acknowledge messages, or choose event retention. Conversely, a JetStream
+adapter never installs, starts, or upgrades the broker process.
 
 JetStream preserves the order in which a stream accepts messages. It does not by
 itself provide aggregate ordering across concurrent publishers. The adapter must
 implement the ordering policy declared by each contract.
+
+The outbound adapter may use `eventId` as the JetStream publication deduplication
+identity, but the broker deduplication window never replaces durable business
+idempotency. Inbound durable consumers use explicit acknowledgement and acknowledge
+only after inbox and business effects commit.
+
+JetStream is not the authoritative source of aggregate state. Exact local store
+backup, corruption handling, journal completeness, and historical replay remain
+governed by OD-009 and OD-021.
+
+The managed local profile additionally enforces the evidence-backed constraints
+from ADR-0035:
+
+- the Supervisor holds an OS-level exclusive lock for the complete lifetime of
+  each physical store because NATS does not reject a second standalone owner;
+- durable inbox processing remains mandatory even for previously acknowledged
+  messages because broker crashes can redeliver confirmed deliveries;
+- configured storage limits and physical `ENOSPC` are distinct failure classes;
+- broker startup does not prove stream completeness after corruption;
+- backup restore, startup reconciliation, and typed degraded states are required.
+
+Local readiness has three independent dimensions:
+
+```text
+process liveness
+broker and JetStream service readiness
+expected store-content integrity
+```
+
+A healthy process and HTTP 200 JetStream health response cannot authorize normal
+dispatch after an unclean or suspicious recovery. The Supervisor and eventing
+composition reconcile an independently durable expected watermark or content
+manifest before leaving degraded mode. Bit-flipped or truncated stores, unexplained
+sequence gaps, and content-hash mismatches fail closed even when the broker starts.
+
+Physical disk exhaustion is not equivalent to a configured stream limit. The
+local profile maintains warning and critical headroom thresholds plus an emergency
+reserve. A critical filestore write signal stops new dispatch admission; recovery
+requires released capacity, controlled restart, integrity reconciliation, and
+outbox/inbox recovery before readiness.
+
+## Adapter reconnect and backpressure
+
+The durable outbox, not the NATS client buffer, is the pending-publication queue.
+When the broker is unavailable, the dispatcher stops claiming new rows beyond its
+configured in-flight bound. A timed-out publication is an ambiguous outcome:
+after reconnect and topology readiness, the adapter retries the same outbox row
+with the same `eventId` and relies on downstream inbox idempotency.
+
+Publication classification distinguishes:
+
+```text
+ACKNOWLEDGED
+NOT_COMMITTED
+UNKNOWN_OUTCOME
+```
+
+A process crash, timeout, or disconnected request may be persisted even when the
+publisher never receives an acknowledgement. `UNKNOWN_OUTCOME` is retried only
+with the original stable transport deduplication identity and remains safe through
+the downstream durable inbox.
+
+Consumers declare bounded `max_ack_pending`, batch size, processing concurrency,
+and acknowledgement deadlines. The adapter does not request more work merely
+because an in-memory iterator can buffer it.
+
+Connection status is operational evidence, not business state or lifecycle
+authority. Drain has a deadline. If disconnected drain rejects or times out, the
+Host closes the client, preserves uncommitted outbox and inbox state, and
+reconciles after restart. It never waits indefinitely for a status iterator to
+finish.
+
+## Topology evolution
+
+The JetStream adapter owns a declarative desired-topology manifest and classifies
+every observed diff before mutation:
+
+- additive changes may be reconciled in place after compatibility checks;
+- mutable operational limits may be updated in place;
+- destructive changes, including subject or filter removal, require an explicit
+  migration plan even when NATS accepts the update;
+- immutable changes require versioned replacement rather than delete-and-recreate
+  in place.
+
+Stored messages surviving a subject removal does not make that change safe:
+publishers may lose routing while consumers still see old data. Raw NATS errors
+are never public error contracts because a missing route can surface as an
+unrelated low-level classification. Exact dual-routing, cursor handoff, rollback,
+and topology-version policy remains in OD-022.
+
+The default compatible topology migration sequence is:
+
+```text
+PREPARED
+-> EXPANDED
+-> PARALLEL_CONSUMER
+-> DUAL_ROUTE
+-> BACKFILLED
+-> PROVED
+-> CUTOVER
+-> RETIRED
+```
+
+Old and new consumers are independent at-least-once delivery paths and therefore
+share the owning context's business inbox semantics. Backfill preserves the
+domain `eventId` for business deduplication but uses a route-scoped transport
+deduplication identity; one JetStream message ID reused across subjects in the
+same stream can suppress the intended backfill.
+
+Every stage and external topology mutation is durably recorded and reconciled
+after restart. Rollback remains possible before cutover and after cutover only
+while the old route and consumer are retained. Once the migration reaches
+`RETIRED`, automatic rollback fails closed and requires an explicit forward
+recovery or verified restore plan.
+
+Broker binary rollout is a separate state machine from semantic topology
+migration. Every node replacement waits for metadata quorum, zero-lag stream
+replicas, a fresh placement probe, and acknowledged traffic before proceeding.
+An adjacent patch upgrade and downgrade test does not authorize arbitrary
+downgrade after new configuration, features, or store formats have been used.
+
+JetStream stream sequence remains transport and audit metadata. Parallel
+aggregates, redelivery, and backfill can produce different global interleavings.
+Business ordering uses the contract's declared partition or aggregate revision,
+never the stream's total sequence.
 
 ## Journal and replay
 
@@ -185,6 +451,41 @@ The system may keep append-only operational and integration-event records for:
 These records are not the default source of truth for rebuilding aggregates.
 Projection rebuild cannot be promised until the journal defines completeness,
 retention, schema upcasting, redaction, and replay authorization.
+
+Replay classes impose different privacy contracts:
+
+- complete journal replay retains every required schema, deterministic upcaster,
+  sequence, and privacy-minimal payload for the declared support horizon;
+- snapshot plus retained tail may use erasable detachable payloads only when an
+  authoritative snapshot at or after erased history remains available and the
+  complete tail after its watermark is retained;
+- a non-rebuildable notification feed rejects projection replay explicitly.
+
+An immutable journal envelope may retain an opaque payload reference and integrity
+metadata while a separately protected payload is erased. The missing payload is
+not replaced with fabricated data. Complete replay then fails, while a declared
+snapshot-plus-tail flow may continue from a qualifying snapshot.
+
+Historical input is validated against its original schema, deterministically
+upcast into the current canonical projection input, and validated again. Required
+historical schemas and upcasters remain available for the replay support horizon.
+
+Replay authorization is evaluated against the current principal, project scope,
+and declared replay authorization class before a plan, snapshot reference, or
+event is exposed. Historical authorization at event occurrence does not grant
+current replay access.
+
+Catastrophic broker rebuild begins with a replay preflight. It verifies contiguous
+contract-defined ordering, retained payload availability, schema support, and
+authorization before publishing any replacement feed. Existing consumer inboxes
+prevent repeated business effects when a complete retained journal is replayed.
+A missing required payload or sequence produces an explicit non-rebuildable or
+snapshot-required outcome, never a silently partial feed.
+
+When several feeds are rebuilt together, every feed preflights successfully before
+the first replacement event is published. Snapshot-plus-tail recovery publishes a
+snapshot reference and validated tail rather than inventing compacted historical
+events.
 
 ## Failure classification
 
