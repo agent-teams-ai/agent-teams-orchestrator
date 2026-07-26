@@ -4,6 +4,7 @@ type: open-decision
 status: resolved
 owner: engineering/tooling
 summary: Select the TypeScript 7 compatible architecture dependency and boundary enforcement stack.
+resolved_by: ADR-0032
 related:
   - ADR-0031
   - ADR-0032

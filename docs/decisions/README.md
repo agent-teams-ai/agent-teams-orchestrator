@@ -10,6 +10,25 @@ summary: Stable index and lifecycle rules for Architecture Decision Records.
 
 ADRs record significant architecture choices and their consequences.
 
+## Landmark decisions by concern
+
+This map is a short reading aid, not another complete catalog. Use
+`pnpm docs:query -- --owner|--status|--related <value>` for metadata-backed
+discovery. The lifecycle lists below remain the complete status ledger.
+
+| Concern | Current decisions | Current architecture |
+|---|---|---|
+| System shape and long-term evolution | [ADR-0001](0001-headless-event-driven-modular-monolith.md), [ADR-0042](0042-evidence-driven-bounded-context-topology.md), [ADR-0051](0051-full-ddd-operating-model.md) | [Overview](../architecture/overview.md), [context map](../architecture/context-map.md) |
+| Feature and dependency boundaries | [ADR-0012](0012-feature-owned-inbound-and-outbound-adapters.md), [ADR-0038](0038-machine-enforced-package-catalog.md), [ADR-0040](0040-context-private-awilix-containers.md) | [Feature standard](../architecture/feature-module-standard.md), [dependency rules](../architecture/dependency-rules.md) |
+| Runtime ownership and AR integration | [ADR-0003](0003-ar-owns-runtime-lifecycle.md), [ADR-0008](0008-consumer-owned-runtime-ports.md), [ADR-0028](0028-runtime-published-language-and-internal-fence.md) | [Runtime boundary](../architecture/runtime-boundary.md) |
+| Eventing, delivery, and replay | [ADR-0004](0004-broker-neutral-events-with-jetstream.md), [ADR-0010](0010-broker-neutral-partition-ordering.md), [ADR-0019](0019-resumable-feed-contracts.md), [ADR-0035](0035-managed-local-nats-jetstream.md) | [Eventing and reliability](../architecture/eventing-and-reliability.md) |
+| Persistence, migrations, and exact values | [ADR-0011](0011-context-isolated-sqlite-and-postgres-topology.md), [ADR-0025](0025-context-scoped-unit-of-work-and-local-command-lanes.md), [ADR-0046](0046-exact-usage-and-money-values.md), [ADR-0052](0052-adapter-local-drizzle-and-bounded-dialect-duplication.md) | [Persistence boundary](../architecture/persistence-boundary.md) |
+| Public contracts and SDK | [ADR-0016](0016-protobuf-buf-connect-control-api.md), [ADR-0019](0019-resumable-feed-contracts.md), [ADR-0036](0036-typescript-sdk-publication-format.md), [ADR-0037](0037-single-initial-contract-version.md) | [SDK and transports](../architecture/sdk-and-transports.md), [public contracts](../architecture/public-control-contracts.md) |
+| Local and hosted composition | [ADR-0030](0030-shared-core-with-local-and-server-compositions.md), [ADR-0033](0033-shared-local-supervisor-and-versioned-host.md) | [Local Host lifecycle](../architecture/local-host-lifecycle.md), [composition](../architecture/composition-and-dependency-injection.md) |
+| Workflow and migration | [ADR-0027](0027-temporal-as-run-orchestration-adapter.md), [ADR-0029](0029-compatibility-facade-and-strangler-migration.md) | [Extension points](../architecture/extension-points.md), [migration boundary](../architecture/migration-boundary.md) |
+| Repository enforcement | [ADR-0031](0031-native-typescript-7-primary-toolchain.md), [ADR-0032](0032-staged-architecture-conformance-tooling.md), [ADR-0039](0039-staged-nx-foundation.md) | [Repository tooling](../architecture/repository-tooling.md), [testing](../architecture/testing-strategy.md) |
+| Organization and usage capabilities | [ADR-0044](0044-tenant-scoped-agent-organization.md), [ADR-0045](0045-three-usage-bounded-contexts.md), [ADR-0046](0046-exact-usage-and-money-values.md) | [Context map](../architecture/context-map.md), [context dossiers](../domain/contexts/README.md) |
+
 ## Accepted decisions
 
 - [ADR-0001: Headless event-driven modular monolith](0001-headless-event-driven-modular-monolith.md)
@@ -85,6 +104,10 @@ assigned invented approval history.
 
 Accepted ADRs are immutable except for typo or link fixes. A changed decision gets
 a new ADR that supersedes the old one.
+
+Keep the lifecycle section synchronized with frontmatter. A proposed decision goes
+under `Proposed decisions`; after approval it moves to `Accepted decisions`.
+Superseded history remains in `Superseded decisions`. CI verifies this placement.
 
 Use a permanent sequential ID and filename:
 

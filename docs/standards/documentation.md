@@ -16,6 +16,23 @@ related:
 Documentation is part of the architecture contract. It must remain navigable,
 owned, non-duplicative, and machine-verifiable as the repository grows.
 
+## Information architecture
+
+Organize documents by the question they answer, not by author, sprint, or frontend:
+
+| Intent | Question | Artifact |
+|---|---|---|
+| Orientation | Where should I start for this task? | Repository and directory indexes |
+| Explanation | What architecture or domain model applies now? | Architecture documents and context dossiers |
+| Decision | Why was this significant choice made? | ADR |
+| Uncertainty | What choice is still unresolved? | Open decision |
+| Reference | What is the exact contract, term, or supported surface? | Machine-readable schema, contract document, glossary |
+| Procedure | How is a real operation, migration, or recovery executed? | Runbook or migration program |
+| Evidence | What experiment or external fact informed a choice? | Time-bounded research report |
+
+One document has one primary intent and one authority. A document may link to
+other intents, but it must not redefine them.
+
 ## Authority by knowledge type
 
 There is no global precedence order between unrelated artifact types. Authority is
@@ -61,11 +78,24 @@ Required fields:
 - `owner`: a capability, bounded context, or architecture area, never a person;
 - `summary`: one sentence describing the document's authority.
 
+Every non-template owner is registered in
+[`docs/owners.yaml`](../owners.yaml). The registry prevents spelling drift; it
+does not define organizational reporting or accept a bounded context.
+
 Optional relationship fields use document IDs, not paths:
 
 - `related`;
+- `blocked_by`;
 - `supersedes`;
 - `superseded_by`.
+
+`blocked_by` names open decisions that prevent the proposed artifact from becoming
+accepted. Every blocker also appears in `related`. Accepted artifacts cannot
+retain an open blocker.
+
+Resolved open decisions also require `resolved_by` with exactly one deciding ADR.
+That field is forbidden while the decision is `open` or `deferred`; supporting
+ADRs may still appear in `related`.
 
 Accepted and superseded ADRs governed by ADR-0034 also require:
 
@@ -82,7 +112,7 @@ Paths may change; IDs remain stable. Renaming a document does not change its ID.
 
 | Document type | Allowed statuses |
 |---|---|
-| `architecture`, `domain-standard`, `bounded-context`, `contract` | `accepted`, `proposed`, `exploratory`, `deprecated`, `superseded` |
+| `architecture`, `domain-standard`, `bounded-context`, `feature`, `contract` | `accepted`, `proposed`, `exploratory`, `deprecated`, `superseded` |
 | `adr` | `proposed`, `accepted`, `superseded` |
 | `open-decision` | `open`, `deferred`, `resolved` |
 | `index`, `template`, `glossary`, `runbook`, `research` | `active`, `deprecated` |
@@ -116,6 +146,11 @@ decision; the research report links to those sources instead of redefining them.
 Do not create empty directories. The last three directories are created only with
 their first real document.
 
+Split documents by ownership, authority, lifecycle, or reader task, not merely by
+line count. A long cohesive boundary is safer than several overlapping partial
+sources. When a document is split, leave one indexed primary entry point and move
+content rather than copying it.
+
 ## Domain documentation and colocation
 
 Before a bounded-context package exists, its strategic dossier lives under
@@ -126,6 +161,11 @@ Before a bounded-context package exists, its strategic dossier lives under
   `packages/contexts/<context>/src/features/<feature>/`;
 - package-level public surfaces are documented beside the package;
 - the dossier links to those sources instead of copying them.
+
+Package-root and `src/features/**/README.md` documents are governed by the same
+metadata, links, title, and reachability checks as `docs/**`. A package index uses
+`type: index`; a feature document uses `type: feature`. The owning strategic
+dossier links the package index before production code is accepted.
 
 Global `docs/glossary.md` contains only cross-system terms. Context-specific
 Ubiquitous Language belongs in the owning context dossier.
@@ -145,18 +185,62 @@ Ubiquitous Language belongs in the owning context dossier.
 
 ## Templates
 
-- [ADR](../templates/adr.md)
-- [Bounded-context dossier](../templates/bounded-context.md)
-- [Contract documentation](../templates/contract.md)
-- [Open decision](../templates/open-decision.md)
-- [Runbook](../templates/runbook.md)
+Use the [template index](../templates/README.md) to select the governed skeleton.
+Templates define required evidence and headings; they do not authorize invented
+domain detail.
 
 ## Navigation
 
 Every document must be reachable from [the documentation index](../README.md)
-through Markdown links. Every directory containing multiple documents has a
-`README.md` index. Agents should not need directory scans to discover canonical
-guidance.
+through Markdown links. Every documentation directory has a `README.md`: a
+collection index for multiple entries or the governed dossier for one leaf
+artifact. Agents should not need directory scans to discover canonical guidance.
+
+Each directory index directly links:
+
+- every Markdown document immediately inside that directory;
+- the `README.md` of every immediate child directory containing documentation.
+
+Transitive reachability alone is insufficient. Direct links make ownership and
+placement visible at the boundary where a contributor adds a file.
+
+Repository and directory indexes route readers; they do not repeat normative
+rules. Use task-oriented links and short scope descriptions. Stable document IDs
+are preferred in discussion and automation because paths may move.
+
+Use
+`pnpm docs:query -- --id|--owner|--type|--status|--related|--blocked-by <value>`
+for metadata-backed discovery. It derives results from frontmatter and never
+writes a generated source-of-truth file.
+
+## AI-assisted authoring
+
+An agent changing documentation must:
+
+1. start from the nearest directory index and the task route in `docs/README.md`;
+2. identify the authoritative artifact type before writing;
+3. search stable IDs, related metadata, and supersession links;
+4. update the existing authority instead of creating a parallel explanation;
+5. preserve unresolved choices as open decisions;
+6. use the matching template for a new governed artifact;
+7. run `pnpm docs:check`.
+
+Generated summaries, semantic indexes, search databases, and AI-produced diagrams
+are disposable derived views. They never become a source of truth unless reviewed
+and committed as a governed document with an owner and lifecycle.
+
+## Change consistency
+
+Update related artifacts in one change when their authority requires it:
+
+| Change | Required documentation |
+|---|---|
+| Significant accepted design choice | New or superseding ADR plus current architecture update |
+| New unresolved architecture choice | One open-decision record and links from affected current documents |
+| New or changed context boundary | Context map, owning dossier, package catalog reservation when applicable, and ADR |
+| New public contract capability | Machine-readable schema, semantic contract documentation, fixtures, and compatibility notes |
+| New operational failure mode | Runbook, observability links, and tested recovery evidence |
+| New feature behavior | Colocated feature documentation plus root dossier links when strategically relevant |
 
 ## Validation
 
@@ -164,10 +248,15 @@ guidance.
 
 - YAML frontmatter against `docs/metadata.schema.json`;
 - unique document IDs and filename conventions;
+- exactly one top-level title per Markdown document;
 - local links and anchors;
 - navigation reachability;
-- ADR, open-decision, and context index completeness;
+- direct directory-index completeness;
+- ADR lifecycle placement and metadata-backed collection indexes;
+- status-sensitive required document sections;
 - Mermaid syntax using the official Mermaid parser;
 - Markdown structure and style.
 
-External HTTP availability is not checked in this deterministic gate.
+The validator itself has positive and negative fixture tests. External HTTP
+availability is checked by a scheduled Lychee workflow, not by the deterministic
+per-change gate; transient network failures must not block every pull request.

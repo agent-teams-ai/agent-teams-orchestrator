@@ -4,6 +4,10 @@ type: bounded-context
 status: proposed
 owner: run-orchestration
 summary: Proposed model boundary for durable execution coordination and recovery policy.
+blocked_by:
+  - OD-005
+  - OD-006
+  - OD-013
 related:
   - architecture.context-map
   - architecture.runtime-boundary

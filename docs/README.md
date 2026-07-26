@@ -3,70 +3,88 @@ id: docs.index
 type: index
 status: active
 owner: architecture
-summary: Canonical navigation and authority index for all technical documentation.
+summary: Canonical task-oriented map and authority index for all technical documentation.
 ---
 
 # Technical Documentation
 
 This directory is the canonical architecture knowledge base for Agent Teams
-Orchestrator.
+Orchestrator. Navigate by the question you need to answer; do not read the whole
+repository by default.
 
-## Reading order
+## Five-minute orientation
 
-1. [Documentation standard](standards/documentation.md)
-2. [Architecture index](architecture/README.md)
-3. [Architecture overview](architecture/overview.md)
-4. [Evolution and quality attributes](architecture/evolution-quality-attributes.md)
-5. [Composition and dependency injection](architecture/composition-and-dependency-injection.md)
-6. [Repository tooling plan](architecture/repository-tooling.md)
-7. [Local Host lifecycle](architecture/local-host-lifecycle.md)
-8. [Domain documentation](domain/README.md)
-9. [Full DDD modeling standard](domain/modeling-standard.md)
-10. [Proposed bounded-context dossiers](domain/contexts/README.md)
-11. [Architecture decisions](decisions/README.md)
-12. [Open decisions](open-decisions/README.md)
-13. [Research evidence](research/README.md)
-14. [Glossary](glossary.md)
+1. [Architecture overview](architecture/overview.md)
+2. [Strategic context map](architecture/context-map.md)
+3. [Open decisions](open-decisions/README.md)
+4. [Domain documentation](domain/README.md)
+5. [Glossary](glossary.md)
 
-For client/API work, read [SDK and transports](architecture/sdk-and-transports.md)
-and [Public control contracts](architecture/public-control-contracts.md) together.
-For desktop extraction work, read
-[Migration boundary](architecture/migration-boundary.md) before the runtime or
-board-specific open decisions.
+Agents should also follow the short repository-level
+[navigation and guardrails](../AGENTS.md).
 
-## Document status
+## Navigate by task
 
-Every document declares machine-validated metadata. An ADR records why a decision
-was made and what it supersedes. Each open question has one file under
-`open-decisions/`; it must not be silently resolved in implementation code.
+| Task | Primary source | Supporting sources |
+|---|---|---|
+| Understand the system | [Architecture index](architecture/README.md) | [Overview](architecture/overview.md), [quality attributes](architecture/evolution-quality-attributes.md) |
+| Model or change a business capability | [Domain index](domain/README.md) | [Context dossiers](domain/contexts/README.md), [Full DDD standard](domain/modeling-standard.md) |
+| Add a package or feature | [Feature module standard](architecture/feature-module-standard.md) | [Dependency rules](architecture/dependency-rules.md), [package catalog](../architecture/package-catalog.yaml) |
+| Integrate AR or a provider runtime | [Runtime boundary](architecture/runtime-boundary.md) | `OD-004`, [eventing](architecture/eventing-and-reliability.md) |
+| Design persistence or concurrency | [Persistence boundary](architecture/persistence-boundary.md) | `OD-003`, [testing](architecture/testing-strategy.md) |
+| Add events, feeds, inbox, or outbox | [Eventing and reliability](architecture/eventing-and-reliability.md) | [Public contracts](architecture/public-control-contracts.md) |
+| Add an SDK or API capability | [SDK and transports](architecture/sdk-and-transports.md) | [Public control contracts](architecture/public-control-contracts.md) |
+| Change local lifecycle | [Local Host lifecycle](architecture/local-host-lifecycle.md) | `OD-001`, `OD-021` |
+| Migrate legacy behavior | [Migration boundary](architecture/migration-boundary.md) | owning context dossier and migration open decision |
+| Change repository tooling | [Repository tooling](architecture/repository-tooling.md) | [Testing strategy](architecture/testing-strategy.md) |
+| Record a decision | [Decision index](decisions/README.md) | [ADR template](templates/adr.md), [open-decision index](open-decisions/README.md) |
+| Add or reorganize documentation | [Documentation standards](standards/README.md) | [Templates](templates/README.md) |
+| Inspect experimental evidence | [Research index](research/README.md) | owning ADR or open decision |
 
-The [documentation standard](standards/documentation.md) defines type-compatible
-statuses, metadata, placement, ownership, and lifecycle rules.
+## Knowledge map
 
-## Authority model
+| Area | Owns | Index |
+|---|---|---|
+| `architecture/` | Current cross-context structure, boundaries, and quality rules | [Architecture](architecture/README.md) |
+| `domain/` | Strategic context dossiers, Ubiquitous Language, invariants, and DDD standards | [Domain](domain/README.md) |
+| `decisions/` | Stable architectural rationale and consequences | [ADRs](decisions/README.md) |
+| `open-decisions/` | One unresolved or historically resolved design question per file | [Open decisions](open-decisions/README.md) |
+| `standards/` | Documentation and repository-wide authoring rules | [Standards](standards/README.md) |
+| `templates/` | Required skeletons for governed document types | [Templates](templates/README.md) |
+| `research/` | Time-bounded, reproducible evidence; never normative | [Research](research/README.md) |
 
-Authority depends on the knowledge type: ADRs own rationale, architecture
-documents own current cross-context rules, bounded-context dossiers own domain
-language and invariants, machine-readable schemas own exact wire shape, and
-runbooks own operations. See the
-[authority matrix](standards/documentation.md#authority-by-knowledge-type).
+`operations/`, `migrations/`, and contract reference directories are created only
+with their first real document. Empty architecture placeholders are prohibited.
 
-When two artifacts of the same authority type disagree, resolve the conflict
-explicitly. Do not update only one side.
+Machine-readable governance:
 
-## Documentation quality bar
+- [`owners.yaml`](owners.yaml) defines valid documentation responsibility IDs;
+- [`metadata.schema.json`](metadata.schema.json) defines document metadata;
+- [`architecture/package-catalog.yaml`](../architecture/package-catalog.yaml)
+  reserves production package topology.
 
-Architecture documentation must:
+## Authority and lifecycle
 
-- name the owner of every responsibility;
-- distinguish accepted decisions from unresolved questions;
-- define allowed and forbidden dependency directions;
-- describe failure, retry, idempotency, recovery, and migration behavior;
-- avoid references to one frontend as if it were the product;
-- include consequences and tradeoffs, not only the chosen design;
-- remain provider-neutral unless documenting an adapter.
+Document type determines authority. ADRs own rationale, architecture documents
+own current system rules, context dossiers own domain language and invariants,
+machine-readable schemas own exact wire shape, and runbooks own operations.
+Research only supplies evidence.
+
+Every document declares machine-validated metadata. An unresolved question stays
+in `open-decisions/`; implementation must not choose it silently. A changed
+accepted decision gets a new superseding ADR rather than a rewritten history.
+
+See the [documentation standard](standards/documentation.md) for the complete
+authority matrix, placement rules, metadata, lifecycle, and review workflow.
 
 ## Quality gate
 
-Run `pnpm docs:check` before committing documentation changes. CI applies the same
-metadata, ID, navigation, link, anchor, Mermaid, and Markdown checks.
+Run:
+
+```bash
+pnpm docs:check
+```
+
+CI applies the same metadata, ID, hierarchy, index, navigation, link, anchor,
+Mermaid, and Markdown checks. External HTTP availability is checked separately
+because it is nondeterministic.

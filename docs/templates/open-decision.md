@@ -31,5 +31,6 @@ related:
 
 ## Resolution
 
-Open. When resolved, set `status: resolved` and link the deciding ADR.
+Open. When resolved, set `status: resolved`, add `resolved_by: ADR-NNNN`, and
+retain the deciding ADR in `related`.
 ```

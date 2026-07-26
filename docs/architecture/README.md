@@ -50,3 +50,7 @@ procedures belong in `docs/operations/` when the first runbook is needed.
 
 Do not create a second document for the same rule. Update the current architecture
 document and add or supersede an ADR when the underlying decision changes.
+
+Large documents are not split merely by line count. Split only when sections have
+different owners, lifecycle, authority, or reader tasks. The index must continue
+to expose one primary source for each architecture question.

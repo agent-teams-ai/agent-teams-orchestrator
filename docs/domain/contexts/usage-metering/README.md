@@ -4,6 +4,8 @@ type: bounded-context
 status: proposed
 owner: usage-metering
 summary: Strategic model boundary for immutable usage observations, normalization, corrections, meters, and exact quantities.
+blocked_by:
+  - OD-024
 related:
   - ADR-0045
   - ADR-0046

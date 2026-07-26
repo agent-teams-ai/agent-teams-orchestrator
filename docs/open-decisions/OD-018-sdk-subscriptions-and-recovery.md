@@ -4,6 +4,7 @@ type: open-decision
 status: resolved
 owner: clients/sdk
 summary: Define SDK subscription feeds, ordering, cursor, retention, backpressure, and recovery semantics.
+resolved_by: ADR-0019
 related:
   - ADR-0010
   - ADR-0015

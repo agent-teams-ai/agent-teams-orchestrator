@@ -4,6 +4,7 @@ type: open-decision
 status: resolved
 owner: platform/eventing
 summary: Select the durable local eventing profile and lifecycle owner for bundled NATS.
+resolved_by: ADR-0035
 related:
   - ADR-0004
   - ADR-0033

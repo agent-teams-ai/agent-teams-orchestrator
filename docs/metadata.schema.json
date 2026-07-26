@@ -21,6 +21,7 @@
         "architecture",
         "domain-standard",
         "bounded-context",
+        "feature",
         "contract",
         "adr",
         "open-decision",
@@ -61,7 +62,14 @@
       "type": "string",
       "format": "date"
     },
+    "resolved_by": {
+      "type": "string",
+      "pattern": "^ADR-[0-9]{4}$"
+    },
     "related": {
+      "$ref": "#/$defs/documentIdList"
+    },
+    "blocked_by": {
       "$ref": "#/$defs/documentIdList"
     },
     "supersedes": {
@@ -154,6 +162,7 @@
               "architecture",
               "domain-standard",
               "bounded-context",
+              "feature",
               "contract"
             ]
           }

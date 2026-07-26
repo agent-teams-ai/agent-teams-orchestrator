@@ -4,6 +4,9 @@ type: bounded-context
 status: proposed
 owner: policy-risk
 summary: Proposed model boundary for trust, execution policy, risk, and limits.
+blocked_by:
+  - OD-011
+  - OD-012
 related:
   - architecture.context-map
   - OD-011

@@ -4,6 +4,9 @@ type: bounded-context
 status: proposed
 owner: team-topology
 summary: Proposed model boundary for agent-team composition, roles, and roster invariants.
+blocked_by:
+  - OD-006
+  - OD-011
 related:
   - architecture.context-map
   - OD-006

@@ -4,6 +4,7 @@ type: open-decision
 status: resolved
 owner: platform/control-api
 summary: Select the public request-response and streaming protocol for orchestrator clients.
+resolved_by: ADR-0016
 related:
   - architecture.sdk-transports
   - architecture.public-control-contracts

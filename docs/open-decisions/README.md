@@ -12,6 +12,10 @@ Each unresolved question has one stable ID and file. Implementation must not
 silently choose an option. Resolution changes the document status to `resolved`
 and links the deciding ADR; the historical record is retained.
 
+Use the owner column to find the decision that gates a change. `Open` blocks an
+implicit implementation choice. `Deferred` records a consciously postponed
+question. `Resolved` is historical and must relate to at least one deciding ADR.
+
 | ID | Decision | Owner | Status |
 |---|---|---|---|
 | OD-001 | [Local control transport](OD-001-local-control-transport.md) | platform/control-api | Open |
@@ -44,3 +48,5 @@ and links the deciding ADR; the historical record is retained.
 | OD-028 | [Agent Context lifecycle](OD-028-agent-context-lifecycle.md) | architecture/domain | Open |
 
 Use the [open-decision template](../templates/open-decision.md) for new entries.
+CI verifies that every record is listed and that table owner and status match its
+frontmatter.

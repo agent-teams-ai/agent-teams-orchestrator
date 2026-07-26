@@ -4,6 +4,8 @@ type: bounded-context
 status: proposed
 owner: consumption-governance
 summary: Strategic model boundary for budgets, alerts, limits, quota reservations, and consumption decisions.
+blocked_by:
+  - OD-024
 related:
   - ADR-0045
   - ADR-0046

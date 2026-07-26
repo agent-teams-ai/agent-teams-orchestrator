@@ -1,0 +1,72 @@
+version: 1
+owners:
+  access-control:
+    kind: bounded-context
+  agent-communication:
+    kind: bounded-context
+  agent-organization:
+    kind: bounded-context
+  approval-management:
+    kind: bounded-context
+  consumption-governance:
+    kind: bounded-context
+  identity-registry:
+    kind: bounded-context
+  policy-risk:
+    kind: bounded-context
+  run-orchestration:
+    kind: bounded-context
+  team-topology:
+    kind: bounded-context
+  tenant-project-registry:
+    kind: bounded-context
+  usage-accounting:
+    kind: bounded-context
+  usage-metering:
+    kind: bounded-context
+  work-coordination:
+    kind: bounded-context
+  workspace-registry:
+    kind: bounded-context
+  apps:
+    kind: application
+  apps/desktop-sidecar:
+    kind: legacy
+  architecture:
+    kind: architecture
+  architecture/composition:
+    kind: architecture
+  architecture/contracts:
+    kind: architecture
+  architecture/domain:
+    kind: architecture
+  architecture/governance:
+    kind: architecture
+  architecture/quality:
+    kind: architecture
+  architecture/reliability:
+    kind: architecture
+  architecture/tooling:
+    kind: architecture
+  clients/sdk:
+    kind: client
+  engineering/tooling:
+    kind: engineering
+  integration/runtime:
+    kind: integration
+  migration/desktop:
+    kind: migration
+  operations:
+    kind: operations
+  platform/control-api:
+    kind: platform
+  platform/eventing:
+    kind: platform
+  platform/local-host:
+    kind: platform
+  platform/observability:
+    kind: platform
+  platform/persistence:
+    kind: platform
+  usage-capability:
+    kind: domain-capability

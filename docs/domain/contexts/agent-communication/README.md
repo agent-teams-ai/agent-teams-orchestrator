@@ -4,6 +4,10 @@ type: bounded-context
 status: proposed
 owner: agent-communication
 summary: Proposed model boundary for typed team communication and delivery semantics.
+blocked_by:
+  - OD-006
+  - OD-013
+  - OD-026
 related:
   - architecture.context-map
   - architecture.runtime-boundary

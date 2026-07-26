@@ -4,6 +4,8 @@ type: bounded-context
 status: proposed
 owner: agent-organization
 summary: Strategic model boundary for tenant-scoped organizations, semantic units, structures, and team placements.
+blocked_by:
+  - OD-023
 related:
   - ADR-0044
   - architecture.context-map

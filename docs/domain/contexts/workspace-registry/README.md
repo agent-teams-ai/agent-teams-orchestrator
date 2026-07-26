@@ -4,6 +4,8 @@ type: bounded-context
 status: proposed
 owner: workspace-registry
 summary: Proposed model boundary for project workspace registration and binding generations.
+blocked_by:
+  - OD-011
 related:
   - architecture.context-map
   - OD-011

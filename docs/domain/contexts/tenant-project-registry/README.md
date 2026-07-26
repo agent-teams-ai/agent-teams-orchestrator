@@ -4,6 +4,9 @@ type: bounded-context
 status: proposed
 owner: tenant-project-registry
 summary: Proposed model boundary for tenant and project identity and lifecycle.
+blocked_by:
+  - OD-011
+  - OD-012
 related:
   - architecture.context-map
   - OD-011

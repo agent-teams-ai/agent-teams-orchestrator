@@ -4,6 +4,11 @@ type: bounded-context
 status: proposed
 owner: work-coordination
 summary: Proposed model boundary for tasks, assignments, dependencies, and handoffs.
+blocked_by:
+  - OD-006
+  - OD-015
+  - OD-026
+  - OD-027
 related:
   - architecture.context-map
   - OD-006

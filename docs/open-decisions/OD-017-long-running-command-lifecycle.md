@@ -4,6 +4,7 @@ type: open-decision
 status: resolved
 owner: clients/sdk
 summary: Define public lifecycle, receipts, reconciliation, and cancellation for long-running commands.
+resolved_by: ADR-0018
 related:
   - ADR-0015
   - ADR-0018

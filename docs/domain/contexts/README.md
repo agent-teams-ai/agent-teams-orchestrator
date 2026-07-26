@@ -18,22 +18,39 @@ strategic boundary may be accepted by ADR while its detailed dossier remains
 proposed until the Full DDD acceptance gate is satisfied. The status below is
 dossier readiness, not boundary existence.
 
-| Context | Dossier readiness | Dossier |
-|---|---|---|
-| Identity Registry | Proposed | [Identity Registry](identity-registry/README.md) |
-| Access Control | Proposed | [Access Control](access-control/README.md) |
-| Tenant and Project Registry | Proposed | [Tenant and Project Registry](tenant-project-registry/README.md) |
-| Workspace Registry | Proposed | [Workspace Registry](workspace-registry/README.md) |
-| Team Topology | Proposed | [Team Topology](team-topology/README.md) |
-| Agent Organization | Proposed | [Agent Organization](agent-organization/README.md) |
-| Work Coordination | Proposed | [Work Coordination](work-coordination/README.md) |
-| Run Orchestration | Proposed | [Run Orchestration](run-orchestration/README.md) |
-| Agent Communication | Proposed | [Agent Communication](agent-communication/README.md) |
-| Policy and Risk | Proposed | [Policy and Risk](policy-risk/README.md) |
-| Approval Management | Proposed | [Approval Management](approval-management/README.md) |
-| Usage Metering | Proposed | [Usage Metering](usage-metering/README.md) |
-| Usage Accounting | Proposed | [Usage Accounting](usage-accounting/README.md) |
-| Consumption Governance | Proposed | [Consumption Governance](consumption-governance/README.md) |
+## Identity and scope
+
+| Context | Readiness | Primary gate | Dossier |
+|---|---|---|---|
+| Identity Registry | Proposed | `OD-011` | [Identity Registry](identity-registry/README.md) |
+| Access Control | Proposed | `OD-012` | [Access Control](access-control/README.md) |
+| Tenant and Project Registry | Proposed | `OD-011`, `OD-012` | [Tenant and Project Registry](tenant-project-registry/README.md) |
+| Workspace Registry | Proposed | `OD-011` | [Workspace Registry](workspace-registry/README.md) |
+
+## Coordination
+
+| Context | Readiness | Primary gate | Dossier |
+|---|---|---|---|
+| Team Topology | Proposed | `OD-006`, `OD-011` | [Team Topology](team-topology/README.md) |
+| Agent Organization | Proposed | `OD-023` | [Agent Organization](agent-organization/README.md) |
+| Work Coordination | Proposed | `OD-006`, `OD-015`, `OD-026`, `OD-027` | [Work Coordination](work-coordination/README.md) |
+| Run Orchestration | Proposed | `OD-005`, `OD-006`, `OD-013` | [Run Orchestration](run-orchestration/README.md) |
+| Agent Communication | Proposed | `OD-006`, `OD-013`, `OD-026` | [Agent Communication](agent-communication/README.md) |
+
+## Governance
+
+| Context | Readiness | Primary gate | Dossier |
+|---|---|---|---|
+| Policy and Risk | Proposed | `OD-011`, `OD-012` | [Policy and Risk](policy-risk/README.md) |
+| Approval Management | Proposed | `OD-011` | [Approval Management](approval-management/README.md) |
+
+## Usage
+
+| Context | Readiness | Primary gate | Dossier |
+|---|---|---|---|
+| Usage Metering | Proposed | `OD-024` | [Usage Metering](usage-metering/README.md) |
+| Usage Accounting | Proposed | `OD-024` | [Usage Accounting](usage-accounting/README.md) |
+| Consumption Governance | Proposed | `OD-024` | [Consumption Governance](consumption-governance/README.md) |
 
 ## Dossier rule
 
@@ -45,3 +62,6 @@ discovery produces real language, invariants, scenarios, or ownership evidence.
 When a context package is created, this dossier remains its strategic entry point
 and links to package and feature documentation. It must not duplicate colocated
 implementation details.
+
+CI verifies that every context dossier appears here and that readiness matches its
+frontmatter.

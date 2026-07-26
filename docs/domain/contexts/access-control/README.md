@@ -4,6 +4,8 @@ type: bounded-context
 status: proposed
 owner: access-control
 summary: Proposed model boundary for membership, grants, and authorization facts.
+blocked_by:
+  - OD-012
 related:
   - architecture.context-map
   - OD-012

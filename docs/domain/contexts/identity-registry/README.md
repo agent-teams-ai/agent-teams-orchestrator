@@ -4,6 +4,8 @@ type: bounded-context
 status: proposed
 owner: identity-registry
 summary: Proposed model boundary for human and machine principal identity.
+blocked_by:
+  - OD-011
 related:
   - architecture.context-map
   - OD-011

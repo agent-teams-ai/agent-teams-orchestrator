@@ -4,6 +4,8 @@ type: bounded-context
 status: proposed
 owner: approval-management
 summary: Proposed model boundary for product approvals, routing, expiry, and evidence.
+blocked_by:
+  - OD-011
 related:
   - architecture.context-map
   - ADR-0028
