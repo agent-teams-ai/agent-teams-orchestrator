@@ -5,10 +5,13 @@ status: accepted
 owner: architecture
 summary: Canonical feature-owned vertical-slice layout and responsibility rules.
 related:
-  - ADR-0007
+  - ADR-0051
+  - ADR-0042
   - ADR-0012
-  - ADR-0014
+  - ADR-0047
   - ADR-0033
+  - ADR-0037
+  - ADR-0038
 ---
 
 # Feature Module Standard
@@ -34,7 +37,7 @@ Do not create one package per endpoint or one feature per class.
 
 All production behavior under `packages/**` belongs to an explicit
 `src/features/<feature>/` capability slice. This rule applies to bounded contexts,
-integrations, platform capabilities, clients, and testing packages. Package role
+integrations, platform capabilities, SDKs, and testing packages. Package role
 determines the valid internal layers; it does not remove feature ownership.
 
 A package-level `src/` may contain only:
@@ -57,7 +60,7 @@ Feature ownership is structural, while DDD depth is semantic:
   adapters without inventing a domain model;
 - platform features own technical capabilities and stable technical ports without
   pretending that infrastructure is a business domain;
-- client features are sliced by public SDK capability and own contracts, client
+- SDK features are sliced by public capability and own contracts, client
   operations, mappings, and tests;
 - testing features own reusable fixtures, conformance suites, and harnesses by the
   capability they validate.
@@ -78,18 +81,17 @@ packages/
           dependency-model/
           subscriptions/
           handoffs/
-        api/
         published-language/
-        composition/
+        module.ts
         index.ts
   integrations/
-    task-boards/
-      jira/
-        src/
-          features/
-            task-sync/
-          composition/
-          index.ts
+    runtime-gateway/
+      src/
+        features/
+          session-control/
+          runtime-observation/
+        module.ts
+        index.ts
   platform/
     local-host-control/
       src/
@@ -97,21 +99,21 @@ packages/
           supervisor-bootstrap/
           host-discovery/
           component-lifecycle/
-        composition/
+        module.ts
         index.ts
     eventing/
       src/
         features/
           outbox-relay/
-        composition/
+        module.ts
         index.ts
-  clients/
-    sdk-typescript/
+  sdk/
+    orchestrator/
       src/
         features/
           teams/
           tasks/
-        composition/
+        module.ts
         index.ts
 ```
 
@@ -121,20 +123,31 @@ OS-specific adapters but contains no bounded-context domain or application
 behavior. `apps/cli` composes the public SDK and, for explicit host administration
 commands, a separate narrow local-host control client.
 
+`packages/sdk/**` is reserved for supported distributable client libraries.
+Executable clients belong in `apps/**`; protocol clients used only by one
+integration remain inside that owning adapter. A generic top-level `clients/`
+package family is not created preemptively.
+
 ## Feature layout
 
 ```text
 features/task-model/
   contracts/
-    api/
-    published/
+    control-api/
+    published-language/
+    integration-events/
   domain/
     aggregates/
-    entities/
-    value-objects/
-    events/
+      task/
+        task.ts
+        task-id.ts
+        task-dependency.ts
+        events/
     services/
+    policies/
+    specifications/
     errors/
+    README.md
   application/
     models/
     use-cases/
@@ -148,8 +161,7 @@ features/task-model/
       persistence/
         schema/
         migrations/
-  composition/
-  projections/
+  module.ts
   tests/
     domain/
     application/
@@ -163,6 +175,13 @@ separate feature.
 Directories are created only when they contain a real artifact. Empty ceremonial
 folders are prohibited.
 
+Aggregate-specific entities, value objects, factories, and domain events are
+colocated under `domain/aggregates/<aggregate-name>/`. Feature-level policy,
+service, specification, error, or value-object directories exist only when the
+concept is genuinely shared by several aggregates inside that feature. Detailed
+behavior follows the
+[tactical modeling standard](../domain/tactical-modeling-patterns.md).
+
 Business features use the layers required by their behavior. A pure integration
 feature may have contracts, application ports, and adapters without a domain
 aggregate. Do not invent entities, repositories, ports, or domain services to
@@ -171,11 +190,13 @@ satisfy a directory template.
 Role-specific feature examples:
 
 ```text
-packages/integrations/task-boards/jira/src/features/task-sync/
+packages/contexts/work-coordination/src/features/task-sync/
   contracts/
   application/
   adapters/
-  composition/
+    outbound/
+      jira/
+  module.ts
   tests/
 
 packages/platform/eventing/src/features/outbox-relay/
@@ -184,7 +205,7 @@ packages/platform/eventing/src/features/outbox-relay/
   implementation/
   tests/
 
-packages/clients/sdk-typescript/src/features/teams/
+packages/sdk/orchestrator/src/features/teams/
   contracts/
   client/
   mappers/
@@ -196,8 +217,11 @@ real owned artifacts.
 
 ## Growth guardrails
 
-Feature ownership must be enforced mechanically rather than remembered during
-review. Before implementation packages are accepted, repository tooling must:
+Feature ownership is enforced mechanically rather than remembered during review.
+`architecture/package-catalog.yaml` is the default-deny registry of allowed
+production package identities, roles, paths, names, and owner documents. A
+proposed owner reserves a name and path but cannot materialize production files.
+Before implementation packages are accepted, repository tooling must:
 
 1. classify every workspace package by architectural role;
 2. reject production source outside an allowed feature or package-assembly root;
@@ -206,12 +230,15 @@ review. Before implementation packages are accepted, repository tooling must:
 5. reject empty ceremonial DDD layers;
 6. require an explicit architecture decision for package-level ownership
    exceptions;
-7. provide generators for new packages and features so the compliant path is the
+7. validate every materialized package against the package catalog;
+8. provide generators for new packages and features so the compliant path is the
    easiest path.
 
-The package-role manifest format and the TypeScript-7-compatible enforcement tool
-remain implementation decisions. The architectural rules above do not depend on a
-specific linter.
+ADR-0038 owns the catalog and materialization policy. The package scaffolder reads
+the catalog and cannot invent a package, role, path, or owner. Run it with
+`pnpm architecture:scaffold-package -- --id <catalog-id>` only after the owner and
+first slice are accepted. The generated boundary does not pass CI until a real
+feature slice is added in the same change.
 
 Durable process managers are owned by the feature or bounded context whose
 business process they coordinate. Shared platform code may provide timers,
@@ -251,6 +278,11 @@ because Temporal invokes the application. Shared connection factories and worker
 bootstrap may live in platform or an application composition root, but
 feature-specific mappings and workflow contracts remain inside the owning feature.
 
+Feature modules expose typed factories and narrow module APIs. They do not own DI
+containers or import Awilix. A bounded context's private composition layer registers
+feature factories and concrete adapters as defined by
+[the composition standard](composition-and-dependency-injection.md).
+
 ## Layer responsibilities
 
 ### Contracts
@@ -274,6 +306,10 @@ and disclosure rules and must not be reused merely to avoid mapping code.
 Feature contract directories own schema definitions. The context-level
 `published-language` module is only a curated export and compatibility manifest; it
 does not redefine or copy those schemas.
+
+Each external contract surface starts with one explicit `v1` schema family.
+Speculative `v2` directories, writers, adapters, and SDK models are prohibited.
+ADR-0037 governs the migration required before a later major exists.
 
 Public control `.proto` files and integration-event JSON Schemas are separate
 feature-owned artifacts. A feature may map the same business fact to both, but
@@ -351,6 +387,22 @@ feature's adapter directory. Context or process composition may share low-level
 connections and lifecycle resources, but it must not own feature mappings,
 repositories, handlers, schemas, or recovery policy.
 
+An external-system adapter belongs to the feature that owns the use case, port,
+mapping policy, and recovery decision. For example, Jira task synchronization
+normally belongs to a Work Coordination feature, and an AR adapter implementing a
+run capability belongs to the consuming orchestration feature. Promote an adapter
+to `packages/integrations/**` only when it has proven cross-context reuse,
+independent lifecycle or publication, or a dedicated provider conformance surface.
+The integration package may own protocol clients and mappings but never the
+consumer's business policy.
+
+`@agent-teams/runtime-gateway` is the accepted narrow AR integration boundary. It
+owns the AR Published Language client, transport behavior, protocol mapping
+primitives, and provider conformance. It is not the consumer-owned feature adapter:
+each consuming feature still owns the adapter from its application port to that
+gateway. The gateway cannot import business contexts or define Team, Task, Run,
+Approval, or teammate-message semantics.
+
 Feature-specific tables, indexes, schema fragments, and dialect migration
 implementations remain with the feature's outbound persistence adapter. They are
 not moved into a context-wide infrastructure folder.
@@ -362,10 +414,12 @@ business invariant that belongs in the domain.
 
 ### Composition
 
-Composition has three levels:
+Composition is an assembly responsibility, not a mandatory DDD layer or directory.
+It has three possible levels:
 
-1. A feature factory wires feature-local handlers and receives required ports.
-2. Context composition wires features and context-owned adapters and assembles
+1. An optional feature `module.ts` wires feature-local handlers and receives
+   required ports.
+2. Context `module.ts` wires features and context-owned adapters and assembles
    feature migration contributions into one deterministic context bundle.
 3. The application composition root creates process-wide resources such as
    database pools, NATS connections, runtime clients, clocks, and telemetry.
@@ -386,12 +440,17 @@ compatibility checks, and the single context migration entry point. It does not
 own feature schemas or rewrite migration SQL. Features never acquire migration
 locks or run migrations independently.
 
-### Projections
+### Projection responsibilities
 
 Each context owns projections derived from its state and events. A feature may own
 projection handlers and read models for its capability. Cross-context client views
 are assembled by an edge Query Composition adapter, not a global projection
 bounded context.
+
+`projections/` is not a universal feature layer. Projection policy and projectors
+belong in application code, inbound event handlers belong in inbound adapters, and
+read-model persistence belongs in outbound adapters. Create named directories only
+for real artifacts.
 
 ## Aggregate and internal-module ownership
 

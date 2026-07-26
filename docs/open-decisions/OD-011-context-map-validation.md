@@ -14,13 +14,13 @@ related:
 
 ## Decision required
 
-Validate the ten proposed contexts through business-capability mapping,
+Validate proposed contexts through business-capability mapping,
 event-storming, Ubiquitous Language, current-system analysis, invariants, and
 concurrency scenarios.
 
 ## Constraints
 
-Keep the accepted focused eight-to-ten-context direction, but merge or split a
+Use as many focused contexts as evidence requires. Add, merge, split, or retire a
 proposed boundary when language and invariants prove it necessary. A proposed
 dossier is not permission to create its package.
 

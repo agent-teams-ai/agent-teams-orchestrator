@@ -16,13 +16,11 @@ ADRs record significant architecture choices and their consequences.
 - [ADR-0003: Runtime lifecycle belongs to ar](0003-ar-owns-runtime-lifecycle.md)
 - [ADR-0004: Broker-neutral core with NATS JetStream adapter](0004-broker-neutral-events-with-jetstream.md)
 - [ADR-0005: Public contracts are outside application and domain](0005-public-contracts-outside-application.md)
-- [ADR-0007: Focused contexts and domain-capability slices](0007-focused-contexts-and-domain-capability-slices.md)
 - [ADR-0008: Consumer-owned runtime ports and stateless ACL](0008-consumer-owned-runtime-ports.md)
 - [ADR-0009: Commands and events have distinct contracts](0009-commands-and-events-are-distinct.md)
 - [ADR-0010: Broker-neutral partition ordering](0010-broker-neutral-partition-ordering.md)
 - [ADR-0011: Context-isolated SQLite and PostgreSQL topology](0011-context-isolated-sqlite-and-postgres-topology.md)
 - [ADR-0012: Feature-owned inbound and outbound adapters](0012-feature-owned-inbound-and-outbound-adapters.md)
-- [ADR-0014: Feature-owned migrations with context-level assembly](0014-feature-owned-migrations-with-context-assembly.md)
 - [ADR-0015: Handwritten capability SDK over internal transports](0015-handwritten-capability-sdk-over-internal-transports.md)
 - [ADR-0016: Protobuf, Buf, and Connect control API](0016-protobuf-buf-connect-control-api.md)
 - [ADR-0017: Cross-language Protobuf contract profile](0017-cross-language-protobuf-profile.md)
@@ -44,12 +42,30 @@ ADRs record significant architecture choices and their consequences.
 - [ADR-0034: Explicit product-owner approval for accepted ADRs](0034-explicit-product-owner-approval.md)
 - [ADR-0035: Managed local NATS JetStream](0035-managed-local-nats-jetstream.md)
 - [ADR-0036: TypeScript SDK publication format](0036-typescript-sdk-publication-format.md)
+- [ADR-0037: Single initial contract version](0037-single-initial-contract-version.md)
+- [ADR-0038: Machine-enforced package catalog](0038-machine-enforced-package-catalog.md)
+- [ADR-0039: Staged Nx foundation](0039-staged-nx-foundation.md)
+- [ADR-0040: Context-private Awilix containers](0040-context-private-awilix-containers.md)
+- [ADR-0041: Deterministic repository guardrails](0041-deterministic-repository-guardrails.md)
+- [ADR-0042: Evidence-driven bounded-context topology](0042-evidence-driven-bounded-context-topology.md)
+- [ADR-0043: Long-horizon evolutionary architecture](0043-long-horizon-evolutionary-architecture.md)
+- [ADR-0044: Tenant-scoped Agent Organization](0044-tenant-scoped-agent-organization.md)
+- [ADR-0045: Three usage bounded contexts](0045-three-usage-bounded-contexts.md)
+- [ADR-0046: Exact usage and money values](0046-exact-usage-and-money-values.md)
+- [ADR-0047: Resumable context migration plans](0047-resumable-context-migration-plans.md)
+- [ADR-0048: Single persistence authority and logical transfer](0048-single-persistence-authority-and-logical-transfer.md)
+- [ADR-0049: Exact persistence and instant profile](0049-exact-persistence-and-instant-profile.md)
+- [ADR-0050: Capability-owned hosted concurrency](0050-capability-owned-hosted-concurrency.md)
+- [ADR-0051: Full DDD operating model](0051-full-ddd-operating-model.md)
+- [ADR-0052: Adapter-local Drizzle and bounded dialect duplication](0052-adapter-local-drizzle-and-bounded-dialect-duplication.md)
 
 ## Superseded decisions
 
 - [ADR-0002: Bounded-context packages with feature-owned slices](0002-bounded-context-packages-and-feature-slices.md), superseded by ADR-0007
+- [ADR-0007: Focused contexts and domain-capability slices](0007-focused-contexts-and-domain-capability-slices.md), superseded by ADR-0042
 - [ADR-0006: Ordering is declared per contract](0006-contract-specific-event-ordering.md), superseded by ADR-0010
 - [ADR-0013: Runtime Published Language and permission boundary](0013-runtime-published-language-and-permission-boundary.md), superseded by ADR-0028
+- [ADR-0014: Feature-owned migrations with context-level assembly](0014-feature-owned-migrations-with-context-assembly.md), superseded by ADR-0047
 - [ADR-0022: Host-owned sidecar supervision](0022-host-owned-sidecar-supervision.md), superseded by ADR-0033
 
 ## ADR process

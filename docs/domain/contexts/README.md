@@ -7,31 +7,39 @@ summary: Index of proposed and accepted bounded-context domain dossiers.
 related:
   - architecture.context-map
   - domain.modeling-standard
+  - domain.tactical-modeling-patterns
   - OD-011
 ---
 
 # Bounded Context Dossiers
 
-These dossiers are strategic domain artifacts, not package declarations. Every
-context remains proposed until the Full DDD acceptance gate is satisfied.
+These dossiers are strategic domain artifacts, not package declarations. A
+strategic boundary may be accepted by ADR while its detailed dossier remains
+proposed until the Full DDD acceptance gate is satisfied. The status below is
+dossier readiness, not boundary existence.
 
-| Context | Status | Dossier |
+| Context | Dossier readiness | Dossier |
 |---|---|---|
 | Identity Registry | Proposed | [Identity Registry](identity-registry/README.md) |
 | Access Control | Proposed | [Access Control](access-control/README.md) |
 | Tenant and Project Registry | Proposed | [Tenant and Project Registry](tenant-project-registry/README.md) |
 | Workspace Registry | Proposed | [Workspace Registry](workspace-registry/README.md) |
 | Team Topology | Proposed | [Team Topology](team-topology/README.md) |
+| Agent Organization | Proposed | [Agent Organization](agent-organization/README.md) |
 | Work Coordination | Proposed | [Work Coordination](work-coordination/README.md) |
 | Run Orchestration | Proposed | [Run Orchestration](run-orchestration/README.md) |
 | Agent Communication | Proposed | [Agent Communication](agent-communication/README.md) |
 | Policy and Risk | Proposed | [Policy and Risk](policy-risk/README.md) |
 | Approval Management | Proposed | [Approval Management](approval-management/README.md) |
+| Usage Metering | Proposed | [Usage Metering](usage-metering/README.md) |
+| Usage Accounting | Proposed | [Usage Accounting](usage-accounting/README.md) |
+| Consumption Governance | Proposed | [Consumption Governance](consumption-governance/README.md) |
 
 ## Dossier rule
 
 Use the [bounded-context template](../../templates/bounded-context.md) and
-[Full DDD modeling standard](../modeling-standard.md). Add an artifact only after
+[Full DDD modeling standard](../modeling-standard.md), with the
+[tactical modeling patterns](../tactical-modeling-patterns.md). Add an artifact only after
 discovery produces real language, invariants, scenarios, or ownership evidence.
 
 When a context package is created, this dossier remains its strategic entry point

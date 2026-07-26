@@ -15,39 +15,66 @@
     "boundaries/elements": [
       {
         "type": "domain",
-        "pattern": "**/src/features/*/domain/**"
+        "pattern": "features/*/domain",
+        "capture": ["feature"],
+        "basePattern": "**/src",
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "application",
-        "pattern": "**/src/features/*/application/**"
+        "pattern": "features/*/application",
+        "capture": ["feature"],
+        "basePattern": "**/src",
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "contracts",
-        "pattern": "**/src/features/*/contracts/**"
+        "pattern": "features/*/contracts",
+        "capture": ["feature"],
+        "basePattern": "**/src",
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "adapter-inbound",
-        "pattern": "**/src/features/*/adapters/inbound/**"
+        "pattern": "features/*/adapters/inbound",
+        "capture": ["feature"],
+        "basePattern": "**/src",
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "adapter-outbound",
-        "pattern": "**/src/features/*/adapters/outbound/**"
+        "pattern": "features/*/adapters/outbound",
+        "capture": ["feature"],
+        "basePattern": "**/src",
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "composition",
-        "pattern": "**/src/features/*/composition/**"
+        "pattern": "features/*/composition",
+        "capture": ["feature"],
+        "basePattern": "**/src",
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "projection",
-        "pattern": "**/src/features/*/projections/**"
+        "pattern": "features/*/projections",
+        "capture": ["feature"],
+        "basePattern": "**/src",
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "tests",
-        "pattern": "**/src/features/*/tests/**"
+        "pattern": "features/*/tests",
+        "capture": ["feature"],
+        "basePattern": "**/src",
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "feature-other",
-        "pattern": "**/src/features/*/**"
+        "pattern": "features/*",
+        "capture": ["feature"],
+        "basePattern": "**/src",
+        "baseCapture": ["packagePath"]
       }
     ],
     "import/resolver": {
@@ -64,7 +91,8 @@
     "boundaries/dependencies": [
       "error",
       {
-        "default": "allow",
+        "checkAllOrigins": true,
+        "default": "disallow",
         "policies": [
           {
             "from": {
@@ -72,17 +100,34 @@
                 "type": "domain"
               }
             },
-            "disallow": {
+            "allow": {
               "to": {
                 "element": {
-                  "type": [
-                    "application",
-                    "contracts",
-                    "adapter-inbound",
-                    "adapter-outbound",
-                    "composition",
-                    "projection"
-                  ]
+                  "type": "domain",
+                  "captured": {
+                    "feature": "{{ from.element.captured.feature }}",
+                    "packagePath": "{{ from.element.captured.packagePath }}"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
+                "type": [
+                  "adapter-inbound",
+                  "adapter-outbound",
+                  "composition",
+                  "tests",
+                  "feature-other"
+                ]
+              }
+            },
+            "allow": {
+              "to": {
+                "module": {
+                  "origin": "core"
                 }
               }
             }
@@ -93,15 +138,17 @@
                 "type": "application"
               }
             },
-            "disallow": {
+            "allow": {
               "to": {
                 "element": {
                   "type": [
-                    "contracts",
-                    "adapter-inbound",
-                    "adapter-outbound",
-                    "composition"
-                  ]
+                    "application",
+                    "domain"
+                  ],
+                  "captured": {
+                    "feature": "{{ from.element.captured.feature }}",
+                    "packagePath": "{{ from.element.captured.packagePath }}"
+                  }
                 }
               }
             }
@@ -112,17 +159,14 @@
                 "type": "contracts"
               }
             },
-            "disallow": {
+            "allow": {
               "to": {
                 "element": {
-                  "type": [
-                    "domain",
-                    "application",
-                    "adapter-inbound",
-                    "adapter-outbound",
-                    "composition",
-                    "projection"
-                  ]
+                  "type": "contracts",
+                  "captured": {
+                    "feature": "{{ from.element.captured.feature }}",
+                    "packagePath": "{{ from.element.captured.packagePath }}"
+                  }
                 }
               }
             }
@@ -133,13 +177,17 @@
                 "type": "adapter-inbound"
               }
             },
-            "disallow": {
+            "allow": {
               "to": {
                 "element": {
                   "type": [
-                    "adapter-outbound",
-                    "composition"
-                  ]
+                    "application",
+                    "contracts"
+                  ],
+                  "captured": {
+                    "feature": "{{ from.element.captured.feature }}",
+                    "packagePath": "{{ from.element.captured.packagePath }}"
+                  }
                 }
               }
             }
@@ -150,13 +198,138 @@
                 "type": "adapter-outbound"
               }
             },
-            "disallow": {
+            "allow": {
               "to": {
                 "element": {
                   "type": [
+                    "application",
+                    "contracts",
+                    "domain"
+                  ],
+                  "captured": {
+                    "feature": "{{ from.element.captured.feature }}",
+                    "packagePath": "{{ from.element.captured.packagePath }}"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
+                "type": "composition"
+              }
+            },
+            "allow": {
+              "to": {
+                "element": {
+                  "type": [
+                    "domain",
+                    "application",
+                    "contracts",
                     "adapter-inbound",
-                    "composition"
-                  ]
+                    "adapter-outbound",
+                    "composition",
+                    "projection",
+                    "feature-other"
+                  ],
+                  "captured": {
+                    "feature": "{{ from.element.captured.feature }}",
+                    "packagePath": "{{ from.element.captured.packagePath }}"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
+                "type": "projection"
+              }
+            },
+            "allow": {
+              "to": {
+                "element": {
+                  "type": [
+                    "domain",
+                    "application",
+                    "contracts",
+                    "projection"
+                  ],
+                  "captured": {
+                    "feature": "{{ from.element.captured.feature }}",
+                    "packagePath": "{{ from.element.captured.packagePath }}"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
+                "type": [
+                  "tests",
+                  "feature-other"
+                ]
+              }
+            },
+            "allow": {
+              "to": {
+                "element": {
+                  "type": [
+                    "domain",
+                    "application",
+                    "contracts",
+                    "adapter-inbound",
+                    "adapter-outbound",
+                    "composition",
+                    "projection",
+                    "tests",
+                    "feature-other"
+                  ],
+                  "captured": {
+                    "feature": "{{ from.element.captured.feature }}",
+                    "packagePath": "{{ from.element.captured.packagePath }}"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
+                "type": [
+                  "adapter-inbound",
+                  "adapter-outbound",
+                  "composition",
+                  "tests",
+                  "feature-other"
+                ]
+              }
+            },
+            "allow": {
+              "to": {
+                "module": {
+                  "origin": "external"
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
+                "type": [
+                  "domain",
+                  "application",
+                  "contracts",
+                  "projection"
+                ]
+              }
+            },
+            "disallow": {
+              "to": {
+                "module": {
+                  "origin": "external"
                 }
               }
             }

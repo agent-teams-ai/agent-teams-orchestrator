@@ -66,30 +66,47 @@ const validLint = run(
 );
 requireSuccess("valid Oxlint boundary fixture", validLint);
 
+const validCoreRoot = path.join(toolingRoot, "fixtures/core-valid");
+const validCoreLint = run(
+  "pnpm",
+  ["exec", "oxlint", "--config", rootOxlintConfig, validCoreRoot],
+  repositoryRoot,
+);
+requireSuccess("valid core-module adapter fixture", validCoreLint);
+
 const invalidBoundaryFiles = [
-  "value-import.ts",
-  "type-import.ts",
-  "dynamic-import.ts",
-  "re-export.ts",
-  "alias-import.ts",
+  "domain/value-import.ts",
+  "domain/type-import.ts",
+  "domain/dynamic-import.ts",
+  "domain/re-export.ts",
+  "domain/alias-import.ts",
+  "domain/external-import.ts",
+  "domain/cross-feature-import.ts",
+  "domain/core-import.ts",
+  "application/import-contract.ts",
+  "contracts/import-domain.ts",
+  "adapters/inbound/import-outbound.ts",
+  "adapters/outbound/import-inbound.ts",
 ];
 
+const invalidRoot = path.join(toolingRoot, "fixtures/invalid");
+const invalidLint = run(
+  "pnpm",
+  ["exec", "oxlint", "--config", rootOxlintConfig, invalidRoot],
+  repositoryRoot,
+);
+requireFailure(
+  "invalid Oxlint boundary fixtures",
+  invalidLint,
+  "boundaries(dependencies)",
+);
+const invalidLintOutput = combinedOutput(invalidLint);
 for (const fileName of invalidBoundaryFiles) {
-  const filePath = path.join(
-    toolingRoot,
-    "fixtures/invalid/src/features/task-model/domain",
-    fileName,
-  );
-  const result = run(
-    "pnpm",
-    ["exec", "oxlint", "--config", rootOxlintConfig, filePath],
-    repositoryRoot,
-  );
-  requireFailure(
-    `invalid Oxlint boundary fixture ${fileName}`,
-    result,
-    "boundaries(dependencies)",
-  );
+  if (!invalidLintOutput.includes(fileName)) {
+    throw new Error(
+      `invalid Oxlint boundary fixture ${fileName} was not reported:\n${invalidLintOutput}`,
+    );
+  }
 }
 
 const validGraph = run(
@@ -114,7 +131,7 @@ const invalidGraph = run(
     "err",
     path.relative(
       repositoryRoot,
-      path.join(toolingRoot, "fixtures/invalid"),
+    invalidRoot,
     ),
     path.relative(
       repositoryRoot,

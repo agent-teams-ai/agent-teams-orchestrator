@@ -4,6 +4,70 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    ajv:
+      specifier: 8.20.0
+      version: 8.20.0
+    ajv-formats:
+      specifier: 3.0.1
+      version: 3.0.1
+    eslint-import-resolver-oxc:
+      specifier: 0.15.0
+      version: 0.15.0
+    eslint-plugin-boundaries:
+      specifier: 7.1.0
+      version: 7.1.0
+    github-slugger:
+      specifier: 2.0.0
+      version: 2.0.0
+    jsdom:
+      specifier: 29.1.1
+      version: 29.1.1
+    markdownlint-cli2:
+      specifier: 0.23.1
+      version: 0.23.1
+    mdast-util-to-string:
+      specifier: 4.0.0
+      version: 4.0.0
+    mermaid:
+      specifier: 11.16.0
+      version: 11.16.0
+    oxc-resolver:
+      specifier: 11.24.2
+      version: 11.24.2
+    oxlint:
+      specifier: 1.75.0
+      version: 1.75.0
+    remark-frontmatter:
+      specifier: 5.0.0
+      version: 5.0.0
+    remark-gfm:
+      specifier: 4.0.1
+      version: 4.0.1
+    remark-parse:
+      specifier: 11.0.0
+      version: 11.0.0
+    typescript:
+      specifier: 7.0.2
+      version: 7.0.2
+    unified:
+      specifier: 11.0.5
+      version: 11.0.5
+    unist-util-visit:
+      specifier: 5.1.0
+      version: 5.1.0
+    yaml:
+      specifier: 2.9.0
+      version: 2.9.0
+  tooling-ts6:
+    dependency-cruiser:
+      specifier: 18.1.0
+      version: 18.1.0
+    typescript:
+      specifier: 6.0.3
+      version: 6.0.3
+
 overrides:
   js-yaml: 5.2.2
 
@@ -14,67 +78,67 @@ importers:
   .:
     devDependencies:
       ajv:
-        specifier: 8.20.0
+        specifier: 'catalog:'
         version: 8.20.0
       ajv-formats:
-        specifier: 3.0.1
+        specifier: 'catalog:'
         version: 3.0.1(ajv@8.20.0)
       eslint-import-resolver-oxc:
-        specifier: 0.15.0
+        specifier: 'catalog:'
         version: 0.15.0(eslint@10.7.0(supports-color@7.2.0))(oxc-resolver@11.24.2)
       eslint-plugin-boundaries:
-        specifier: 7.1.0
+        specifier: 'catalog:'
         version: 7.1.0(eslint@10.7.0(supports-color@7.2.0))(supports-color@7.2.0)
       github-slugger:
-        specifier: 2.0.0
+        specifier: 'catalog:'
         version: 2.0.0
       jsdom:
-        specifier: 29.1.1
+        specifier: 'catalog:'
         version: 29.1.1
       markdownlint-cli2:
-        specifier: 0.23.1
+        specifier: 'catalog:'
         version: 0.23.1(supports-color@7.2.0)
       mdast-util-to-string:
-        specifier: 4.0.0
+        specifier: 'catalog:'
         version: 4.0.0
       mermaid:
-        specifier: 11.16.0
+        specifier: 'catalog:'
         version: 11.16.0
       oxc-resolver:
-        specifier: 11.24.2
+        specifier: 'catalog:'
         version: 11.24.2
       oxlint:
-        specifier: 1.75.0
+        specifier: 'catalog:'
         version: 1.75.0
       remark-frontmatter:
-        specifier: 5.0.0
+        specifier: 'catalog:'
         version: 5.0.0(supports-color@7.2.0)
       remark-gfm:
-        specifier: 4.0.1
+        specifier: 'catalog:'
         version: 4.0.1(supports-color@7.2.0)
       remark-parse:
-        specifier: 11.0.0
+        specifier: 'catalog:'
         version: 11.0.0(supports-color@7.2.0)
       typescript:
-        specifier: 7.0.2
+        specifier: 'catalog:'
         version: 7.0.2
       unified:
-        specifier: 11.0.5
+        specifier: 'catalog:'
         version: 11.0.5
       unist-util-visit:
-        specifier: 5.1.0
+        specifier: 'catalog:'
         version: 5.1.0
       yaml:
-        specifier: 2.9.0
+        specifier: 'catalog:'
         version: 2.9.0
 
   tooling/architecture-conformance:
     devDependencies:
       dependency-cruiser:
-        specifier: 18.1.0
+        specifier: catalog:tooling-ts6
         version: 18.1.0(typescript@6.0.3)
       typescript:
-        specifier: 6.0.3
+        specifier: catalog:tooling-ts6
         version: 6.0.3
 
 packages:
@@ -2405,7 +2469,7 @@ snapshots:
 
   '@types/mdast@4.0.4':
     dependencies:
-      '@types/unist': 2.0.11
+      '@types/unist': 3.0.3
 
   '@types/ms@2.1.0': {}
 

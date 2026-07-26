@@ -6,7 +6,8 @@ owner: platform/persistence
 summary: Use capability-scoped units of work and per-context local command lanes over replaceable persistence adapters.
 related:
   - ADR-0011
-  - ADR-0014
+  - ADR-0047
+  - ADR-0050
   - OD-003
   - architecture.persistence
 ---

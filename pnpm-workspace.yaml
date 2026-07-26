@@ -3,6 +3,33 @@ packages:
   - "packages/**"
   - "tooling/*"
 
+catalogMode: strict
+
+catalog:
+  ajv: 8.20.0
+  ajv-formats: 3.0.1
+  eslint-import-resolver-oxc: 0.15.0
+  eslint-plugin-boundaries: 7.1.0
+  github-slugger: 2.0.0
+  jsdom: 29.1.1
+  markdownlint-cli2: 0.23.1
+  mdast-util-to-string: 4.0.0
+  mermaid: 11.16.0
+  oxc-resolver: 11.24.2
+  oxlint: 1.75.0
+  remark-frontmatter: 5.0.0
+  remark-gfm: 4.0.1
+  remark-parse: 11.0.0
+  typescript: 7.0.2
+  unified: 11.0.5
+  unist-util-visit: 5.1.0
+  yaml: 2.9.0
+
+catalogs:
+  tooling-ts6:
+    dependency-cruiser: 18.1.0
+    typescript: 6.0.3
+
 packageExtensions:
   "dependency-cruiser@18.1.0":
     peerDependencies:

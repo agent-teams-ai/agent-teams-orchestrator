@@ -13,6 +13,7 @@ related:
   - ADR-0024
   - ADR-0033
   - ADR-0036
+  - ADR-0037
   - architecture.local-host-lifecycle
   - architecture.public-control-contracts
   - OD-001
@@ -280,6 +281,11 @@ status codes and exceptions are mapped into the stable public error model select
 by OD-016.
 
 ## Compatibility
+
+The initial product exposes one control-contract major family, `v1`. No
+speculative `v2` package, facade, mapper, or generated client exists. Compatible
+evolution remains in v1; a later major requires the explicit migration decision,
+support horizon, and retirement plan in ADR-0037.
 
 Contracts follow additive evolution where possible:
 

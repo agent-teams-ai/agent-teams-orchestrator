@@ -123,6 +123,12 @@ The same core supports multiple compositions:
 The local and server artifacts are thin composition roots, not separate product
 implementations. Deployment mode must not change domain behavior.
 
+One bounded context has one authoritative persistence profile in a running
+deployment. A Desktop using Orchestrator Server does not keep a second local
+business write model; any local cache is disposable. Moving context state between
+profiles is a versioned logical transfer, never generic SQLite/PostgreSQL table
+synchronization.
+
 Normal local use is zero-touch. The Local Supervisor manages the bundled
 `nats-server` process and physical store lifecycle; the Host's JetStream adapters
 own broker interaction. It may supervise AR host availability, but AR remains the

@@ -5,7 +5,9 @@ status: accepted
 owner: architecture/domain
 summary: Full DDD discovery and tactical modeling requirements for bounded contexts.
 related:
-  - ADR-0007
+  - ADR-0051
+  - ADR-0042
+  - domain.tactical-modeling-patterns
   - OD-006
   - OD-011
 ---
@@ -20,6 +22,19 @@ or package for every class or noun.
 
 The strongest abstraction boundary is the bounded context. Inside a context,
 abstractions follow real domain variation, invariants, and ownership.
+
+Full DDD has three required dimensions:
+
+1. strategic modeling defines subdomains, bounded contexts, language, ownership,
+   relationships, and Published Languages;
+2. tactical modeling expresses aggregates, entities, value objects, policies,
+   domain services, specifications, domain events, repositories, and process
+   managers where their semantics are proven;
+3. evolutionary modeling preserves compatibility, migrations, replay, recovery,
+   observability, and context-extraction paths as the model changes.
+
+Passing only one dimension is not Full DDD. Folder structure cannot compensate
+for missing language, invariants, behavior, or operational evolution.
 
 ## Strategic DDD requirements
 
@@ -59,6 +74,11 @@ are introduced only when their domain role is explicit.
 
 Repositories exist only for aggregate roots. Query models do not use aggregate
 repositories.
+
+Implementation follows the aggregate-centered placement and behavior rules in
+[Tactical DDD Modeling Patterns](tactical-modeling-patterns.md). An aggregate is
+not an anemic persistence record: its root owns intention-revealing state
+transitions and makes invalid transitions impossible or explicit domain outcomes.
 
 ## Policy vocabulary
 
@@ -113,3 +133,13 @@ A core context cannot move from Proposed to Accepted until:
 5. terminology conflicts are resolved or documented;
 6. architecture tests can enforce the intended package and export boundary;
 7. an ADR records the accepted boundary.
+
+For the first implementing vertical slice, the gate also requires:
+
+1. each aggregate has the required decision matrix;
+2. domain behavior and integration contracts use separate event types;
+3. persistence and public schemas have explicit mappers rather than becoming
+   domain types;
+4. domain, concurrency, rehydration, and property-test scenarios are named;
+5. domain navigation identifies each aggregate and owning feature without a
+   repository-wide source search.

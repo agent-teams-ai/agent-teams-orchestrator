@@ -1,11 +1,13 @@
 ---
 id: ADR-0007
 type: adr
-status: accepted
+status: superseded
 owner: architecture/domain
-summary: Use focused bounded contexts containing feature-owned domain-capability slices.
+summary: Original focused-context decision superseded by evidence-driven bounded-context topology in ADR-0042.
 supersedes:
   - ADR-0002
+superseded_by:
+  - ADR-0042
 related:
   - OD-011
 ---

@@ -5,15 +5,21 @@ status: proposed
 owner: architecture/domain
 summary: Proposed strategic bounded contexts, responsibilities, and relationships.
 related:
-  - ADR-0007
+  - ADR-0042
+  - ADR-0044
+  - ADR-0045
+  - ADR-0046
   - OD-011
+  - OD-023
+  - OD-024
 ---
 
 # Strategic Context Map
 
-The target is eight to ten focused business bounded contexts. This level of
-granularity is deliberate: contexts must be independently understandable and
-extractable without turning every use case into a distributed subsystem.
+The map uses as many focused business bounded contexts as domain evidence requires.
+There is no numerical target or ceiling. Contexts must be independently
+understandable and extractable without turning every use case into a distributed
+subsystem or merging unrelated models to satisfy a package count.
 
 Exact boundaries remain proposed until validated through business-capability
 mapping, event storming, current-system analysis, invariants, language differences,
@@ -32,24 +38,45 @@ package, schema, or public contract prematurely.
 
 These concepts often align, but they are not interchangeable.
 
-## Proposed business contexts
+## Strategic business contexts
 
-| Bounded context | Classification | Primary responsibility |
-|---|---|---|
-| Identity Registry | Generic | Human and machine principal identity |
-| Access Control | Supporting | Tenant/project membership, grants, and authorization facts |
-| Tenant and Project Registry | Supporting | Tenant/project identity, lifecycle, and ownership |
-| Workspace Registry | Supporting | Workspace registration, binding generations, and metadata |
-| Team Topology | Core | Agent-team composition, roles, capabilities, and roster invariants |
-| Work Coordination | Core | Tasks, assignments, dependencies, handoffs, and work lifecycle |
-| Run Orchestration | Core | Durable execution coordination, retries, compensation, and recovery policy |
-| Agent Communication | Core | Typed agent communication, delivery intent, inbox policy, and receipts |
-| Policy and Risk | Supporting | Execution policy, workspace trust, risk classification, and limits |
-| Approval Management | Supporting | Product approval requests, authority decision records, routing, expiry, and audit |
+| Bounded context | Classification | Boundary status | Primary responsibility |
+|---|---|---|---|
+| Identity Registry | Generic | Proposed | Human and machine principal identity |
+| Access Control | Supporting | Proposed | Tenant/project membership, grants, and authorization facts |
+| Tenant and Project Registry | Supporting | Proposed | Tenant/project identity, lifecycle, and ownership |
+| Workspace Registry | Supporting | Proposed | Workspace registration, binding generations, and metadata |
+| Team Topology | Core | Proposed | Agent-team composition, roles, capabilities, and roster invariants |
+| Agent Organization | Core | Accepted by ADR-0044 | Tenant-scoped organizations, units, structures, and team placements |
+| Work Coordination | Core | Proposed | Tasks, assignments, dependencies, handoffs, and work lifecycle |
+| Run Orchestration | Core | Proposed | Durable execution coordination, retries, compensation, and recovery policy |
+| Agent Communication | Core | Proposed | Typed agent communication, delivery intent, inbox policy, and receipts |
+| Policy and Risk | Supporting | Proposed | Execution policy, workspace trust, risk classification, and controls |
+| Approval Management | Supporting | Proposed | Product approval requests, authority decisions, routing, expiry, and audit |
+| Usage Metering | Supporting | Accepted by ADR-0045 | Observations, normalization, corrections, meters, and exact quantities |
+| Usage Accounting | Supporting | Accepted by ADR-0045 | Attribution, rating, exact cost, reconciliation, and projections |
+| Consumption Governance | Supporting | Accepted by ADR-0045 | Budgets, alerts, limits, reservations, and consumption decisions |
 
-`Usage and Entitlements` is a likely future supporting context for token accounting,
-budgets, quotas, and commercial limits. It is not part of the initial package map
-until its language and invariants are discovered.
+## Accepted strategic additions
+
+ADR-0044 accepts tenant-scoped Agent Organization. ADR-0045 accepts three distinct
+usage bounded contexts. ADR-0046 accepts their exact-value strategy. Their dossiers
+remain proposed until the Full DDD acceptance gate validates exact aggregates,
+commands, events, relationships, and concurrency models. Acceptance of a strategic
+boundary reserves topology but does not authorize empty package materialization.
+
+### Agent organization
+
+The product requires tenant-scoped semantic organization hierarchies above teams.
+Groups with lifecycle, responsibility, policy bindings, or process references are
+OrganizationalUnits rather than UI folders. OD-023 owns the remaining detailed
+hierarchy, placement, relationship, and concurrency model.
+
+### Usage, accounting, and consumption controls
+
+Usage Metering, Usage Accounting, and Consumption Governance own measurement,
+attribution/rating, and budget/limit authority respectively. OD-024 owns their
+remaining detailed semantics and executable concurrency scenarios.
 
 ## Integration modules
 
@@ -74,11 +101,15 @@ flowchart LR
     Project["Tenant and Project Registry"]
     Workspace["Workspace Registry"]
     Team["Team Topology"]
+    Organization["Agent Organization"]
     Work["Work Coordination"]
     Run["Run Orchestration"]
     Communication["Agent Communication"]
     Policy["Policy and Risk"]
     Approval["Approval Management"]
+    Metering["Usage Metering"]
+    Accounting["Usage Accounting"]
+    Governance["Consumption Governance"]
     Runtime["Stateless Runtime ACL"]
     AR["ar Runtime"]
     Boards["Task Board ACLs"]
@@ -89,10 +120,17 @@ flowchart LR
     Access -->|"Authorization facts through consumer-owned boundaries"| Authorized
     Project -->|"Project identity"| Workspace
     Project -->|"Project identity"| Team
+    Project -->|"Tenant and project identities"| Organization
     Project -->|"Project identity"| Work
     Project -->|"Project identity"| Run
+    Project -->|"Tenant and project identities"| Metering
+    Project -->|"Tenant and project identities"| Accounting
+    Project -->|"Tenant and project identities"| Governance
+    Team -->|"Team identity and lifecycle facts"| Organization
     Team -->|"Team topology facts"| Work
     Team -->|"Team topology facts"| Run
+    Organization -. "Explicit structure facts" .-> Access
+    Organization -. "Attribution scope facts" .-> Accounting
     Workspace -->|"Workspace facts"| Policy
     Workspace -->|"Workspace identity"| Run
 
@@ -100,6 +138,7 @@ flowchart LR
     Run -. "Execution facts" .-> Work
 
     Policy -->|"Policy decisions"| Run
+    Governance -->|"Consumption decisions and reservations"| Run
     Run -. "Approval requested" .-> Approval
     Approval -. "Approval decided" .-> Run
 
@@ -112,6 +151,10 @@ flowchart LR
     Runtime -->|"Anti-Corruption Layer"| AR
     AR -. "Runtime facts and permission requests" .-> Runtime
     Runtime -. "Normalized runtime observations" .-> Run
+    Runtime -. "Usage observations" .-> Metering
+    Run -. "Attribution hints" .-> Metering
+    Metering -. "Exact metered usage" .-> Accounting
+    Accounting -. "Usage and cost facts" .-> Governance
     Work -->|"Consumer-owned board ports"| Boards
 ```
 
@@ -135,6 +178,23 @@ Owns:
 - authentication identity facts exposed to Access Control.
 
 It does not decide whether a principal may perform a domain operation.
+
+### Identity namespaces
+
+Three identity namespaces are deliberately distinct:
+
+- `PrincipalId` identifies an authenticated human or machine actor and belongs to
+  Identity Registry;
+- `AgentProfileId` identifies a product-level agent definition and belongs to Team
+  Topology;
+- `RuntimeSessionRef` is an opaque reference to an AR-owned technical execution
+  session.
+
+These identifiers are never aliases and no one-to-one relationship is assumed.
+Any association between them is an explicit, scoped, lifecycle-aware binding owned
+by the context that needs the association. Authentication does not make a
+principal an agent profile, and starting or replacing a runtime session does not
+change either product identity.
 
 ## Access Control
 
@@ -204,6 +264,25 @@ concurrency and lifecycle prove that it needs a separate aggregate.
 
 It does not own agent processes, tasks, or provider sessions.
 
+## Agent Organization
+
+Owns:
+
+- tenant-scoped Organization identity and lifecycle;
+- named OrganizationStructure topology;
+- semantic OrganizationalUnit identity, nesting, and lifecycle;
+- project-qualified TeamPlacement references;
+- typed organization relationships and published structure facts.
+
+Team Topology remains authoritative for Team identity and roster. Tenant and
+Project Registry remains authoritative for tenant/project identity. Tasks, runs,
+budgets, approvals, and policies may reference organization subjects but remain
+owned by their contexts.
+
+Containment is cycle-free per Structure. Matrix organization uses multiple
+structures or typed relationships, not unrestricted containment. Organization
+facts do not grant access implicitly.
+
 ## Work Coordination
 
 Owns:
@@ -264,6 +343,28 @@ aggregate. Cross-context effects use versioned commands and facts; each context
 commits its own state, inbox or receipt, and outbox in its own Unit of Work.
 Compensation is a durable idempotent command, never a cross-context rollback.
 
+## Usage Metering
+
+Owns immutable source observations, deduplication, provider-neutral normalization,
+corrections, versioned meter definitions, and exact metered quantities. It does not
+own pricing, attribution, budgets, or runtime execution.
+
+## Usage Accounting
+
+Owns attribution decisions, effective-dated rate cards, rated usage, exact cost,
+provider reconciliation, and usage/cost projections. It does not own invoices,
+payments, raw provider normalization, or hard-limit authority.
+
+## Consumption Governance
+
+Owns user budgets, alert thresholds, soft limits, hard quotas, reservations,
+capture/release, expiry, reconciliation, and consumption decisions. Run
+Orchestration consumes those decisions; Policy and Risk may compose them into a
+broader admission policy; AR performs only technical runtime enforcement.
+
+Hard-limit policies declare reservation estimates and permitted overshoot because
+provider usage can arrive after execution has consumed resources.
+
 ## Agent Communication
 
 Owns:
@@ -295,7 +396,7 @@ Owns:
 - execution and tool policy;
 - risk classifications;
 - capability-profile selection;
-- limits that protect execution;
+- risk controls that protect execution, excluding consumption budgets and quotas;
 - auditable policy evaluations.
 
 Domain policies that enforce invariants cannot be replaced by plugins. An external

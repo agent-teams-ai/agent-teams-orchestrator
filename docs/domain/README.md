@@ -32,7 +32,9 @@ contain:
 11. domain error taxonomy;
 12. upstream/downstream relationship contracts.
 
-Use [the Full DDD modeling standard](modeling-standard.md) for acceptance criteria.
+Use [the Full DDD modeling standard](modeling-standard.md) for acceptance criteria
+and [Tactical DDD Modeling Patterns](tactical-modeling-patterns.md) for aggregate,
+entity, value-object, policy, event, repository, and implementation rules.
 
 Do not fill these artifacts with guessed nouns or directory-driven models. They are
 produced from current behavior, domain-expert language, edge cases, invariants, and

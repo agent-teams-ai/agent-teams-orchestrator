@@ -14,6 +14,12 @@ The execution and safety layer that starts, observes, resumes, cancels, and
 recovers provider sessions and processes. In this architecture, `ar` is the agent
 runtime.
 
+## Agent profile identity
+
+The stable product identity of an agent definition owned by Team Topology and
+represented by `AgentProfileId`. It is distinct from an authenticated principal,
+team membership, and every AR runtime session.
+
 ## Aggregate
 
 A DDD consistency boundary with one aggregate root. All state changes preserve its
@@ -82,6 +88,13 @@ runtime mutations.
 
 An opaque public concurrency token representing the observed version of a
 resource. It is not a database version or public aggregate revision.
+
+## ECMAScript Temporal
+
+The JavaScript date, time, calendar, and timezone API that succeeds `Date`.
+Orchestrator calendar adapters may use it to resolve exact period boundaries. It
+is unrelated to the Temporal.io workflow engine and its objects never become
+domain or public contract types.
 
 ## Execution epoch
 
@@ -153,6 +166,12 @@ adapter modules.
 An interface declared at an architecture boundary. Inbound ports expose use cases;
 outbound ports describe required external capabilities.
 
+## Principal identity
+
+The Identity Registry identity of an authenticated human or machine actor,
+represented by `PrincipalId`. It does not imply an agent profile, team membership,
+authorization grant, or runtime session.
+
 ## Product approval
 
 An orchestrator-owned request and decision lifecycle that applies product policy,
@@ -206,6 +225,12 @@ logic belongs in an `ar` driver.
 An opaque execution lifecycle owned by `ar`, referenced by the orchestrator but
 not reconstructed from provider internals.
 
+## Runtime session reference
+
+An opaque orchestrator-side reference to an AR-owned technical runtime session,
+represented by `RuntimeSessionRef`. It is not a principal identity, agent profile,
+team membership, business run, or authorization credential.
+
 ## Runtime permission request
 
 An `ar`-owned technical request to grant or deny a scoped runtime capability.
@@ -251,3 +276,9 @@ other contexts hold opaque local references.
 One concrete local or remote orchestrator deployment and its trust configuration.
 A Target is selected by a Client Profile and is independent of the current
 project directory or Workspace.
+
+## Temporal.io
+
+The durable workflow platform used through a Run Orchestration adapter for
+scheduling, replay, timers, retries, signals, and Activities. Temporal.io workflow
+history is not business aggregate state and is unrelated to ECMAScript Temporal.

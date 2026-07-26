@@ -36,5 +36,8 @@ and links the deciding ADR; the historical record is retained.
 | OD-020 | [Architecture conformance tooling](OD-020-architecture-conformance-tooling.md) | engineering/tooling | Resolved by ADR-0032 |
 | OD-021 | [Local Supervisor lifecycle and distribution](OD-021-local-supervisor-lifecycle-and-distribution.md) | platform/local-host | Open |
 | OD-022 | [JetStream topology migration](OD-022-jetstream-topology-migration.md) | platform/eventing | Open |
+| OD-023 | [Agent Organization detailed model](OD-023-agent-organization-model.md) | agent-organization | Open |
+| OD-024 | [Usage and consumption detailed semantics](OD-024-usage-accounting-boundaries-and-exact-quantities.md) | usage-capability | Open |
+| OD-025 | [ECMAScript Temporal calendar engine](OD-025-ecmascript-temporal-calendar-engine.md) | architecture/domain | Open |
 
 Use the [open-decision template](../templates/open-decision.md) for new entries.

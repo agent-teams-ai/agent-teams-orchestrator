@@ -6,9 +6,15 @@ owner: platform/persistence
 summary: Complete persistence operational policy, readiness, migration tooling, and backup design.
 related:
   - ADR-0011
-  - ADR-0014
+  - ADR-0047
   - ADR-0025
+  - ADR-0048
+  - ADR-0049
+  - ADR-0050
+  - ADR-0051
+  - ADR-0052
   - architecture.persistence
+  - research.cross-dialect-persistence-tooling-2026-07-26
 ---
 
 # OD-003: Persistence Composition
@@ -16,19 +22,33 @@ related:
 ## Accepted constraints
 
 ADR-0011 selects one SQLite file per bounded context locally and one PostgreSQL
-schema per bounded context initially when hosted. ADR-0014 fixes feature-owned
-migrations with context-level assembly. ADR-0025 selects Node.js 24 LTS,
+schema per bounded context initially when hosted. ADR-0047 fixes feature-owned
+migration plans with context-level assembly and transactional versus
+online-resumable steps. ADR-0025 selects Node.js 24 LTS,
 `node:sqlite`, `node-postgres`, adapter-local Drizzle, capability-scoped Units of
 Work, and a per-context local command lane. It rejects a repository-level database
 worker and keeps external effects after commit.
 
-The current provisional `node:sqlite` implementation candidates are
+ADR-0048 selects one authoritative persistence profile per context and separates
+logical transfer from physical recovery. ADR-0049 fixes the initial exact-value
+and microsecond-instant mapping. ADR-0050 requires capability-owned hosted
+concurrency profiles and real concurrent PostgreSQL conformance.
+
+ADR-0052 selects adapter-local Drizzle as the default toolkit and direct drivers
+only as contingency. The initial `node:sqlite` dependency baseline is
 `drizzle-orm@1.0.0-rc.4` and `drizzle-kit@1.0.0-rc.4`, pinned without version
-ranges. Stable `0.45.2` does not expose the `node:sqlite` adapter. These are
-implementation candidates, not permanent architecture versions: installation
+ranges. Stable `0.45.2` does not expose the `node:sqlite` adapter. Installation
 must recheck the current GA release, verify the actual
 `drizzle-orm/node-sqlite` import, and run persistence conformance before changing
 this decision's readiness state.
+
+The 2026-07-26 cross-dialect tooling review found no stable library that satisfies
+the accepted `node:sqlite`, `node-postgres`, exact-value, migration, and
+capability-concurrency requirements while safely collapsing both repository
+implementations. Drizzle remains the strongest provisional adapter-local toolkit.
+Kysely lacks a current first-party `node:sqlite` dialect, Prisma's maintained
+SQLite adapter uses `better-sqlite3`, and released Effect SQL has not yet shipped
+its source migration to built-in SQLite.
 
 ## Decision evidence
 
@@ -69,6 +89,10 @@ the PostgreSQL advisory lock must precede metadata DDL and that SQLite needs a
 cross-process bootstrap lock before WAL and migration setup. The retained
 `Persistence migrations and backup` fingerprint is in the
 [foundation evidence manifest](../research/foundation-spike-evidence-manifest-2026-07-26.md).
+
+That evidence covers transactional migrations. ADR-0047 requires a separate
+interruption, verification, and ambiguity matrix for non-transactional online
+steps before those steps are production ready.
 
 A multi-context SQLite barrier spike passed 25/25 scenarios in three full runs.
 Three independent context command lanes produced one product backup generation
@@ -139,9 +163,12 @@ bounded-context restore remains a separate logical and reconciliation workflow.
 
 ## Decisions required
 
-- exact dependency versions and the pre-production Drizzle readiness decision;
-- concrete capability Unit of Work interfaces after initial aggregate discovery;
-- migration contribution API and dialect execution tooling;
+- the pre-production Drizzle readiness result and exact materialized dependency
+  versions after checking for a compatible GA release;
+- concrete capability Unit of Work and hosted concurrency profiles after initial
+  aggregate discovery;
+- migration contribution API, online-step state machine, and dialect execution
+  tooling;
 - WAL, checkpoints, busy timeout, and supported SQLite versions;
 - PostgreSQL connections, schema qualification, relay leasing, and row security;
 - PgBouncer restart, upgrade, HA, credential rotation, saturation, and

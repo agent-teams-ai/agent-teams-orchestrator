@@ -8,6 +8,10 @@ related:
   - ADR-0005
   - ADR-0008
   - ADR-0012
+  - ADR-0037
+  - ADR-0038
+  - ADR-0040
+  - architecture.composition
 ---
 
 # Dependency Rules
@@ -54,6 +58,11 @@ both roles expose separate modules and ports for each role.
 | Composition | All layers in its own package and public APIs of dependencies |
 | SDK | Published contracts and transport libraries |
 
+Awilix and every other container implementation are composition dependencies, not
+application ports. They may be imported only below `composition/**`. Contexts,
+features, adapters, and SDKs cannot receive a raw container, cradle, resolver, or
+service locator.
+
 ## Forbidden dependencies
 
 Domain and application layers must not import:
@@ -66,6 +75,12 @@ Domain and application layers must not import:
 - Node filesystem, child-process, or network implementations;
 - concrete database clients;
 - another bounded context's internal modules.
+
+Domain and application models also cannot expose JavaScript `Date`, ECMAScript
+Temporal objects, Decimal/Dinero instances, ORM records, or driver values. A pure
+arithmetic library may be private to a context-owned value-object implementation
+only when its type and mutable configuration cannot escape. Timezone/calendar
+engines belong behind application-owned calculation ports.
 
 ## Cross-context dependencies
 
@@ -101,12 +116,19 @@ The following surfaces are distinct:
 Sharing similar fields is not sufficient reason to reuse one surface as another.
 Mappings protect ownership, compatibility, authorization, and disclosure rules.
 
+Each surface starts with one explicit `v1` family. Parallel speculative major
+versions are prohibited. A later major requires the migration decision and support
+horizon defined by ADR-0037.
+
 ## Enforcement
 
-The implementation phase must add automated architecture tests for:
+CI architecture gates test:
 
 - production source outside approved feature or package-assembly roots;
 - packages without an explicit architectural role;
+- production packages absent from `architecture/package-catalog.yaml`;
+- packages whose owner document remains proposed;
+- package manifests whose name, role, or owner differs from the catalog;
 - empty ceremonial DDD layers;
 - package export boundaries;
 - forbidden imports by layer;
@@ -128,6 +150,14 @@ The implementation phase must add automated architecture tests for:
 
 TypeScript path aliases are conveniences, not boundaries. `package.json` exports,
 workspace dependencies, lint rules, and architecture tests enforce boundaries.
+The package catalog reserves approved topology; it does not replace import-graph
+enforcement inside materialized packages.
+
+The package-role gate prevents platform packages from depending on business
+contexts, integrations from depending on contexts or SDKs, and SDKs from depending
+on contexts, integrations, or platform implementation packages. Internal workspace
+dependencies must be cataloged and use the `workspace:` protocol. Dev-only testing
+packages are the explicit exception to runtime role direction.
 
 ## Dependency inversion examples
 

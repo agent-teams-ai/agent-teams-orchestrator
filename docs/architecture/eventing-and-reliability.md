@@ -10,6 +10,7 @@ related:
   - ADR-0010
   - ADR-0033
   - ADR-0035
+  - ADR-0037
   - architecture.local-host-lifecycle
   - OD-009
 ---
@@ -165,6 +166,11 @@ when their contract semantics require them. Operational events that do not
 originate from an aggregate must not fabricate aggregate identities.
 
 Schema validation occurs at publication and consumption boundaries.
+
+Each integration-event surface begins with one `v1` schema family. Producers do
+not emit speculative parallel majors. After durable publication, an incompatible
+change requires the migration, replay-reader, and support-horizon decision in
+ADR-0037.
 
 Producer and consumer validation use different generated profiles:
 

@@ -93,6 +93,12 @@ This protocol exposes no team, task, run, message, or approval operation. Ordina
 SDK packages do not install, start, stop, or update components. A product CLI may
 compose the SDK with a separate local-host administration client.
 
+The first implementation milestone is deliberately limited to idempotent
+bootstrap, `ensure`, `discover`, readiness/health, and typed diagnostics. Automatic
+updates, staged activation, rollback, drain, garbage collection, and full
+service-manager recovery remain target capabilities governed by OD-021; they are
+not prerequisites for the first local vertical slice.
+
 Bootstrap, discovery, and administration remain narrow capability surfaces even
 if they share one low-level protected connection. Exact public TypeScript names
 are deferred, but one broad process-control interface is prohibited.

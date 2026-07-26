@@ -17,11 +17,15 @@ that contributors must implement now.
 - [Architecture overview](overview.md)
 - [Local Host lifecycle](local-host-lifecycle.md)
 - [Strategic context map](context-map.md)
+- [Evolution and quality attributes](evolution-quality-attributes.md)
 
 ## Structural standards
 
 - [Dependency rules](dependency-rules.md)
 - [Feature module standard](feature-module-standard.md)
+- [Composition and dependency injection](composition-and-dependency-injection.md)
+- [Repository tooling plan](repository-tooling.md)
+- [Machine-readable package catalog](../../architecture/package-catalog.yaml)
 
 ## Integration and data boundaries
 

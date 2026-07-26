@@ -6,8 +6,13 @@ owner: platform/persistence
 summary: Context-owned persistence, transaction, migration, backup, and storage topology rules.
 related:
   - ADR-0011
-  - ADR-0014
+  - ADR-0047
   - ADR-0025
+  - ADR-0052
+  - ADR-0046
+  - ADR-0048
+  - ADR-0049
+  - ADR-0050
   - OD-003
 ---
 
@@ -143,6 +148,13 @@ The initial production topology is:
 Alternative profiles may be added at the application composition root without
 changing domain or application behavior.
 
+Exactly one profile is authoritative for each bounded context in one running
+deployment. A Desktop connected to a hosted orchestrator uses hosted authority;
+local storage may hold explicitly disposable client cache or client-owned state
+but never a fallback aggregate repository. Local and hosted databases are not
+dual-written or synchronized table by table. Context movement uses the logical
+transfer protocol defined by ADR-0048.
+
 ### Desktop SQLite
 
 Each bounded context receives its own database file and connection lifecycle:
@@ -228,6 +240,13 @@ The first hosted driver is `node-postgres`. Hosted command handlers may execute
 concurrently, but repository revisions, idempotency, fencing where applicable,
 and transaction outcomes must match the local profile's application semantics.
 
+Every mutating capability declares its hosted concurrency profile before
+implementation. It identifies the invariant, conflicting command set, revision
+rule, constraints, lock order, isolation level, complete-Unit-of-Work retry
+policy, and unknown-commit reconciliation. Local command-lane tests do not prove
+hosted safety. Critical capabilities run real concurrent PostgreSQL conformance
+scenarios as required by ADR-0050.
+
 Primary-only reads are the default hosted consistency profile. Replica reads are
 an explicit query capability with declared eventual-consistency or required-LSN
 semantics. A reconnect never silently sends read-after-write traffic to a replica
@@ -298,11 +317,94 @@ Drizzle may provide query, schema, and migration tooling inside SQLite and
 PostgreSQL persistence adapters. Drizzle types and generated models never enter
 domain, application, feature contracts, or public SDK packages.
 
-Versions are pinned exactly and verified through import, migration, and
-conformance tests. The `node:sqlite` Drizzle integration is pre-GA at the time of
-this decision, so a dependency-readiness review is required before production.
+ADR-0052 selects Drizzle as the one default toolkit and direct drivers only as a
+contingency. Versions are pinned exactly and verified through import, migration,
+and conformance tests. The initial `node:sqlite` Drizzle integration is pre-GA, so
+a dependency-readiness review is required before production materialization.
 Released migrations remain immutable SQL artifacts and are not regenerated when
 tooling changes.
+
+Repository ports, Unit of Work semantics, aggregate-state mapping, stable errors,
+and conformance fixtures remain shared. Physical schemas, migrations,
+transactions, locking, engine operations, and dialect error classification stay
+separate where their correctness proof differs. There is no universal repository,
+base repository hierarchy, or dialect branch outside persistence adapters.
+
+After the first two implemented repository pairs, the architecture review measures
+actual duplication. It removes domain/application duplication, extracts proven
+dialect-neutral adapter behavior inside its owning feature, and retains
+irreducible physical behavior with paired conformance tests. An estimated
+duplication percentage is not an architecture guarantee.
+
+### Exact quantities, money, and instants
+
+ADR-0046 governs authoritative counts, quantities, rates, and money.
+
+- Domain and application code use context-owned exact value objects. Decimal,
+  Dinero, Drizzle, and driver types remain adapter or implementation details.
+- SQLite uses `INTEGER` only after a signed 64-bit range check and enables BigInt
+  reads before consuming any result row. Wider coefficients and decimals use
+  canonical text or coefficient-plus-scale columns. `REAL` is prohibited.
+- PostgreSQL uses bounded `bigint` and `numeric(precision, scale)`. Node-postgres
+  string results remain strings until context mapping.
+- PostgreSQL exact values are cast to text before JSON construction. JSON numeric
+  parsing is not a lossless codec for `bigint` or arbitrary-precision `numeric`.
+- Every database aggregate has an explicit range or overflow strategy. SQLite
+  integer `sum()` requires a proven safe bound; otherwise checked BigInt or exact
+  decimal aggregation is used.
+- Persistence records retain scale, unit, basis, currency, rounding policy, and
+  algorithm/version references required by their owning context.
+
+The initial exact mapping profile is:
+
+| Semantic value | SQLite | PostgreSQL |
+|---|---|---|
+| Bounded whole count | `INTEGER` with BigInt reads | `BIGINT` read as string |
+| Exact quantity | canonical coefficient `TEXT` plus `INTEGER` scale | coefficient `NUMERIC(P, 0)` plus `SMALLINT` scale |
+| Money | canonical coefficient `TEXT`, scale, currency | coefficient `NUMERIC(P, 0)`, scale, currency |
+| Exact instant | signed `INTEGER` epoch microseconds | `TIMESTAMPTZ(6)` read and written as text |
+
+`P` comes from an explicit domain bound and overflow policy. SQLite exact
+coefficient columns use text affinity and canonical validation, never `NUMERIC`
+affinity. PostgreSQL special numeric values are rejected. A fixed-scale
+`NUMERIC(P, S)` requires a later type-specific decision naming its insertion,
+rounding, and overflow behavior.
+
+The domain represents exact time as `ExactInstant` backed by epoch microseconds.
+Wire form is UTC RFC3339 with fixed microsecond precision. JavaScript `Date` and
+Temporal implementation objects do not enter persistence records, application
+models, Published Languages, or SDK contracts. Provider timestamps with finer
+precision remain raw evidence, while sequence, cursor, revision, or fence defines
+business ordering.
+
+SQLite and PostgreSQL may use different physical representations but must
+round-trip the same canonical values and produce identical domain outcomes.
+
+### High-volume facts and projections
+
+Append-heavy usage observations and rated entries retain two physically distinct
+responsibilities:
+
+- a compact source-receipt ledger protects global source identity and
+  deduplication across every retention window;
+- immutable fact tables retain normalized or rated evidence and may be partitioned
+  in hosted PostgreSQL after workload evidence selects the key and interval.
+
+Deleting or detaching a fact partition cannot make an old source identity
+acceptable again. Corrections append new facts with stable references to the
+superseded evidence. Raw provider payloads may move behind a content-addressed
+BlobStore reference without deleting the canonical receipt or normalized fact.
+
+SQLite does not emulate PostgreSQL partitioning. Local retention uses bounded
+batch deletion, archival, and checkpointed vacuum policy behind the same context
+capability. The application observes identical receipt, correction, cursor, and
+retention semantics rather than identical physical maintenance.
+
+Rollups are versioned, rebuildable read projections. Each records source cursor,
+watermark, projector version, and dimensional scope. Statistics may read them,
+but budget admission, quota reservation, accounting close, and correction
+authority use their owning aggregate state or authoritative facts. A projection
+cannot silently become a write-model invariant because it is faster to query.
 
 Driver errors are translated inside each adapter into stable persistence
 outcomes. Raw SQLite error names, SQLite numeric codes, PostgreSQL SQLSTATE values,
@@ -359,6 +461,13 @@ SQLite and PostgreSQL implementations of the same context capability must pass t
 same applicable semantic and capability suites. Tests verify behavior, not
 identical SQL or identical performance.
 
+Usage-capability persistence additionally verifies exact-value round trips above
+`Number.MAX_SAFE_INTEGER`, decimal scale conversion, malformed canonical strings,
+currency mismatch, allocation conservation, explicit rounding, SQLite BigInt read
+configuration, integer aggregate overflow, PostgreSQL numeric codecs, exact values
+inside JSON, microsecond instant preservation, negative epoch conversion, DST
+period boundaries, and SQLite/PostgreSQL semantic parity.
+
 Every supported PgBouncer profile runs the PostgreSQL semantic suite plus
 transaction-pooling hazards, physical-backend switching, tenant-state reset,
 prepared-statement behavior, endpoint separation, and whole-UoW retry after
@@ -376,7 +485,8 @@ validated migration manifest. This assembly layer owns ordering and exposes one
 context migration entry point; it does not absorb feature schemas or SQL.
 
 Migrations are immutable after release. When multiple dialects are supported, one
-semantic migration ID maps to dialect-specific implementations.
+semantic migration ID maps to dialect-specific implementations. The context plan
+classifies each step as transactional or online-resumable.
 
 Hosted zero-downtime changes use expand, migrate, and contract phases. Destructive
 desktop migrations require a verified backup or another explicit forward-recovery
@@ -387,17 +497,20 @@ cannot edit, reorder, or merge context schemas. One migration runner and lock ex
 per context deployment. Features never run migrations independently or compete for
 that lock.
 
-The migration lock covers bootstrap as well as migration SQL. The PostgreSQL
+The migration lock covers bootstrap as well as migration execution. The PostgreSQL
 adapter acquires its context-scoped advisory lock before creating or inspecting
 migration metadata. The SQLite adapter acquires its cross-process bootstrap lock
 before configuring WAL, creating metadata, or running migrations. Database busy
 timeouts and `CREATE TABLE IF NOT EXISTS` do not replace this ownership lock.
 
-Migration SQL, immutable checksum history, and the applied version watermark
-commit atomically. A process that loses acknowledgement after commit re-reads
-history under the same lock; it does not reapply the migration blindly. A database
-whose applied watermark is newer than the binary is rejected before application
-use cases start.
+For a transactional step, SQL, immutable checksum history, and the completed
+watermark commit atomically. An online-resumable step first records immutable
+intent and generation, then executes an idempotent non-transactional operation,
+reconciles ambiguous outcome, verifies postconditions, and only then records
+completion. A process that loses acknowledgement re-reads state under the same
+lock; it does not reapply blindly. Incomplete, failed, or newer-than-supported
+steps reject normal application startup unless an explicit compatibility phase
+permits coexistence.
 
 ## Tenant isolation
 
@@ -481,8 +594,17 @@ restored context becomes active, the adapter verifies:
 - capability invariants such as state, command receipt, and outbox consistency.
 
 SQLite restore swaps a verified database file only while the owning Host is
-stopped. PostgreSQL backup and restore are explicitly schema scoped and must not
-replace unrelated context schemas.
+stopped. Hosted disaster recovery restores a PostgreSQL cluster from a base backup
+and continuous WAL to one recovery point. A schema-scoped dump is a logical
+context export/import artifact with validation and reconciliation; it is not PITR
+and must not replace unrelated context schemas implicitly.
+
+Large provider payloads, prompts, logs, attachments, and artifacts do not live in
+hot relational tables by default. Their owning feature stores metadata, content
+hash, retention policy, and an opaque BlobStore reference. Local composition may
+use a content-addressed filesystem adapter and hosted composition an S3-compatible
+adapter. Credentials and encryption keys remain behind SecretStore capabilities,
+never in context databases.
 
 Local product restore supports two explicit modes:
 

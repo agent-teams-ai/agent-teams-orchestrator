@@ -12,19 +12,22 @@ Read these documents before proposing or changing architecture:
 3. [Architecture index](docs/architecture/README.md)
 4. [Architecture overview](docs/architecture/overview.md)
 5. [Full DDD modeling standard](docs/domain/modeling-standard.md)
-6. [Bounded-context dossiers](docs/domain/contexts/README.md)
-7. [Context map](docs/architecture/context-map.md)
-8. [Feature module standard](docs/architecture/feature-module-standard.md)
-9. [Dependency rules](docs/architecture/dependency-rules.md)
-10. [Persistence boundary](docs/architecture/persistence-boundary.md)
-11. [Runtime boundary](docs/architecture/runtime-boundary.md)
-12. [Eventing and reliability](docs/architecture/eventing-and-reliability.md)
-13. [Local Host lifecycle](docs/architecture/local-host-lifecycle.md)
-14. [SDK and transports](docs/architecture/sdk-and-transports.md)
-15. [Public control contracts](docs/architecture/public-control-contracts.md)
-16. [Extension points](docs/architecture/extension-points.md)
-17. [Open decisions](docs/open-decisions/README.md)
-18. [Accepted ADRs](docs/decisions/README.md)
+6. [Tactical DDD modeling patterns](docs/domain/tactical-modeling-patterns.md)
+7. [Bounded-context dossiers](docs/domain/contexts/README.md)
+8. [Context map](docs/architecture/context-map.md)
+9. [Feature module standard](docs/architecture/feature-module-standard.md)
+10. [Dependency rules](docs/architecture/dependency-rules.md)
+11. [Composition and dependency injection](docs/architecture/composition-and-dependency-injection.md)
+12. [Repository tooling plan](docs/architecture/repository-tooling.md)
+13. [Persistence boundary](docs/architecture/persistence-boundary.md)
+14. [Runtime boundary](docs/architecture/runtime-boundary.md)
+15. [Eventing and reliability](docs/architecture/eventing-and-reliability.md)
+16. [Local Host lifecycle](docs/architecture/local-host-lifecycle.md)
+17. [SDK and transports](docs/architecture/sdk-and-transports.md)
+18. [Public control contracts](docs/architecture/public-control-contracts.md)
+19. [Extension points](docs/architecture/extension-points.md)
+20. [Open decisions](docs/open-decisions/README.md)
+21. [Accepted ADRs](docs/decisions/README.md)
 
 Terminology is defined in [the glossary](docs/glossary.md).
 
@@ -144,10 +147,10 @@ technical runtime permission state and enforcement, and provider-specific driver
 41. Durable subscription replay always reads the owning feed log. Notifications
     only wake readers. Expired, tampered, or cross-feed cursors fail before any
     partial retained tail is exposed.
-42. A context migration authority acquires its deployment lock before migration
-    metadata bootstrap. SQL, immutable checksum history, and version watermark
-    commit atomically; restore requires schema and capability validation beyond
-    an engine integrity check.
+42. A context migration authority acquires its deployment lock before metadata
+    bootstrap. Transactional steps commit SQL, checksum, and completion atomically;
+    non-transactional hosted work uses the ADR-0047 durable online-resumable state
+    machine and advances compatibility only after verified completion.
 43. A staged local Host candidate has no mutation authority before atomic
     generation selection and locator replacement. Keep the previous Host for a
     bounded rollback window; never adopt or unlink a responsive foreign endpoint.
@@ -196,6 +199,74 @@ technical runtime permission state and enforcement, and provider-specific driver
     keeps one checked-out client and transaction-local tenant binding; runtime
     session state is forbidden, and migrations or maintenance use separate direct
     endpoints.
+57. Every public contract surface starts with one explicit `v1` family.
+    Speculative parallel major versions are prohibited. A later major requires the
+    migration decision, fixtures, support horizon, and retirement plan in
+    ADR-0037.
+58. Every production package path, role, name, and owner must exist in
+    `architecture/package-catalog.yaml`. A proposed owner reserves topology but
+    cannot materialize production code. Uncataloged `shared`, `core`, context, or
+    integration packages fail CI.
+59. Every materialized bounded context owns one independent private Awilix
+    container with no parent fallback. Features export typed factories, not
+    containers. Container, cradle, scope, registration, and resolution APIs exist
+    only below `composition/**`.
+60. Workspace packages use strict pnpm catalogs for external dependency versions
+    and `workspace:` for internal dependencies. A named catalog requires an
+    accepted compatibility reason; direct package-local version islands are
+    prohibited. Manual manifest edits must pass
+    `pnpm architecture:dependencies`.
+61. A structural architecture rule becomes blocking only with valid and invalid
+    fixtures. ast-grep owns structural patterns, not generic style, dependency
+    graphs, dead code, wire compatibility, or package publication.
+62. Bounded-context topology has no numerical target or ceiling. Add, merge,
+    split, or retire contexts only from Ubiquitous Language, ownership, invariant,
+    lifecycle, consistency, security, and evolution evidence. Package-count
+    symmetry is never evidence.
+63. Design for controlled multi-decade evolution across local and hosted profiles,
+    many runtimes, clients, languages, and future context extraction. This requires
+    versioned contracts, migrations, recovery, conformance, and explicit ownership;
+    it does not permit speculative abstractions without a proven variation or
+    invariant.
+64. `PrincipalId`, `AgentProfileId`, and `RuntimeSessionRef` are distinct identity
+    namespaces owned by Identity Registry, Team Topology, and AR respectively.
+    Never alias or infer one from another; use explicit scoped bindings where a use
+    case needs a relationship.
+65. Agent Organization is tenant-scoped. Semantic Groups are
+    `OrganizationalUnit` subjects; team placements use opaque
+    `TeamRef(projectId, teamId)` and never transfer Team Topology ownership.
+66. Usage Metering, Usage Accounting, and Consumption Governance are separate
+    bounded contexts. Measurement, attribution/rating, and budget/quota authority
+    cannot be merged into one Usage model or moved into Run Orchestration.
+67. Authoritative counts, quantities, rates, and money never use JavaScript
+    `number`, SQLite `REAL`, or JSON numbers. Use native BigInt and context-owned
+    exact value objects, canonical decimal strings, explicit
+    unit/scale/basis/currency, and the ADR-0046 overflow and rounding rules.
+68. Each bounded context has exactly one authoritative persistence profile in one
+    deployment. Connected Desktop caches are disposable; SQLite and PostgreSQL
+    are never generic bidirectional table replicas.
+69. Exact instants use project-owned BigInt-backed microsecond value objects.
+    JavaScript `Date`, Temporal implementation objects, ORM types, and driver
+    values never become domain, application-model, Published Language, or SDK
+    types.
+70. Every hosted mutation capability declares and proves its own concurrency
+    profile. SQLite command-lane success is not evidence against PostgreSQL write
+    skew, deadlocks, or over-reservation.
+71. Aggregate roots own state transitions and protect named invariants. Entities
+    do not escape their aggregate boundary, cross-aggregate references use stable
+    identities, and repositories exist only for aggregate roots.
+72. Domain events describe completed domain facts and are not public integration
+    events. Application code maps them to durable publication intent in the same
+    Unit of Work as the state transition.
+73. ADR-0051 Full DDD is mandatory for business bounded contexts: strategic,
+    tactical, and evolutionary modeling must all pass their evidence gates.
+    Platform, integration, SDK, host, and tooling features retain strict ownership
+    and Clean Architecture but must not invent ceremonial domain artifacts.
+74. ADR-0052 selects exactly pinned adapter-local Drizzle as the default SQLite
+    and PostgreSQL toolkit. Direct drivers are contingency, never a parallel
+    implementation. Share semantic ports, mapping, outcomes, and conformance;
+    keep engine-specific schema, migration, locking, operations, and recovery
+    separate where their correctness proof differs.
 
 ## Planned repository shape
 
@@ -212,34 +283,50 @@ packages/
     tenant-project-registry/
     workspace-registry/
     team-topology/
+    agent-organization/
     work-coordination/
     run-orchestration/
     agent-communication/
     policy-risk/
     approval-management/
+    usage-metering/
+    usage-accounting/
+    consumption-governance/
   integrations/
-    runtime-acl/
-    task-boards/
-      jira/
+    runtime-gateway/
   platform/
     local-host-control/
     eventing/
     persistence/
     observability/
     schema-registry/        # indexes feature-owned Protobuf and JSON schemas
-  clients/
-    sdk-typescript/
+  sdk/
+    orchestrator/
+    orchestrator-local/
   testing/
+    conformance/
 docs/
   domain/
   architecture/
   decisions/
 ```
 
-The focused eight-to-ten-context direction is accepted. Exact context packages
-remain proposed until language, invariants, context relationships, and concurrency
-are validated. Create packages and features only when the context and an initial
-vertical slice are accepted.
+There is no numerical target or ceiling for bounded contexts. Exact context
+packages remain proposed until language, invariants, context relationships, and
+concurrency are validated. Create packages and features only when the context and
+an initial vertical slice are accepted.
+
+`architecture/package-catalog.yaml` reserves these identities without creating
+empty packages. Its owner documents remain the source of lifecycle truth, and CI
+rejects both uncataloged packages and code under a proposed owner.
+
+Business concepts remain in their owning contexts: Team and membership in Team
+Topology, Organization and Units in Agent Organization, Task/Work in Work
+Coordination, Run in Run Orchestration, usage observations in Usage Metering,
+rating in Usage Accounting, budgets and quotas in Consumption Governance, product
+Approval in Approval Management, and teammate messages in Agent Communication.
+Platform packages may carry opaque identifiers and technical envelopes but never
+define those business models or lifecycle rules.
 
 `orchestrator-local` and `orchestrator-server` are thin composition roots over the
 same application core and public control contracts. `local-supervisor` is a
@@ -294,6 +381,7 @@ Do not:
 - copy legacy implementations into the new domain or application core;
 - derive new aggregates or feature boundaries from legacy class structure instead
   of accepted language and invariants;
+- serialize authoritative usage, rate, or money values as JSON numbers;
 - test agent execution against real user projects.
 
 ## Runtime testing safety

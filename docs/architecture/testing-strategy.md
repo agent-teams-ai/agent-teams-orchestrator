@@ -12,6 +12,12 @@ related:
   - ADR-0018
   - ADR-0019
   - ADR-0033
+  - ADR-0045
+  - ADR-0046
+  - ADR-0047
+  - ADR-0048
+  - ADR-0049
+  - ADR-0050
   - architecture.local-host-lifecycle
 ---
 
@@ -28,6 +34,10 @@ Fast, deterministic tests for:
 - state transitions;
 - domain events;
 - policy edge cases.
+
+Domain-heavy features also use property-based value-object tests, aggregate
+command-trace tests, invalid-state construction tests, and explicit assertions
+that domain events remain distinct from public integration-event fixtures.
 
 They use no mocks for infrastructure because infrastructure is absent.
 
@@ -154,6 +164,29 @@ Each production persistence adapter runs:
 - applicable capability suites for event outbox, command dispatch, inbox, tenant
   isolation, and projection cursors.
 
+Exact-value conformance for Usage Metering, Usage Accounting, and Consumption
+Governance covers BigInt values above `Number.MAX_SAFE_INTEGER`, canonical decimal
+parsing, scale conversion, half-even and policy-specific rounding, currency
+mismatch, allocation conservation, malformed values, overflow, and lossless
+contract/persistence round trips. SQLite fixtures prove BigInt reads are enabled
+before result consumption and integer aggregate overflow fails safely. PostgreSQL
+fixtures prove `bigint`/`numeric` string mapping and reject exact values exposed as
+JSON numbers. Exact-time fixtures cover microsecond preservation, negative epoch
+conversion, explicit rounding, DST gaps and folds, period boundaries, and
+provider evidence with finer precision. The same semantic vectors run through
+both adapters.
+
+Each hosted mutating capability runs its declared ADR-0050 conflict matrix against
+real PostgreSQL. Tests force same-revision races, write skew, deadlocks,
+serialization failures, lock-order inversions, timeout, complete-Unit-of-Work
+retry, and lost commit acknowledgement. Equivalent SQLite scenarios prove domain
+outcomes but do not substitute for hosted concurrency evidence.
+
+Migration tests distinguish transactional and online-resumable steps. They kill
+the runner after intent persistence, external operation dispatch, ambiguous
+response, verification, and completion recording; rerun under the same generation;
+and prove that compatibility never advances before verified completion.
+
 Hosted tenant-isolation fixtures exercise application predicates and PostgreSQL
 RLS independently. They cover pooled connection reuse, forbidden session-level
 tenant state, transaction-local reset after commit and rollback, missing context,
@@ -173,6 +206,8 @@ phase classification, same-command reconciliation, replica-lag read policy,
 endpoint and deployment-epoch replacement, tenant rebinding, old-primary fencing,
 physical base backup, archived WAL, selected-point restore, context watermarks,
 and fail-closed too-early, too-late, missing-WAL, and corrupted-WAL plans.
+They treat physical cluster PITR separately from logical context export/import and
+prove that a schema dump is never accepted as disaster-recovery evidence.
 
 Multi-context local backup tests additionally kill the coordinator after every
 barrier, manifest, staging, activation, and commit stage; time out individual
@@ -284,6 +319,9 @@ Automated checks must reject:
 - broad `spi` or root package barrel exports;
 - feature dependency cycles inside one bounded context;
 - generic aggregate repositories or ORM entities in domain/application;
+- child-entity repositories or direct application mutation of aggregate internals;
+- JavaScript `Date`, Temporal implementation objects, Decimal, Dinero, Drizzle,
+  or driver types in domain/application models or public contracts;
 - integration-event schemas without complete manifests or with broker-specific
   semantics in canonical contract metadata.
 

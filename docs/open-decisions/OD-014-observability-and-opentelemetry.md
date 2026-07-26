@@ -38,6 +38,13 @@ Telemetry is not durable causality or authority:
   spans with links to their causal observation;
 - every publish, delivery, and activity retry is a distinct attempt span.
 
+OpenTelemetry also has two separate product roles. Platform observability owns
+traces, metrics, logs, exporters, and operational correlation. A usage-owning
+bounded context may expose feature-owned OpenTelemetry ingestion or export
+adapters. Those adapters translate into the context's Published Language and do
+not make sampled telemetry authoritative accounting evidence. OD-024 owns the
+usage-specific identity, precision, deduplication, and correction rules.
+
 Public inbound baggage is not propagated by default. Resource attributes contain
 service and deployment identity only. Tenant, project, workspace, command, event,
 task, run, and agent IDs may be allowlisted trace or log attributes for lookup but

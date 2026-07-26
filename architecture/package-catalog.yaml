@@ -1,0 +1,137 @@
+version: 1
+packages:
+  - id: app.cli
+    role: app
+    path: apps/cli
+    package_name: "@agent-teams/app-cli"
+    owner_document: architecture.feature-module-standard
+  - id: app.local-supervisor
+    role: app
+    path: apps/local-supervisor
+    package_name: "@agent-teams/app-local-supervisor"
+    owner_document: ADR-0033
+  - id: app.orchestrator-local
+    role: app
+    path: apps/orchestrator-local
+    package_name: "@agent-teams/app-orchestrator-local"
+    owner_document: ADR-0030
+  - id: app.orchestrator-server
+    role: app
+    path: apps/orchestrator-server
+    package_name: "@agent-teams/app-orchestrator-server"
+    owner_document: ADR-0030
+  - id: context.identity-registry
+    role: bounded-context
+    path: packages/contexts/identity-registry
+    package_name: "@agent-teams/identity-registry"
+    owner_document: domain.contexts.identity-registry
+  - id: context.access-control
+    role: bounded-context
+    path: packages/contexts/access-control
+    package_name: "@agent-teams/access-control"
+    owner_document: domain.contexts.access-control
+  - id: context.tenant-project-registry
+    role: bounded-context
+    path: packages/contexts/tenant-project-registry
+    package_name: "@agent-teams/tenant-project-registry"
+    owner_document: domain.contexts.tenant-project-registry
+  - id: context.workspace-registry
+    role: bounded-context
+    path: packages/contexts/workspace-registry
+    package_name: "@agent-teams/workspace-registry"
+    owner_document: domain.contexts.workspace-registry
+  - id: context.team-topology
+    role: bounded-context
+    path: packages/contexts/team-topology
+    package_name: "@agent-teams/team-topology"
+    owner_document: domain.contexts.team-topology
+  - id: context.agent-organization
+    role: bounded-context
+    path: packages/contexts/agent-organization
+    package_name: "@agent-teams/agent-organization"
+    owner_document: domain.contexts.agent-organization
+  - id: context.work-coordination
+    role: bounded-context
+    path: packages/contexts/work-coordination
+    package_name: "@agent-teams/work-coordination"
+    owner_document: domain.contexts.work-coordination
+  - id: context.run-orchestration
+    role: bounded-context
+    path: packages/contexts/run-orchestration
+    package_name: "@agent-teams/run-orchestration"
+    owner_document: domain.contexts.run-orchestration
+  - id: context.agent-communication
+    role: bounded-context
+    path: packages/contexts/agent-communication
+    package_name: "@agent-teams/agent-communication"
+    owner_document: domain.contexts.agent-communication
+  - id: context.policy-risk
+    role: bounded-context
+    path: packages/contexts/policy-risk
+    package_name: "@agent-teams/policy-risk"
+    owner_document: domain.contexts.policy-risk
+  - id: context.approval-management
+    role: bounded-context
+    path: packages/contexts/approval-management
+    package_name: "@agent-teams/approval-management"
+    owner_document: domain.contexts.approval-management
+  - id: context.usage-metering
+    role: bounded-context
+    path: packages/contexts/usage-metering
+    package_name: "@agent-teams/usage-metering"
+    owner_document: domain.contexts.usage-metering
+  - id: context.usage-accounting
+    role: bounded-context
+    path: packages/contexts/usage-accounting
+    package_name: "@agent-teams/usage-accounting"
+    owner_document: domain.contexts.usage-accounting
+  - id: context.consumption-governance
+    role: bounded-context
+    path: packages/contexts/consumption-governance
+    package_name: "@agent-teams/consumption-governance"
+    owner_document: domain.contexts.consumption-governance
+  - id: integration.runtime-gateway
+    role: integration
+    path: packages/integrations/runtime-gateway
+    package_name: "@agent-teams/runtime-gateway"
+    owner_document: ADR-0024
+  - id: platform.local-host-control
+    role: platform
+    path: packages/platform/local-host-control
+    package_name: "@agent-teams/local-host-control"
+    owner_document: architecture.local-host-lifecycle
+  - id: platform.eventing
+    role: platform
+    path: packages/platform/eventing
+    package_name: "@agent-teams/eventing"
+    owner_document: architecture.eventing
+  - id: platform.persistence
+    role: platform
+    path: packages/platform/persistence
+    package_name: "@agent-teams/persistence"
+    owner_document: architecture.persistence
+  - id: platform.observability
+    role: platform
+    path: packages/platform/observability
+    package_name: "@agent-teams/observability"
+    owner_document: architecture.extensions
+  - id: platform.schema-registry
+    role: platform
+    path: packages/platform/schema-registry
+    package_name: "@agent-teams/schema-registry"
+    owner_document: architecture.public-control-contracts
+  - id: sdk.orchestrator
+    role: sdk
+    path: packages/sdk/orchestrator
+    package_name: "@agent-teams/orchestrator-sdk"
+    owner_document: ADR-0036
+  - id: sdk.orchestrator-local
+    role: sdk
+    path: packages/sdk/orchestrator-local
+    package_name: "@agent-teams/orchestrator-local"
+    owner_document: ADR-0036
+  - id: testing.conformance
+    role: testing
+    path: packages/testing/conformance
+    package_name: "@agent-teams/conformance"
+    owner_document: architecture.testing

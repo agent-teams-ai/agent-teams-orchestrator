@@ -12,6 +12,7 @@ related:
   - ADR-0020
   - ADR-0021
   - ADR-0023
+  - ADR-0046
   - OD-016
   - OD-019
 ---
@@ -64,6 +65,24 @@ Contracts follow ADR-0017. In particular:
 - artifacts replace large inline data.
 
 Machine linting enforces the profile. Generated code is never hand-edited.
+
+## Exact-value profile
+
+Authoritative counts, quantities, rates, and money follow ADR-0046:
+
+- exact integers and decimals use canonical string fields at JSON boundaries;
+- quantity contracts carry explicit unit and semantic basis;
+- decimal contracts carry scale when representation or rounding depends on it;
+- money carries exact amount and currency;
+- unit prices additionally carry denominator quantity and rate-card version;
+- rounding results identify mode, target scale, and algorithm version when they
+  become durable business facts;
+- generated language numeric types, JavaScript `number`, ProtoJSON numbers, and
+  database numeric types never become the canonical exact-value representation.
+
+Contract conformance round-trips values above `Number.MAX_SAFE_INTEGER`, trailing
+scale, negative values, zero, maximum accepted precision, and malformed or
+non-canonical inputs across binary Protobuf and ProtoJSON.
 
 ## Resource and scope model
 
