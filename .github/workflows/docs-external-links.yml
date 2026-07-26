@@ -1,0 +1,40 @@
+name: External Documentation Links
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-external-links
+  cancel-in-progress: true
+
+jobs:
+  links:
+    name: Check external links
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check external links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --cache
+            --max-retries 3
+            --retry-wait-time 2
+            --timeout 20
+            --no-progress
+            --scheme https
+            --scheme http
+            README.md
+            AGENTS.md
+            'docs/**/*.md'
+          fail: true
+          lycheeVersion: v0.24.2

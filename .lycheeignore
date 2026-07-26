@@ -1,0 +1,2 @@
+# Private runtime repository; the scheduled workflow token cannot access it.
+^https://github\.com/vioxen/agent-runtime(?:/.*)?$
