@@ -39,5 +39,8 @@ and links the deciding ADR; the historical record is retained.
 | OD-023 | [Agent Organization detailed model](OD-023-agent-organization-model.md) | agent-organization | Open |
 | OD-024 | [Usage and consumption detailed semantics](OD-024-usage-accounting-boundaries-and-exact-quantities.md) | usage-capability | Open |
 | OD-025 | [ECMAScript Temporal calendar engine](OD-025-ecmascript-temporal-calendar-engine.md) | architecture/domain | Open |
+| OD-026 | [Communication, notification, and attention](OD-026-communication-notification-and-attention.md) | architecture/domain | Open |
+| OD-027 | [Configurable Work lifecycle](OD-027-configurable-work-lifecycle.md) | work-coordination | Open |
+| OD-028 | [Agent Context lifecycle](OD-028-agent-context-lifecycle.md) | architecture/domain | Open |
 
 Use the [open-decision template](../templates/open-decision.md) for new entries.

@@ -6,6 +6,7 @@ owner: architecture
 summary: Placement and ownership rules for deferred engines, protocols, plugins, and observability.
 related:
   - ADR-0027
+  - ADR-0045
   - OD-005
   - OD-014
   - OD-015
@@ -123,10 +124,26 @@ aggregate without a separate consistency ADR.
 
 ## Agent-to-Agent protocols
 
-A2A or future agent communication protocols belong in Agent Communication
-inbound/outbound adapters. Protocol messages map to typed messages. Work handoff
-semantics remain in Work Coordination. Protocol identity and authorization pass
-through Identity Registry and Access Control.
+A2A is an integration protocol spanning several orchestrator capabilities, not one
+foreign domain model imported into Agent Communication:
+
+- A2A `Message` maps through feature-owned Agent Communication adapters when it
+  represents product dialogue;
+- A2A `Task` is an external tracked interaction handle and maps through
+  feature-owned Run Orchestration and Work Coordination adapters;
+- A2A `contextId`, `taskId`, and artifact identifiers remain external ACL bindings,
+  never aliases for `ConversationId`, internal Task or Work identity,
+  `OrchestrationRunId`, or artifact identity;
+- A2A task status is external execution evidence. It cannot directly change
+  internal Work lifecycle;
+- work handoff and acceptance remain Work Coordination semantics;
+- protocol identity and authorization pass through Identity Registry and Access
+  Control before binding lookup or domain commands.
+
+An A2A gateway may share codecs, protocol-version negotiation, streaming, push
+delivery, and conformance fixtures. Feature-owned mappings still call narrow
+application ports in their owning contexts. The gateway owns no Work, Run,
+Conversation, or authorization state.
 
 ## MCP and tool surfaces
 
@@ -140,7 +157,15 @@ versioned application commands and cannot bypass authorization or invariants.
 
 ## Observability and OpenTelemetry
 
-OpenTelemetry belongs in the platform observability package and adapters.
+OpenTelemetry has two distinct integration roles:
+
+- platform observability for traces, metrics, logs, correlation, and operational
+  diagnostics;
+- feature-owned usage ingestion or export adapters when OpenTelemetry carries
+  provider-neutral consumption observations.
+
+The roles may share low-level SDK setup but never a domain model or source-of-truth
+assumption. Sampled or lossy telemetry is not authoritative usage accounting.
 
 Required boundaries:
 
