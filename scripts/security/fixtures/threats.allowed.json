@@ -1,0 +1,120 @@
+[
+  {
+    "id": "same-tenant-resource-scope",
+    "threat": "cross-tenant-substitution",
+    "expected": {
+      "decision": "allow",
+      "ruleIds": []
+    },
+    "input": {
+      "authenticatedTenantId": "tenant-a",
+      "resourceTenantId": "tenant-a",
+      "payloadTenantId": "tenant-a",
+      "operationKind": "tenant-operation",
+      "authenticatedAuthorityScope": "tenant"
+    }
+  },
+  {
+    "id": "explicit-cross-tenant-administration",
+    "threat": "cross-tenant-substitution",
+    "expected": {
+      "decision": "allow",
+      "ruleIds": []
+    },
+    "input": {
+      "authenticatedTenantId": "tenant-admin-home",
+      "resourceTenantId": "tenant-target",
+      "payloadTenantId": "tenant-target",
+      "operationKind": "cross-tenant-administration",
+      "authenticatedAuthorityScope": "cross-tenant-administrator"
+    }
+  },
+  {
+    "id": "validated-untrusted-workspace-settings",
+    "threat": "malicious-workspace-config",
+    "expected": {
+      "decision": "allow",
+      "ruleIds": []
+    },
+    "input": {
+      "workspaceTrusted": false,
+      "requestsExecutableOverride": false,
+      "requestsEndpointOverride": false,
+      "validatedByWorkspacePolicy": true
+    }
+  },
+  {
+    "id": "prompt-remains-user-content",
+    "threat": "prompt-authority-confusion",
+    "expected": {
+      "decision": "allow",
+      "ruleIds": []
+    },
+    "input": {
+      "sourceChannel": "user-content",
+      "action": "store-as-content",
+      "typedCommandEnvelope": false,
+      "authenticatedAuthority": false
+    }
+  },
+  {
+    "id": "policy-approved-public-egress",
+    "threat": "ssrf-egress-policy",
+    "expected": {
+      "decision": "allow",
+      "ruleIds": []
+    },
+    "input": {
+      "usesControlledEgress": true,
+      "scheme": "https",
+      "destinationClass": "public",
+      "policyAllowsDestination": true,
+      "resolvedAddressesPinned": true
+    }
+  },
+  {
+    "id": "current-idempotent-authority",
+    "threat": "replay-stale-authority",
+    "expected": {
+      "decision": "allow",
+      "ruleIds": []
+    },
+    "input": {
+      "idempotencyKey": "decision-123",
+      "expectedRevision": 7,
+      "currentRevision": 7,
+      "authorityValidUntil": "2026-07-27T13:00:00Z",
+      "now": "2026-07-27T12:00:00Z",
+      "expectedScopeHash": "scope-v2",
+      "authorityScopeHash": "scope-v2"
+    }
+  },
+  {
+    "id": "opaque-secret-reference-in-application",
+    "threat": "credential-leakage",
+    "expected": {
+      "decision": "allow",
+      "ruleIds": []
+    },
+    "input": {
+      "valueKind": "secret-ref",
+      "location": "application",
+      "redacted": true
+    }
+  },
+  {
+    "id": "redacted-user-content-feed",
+    "threat": "unredacted-output",
+    "expected": {
+      "decision": "allow",
+      "ruleIds": []
+    },
+    "input": {
+      "surface": "feed",
+      "classification": "sensitive",
+      "containsUserContent": true,
+      "containsAuthorityEvidence": false,
+      "redactionProfile": "user-content"
+    }
+  }
+]

@@ -31,6 +31,7 @@ that contributors must implement now.
 
 ## Integration and data boundaries
 
+- [Security architecture](security-architecture.md)
 - [Runtime boundary](runtime-boundary.md)
 - [Persistence boundary](persistence-boundary.md)
 - [Eventing and reliability](eventing-and-reliability.md)

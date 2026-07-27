@@ -48,8 +48,8 @@ function runValidator(root) {
   });
 }
 
-async function replaceModel(root, before, after) {
-  const modelPath = path.join(root, "architecture/likec4/model.c4");
+async function replaceModel(root, before, after, fileName = "model.c4") {
+  const modelPath = path.join(root, "architecture/likec4", fileName);
   const source = await readFile(modelPath, "utf8");
   assert.ok(source.includes(before), `model fixture does not contain ${before}`);
   await writeFile(modelPath, source.replace(before, after));
@@ -110,6 +110,60 @@ test("rejects unresolved LikeC4 references", async () => {
     const result = await runValidator(root);
     assert.equal(result.code, 1);
     assert.match(result.output, /missingContext/);
+  } finally {
+    await rm(root, { force: true, recursive: true });
+  }
+});
+
+test("rejects a missing security trust-boundary view", async () => {
+  const root = await createFixture();
+  try {
+    await replaceModel(
+      root,
+      "view securityTrustBoundaries",
+      "view renamedSecurityTrustBoundaries",
+      "views.c4",
+    );
+    const result = await runValidator(root);
+    assert.equal(result.code, 1);
+    assert.match(result.output, /missing the securityTrustBoundaries view/);
+  } finally {
+    await rm(root, { force: true, recursive: true });
+  }
+});
+
+test("rejects missing security role metadata", async () => {
+  const root = await createFixture();
+  try {
+    await replaceModel(
+      root,
+      "security_role 'desktop-client'",
+      "security_role 'desktop-client-typo'",
+      "security.c4",
+    );
+    const result = await runValidator(root);
+    assert.equal(result.code, 1);
+    assert.match(result.output, /security topology is missing role desktop-client/);
+  } finally {
+    await rm(root, { force: true, recursive: true });
+  }
+});
+
+test("rejects a security view that collapses required trust-zone detail", async () => {
+  const root = await createFixture();
+  try {
+    await replaceModel(
+      root,
+      "include securityLandscape.**",
+      "include securityLandscape.*",
+      "views.c4",
+    );
+    const result = await runValidator(root);
+    assert.equal(result.code, 1);
+    assert.match(
+      result.output,
+      /securityTrustBoundaries view omits security element/,
+    );
   } finally {
     await rm(root, { force: true, recursive: true });
   }

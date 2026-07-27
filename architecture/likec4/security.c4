@@ -1,0 +1,333 @@
+model {
+  securityLandscape = applicationBoundary 'Orchestrator Security Landscape' {
+    metadata {
+      owner_document 'architecture.security'
+      security_role 'security-landscape'
+      trust_zone 'cross-zone'
+    }
+
+    localDevice = trustBoundary 'Local User Device' {
+      metadata {
+        owner_document 'architecture.security'
+        security_role 'trust-boundary'
+        trust_zone 'local-device'
+      }
+
+      desktop = securityClient 'Desktop App' {
+        metadata {
+          owner_document 'architecture.security'
+          security_role 'desktop-client'
+          trust_zone 'local-device'
+        }
+      }
+
+      cli = securityClient 'CLI' {
+        metadata {
+          owner_document 'architecture.security'
+          security_role 'cli-client'
+          trust_zone 'local-device'
+        }
+      }
+
+      supervisor = securityProcess 'Local Supervisor' {
+        metadata {
+          owner_document 'architecture.security'
+          security_role 'local-supervisor'
+          trust_zone 'local-device'
+        }
+      }
+
+      host = securityProcess 'Local Orchestrator Host' {
+        metadata {
+          owner_document 'architecture.security'
+          security_role 'orchestrator-host'
+          trust_zone 'local-device'
+        }
+      }
+
+      runtimeWorker = trustBoundary 'Local Runtime Enforcement Zone' {
+        metadata {
+          owner_document 'architecture.runtime-boundary'
+          security_role 'trust-boundary'
+          trust_zone 'runtime-execution'
+        }
+
+        runtime = runtimeEndpoint 'Local ar Runtime' {
+          metadata {
+            owner_document 'architecture.runtime-boundary'
+            security_role 'agent-runtime'
+            trust_zone 'runtime-execution'
+          }
+        }
+      }
+
+      nats = eventBroker 'Managed Local NATS JetStream' {
+        metadata {
+          owner_document 'architecture.eventing'
+          security_role 'event-broker'
+          trust_zone 'local-device'
+        }
+      }
+
+      database = stateStore 'Local SQLite Stores' {
+        metadata {
+          owner_document 'architecture.persistence'
+          security_role 'state-store'
+          trust_zone 'local-device'
+        }
+      }
+    }
+
+    browserDevice = trustBoundary 'Browser Device' {
+      metadata {
+        owner_document 'architecture.security'
+        security_role 'trust-boundary'
+        trust_zone 'browser-device'
+      }
+
+      browser = securityClient 'Browser App' {
+        metadata {
+          owner_document 'architecture.security'
+          security_role 'browser-client'
+          trust_zone 'browser-device'
+        }
+      }
+    }
+
+    hostedControlPlane = trustBoundary 'Hosted Control Plane' {
+      metadata {
+        owner_document 'architecture.security'
+        security_role 'trust-boundary'
+        trust_zone 'hosted-control-plane'
+      }
+
+      host = securityProcess 'Hosted Orchestrator Host' {
+        metadata {
+          owner_document 'architecture.security'
+          security_role 'orchestrator-host'
+          trust_zone 'hosted-control-plane'
+        }
+      }
+
+      nats = eventBroker 'Hosted NATS JetStream' {
+        metadata {
+          owner_document 'architecture.eventing'
+          security_role 'event-broker'
+          trust_zone 'hosted-control-plane'
+        }
+      }
+
+      database = stateStore 'Hosted PostgreSQL Stores' {
+        metadata {
+          owner_document 'architecture.persistence'
+          security_role 'state-store'
+          trust_zone 'hosted-control-plane'
+        }
+      }
+    }
+
+    runtimeWorker = trustBoundary 'Runtime Worker Trust Zone' {
+      metadata {
+        owner_document 'architecture.runtime-boundary'
+        security_role 'trust-boundary'
+        trust_zone 'runtime-worker'
+      }
+
+      runtime = runtimeEndpoint 'Remote ar Runtime' {
+        metadata {
+          owner_document 'architecture.runtime-boundary'
+          security_role 'agent-runtime'
+          trust_zone 'runtime-worker'
+        }
+      }
+    }
+
+    externalZone = trustBoundary 'External Systems' {
+      metadata {
+        owner_document 'architecture.security'
+        security_role 'trust-boundary'
+        trust_zone 'external'
+      }
+
+      identityAuthority = externalIntegration 'Identity Authority' {
+        metadata {
+          owner_document 'domain.contexts.identity-registry'
+          security_role 'external-integration'
+          trust_zone 'external'
+          decision_status 'provider-unresolved'
+        }
+      }
+
+      taskBoards = externalIntegration 'Task Boards' {
+        metadata {
+          owner_document 'domain.contexts.work-coordination'
+          security_role 'external-integration'
+          trust_zone 'external'
+        }
+      }
+
+      webEndpoints = externalIntegration 'Webhooks and External APIs' {
+        metadata {
+          owner_document 'architecture.security'
+          security_role 'external-integration'
+          trust_zone 'external'
+        }
+      }
+    }
+  }
+
+  securityLandscape.localDevice.desktop -[authenticatedControl]-> securityLandscape.localDevice.host 'Scoped local control API' {
+    metadata {
+      integration_style 'Authenticated local control channel'
+      authority 'Authenticated context and resource scope establish authority; payload fields do not'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.cli -[authenticatedControl]-> securityLandscape.localDevice.host 'Scoped local control API' {
+    metadata {
+      integration_style 'Authenticated local control channel'
+      authority 'Authenticated context and resource scope establish authority; payload fields do not'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.desktop -[lifecycleControl]-> securityLandscape.localDevice.supervisor 'Discover and ensure local Host' {
+    metadata {
+      integration_style 'OS-protected bootstrap channel'
+      authority 'Supervisor owns process availability only; it does not authorize business commands'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.cli -[lifecycleControl]-> securityLandscape.localDevice.supervisor 'Discover and ensure local Host' {
+    metadata {
+      integration_style 'OS-protected bootstrap channel'
+      authority 'Supervisor owns process availability only; it does not authorize business commands'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.supervisor -[lifecycleControl]-> securityLandscape.localDevice.host 'Start, health, drain, and activate' {
+    metadata {
+      integration_style 'Versioned process lifecycle protocol'
+      authority 'Supervisor owns availability; Host owns orchestration behavior'
+      status 'accepted'
+    }
+  }
+  securityLandscape.browserDevice.browser -[authenticatedControl]-> securityLandscape.hostedControlPlane.host 'HTTPS control API' {
+    metadata {
+      integration_style 'Untrusted-network authenticated control channel'
+      authority 'Server-derived identity and scope are authoritative; browser payload is untrusted'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.desktop -[authenticatedControl]-> securityLandscape.hostedControlPlane.host 'Remote HTTPS control API' {
+    metadata {
+      integration_style 'Untrusted-network authenticated control channel'
+      authority 'Hosted identity and resource scope are authoritative; local client payload is untrusted'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.cli -[authenticatedControl]-> securityLandscape.hostedControlPlane.host 'Remote HTTPS control API' {
+    metadata {
+      integration_style 'Untrusted-network authenticated control channel'
+      authority 'Hosted identity and resource scope are authoritative; local client payload is untrusted'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.host -[runtimeControl]-> securityLandscape.localDevice.runtimeWorker.runtime 'Consumer-owned runtime ports through ACL' {
+    metadata {
+      integration_style 'ar Runtime Published Language through stateless ACL'
+      authority 'Orchestrator owns product authorization; ar owns technical enforcement'
+      status 'accepted'
+    }
+  }
+  securityLandscape.hostedControlPlane.host -[runtimeControl]-> securityLandscape.runtimeWorker.runtime 'Consumer-owned runtime ports through ACL' {
+    metadata {
+      integration_style 'ar Runtime Published Language through stateless ACL'
+      authority 'Orchestrator owns product authorization; ar owns technical enforcement'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.host -[eventDelivery]-> securityLandscape.localDevice.nats 'Integration events and durable delivery' {
+    metadata {
+      integration_style 'Broker-neutral event ports through managed local JetStream adapter'
+      authority 'Owning bounded context owns event semantics; broker owns delivery mechanics'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.nats -[eventDelivery]-> securityLandscape.localDevice.host 'Deliver subscribed events' {
+    metadata {
+      integration_style 'At-least-once local JetStream consumer delivery'
+      authority 'Consumer inbox and owning use case validate scope, idempotency, and event semantics'
+      status 'accepted'
+    }
+  }
+  securityLandscape.hostedControlPlane.host -[eventDelivery]-> securityLandscape.hostedControlPlane.nats 'Integration events and durable delivery' {
+    metadata {
+      integration_style 'Broker-neutral event ports through hosted JetStream adapter'
+      authority 'Owning bounded context owns event semantics; broker owns delivery mechanics'
+      status 'accepted'
+    }
+  }
+  securityLandscape.hostedControlPlane.nats -[eventDelivery]-> securityLandscape.hostedControlPlane.host 'Deliver subscribed events' {
+    metadata {
+      integration_style 'At-least-once hosted JetStream consumer delivery'
+      authority 'Consumer inbox and owning use case validate scope, idempotency, and event semantics'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.host -[stateAccess]-> securityLandscape.localDevice.database 'Context-owned state, inbox, outbox, and feeds' {
+    metadata {
+      integration_style 'Context-owned SQLite persistence adapters'
+      authority 'Each bounded context owns its state and transaction boundary'
+      status 'accepted'
+    }
+  }
+  securityLandscape.hostedControlPlane.host -[stateAccess]-> securityLandscape.hostedControlPlane.database 'Context-owned state, inbox, outbox, and feeds' {
+    metadata {
+      integration_style 'Context-owned PostgreSQL persistence adapters'
+      authority 'Each bounded context owns its state and transaction boundary'
+      status 'accepted'
+    }
+  }
+  securityLandscape.hostedControlPlane.host -[authenticatedControl]-> securityLandscape.externalZone.identityAuthority 'Authenticate and obtain identity evidence' {
+    metadata {
+      integration_style 'Provider-neutral identity adapter'
+      authority 'Identity provider selection is unresolved; Access Control owns product authorization'
+      status 'proposed'
+    }
+  }
+  securityLandscape.localDevice.host -[controlledEgress]-> securityLandscape.externalZone.taskBoards 'Policy-checked task-board requests' {
+    metadata {
+      integration_style 'Feature-owned adapter through controlled egress port'
+      authority 'Owning integration defines intent; egress adapter enforces destination policy'
+      status 'accepted'
+    }
+  }
+  securityLandscape.hostedControlPlane.host -[controlledEgress]-> securityLandscape.externalZone.taskBoards 'Policy-checked task-board requests' {
+    metadata {
+      integration_style 'Feature-owned adapter through controlled egress port'
+      authority 'Owning integration defines intent; egress adapter enforces destination policy'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.host -[controlledEgress]-> securityLandscape.externalZone.webEndpoints 'Policy-checked outbound HTTP' {
+    metadata {
+      integration_style 'Controlled egress adapter with destination validation'
+      authority 'Application intent cannot bypass egress policy or resolve arbitrary private destinations'
+      status 'accepted'
+    }
+  }
+  securityLandscape.hostedControlPlane.host -[controlledEgress]-> securityLandscape.externalZone.webEndpoints 'Policy-checked outbound HTTP' {
+    metadata {
+      integration_style 'Controlled egress adapter with destination validation'
+      authority 'Application intent cannot bypass egress policy or resolve arbitrary private destinations'
+      status 'accepted'
+    }
+  }
+  securityLandscape.externalZone.webEndpoints -[externalPort]-> securityLandscape.hostedControlPlane.host 'Authenticated inbound webhook or callback' {
+    metadata {
+      integration_style 'Feature-owned inbound adapter with signature, replay, scope, and schema validation'
+      authority 'External payload is untrusted; owning use case and Access Control determine product consequence'
+      status 'proposed'
+    }
+  }
+}

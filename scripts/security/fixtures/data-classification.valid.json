@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "owner": "run-orchestration",
+  "assets": [
+    {
+      "id": "control.run-command",
+      "surface": "public-contract",
+      "classification": "sensitive",
+      "tenantScope": "project",
+      "retentionClass": "transient",
+      "redactionProfile": "standard",
+      "exportPolicy": "tenant-authorized",
+      "containsUserContent": false,
+      "containsAuthorityEvidence": false
+    },
+    {
+      "id": "event.run-execution-requested",
+      "surface": "integration-event",
+      "classification": "internal",
+      "tenantScope": "project",
+      "retentionClass": "durable",
+      "redactionProfile": "standard",
+      "exportPolicy": "restricted",
+      "containsUserContent": false,
+      "containsAuthorityEvidence": false
+    },
+    {
+      "id": "feed.approval-control",
+      "surface": "feed",
+      "classification": "authority-evidence",
+      "tenantScope": "project",
+      "retentionClass": "audit",
+      "redactionProfile": "authority-evidence",
+      "exportPolicy": "restricted",
+      "containsUserContent": false,
+      "containsAuthorityEvidence": true
+    },
+    {
+      "id": "blob.agent-output",
+      "surface": "blob",
+      "classification": "sensitive",
+      "tenantScope": "resource",
+      "retentionClass": "policy-governed",
+      "redactionProfile": "user-content",
+      "exportPolicy": "tenant-authorized",
+      "containsUserContent": true,
+      "containsAuthorityEvidence": false
+    },
+    {
+      "id": "telemetry.command-latency",
+      "surface": "telemetry",
+      "classification": "internal",
+      "tenantScope": "tenant",
+      "retentionClass": "operational",
+      "redactionProfile": "standard",
+      "exportPolicy": "restricted",
+      "containsUserContent": false,
+      "containsAuthorityEvidence": false
+    }
+  ]
+}

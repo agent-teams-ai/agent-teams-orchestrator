@@ -18,7 +18,9 @@ related:
   - ADR-0048
   - ADR-0049
   - ADR-0050
+  - ADR-0055
   - architecture.local-host-lifecycle
+  - architecture.security
 ---
 
 # Testing Strategy
@@ -61,6 +63,18 @@ Validate:
 - SDK/server compatibility;
 - runtime-adapter conformance;
 - transport error mapping.
+
+### Security architecture conformance
+
+The deterministic security gate validates feature-owned data-classification
+manifest fragments and executes paired allow/deny fixtures for cross-tenant
+substitution, malicious workspace configuration, prompt authority confusion,
+controlled egress and SSRF, replay and stale authority, credential leakage, and
+unredacted operational output.
+
+These fixtures are architecture fitness functions. They do not replace
+context-owned authorization tests, adapter threat tests, hosted tenant-isolation
+tests, or `ar`-owned runtime enforcement conformance.
 
 Integration-event compatibility tests use separate exact producer and
 major-compatible consumer-reader schemas. Their matrix covers additive payload

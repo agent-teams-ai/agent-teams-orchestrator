@@ -3,5 +3,12 @@ views {
     title 'Strategic Context Map'
     description 'Business bounded contexts and their explicit integration boundaries'
     include *
+    exclude securityLandscape
+  }
+
+  view securityTrustBoundaries of securityLandscape {
+    title 'Security Trust Boundaries and Data Flows'
+    description 'Local and hosted trust zones, authority crossings, controlled egress, runtime control, broker delivery, and state access'
+    include securityLandscape.**
   }
 }

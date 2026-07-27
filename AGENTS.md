@@ -91,6 +91,14 @@ before a high-cost boundary violation.
 - Authoritative exact values never use JavaScript `number`, SQLite `REAL`, or JSON
   numbers. Follow the exact-value profile in
   [persistence](docs/architecture/persistence-boundary.md#exact-quantities-money-and-instants).
+- Product authorization belongs to Access Control and owning use cases; runtime,
+  sandbox, capability, and technical permission enforcement belongs to `ar`.
+- Trusted tenant scope comes from authenticated context and canonical resources,
+  never from payload or workspace configuration. Untrusted content never becomes
+  a command without a typed authenticated control boundary.
+- Raw secrets remain inside secret adapters; other layers carry only `SecretRef`.
+  Outbound HTTP crosses a controlled egress adapter. Follow
+  [security architecture](docs/architecture/security-architecture.md).
 
 ## Change workflow
 
@@ -122,6 +130,7 @@ Minimum documentation and architecture preflight:
 ```bash
 pnpm docs:check
 pnpm architecture:check
+pnpm security:check
 pnpm typecheck
 ```
 

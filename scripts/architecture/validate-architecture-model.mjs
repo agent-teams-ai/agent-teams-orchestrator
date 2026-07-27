@@ -14,6 +14,18 @@ const requiredRelationshipMetadata = [
   "integration_style",
   "status",
 ];
+const requiredSecurityRoles = [
+  "agent-runtime",
+  "browser-client",
+  "cli-client",
+  "desktop-client",
+  "event-broker",
+  "external-integration",
+  "local-supervisor",
+  "orchestrator-host",
+  "state-store",
+  "trust-boundary",
+];
 
 function parseArguments(argv) {
   const options = {
@@ -179,6 +191,64 @@ function validateRelationships(project, errors) {
   }
 }
 
+function validateSecurityTopology(project, errors) {
+  const securityElements = Object.values(project.elements ?? {}).filter(
+    (element) => typeof element.metadata?.security_role === "string",
+  );
+  if (securityElements.length === 0) {
+    errors.push("LikeC4 model is missing security topology elements");
+    return;
+  }
+
+  const roles = new Set();
+  for (const element of securityElements) {
+    roles.add(element.metadata.security_role);
+    for (const field of ["owner_document", "trust_zone"]) {
+      if (
+        typeof element.metadata?.[field] !== "string" ||
+        !element.metadata[field].trim()
+      ) {
+        errors.push(
+          `LikeC4 security element ${element.id} is missing metadata.${field}`,
+        );
+      }
+    }
+  }
+
+  for (const role of requiredSecurityRoles) {
+    if (!roles.has(role)) {
+      errors.push(`LikeC4 security topology is missing role ${role}`);
+    }
+  }
+
+  const securityElementIds = new Set(
+    securityElements.map((element) => element.id),
+  );
+  const securityViewNodeIds = new Set(
+    (project.views?.securityTrustBoundaries?.nodes ?? []).map(
+      (node) => node.id,
+    ),
+  );
+  for (const element of securityElements) {
+    if (
+      element.metadata.security_role !== "security-landscape" &&
+      !securityViewNodeIds.has(element.id)
+    ) {
+      errors.push(
+        `LikeC4 securityTrustBoundaries view omits security element ${element.id}`,
+      );
+    }
+  }
+
+  for (const node of project.views?.strategicContextMap?.nodes ?? []) {
+    if (securityElementIds.has(node.id)) {
+      errors.push(
+        `LikeC4 strategicContextMap must exclude security element ${node.id}`,
+      );
+    }
+  }
+}
+
 async function main() {
   let options;
   try {
@@ -255,8 +325,12 @@ async function main() {
       if (!project.views?.strategicContextMap) {
         errors.push("LikeC4 model is missing the strategicContextMap view");
       }
+      if (!project.views?.securityTrustBoundaries) {
+        errors.push("LikeC4 model is missing the securityTrustBoundaries view");
+      }
       validateBoundedContexts(project, catalog, errors);
       validateRelationships(project, errors);
+      validateSecurityTopology(project, errors);
     }
   } catch (error) {
     errors.push(error.message);

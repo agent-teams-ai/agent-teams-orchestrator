@@ -28,6 +28,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 | Workflow and migration | [ADR-0027](0027-temporal-as-run-orchestration-adapter.md), [ADR-0029](0029-compatibility-facade-and-strangler-migration.md) | [Extension points](../architecture/extension-points.md), [migration boundary](../architecture/migration-boundary.md) |
 | Repository enforcement | [ADR-0031](0031-native-typescript-7-primary-toolchain.md), [ADR-0032](0032-staged-architecture-conformance-tooling.md), [ADR-0039](0039-staged-nx-foundation.md), [ADR-0053](0053-repository-local-documentation-workflow.md) | [Repository tooling](../architecture/repository-tooling.md), [documentation standard](../standards/documentation.md), [testing](../architecture/testing-strategy.md) |
 | Organization and usage capabilities | [ADR-0044](0044-tenant-scoped-agent-organization.md), [ADR-0045](0045-three-usage-bounded-contexts.md), [ADR-0046](0046-exact-usage-and-money-values.md) | [Context map](../architecture/context-map.md), [context dossiers](../domain/contexts/README.md) |
+| Security boundaries and data handling | [ADR-0021](0021-immutable-sdk-scope-and-credentials.md), [ADR-0028](0028-runtime-published-language-and-internal-fence.md), [ADR-0055](0055-security-boundaries-and-data-classification.md) | [Security architecture](../architecture/security-architecture.md), [runtime boundary](../architecture/runtime-boundary.md) |
 
 ## Accepted decisions
 
@@ -79,6 +80,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0052: Adapter-local Drizzle and bounded dialect duplication](0052-adapter-local-drizzle-and-bounded-dialect-duplication.md)
 - [ADR-0053: Repository-local documentation workflow](0053-repository-local-documentation-workflow.md)
 - [ADR-0054: LikeC4 strategic relationship model](0054-likec4-strategic-relationship-model.md)
+- [ADR-0055: Security boundaries and data classification](0055-security-boundaries-and-data-classification.md)
 
 ## Superseded decisions
 

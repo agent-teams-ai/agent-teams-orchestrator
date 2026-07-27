@@ -58,10 +58,20 @@ or trust authority.
 A transport-independent input or output type owned by an application use case. It
 is distinct from a public SDK, transport, or integration-event contract.
 
+## Authority evidence
+
+Restricted evidence that an authority decision or check occurred. It is never the
+authority credential itself and cannot include an AR-private execution fence.
+
 ## Control plane
 
 The layer that decides desired coordination state and policy. It does not perform
 provider execution itself.
+
+## Controlled egress
+
+An outbound adapter boundary that validates destination, scheme, resolved
+addresses, redirects, size, and policy before external network access.
 
 ## Control Published Language
 
@@ -72,6 +82,12 @@ Published Language.
 ## Domain event
 
 A fact emitted by domain behavior inside a bounded context.
+
+## Data classification manifest
+
+A feature-owned machine-readable declaration of classification, scope,
+retention class, redaction, export policy, user content, and authority evidence
+for an externally observable data surface.
 
 ## Feature-owned vertical slice
 
@@ -244,6 +260,11 @@ The stateless anti-corruption adapter that implements consumer-owned runtime
 capability ports and translates between orchestration concepts and opaque `ar`
 contracts. It does not own runtime bindings or orchestration observation state.
 
+## Secret reference
+
+An opaque identifier resolved only by a secret adapter. It is not the secret
+value and grants no authority by itself.
+
 ## Workspace registration
 
 A project-owned record that identifies an approved workspace binding and its
@@ -270,6 +291,11 @@ cursor begins strictly after that position.
 The top-level hosted ownership and isolation identity for projects, principals,
 grants, and tenant-scoped policy. Tenant and Project Registry owns its lifecycle;
 other contexts hold opaque local references.
+
+## Trust boundary
+
+A boundary across which identity, scope, data, or control cannot be trusted
+implicitly. Every crossing requires an explicit protocol and authority model.
 
 ## Target
 

@@ -1,0 +1,424 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-teams.ai/schemas/security/threat-scenario.v1.schema.json",
+  "title": "Agent Teams security threat scenario v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "threat",
+    "expected",
+    "input"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "threat": {
+      "enum": [
+        "cross-tenant-substitution",
+        "malicious-workspace-config",
+        "prompt-authority-confusion",
+        "ssrf-egress-policy",
+        "replay-stale-authority",
+        "credential-leakage",
+        "unredacted-output"
+      ]
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "ruleIds"
+      ],
+      "properties": {
+        "decision": {
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "ruleIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^SEC-[A-Z]+-[0-9]{3}$"
+          }
+        }
+      }
+    },
+    "input": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "threat": {
+            "const": "cross-tenant-substitution"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "$ref": "#/$defs/crossTenantInput"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "threat": {
+            "const": "malicious-workspace-config"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "$ref": "#/$defs/workspaceInput"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "threat": {
+            "const": "prompt-authority-confusion"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "$ref": "#/$defs/promptInput"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "threat": {
+            "const": "ssrf-egress-policy"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "$ref": "#/$defs/egressInput"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "threat": {
+            "const": "replay-stale-authority"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "$ref": "#/$defs/replayInput"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "threat": {
+            "const": "credential-leakage"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "$ref": "#/$defs/credentialInput"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "threat": {
+            "const": "unredacted-output"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "input": {
+            "$ref": "#/$defs/outputInput"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "crossTenantInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authenticatedTenantId",
+        "resourceTenantId",
+        "payloadTenantId",
+        "operationKind",
+        "authenticatedAuthorityScope"
+      ],
+      "properties": {
+        "authenticatedTenantId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resourceTenantId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payloadTenantId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operationKind": {
+          "enum": [
+            "tenant-operation",
+            "cross-tenant-administration"
+          ]
+        },
+        "authenticatedAuthorityScope": {
+          "enum": [
+            "tenant",
+            "cross-tenant-administrator"
+          ]
+        }
+      }
+    },
+    "workspaceInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspaceTrusted",
+        "requestsExecutableOverride",
+        "requestsEndpointOverride",
+        "validatedByWorkspacePolicy"
+      ],
+      "properties": {
+        "workspaceTrusted": {
+          "type": "boolean"
+        },
+        "requestsExecutableOverride": {
+          "type": "boolean"
+        },
+        "requestsEndpointOverride": {
+          "type": "boolean"
+        },
+        "validatedByWorkspacePolicy": {
+          "type": "boolean"
+        }
+      }
+    },
+    "promptInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceChannel",
+        "action",
+        "typedCommandEnvelope",
+        "authenticatedAuthority"
+      ],
+      "properties": {
+        "sourceChannel": {
+          "enum": [
+            "control-api",
+            "user-content",
+            "agent-output",
+            "external-content"
+          ]
+        },
+        "action": {
+          "enum": [
+            "store-as-content",
+            "execute-control-command"
+          ]
+        },
+        "typedCommandEnvelope": {
+          "type": "boolean"
+        },
+        "authenticatedAuthority": {
+          "type": "boolean"
+        }
+      }
+    },
+    "egressInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "usesControlledEgress",
+        "scheme",
+        "destinationClass",
+        "policyAllowsDestination",
+        "resolvedAddressesPinned"
+      ],
+      "properties": {
+        "usesControlledEgress": {
+          "type": "boolean"
+        },
+        "scheme": {
+          "enum": [
+            "http",
+            "https",
+            "file",
+            "ftp"
+          ]
+        },
+        "destinationClass": {
+          "enum": [
+            "public",
+            "private",
+            "loopback",
+            "link-local",
+            "metadata-service"
+          ]
+        },
+        "policyAllowsDestination": {
+          "type": "boolean"
+        },
+        "resolvedAddressesPinned": {
+          "type": "boolean"
+        }
+      }
+    },
+    "replayInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "idempotencyKey",
+        "expectedRevision",
+        "currentRevision",
+        "authorityValidUntil",
+        "now",
+        "expectedScopeHash",
+        "authorityScopeHash"
+      ],
+      "properties": {
+        "idempotencyKey": {
+          "type": "string"
+        },
+        "expectedRevision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "currentRevision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "authorityValidUntil": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "now": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expectedScopeHash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authorityScopeHash": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "credentialInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "valueKind",
+        "location",
+        "redacted"
+      ],
+      "properties": {
+        "valueKind": {
+          "enum": [
+            "secret-ref",
+            "raw-secret"
+          ]
+        },
+        "location": {
+          "enum": [
+            "secret-adapter",
+            "domain",
+            "application",
+            "public-contract",
+            "integration-event",
+            "log",
+            "telemetry"
+          ]
+        },
+        "redacted": {
+          "type": "boolean"
+        }
+      }
+    },
+    "outputInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface",
+        "classification",
+        "containsUserContent",
+        "containsAuthorityEvidence",
+        "redactionProfile"
+      ],
+      "properties": {
+        "surface": {
+          "enum": [
+            "integration-event",
+            "feed",
+            "log",
+            "telemetry"
+          ]
+        },
+        "classification": {
+          "enum": [
+            "public",
+            "internal",
+            "sensitive",
+            "secret",
+            "authority-evidence"
+          ]
+        },
+        "containsUserContent": {
+          "type": "boolean"
+        },
+        "containsAuthorityEvidence": {
+          "type": "boolean"
+        },
+        "redactionProfile": {
+          "enum": [
+            "none",
+            "standard",
+            "user-content",
+            "secret",
+            "authority-evidence",
+            "metadata-only"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -13,8 +13,10 @@ related:
   - ADR-0021
   - ADR-0023
   - ADR-0046
+  - ADR-0055
   - OD-016
   - OD-019
+  - architecture.security
 ---
 
 # Public Control Contracts
@@ -33,6 +35,11 @@ The repository has separate external contract surfaces:
 Control messages, integration events, runtime messages, application models, and
 domain models never become aliases of one another. Feature-owned mappers cross
 each boundary.
+
+Every materialized public contract, integration event, durable feed, blob, and
+telemetry surface also owns a feature-local classification manifest conforming
+to [the security architecture](security-architecture.md). Classification
+metadata never grants access or replaces contract-specific authorization.
 
 ## Control service profile
 

@@ -1,0 +1,128 @@
+[
+  {
+    "id": "payload-selects-another-tenant",
+    "threat": "cross-tenant-substitution",
+    "expected": {
+      "decision": "deny",
+      "ruleIds": [
+        "SEC-TENANT-001",
+        "SEC-TENANT-002"
+      ]
+    },
+    "input": {
+      "authenticatedTenantId": "tenant-a",
+      "resourceTenantId": "tenant-b",
+      "payloadTenantId": "tenant-a",
+      "operationKind": "tenant-operation",
+      "authenticatedAuthorityScope": "tenant"
+    }
+  },
+  {
+    "id": "workspace-overrides-executable-and-endpoint",
+    "threat": "malicious-workspace-config",
+    "expected": {
+      "decision": "deny",
+      "ruleIds": [
+        "SEC-WORKSPACE-001",
+        "SEC-WORKSPACE-002",
+        "SEC-WORKSPACE-003"
+      ]
+    },
+    "input": {
+      "workspaceTrusted": false,
+      "requestsExecutableOverride": true,
+      "requestsEndpointOverride": true,
+      "validatedByWorkspacePolicy": false
+    }
+  },
+  {
+    "id": "agent-output-executes-as-command",
+    "threat": "prompt-authority-confusion",
+    "expected": {
+      "decision": "deny",
+      "ruleIds": [
+        "SEC-AUTHORITY-001",
+        "SEC-AUTHORITY-002"
+      ]
+    },
+    "input": {
+      "sourceChannel": "agent-output",
+      "action": "execute-control-command",
+      "typedCommandEnvelope": false,
+      "authenticatedAuthority": false
+    }
+  },
+  {
+    "id": "direct-cloud-metadata-request",
+    "threat": "ssrf-egress-policy",
+    "expected": {
+      "decision": "deny",
+      "ruleIds": [
+        "SEC-EGRESS-001",
+        "SEC-EGRESS-003",
+        "SEC-EGRESS-004"
+      ]
+    },
+    "input": {
+      "usesControlledEgress": false,
+      "scheme": "http",
+      "destinationClass": "metadata-service",
+      "policyAllowsDestination": false,
+      "resolvedAddressesPinned": false
+    }
+  },
+  {
+    "id": "stale-expired-authority-decision",
+    "threat": "replay-stale-authority",
+    "expected": {
+      "decision": "deny",
+      "ruleIds": [
+        "SEC-REPLAY-002",
+        "SEC-REPLAY-003",
+        "SEC-REPLAY-004"
+      ]
+    },
+    "input": {
+      "idempotencyKey": "decision-123",
+      "expectedRevision": 6,
+      "currentRevision": 7,
+      "authorityValidUntil": "2026-07-27T11:00:00Z",
+      "now": "2026-07-27T12:00:00Z",
+      "expectedScopeHash": "scope-v1",
+      "authorityScopeHash": "scope-v2"
+    }
+  },
+  {
+    "id": "raw-credential-written-to-log",
+    "threat": "credential-leakage",
+    "expected": {
+      "decision": "deny",
+      "ruleIds": [
+        "SEC-SECRET-001",
+        "SEC-SECRET-002"
+      ]
+    },
+    "input": {
+      "valueKind": "raw-secret",
+      "location": "log",
+      "redacted": false
+    }
+  },
+  {
+    "id": "user-content-event-without-redaction",
+    "threat": "unredacted-output",
+    "expected": {
+      "decision": "deny",
+      "ruleIds": [
+        "SEC-REDACTION-003"
+      ]
+    },
+    "input": {
+      "surface": "integration-event",
+      "classification": "sensitive",
+      "containsUserContent": true,
+      "containsAuthorityEvidence": false,
+      "redactionProfile": "none"
+    }
+  }
+]

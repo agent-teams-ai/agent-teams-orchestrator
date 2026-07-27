@@ -46,6 +46,8 @@ owners:
     kind: architecture
   architecture/reliability:
     kind: architecture
+  architecture/security:
+    kind: architecture
   architecture/tooling:
     kind: architecture
   clients/sdk:

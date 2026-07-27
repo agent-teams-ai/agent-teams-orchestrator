@@ -1,0 +1,25 @@
+{
+  "manifest": {
+    "schemaVersion": 1,
+    "owner": "fixture",
+    "assets": [
+      {
+        "id": "telemetry.raw-credential",
+        "surface": "telemetry",
+        "classification": "secret",
+        "tenantScope": "tenant",
+        "retentionClass": "operational",
+        "redactionProfile": "none",
+        "exportPolicy": "unrestricted",
+        "containsUserContent": false,
+        "containsAuthorityEvidence": true
+      }
+    ]
+  },
+  "expectedRuleIds": [
+    "SEC-DATA-002",
+    "SEC-DATA-004",
+    "SEC-DATA-006",
+    "SEC-DATA-007"
+  ]
+}

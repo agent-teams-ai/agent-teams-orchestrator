@@ -3,6 +3,13 @@ specification {
   element integrationModule
   element externalSystem
   element applicationBoundary
+  element trustBoundary
+  element securityClient
+  element securityProcess
+  element runtimeEndpoint
+  element eventBroker
+  element stateStore
+  element externalIntegration
 
   relationship publishedFacts
   relationship decisionContract
@@ -10,4 +17,10 @@ specification {
   relationship aclTranslation
   relationship observation
   relationship externalPort
+  relationship authenticatedControl
+  relationship lifecycleControl
+  relationship runtimeControl
+  relationship eventDelivery
+  relationship stateAccess
+  relationship controlledEgress
 }

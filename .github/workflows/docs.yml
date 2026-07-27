@@ -13,6 +13,7 @@ on:
       - ".vale.ini"
       - "AGENTS.md"
       - "architecture/likec4/**"
+      - "architecture/security/**"
       - "README.md"
       - "docs/**"
       - "package.json"
@@ -20,6 +21,7 @@ on:
       - "pnpm-workspace.yaml"
       - "scripts/docs/**"
       - "scripts/architecture/validate-architecture-model*"
+      - "scripts/security/**"
       - "scripts/skills/**"
   push:
     branches:
@@ -35,6 +37,7 @@ on:
       - ".vale.ini"
       - "AGENTS.md"
       - "architecture/likec4/**"
+      - "architecture/security/**"
       - "README.md"
       - "docs/**"
       - "package.json"
@@ -42,6 +45,7 @@ on:
       - "pnpm-workspace.yaml"
       - "scripts/docs/**"
       - "scripts/architecture/validate-architecture-model*"
+      - "scripts/security/**"
       - "scripts/skills/**"
 
 permissions:
@@ -80,6 +84,9 @@ jobs:
 
       - name: Validate documentation
         run: pnpm docs:check
+
+      - name: Validate security architecture
+        run: pnpm security:check
 
       - name: Check documentation impact
         if: github.event_name == 'pull_request'

@@ -44,6 +44,7 @@ architecture/likec4/
   likec4.config.json   project identity
   specification.c4    allowed element and relationship kinds
   model.c4            canonical elements and directed relationships
+  security.c4         deployment trust zones and security data flows
   views.c4            derived human navigation views
 ```
 
@@ -53,6 +54,12 @@ modules and external systems declare their owning document. Relationships declar
 
 Relationship status describes the readiness of that relationship contract. It
 must not be interpreted as the lifecycle status of either bounded context.
+
+The `securityTrustBoundaries` view is deployment-oriented. Its clients,
+processes, stores, brokers, runtimes, and external integrations are not bounded
+contexts. Each element declares a `security_role`, `trust_zone`, and owning
+document. The view follows [the security architecture](security-architecture.md)
+and never assigns product authorization or runtime enforcement to the diagram.
 
 ## Change workflow
 
@@ -83,7 +90,8 @@ The preview server is a development view only.
 - exact bounded-context coverage against the package catalog;
 - package ID and dossier ID consistency;
 - required relationship ownership metadata;
-- presence of the strategic context view.
+- presence of the strategic context and security trust-boundary views;
+- required security roles and trust-zone metadata.
 
 `pnpm architecture:model:test` proves valid and invalid behavior with isolated
 fixtures. Both run inside `pnpm architecture:check`; the model consistency check
