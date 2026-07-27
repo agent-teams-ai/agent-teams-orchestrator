@@ -37,6 +37,7 @@ Agents should also follow the short repository-level
 | Change local lifecycle | [Local Host lifecycle](architecture/local-host-lifecycle.md) | `OD-001`, `OD-021` |
 | Migrate legacy behavior | [Migration boundary](architecture/migration-boundary.md) | owning context dossier and migration open decision |
 | Change repository tooling | [Repository tooling](architecture/repository-tooling.md) | [Testing strategy](architecture/testing-strategy.md) |
+| Change strategic relationships | [Machine-readable architecture model](architecture/architecture-model.md) | [Context map](architecture/context-map.md), owning context dossiers |
 | Record a decision | [Decision index](decisions/README.md) | [ADR template](templates/adr.md), [open-decision index](open-decisions/README.md) |
 | Add or reorganize documentation | [Documentation standards](standards/README.md) | [Templates](templates/README.md) |
 | Inspect experimental evidence | [Research index](research/README.md) | owning ADR or open decision |
@@ -62,6 +63,10 @@ Machine-readable governance:
 - [`metadata.schema.json`](metadata.schema.json) defines document metadata;
 - [`architecture/package-catalog.yaml`](../architecture/package-catalog.yaml)
   reserves production package topology.
+- [`architecture/likec4/`](../architecture/likec4/model.c4) owns the exact
+  strategic relationship graph.
+- [The repository-local docs-authoring Skill](../.agents/skills/docs-authoring/SKILL.md)
+  provides the canonical agent workflow without becoming architecture authority.
 
 ## Authority and lifecycle
 
@@ -83,8 +88,10 @@ Run:
 
 ```bash
 pnpm docs:check
+pnpm docs:impact
 ```
 
 CI applies the same metadata, ID, hierarchy, index, navigation, link, anchor,
-Mermaid, and Markdown checks. External HTTP availability is checked separately
-because it is nondeterministic.
+code-impact, Skill, LikeC4, Mermaid, Markdown, terminology, and spelling checks. Vale enforces only
+project-owned terminology rules; CSpell uses the reviewed project dictionary.
+External HTTP availability is checked separately because it is nondeterministic.

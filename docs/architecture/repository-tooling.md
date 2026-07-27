@@ -10,8 +10,22 @@ related:
   - ADR-0038
   - ADR-0039
   - ADR-0041
+  - ADR-0053
+  - ADR-0054
   - architecture.dependency-rules
   - architecture.feature-module-standard
+  - architecture.machine-readable-model
+code_anchors:
+  - pattern: architecture/package-catalog.yaml
+    enforcement: advisory
+  - pattern: scripts/architecture/**
+    enforcement: advisory
+  - pattern: tooling/architecture-conformance/**
+    enforcement: advisory
+  - pattern: .oxlintrc.json
+    enforcement: advisory
+  - pattern: pnpm-workspace.yaml
+    enforcement: advisory
 ---
 
 # Repository Tooling Plan
@@ -37,6 +51,7 @@ DDD boundaries, or source dependency rules.
 | Compiler behavior | Package and root TypeScript configurations |
 | Portable task command | Package manifest script |
 | Task and project execution graph | Nx derived view |
+| Strategic relationship graph | LikeC4 source model |
 
 Nx consumes or validates the standard sources. Nx metadata never becomes a
 parallel hand-maintained architecture catalog.
@@ -57,6 +72,8 @@ The baseline consists of:
 - dependency-cruiser in the isolated TypeScript 6 tooling package as an advisory
   complete-graph gate;
 - fixture-based architecture conformance tests.
+- LikeC4 semantic validation and package-catalog consistency checks;
+- repository-local documentation Skill and code impact anchors.
 
 Stage 0 remains active through every later stage. Nx does not replace it.
 
@@ -311,6 +328,8 @@ published artifact is correct.
 | TypeScript public API review | API Extractor |
 | Protobuf compatibility | Buf |
 | Packed npm runtime and type resolution | publint and Are The Types Wrong |
+| Strategic context relationship topology | LikeC4 plus repository consistency validator |
+| Documentation workflow and implementation impact | Repository-local Skill and code anchors |
 
 Do not add overlapping task runners or multiple tools that claim the same
 architectural authority. A new tool needs a distinct failure class, deterministic

@@ -5,8 +5,20 @@ status: accepted
 owner: architecture
 summary: Canonical metadata, ownership, placement, and validation rules for project documentation.
 related:
+  - ADR-0053
   - architecture.index
   - domain.contexts.index
+code_anchors:
+  - pattern: scripts/docs/**
+    enforcement: advisory
+  - pattern: scripts/skills/**
+    enforcement: advisory
+  - pattern: .vale/**
+    enforcement: advisory
+  - pattern: .cspell/**
+    enforcement: advisory
+  - pattern: .cspell.json
+    enforcement: advisory
 ---
 
 # Documentation Standard
@@ -88,6 +100,26 @@ Optional relationship fields use document IDs, not paths:
 - `blocked_by`;
 - `supersedes`;
 - `superseded_by`.
+
+Optional `code_anchors` connect a governed document to implementation or
+machine-readable sources whose changes require documentation review:
+
+```yaml
+code_anchors:
+  - pattern: scripts/docs/**
+    enforcement: advisory
+  - pattern: packages/contexts/example/src/features/example/**
+    enforcement: required
+```
+
+Patterns are repository-relative, use forward slashes, cannot escape the
+repository, and must match at least one current file. They cannot target `docs/**`
+or `.agents/**`; documentation relationships use stable IDs and links instead.
+
+`advisory` reports impact without blocking. `required` fails
+`pnpm docs:impact -- --strict` when matching source changed but the owning
+document did not. Start broad relationships as advisory and promote only after a
+measured false-positive baseline.
 
 `blocked_by` names open decisions that prevent the proposed artifact from becoming
 accepted. Every blocker also appears in `related`. Accepted artifacts cannot
@@ -215,7 +247,11 @@ writes a generated source-of-truth file.
 
 ## AI-assisted authoring
 
-An agent changing documentation must:
+An agent changing documentation starts with the canonical repository-local
+[docs-authoring Skill](../../.agents/skills/docs-authoring/SKILL.md). The Skill is
+workflow guidance, not another architecture authority.
+
+The agent must:
 
 1. start from the nearest directory index and the task route in `docs/README.md`;
 2. identify the authoritative artifact type before writing;
@@ -223,11 +259,17 @@ An agent changing documentation must:
 4. update the existing authority instead of creating a parallel explanation;
 5. preserve unresolved choices as open decisions;
 6. use the matching template for a new governed artifact;
-7. run `pnpm docs:check`.
+7. run `pnpm docs:impact` to inspect code-anchored documents;
+8. run `pnpm docs:check`.
 
 Generated summaries, semantic indexes, search databases, and AI-produced diagrams
 are disposable derived views. They never become a source of truth unless reviewed
 and committed as a governed document with an owner and lifecycle.
+
+The Skill itself is machine-validated for naming, metadata, size, local links,
+and UI metadata. Do not copy it into product-specific agent directories. Agent
+surfaces should discover the canonical `.agents/skills/` location or use a thin
+generated pointer.
 
 ## Change consistency
 
@@ -254,9 +296,23 @@ Update related artifacts in one change when their authority requires it:
 - direct directory-index completeness;
 - ADR lifecycle placement and metadata-backed collection indexes;
 - status-sensitive required document sections;
+- safe, non-stale code anchors and changed-path impact reporting;
 - Mermaid syntax using the official Mermaid parser;
-- Markdown structure and style.
+- Markdown structure;
+- canonical product and technology terminology through project-owned Vale rules;
+- spelling through a reviewed CSpell project dictionary.
+- repository-local Skill structure and fixture tests;
+- LikeC4 relationship-model consistency with the package catalog.
 
 The validator itself has positive and negative fixture tests. External HTTP
 availability is checked by a scheduled Lychee workflow, not by the deterministic
 per-change gate; transient network failures must not block every pull request.
+
+Vale is intentionally restricted to deterministic terminology rules under
+`.vale/styles/AgentTeams/`. Do not add a general-purpose prose style pack without
+an ADR and a measured false-positive baseline.
+
+CSpell checks governed English documentation. Valid domain terms are added once
+to `.cspell/project-words.txt` after review, never scattered across inline ignore
+comments. Suspected typos are corrected rather than allowlisted. The project
+configuration and dictionary are authoritative for local checks and CI.

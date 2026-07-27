@@ -74,7 +74,7 @@ at least one feature slice remains CI-invalid.
 
 ## Rejected alternatives
 
-- Precreate every proposed bounded-context package.
+- Pre-create every proposed bounded-context package.
 - Use directory naming conventions without machine validation.
 - Duplicate context lifecycle status in the catalog.
 - Allow generators to create uncataloged package identities.

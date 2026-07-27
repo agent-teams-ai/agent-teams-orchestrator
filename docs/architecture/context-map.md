@@ -13,9 +13,13 @@ related:
   - ADR-0044
   - ADR-0045
   - ADR-0046
+  - ADR-0054
   - OD-011
   - OD-023
   - OD-024
+code_anchors:
+  - pattern: architecture/likec4/**
+    enforcement: advisory
 ---
 
 # Strategic Context Map
@@ -80,96 +84,22 @@ business aggregates or become authorities for business lifecycle.
 
 ## Relationship map
 
-```mermaid
-flowchart LR
-    Identity["Identity Registry"]
-    Access["Access Control"]
-    Project["Tenant and Project Registry"]
-    Workspace["Workspace Registry"]
-    Team["Team Topology"]
-    Organization["Agent Organization"]
-    Work["Work Coordination"]
-    Run["Run Orchestration"]
-    Communication["Agent Communication"]
-    Policy["Policy and Risk"]
-    Approval["Approval Management"]
-    Metering["Usage Metering"]
-    Accounting["Usage Accounting"]
-    Governance["Consumption Governance"]
-    Runtime["Stateless Runtime ACL"]
-    AR["ar Runtime"]
-    Boards["Task Board ACLs"]
-    Authorized["Application use cases"]
+The exact element and directed-relationship graph is maintained in the
+[machine-readable LikeC4 model](architecture-model.md), not repeated as Mermaid
+or a prose edge table. This prevents three copies of the same topology.
 
-    Identity -->|"Principal facts"| Access
-    Project -->|"Tenant and project facts"| Access
-    Access -->|"Authorization facts"| Authorized
-    Project -->|"Project identity"| Workspace
-    Project -->|"Project identity"| Team
-    Project -->|"Tenant and project identity"| Organization
-    Project -->|"Project identity"| Work
-    Project -->|"Project identity"| Run
-    Project -->|"Scope identity"| Metering
-    Project -->|"Scope identity"| Accounting
-    Project -->|"Scope identity"| Governance
-    Team -->|"Team facts"| Organization
-    Team -->|"Topology facts"| Work
-    Team -->|"Topology facts"| Run
-    Organization -. "Structure facts" .-> Access
-    Organization -. "Attribution scope" .-> Accounting
-    Workspace -->|"Workspace facts"| Policy
-    Workspace -->|"Workspace identity"| Run
-    Work -. "Execution requested" .-> Run
-    Run -. "Execution facts" .-> Work
-    Policy -->|"Policy decisions"| Run
-    Governance -->|"Consumption decisions"| Run
-    Run -. "Approval requested" .-> Approval
-    Approval -. "Approval decided" .-> Run
-    Run -. "Delivery intent" .-> Communication
-    Communication -. "Delivery facts" .-> Run
-    Work -. "Handoff intent" .-> Communication
-    Communication -. "Handoff facts" .-> Work
-    Run -->|"Consumer-owned runtime ports"| Runtime
-    Runtime -->|"Anti-Corruption Layer"| AR
-    AR -. "Runtime facts" .-> Runtime
-    Runtime -. "Runtime observations" .-> Run
-    Runtime -. "Usage observations" .-> Metering
-    Run -. "Attribution hints" .-> Metering
-    Metering -. "Metered usage" .-> Accounting
-    Accounting -. "Usage and cost facts" .-> Governance
-    Work -->|"Consumer-owned board ports"| Boards
-```
+Each relationship in the model declares its integration style, authority, and
+relationship status. Arrows describe semantic information flow, not source
+imports. Relationship status does not accept either bounded context.
 
-Arrows describe semantic information flow, not source imports. Every relationship
-must declare an upstream owner, downstream translation, consistency, delivery,
-latency, and failure behavior before implementation.
+Every relationship must still define consistency, delivery, latency, failure,
+and compatibility behavior in its owning dossier or contract before
+implementation. Detailed message names and aggregate reactions never belong in
+the strategic graph.
 
 `Application use cases` is an authorization-consumption boundary, not another
 bounded context. Bidirectional information flow never authorizes cyclic package
 imports.
-
-## Relationship catalog
-
-| Upstream | Downstream | Integration style | Authority |
-|---|---|---|---|
-| Identity Registry | Access Control | Published principal facts | Identity owns identity; Access owns grants |
-| Tenant and Project Registry | Other business contexts | Published tenant/project references | Registry owns lifecycle; consumers own local opaque references |
-| Access Control | Every protected use case | Consumer-owned decision port or context-local grant projection | Access owns authorization facts; consumer owns operation policy |
-| Team Topology | Organization, Work, Run | Versioned team facts | Team owns roster and lifecycle |
-| Agent Organization | Access, Accounting, policy consumers | Versioned structure facts | Organization owns semantic hierarchy, not grants or accounting |
-| Workspace Registry | Policy and Risk, Run | Workspace facts and opaque references | Workspace owns registration; Policy owns trust |
-| Work Coordination | Run Orchestration | Versioned execution requests and work facts | Work owns work lifecycle; Run owns business execution |
-| Run Orchestration | Agent Communication | Delivery intent and delivery facts | Run owns run policy; Communication owns product delivery |
-| Policy and Risk | Run Orchestration | Policy decision contract | Policy owns risk decision; Run applies it |
-| Approval Management | Run Orchestration | Approval facts | Approval owns product decision; Run owns consequence |
-| Usage Metering | Usage Accounting | Exact normalized usage facts | Metering owns measurement |
-| Usage Accounting | Consumption Governance | Rated usage and cost facts | Accounting owns attribution and rating |
-| Consumption Governance | Run Orchestration | Reservation and consumption decision contract | Governance owns budget/quota decision |
-| Run Orchestration | Runtime ACL and AR | Consumer-owned ports plus AR Published Language | Run owns orchestration intent; AR owns execution |
-| Work Coordination | Task Board ACLs | Consumer-owned ports and external mappings | Work owns canonical work semantics |
-
-Detailed message names, aggregate reactions, and latency budgets remain in the
-owning dossiers, contract schemas, and open decisions.
 
 ## Cross-context identity namespaces
 
