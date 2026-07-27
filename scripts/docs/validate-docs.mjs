@@ -7,14 +7,16 @@ import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import GithubSlugger from "github-slugger";
 import { toString } from "mdast-util-to-string";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkGfm from "remark-gfm";
-import remarkParse from "remark-parse";
-import { unified } from "unified";
 import { visit } from "unist-util-visit";
 import YAML from "yaml";
 
+import {
+  listRepositoryFiles,
+  matchingCodeAnchorFiles,
+  validateCodeAnchorPattern,
+} from "./code-anchors.mjs";
 import { discoverGovernedMarkdown } from "./document-files.mjs";
+import { parseFrontmatter, parseMarkdown } from "./document-parser.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = process.env.DOCS_REPOSITORY_ROOT
@@ -28,44 +30,47 @@ const mermaidValidatorPath = path.join(scriptDirectory, "validate-mermaid.mjs");
 const adrApprovalPolicyStart = 34;
 
 const errors = [];
-const markdownProcessor = unified()
-  .use(remarkParse)
-  .use(remarkFrontmatter)
-  .use(remarkGfm);
-
 function relative(filePath) {
   return path.relative(repositoryRoot, filePath).split(path.sep).join("/");
 }
 
-function parseMarkdown(source) {
-  return markdownProcessor.parse(source.replaceAll("\r\n", "\n"));
+function parseDocument(filePath, tree) {
+  const { error, metadata } = parseFrontmatter(tree);
+  if (error) {
+    errors.push(`${relative(filePath)}: ${error}`);
+  }
+  return { metadata, tree };
 }
 
-function parseDocument(filePath, tree) {
-  const frontmatter = tree.children[0];
-  if (
-    frontmatter?.type !== "yaml" ||
-    frontmatter.position?.start.line !== 1
-  ) {
-    errors.push(`${relative(filePath)}: missing YAML frontmatter`);
-    return {
-      metadata: null,
-      tree,
-    };
+function validateCodeAnchors(document, repositoryFiles) {
+  if (!Array.isArray(document.metadata?.code_anchors)) {
+    return;
   }
 
-  try {
-    const metadata = YAML.parse(frontmatter.value);
-    return {
-      metadata,
-      tree,
-    };
-  } catch (error) {
-    errors.push(`${relative(filePath)}: invalid YAML: ${error.message}`);
-    return {
-      metadata: null,
-      tree,
-    };
+  const patterns = new Set();
+  for (const anchor of document.metadata.code_anchors) {
+    if (!anchor || typeof anchor !== "object") {
+      continue;
+    }
+    const patternError = validateCodeAnchorPattern(anchor.pattern);
+    if (patternError) {
+      errors.push(
+        `${relative(document.filePath)}: invalid code anchor ${JSON.stringify(anchor.pattern)}: ${patternError}`,
+      );
+      continue;
+    }
+    if (patterns.has(anchor.pattern)) {
+      errors.push(
+        `${relative(document.filePath)}: duplicate code anchor pattern ${anchor.pattern}`,
+      );
+      continue;
+    }
+    patterns.add(anchor.pattern);
+    if (matchingCodeAnchorFiles(anchor.pattern, repositoryFiles).length === 0) {
+      errors.push(
+        `${relative(document.filePath)}: stale code anchor ${anchor.pattern} matches no repository files`,
+      );
+    }
   }
 }
 
@@ -733,6 +738,7 @@ async function main() {
   const documentsByPath = new Map();
   const documentsById = new Map();
   const markdownTrees = new Map();
+  const repositoryFiles = await listRepositoryFiles(repositoryRoot);
 
   for (const filePath of allMarkdownFiles) {
     const source = await readFile(filePath, "utf8");
@@ -781,6 +787,7 @@ async function main() {
     validateDocumentPlacement(document);
     validateRequiredHeadings(document);
     validateAdrApproval(document);
+    validateCodeAnchors(document, repositoryFiles);
   }
 
   for (const document of documents) {

@@ -2,20 +2,11 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import remarkFrontmatter from "remark-frontmatter";
-import remarkGfm from "remark-gfm";
-import remarkParse from "remark-parse";
-import { unified } from "unified";
-import YAML from "yaml";
-
 import { discoverGovernedMarkdown } from "./document-files.mjs";
+import { parseFrontmatter, parseMarkdown } from "./document-parser.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "../..");
-const processor = unified()
-  .use(remarkParse)
-  .use(remarkFrontmatter)
-  .use(remarkGfm);
 const filterNames = new Set([
   "blocked-by",
   "id",
@@ -78,12 +69,7 @@ function parseArguments(arguments_) {
 }
 
 function parseMetadata(source) {
-  const tree = processor.parse(source.replaceAll("\r\n", "\n"));
-  const frontmatter = tree.children[0];
-  if (frontmatter?.type !== "yaml") {
-    return null;
-  }
-  return YAML.parse(frontmatter.value);
+  return parseFrontmatter(parseMarkdown(source)).metadata;
 }
 
 function matches(document, filters) {

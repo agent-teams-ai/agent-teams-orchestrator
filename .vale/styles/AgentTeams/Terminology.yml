@@ -1,0 +1,16 @@
+extends: substitution
+message: "Use '%s' instead of '%s'."
+level: error
+ignorecase: false
+swap:
+  '\bCloudevents\b': CloudEvents
+  '\bGithub\b': GitHub
+  '\bJavascript\b': JavaScript
+  '\bJetstream\b': JetStream
+  '\bLanggraph\b': LangGraph
+  '\bNats\b': NATS
+  '\bOpencode\b': OpenCode
+  '\bOpen Telemetry\b': OpenTelemetry
+  '\bPostgresql\b': PostgreSQL
+  '\bSqlite\b': SQLite
+  '\bTypescript\b': TypeScript

@@ -230,3 +230,51 @@ test("rejects an ADR without its required semantic structure", async () => {
     },
   );
 });
+
+test("rejects a code anchor that escapes the repository", async () => {
+  await withFixture(
+    (fixtureRoot) =>
+      replaceInFile(
+        path.join(fixtureRoot, "docs/glossary.md"),
+        "summary: Minimal glossary document used by documentation validator fixtures.\n",
+        "summary: Minimal glossary document used by documentation validator fixtures.\ncode_anchors:\n  - pattern: ../outside/**\n    enforcement: advisory\n",
+      ),
+    ({ code, output }) => {
+      assert.equal(code, 1);
+      assert.match(output, /pattern must not escape the repository root/);
+    },
+  );
+});
+
+test("rejects a stale code anchor", async () => {
+  await withFixture(
+    (fixtureRoot) =>
+      replaceInFile(
+        path.join(fixtureRoot, "docs/glossary.md"),
+        "summary: Minimal glossary document used by documentation validator fixtures.\n",
+        "summary: Minimal glossary document used by documentation validator fixtures.\ncode_anchors:\n  - pattern: src/missing/**\n    enforcement: advisory\n",
+      ),
+    ({ code, output }) => {
+      assert.equal(code, 1);
+      assert.match(output, /stale code anchor src\/missing\/\*\*/);
+    },
+  );
+});
+
+test("rejects conflicting enforcement for one code anchor pattern", async () => {
+  await withFixture(
+    async (fixtureRoot) => {
+      await mkdir(path.join(fixtureRoot, "src"), { recursive: true });
+      await writeFile(path.join(fixtureRoot, "src/example.ts"), "export {};\n");
+      await replaceInFile(
+        path.join(fixtureRoot, "docs/glossary.md"),
+        "summary: Minimal glossary document used by documentation validator fixtures.\n",
+        "summary: Minimal glossary document used by documentation validator fixtures.\ncode_anchors:\n  - pattern: src/**\n    enforcement: advisory\n  - pattern: src/**\n    enforcement: required\n",
+      );
+    },
+    ({ code, output }) => {
+      assert.equal(code, 1);
+      assert.match(output, /duplicate code anchor pattern src\/\*\*/);
+    },
+  );
+});

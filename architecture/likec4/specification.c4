@@ -1,0 +1,13 @@
+specification {
+  element boundedContext
+  element integrationModule
+  element externalSystem
+  element applicationBoundary
+
+  relationship publishedFacts
+  relationship decisionContract
+  relationship consumerPort
+  relationship aclTranslation
+  relationship observation
+  relationship externalPort
+}

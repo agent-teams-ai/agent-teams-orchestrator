@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en,en-GB",
+  "useGitignore": true,
+  "enableGlobDot": true,
+  "files": [
+    "README.md",
+    "AGENTS.md",
+    "docs/**/*.md"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "agent-teams-project",
+      "path": "./.cspell/project-words.txt",
+      "addWords": true
+    }
+  ],
+  "dictionaries": [
+    "agent-teams-project",
+    "companies",
+    "node",
+    "npm",
+    "softwareTerms",
+    "typescript"
+  ],
+  "ignorePaths": [
+    ".cache/**",
+    "node_modules/**",
+    "scripts/docs/fixtures/**"
+  ],
+  "ignoreRegExpList": [
+    "Urls",
+    "Email",
+    "Base64",
+    "CommitHash",
+    "/`[^`\\n]+`/g"
+  ]
+}

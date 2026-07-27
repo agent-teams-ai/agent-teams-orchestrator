@@ -1,0 +1,7 @@
+views {
+  view strategicContextMap {
+    title 'Strategic Context Map'
+    description 'Business bounded contexts and their explicit integration boundaries'
+    include *
+  }
+}

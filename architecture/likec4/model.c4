@@ -1,0 +1,383 @@
+model {
+  identityRegistry = boundedContext 'Identity Registry' {
+    metadata {
+      package_id 'context.identity-registry'
+      document_id 'domain.contexts.identity-registry'
+    }
+  }
+
+  accessControl = boundedContext 'Access Control' {
+    metadata {
+      package_id 'context.access-control'
+      document_id 'domain.contexts.access-control'
+    }
+  }
+
+  tenantProjectRegistry = boundedContext 'Tenant and Project Registry' {
+    metadata {
+      package_id 'context.tenant-project-registry'
+      document_id 'domain.contexts.tenant-project-registry'
+    }
+  }
+
+  workspaceRegistry = boundedContext 'Workspace Registry' {
+    metadata {
+      package_id 'context.workspace-registry'
+      document_id 'domain.contexts.workspace-registry'
+    }
+  }
+
+  teamTopology = boundedContext 'Team Topology' {
+    metadata {
+      package_id 'context.team-topology'
+      document_id 'domain.contexts.team-topology'
+    }
+  }
+
+  agentOrganization = boundedContext 'Agent Organization' {
+    metadata {
+      package_id 'context.agent-organization'
+      document_id 'domain.contexts.agent-organization'
+    }
+  }
+
+  workCoordination = boundedContext 'Work Coordination' {
+    metadata {
+      package_id 'context.work-coordination'
+      document_id 'domain.contexts.work-coordination'
+    }
+  }
+
+  runOrchestration = boundedContext 'Run Orchestration' {
+    metadata {
+      package_id 'context.run-orchestration'
+      document_id 'domain.contexts.run-orchestration'
+    }
+  }
+
+  agentCommunication = boundedContext 'Agent Communication' {
+    metadata {
+      package_id 'context.agent-communication'
+      document_id 'domain.contexts.agent-communication'
+    }
+  }
+
+  policyRisk = boundedContext 'Policy and Risk' {
+    metadata {
+      package_id 'context.policy-risk'
+      document_id 'domain.contexts.policy-risk'
+    }
+  }
+
+  approvalManagement = boundedContext 'Approval Management' {
+    metadata {
+      package_id 'context.approval-management'
+      document_id 'domain.contexts.approval-management'
+    }
+  }
+
+  usageMetering = boundedContext 'Usage Metering' {
+    metadata {
+      package_id 'context.usage-metering'
+      document_id 'domain.contexts.usage-metering'
+    }
+  }
+
+  usageAccounting = boundedContext 'Usage Accounting' {
+    metadata {
+      package_id 'context.usage-accounting'
+      document_id 'domain.contexts.usage-accounting'
+    }
+  }
+
+  consumptionGovernance = boundedContext 'Consumption Governance' {
+    metadata {
+      package_id 'context.consumption-governance'
+      document_id 'domain.contexts.consumption-governance'
+    }
+  }
+
+  runtimeAcl = integrationModule 'Stateless Runtime ACL' {
+    metadata {
+      owner_document 'architecture.runtime-boundary'
+    }
+  }
+
+  agentRuntime = externalSystem 'ar Runtime' {
+    metadata {
+      owner_document 'architecture.runtime-boundary'
+    }
+  }
+
+  taskBoardAcls = integrationModule 'Task Board ACLs' {
+    metadata {
+      owner_document 'domain.contexts.work-coordination'
+    }
+  }
+
+  applicationUseCases = applicationBoundary 'Application use cases' {
+    metadata {
+      owner_document 'architecture.dependency-rules'
+    }
+  }
+
+  identityRegistry -[publishedFacts]-> accessControl 'Principal facts' {
+    metadata {
+      integration_style 'Published principal facts'
+      authority 'Identity owns identity; Access owns grants'
+      status 'proposed'
+    }
+  }
+  tenantProjectRegistry -[publishedFacts]-> accessControl 'Tenant and project facts' {
+    metadata {
+      integration_style 'Published tenant and project references'
+      authority 'Registry owns lifecycle; Access owns authorization facts'
+      status 'proposed'
+    }
+  }
+  accessControl -[decisionContract]-> applicationUseCases 'Authorization facts' {
+    metadata {
+      integration_style 'Consumer-owned decision port or context-local grant projection'
+      authority 'Access owns authorization facts; consumer owns operation policy'
+      status 'proposed'
+    }
+  }
+  tenantProjectRegistry -[publishedFacts]-> workspaceRegistry 'Project identity' {
+    metadata {
+      integration_style 'Published tenant and project references'
+      authority 'Registry owns lifecycle; Workspace owns registration'
+      status 'proposed'
+    }
+  }
+  tenantProjectRegistry -[publishedFacts]-> teamTopology 'Project identity' {
+    metadata {
+      integration_style 'Published tenant and project references'
+      authority 'Registry owns lifecycle; Team owns roster and team lifecycle'
+      status 'proposed'
+    }
+  }
+  tenantProjectRegistry -[publishedFacts]-> agentOrganization 'Tenant and project identity' {
+    metadata {
+      integration_style 'Published tenant and project references'
+      authority 'Registry owns lifecycle; Organization owns semantic hierarchy'
+      status 'proposed'
+    }
+  }
+  tenantProjectRegistry -[publishedFacts]-> workCoordination 'Project identity' {
+    metadata {
+      integration_style 'Published tenant and project references'
+      authority 'Registry owns lifecycle; Work owns work lifecycle'
+      status 'proposed'
+    }
+  }
+  tenantProjectRegistry -[publishedFacts]-> runOrchestration 'Project identity' {
+    metadata {
+      integration_style 'Published tenant and project references'
+      authority 'Registry owns lifecycle; Run owns business execution'
+      status 'proposed'
+    }
+  }
+  tenantProjectRegistry -[publishedFacts]-> usageMetering 'Scope identity' {
+    metadata {
+      integration_style 'Published tenant and project references'
+      authority 'Registry owns lifecycle; Metering owns measurement'
+      status 'proposed'
+    }
+  }
+  tenantProjectRegistry -[publishedFacts]-> usageAccounting 'Scope identity' {
+    metadata {
+      integration_style 'Published tenant and project references'
+      authority 'Registry owns lifecycle; Accounting owns attribution and rating'
+      status 'proposed'
+    }
+  }
+  tenantProjectRegistry -[publishedFacts]-> consumptionGovernance 'Scope identity' {
+    metadata {
+      integration_style 'Published tenant and project references'
+      authority 'Registry owns lifecycle; Governance owns budget and quota decisions'
+      status 'proposed'
+    }
+  }
+  teamTopology -[publishedFacts]-> agentOrganization 'Team facts' {
+    metadata {
+      integration_style 'Versioned team facts'
+      authority 'Team owns roster and lifecycle; Organization owns placements'
+      status 'proposed'
+    }
+  }
+  teamTopology -[publishedFacts]-> workCoordination 'Topology facts' {
+    metadata {
+      integration_style 'Versioned team facts'
+      authority 'Team owns roster and lifecycle; Work owns assignments'
+      status 'proposed'
+    }
+  }
+  teamTopology -[publishedFacts]-> runOrchestration 'Topology facts' {
+    metadata {
+      integration_style 'Versioned team facts'
+      authority 'Team owns roster and lifecycle; Run owns execution policy'
+      status 'proposed'
+    }
+  }
+  agentOrganization -[publishedFacts]-> accessControl 'Structure facts' {
+    metadata {
+      integration_style 'Versioned structure facts'
+      authority 'Organization owns hierarchy; Access owns grants'
+      status 'proposed'
+    }
+  }
+  agentOrganization -[publishedFacts]-> usageAccounting 'Attribution scope' {
+    metadata {
+      integration_style 'Versioned structure facts'
+      authority 'Organization owns hierarchy; Accounting owns attribution'
+      status 'proposed'
+    }
+  }
+  workspaceRegistry -[publishedFacts]-> policyRisk 'Workspace facts' {
+    metadata {
+      integration_style 'Workspace facts and opaque references'
+      authority 'Workspace owns registration; Policy owns trust'
+      status 'proposed'
+    }
+  }
+  workspaceRegistry -[publishedFacts]-> runOrchestration 'Workspace identity' {
+    metadata {
+      integration_style 'Workspace facts and opaque references'
+      authority 'Workspace owns registration; Run owns execution policy'
+      status 'proposed'
+    }
+  }
+  workCoordination -[publishedFacts]-> runOrchestration 'Execution requested' {
+    metadata {
+      integration_style 'Versioned execution requests'
+      authority 'Work owns work lifecycle; Run owns business execution'
+      status 'proposed'
+    }
+  }
+  runOrchestration -[publishedFacts]-> workCoordination 'Execution facts' {
+    metadata {
+      integration_style 'Versioned execution facts'
+      authority 'Run owns execution; Work owns work lifecycle consequences'
+      status 'proposed'
+    }
+  }
+  policyRisk -[decisionContract]-> runOrchestration 'Policy decisions' {
+    metadata {
+      integration_style 'Policy decision contract'
+      authority 'Policy owns risk decisions; Run applies them'
+      status 'proposed'
+    }
+  }
+  consumptionGovernance -[decisionContract]-> runOrchestration 'Consumption decisions' {
+    metadata {
+      integration_style 'Reservation and consumption decision contract'
+      authority 'Governance owns budget and quota decisions; Run applies them'
+      status 'proposed'
+    }
+  }
+  runOrchestration -[publishedFacts]-> approvalManagement 'Approval requested' {
+    metadata {
+      integration_style 'Versioned approval request'
+      authority 'Run owns execution intent; Approval owns product decision lifecycle'
+      status 'proposed'
+    }
+  }
+  approvalManagement -[publishedFacts]-> runOrchestration 'Approval decided' {
+    metadata {
+      integration_style 'Versioned approval facts'
+      authority 'Approval owns product decision; Run owns consequence'
+      status 'proposed'
+    }
+  }
+  runOrchestration -[publishedFacts]-> agentCommunication 'Delivery intent' {
+    metadata {
+      integration_style 'Versioned delivery intent'
+      authority 'Run owns run policy; Communication owns product delivery'
+      status 'proposed'
+    }
+  }
+  agentCommunication -[publishedFacts]-> runOrchestration 'Delivery facts' {
+    metadata {
+      integration_style 'Versioned delivery facts'
+      authority 'Communication owns product delivery; Run owns run consequence'
+      status 'proposed'
+    }
+  }
+  workCoordination -[publishedFacts]-> agentCommunication 'Handoff intent' {
+    metadata {
+      integration_style 'Versioned handoff intent'
+      authority 'Work owns work lifecycle; Communication owns delivery'
+      status 'proposed'
+    }
+  }
+  agentCommunication -[publishedFacts]-> workCoordination 'Handoff facts' {
+    metadata {
+      integration_style 'Versioned handoff facts'
+      authority 'Communication owns delivery; Work owns work consequence'
+      status 'proposed'
+    }
+  }
+  runOrchestration -[consumerPort]-> runtimeAcl 'Runtime commands' {
+    metadata {
+      integration_style 'Consumer-owned runtime ports'
+      authority 'Run owns orchestration intent; ACL translates only'
+      status 'proposed'
+    }
+  }
+  runtimeAcl -[aclTranslation]-> agentRuntime 'Runtime Published Language' {
+    metadata {
+      integration_style 'Anti-Corruption Layer translation'
+      authority 'AR owns execution; ACL owns translation'
+      status 'proposed'
+    }
+  }
+  agentRuntime -[observation]-> runtimeAcl 'Runtime facts' {
+    metadata {
+      integration_style 'AR Published Language'
+      authority 'AR owns runtime facts; ACL translates only'
+      status 'proposed'
+    }
+  }
+  runtimeAcl -[observation]-> runOrchestration 'Runtime observations' {
+    metadata {
+      integration_style 'Consumer-owned observation projection'
+      authority 'AR owns runtime facts; Run owns its observation projection'
+      status 'proposed'
+    }
+  }
+  runtimeAcl -[observation]-> usageMetering 'Usage observations' {
+    metadata {
+      integration_style 'Consumer-owned usage ingestion'
+      authority 'AR owns runtime facts; Metering owns normalized measurement'
+      status 'proposed'
+    }
+  }
+  runOrchestration -[publishedFacts]-> usageMetering 'Attribution hints' {
+    metadata {
+      integration_style 'Versioned attribution hints'
+      authority 'Run owns execution context; Metering owns normalized measurement'
+      status 'proposed'
+    }
+  }
+  usageMetering -[publishedFacts]-> usageAccounting 'Metered usage' {
+    metadata {
+      integration_style 'Exact normalized usage facts'
+      authority 'Metering owns measurement; Accounting owns attribution and rating'
+      status 'proposed'
+    }
+  }
+  usageAccounting -[publishedFacts]-> consumptionGovernance 'Usage and cost facts' {
+    metadata {
+      integration_style 'Rated usage and cost facts'
+      authority 'Accounting owns attribution and rating; Governance owns limits'
+      status 'proposed'
+    }
+  }
+  workCoordination -[externalPort]-> taskBoardAcls 'Board operations' {
+    metadata {
+      integration_style 'Consumer-owned board ports and external mappings'
+      authority 'Work owns canonical work semantics; ACL translates only'
+      status 'proposed'
+    }
+  }
+}

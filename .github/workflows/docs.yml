@@ -4,29 +4,45 @@ on:
   pull_request:
     paths:
       - ".github/workflows/docs.yml"
+      - ".agents/skills/**"
+      - ".cspell/**"
+      - ".cspell.json"
       - ".markdownlint-cli2.mjs"
       - ".node-version"
+      - ".vale/**"
+      - ".vale.ini"
       - "AGENTS.md"
+      - "architecture/likec4/**"
       - "README.md"
       - "docs/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - "scripts/docs/**"
+      - "scripts/architecture/validate-architecture-model*"
+      - "scripts/skills/**"
   push:
     branches:
       - main
     paths:
       - ".github/workflows/docs.yml"
+      - ".agents/skills/**"
+      - ".cspell/**"
+      - ".cspell.json"
       - ".markdownlint-cli2.mjs"
       - ".node-version"
+      - ".vale/**"
+      - ".vale.ini"
       - "AGENTS.md"
+      - "architecture/likec4/**"
       - "README.md"
       - "docs/**"
       - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - "scripts/docs/**"
+      - "scripts/architecture/validate-architecture-model*"
+      - "scripts/skills/**"
 
 permissions:
   contents: read
@@ -44,6 +60,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - name: Install pnpm
         uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
@@ -62,3 +80,7 @@ jobs:
 
       - name: Validate documentation
         run: pnpm docs:check
+
+      - name: Check documentation impact
+        if: github.event_name == 'pull_request'
+        run: pnpm docs:impact -- --base "${{ github.event.pull_request.base.sha }}" --strict
