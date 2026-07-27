@@ -122,14 +122,14 @@ async function main() {
     }
   }
 
-  const matches_ = documents
+  const matchedDocuments = documents
     .filter((document) => matches(document, options.filters))
-    .sort((left, right) => left.id.localeCompare(right.id));
+    .toSorted((left, right) => left.id.localeCompare(right.id));
 
   if (options.json) {
-    console.log(JSON.stringify(matches_, null, 2));
+    console.log(JSON.stringify(matchedDocuments, null, 2));
   } else {
-    for (const document of matches_) {
+    for (const document of matchedDocuments) {
       console.log(
         [
           document.id,
@@ -143,7 +143,7 @@ async function main() {
     }
   }
 
-  if (matches_.length === 0) {
+  if (matchedDocuments.length === 0) {
     process.exitCode = 1;
   }
 }

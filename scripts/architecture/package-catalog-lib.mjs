@@ -25,7 +25,7 @@ export async function walk(directory, predicate, options = {}) {
 
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
-  for (const entry of entries.sort((left, right) =>
+  for (const entry of entries.toSorted((left, right) =>
     left.name.localeCompare(right.name),
   )) {
     if (

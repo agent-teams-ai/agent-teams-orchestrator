@@ -94,7 +94,7 @@ function selectedCatalogName(specifier) {
   if (specifier.startsWith("catalog:") && specifier.length > 8) {
     return specifier.slice(8);
   }
-  return undefined;
+  return;
 }
 
 async function loadWorkspaceManifests(repositoryRoot, workspace, errors) {
@@ -125,7 +125,7 @@ async function loadWorkspaceManifests(repositoryRoot, workspace, errors) {
   });
   const manifests = [];
 
-  for (const filePath of selectedPaths.sort()) {
+  for (const filePath of selectedPaths.toSorted()) {
     try {
       manifests.push({
         filePath,
@@ -251,7 +251,7 @@ async function main() {
     for (const section of dependencySections) {
       for (const [dependencyName, dependencySpecifier] of Object.entries(
         entry.manifest[section] ?? {},
-      ).sort(([left], [right]) => left.localeCompare(right))) {
+      ).toSorted(([left], [right]) => left.localeCompare(right))) {
         validateDependency(
           entry,
           section,
@@ -266,7 +266,7 @@ async function main() {
   }
 
   if (errors.length > 0) {
-    for (const error of [...new Set(errors)].sort()) {
+    for (const error of [...new Set(errors)].toSorted()) {
       console.error(`ERROR ${error}`);
     }
     console.error(

@@ -426,7 +426,7 @@ async function validateDirectoryIndexes(markdownFiles, documentsByPath) {
     }
   }
 
-  for (const directory of [...directories].sort()) {
+  for (const directory of [...directories].toSorted()) {
     const entries = await readdir(directory, { withFileTypes: true });
     const directDocuments = entries
       .filter(
@@ -542,10 +542,10 @@ function validateIndexTables(documentsByPath) {
               .split(",")
               .map((value) => value.trim())
               .filter(Boolean)
-              .sort();
+              .toSorted();
             const expectedBlockers = [
               ...(target.metadata.blocked_by ?? []),
-            ].sort();
+            ].toSorted();
             if (
               JSON.stringify(renderedBlockers) !==
               JSON.stringify(expectedBlockers)
@@ -651,11 +651,23 @@ function validateMermaid(diagrams) {
     let stdout = "";
     let stderr = "";
     let timedOut = false;
+    let settled = false;
 
     const timeout = setTimeout(() => {
       timedOut = true;
       child.kill("SIGKILL");
     }, 120_000);
+
+    const resolveOnce = (result) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timeout);
+      // The settled guard makes this callback idempotent across error/close races.
+      // oxlint-disable-next-line promise/no-multiple-resolved
+      resolve(result);
+    };
 
     child.stdout.setEncoding("utf8");
     child.stdout.on("data", (chunk) => {
@@ -667,17 +679,15 @@ function validateMermaid(diagrams) {
     });
 
     child.on("error", (error) => {
-      clearTimeout(timeout);
-      resolve({
+      resolveOnce({
         error: error.message,
         results: null,
       });
     });
 
     child.on("close", (code) => {
-      clearTimeout(timeout);
       if (timedOut || code !== 0) {
-        resolve({
+        resolveOnce({
           error: timedOut
             ? "parser timed out after 120 seconds"
             : stderr.trim() || `parser exited with code ${code}`,
@@ -687,12 +697,12 @@ function validateMermaid(diagrams) {
       }
 
       try {
-        resolve({
+        resolveOnce({
           error: null,
           results: JSON.parse(stdout),
         });
       } catch (error) {
-        resolve({
+        resolveOnce({
           error: `parser returned invalid JSON: ${error.message}`,
           results: null,
         });
@@ -1017,7 +1027,7 @@ async function main() {
   }
 
   if (errors.length > 0) {
-    for (const error of errors.sort()) {
+    for (const error of errors.toSorted()) {
       console.error(`ERROR ${error}`);
     }
     console.error(`\nDocumentation validation failed with ${errors.length} error(s).`);

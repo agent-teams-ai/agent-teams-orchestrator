@@ -50,7 +50,7 @@ export async function listRepositoryFiles(repositoryRoot) {
 
   async function visit(directory) {
     const entries = await readdir(directory, { withFileTypes: true });
-    for (const entry of entries.sort((left, right) =>
+    for (const entry of entries.toSorted((left, right) =>
       left.name.localeCompare(right.name),
     )) {
       if (entry.isDirectory() && excludedDirectoryNames.has(entry.name)) {

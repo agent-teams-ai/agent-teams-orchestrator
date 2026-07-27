@@ -107,7 +107,7 @@ test("every negative threat fixture is rejected by exact rule ids", async () => 
   for (const scenario of scenarios) {
     assert.deepEqual(evaluateThreatScenario(scenario), {
       decision: scenario.expected.decision,
-      ruleIds: [...scenario.expected.ruleIds].sort(),
+      ruleIds: [...scenario.expected.ruleIds].toSorted(),
     });
   }
 });
@@ -116,6 +116,6 @@ test("rejects protected telemetry with unrestricted export", async () => {
   const fixture = await readJson("data-classification.invalid.json");
   const ruleIds = validateClassificationSemantics(fixture.manifest)
     .map((error) => error.slice(0, error.indexOf(" ")))
-    .sort();
-  assert.deepEqual(ruleIds, [...fixture.expectedRuleIds].sort());
+    .toSorted();
+  assert.deepEqual(ruleIds, [...fixture.expectedRuleIds].toSorted());
 });

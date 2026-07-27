@@ -12,6 +12,7 @@ related:
   - ADR-0041
   - ADR-0053
   - ADR-0054
+  - ADR-0056
   - architecture.dependency-rules
   - architecture.feature-module-standard
   - architecture.machine-readable-model
@@ -22,8 +23,10 @@ code_anchors:
     enforcement: advisory
   - pattern: tooling/architecture-conformance/**
     enforcement: advisory
-  - pattern: .oxlintrc.json
-    enforcement: advisory
+  - pattern: .oxlintrc*.json
+    enforcement: required
+  - pattern: scripts/lint/**
+    enforcement: required
   - pattern: pnpm-workspace.yaml
     enforcement: advisory
 ---
@@ -74,6 +77,35 @@ The baseline consists of:
 - fixture-based architecture conformance tests.
 - LikeC4 semantic validation and package-catalog consistency checks;
 - repository-local documentation Skill and code impact anchors.
+
+### Source-quality lanes
+
+Status: active.
+
+Oxlint is the only lint runtime. The repository does not install or invoke ESLint.
+The JavaScript boundary plugin executes inside Oxlint and is covered by the
+architecture conformance corpus.
+
+The quality lanes are deliberately different:
+
+| Lane | Command | Policy |
+|---|---|---|
+| Focused fast feedback | `pnpm lint:fast:files -- <paths>` | Blocking rules for files being edited |
+| Repository fast gate | `pnpm lint:fast` | Blocking correctness, suspicious-code, runtime, test, and boundary rules |
+| Type-aware gate | `pnpm lint:type-aware` | Blocking typed safety over production TypeScript roots |
+| Full lint gate | `pnpm lint` | Fast, type-aware, and lint-configuration conformance |
+| Evaluation lane | `pnpm lint:advisory` | Non-blocking bounded complexity and modernization findings |
+
+The blocking baseline enables the built-in TypeScript, Oxc, Unicorn, import,
+JSDoc, Vitest, Promise, and Node plugins where they provide high-signal checks.
+Capability-specific plugins such as React, JSX accessibility, Next.js, Vue, or
+Jest are activated only when a real package needs them. Every promotion requires
+valid and invalid fixtures and a clean baseline review.
+
+TypeScript 7 remains the authoritative compiler. Type-aware Oxlint supplements it
+through the exact pinned `oxlint-tsgolint` release and never replaces
+`pnpm typecheck`. Unsupported rules are not listed as protection; the conformance
+suite proves that representative blocking diagnostics really fire.
 
 Stage 0 remains active through every later stage. Nx does not replace it.
 

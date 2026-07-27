@@ -123,7 +123,7 @@ function validateCatalogSemantics(catalog, documents, errors) {
     }
   }
 
-  const catalogPaths = [...byPath.keys()].sort();
+  const catalogPaths = [...byPath.keys()].toSorted();
   for (let leftIndex = 0; leftIndex < catalogPaths.length; leftIndex += 1) {
     for (
       let rightIndex = leftIndex + 1;
@@ -214,7 +214,7 @@ async function validateMaterializedPackage(
   ]) {
     for (const [dependencyName, dependencyRange] of Object.entries(
       manifest[section] ?? {},
-    ).sort(([left], [right]) => left.localeCompare(right))) {
+    ).toSorted(([left], [right]) => left.localeCompare(right))) {
       if (!dependencyName.startsWith("@agent-teams/")) {
         continue;
       }
@@ -355,7 +355,7 @@ async function main() {
     materializedPaths.add(owner[0]);
   }
 
-  for (const materializedPath of [...materializedPaths].sort()) {
+  for (const materializedPath of [...materializedPaths].toSorted()) {
     const entry = byPath.get(materializedPath);
     const owner = documents.get(entry.owner_document);
     if (owner) {
@@ -370,7 +370,7 @@ async function main() {
   }
 
   if (errors.length > 0) {
-    for (const error of [...new Set(errors)].sort()) {
+    for (const error of [...new Set(errors)].toSorted()) {
       console.error(`ERROR ${error}`);
     }
     console.error(

@@ -107,9 +107,12 @@ async function validateOpenAiMetadata(
     );
     return;
   }
-  const interface_ = metadata?.interface;
+  const interfaceMetadata = metadata?.interface;
   for (const field of ["display_name", "short_description", "default_prompt"]) {
-    if (typeof interface_?.[field] !== "string" || !interface_[field].trim()) {
+    if (
+      typeof interfaceMetadata?.[field] !== "string" ||
+      !interfaceMetadata[field].trim()
+    ) {
       errors.push(
         `${relative(repositoryRoot, metadataPath)}: interface.${field} must be a non-empty string`,
       );
@@ -214,10 +217,10 @@ async function main() {
     const skillDirectories = entries
       .filter((entry) => entry.isDirectory())
       .map((entry) => path.join(skillsRoot, entry.name))
-      .sort();
-    for (const entry of entries.filter((entry) => !entry.isDirectory())) {
+      .toSorted();
+    for (const fileEntry of entries.filter((entry) => !entry.isDirectory())) {
       errors.push(
-        `${relative(repositoryRoot, path.join(skillsRoot, entry.name))}: skill root may contain only skill directories`,
+        `${relative(repositoryRoot, path.join(skillsRoot, fileEntry.name))}: skill root may contain only skill directories`,
       );
     }
     if (skillDirectories.length === 0) {
@@ -235,7 +238,7 @@ async function main() {
   }
 
   if (errors.length > 0) {
-    for (const error of errors.sort()) {
+    for (const error of errors.toSorted()) {
       console.error(`ERROR ${error}`);
     }
     console.error(`\nSkill validation failed with ${errors.length} error(s).`);

@@ -94,7 +94,7 @@ test("the project dictionary is sorted and unique", async () => {
 
   assert.deepEqual(
     normalizedWords,
-    [...normalizedWords].sort(),
+    [...normalizedWords].toSorted(),
     "project dictionary must be sorted case-insensitively",
   );
   assert.equal(

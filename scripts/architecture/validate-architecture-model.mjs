@@ -339,7 +339,7 @@ async function main() {
   }
 
   if (errors.length > 0) {
-    for (const error of errors.sort()) {
+    for (const error of errors.toSorted()) {
       console.error(`ERROR ${error}`);
     }
     console.error(

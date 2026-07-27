@@ -99,7 +99,6 @@ before a high-cost boundary violation.
 - Raw secrets remain inside secret adapters; other layers carry only `SecretRef`.
   Outbound HTTP crosses a controlled egress adapter. Follow
   [security architecture](docs/architecture/security-architecture.md).
-
 ## Change workflow
 
 For architecture or implementation work:
@@ -112,7 +111,8 @@ For architecture or implementation work:
 6. add adapters and composition at the edge;
 7. add tests and conformance evidence proportional to risk;
 8. update canonical documentation in the same change;
-9. run the relevant repository gates.
+9. run `pnpm lint:fast:files -- <changed source files>` during iteration;
+10. run the relevant full repository gates before handoff.
 
 For governed documentation changes, follow the repository-local
 `docs-authoring` Skill. Run `pnpm docs:impact` before the final documentation
@@ -130,6 +130,7 @@ Minimum documentation and architecture preflight:
 ```bash
 pnpm docs:check
 pnpm architecture:check
+pnpm lint
 pnpm security:check
 pnpm typecheck
 ```

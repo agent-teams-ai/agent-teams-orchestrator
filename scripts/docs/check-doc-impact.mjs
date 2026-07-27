@@ -229,7 +229,7 @@ function calculateImpacts(documents, changedPaths) {
     });
   }
 
-  return impacts.sort((left, right) => left.id.localeCompare(right.id));
+  return impacts.toSorted((left, right) => left.id.localeCompare(right.id));
 }
 
 async function main() {
@@ -248,7 +248,9 @@ async function main() {
   }
 
   try {
-    const changedPaths = [...new Set(await discoverChangedPaths(options))].sort();
+    const changedPaths = [
+      ...new Set(await discoverChangedPaths(options)),
+    ].toSorted();
     const documents = await loadAnchoredDocuments(options.repositoryRoot);
     const impacts = calculateImpacts(documents, changedPaths);
     const missingRequired = impacts.filter(
@@ -266,7 +268,7 @@ async function main() {
           ...new Set(
             impact.matchedAnchors.flatMap((anchor) => anchor.matchedPaths),
           ),
-        ].sort();
+        ].toSorted();
         console.log(
           `${impact.enforcement.toUpperCase()} ${impact.id} ${impact.path} <- ${matchedPaths.join(", ")}${impact.documentChanged ? " (document updated)" : ""}`,
         );

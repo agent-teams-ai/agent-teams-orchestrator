@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": [
+    "./.oxlintrc.json"
+  ],
+  "jsPlugins": [],
+  "categories": {
+    "correctness": "error",
+    "nursery": "off",
+    "pedantic": "off",
+    "perf": "off",
+    "restriction": "off",
+    "style": "off",
+    "suspicious": "error"
+  },
+  "rules": {
+    "boundaries/dependencies": "off",
+    "boundaries/no-unknown-dependencies": "off",
+    "eslint/complexity": ["warn", 20],
+    "eslint/max-depth": ["warn", 5],
+    "eslint/max-lines-per-function": ["warn", 150],
+    "eslint/max-params": ["warn", 5],
+    "unicorn/consistent-function-scoping": "warn",
+    "unicorn/prefer-at": "warn",
+    "unicorn/prefer-structured-clone": "warn"
+  }
+}

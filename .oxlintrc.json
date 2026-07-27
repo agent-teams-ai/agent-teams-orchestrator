@@ -1,10 +1,35 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "nursery": "off",
+    "pedantic": "off",
+    "perf": "off",
+    "restriction": "off",
+    "style": "off",
+    "suspicious": "error"
+  },
   "jsPlugins": [
     {
       "name": "boundaries",
       "specifier": "eslint-plugin-boundaries"
     }
+  ],
+  "options": {
+    "reportUnusedDisableDirectives": "error",
+    "typeAware": false,
+    "typeCheck": false
+  },
+  "plugins": [
+    "eslint",
+    "typescript",
+    "oxc",
+    "unicorn",
+    "import",
+    "jsdoc",
+    "vitest",
+    "promise",
+    "node"
   ],
   "settings": {
     "boundaries/include": [
@@ -87,6 +112,29 @@
     }
   },
   "rules": {
+    "curly": "error",
+    "eqeqeq": "error",
+    "import/no-duplicates": "error",
+    "import/no-mutable-exports": "error",
+    "import/no-self-import": "error",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "no-script-url": "error",
+    "node/no-path-concat": "error",
+    "promise/no-return-wrap": "error",
+    "promise/param-names": "error",
+    "typescript/consistent-type-imports": "error",
+    "typescript/no-import-type-side-effects": "error",
+    "typescript/prefer-as-const": "error",
+    "unicorn/error-message": "error",
+    "unicorn/no-abusive-eslint-disable": "error",
+    "unicorn/prefer-node-protocol": "error",
+    "unicorn/no-useless-undefined": "error",
+    "vitest/no-focused-tests": "error",
+    "vitest/no-identical-title": "error",
+    "vitest/valid-expect": "error",
+    "vitest/valid-expect-in-promise": "error",
     "boundaries/no-unknown-dependencies": "error",
     "boundaries/dependencies": [
       "error",
@@ -337,5 +385,19 @@
         ]
       }
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "apps/**/src/features/*/domain/**/*.{ts,tsx,mts,cts}",
+        "apps/**/src/features/*/contracts/**/*.{ts,tsx,mts,cts}",
+        "packages/**/src/features/*/domain/**/*.{ts,tsx,mts,cts}",
+        "packages/**/src/features/*/contracts/**/*.{ts,tsx,mts,cts}"
+      ],
+      "rules": {
+        "typescript/no-explicit-any": "error",
+        "typescript/no-non-null-assertion": "error"
+      }
+    }
+  ]
 }

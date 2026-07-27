@@ -39,7 +39,7 @@ async function findSecurityManifests(repositoryRoot) {
       throw error;
     }
 
-    for (const entry of entries.sort((left, right) =>
+    for (const entry of entries.toSorted((left, right) =>
       left.name.localeCompare(right.name),
     )) {
       const entryPath = path.join(directory, entry.name);
@@ -58,7 +58,7 @@ async function findSecurityManifests(repositoryRoot) {
 }
 
 function sorted(values) {
-  return [...new Set(values)].sort();
+  return [...new Set(values)].toSorted();
 }
 
 function schemaErrors(validate) {

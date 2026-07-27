@@ -14,7 +14,7 @@ export async function walk(directory, predicate) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
 
-  for (const entry of entries.sort((left, right) =>
+  for (const entry of entries.toSorted((left, right) =>
     left.name.localeCompare(right.name),
   )) {
     const entryPath = path.join(directory, entry.name);
@@ -84,6 +84,6 @@ export async function discoverGovernedMarkdown(repositoryRoot) {
     governedMarkdownFiles: [
       ...docsMarkdownFiles,
       ...colocatedMarkdownFiles,
-    ].sort(),
+    ].toSorted(),
   };
 }
