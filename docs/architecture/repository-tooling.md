@@ -91,6 +91,7 @@ The quality lanes are deliberately different:
 | Lane | Command | Policy |
 |---|---|---|
 | Focused fast feedback | `pnpm lint:fast:files -- <paths>` | Blocking rules for files being edited |
+| Focused typed feedback | `pnpm lint:type-aware:files -- <paths>` | Blocking typed safety for one or more explicit TypeScript files or directories |
 | Repository fast gate | `pnpm lint:fast` | Blocking correctness, suspicious-code, runtime, test, and boundary rules |
 | Type-aware gate | `pnpm lint:type-aware` | Blocking typed safety over production TypeScript roots |
 | Full lint gate | `pnpm lint` | Fast, type-aware, and lint-configuration conformance |
@@ -105,7 +106,10 @@ valid and invalid fixtures and a clean baseline review.
 TypeScript 7 remains the authoritative compiler. Type-aware Oxlint supplements it
 through the exact pinned `oxlint-tsgolint` release and never replaces
 `pnpm typecheck`. Unsupported rules are not listed as protection; the conformance
-suite proves that representative blocking diagnostics really fire.
+suite proves that representative blocking diagnostics really fire. The
+type-aware runner resolves explicit source roots, reports the number of selected
+TypeScript files, and fails closed when that count is zero. Blocking lanes also
+deny warnings so a newly introduced warning cannot silently weaken CI.
 
 Stage 0 remains active through every later stage. Nx does not replace it.
 
