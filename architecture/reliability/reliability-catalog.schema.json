@@ -1,0 +1,326 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-teams.ai/schemas/reliability-catalog.schema.json",
+  "title": "Agent Teams Orchestrator Reliability Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "profiles",
+    "metricAttributes",
+    "prohibitedMetricAttributes",
+    "indicators",
+    "invariants",
+    "resourceBudgets"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/profile"
+      }
+    },
+    "metricAttributes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/metricAttribute"
+      }
+    },
+    "prohibitedMetricAttributes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/dottedId"
+      }
+    },
+    "indicators": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/indicator"
+      }
+    },
+    "invariants": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/invariant"
+      }
+    },
+    "resourceBudgets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/resourceBudget"
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$"
+    },
+    "dottedId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z0-9]+)+$"
+    },
+    "nonEmptyText": {
+      "type": "string",
+      "minLength": 12
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*(?:/[a-z][a-z0-9-]*)?$"
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description"],
+      "properties": {
+        "id": {
+          "enum": ["local", "hosted"]
+        },
+        "description": {
+          "$ref": "#/$defs/nonEmptyText"
+        }
+      }
+    },
+    "metricAttribute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "cardinality", "maxDistinct"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/dottedId"
+        },
+        "cardinality": {
+          "enum": ["low", "bounded"]
+        },
+        "maxDistinct": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        }
+      }
+    },
+    "profileRefs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["local", "hosted"]
+      }
+    },
+    "attributeRefs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/dottedId"
+      }
+    },
+    "objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "targetRatio",
+        "window",
+        "approvedBy",
+        "approvedAt",
+        "reviewAfter",
+        "errorBudgetPolicyRef"
+      ],
+      "properties": {
+        "targetRatio": {
+          "type": "string",
+          "pattern": "^0(?:\\.\\d+)?$"
+        },
+        "goodThreshold": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["operator", "value", "unit"],
+          "properties": {
+            "operator": {
+              "enum": ["lt", "lte"]
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^[0-9]+(?:\\.[0-9]+)?$"
+            },
+            "unit": {
+              "enum": ["milliseconds", "seconds", "bytes", "count"]
+            }
+          }
+        },
+        "window": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "duration"],
+          "properties": {
+            "kind": {
+              "enum": ["rolling", "calendar"]
+            },
+            "duration": {
+              "type": "string",
+              "pattern": "^P(?:[1-9][0-9]*D|T[1-9][0-9]*H)$"
+            }
+          }
+        },
+        "approvedBy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approvedAt": {
+          "type": "string",
+          "format": "date"
+        },
+        "reviewAfter": {
+          "type": "string",
+          "format": "date"
+        },
+        "errorBudgetPolicyRef": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "indicator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "owner",
+        "criticalUserJourney",
+        "specification",
+        "status",
+        "measure",
+        "unit",
+        "source",
+        "profiles",
+        "allowedAttributes"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "criticalUserJourney": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "specification": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "status": {
+          "enum": [
+            "candidate",
+            "calibrating",
+            "aspirational",
+            "active",
+            "retired"
+          ]
+        },
+        "measure": {
+          "enum": ["ratio", "histogram", "gauge"]
+        },
+        "unit": {
+          "enum": ["ratio", "milliseconds", "seconds", "bytes", "count"]
+        },
+        "source": {
+          "$ref": "#/$defs/id"
+        },
+        "profiles": {
+          "$ref": "#/$defs/profileRefs"
+        },
+        "allowedAttributes": {
+          "$ref": "#/$defs/attributeRefs"
+        },
+        "objective": {
+          "$ref": "#/$defs/objective"
+        }
+      }
+    },
+    "invariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "owner", "statement", "verification"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "statement": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "verification": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "architecture-conformance",
+              "contract-conformance",
+              "fault-injection",
+              "persistence-conformance",
+              "property-test",
+              "security-fixture"
+            ]
+          }
+        }
+      }
+    },
+    "resourceBudget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "owner",
+        "concern",
+        "status",
+        "measure",
+        "unit",
+        "source",
+        "profiles",
+        "allowedAttributes"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "concern": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "status": {
+          "enum": ["candidate", "calibrating", "active", "retired"]
+        },
+        "measure": {
+          "enum": ["histogram", "gauge"]
+        },
+        "unit": {
+          "enum": ["milliseconds", "seconds", "bytes", "count", "ratio"]
+        },
+        "source": {
+          "$ref": "#/$defs/id"
+        },
+        "profiles": {
+          "$ref": "#/$defs/profileRefs"
+        },
+        "allowedAttributes": {
+          "$ref": "#/$defs/attributeRefs"
+        },
+        "limit": {
+          "type": "string",
+          "pattern": "^[0-9]+(?:\\.[0-9]+)?$"
+        }
+      }
+    }
+  }
+}

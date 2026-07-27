@@ -112,6 +112,12 @@ Orchestrator calendar adapters may use it to resolve exact period boundaries. It
 is unrelated to the Temporal.io workflow engine and its objects never become
 domain or public contract types.
 
+## Error budget
+
+The permitted amount of unsuccessful service within an approved SLO window. Its
+policy defines concrete engineering and release actions when the budget is being
+consumed too quickly or is exhausted.
+
 ## Execution epoch
 
 A non-authorizing AR observation used to distinguish technical custody
@@ -259,6 +265,22 @@ to a separate product approval through an opaque authority decision reference.
 The stateless anti-corruption adapter that implements consumer-owned runtime
 capability ports and translates between orchestration concepts and opaque `ar`
 contracts. It does not own runtime bindings or orchestration observation state.
+
+## Resource budget
+
+A measured limit protecting a deployment from saturation, such as queue depth,
+event-loop delay, memory, disk headroom, or metric cardinality. It is not an SLO
+and does not claim that a user journey succeeded.
+
+## Service-level indicator
+
+A specification and implementation for measuring one user-visible reliability
+outcome. Often abbreviated SLI.
+
+## Service-level objective
+
+An approved target and measurement window for an SLI, with an owner, review date,
+and enforceable error-budget policy. Often abbreviated SLO.
 
 ## Secret reference
 

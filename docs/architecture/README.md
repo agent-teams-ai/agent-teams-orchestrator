@@ -43,6 +43,7 @@ that contributors must implement now.
 ## Quality
 
 - [Testing strategy](testing-strategy.md)
+- [Reliability objectives](reliability-objectives.md)
 
 ## Placement rule
 

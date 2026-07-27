@@ -1,0 +1,171 @@
+schemaVersion: 1
+
+profiles:
+  - id: local
+    description: User-managed machine with an automatically supervised local Orchestrator Host.
+  - id: hosted
+    description: Server deployment with externally operated persistence, messaging, and observability.
+
+metricAttributes:
+  - id: deployment.profile
+    cardinality: low
+    maxDistinct: 2
+  - id: command.kind
+    cardinality: bounded
+    maxDistinct: 32
+  - id: operation.outcome
+    cardinality: bounded
+    maxDistinct: 8
+  - id: feed.kind
+    cardinality: bounded
+    maxDistinct: 16
+  - id: recovery.reason
+    cardinality: bounded
+    maxDistinct: 16
+
+prohibitedMetricAttributes:
+  - tenant.id
+  - project.id
+  - team.id
+  - run.id
+  - agent.id
+  - user.id
+  - runtime.session.id
+  - operation.id
+  - trace.id
+  - span.id
+  - url.full
+  - url.path
+  - workspace.path
+
+indicators:
+  - id: orchestrator.command-acceptance-latency
+    owner: platform/control-api
+    criticalUserJourney: A caller submits a valid command and receives a durable acceptance outcome.
+    specification: Distribution from authenticated command receipt to durable acceptance or rejection.
+    status: candidate
+    measure: histogram
+    unit: milliseconds
+    source: control-api.command-receipt
+    profiles: [local, hosted]
+    allowedAttributes:
+      - deployment.profile
+      - command.kind
+      - operation.outcome
+
+  - id: orchestrator.dispatch-age
+    owner: run-orchestration
+    criticalUserJourney: Accepted orchestration work reaches the responsible external capability.
+    specification: Distribution from durable dispatch intent creation to acknowledged dispatch or reconciliation.
+    status: candidate
+    measure: histogram
+    unit: milliseconds
+    source: dispatch.intent-lifecycle
+    profiles: [local, hosted]
+    allowedAttributes:
+      - deployment.profile
+      - command.kind
+      - operation.outcome
+
+  - id: orchestrator.observation-freshness
+    owner: platform/eventing
+    criticalUserJourney: A subscribed caller observes durable orchestration progress without an unexplained stale view.
+    specification: Age of the newest durable feed position available to an authorized consumer.
+    status: candidate
+    measure: gauge
+    unit: milliseconds
+    source: feed.delivery-watermark
+    profiles: [local, hosted]
+    allowedAttributes:
+      - deployment.profile
+      - feed.kind
+
+  - id: orchestrator.recovery-duration
+    owner: run-orchestration
+    criticalUserJourney: Durable orchestration resumes to a known state after continuity is lost.
+    specification: Distribution from recovery detection to a terminal recovered, failed, or operator-required outcome.
+    status: candidate
+    measure: histogram
+    unit: milliseconds
+    source: recovery.lifecycle
+    profiles: [local, hosted]
+    allowedAttributes:
+      - deployment.profile
+      - recovery.reason
+      - operation.outcome
+
+invariants:
+  - id: orchestrator.accepted-command-durability
+    owner: platform/control-api
+    statement: A durably accepted command is never silently lost after acknowledgement.
+    verification:
+      - contract-conformance
+      - fault-injection
+      - persistence-conformance
+
+  - id: orchestrator.single-business-effect
+    owner: architecture/reliability
+    statement: Retries and duplicate delivery never create a duplicate business effect.
+    verification:
+      - architecture-conformance
+      - contract-conformance
+      - property-test
+
+  - id: orchestrator.tenant-isolation
+    owner: access-control
+    statement: A command or observation never crosses an unauthorized tenant boundary.
+    verification:
+      - contract-conformance
+      - security-fixture
+
+  - id: orchestrator.state-outbox-atomicity
+    owner: platform/persistence
+    statement: Authoritative state and its required durable dispatch intent commit atomically.
+    verification:
+      - fault-injection
+      - persistence-conformance
+
+resourceBudgets:
+  - id: orchestrator.event-loop-delay
+    owner: platform/local-host
+    concern: Host responsiveness must remain bounded while synchronous local persistence performs work.
+    status: candidate
+    measure: histogram
+    unit: milliseconds
+    source: host.event-loop
+    profiles: [local, hosted]
+    allowedAttributes:
+      - deployment.profile
+
+  - id: orchestrator.command-lane-saturation
+    owner: architecture/reliability
+    concern: Command lanes must reject or shed work predictably before memory becomes unbounded.
+    status: candidate
+    measure: gauge
+    unit: ratio
+    source: command-lane.capacity
+    profiles: [local, hosted]
+    allowedAttributes:
+      - deployment.profile
+
+  - id: orchestrator.local-disk-headroom
+    owner: platform/local-host
+    concern: Local durable state must stop safely before storage exhaustion corrupts active work.
+    status: candidate
+    measure: gauge
+    unit: bytes
+    source: local-storage.headroom
+    profiles: [local]
+    allowedAttributes:
+      - deployment.profile
+
+  - id: orchestrator.metric-cardinality
+    owner: platform/observability
+    concern: Metric series growth must stay bounded and preserve reliable outcome dimensions.
+    status: candidate
+    measure: gauge
+    unit: count
+    source: telemetry.metric-cardinality
+    profiles: [local, hosted]
+    allowedAttributes:
+      - deployment.profile

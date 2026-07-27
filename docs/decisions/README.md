@@ -29,6 +29,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 | Repository enforcement | [ADR-0031](0031-native-typescript-7-primary-toolchain.md), [ADR-0032](0032-staged-architecture-conformance-tooling.md), [ADR-0039](0039-staged-nx-foundation.md), [ADR-0053](0053-repository-local-documentation-workflow.md), [ADR-0056](0056-oxlint-first-quality-gates.md) | [Repository tooling](../architecture/repository-tooling.md), [documentation standard](../standards/documentation.md), [testing](../architecture/testing-strategy.md) |
 | Organization and usage capabilities | [ADR-0044](0044-tenant-scoped-agent-organization.md), [ADR-0045](0045-three-usage-bounded-contexts.md), [ADR-0046](0046-exact-usage-and-money-values.md) | [Context map](../architecture/context-map.md), [context dossiers](../domain/contexts/README.md) |
 | Security boundaries and data handling | [ADR-0021](0021-immutable-sdk-scope-and-credentials.md), [ADR-0028](0028-runtime-published-language-and-internal-fence.md), [ADR-0055](0055-security-boundaries-and-data-classification.md) | [Security architecture](../architecture/security-architecture.md), [runtime boundary](../architecture/runtime-boundary.md) |
+| Reliability objectives | [ADR-0057](0057-measurement-first-reliability-objectives.md) | [Reliability objectives](../architecture/reliability-objectives.md), [testing](../architecture/testing-strategy.md) |
 
 ## Accepted decisions
 
@@ -82,6 +83,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0054: LikeC4 strategic relationship model](0054-likec4-strategic-relationship-model.md)
 - [ADR-0055: Security boundaries and data classification](0055-security-boundaries-and-data-classification.md)
 - [ADR-0056: Oxlint-first quality gates](0056-oxlint-first-quality-gates.md)
+- [ADR-0057: Measurement-first reliability objectives](0057-measurement-first-reliability-objectives.md)
 
 ## Superseded decisions
 

@@ -19,6 +19,7 @@ related:
   - ADR-0049
   - ADR-0050
   - ADR-0055
+  - ADR-0057
   - architecture.local-host-lifecycle
   - architecture.security
 ---
@@ -75,6 +76,18 @@ unredacted operational output.
 These fixtures are architecture fitness functions. They do not replace
 context-owned authorization tests, adapter threat tests, hosted tenant-isolation
 tests, or `ar`-owned runtime enforcement conformance.
+
+### Reliability architecture conformance
+
+The reliability gate validates candidate SLI specifications, deployment profiles,
+strict invariants, resource budgets, owners, lifecycle state, and metric
+attributes. Negative fixtures prove that high-cardinality dimensions, active
+objectives without approval evidence, and 100 percent targets are rejected.
+
+This architecture gate does not prove a production SLO. Activating an objective
+also requires representative measurements, controlled failure evidence,
+product-owner approval, an operational owner, and an enforceable error-budget
+policy.
 
 Integration-event compatibility tests use separate exact producer and
 major-compatible consumer-reader schemas. Their matrix covers additive payload

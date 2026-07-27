@@ -39,6 +39,7 @@ Agents should also follow the short repository-level
 | Migrate legacy behavior | [Migration boundary](architecture/migration-boundary.md) | owning context dossier and migration open decision |
 | Change repository tooling | [Repository tooling](architecture/repository-tooling.md) | [Testing strategy](architecture/testing-strategy.md) |
 | Change strategic relationships | [Machine-readable architecture model](architecture/architecture-model.md) | [Context map](architecture/context-map.md), owning context dossiers |
+| Define SLI, SLO, invariants, or resource budgets | [Reliability objectives](architecture/reliability-objectives.md) | [Testing strategy](architecture/testing-strategy.md), `OD-030` |
 | Record a decision | [Decision index](decisions/README.md) | [ADR template](templates/adr.md), [open-decision index](open-decisions/README.md) |
 | Add or reorganize documentation | [Documentation standards](standards/README.md) | [Templates](templates/README.md) |
 | Inspect experimental evidence | [Research index](research/README.md) | owning ADR or open decision |
@@ -68,6 +69,8 @@ Machine-readable governance:
   strategic relationship graph and security trust-boundary view.
 - [`architecture/security/`](../architecture/security/data-classification.schema.json)
   owns machine-readable security classification and fixture schemas.
+- [`architecture/reliability/`](../architecture/reliability/reliability-catalog.yaml)
+  owns candidate SLIs, strict reliability invariants, and resource budgets.
 - [The repository-local docs-authoring Skill](../.agents/skills/docs-authoring/SKILL.md)
   provides the canonical agent workflow without becoming architecture authority.
 

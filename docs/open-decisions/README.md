@@ -47,6 +47,7 @@ question. `Resolved` is historical and must relate to at least one deciding ADR.
 | OD-027 | [Configurable Work lifecycle](OD-027-configurable-work-lifecycle.md) | work-coordination | Open |
 | OD-028 | [Agent Context lifecycle](OD-028-agent-context-lifecycle.md) | architecture/domain | Open |
 | OD-029 | [Data retention and erasure policy](OD-029-data-retention-and-erasure-policy.md) | architecture/security | Open |
+| OD-030 | [SLO targets and error-budget policy](OD-030-slo-targets-and-error-budget-policy.md) | architecture/reliability | Open |
 
 Use the [open-decision template](../templates/open-decision.md) for new entries.
 CI verifies that every record is listed and that table owner and status match its

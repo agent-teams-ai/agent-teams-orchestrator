@@ -15,7 +15,7 @@
     "pnpm": "11.17.0"
   },
   "scripts": {
-    "architecture:check": "pnpm run architecture:topology && pnpm run architecture:model:check && pnpm run architecture:model:test && pnpm run security:check && pnpm run architecture:dependencies && pnpm run lint && pnpm run architecture:conformance && pnpm run architecture:graph:advisory",
+    "architecture:check": "pnpm run architecture:topology && pnpm run architecture:model:check && pnpm run architecture:model:test && pnpm run security:check && pnpm run reliability:check && pnpm run architecture:dependencies && pnpm run lint && pnpm run architecture:conformance && pnpm run architecture:graph:advisory",
     "architecture:conformance": "pnpm --filter @agent-teams/architecture-conformance run check:conformance",
     "architecture:graph:advisory": "pnpm --filter @agent-teams/architecture-conformance run check:graph",
     "architecture:dependencies": "node scripts/architecture/validate-dependency-specifiers.mjs",
@@ -42,6 +42,9 @@
     "lint:fast:files": "oxlint --config .oxlintrc.json --format agent --ignore-pattern 'scripts/lint/fixtures/**' --no-error-on-unmatched-pattern",
     "lint:test": "node --test --test-concurrency=1 scripts/lint/validate-lint-config.test.mjs",
     "lint:type-aware": "oxlint --config .oxlintrc.type-aware.json --no-error-on-unmatched-pattern 'apps/**/*.{ts,tsx,mts,cts}' 'packages/**/*.{ts,tsx,mts,cts}' 'tooling/architecture-conformance/fixtures/valid/**/*.{ts,tsx,mts,cts}'",
+    "reliability:check": "pnpm run reliability:validate && pnpm run reliability:test",
+    "reliability:test": "node --test --test-concurrency=1 scripts/reliability/validate-reliability-foundation.test.mjs",
+    "reliability:validate": "node scripts/reliability/validate-reliability-foundation.mjs",
     "security:check": "pnpm run security:validate && pnpm run security:test",
     "security:test": "node --test --test-concurrency=1 scripts/security/validate-security-architecture.test.mjs",
     "security:validate": "node scripts/security/validate-security-architecture.mjs",

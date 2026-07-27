@@ -99,6 +99,11 @@ before a high-cost boundary violation.
 - Raw secrets remain inside secret adapters; other layers carry only `SecretRef`.
   Outbound HTTP crosses a controlled egress adapter. Follow
   [security architecture](docs/architecture/security-architecture.md).
+- SLOs measure a small set of user journeys. Correctness, tenant isolation, and
+  resource saturation remain separate invariants or budgets. Numerical targets
+  require calibration and explicit approval under
+  [reliability objectives](docs/architecture/reliability-objectives.md).
+
 ## Change workflow
 
 For architecture or implementation work:
