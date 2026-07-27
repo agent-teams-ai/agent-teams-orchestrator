@@ -3,6 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "description": "Headless control plane for coordinating multi-agent teams.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agent-teams-ai/agent-teams-orchestrator.git"
+  },
   "type": "module",
   "packageManager": "pnpm@11.17.0",
   "engines": {
