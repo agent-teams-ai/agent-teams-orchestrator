@@ -1,0 +1,9 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "explicit"
+  },
+  "oxc.configPath": ".oxlintrc.json",
+  "oxc.fixKind": "safe_fix",
+  "oxc.typeAware": true,
+  "oxc.unusedDisableDirectives": "deny"
+}

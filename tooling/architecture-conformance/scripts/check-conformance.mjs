@@ -2,12 +2,16 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
+import { createConformanceOxlintConfig } from "../../../scripts/lint/create-conformance-config.mjs";
+
 const toolingRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
 const repositoryRoot = path.resolve(toolingRoot, "../..");
-const rootOxlintConfig = path.join(repositoryRoot, ".oxlintrc.json");
+const generatedOxlintConfig = createConformanceOxlintConfig(repositoryRoot);
+const conformanceOxlintConfig = generatedOxlintConfig.filePath;
+process.once("exit", generatedOxlintConfig.dispose);
 const graphConfig = path.join(
   toolingRoot,
   "dependency-cruiser.config.cjs",
@@ -61,7 +65,14 @@ for (const expected of ["typescript@6.0.3"]) {
 const validRoot = path.join(toolingRoot, "fixtures/valid");
 const validLint = run(
   "pnpm",
-  ["exec", "oxlint", "--config", rootOxlintConfig, validRoot],
+  [
+    "exec",
+    "oxlint",
+    "--config",
+    conformanceOxlintConfig,
+    "--disable-nested-config",
+    validRoot,
+  ],
   repositoryRoot,
 );
 requireSuccess("valid Oxlint boundary fixture", validLint);
@@ -69,7 +80,14 @@ requireSuccess("valid Oxlint boundary fixture", validLint);
 const validCoreRoot = path.join(toolingRoot, "fixtures/core-valid");
 const validCoreLint = run(
   "pnpm",
-  ["exec", "oxlint", "--config", rootOxlintConfig, validCoreRoot],
+  [
+    "exec",
+    "oxlint",
+    "--config",
+    conformanceOxlintConfig,
+    "--disable-nested-config",
+    validCoreRoot,
+  ],
   repositoryRoot,
 );
 requireSuccess("valid core-module adapter fixture", validCoreLint);
@@ -92,7 +110,14 @@ const invalidBoundaryFiles = [
 const invalidRoot = path.join(toolingRoot, "fixtures/invalid");
 const invalidLint = run(
   "pnpm",
-  ["exec", "oxlint", "--config", rootOxlintConfig, invalidRoot],
+  [
+    "exec",
+    "oxlint",
+    "--config",
+    conformanceOxlintConfig,
+    "--disable-nested-config",
+    invalidRoot,
+  ],
   repositoryRoot,
 );
 requireFailure(
@@ -153,3 +178,5 @@ for (const expectedRule of [
 }
 
 console.log("Architecture tooling conformance passed.");
+generatedOxlintConfig.dispose();
+process.off("exit", generatedOxlintConfig.dispose);

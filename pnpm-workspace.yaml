@@ -38,6 +38,9 @@ packageExtensions:
     peerDependencies:
       "typescript": ">=2.0.0 <7.0.0"
 
+minimumReleaseAge: 1440
+minimumReleaseAgeStrict: true
+
 minimumReleaseAgeExclude:
   - js-yaml@5.2.2
 

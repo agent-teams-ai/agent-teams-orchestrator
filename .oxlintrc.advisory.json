@@ -13,6 +13,11 @@
     "style": "off",
     "suspicious": "error"
   },
+  "ignorePatterns": [
+    "scripts/lint/fixtures/**",
+    "tooling/architecture-conformance/fixtures/cycles/**",
+    "tooling/architecture-conformance/fixtures/invalid/**"
+  ],
   "rules": {
     "boundaries/dependencies": "off",
     "boundaries/no-unknown-dependencies": "off",
@@ -20,6 +25,8 @@
     "eslint/max-depth": ["warn", 5],
     "eslint/max-lines-per-function": ["warn", 150],
     "eslint/max-params": ["warn", 5],
+    "typescript/no-unnecessary-condition": "warn",
+    "typescript/prefer-optional-chain": "warn",
     "unicorn/consistent-function-scoping": "warn",
     "unicorn/prefer-at": "warn",
     "unicorn/prefer-structured-clone": "warn"

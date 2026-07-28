@@ -117,7 +117,9 @@ For architecture or implementation work:
 7. add tests and conformance evidence proportional to risk;
 8. update canonical documentation in the same change;
 9. run `pnpm lint:fast:files -- <changed source files>` during iteration;
-10. run the relevant full repository gates before handoff.
+10. run `pnpm lint:type-aware:files -- <changed TypeScript files>` after typed
+    behavior changes;
+11. run the relevant full repository gates before handoff.
 
 For governed documentation changes, follow the repository-local
 `docs-authoring` Skill. Run `pnpm docs:impact` before the final documentation

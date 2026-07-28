@@ -1,19 +1,21 @@
 import { spawnSync } from "node:child_process";
-import { readdir, stat } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { parse as parseYaml } from "yaml";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "../..");
 const oxlintBinary = path.join(repositoryRoot, "node_modules/.bin/oxlint");
-const defaultTargets = [
-  path.join(repositoryRoot, "apps"),
-  path.join(repositoryRoot, "packages"),
-  path.join(
-    repositoryRoot,
-    "tooling/architecture-conformance/fixtures/valid",
-  ),
-];
+const packageCatalogPath = path.join(
+  repositoryRoot,
+  "architecture/package-catalog.yaml",
+);
+const conformanceTarget = path.join(
+  repositoryRoot,
+  "tooling/architecture-conformance/fixtures/valid",
+);
 const typeScriptExtensions = new Set([".cts", ".mts", ".ts", ".tsx"]);
 const excludedDirectories = new Set([
   ".git",
@@ -63,16 +65,24 @@ async function countTypeScriptFiles(target) {
   return count;
 }
 
-async function resolveTargets(arguments_) {
-  const requested =
-    arguments_.length > 0
-      ? arguments_.map((target) => path.resolve(repositoryRoot, target))
-      : defaultTargets;
+async function resolveTargets(cliArguments) {
+  let requested;
+  if (cliArguments.length > 0) {
+    requested = cliArguments.map((target) => path.resolve(repositoryRoot, target));
+  } else {
+    const catalog = parseYaml(await readFile(packageCatalogPath, "utf8"));
+    requested = [
+      ...(catalog.packages ?? []).map((entry) =>
+        path.join(repositoryRoot, entry.path),
+      ),
+      conformanceTarget,
+    ];
+  }
   const targets = [];
   for (const target of requested) {
     if (await exists(target)) {
       targets.push(target);
-    } else if (arguments_.length > 0) {
+    } else if (cliArguments.length > 0) {
       throw new Error(`type-aware lint target does not exist: ${target}`);
     }
   }
@@ -80,7 +90,11 @@ async function resolveTargets(arguments_) {
 }
 
 async function main() {
-  const targets = await resolveTargets(process.argv.slice(2));
+  const cliArguments = process.argv.slice(2);
+  const advisory = cliArguments[0] === "--advisory";
+  const targets = await resolveTargets(
+    advisory ? cliArguments.slice(1) : cliArguments,
+  );
   let fileCount = 0;
   for (const target of targets) {
     fileCount += await countTypeScriptFiles(target);
@@ -92,15 +106,25 @@ async function main() {
     return;
   }
 
-  console.log(`Type-aware lint inputs: ${fileCount} TypeScript file(s).`);
+  console.log(
+    `${advisory ? "Advisory type-aware" : "Type-aware"} lint inputs: ${fileCount} TypeScript file(s).`,
+  );
+  const oxlintArguments = [
+    "--config",
+    path.join(
+      repositoryRoot,
+      advisory ? ".oxlintrc.advisory.json" : ".oxlintrc.json",
+    ),
+    "--disable-nested-config",
+    "--type-aware",
+  ];
+  if (!advisory) {
+    oxlintArguments.push("--deny-warnings");
+  }
+  oxlintArguments.push(...targets);
   const result = spawnSync(
     oxlintBinary,
-    [
-      "--config",
-      path.join(repositoryRoot, ".oxlintrc.type-aware.json"),
-      "--deny-warnings",
-      ...targets,
-    ],
+    oxlintArguments,
     {
       cwd: repositoryRoot,
       stdio: "inherit",

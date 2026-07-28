@@ -86,6 +86,15 @@ Oxlint is the only lint runtime. The repository does not install or invoke ESLin
 The JavaScript boundary plugin executes inside Oxlint and is covered by the
 architecture conformance corpus.
 
+The root `.oxlintrc.json` is the single policy for CLI, CI, and editor use.
+Type-aware commands enable that capability on the same config rather than
+maintaining a second rule copy. Nested Oxlint configs are disabled so a package
+cannot weaken repository policy. Package-specific differences use reviewed root
+overrides or a separate explicit capability gate. The conformance config inherits
+that policy by deriving a temporary root-level config that clears only ignore
+patterns, so intentional invalid fixtures can prove that blocking diagnostics
+fire without maintaining a second rule copy.
+
 The quality lanes are deliberately different:
 
 | Lane | Command | Policy |
@@ -94,8 +103,13 @@ The quality lanes are deliberately different:
 | Focused typed feedback | `pnpm lint:type-aware:files -- <paths>` | Blocking typed safety for one or more explicit TypeScript files or directories |
 | Repository fast gate | `pnpm lint:fast` | Blocking correctness, suspicious-code, runtime, test, and boundary rules |
 | Type-aware gate | `pnpm lint:type-aware` | Blocking typed safety over production TypeScript roots |
-| Full lint gate | `pnpm lint` | Fast, type-aware, and lint-configuration conformance |
+| Full lint gate | `pnpm lint` | Fast, type-aware, suppression-policy, and lint-configuration conformance |
 | Evaluation lane | `pnpm lint:advisory` | Non-blocking bounded complexity and modernization findings |
+
+The advisory lane runs fast repository-wide analysis first, then limits its
+type-aware pass to materialized paths from the package catalog. Invalid fixtures
+and repository tooling do not become accidental TypeScript programs, and a new
+production package cannot silently fall outside typed analysis.
 
 The blocking baseline enables the built-in TypeScript, Oxc, Unicorn, import,
 JSDoc, Vitest, Promise, and Node plugins where they provide high-signal checks.
@@ -110,6 +124,21 @@ suite proves that representative blocking diagnostics really fire. The
 type-aware runner resolves explicit source roots, reports the number of selected
 TypeScript files, and fails closed when that count is zero. Blocking lanes also
 deny warnings so a newly introduced warning cannot silently weaken CI.
+
+Inline suppressions are exceptional evidence, not a local configuration surface.
+`eslint-disable`, file-wide disables, unexplained exceptions, and local
+suppression of architecture rules are rejected. A permitted exception uses one
+rule-scoped `oxlint-disable-next-line` preceded by a specific explanation.
+
+Source classes remain distinct:
+
+- handwritten source receives the complete blocking rule set;
+- generated contracts must compile and pass contract-drift tests, while any lint
+  relaxation is a narrow path override owned by the generator;
+- vendored source is excluded and cannot be imported by domain or application
+  layers;
+- intentional invalid fixtures are ignored by normal lint and exercised directly
+  by conformance tests.
 
 Stage 0 remains active through every later stage. Nx does not replace it.
 
@@ -129,7 +158,14 @@ manifest.
 Strict catalog mode and `pnpm architecture:dependencies` are blocking. The latter
 checks every workspace manifest, including manual edits, and rejects direct
 external versions, non-`workspace:` internal references, missing catalog entries,
-and non-exact catalog versions. Adding a dependency requires:
+and non-exact catalog versions.
+
+The repository also enforces a strict 24-hour minimum release age. An immature
+direct or transitive package fails installation instead of being added
+automatically to an exception list. Any exact-version exception is a reviewed
+supply-chain decision and remains visible in `pnpm-workspace.yaml`.
+
+Adding a dependency requires:
 
 1. verifying its current stable version and maintenance state;
 2. adding the exact version to the appropriate catalog;
