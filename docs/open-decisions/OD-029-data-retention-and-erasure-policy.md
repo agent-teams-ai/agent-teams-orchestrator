@@ -48,6 +48,64 @@ legal hold, backup expiry, and externally retained data are represented.
 - Backup, feed, blob, telemetry, and external-system behavior are covered.
 - Local and hosted conformance scenarios are defined.
 
+## Working draft: coordinated erasure
+
+This section is a proposed model, not an accepted architecture decision.
+
+A cross-context erasure process manager is justified only when one deletion
+request affects two or more independently durable owners, or an external system
+whose outcome can be delayed or unknown. Examples include deleting a hosted
+Project whose tasks, runs, messages, usage records, blobs, public feeds, and AR
+references are owned by different bounded contexts.
+
+It is not used for:
+
+- deleting an aggregate wholly owned by one bounded context;
+- ordinary retention expiry that one owner can execute independently;
+- wiping a local installation whose complete state can be removed atomically
+  without remote or externally retained data;
+- speculative future integrations that do not exist yet.
+
+The candidate first owner is Tenant and Project Registry because Project
+lifecycle supplies the initiating business intent. That ownership is provisional.
+If legal holds, subject exports, jurisdiction-specific policy versions, and
+independent governance workflows become a coherent domain, a Data Governance
+bounded context may take ownership through a new ADR and Published Language.
+
+The process is one durable instance per erasure request, not a global listener or
+a shared cleanup service:
+
+```text
+Authorized erasure command
+  -> establish deletion epoch and stop new writes
+  -> persist participant plan and dispatch intents
+  -> each owning context erases or anonymizes its own data
+  -> collect idempotent acknowledgements and reconcile unknown outcomes
+  -> verify required participants
+  -> retain a minimal non-sensitive tombstone
+```
+
+The process manager stores coordination state only: erasure ID, scoped resource
+reference, policy version, deletion epoch, participant statuses, deadlines, and
+opaque evidence references. It never reads or mutates another context's tables.
+Participants are selected from a versioned declared catalog rather than
+discovered by subscribing to every event.
+
+Each bounded context owns its local transaction, including projections, inbox or
+outbox records, and blob references. External AR or integration effects use typed
+idempotent commands and explicit `unknown` outcomes followed by reconciliation.
+Delayed events and restored backups must check the deletion epoch or durable
+erasure ledger so they cannot recreate erased payload.
+
+Temporal may later execute timers, retries, and waiting, but it does not own the
+business erasure state or participant semantics. The same process-manager
+contract must be executable in the local profile without Temporal.
+
+Materialization is deferred until the first real deletion flow crosses an
+independent durability boundary. Before that point this draft defines constraints
+only and does not justify creating a package, aggregate, or generic workflow
+engine.
+
 ## Resolution
 
 Open. No legal duration, identity provider, or jurisdiction behavior is selected

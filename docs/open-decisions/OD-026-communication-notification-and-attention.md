@@ -11,6 +11,7 @@ related:
   - domain.contexts.work-coordination
   - OD-004
   - OD-006
+  - OD-028
 ---
 
 # OD-026: Communication, Notification, and Attention
@@ -49,31 +50,115 @@ accepted context boundary. Package count and symmetry are not decision criteria.
   and domain acknowledgement are different facts.
 - Approvals, permissions, workflow signals, and telemetry do not become chat
   messages or notification kinds merely to reuse a queue.
+- A connector webhook, broker record, and external protocol event are observations,
+  not trusted prompt content. They pass through signature, tenancy, ACL, dedupe,
+  schema, and semantic-owner boundaries before they can affect attention or context.
+- Conversation ordering is a domain sequence. Broker sequence, source timestamp,
+  and delivery-attempt order are transport evidence only.
 
-## Candidate interaction model
+## Candidate source-to-agent model
 
 ```text
-Source fact
-  -> recipient relevance and subscription evaluation
-  -> Notification or Alert state
-  -> DeliveryIntent
-  -> Run Orchestration wake/interruption decision
+External source
+  -> Integration Management verification, cursor, and reconciliation
+  -> semantic owner and anti-corruption layer
+       -> ContextSourceInvalidated -> Agent Context freshness processing
+       -> AttentionCandidate -> relevance, subscription, and policy evaluation
+  -> AttentionIntent
+  -> Run Orchestration wake, checkpoint, or interruption decision
+  -> Agent Context delta manifest
   -> Runtime ACL
-  -> AR technical input application
+  -> AR technical context application
 ```
 
-Candidate delivery policy has independent axes rather than one priority enum:
+One source change may produce both `ContextSourceInvalidated` and
+`AttentionCandidate`. Suppressing, snoozing, or digesting attention must not leave
+an already disclosed context contribution falsely marked as fresh. Conversely, a
+source invalidation does not by itself authorize waking or interrupting an agent.
+
+The following subscriptions have separate owners and must not collapse into one
+generic subscription table:
+
+- a connector subscription selects upstream Jira, Notion, Discord, A2A, or other
+  events and belongs to Integration Management;
+- an attention subscription expresses recipient interest, mute, snooze, digest,
+  and escalation policy and belongs to the candidate Attention boundary;
+- a context binding authorizes a source to contribute to a team, agent, purpose,
+  or Run and belongs to Agent Context.
+
+Jira, Notion, Discord, A2A, and similar systems are adapters. Their raw schemas do
+not become internal domain events, notification kinds, or Agent Context models.
+
+## Candidate delivery policy
+
+Product intent should not expose an unrestricted priority-by-timing matrix. A
+small profile plus explicit constraints is a stronger candidate:
 
 ```text
-attention: passive | active | time-sensitive | critical
-timing: queued | next-safe-point | after-operation | when-idle | interrupt
-durability: durable | standard | best-effort
-ordering lane: operator-control | conversation | work-attention | automation
+AttentionIntent
+  recipientSelector
+  profile: fyi | action-required | critical
+  deliverBy?
+  expiresAt?
+  acknowledgementRequirement?
+  aggregationPolicy?
+  businessPreconditions
 ```
 
-Names and exact combinations remain unresolved. In particular, `when-idle` cannot
-be inferred from prompt text, silence, or a UI status. It requires an authoritative
-runtime observation and a matching runtime generation.
+Policy and Run Orchestration normalize that intent into independent technical
+dimensions:
+
+```text
+importance and urgency
+not-before, deliver-by, and expiry
+disruption budget
+offline policy: retain | wake-existing | start-if-authorized
+application boundary: next-checkpoint | after-operation | safe-point
+required evidence
+ordering lane
+```
+
+The names, exact profiles, and authority matrix remain unresolved. `Critical` does
+not automatically grant process-start or interruption authority. `When idle`
+cannot be inferred from silence, prompt text, or UI status; it requires a current
+runtime observation and matching execution generation. Interruption is a
+cooperative request to reach a supported safe point, not an alias for process kill.
+
+## Candidate delivery evidence
+
+A single `message.status` cannot represent end-to-end delivery. Candidate models
+are an immutable Message revision, one recipient-specific Delivery, one or more
+Delivery Attempts, and append-only typed evidence. This is an audit and
+reconciliation ledger, not mandatory event sourcing of Conversation state.
+
+```text
+message.committed
+broker.published
+mailbox.committed
+runtime.accepted
+context.applied
+turn.observed
+agent.acknowledged
+agent.acted
+agent.replied
+human.presented
+human.read
+```
+
+`turn.observed` and `context.applied` never claim that a model understood the
+content. `AgentAcknowledged`, a causally linked domain action, and a reply are
+separate evidence. For group messages, evidence is per logical recipient and UI
+shows an aggregate projection rather than one shared `delivered` flag.
+
+Candidate delivery outcomes additionally include `acceptance-unknown`,
+`application-unknown`, `blocked-by-policy`, `expired`, `superseded`, and
+`failed-terminal`. Unknown application cannot trigger blind prompt replay; it
+requires runtime reconciliation or controlled recovery.
+
+Edits append an immutable message revision. Before context application, delivery
+may advance to the desired revision. After application, a material correction is
+a successor contribution with explicit supersession. Revocation prevents future
+application but cannot erase data already disclosed to a provider.
 
 ## Options
 
@@ -89,8 +174,8 @@ runtime observation and a matching runtime generation.
 ## Acceptance criteria
 
 - Event-storming covers task comments, direct messages, group messages, ordinary
-  agent-to-user messages, user alerts, approvals, offline agents, and runtime
-  replacement.
+  agent-to-user messages, user alerts, approvals, offline agents, runtime
+  replacement, source edits, access revocation, and external mentions.
 - The model prevents notification-to-model feedback loops and alert spam.
 - Duplicate, stale, reordered, expired, edited, retracted, reassigned, and
   authorization-changed source facts have deterministic outcomes.
@@ -98,6 +183,12 @@ runtime observation and a matching runtime generation.
   capability negotiation, fencing, downgrade, cancellation, and recovery behavior.
 - The product can expose separate Messages and Notifications views without a second
   source of truth.
+- Notion-like invalidation signals, Discord-like resumable streams, Jira-like
+  source changes, and A2A push callbacks pass conformance scenarios without raw
+  external content entering a prompt.
+- OODA is demonstrated as collaboration among existing owners: Integration and
+  source contexts observe, Attention and Agent Context orient, Run and the agent
+  decide, AR and tools act, and typed outcomes begin the next observation cycle.
 - Shared infrastructure reuse is limited to technical outbox, idempotency,
   connection, serialization, and transport primitives.
 

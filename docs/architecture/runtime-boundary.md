@@ -22,7 +22,7 @@ The orchestrator is the control plane. `ar` is the execution and safety runtime.
 Provider implementations belong behind `ar`.
 
 The canonical implementation repository is
-[`vioxen/agent-runtime`](https://github.com/vioxen/agent-runtime). Repository
+[`agent-teams-ai/agent-runtime`](https://github.com/agent-teams-ai/agent-runtime). Repository
 location is informational; the versioned Runtime Published Language remains the
 only integration authority.
 
