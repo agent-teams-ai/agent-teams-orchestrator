@@ -26,7 +26,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 | Public contracts and SDK | [ADR-0016](0016-protobuf-buf-connect-control-api.md), [ADR-0019](0019-resumable-feed-contracts.md), [ADR-0036](0036-typescript-sdk-publication-format.md), [ADR-0037](0037-single-initial-contract-version.md) | [SDK and transports](../architecture/sdk-and-transports.md), [public contracts](../architecture/public-control-contracts.md) |
 | Local and hosted composition | [ADR-0030](0030-shared-core-with-local-and-server-compositions.md), [ADR-0033](0033-shared-local-supervisor-and-versioned-host.md) | [Local Host lifecycle](../architecture/local-host-lifecycle.md), [composition](../architecture/composition-and-dependency-injection.md) |
 | Workflow and migration | [ADR-0027](0027-temporal-as-run-orchestration-adapter.md), [ADR-0029](0029-compatibility-facade-and-strangler-migration.md) | [Extension points](../architecture/extension-points.md), [migration boundary](../architecture/migration-boundary.md) |
-| Repository enforcement | [ADR-0031](0031-native-typescript-7-primary-toolchain.md), [ADR-0032](0032-staged-architecture-conformance-tooling.md), [ADR-0039](0039-staged-nx-foundation.md), [ADR-0053](0053-repository-local-documentation-workflow.md), [ADR-0056](0056-oxlint-first-quality-gates.md) | [Repository tooling](../architecture/repository-tooling.md), [documentation standard](../standards/documentation.md), [testing](../architecture/testing-strategy.md) |
+| Repository enforcement | [ADR-0031](0031-native-typescript-7-primary-toolchain.md), [ADR-0032](0032-staged-architecture-conformance-tooling.md), [ADR-0039](0039-staged-nx-foundation.md), [ADR-0053](0053-repository-local-documentation-workflow.md), [ADR-0056](0056-oxlint-first-quality-gates.md), [ADR-0059](0059-versioned-engineering-foundation.md) | [Repository tooling](../architecture/repository-tooling.md), [documentation standard](../standards/documentation.md), [testing](../architecture/testing-strategy.md) |
 | Organization and usage capabilities | [ADR-0044](0044-tenant-scoped-agent-organization.md), [ADR-0045](0045-three-usage-bounded-contexts.md), [ADR-0046](0046-exact-usage-and-money-values.md) | [Context map](../architecture/context-map.md), [context dossiers](../domain/contexts/README.md) |
 | Security boundaries and data handling | [ADR-0021](0021-immutable-sdk-scope-and-credentials.md), [ADR-0028](0028-runtime-published-language-and-internal-fence.md), [ADR-0055](0055-security-boundaries-and-data-classification.md) | [Security architecture](../architecture/security-architecture.md), [runtime boundary](../architecture/runtime-boundary.md) |
 | Reliability objectives | [ADR-0057](0057-measurement-first-reliability-objectives.md) | [Reliability objectives](../architecture/reliability-objectives.md), [testing](../architecture/testing-strategy.md) |
@@ -84,6 +84,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0055: Security boundaries and data classification](0055-security-boundaries-and-data-classification.md)
 - [ADR-0056: Oxlint-first quality gates](0056-oxlint-first-quality-gates.md)
 - [ADR-0057: Measurement-first reliability objectives](0057-measurement-first-reliability-objectives.md)
+- [ADR-0059: Versioned engineering foundation](0059-versioned-engineering-foundation.md)
 
 ## Superseded decisions
 

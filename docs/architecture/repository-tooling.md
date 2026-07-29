@@ -13,6 +13,7 @@ related:
   - ADR-0053
   - ADR-0054
   - ADR-0056
+  - ADR-0059
   - architecture.dependency-rules
   - architecture.feature-module-standard
   - architecture.machine-readable-model
@@ -42,6 +43,25 @@ creating a second architecture.
 
 This document owns the staged adoption plan. It does not redefine package roles,
 DDD boundaries, or source dependency rules.
+
+## Cross-repository engineering foundation
+
+ADR-0059 places reusable engineering tooling in the versioned
+`@agent-teams/engineering-foundation` dev dependency. This repository remains the
+source of truth for its business architecture and supplies project-specific facts
+through a narrow local adapter. Production packages cannot import the foundation.
+
+Registry mode is the reproducible default. Local sibling development uses only
+the guarded `foundation:attach`, `foundation:status`, and `foundation:detach`
+workflow. CI, packaging, and release paths fail closed unless
+`foundation:assert-registry` proves that the exact lockfile package is active.
+`foundation:pack-test` verifies the publishable artifact independently from local
+symlinks.
+
+Foundation adoption is incremental. Existing repository-local tooling moves only
+after the extracted capability has equivalent fixtures, a migration path, and a
+consumer conformance test. Until then, the local implementation remains
+authoritative; two independently evolving copies are prohibited.
 
 ## Sources of truth
 
