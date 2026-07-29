@@ -17,6 +17,7 @@ catalog:
   markdownlint-cli2: 0.23.1
   mdast-util-to-string: 4.0.0
   mermaid: 11.16.0
+  nx: 23.1.0
   oxc-resolver: 11.24.2
   oxlint: 1.75.0
   oxlint-tsgolint: 7.0.2001
@@ -49,3 +50,4 @@ overrides:
 
 allowBuilds:
   esbuild: true
+  nx: true

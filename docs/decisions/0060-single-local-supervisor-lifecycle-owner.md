@@ -1,9 +1,11 @@
 ---
 id: ADR-0060
 type: adr
-status: proposed
+status: accepted
 owner: platform/local-host
 summary: Clarify that one shared Local Supervisor exclusively owns local orchestrator process lifecycle.
+approved_by: product-owner
+accepted_at: 2026-07-29
 related:
   - ADR-0030
   - ADR-0033
@@ -28,9 +30,9 @@ accepted ADR history.
 
 ## Decision
 
-When accepted, this ADR will partially supersede only the local lifecycle
-ownership statements in ADR-0030. ADR-0030 will remain authoritative for the
-separate local and hosted composition roots.
+This ADR partially supersedes only the local lifecycle ownership statements in
+ADR-0030. ADR-0030 remains authoritative for the separate local and hosted
+composition roots.
 
 One shared per-user Local Supervisor is the sole owner of local Orchestrator Host
 process availability, lifecycle serialization, discovery, health, drain, restart,
