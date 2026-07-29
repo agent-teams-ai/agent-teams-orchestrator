@@ -12,6 +12,8 @@ related:
   - OD-012
   - OD-014
   - OD-029
+  - OD-031
+  - OD-032
   - architecture.machine-readable-model
   - architecture.public-control-contracts
   - architecture.runtime-boundary
@@ -262,5 +264,9 @@ LikeC4 cannot bypass validation.
 - `OD-029` owns legal and product retention durations, erasure policy, legal
   holds, backup interaction, and jurisdiction-specific sources.
 - `OD-014` owns the exact OpenTelemetry profile and export topology.
+- `OD-031` owns semantic authority, typed claim admission, delegation, and
+  cross-source conflict behavior.
+- `OD-032` owns the detailed feature-owned intent, last-mile enforcement,
+  target-safety profile, and ambiguous-effect recovery model.
 
 No implementation may infer these choices from examples or fixture timestamps.

@@ -4,6 +4,12 @@ type: open-decision
 status: open
 owner: architecture/domain
 summary: Decide Agent Context ownership, lifecycle, manifests, checkpoints, and runtime materialization boundary.
+blocked_by:
+  - OD-006
+  - OD-026
+  - OD-029
+  - OD-031
+  - OD-032
 related:
   - architecture.context-map
   - architecture.runtime-boundary
@@ -11,6 +17,10 @@ related:
   - OD-004
   - OD-006
   - OD-026
+  - OD-029
+  - OD-031
+  - OD-032
+  - OD-033
 ---
 
 # OD-028: Agent Context Lifecycle
@@ -41,8 +51,13 @@ RehydrationPlan
 ContextPressure
 ContextLineage
 ContextContribution
-ContextApplication
-SourceRevisionVector
+ContextBasis
+ContextContractSnapshot
+ContextValidityAssessment
+RepresentationArtifact
+ContextMaterializationPlan
+ContextActivationRef
+OrientationReceipt
 ContinuityGrade
 LossReport
 ```
@@ -55,10 +70,13 @@ These are discovery candidates, not accepted aggregate names.
   and other product facts. Context planning cannot copy their aggregates.
 - Hard product invariants remain domain/application code and never rely on prompt
   obedience.
-- Policy and Risk owns execution/trust decisions. Consumption Governance owns
-  monetary budgets and quotas. Context planning consumes their decisions.
+- Access Control owns grants, delegation, revocation, and product authorization.
+  Policy and Risk owns risk, approval requirements, automation limits, and egress
+  policy. Consumption Governance owns monetary budgets and quotas. Context
+  planning consumes their decisions.
 - Run Orchestration remains the only product owner that commands execution and
-  decides whether to continue, pause, restart, or replace a runtime.
+  decides whether to continue, pause, restart, replace a runtime, or activate
+  context for an action-capable runtime generation.
 - AR owns provider formatting, roles, tokenization, native cache and compaction
   mechanics, provider-session state, and actual materialization.
 - Tool availability is enforced technically by AR and policy. Hiding tool text from
@@ -74,6 +92,8 @@ These are discovery candidates, not accepted aggregate names.
 - External change notifications are untrusted observations. They never become
   prompt content without source retrieval, current authorization, provenance, and
   semantic-owner translation.
+- Agent Context may prove semantic readiness, but it cannot authorize a product
+  action, wake a runtime, or command AR.
 
 ## Current draft hypothesis
 
@@ -85,23 +105,29 @@ a separately deployed service in the first version.
 
 The candidate owns:
 
-- source selection, provenance, revision vectors, and composition;
-- instruction authority, ordering, conflict detection, and disclosure;
+- source selection, provenance, context basis, and composition;
+- instruction classification, precedence, conflict detection, and disclosure;
 - multidimensional context budgeting and required-content fit;
 - immutable manifests and portable semantic checkpoints;
 - freshness, invalidation, and successor planning;
-- idempotent context application and materialization evidence;
+- semantic readiness and materialization evidence intake;
 - provider-neutral continuity and explicit provider-switch loss reporting.
 
 Source ownership remains outside this context:
 
 - Work owns tasks, comments, dependencies, and lifecycle;
 - Agent Communication owns messages, participants, and Conversation history;
-- Memory owns facts, evidence, confidence, expiry, and supersession;
-- Attention owns recipient relevance, urgency, digest, and interruption intent;
-- Integration Management owns connector installation, vendor authentication,
-  webhook cursors, raw dedupe, and reconciliation;
-- Policy and Risk owns trust, authorization, and egress decisions;
+- a future Memory capability, if accepted, owns its own facts, evidence,
+  confidence, expiry, and supersession rather than donating that ownership to
+  Agent Context;
+- the candidate Attention boundary in OD-026 owns recipient relevance, urgency,
+  digest, and interruption intent only if that boundary is accepted;
+- the still-unaccepted integration boundary owns connector installation, vendor
+  authentication, webhook cursors, raw dedupe, and reconciliation only after
+  event storming and context-map acceptance;
+- Access Control owns grants, delegation, revocation, and authorization decisions;
+- Policy and Risk owns trust, risk, approval requirements, automation, and egress
+  decisions;
 - Consumption Governance owns money and quota;
 - Run Orchestration owns execution authority and runtime lifecycle decisions;
 - AR owns provider sessions, tokenizer and capability observations, compilation,
@@ -111,13 +137,16 @@ Source ownership remains outside this context:
 
 ```text
 ContextLineage          logical continuity across Runs and providers
+ContextBinding          selected source-scope references for a purpose
+ContextContractSnapshot immutable purpose-relative requirements
 ContextManifest         immutable content-addressed composition artifact
 ContextContribution     exact disclosed derived artifact and source provenance
+RepresentationArtifact exact, extract, translation, summary, or retrieval index
+ContextValidityAssessment current purpose-relative usability evaluation
 SemanticCheckpoint      portable verified continuity artifact
 NativeCheckpoint        opaque AR/provider continuation reference
-ContextApplication      process manager for one manifest-to-runtime application
-ProviderEnvelope        adapter projection, never a domain aggregate
 MaterializationReport   evidence returned by AR
+OrientationReceipt      bounded public explanation of readiness and omissions
 ```
 
 `ContextBranch` remains a reserved candidate rather than a first-version
@@ -127,20 +156,64 @@ a real concurrent-branch invariant. Compaction alone does not create a branch.
 
 An immutable manifest is not a giant aggregate. A small lineage aggregate governs
 continuity and successor rules; exact disclosed artifacts, manifests, and
-checkpoints are immutable records. A Context Application coordinates asynchronous
-application and ambiguous outcomes without importing AR domain models.
+checkpoints are immutable records. Runtime activation and ambiguous application
+outcomes belong to a Run-owned process, not to the Agent Context aggregate.
+
+`ContextBinding` records selected source scopes and references current Access
+Control decisions. It does not grant access. `ContextValidityAssessment` records
+evidence for a purpose and moment; the owning use case still decides whether an
+action is authorized.
+
+## Separation against god objects
+
+`ContextManifest` is an immutable bill of materials, not an aggregate, policy
+engine, current-state cache, provider prompt, authorization decision, or
+understanding receipt. It identifies selected contributions, representations,
+omissions, conflicts, basis, contract and composition versions, and validity
+constraints.
+
+Purpose requirements live in a separate immutable `ContextContractSnapshot`.
+Current applicability lives in a vector-valued `ContextValidityAssessment`.
+Runtime activation and ambiguous outcome recovery live in a Run-owned
+`ContextActivationProcess`. Provider formatting, tokenization, native caching,
+and compaction remain in AR.
+
+The candidate feature split inside Agent Context is:
+
+```text
+context-bindings
+context-contracts
+contribution-intake
+derived-representations
+manifest-assembly
+validity-and-invalidation
+materialization-evidence
+checkpoints-and-rehydration
+```
+
+These are cohesive feature candidates, not mandatory empty folders. Shared code
+may contain only proven technical primitives. There is no central manifest
+compiler that imports every source context.
+
+Manifest internals do not become public SDK models. A future public surface may
+expose a bounded `OrientationReceipt`: why the Run re-oriented, purpose and Work
+revision, freshness and coverage summary, unresolved conflicts, omissions,
+superseded instructions, and retrieval handles. Exact composition, hashes,
+taint graphs, source positions, provider envelopes, and native checkpoints remain
+private.
 
 ## Observation and OODA draft
 
-OODA describes collaboration among contexts, not a new aggregate or workflow
-engine:
+OODA describes collaboration among contexts, not a new aggregate, bounded
+context, or workflow engine. OD-033 owns the unresolved convergence and
+activation process:
 
 ```text
-Observe  Integration verifies, deduplicates, and retrieves current source state
-Orient   source owner, Attention, Agent Context, trust, and purpose build a view
-Decide   agent, operator, and Run policies select the response and delivery timing
-Act      AR and tools execute through authorized application commands
-Feedback typed domain outcomes start a new observation cycle
+Observe  source adapters verify, deduplicate, and retrieve current source state
+Orient   semantic owners and Agent Context build purpose-relative evidence
+Decide   owning application use cases, operator, and Run choose an authorized act
+Act      the owning use case performs product effects; AR enforces runtime effects
+Feedback typed owner facts pass through admission before a new cycle
 ```
 
 One semantic source change may emit two independent facts:
@@ -153,11 +226,42 @@ interrupt authority. Frequent source changes are coalesced; they do not rebuild 
 manifest per webhook. Missing or out-of-order vendor events are repaired through
 current-state retrieval and periodic reconciliation.
 
+Stateful sources converge on their latest head rather than replaying every
+change. The reconciliation record must distinguish desired, claimed, and applied
+generations so an older completion cannot clear a newer wake-up:
+
+```text
+durable integration receipts
+  -> SourceHead desiredGeneration + sourceIncarnation
+  -> claim claimedGeneration + leaseEpoch
+  -> bounded current-state reconciliation
+  -> appliedGeneration through compare-and-swap
+  -> semantic-owner fact
+```
+
+Every source contract declares either `state-head` convergence or
+`discrete-ledger` delivery. Discrete comments, messages, approvals, revocations,
+withdrawals, and security facts are not coalesced.
+Safety, source reconciliation, context assembly, and external-action work require
+independent capacity lanes so a noisy source or tenant cannot starve revocation or
+fencing. This is workload isolation, not a global OODA coordinator.
+
 ## Freshness and disclosure
 
 There is no globally atomic snapshot across bounded contexts. Every manifest
-records a `SourceRevisionVector`; critical tool actions re-check relevant
-preconditions immediately before committing an external effect.
+records a `ContextBasis`; critical tool actions re-check relevant preconditions
+immediately before committing an external effect.
+
+`ContextBasis` is a set of opaque, source-owned positions plus purpose scope,
+owner-issued coverage evidence, known gaps, and admission or authorization
+evidence references. Revisions are comparable only within the same source
+lineage. It is not a vector clock and claims no causal ordering across Jira,
+Notion, Conversation, Work, Policy, or another context. A list of observed
+records alone never proves that the requested scope is complete.
+
+Hot-source invalidation updates a source head or validity epoch instead of
+rewriting every historical manifest. Active Runs receive bounded invalidation
+signals; inactive manifests are assessed lazily when reused.
 
 Each contribution candidate records at least:
 
@@ -166,7 +270,7 @@ source identity and revision
 observedAt, validUntil, maxAge, and freshness requirement
 authorization revision
 content hash and exact disclosed artifact reference
-authority, trust, taint, and confidentiality
+source authenticity, semantic authority evidence, trust, taint, and confidentiality
 retention and deletion policy
 required or optional disposition
 transformation and omission reasons
@@ -178,18 +282,46 @@ an encrypted, retention-governed contribution artifact containing exactly what w
 disclosed, tied to source revision and hash. Secrets remain opaque `secretRef`
 values and are resolved only at an authorized execution boundary.
 
-Invalidation includes source mutation or deletion, access revocation, trust or
-egress change, assignment or objective change, instruction supersession,
-provider/capability change, budget change, and Attention retraction. An immutable
-manifest is never edited in place; invalidation records impact and may create a
-successor.
+Semantic invalidation includes source mutation or deletion, access revocation,
+trust or egress change, assignment or objective change, and instruction
+supersession. Provider, capability, or budget change invalidates target fit or
+activation, not necessarily semantic composition. Attention retraction cancels a
+delivery or interruption intent; it does not make a source fact stale. An
+immutable manifest is never edited in place.
 
 ## Manifest and instruction draft
 
 A candidate manifest includes schema and composition versions, lineage and parent
-identity, purpose and audience, ordered contributions, source revision vector,
-policy and capability snapshots, budget reservation, validity constraints,
-omission evidence, checkpoint base, and a deterministic fingerprint.
+identity, purpose and audience, selected contributions and precedence outcomes,
+context basis, omission and conflict evidence, checkpoint base, and a
+deterministic fingerprint. Current authorization, risk, budget, target
+capability, token count, runtime identity, and provider ordering remain external
+evidence or activation concerns rather than fields that turn the manifest into a
+semantic compiler.
+
+Content identities and fingerprints are tenant-scoped. Raw or low-entropy
+protected content never uses a public unkeyed hash as a global deduplication
+identity.
+
+Validity is purpose-relative and vector-valued rather than one state that mixes
+different owners:
+
+```text
+coverage: complete | incomplete | indeterminate
+freshness: current | stale | indeterminate
+disclosure: eligible | forbidden | remediation-required | indeterminate
+semantic-fit: complete | degraded | incomplete | conflicted
+target-fit: fits | reduction-required | rejected | unknown
+activation: inactive | active | superseded | outcome-unknown
+```
+
+A `ContextContractSnapshot` declares required and advisory clauses, acceptable
+representations, freshness, conflict, disclosure, risk, and fit behavior. Required
+content cannot silently become a summary, retrieval handle, omission, or truncated
+text. `COMPLETE_FOR_PURPOSE` may be derived only when each required clause has
+satisfaction evidence and source-owner coverage is complete. A retrieval handle
+satisfies only a clause that explicitly allows on-demand availability. A conflict
+remains visible until its semantic owner resolves it.
 
 Instruction authority is explicit rather than text-order folklore:
 
@@ -207,6 +339,12 @@ Untrusted content cannot promote itself to instruction. A model-generated summar
 cannot increase authority, remove taint, approve an action, or assert completion.
 Hard invariants remain code. Stable instruction prefixes may be compiled to exploit
 provider caching, but cache identity never becomes domain identity.
+
+Every instruction contribution also declares scope, source, revision,
+`supersedes`, expiry, and conflict behavior. Same-level contradictions remain
+explicit; list order does not resolve them. Summaries, translation, retrieval,
+memory, and compaction preserve derivation edges and cannot lower effective taint
+or raise authority without a separately attested sanitized artifact.
 
 The minimal first context is a mandatory spine: identity, current purpose, hard
 constraints, active Work, latest user turn, unresolved commitments and approvals,
@@ -232,7 +370,7 @@ contains objective, constraints, verified decisions, evidence references,
 completed and pending Work, source cursors, unresolved approvals, and explicit
 omissions.
 
-Compaction freezes the source vector, builds a deterministic skeleton from
+Compaction freezes the context basis, builds a deterministic skeleton from
 authoritative contexts, optionally adds a model-generated narrative, validates
 identities and states, and stores a checkpoint boundary without replacing raw
 history. Rehydration uses the checkpoint plus fresh source deltas, current mandatory
@@ -240,30 +378,34 @@ modules, and permitted retrieval.
 
 Provider switch classifies contributions as portable, transformable, not portable,
 or prohibited; rechecks trust and egress; obtains new capabilities and budgets;
-creates a successor manifest; and records a `ContinuityGrade` plus `LossReport`.
+creates a new Run-owned activation and records a `ContinuityGrade` plus
+`LossReport`. It creates a successor semantic manifest only when semantic
+composition changes.
 Hidden reasoning, native tool-call identity, provider cache, opaque compaction, and
 provider-local approval state do not transfer as semantic truth.
 
-## Context application evidence
+Run must quiesce the old action-capable runtime, checkpoint recoverable state,
+prepare the target, fence the old runtime, and only then activate the target.
+Two action-capable runtime generations for one Run authority generation are
+forbidden. Offline or queued activation always repeats freshness, authorization,
+deletion-epoch, and target-fit assessment before dispatch.
 
-Candidate evidence stages are:
+## Runtime materialization evidence
 
-```text
-manifest-prepared
-runtime-accepted
-materialized
-partially-materialized
-rejected
-application-outcome-unknown
-```
+OD-033 owns the unresolved Run activation state machine, resume gate, and
+supersession behavior. Agent Context owns only the semantic input and evidence
+contract needed by that process. The contract must distinguish full, partial,
+rejected, superseded, remediation-required, and unknown materialization outcomes
+without defining Run lifecycle transitions inside Agent Context.
 
 Evidence records manifest and contribution hashes, runtime session or operation
-reference, execution epoch, provider/model/compiler versions, applied and omitted
-contributions, token evidence, and reason codes. `Materialized` means included in a
-provider request or active context. It never claims that a model read, understood,
-or followed the content.
+reference, observable AR execution epoch, Run authority generation,
+provider/model/compiler versions, applied and omitted contributions, token
+evidence, and reason codes. Private AR fences never leave AR. `Materialized`
+means included in a provider request or active context. It never claims that a
+model read, understood, remembered, or followed the content.
 
-Unknown outcomes are reconciled by stable Context Application identity and AR
+Unknown outcomes require the Run-owned reconciliation defined by OD-033 and AR
 query capability. Blindly injecting the same contribution again can duplicate a
 user instruction and is forbidden without reconciliation or controlled recovery.
 
@@ -291,10 +433,16 @@ or later models after measured use cases prove them.
 - Event-storming proves a cohesive language, independent lifecycle, concurrency,
   security boundary, and first vertical slice before any package is created.
 - A manifest records source revisions, policy/capability snapshots, required versus
-  optional contributions, composition version, hashes, sensitivity, freshness, and
-  expiry.
-- A manifest records a source revision vector rather than claiming a globally
-  atomic cross-context snapshot, and application preconditions can be revalidated.
+   optional contributions, composition version, hashes, sensitivity, freshness,
+   coverage, known gaps, and expiry.
+- A manifest records a `ContextBasis` of opaque source-lineage positions rather
+  than claiming a globally atomic snapshot or cross-source causal clock.
+- Contract, manifest, current validity, representation, and Run-owned activation
+  remain separate models with separate owners and lifecycles.
+- Hot-source invalidation does not require rewriting historical manifests or
+  synchronously rebuilding every dependent Run.
+- Public SDK contracts do not expose manifest internals, provider compilation, or
+  adapter-native context state.
 - AR returns a typed materialization report for applied, dropped, downgraded,
   delegated, or rejected contributions.
 - Required context fails explicitly when it cannot fit or cannot be enforced.
@@ -302,6 +450,8 @@ or later models after measured use cases prove them.
   old prompt byte-for-byte.
 - Revocation distinguishes future nondisclosure from content already disclosed to
   a provider and produces an explicit remediation decision.
+- Deletion epochs are checked during rehydrate, restore, replay, delayed
+  activation, and provider switch so erased content cannot be resurrected.
 - Provider switch, runtime replacement, fork, concurrent refresh, and stale receipt
   scenarios have deterministic revision and fencing behavior.
 - Exact disclosed artifacts have retention, encryption, redaction, and privacy

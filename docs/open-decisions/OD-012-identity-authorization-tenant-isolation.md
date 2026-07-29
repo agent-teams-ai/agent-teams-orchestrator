@@ -9,6 +9,8 @@ related:
   - domain.contexts.access-control
   - domain.contexts.tenant-project-registry
   - ADR-0021
+  - OD-031
+  - OD-032
 ---
 
 # OD-012: Identity, Authorization, and Tenant Isolation
@@ -39,6 +41,13 @@ ADR-0021 fixes the client boundary:
 This decision still selects concrete identity providers, grant flows, token
 validation, revocation propagation, service identities, and authorization
 consistency.
+
+OD-031 separately owns semantic claim admission and conflict resolution. Access
+Control determines whether a principal may attempt an operation; it does not
+decide whether a Jira observation, agent statement, comment, or model summary is
+the accepted business fact. OD-032 separately owns the final pre-side-effect
+enforcement chain. Neither concern may be absorbed into one authorization
+god-service.
 
 An isolated real-Connect security spike passed 43/43 assertions in three runs. It
 proved exact-scope credential cache keys, 100-way single-flight refresh,

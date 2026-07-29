@@ -236,22 +236,21 @@ Opaque runtime references must not be reconstructed from process IDs, paths, or
 provider session names.
 
 The public control API may expose a non-authorizing execution epoch for
-observation and stale-attempt diagnostics. It never exposes an execution fence or
-accepts an epoch as proof of runtime authority.
+observation and stale-execution diagnostics. It never exposes an execution fence
+or accepts an epoch as proof of runtime authority.
 
-An execution epoch and an execution attempt are not interchangeable. Reattachment
-to the same live provider process may advance `executionEpoch` while retaining the
-same `attemptId`. A new provider process or invocation creates a successor
-attempt. The orchestrator treats both values as runtime observations and never
-infers attempt identity from an epoch change.
+AR owns runtime sessions, execution identity and custody, provider runtime
+instances, provider-session bindings, operations, allocation references, provider
+accounts, credentials, and recovery generations. Reattachment, takeover, restart,
+and successor-generation rules remain AR invariants. The orchestrator treats only
+the explicitly published epoch and provider-neutral references as opaque
+observations and never infers execution identity from an epoch, process ID,
+provider invocation, or reconnect.
 
-`RuntimeSession`, `ExecutionAttempt`, `ExecutionCustodyEpoch`, `ExecutionSlot`,
-`RuntimeAllocationRef`, `ProviderAccount`, and `CredentialCustody` belong to AR's
-model. The Runtime ACL does not assume allocation, account, custody, or slot
-identities are published and does not reproduce that hierarchy. When AR explicitly
+The Runtime ACL does not reproduce AR's internal hierarchy. When AR explicitly
 publishes a provider-neutral correlation reference, the ACL preserves it as opaque
 and non-authoritative. Run Orchestration never stores raw runtime credentials,
-account custody, or authoritative capacity allocation.
+account custody, private fences, or authoritative capacity allocation.
 
 ## Snapshots and events
 
