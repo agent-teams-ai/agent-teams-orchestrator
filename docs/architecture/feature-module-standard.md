@@ -12,6 +12,11 @@ related:
   - ADR-0033
   - ADR-0037
   - ADR-0038
+code_anchors:
+  - pattern: scripts/architecture/validate-package-topology.mjs
+    enforcement: required
+  - pattern: tooling/architecture-conformance/scripts/check-package-topology.mjs
+    enforcement: required
 ---
 
 # Feature Module Standard
@@ -67,6 +72,10 @@ Feature ownership is structural, while DDD depth is semantic:
 
 No package may postpone feature ownership until it becomes large. A package may
 start with one feature, but production behavior still begins inside that feature.
+Every materialized package, including an application, contains at least one real
+source file under `src/features/<feature>/` and a colocated feature `README.md`
+whose metadata is `type: feature`, `status: accepted`, and references the package
+owner document. Package assembly files do not satisfy this gate.
 
 ## Target workspace layout
 
@@ -398,8 +407,10 @@ consumer's business policy.
 
 `@agent-teams/runtime-gateway` is the accepted narrow AR integration boundary. It
 owns the AR Published Language client, transport behavior, protocol mapping
-primitives, and provider conformance. It is not the consumer-owned feature adapter:
-each consuming feature still owns the adapter from its application port to that
+primitives, and consumer-side Runtime Published Language client and ACL
+conformance. Provider-driver and provider-behavior conformance remain owned and
+published by AR. The gateway is not the consumer-owned feature adapter: each
+consuming feature still owns the adapter from its application port to that
 gateway. The gateway cannot import business contexts or define Team, Task, Run,
 Approval, or teammate-message semantics.
 

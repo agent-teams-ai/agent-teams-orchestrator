@@ -12,6 +12,15 @@ related:
   - ADR-0038
   - ADR-0040
   - architecture.composition
+code_anchors:
+  - pattern: scripts/architecture/validate-dependency-specifiers.mjs
+    enforcement: required
+  - pattern: scripts/architecture/source-imports.mjs
+    enforcement: required
+  - pattern: scripts/architecture/validate-package-topology.mjs
+    enforcement: required
+  - pattern: tooling/architecture-conformance/scripts/check-dependency-specifiers.mjs
+    enforcement: required
 ---
 
 # Dependency Rules
@@ -158,6 +167,19 @@ contexts, integrations from depending on contexts or SDKs, and SDKs from dependi
 on contexts, integrations, or platform implementation packages. Internal workspace
 dependencies must be cataloged and use the `workspace:` protocol. Dev-only testing
 packages are the explicit exception to runtime role direction.
+
+The published `@agent-teams/engineering-foundation` package is the only external
+package allowed in the reserved scope. It must use an exact registry version in
+`devDependencies`; runtime, optional, and peer declarations are prohibited.
+Production source under `apps/**/src` and `packages/**/src` cannot import it.
+Architecture fixtures prove both the valid dev-only declaration and invalid
+declaration and import cases.
+
+Cross-package source imports must name a declared manifest dependency and use a
+subpath exposed by the target package `exports`. Imports through another package's
+`src/**` are always prohibited. These checks enforce package encapsulation only;
+the package-role matrix and context map remain the authorities for allowed
+business dependencies.
 
 ## Dependency inversion examples
 
