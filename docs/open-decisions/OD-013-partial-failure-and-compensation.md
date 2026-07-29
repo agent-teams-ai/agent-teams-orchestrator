@@ -8,6 +8,7 @@ related:
   - domain.contexts.run-orchestration
   - domain.contexts.work-coordination
   - domain.contexts.agent-communication
+  - OD-032
 ---
 
 # OD-013: Partial Failure and Compensation
@@ -54,6 +55,11 @@ The retained `Cross-context process manager` fingerprint is in the
 - timeout, retry-budget, unknown-outcome, and operator-escalation rules;
 - replan after stale Work revision and active-Run topology changes;
 - terminal Run reopening versus successor Run.
+
+OD-032 owns the general last-mile safety and ambiguous external-effect model.
+This decision remains responsible for Run-specific continuation, compensation,
+and participant policy rather than defining one shared action-execution
+aggregate.
 
 ## Resolution
 

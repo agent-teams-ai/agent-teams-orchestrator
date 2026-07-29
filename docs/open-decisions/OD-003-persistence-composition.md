@@ -178,6 +178,12 @@ bounded-context restore remains a separate logical and reconciliation workflow.
   production-volume RTO, and recurring restore drills;
 - hosted RPO profile and degraded-write policy, automated promotion authority,
   and old-primary rejoin mechanism;
+- outbox publication durability barrier: an asynchronous PostgreSQL profile can
+  publish an outbox item to JetStream and later lose the containing transaction
+  during promotion, leaving a ghost event or external effect; define which
+  contracts require synchronous durability or a confirmed WAL/LSN barrier before
+  relay eligibility, and restrict weaker profiles to explicitly rebuildable or
+  loss-tolerant outputs;
 - persistence conformance-kit ownership.
 
 The production readiness suite must still cover real power-loss and filesystem

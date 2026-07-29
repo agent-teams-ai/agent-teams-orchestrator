@@ -62,11 +62,16 @@ design, not a requirement to reproduce Temporal history or implement a generic
 workflow language locally.
 
 The first Temporal workflow is a feature-specific Run Orchestration process
-manager. Its workflow ID is stable and scoped by tenant, run, process kind, and
-workflow-contract version. Every mutating activity invokes one narrow application
-command with a stable command ID, semantic fingerprint, and expected revision or
-fence. Activity timeout, retry, and apparent success never replace the
-application receipt because overlapping or unknown activity outcomes are normal.
+manager. Its business workflow ID is stable and scoped by tenant, run, process
+kind, and explicit process generation. It never includes a contract, schema,
+worker-build, or deployment version because a version change must not create a
+second owner for the same process. Contract and build versions are pinned as
+workflow metadata and deployment routing. An incompatible replacement requires a
+durable successor handoff and fence under OD-005. Every mutating activity invokes
+one narrow application command with a stable command ID, semantic fingerprint,
+and expected revision or fence. Activity timeout, retry, and apparent success
+never replace the application receipt because overlapping or unknown activity
+outcomes are normal.
 
 External clients do not signal or query Temporal directly. Product commands
 commit through ordinary application inbound ports and publish outbox-backed
