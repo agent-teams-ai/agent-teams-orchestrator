@@ -8,6 +8,7 @@ related:
   - ADR-0030
   - ADR-0033
   - ADR-0035
+  - ADR-0058
   - architecture.local-host-lifecycle
   - OD-001
   - OD-003
@@ -57,7 +58,10 @@ ADR-0033 without changing its ownership boundaries.
 9. Bundled NATS implementation beneath ADR-0035: compatibility matrix, disk
    thresholds, backup schedule, corruption classification, and recovery
    coordination with OD-009.
-10. Whether the Supervisor uses the repository's Node runtime or a smaller native
+10. Bundled Centrifugo implementation beneath ADR-0058: exact platform binaries,
+    nested signing and notarization, endpoint and credential rotation, memory
+    limits, crash-loop policy, staged update, and Windows/Linux lifecycle.
+11. Whether the Supervisor uses the repository's Node runtime or a smaller native
     implementation after a measured packaging and reliability spike.
 
 ## Decision evidence
@@ -144,6 +148,16 @@ The retained `Local JetStream store resilience` fingerprint is in the
 Cross-platform filesystem behavior, power loss, long soak, exact thresholds,
 backup destination and schedule, encryption, signing, and release compatibility
 remain unresolved.
+
+A macOS arm64 Centrifugo 6.9.1 spike proved loopback startup, JWT
+authentication, disabled client publishing, reconnect, explicit
+`recovered=false` after memory-engine restart, 100-client fanout, and clean
+shutdown. Startup was approximately 155-165 ms and idle RSS approximately 38 MB.
+The upstream binary had only an ad-hoc signature, so production Desktop packaging
+must bundle, nested-sign, and notarize it. Windows, Linux, signed Electron
+packaging, staged update, long soak, and hosted Redis-compatible multi-node
+operation remain release gates. The complete evidence is in the
+[Centrifugo Desktop spike](../research/centrifugo-desktop-spike-2026-07-28.md).
 
 ## Acceptance criteria
 

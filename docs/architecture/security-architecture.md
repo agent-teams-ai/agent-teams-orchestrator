@@ -8,6 +8,7 @@ related:
   - ADR-0021
   - ADR-0028
   - ADR-0055
+  - ADR-0058
   - OD-012
   - OD-014
   - OD-029
@@ -199,6 +200,27 @@ Ambiguous outcomes are reconciled rather than blindly retried.
 Orchestrator never stores or validates an AR-private execution fence. It sends
 only the published preconditions accepted by the `ar` contract; `ar` owns the
 technical enforcement decision.
+
+## Client realtime boundary
+
+Centrifugo terminates client realtime connections but grants no business
+authority. The Host issues short-lived, audience-bound, scope-limited
+subscription tokens after authenticating the client and authorizing the feed.
+Opaque channel names, possession of a connection, localhost, presence, and
+publication payload fields never establish tenant or resource scope.
+
+The default profile disables client publication, generic RPC, and unneeded
+history or presence capabilities. Product commands enter only through the typed
+control API. The Host publishes feature-approved, classified client projections
+or opaque wake references after durable feed commit. Raw domain events,
+JetStream envelopes, secrets, private fences, and reusable authority credentials
+cannot cross this boundary.
+
+Centrifugo history is treated as a non-authoritative bounded cache whose payloads
+and scope are validated at the Host and SDK boundaries. Recovery failure,
+revocation, authorization uncertainty, or a cursor gap returns the client to a
+Host-authorized snapshot or feed reconciliation. Hosted Redis-compatible fanout
+and local memory history do not become durable or security authorities.
 
 ## Logs, events, feeds, and telemetry
 

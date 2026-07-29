@@ -11,6 +11,7 @@ related:
   - ADR-0033
   - ADR-0035
   - ADR-0037
+  - ADR-0058
   - architecture.local-host-lifecycle
   - OD-009
 ---
@@ -358,6 +359,43 @@ local profile maintains warning and critical headroom thresholds plus an emergen
 reserve. A critical filestore write signal stops new dispatch admission; recovery
 requires released capacity, controlled restart, integrity reconciliation, and
 outbox/inbox recovery before readiness.
+
+## Client realtime is not integration eventing
+
+Centrifugo is the default client realtime edge, not another event bus or durable
+journal. JetStream transports integration facts and commands between application
+boundaries. Centrifugo fans out already-authorized client feed projections after
+the owning context has committed its authoritative durable application feed.
+
+```text
+context UoW
+  -> domain state
+  -> durable client feed item
+  -> realtime publication work
+  -> commit
+
+realtime relay
+  -> Centrifugo live publication
+  -> client
+  -> authoritative feed cursor or snapshot reconciliation
+```
+
+Realtime publication work is durable and idempotent, but a Centrifugo
+acknowledgement proves only that the edge accepted a publication. It does not
+prove that a client received, displayed, read, processed, or checkpointed it.
+Those meanings remain explicit application concepts when a feature needs them.
+
+Centrifugo history is a bounded reconnect cache. Its offset, epoch, retention,
+presence, and recovery result are adapter concerns. A lost publication, failed
+recovery, restart, or gap returns the SDK to the context-owned feed. Domain
+ordering, durable mailbox state, unread state, and business acknowledgements never
+depend on realtime-edge retention.
+
+The edge receives only feature-approved client projections or opaque wake
+references. It never receives raw integration-event envelopes by default, and it
+never converts client publication into a command. Broker-neutral event ports and
+client-realtime ports remain separate even when one Host process composes both
+adapters.
 
 ## Adapter reconnect and backpressure
 

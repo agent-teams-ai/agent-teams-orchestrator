@@ -69,6 +69,14 @@ model {
         }
       }
 
+      realtime = securityProcess 'Managed Local Centrifugo' {
+        metadata {
+          owner_document 'architecture.sdk-transports'
+          security_role 'client-realtime-edge'
+          trust_zone 'local-device'
+        }
+      }
+
       database = stateStore 'Local SQLite Stores' {
         metadata {
           owner_document 'architecture.persistence'
@@ -113,6 +121,14 @@ model {
         metadata {
           owner_document 'architecture.eventing'
           security_role 'event-broker'
+          trust_zone 'hosted-control-plane'
+        }
+      }
+
+      realtime = securityProcess 'Hosted Centrifugo Edge' {
+        metadata {
+          owner_document 'architecture.sdk-transports'
+          security_role 'client-realtime-edge'
           trust_zone 'hosted-control-plane'
         }
       }
@@ -211,6 +227,13 @@ model {
       status 'accepted'
     }
   }
+  securityLandscape.localDevice.supervisor -[lifecycleControl]-> securityLandscape.localDevice.realtime 'Start, health, stage, and activate' {
+    metadata {
+      integration_style 'Pinned bundled sidecar lifecycle'
+      authority 'Supervisor owns process availability only; Host adapter owns realtime semantics'
+      status 'accepted'
+    }
+  }
   securityLandscape.browserDevice.browser -[authenticatedControl]-> securityLandscape.hostedControlPlane.host 'HTTPS control API' {
     metadata {
       integration_style 'Untrusted-network authenticated control channel'
@@ -229,6 +252,41 @@ model {
     metadata {
       integration_style 'Untrusted-network authenticated control channel'
       authority 'Hosted identity and resource scope are authoritative; local client payload is untrusted'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.desktop -[eventDelivery]-> securityLandscape.localDevice.realtime 'Scoped local live subscriptions' {
+    metadata {
+      integration_style 'Centrifugo live edge with bounded recovery cache'
+      authority 'Host-issued token scopes subscription; SQL feed and Connect reconciliation remain authoritative'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.host -[eventDelivery]-> securityLandscape.localDevice.realtime 'Publish authorized client feed projections' {
+    metadata {
+      integration_style 'Replaceable client realtime adapter after durable feed commit'
+      authority 'Owning feature owns feed and classification; edge owns connection fanout only'
+      status 'accepted'
+    }
+  }
+  securityLandscape.browserDevice.browser -[eventDelivery]-> securityLandscape.hostedControlPlane.realtime 'Scoped hosted live subscriptions' {
+    metadata {
+      integration_style 'Centrifugo live edge with short-lived subscription token'
+      authority 'Hosted Host owns authorization and authoritative resync'
+      status 'accepted'
+    }
+  }
+  securityLandscape.localDevice.desktop -[eventDelivery]-> securityLandscape.hostedControlPlane.realtime 'Scoped remote live subscriptions' {
+    metadata {
+      integration_style 'Centrifugo live edge over untrusted network'
+      authority 'Hosted Host owns authorization and authoritative resync'
+      status 'accepted'
+    }
+  }
+  securityLandscape.hostedControlPlane.host -[eventDelivery]-> securityLandscape.hostedControlPlane.realtime 'Publish authorized client feed projections' {
+    metadata {
+      integration_style 'Replaceable client realtime adapter after durable feed commit'
+      authority 'Owning feature owns feed and classification; edge owns connection fanout only'
       status 'accepted'
     }
   }

@@ -8,6 +8,7 @@ related:
   - ADR-0030
   - ADR-0033
   - ADR-0035
+  - ADR-0058
   - OD-001
   - OD-003
   - OD-009
@@ -33,27 +34,40 @@ flowchart LR
     Desktop["Desktop"]
     Other["Other local application"]
     Bootstrapper["OS Supervisor Bootstrapper"]
+    SDK["Orchestrator SDK"]
 
     CLI --> Connector["Local Connector"]
     Desktop --> Connector
     Other --> Connector
+    CLI --> SDK
+    Desktop --> SDK
+    Other --> SDK
 
     Connector -->|"first-run ensure"| Bootstrapper
     Bootstrapper -->|"register / start"| Supervisor["Local Supervisor"]
     Connector -->|"ensure / discover / status"| Supervisor["Local Supervisor"]
-    Connector -->|"authenticated Connect API"| Host["Orchestrator Host"]
+    Connector -->|"discovered target"| SDK
+    SDK -->|"authenticated Connect API"| Host["Orchestrator Host"]
 
     Supervisor -->|"process availability only"| Host
     Supervisor -->|"process and store lifecycle"| NATS["Bundled nats-server"]
+    Supervisor -->|"binary and process lifecycle"| Realtime["Bundled Centrifugo"]
     Supervisor -. "optional host availability" .-> ARHost["Agent Runtime Host"]
 
     Host -->|"JetStream adapter"| NATS
+    Host -->|"client realtime adapter"| Realtime
+    SDK -->|"live subscriptions after Host auth"| Realtime
     Host -->|"Runtime ACL + AR SDK"| ARHost
     ARHost -->|"AR-owned lifecycle"| Providers["Provider processes and sessions"]
 ```
 
 The Supervisor is not on the normal SDK request path. After discovery and
 handshake, clients connect directly to the Host public control API.
+
+The SDK obtains an opaque realtime subscription descriptor and short-lived token
+from the Host through Connect. Token refresh and feed authorization also return
+to the Host. The Local Connector and Supervisor never issue subscription tokens,
+select channels, or proxy live publications.
 
 ## Responsibility matrix
 
@@ -67,8 +81,12 @@ handshake, clients connect directly to the Host public control API.
 | Local NATS process, binary, store path, lifetime lock, and resource lifecycle | Local Supervisor |
 | JetStream topology, publish, consume, ACK, and transport mapping | JetStream adapters |
 | Event ordering, delivery, privacy, retention, and replay requirements | Owning feature contract |
+| Local Centrifugo binary, endpoint, process health, staged activation, and cleanup | Local Supervisor |
+| Realtime channel mapping, token encoding, publication projection, and recovery signaling | Centrifugo adapter |
+| Durable client feed, cursor, snapshot, feed-scope validation, and classification | Owning feature |
+| Product grant, delegation, revocation, and authorization decision | Access Control |
 | AR host availability when locally managed | Local Supervisor |
-| Runtime session, attempt, provider process, sandbox, and permission enforcement | Agent Runtime |
+| Runtime sessions, AR execution identity and custody, provider processes, sandbox, and permission enforcement | Agent Runtime |
 | User defaults for target and scope | Client Profile |
 | Team project directory or execution workspace identity | Workspace Registry |
 
@@ -98,6 +116,13 @@ bootstrap, `ensure`, `discover`, readiness/health, and typed diagnostics. Automa
 updates, staged activation, rollback, drain, garbage collection, and full
 service-manager recovery remain target capabilities governed by OD-021; they are
 not prerequisites for the first local vertical slice.
+
+The default Desktop package includes pinned platform builds of managed local
+components. It does not download Centrifugo on first launch. The release pipeline
+verifies provenance and checksum, applies nested platform signing and
+notarization, and stages the binary beside the Host. The Supervisor starts the
+memory-engine profile on a protected rotating endpoint. Users install, configure,
+or start nothing manually.
 
 Bootstrap, discovery, and administration remain narrow capability surfaces even
 if they share one low-level protected connection. Exact public TypeScript names
@@ -265,13 +290,20 @@ ACL, and JetStream adapter semantics. They differ only at deployment adapters:
 ```text
 Local:
   Local Supervisor + Orchestrator Local + SQLite + managed NATS
+  + managed Centrifugo memory profile
 
 Hosted:
   platform supervisor + Orchestrator Server + PostgreSQL + external NATS
+  + managed Centrifugo clustered profile
 ```
 
 The hosted platform supervisor does not become a business service, just as the
 Local Supervisor is not a bounded context.
+
+Hosted composition may run multiple Centrifugo nodes with a Redis-compatible
+engine for connection fanout and short recovery history. Local composition uses
+one memory-engine process. Both profiles use the same realtime adapter contract,
+while SQL feeds and Connect reconciliation remain authoritative.
 
 ## Security boundaries
 
@@ -297,6 +329,10 @@ Do not:
 - put process installation or update logic in the SDK;
 - route normal commands through the Supervisor;
 - let JetStream subjects or NATS lifecycle enter domain/application code;
+- let Centrifugo channels, positions, tokens, or errors enter
+  domain/application or public SDK models;
+- let Centrifugo or the Supervisor own feed, authorization, publication, or
+  recovery semantics;
 - let the Supervisor or Host control provider processes outside AR;
 - use workspace configuration as deployment or trust configuration;
 - branch domain behavior on local, desktop, hosted, or foreground mode.

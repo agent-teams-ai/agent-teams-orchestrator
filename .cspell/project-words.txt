@@ -4,6 +4,7 @@ Awilix
 backpressure
 bootstrapper
 boundedness
+Centrifugo
 checkpointed
 checkpointing
 CloudEvents

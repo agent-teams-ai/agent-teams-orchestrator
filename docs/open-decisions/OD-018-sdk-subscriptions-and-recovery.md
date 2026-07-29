@@ -9,6 +9,7 @@ related:
   - ADR-0010
   - ADR-0015
   - ADR-0019
+  - ADR-0058
   - architecture.eventing
   - architecture.sdk-transports
   - OD-009
@@ -38,3 +39,7 @@ heartbeat, slow-consumer behavior, and merged convenience views.
 Resolved by ADR-0019. Cursors are feed-scoped, callers own durable checkpoints,
 buffers are bounded, reconnect is explicit, and snapshot bootstrap carries the
 applied watermark and matching resume cursor or vector.
+
+ADR-0058 later selected Centrifugo as the default replaceable live edge. It does
+not change this resolution: Centrifugo positions remain adapter-local and any
+failed recovery returns to the authoritative feed cursor or snapshot flow.

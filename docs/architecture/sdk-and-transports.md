@@ -14,6 +14,7 @@ related:
   - ADR-0033
   - ADR-0036
   - ADR-0037
+  - ADR-0058
   - architecture.local-host-lifecycle
   - architecture.public-control-contracts
   - OD-001
@@ -182,6 +183,48 @@ NATS subjects, streams, consumers, and acknowledgements are not part of the
 normal public SDK. The orchestrator may expose explicitly durable NATS
 integration surfaces without making broker configuration the client programming
 model.
+
+## Client realtime edge
+
+Centrifugo is the default replaceable realtime edge selected by ADR-0058. It
+accelerates live delivery to interactive clients but does not replace the
+authoritative application feed or the Connect control API.
+
+```text
+capability SDK subscription
+  -> internal RealtimeFeedBackend
+       -> Centrifugo live adapter
+       -> Connect snapshot, resume, and reconciliation adapter
+  -> application feed event and application cursor
+```
+
+The internal backend hides Centrifugo channels, JWT claims, offsets, epochs,
+recovery flags, and transport errors. Public SDK users see feed identity, typed
+events, opaque application cursors, checkpoints, and typed gap or expiry
+outcomes. The SDK never asks users to configure Centrifugo.
+
+The SDK requests an opaque subscription descriptor and short-lived token from
+the Host through Connect. The descriptor supplies the adapter endpoint and
+internal channel identity required by the backend without exposing them as stable
+public API. Refresh repeats Host authorization; the Supervisor and Local Connector
+never mint product subscription tokens.
+
+A Centrifugo publication is an optimization over a committed context-owned feed
+item. It may contain a bounded authorized client projection or only a wake
+reference, according to the feature's classification manifest. It is never a raw
+domain event, JetStream envelope, or authority credential.
+
+When Centrifugo cannot prove continuity, the SDK does not continue past a silent
+gap. It obtains the authoritative snapshot and resume cursor through Connect, or
+resumes the owning feed from the caller's checkpoint. Centrifugo history remains
+a short reconnect cache and its position is not persisted as the application
+checkpoint.
+
+Client publication and generic realtime RPC are disabled. Product mutations,
+including Conversation messages, always enter through typed application commands.
+An accepted alternative realtime adapter must pass the same authorization,
+reconnect, recovery, duplicate, gap, slow-consumer, and cleanup conformance
+fixtures.
 
 ## Local bootstrap and target selection
 

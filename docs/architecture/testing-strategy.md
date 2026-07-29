@@ -20,6 +20,7 @@ related:
   - ADR-0050
   - ADR-0055
   - ADR-0057
+  - ADR-0058
   - architecture.local-host-lifecycle
   - architecture.security
 ---
@@ -253,6 +254,7 @@ Test concrete adapters against disposable infrastructure:
 - SQLite and PostgreSQL;
 - Temporal test environment;
 - local Host transport and Supervisor bootstrap control;
+- Centrifugo client realtime edge;
 - `ar` test runtime.
 
 Temporal adapter tests retain representative histories and exercise replay against
@@ -300,6 +302,16 @@ upgrade tests use exact image digests and verify mixed-version quorum, replica
 catch-up, traffic, downgrade, and re-upgrade for every explicitly supported
 version pair.
 
+Centrifugo conformance runs the same SDK feed fixtures against the local memory
+profile, hosted Redis-compatible profile, and a deterministic fake realtime edge.
+It verifies scoped token issuance and revocation, disabled client publication,
+authorized channel isolation, bounded buffers, duplicates, slow consumers,
+process restart, reconnect storms, `recovered=false`, history expiry, missed
+wake-ups, authoritative snapshot and cursor reconciliation, and cleanup. Packaging
+tests cover nested macOS signing and notarization, Windows signing and lifecycle,
+Linux packaging, staged activation, rollback, crash loops, and absence of
+first-launch downloads.
+
 Observability integration tests send sampled, unsampled, and malformed W3C trace
 context through Connect, persistence, outbox, JetStream, inbox, and durable work.
 They verify new-root span links for delayed work, one span per retry or
@@ -326,6 +338,8 @@ Automated checks must reject:
 - provider branches in core;
 - public SDK/transport contract imports in application or domain;
 - transport types in domain;
+- Centrifugo channels, tokens, offsets, epochs, or errors in domain, application,
+  public SDK, or canonical feed models;
 - unversioned external contracts;
 - public control JSON Schemas that duplicate canonical Protobuf;
 - public Protobuf fields outside the accepted cross-language profile;

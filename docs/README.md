@@ -33,6 +33,7 @@ Agents should also follow the short repository-level
 | Integrate AR or a provider runtime | [Runtime boundary](architecture/runtime-boundary.md) | `OD-004`, [eventing](architecture/eventing-and-reliability.md) |
 | Design persistence or concurrency | [Persistence boundary](architecture/persistence-boundary.md) | `OD-003`, [testing](architecture/testing-strategy.md) |
 | Add events, feeds, inbox, or outbox | [Eventing and reliability](architecture/eventing-and-reliability.md) | [Public contracts](architecture/public-control-contracts.md) |
+| Add client realtime delivery | [SDK and transports](architecture/sdk-and-transports.md) | [ADR-0058](decisions/0058-centrifugo-default-replaceable-client-realtime-edge.md), [Local Host lifecycle](architecture/local-host-lifecycle.md) |
 | Classify data or cross a trust boundary | [Security architecture](architecture/security-architecture.md) | [Machine-readable security schemas](../architecture/security/data-classification.schema.json), `OD-012`, `OD-029` |
 | Add an SDK or API capability | [SDK and transports](architecture/sdk-and-transports.md) | [Public control contracts](architecture/public-control-contracts.md) |
 | Change local lifecycle | [Local Host lifecycle](architecture/local-host-lifecycle.md) | `OD-001`, `OD-021` |
