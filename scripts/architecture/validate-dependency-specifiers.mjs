@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 
 import { relative, walk } from "./package-catalog-lib.mjs";
+import { extractModuleSpecifiers } from "./source-imports.mjs";
 
 const dependencySections = [
   "dependencies",
@@ -12,6 +13,18 @@ const dependencySections = [
   "optionalDependencies",
   "peerDependencies",
 ];
+const engineeringFoundationPackage =
+  "@agent-teams/engineering-foundation";
+const productionSourceExtensions = new Set([
+  ".cjs",
+  ".cts",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".mts",
+  ".ts",
+  ".tsx",
+]);
 const ignoredDirectories = [
   ".git",
   ".nx",
@@ -186,6 +199,19 @@ function validateDependency(
     return;
   }
 
+  if (dependencyName === engineeringFoundationPackage) {
+    if (section !== "devDependencies") {
+      errors.push(
+        `${location} is engineering tooling and is allowed only as an exact devDependency`,
+      );
+    } else if (!isExactRegistryVersion(dependencySpecifier)) {
+      errors.push(
+        `${location} must use an exact registry version`,
+      );
+    }
+    return;
+  }
+
   if (dependencyName.startsWith("@agent-teams/")) {
     errors.push(
       `${location} uses the reserved internal scope but is not a workspace package`,
@@ -208,6 +234,35 @@ function validateDependency(
   }
   if (!Object.hasOwn(catalog, dependencyName)) {
     errors.push(`${location} is missing from catalog ${catalogName}`);
+  }
+}
+
+async function validateProductionFoundationImports(repositoryRoot, errors) {
+  const sourceFiles = (
+    await Promise.all(
+      ["apps", "packages"].map((directory) =>
+        walk(
+          path.join(repositoryRoot, directory),
+          (filePath) =>
+            productionSourceExtensions.has(path.extname(filePath)),
+          { skipDirectories: ignoredDirectories },
+        ),
+      ),
+    )
+  ).flat();
+
+  for (const filePath of sourceFiles) {
+    const source = await readFile(filePath, "utf8");
+    const importsFoundation = extractModuleSpecifiers(source).some(
+      (specifier) =>
+        specifier === engineeringFoundationPackage ||
+        specifier.startsWith(`${engineeringFoundationPackage}/`),
+    );
+    if (importsFoundation) {
+      errors.push(
+        `${relative(repositoryRoot, filePath)}: production source cannot import ${engineeringFoundationPackage}`,
+      );
+    }
   }
 }
 
@@ -264,6 +319,7 @@ async function main() {
       }
     }
   }
+  await validateProductionFoundationImports(repositoryRoot, errors);
 
   if (errors.length > 0) {
     for (const error of [...new Set(errors)].toSorted()) {

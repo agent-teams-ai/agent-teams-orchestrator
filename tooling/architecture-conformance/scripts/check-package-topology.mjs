@@ -116,6 +116,32 @@ summary: Owns the test platform package for topology fixtures.
   );
 }
 
+async function writeFeatureReadme(
+  featureRoot,
+  {
+    id,
+    owner,
+    ownerDocument,
+    status = "accepted",
+  },
+) {
+  await writeFile(
+    path.join(featureRoot, "README.md"),
+    `---
+id: ${id}
+type: feature
+status: ${status}
+owner: ${owner}
+summary: Owns concrete source behavior used by package topology conformance fixtures.
+related:
+  - ${ownerDocument}
+---
+
+# Fixture Feature
+`,
+  );
+}
+
 async function writeCatalog(root) {
   const architectureRoot = path.join(root, "architecture");
   await mkdir(architectureRoot, { recursive: true });
@@ -136,6 +162,11 @@ packages:
     role: platform
     path: packages/platform/test
     package_name: "@agent-teams/platform-test"
+    owner_document: architecture.platform-test
+  - id: app.test
+    role: app
+    path: apps/test
+    package_name: "@agent-teams/app-test"
     owner_document: architecture.platform-test
 `,
   );
@@ -177,6 +208,52 @@ async function materializeContext(root) {
     path.join(packageRoot, "src/features/task-model/index.ts"),
     "export {};\n",
   );
+  await writeFeatureReadme(
+    path.join(packageRoot, "src/features/task-model"),
+    {
+      id: "feature.work-coordination.task-model",
+      owner: "work-coordination/task-model",
+      ownerDocument: "domain.contexts.work-coordination",
+    },
+  );
+}
+
+async function materializeApp(root) {
+  const packageRoot = path.join(root, "apps/test");
+  const featureRoot = path.join(packageRoot, "src/features/launch");
+  await mkdir(featureRoot, { recursive: true });
+  await writeFile(
+    path.join(packageRoot, "package.json"),
+    JSON.stringify(
+      {
+        name: "@agent-teams/app-test",
+        private: true,
+        type: "module",
+        dependencies: {
+          "@agent-teams/work-coordination": "workspace:*",
+        },
+        agentTeamsArchitecture: {
+          role: "app",
+          ownerDocument: "architecture.platform-test",
+        },
+      },
+      null,
+      2,
+    ),
+  );
+  await writeFile(
+    path.join(packageRoot, "tsconfig.json"),
+    JSON.stringify({ compilerOptions: { strict: true } }, null, 2),
+  );
+  await writeFile(
+    path.join(featureRoot, "index.ts"),
+    'import "@agent-teams/work-coordination";\n',
+  );
+  await writeFeatureReadme(featureRoot, {
+    id: "feature.app-test.launch",
+    owner: "apps/test",
+    ownerDocument: "architecture.platform-test",
+  });
 }
 
 const temporaryRoot = await mkdtemp(
@@ -221,7 +298,7 @@ try {
   requireFailure(
     "package-only scaffold",
     run(temporaryRoot),
-    "requires at least one accepted feature slice",
+    "requires at least one real source file in an accepted feature slice",
   );
   const scaffoldedFeatureRoot = path.join(
     temporaryRoot,
@@ -232,6 +309,27 @@ try {
     path.join(scaffoldedFeatureRoot, "index.ts"),
     "export interface TaskFixture { readonly id: string; }\n",
   );
+  requireFailure(
+    "feature source without documentation",
+    run(temporaryRoot),
+    "requires colocated",
+  );
+  await writeFeatureReadme(scaffoldedFeatureRoot, {
+    id: "feature.work-coordination.task-model",
+    owner: "work-coordination/task-model",
+    ownerDocument: "domain.contexts.work-coordination",
+    status: "proposed",
+  });
+  requireFailure(
+    "proposed feature metadata",
+    run(temporaryRoot),
+    "status accepted",
+  );
+  await writeFeatureReadme(scaffoldedFeatureRoot, {
+    id: "feature.work-coordination.task-model",
+    owner: "work-coordination/task-model",
+    ownerDocument: "domain.contexts.work-coordination",
+  });
   requireSuccess(
     "scaffolded accepted context",
     run(temporaryRoot),
@@ -295,6 +393,90 @@ try {
   delete manifest.dependencies;
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
   await rm(unknownRoot, { recursive: true });
+  await materializeApp(temporaryRoot);
+  requireSuccess(
+    "materialized app with accepted feature and public package import",
+    run(temporaryRoot),
+  );
+  const appFeaturePath = path.join(
+    temporaryRoot,
+    "apps/test/src/features/launch/index.ts",
+  );
+  const appManifestPath = path.join(temporaryRoot, "apps/test/package.json");
+  const appManifest = JSON.parse(await readFile(appManifestPath, "utf8"));
+  delete appManifest.dependencies;
+  await writeFile(appManifestPath, JSON.stringify(appManifest, null, 2));
+  requireFailure(
+    "undeclared internal package import",
+    run(temporaryRoot),
+    "is not declared in apps/test/package.json",
+  );
+  appManifest.dependencies = {
+    "@agent-teams/work-coordination": "workspace:*",
+  };
+  await writeFile(appManifestPath, JSON.stringify(appManifest, null, 2));
+  await writeFile(
+    appFeaturePath,
+    'import "@agent-teams/work-coordination/src/features/task-model";\n',
+  );
+  requireFailure(
+    "deep internal source import",
+    run(temporaryRoot),
+    "bypasses package exports",
+  );
+  await writeFile(
+    appFeaturePath,
+    'import "@agent-teams/work-coordination/private";\n',
+  );
+  requireFailure(
+    "unexported internal package subpath",
+    run(temporaryRoot),
+    "is not exported by @agent-teams/work-coordination",
+  );
+  const contextManifest = JSON.parse(
+    await readFile(manifestPath, "utf8"),
+  );
+  contextManifest.exports = {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts",
+    "./blocked/*": null,
+  };
+  await writeFile(
+    manifestPath,
+    JSON.stringify(contextManifest, null, 2),
+  );
+  await writeFile(
+    appFeaturePath,
+    'import "@agent-teams/work-coordination/blocked/internal";\n',
+  );
+  requireFailure(
+    "null export overrides a broader wildcard",
+    run(temporaryRoot),
+    "is not exported by @agent-teams/work-coordination",
+  );
+  contextManifest.exports = {
+    ".": "./src/index.ts",
+  };
+  await writeFile(
+    manifestPath,
+    JSON.stringify(contextManifest, null, 2),
+  );
+  await writeFile(
+    appFeaturePath,
+    'import "@agent-teams/work-coordination";\n',
+  );
+  await writeFile(
+    path.join(temporaryRoot, "apps/test/src/rogue.ts"),
+    "export {};\n",
+  );
+  requireFailure(
+    "app source outside feature or assembly",
+    run(temporaryRoot),
+    "production source must belong to src/features/**",
+  );
+  await rm(path.join(temporaryRoot, "apps/test/src/rogue.ts"));
+  requireSuccess("restored valid app topology", run(temporaryRoot));
+
   requireSuccess(
     "scaffold platform package",
     runScaffolder(temporaryRoot, "platform.test"),
@@ -308,6 +490,11 @@ try {
     path.join(platformFeatureRoot, "index.ts"),
     "export const platformFixture = true;\n",
   );
+  await writeFeatureReadme(platformFeatureRoot, {
+    id: "feature.platform-test.test-capability",
+    owner: "architecture/tooling",
+    ownerDocument: "architecture.platform-test",
+  });
   const platformManifestPath = path.join(
     temporaryRoot,
     "packages/platform/test/package.json",
