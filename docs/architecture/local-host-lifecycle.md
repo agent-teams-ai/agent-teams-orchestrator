@@ -7,6 +7,7 @@ summary: Current ownership, topology, discovery, lifecycle, and deployment rules
 related:
   - ADR-0030
   - ADR-0033
+  - ADR-0060
   - ADR-0035
   - ADR-0058
   - OD-001
@@ -25,6 +26,12 @@ while keeping process availability outside orchestration business behavior.
 `Local Supervisor` and `Orchestrator Host` are platform and application roles,
 not bounded contexts. Full tactical DDD belongs inside business bounded contexts;
 inventing aggregates for process discovery or binary activation is prohibited.
+
+ADR-0033 is the current lifecycle authority: one shared per-user Local Supervisor
+is the sole owner of local Host process availability. Desktop, CLI, and other
+clients may bootstrap and discover it, but they never directly supervise a Host.
+ADR-0030 remains authoritative only for the separate local and hosted composition
+profiles. ADR-0060 proposes making that precedence explicit in ADR history.
 
 ## Process topology
 

@@ -123,6 +123,11 @@ The same core supports multiple compositions:
 The local and server artifacts are thin composition roots, not separate product
 implementations. Deployment mode must not change domain behavior.
 
+The shared per-user Local Supervisor is the only local process-lifecycle owner.
+Desktop, CLI, and other applications bootstrap or discover it and then connect to
+the Host; they do not supervise their own Host sidecars. The proposed ADR-0060
+exists only to remove the remaining historical ambiguity in ADR-0030.
+
 One bounded context has one authoritative persistence profile in a running
 deployment. A Desktop using Orchestrator Server does not keep a second local
 business write model; any local cache is disposable. Moving context state between

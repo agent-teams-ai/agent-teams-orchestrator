@@ -31,6 +31,10 @@ discovery. The lifecycle lists below remain the complete status ledger.
 | Security boundaries and data handling | [ADR-0021](0021-immutable-sdk-scope-and-credentials.md), [ADR-0028](0028-runtime-published-language-and-internal-fence.md), [ADR-0055](0055-security-boundaries-and-data-classification.md) | [Security architecture](../architecture/security-architecture.md), [runtime boundary](../architecture/runtime-boundary.md) |
 | Reliability objectives | [ADR-0057](0057-measurement-first-reliability-objectives.md) | [Reliability objectives](../architecture/reliability-objectives.md), [testing](../architecture/testing-strategy.md) |
 
+## Proposed decisions
+
+- [ADR-0060: Single Local Supervisor lifecycle owner](0060-single-local-supervisor-lifecycle-owner.md)
+
 ## Accepted decisions
 
 - [ADR-0001: Headless event-driven modular monolith](0001-headless-event-driven-modular-monolith.md)
