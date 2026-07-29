@@ -15,7 +15,7 @@
     "pnpm": "11.18.0"
   },
   "scripts": {
-    "architecture:check": "pnpm run architecture:topology && pnpm run architecture:model:check && pnpm run architecture:model:test && pnpm run security:check && pnpm run reliability:check && pnpm run architecture:dependencies && pnpm run lint && pnpm run architecture:conformance && pnpm run architecture:graph:advisory",
+    "architecture:check": "pnpm run architecture:topology && pnpm run architecture:nx:check && pnpm run architecture:model:check && pnpm run architecture:model:test && pnpm run security:check && pnpm run reliability:check && pnpm run architecture:dependencies && pnpm run lint && pnpm run architecture:conformance && pnpm run architecture:graph:advisory",
     "architecture:conformance": "pnpm --filter @agent-teams/architecture-conformance run check:conformance",
     "architecture:graph:advisory": "pnpm --filter @agent-teams/architecture-conformance run check:graph",
     "architecture:dependencies": "node scripts/architecture/validate-dependency-specifiers.mjs",
@@ -24,6 +24,7 @@
     "architecture:model:preview": "likec4 start architecture/likec4",
     "architecture:model:test": "node --test --test-concurrency=1 scripts/architecture/validate-architecture-model.test.mjs",
     "architecture:model:validate": "likec4 validate --no-layout architecture/likec4",
+    "architecture:nx:check": "node scripts/architecture/validate-nx-workspace.mjs",
     "architecture:scaffold-package": "node scripts/architecture/scaffold-package.mjs",
     "architecture:topology": "node scripts/architecture/validate-package-topology.mjs",
     "docs:validate": "node scripts/docs/validate-docs.mjs",
@@ -44,6 +45,8 @@
     "lint:test": "node --test --test-concurrency=1 scripts/lint/validate-lint-config.test.mjs",
     "lint:type-aware": "node scripts/lint/run-type-aware.mjs",
     "lint:type-aware:files": "node scripts/lint/run-type-aware.mjs",
+    "nx:affected": "NX_NO_CLOUD=true NX_DAEMON=false nx show projects --affected",
+    "nx:projects": "NX_NO_CLOUD=true NX_DAEMON=false nx show projects",
     "reliability:check": "pnpm run reliability:validate && pnpm run reliability:test",
     "reliability:test": "node --test --test-concurrency=1 scripts/reliability/validate-reliability-foundation.test.mjs",
     "reliability:validate": "node scripts/reliability/validate-reliability-foundation.mjs",
@@ -67,6 +70,7 @@
     "markdownlint-cli2": "catalog:",
     "mdast-util-to-string": "catalog:",
     "mermaid": "catalog:",
+    "nx": "catalog:",
     "oxc-resolver": "catalog:",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",

@@ -30,6 +30,10 @@ code_anchors:
     enforcement: required
   - pattern: pnpm-workspace.yaml
     enforcement: advisory
+  - pattern: nx.json
+    enforcement: required
+  - pattern: scripts/architecture/validate-nx-workspace.mjs
+    enforcement: required
 ---
 
 # Repository Tooling Plan
@@ -52,8 +56,12 @@ is complete.
 | Capability | Decision state | Implementation state |
 |---|---|---|
 | Repository-local Stage 0 validators, lint, docs, security, and reliability gates | Accepted | Implemented and blocking |
-| Versioned engineering foundation distribution | Accepted in ADR-0059 | Planned; the package is not yet a consumer dependency and local wrappers are not installed |
-| Nx package graph and task foundation | Accepted in ADR-0039 | Planned; Nx is not installed or configured |
+| Versioned engineering foundation distribution | Accepted in ADR-0059 | Blocked on the first public npm release; the consumer dependency and wrappers are not installed |
+| Nx package graph and affected foundation | Accepted in ADR-0039 | Implemented with pinned Nx Core and blocking pnpm-workspace discovery validation |
+| Nx task pipelines and local cache | Accepted in ADR-0039 | Planned; no task is cacheable until its complete inputs and outputs are proven |
+| Structural AST rules | Accepted in ADR-0041 | Planned for the first matching production source and invariant fixture |
+| Dead-code analysis | Accepted in ADR-0041 | Planned after the first production vertical slice |
+| Publishable API and package validation | Accepted in ADR-0041 | Planned before the first publishable package release |
 | Production package graph | Catalog reservations accepted | Not materialized; validators currently exercise conformance fixtures |
 
 The implementation state changes only with executable evidence in this
@@ -67,7 +75,8 @@ ADR-0059 places reusable engineering tooling in the versioned
 source of truth for its business architecture and supplies project-specific facts
 through a narrow local adapter. Production packages cannot import the foundation.
 
-Registry mode is the reproducible default. Local sibling development uses only
+Registry mode will become the reproducible default after the first public npm
+release. Local sibling development will use only
 the guarded `foundation:attach`, `foundation:status`, and `foundation:detach`
 workflow. CI, packaging, and release paths fail closed unless
 `foundation:assert-registry` proves that the exact lockfile package is active.
@@ -77,7 +86,10 @@ symlinks.
 Foundation adoption is incremental. Existing repository-local tooling moves only
 after the extracted capability has equivalent fixtures, a migration path, and a
 consumer conformance test. Until then, the local implementation remains
-authoritative; two independently evolving copies are prohibited.
+authoritative; two independently evolving copies are prohibited. The foundation
+repository being available locally is not sufficient evidence for adoption:
+`@agent-teams/engineering-foundation` must first exist as an immutable public npm
+version.
 
 ## Sources of truth
 
@@ -212,14 +224,18 @@ Adding a dependency requires:
 
 Named catalogs are not general-purpose version groups. A package that needs an
 exception documents why the default version cannot satisfy it and how the exception
-will retire. Knip reports unused catalog entries; install commands do not silently
-delete them.
+will retire. Once its staged activation gate is met, Knip reports unused catalog
+entries; install commands do not silently delete them in the meantime.
 
 ### Stage 1: Nx Foundation
 
 Trigger: ADR-0039 is accepted.
 
-Add the exact current accepted `nx` release in package-based mode. Configure only:
+Status: active for package discovery, graph inspection, and affected calculation.
+Task pipelines and local cache remain inactive until their inputs and outputs are
+proven.
+
+Use the exact current accepted `nx` release in package-based mode. Configure only:
 
 - project discovery from pnpm workspaces;
 - project and task graph inspection;
@@ -240,6 +256,12 @@ Guardrails:
 - Nx runs only from this repository root and never discovers sibling repositories
   or a shared hosting workspace root.
 
+The blocking `architecture:nx:check` command compares Nx discovery with the pnpm
+workspace and rejects root-project, fixture, or sibling-repository discovery.
+`nx.json` disables telemetry, terminal UI, and every attempt to connect the
+workspace to Nx Cloud. Repository scripts also disable the daemon and cloud use
+for deterministic agent and CI commands.
+
 Completion evidence:
 
 1. Nx discovers exactly the materialized workspace packages and no fixtures.
@@ -249,10 +271,11 @@ Completion evidence:
    and shared-tooling changes.
 5. Every existing quality gate remains directly runnable with pnpm.
 
-After that evidence exists, expose the graph to coding agents through checked-in
-instructions that use `nx show projects`, `nx show project`, and machine-readable
-graph output. The official Nx MCP server is optional and must use the repository's
-pinned Nx binary, this repository as its fixed working directory, and a restricted
+The checked-in `nx:projects` and `nx:affected` commands expose current graph
+discovery to coding agents. After the remaining completion evidence exists, add
+task-running guidance using `nx show project` and machine-readable graph output.
+The official Nx MCP server is optional and must use the repository's pinned Nx
+binary, this repository as its fixed working directory, and a restricted
 workspace-only tool set. It cannot enable Nx Cloud implicitly or discover sibling
 repositories.
 
