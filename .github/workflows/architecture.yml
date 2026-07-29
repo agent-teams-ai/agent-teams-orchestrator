@@ -20,14 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
       - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
         with:
-          version: 11.17.0
+          version: 11.18.0
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm docs:check
+      - if: github.event_name == 'pull_request'
+        run: pnpm docs:impact -- --base "${{ github.event.pull_request.base.sha }}" --strict
       - run: pnpm typecheck
       - run: pnpm architecture:check

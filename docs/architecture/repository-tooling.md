@@ -44,6 +44,22 @@ creating a second architecture.
 This document owns the staged adoption plan. It does not redefine package roles,
 DDD boundaries, or source dependency rules.
 
+## Implementation status
+
+An accepted tooling decision is target architecture, not proof that its rollout
+is complete.
+
+| Capability | Decision state | Implementation state |
+|---|---|---|
+| Repository-local Stage 0 validators, lint, docs, security, and reliability gates | Accepted | Implemented and blocking |
+| Versioned engineering foundation distribution | Accepted in ADR-0059 | Planned; the package is not yet a consumer dependency and local wrappers are not installed |
+| Nx package graph and task foundation | Accepted in ADR-0039 | Planned; Nx is not installed or configured |
+| Production package graph | Catalog reservations accepted | Not materialized; validators currently exercise conformance fixtures |
+
+The implementation state changes only with executable evidence in this
+repository. Documentation must not describe a planned dependency, wrapper, or
+gate as active.
+
 ## Cross-repository engineering foundation
 
 ADR-0059 places reusable engineering tooling in the versioned

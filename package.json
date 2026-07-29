@@ -9,10 +9,10 @@
     "url": "git+https://github.com/agent-teams-ai/agent-teams-orchestrator.git"
   },
   "type": "module",
-  "packageManager": "pnpm@11.17.0",
+  "packageManager": "pnpm@11.18.0",
   "engines": {
     "node": ">=24.18.0 <25",
-    "pnpm": "11.17.0"
+    "pnpm": "11.18.0"
   },
   "scripts": {
     "architecture:check": "pnpm run architecture:topology && pnpm run architecture:model:check && pnpm run architecture:model:test && pnpm run security:check && pnpm run reliability:check && pnpm run architecture:dependencies && pnpm run lint && pnpm run architecture:conformance && pnpm run architecture:graph:advisory",
