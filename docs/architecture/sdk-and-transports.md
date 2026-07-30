@@ -7,14 +7,16 @@ summary: SDK responsibility, contract generation, transport adapters, and compat
 related:
   - ADR-0015
   - ADR-0016
-  - ADR-0018
   - ADR-0019
   - ADR-0021
   - ADR-0024
-  - ADR-0033
   - ADR-0036
   - ADR-0037
   - ADR-0058
+  - ADR-0060
+  - ADR-0061
+  - ADR-0064
+  - ADR-0067
   - architecture.local-host-lifecycle
   - architecture.public-control-contracts
   - OD-001
@@ -35,7 +37,7 @@ Illustrative API:
 ```ts
 client.teams.create(input);
 client.tasks.assign(input);
-client.runs.start(input);
+client.runs.create(input);
 client.runs.cancel(input);
 client.messages.send(input);
 client.events.subscribe(options);
@@ -169,7 +171,7 @@ Every accepted official adapter passes one behavioral conformance suite.
 In-process operation may remove serialization and network overhead, but it must
 not bypass authorization, idempotency, validation, scoping, error mapping, or
 lifecycle semantics. OD-001 still selects the protected local IPC substrate; it
-cannot replace the Supervisor-owned lifecycle fixed by ADR-0033.
+cannot replace the Supervisor-owned lifecycle fixed by ADR-0060.
 
 The maintained Connect-Node transport supports direct Unix-domain-socket
 operation through HTTP/1.1 `socketPath`. Unary calls and server streaming have
@@ -277,14 +279,26 @@ The SDK contract includes behavior, not only request and response types:
   failure; a stale failure cannot evict a newer credential;
 - one durable command has one public `commandId`, which is also its idempotency
   identity;
+- complete idempotency scope is the authenticated canonical resource scope plus
+  a stable server-derived command family plus `commandId`;
+- Operation state and receipts remain feature-owned; the common Operations API
+  routes by family and owns no central write registry;
 - crash-safe callers persist a caller-selected command ID before first send;
 - accepted durable commands return recoverable, serializable operation handles;
+- `CreateRun` command completion and Run readiness observation are independent;
+- Run readiness exposes a typed snapshot, resumable feed, and SDK-local
+  `waitFor` conditions without putting observer preferences into command
+  identity;
 - operation cancellation cancels the local wait or transport request only;
 - cancelling an orchestration run is a separate explicit command;
-- disconnecting or closing a client never implicitly stops durable work;
-- terminal closure and `Ctrl+C` detach the local wait and subscription only;
+- disconnecting or closing a client never implicitly stops `DURABLE` work;
+- terminal closure and `Ctrl+C` detach a generic SDK wait or subscription only;
+- a product CLI may explicitly sponsor `CLIENT_BOUND` Run lifetime and translate
+  clean exit or sponsorship expiry into an idempotent business cancellation;
 - automatic retries are limited to reads and commands declared idempotent;
 - one logical command keeps the same `commandId` across transport retries;
+- SDK Operation handles persist the complete opaque Operation name rather than
+  relying on a bare command ID;
 - idempotency fingerprints use versioned semantic canonicalization rather than
   raw serialized bytes;
 - full-result retention and historical key-reuse detection are separate
@@ -306,7 +320,8 @@ The SDK contract includes behavior, not only request and response types:
 - one merged event view cannot claim global ordering or one resumable cursor when
   its underlying feeds do not provide those guarantees;
 - client cleanup is explicit and releases SDK-owned connections, iterators, and
-  local connector state without terminating independently owned durable work.
+  local connector state without terminating independently owned durable work or
+  bypassing an explicitly created Run sponsorship.
 
 The last cleanup rule means connections and SDK-owned iterators, not the
 Supervisor-managed Host. Lifecycle administration uses a separate privileged

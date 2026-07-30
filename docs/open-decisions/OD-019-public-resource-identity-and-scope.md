@@ -9,8 +9,10 @@ related:
   - ADR-0017
   - ADR-0020
   - ADR-0023
+  - ADR-0061
   - architecture.sdk-transports
   - OD-012
+  - research.pre-implementation-gate-critique-2026-07-30
 ---
 
 # OD-019: Public Resource Identity and Scope
@@ -35,6 +37,28 @@ select and validate authorization context.
   ownership hierarchy;
 - public ETags are opaque and do not expose aggregate or database revisions;
 - page tokens and operation names remain scoped to the resource hierarchy.
+- an Operation name deterministically includes canonical command scope, command
+  family, and command ID without exposing database keys or requiring a central
+  Operation registry;
+
+## Current leading first-slice resources
+
+```text
+project scope
+  runs
+    participants
+  workExecutions
+  operations
+```
+
+`Run`, public `Operation`, and `WorkExecution` are independent resources.
+Participants are run-scoped read-only resources with independent pagination.
+Plan transitions, activation processes, runtime bindings, Work placements, and AR
+runtime operations remain private implementation concepts.
+
+`WorkExecution` remains project-scoped so placement may move between Runs without
+changing business identity. Operations are feature-owned and exposed through a
+composition-owned static routing facade rather than a central repository.
 
 ## Resolution
 

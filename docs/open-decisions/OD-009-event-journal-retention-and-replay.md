@@ -68,6 +68,12 @@ The retained `Journal privacy and replay` fingerprint is in the
 Exact retention durations, archive tiers, legal holds, encryption/key management,
 privacy-erasure approval, and external audit access remain open.
 
+The poison-message quarantine lifecycle also remains open: owner, redacted record
+shape, classification transitions, operator authorization, correction and
+reclassification, release or replay, retention, erasure, and audit. A terminal
+transport acknowledgement is allowed only after the redacted quarantine record
+commits; quarantine cannot become a raw prompt, attachment, or credential store.
+
 ## Resolution
 
 Open.

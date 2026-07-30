@@ -42,6 +42,7 @@ that contributors must implement now.
 
 ## Quality
 
+- [Implementation readiness gates](implementation-readiness-gates.md)
 - [Testing strategy](testing-strategy.md)
 - [Reliability objectives](reliability-objectives.md)
 

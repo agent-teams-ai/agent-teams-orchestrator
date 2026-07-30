@@ -6,8 +6,8 @@ owner: platform/local-host
 summary: Current ownership, topology, discovery, lifecycle, and deployment rules for the local orchestrator host.
 related:
   - ADR-0030
-  - ADR-0033
   - ADR-0060
+  - ADR-0064
   - ADR-0035
   - ADR-0058
   - OD-001
@@ -27,11 +27,11 @@ while keeping process availability outside orchestration business behavior.
 not bounded contexts. Full tactical DDD belongs inside business bounded contexts;
 inventing aggregates for process discovery or binary activation is prohibited.
 
-ADR-0033 is the current lifecycle authority: one shared per-user Local Supervisor
-is the sole owner of local Host process availability. Desktop, CLI, and other
-clients may bootstrap and discover it, but they never directly supervise a Host.
-ADR-0030 remains authoritative only for the separate local and hosted composition
-profiles. ADR-0060 proposes making that precedence explicit in ADR history.
+ADR-0060 is the current process-lifecycle authority: one shared per-user Local
+Supervisor is the sole owner of local Host availability. ADR-0064 separately
+defines client-bound and durable product Run lifetime. Desktop, CLI, and other
+clients may bootstrap and discover the Host, but never supervise it directly.
+ADR-0030 remains authoritative for separate local and hosted compositions.
 
 ## Process topology
 
@@ -220,7 +220,10 @@ For a normal local command, the CLI:
 3. asks the Supervisor to ensure and discover a compatible Host;
 4. validates instance identity, protocol range, capabilities, and trust;
 5. invokes the Host through the ordinary SDK;
-6. detaches on `Ctrl+C` without cancelling accepted durable work.
+6. for an attached Run, renews its sponsorship until completion or `Ctrl+C`;
+7. on `Ctrl+C`, requests bounded Run cancellation and reports incomplete cleanup
+   without killing shared infrastructure;
+8. for `--detach`, creates durable work and exits with recovery references.
 
 Remote targets skip local bootstrap entirely. Failure never silently changes the
 selected target.
@@ -248,7 +251,9 @@ status, bounded waits, and typed degraded states are required.
   listening port.
 - Restart is bounded and classified; crash loops become a typed degraded state.
 - Client connection counts never determine Host lifetime.
-- `Ctrl+C`, terminal closure, Desktop exit, and SDK cleanup detach the client only.
+- generic SDK cleanup and observer exit detach only local I/O;
+- attached CLI Run lifetime uses explicit sponsorship and cancellation;
+- detached durable work survives every client exit;
 - Explicit foreground or ephemeral mode never adopts or mutates the durable
   target's store accidentally.
 - The Supervisor does not inspect or repair bounded-context tables.

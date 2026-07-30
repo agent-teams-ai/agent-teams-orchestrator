@@ -6,12 +6,15 @@ owner: platform/eventing
 summary: Keep core event contracts broker-neutral and use NATS JetStream as the first production adapter.
 related:
   - ADR-0010
+  - ADR-0035
   - OD-002
 ---
 
 # ADR-0004: Broker-Neutral Core with NATS JetStream Adapter
 
-The original ordering consequence is superseded by ADR-0010.
+The original ordering consequence is superseded by ADR-0010. ADR-0035 later
+resolved the local lifecycle decision by selecting Supervisor-managed bundled
+JetStream for the default local profile.
 
 ## Context
 
@@ -33,7 +36,8 @@ patterns independently of the broker.
 - At-least-once delivery is part of contract semantics. The original
   per-aggregate ordering rule is superseded by ADR-0010.
 - Replacing or supplementing JetStream does not rewrite business behavior.
-- Local desktop NATS lifecycle remains a deployment decision.
+- Local lifecycle was deliberately left open by this ADR and is now governed by
+  ADR-0035.
 
 ## Rejected alternatives
 

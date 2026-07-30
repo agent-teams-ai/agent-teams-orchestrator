@@ -8,6 +8,8 @@ related:
   - ADR-0029
   - architecture.runtime-boundary
   - architecture.migration-boundary
+  - research.legacy-electron-opencode-behavior-audit-2026-07-30
+  - research.pre-implementation-gate-critique-2026-07-30
   - OD-015
 ---
 
@@ -76,6 +78,53 @@ This evidence supports starting with the already isolated provisioning and
 runtime-observation ports. Exact cutover order, message ownership, log
 projections, generic change-event replacement, and task-board authority remain
 open.
+
+A later read-only audit refreshed the hosted branch to
+`f7fb783a60e984b648a01e2bba9d01f3d52746da` and inspected the legacy OpenCode
+orchestrator. It confirmed:
+
+- the frontend remains coupled mainly to IPC and shared DTO behavior;
+- `TeamsAPI` is a migration facade, not a target SDK interface;
+- runtime snapshot assembly is an heuristic compatibility projection whose
+  anti-flicker policy stays in the renderer;
+- OpenCode process ownership, readiness, execution proof, credentials, provider
+  delivery ledger, and recovery belong behind AR;
+- product messages cross Agent Communication and an AR runtime-input ACL rather
+  than one provider-specific delivery service;
+- hosted HTTP, Electron IPC, Connect, and direct SDK paths need one capability
+  conformance suite;
+- fixed board columns remain a projection over Work Coordination rather than its
+  canonical lifecycle.
+
+The exact evidence and disposition matrix are in the
+[legacy behavior audit](../research/legacy-electron-opencode-behavior-audit-2026-07-30.md).
+
+## Current leading cutover
+
+Migration proceeds by capability cohort. Provisioning create, progress, status,
+cancel, and diagnostics move as one reliability group rather than unrelated
+methods.
+
+Each scope uses a durable route generation:
+
+```text
+LEGACY
+  -> FREEZING
+  -> reconcile legacy in-flight commands
+  -> establish snapshot and watermark
+  -> compare-and-swap route generation
+  -> NEW
+```
+
+The selected owner and command identity are persisted before execution. An
+unknown outcome is reconciled by that owner and is never repeated through the
+other implementation. Active legacy commands finish under the legacy owner.
+Rollback changes routing only for commands not yet accepted. Shadow comparison
+is allowed for reads, never mutations.
+
+Gate evidence requires a versioned compatibility fixture bundle that runs in
+both repositories. Hosted capability support is explicit; transport stubs and
+placeholder responses do not count as parity.
 
 ## Resolution
 

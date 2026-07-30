@@ -8,10 +8,10 @@ related:
   - ADR-0004
   - ADR-0009
   - ADR-0010
-  - ADR-0033
   - ADR-0035
   - ADR-0037
   - ADR-0058
+  - ADR-0060
   - architecture.local-host-lifecycle
   - OD-009
 ---
@@ -48,6 +48,24 @@ agent-teams.work-coordination.task-assigned.v1
 
 Operational events describe delivery, retries, dead-letter decisions, health, and
 diagnostics. They must not be confused with business facts.
+
+### Transport messages
+
+A transport message is the broker-specific carrier of a command, integration
+event, or operational record. It is not another business fact and is never reused
+as a domain-event class.
+
+```text
+private domain event
+  -> transport-independent publication intent
+  -> versioned integration-event contract
+  -> JetStream transport message
+```
+
+The reverse path validates the transport envelope and integration-event schema,
+then maps through a consumer-owned anti-corruption layer into a local application
+command. Domain and application code never receive NATS messages or public-schema
+DTOs.
 
 ## Commands are not events
 
@@ -156,6 +174,13 @@ causationId
 scope
 payload
 ```
+
+`eventId` is assigned once in the producer's state-plus-outbox transaction and
+remains unchanged across retry, replay, and route migration. It must be globally
+unique within the orchestrator trust domain and must never be derived from stream
+sequence, subject, timestamp, or payload alone. Consumers still include the
+authenticated producer identity in defensive deduplication so an ID collision or
+untrusted producer cannot suppress another producer's event.
 
 `scope` is a strict tagged union such as `system`, `tenant`, or `project`.
 Business events for teams, tasks, runs, messages, and runtime bindings require a
@@ -275,6 +300,103 @@ concerns; the core contract exposes only terminal-versus-transient
 classification. OD-014 selects whether rejection correlation uses transport
 identity only, a redacted canonical fingerprint, or a versioned keyed digest.
 
+## Independent cross-context fan-out
+
+The architecture is an event-driven modular monolith, not an event-sourced system.
+Context-owned SQL state remains authoritative. Integration events decouple
+bounded contexts and preserve the same boundary if a context is later extracted
+as a service.
+
+A producer publishes one semantic fact from its own Ubiquitous Language. It never
+constructs downstream notification, attention, context, analytics, or workflow
+commands merely because those consumers currently exist.
+
+Example:
+
+```text
+Work Coordination transaction
+  TaskCommentAdded domain event
+  -> task state
+  -> work.task-comment-added.v1 outbox record
+  -> commit
+
+Outbox relay
+  -> JetStream integration-event stream
+
+Human Notification durable subscription
+  -> schema validation and consumer ACL
+  -> context command
+  -> inbox + notification state + local outbox
+  -> commit
+  -> ACK
+
+Agent Attention durable subscription
+  -> schema validation and consumer ACL
+  -> context command
+  -> inbox + attention state + local outbox
+  -> commit
+  -> ACK
+
+Agent Context durable subscription, when accepted
+  -> schema validation and consumer ACL
+  -> context command
+  -> inbox + context invalidation
+  -> commit
+  -> ACK
+```
+
+Each subscription, inbox, transaction, retry decision, and acknowledgement is
+independent. Failure in Agent Attention cannot roll back a committed human
+notification, and human mute cannot prevent another consumer from receiving the
+source fact.
+
+Every logical subscription has a stable `subscriptionContractId` independent of
+deployment replica, process identity, and ordinary handler implementation
+version. Its durable inbox uniqueness scope is:
+
+```text
+event scope + subscriptionContractId + producer + eventId
+```
+
+Changing code without changing semantic ownership does not create another logical
+subscription. A deliberate rebuild or incompatible interpretation uses an
+explicit projection or migration generation rather than silently changing the
+inbox key.
+
+The inbox deduplication horizon is at least the longest supported source retention,
+replay, backfill, migration, and disaster-recovery horizon for that subscription.
+If permanent historical recognition cannot be retained, the contract declares the
+expiry and reconciliation behavior explicitly.
+
+Normal redelivery, projection rebuild, and migration replay are distinct
+operations. They have separate authorization, generation identity, progress,
+rate limits, and completion evidence.
+
+## Cross-context reuse boundary
+
+DRY applies to stable technical mechanics, not superficially similar business
+language.
+
+| Layer | Reuse rule |
+|---|---|
+| Domain | No cross-context reuse of aggregates, entities, domain events, recipient, priority, status, delivery, or acknowledgement types |
+| Application | Context-owned use cases, commands, ports, Unit of Work, policies, process managers, and retry classification |
+| Contracts | One minimal technical envelope standard; producer-owned versioned payload schemas and manifests |
+| Adapters and platform | Reusable outbox relay, inbox admission, schema validation, broker connection, scheduling algorithms, backpressure, tracing, redaction, and persistence primitives |
+| Composition | Shared process-wide connections and lifecycle resources, never shared repositories or business transactions |
+| Testing | Reusable conformance suites and deterministic failure fixtures parameterized by context-owned adapters |
+
+Platform eventing code may claim and publish records only through a narrow
+context-owned dispatch port. It cannot query or mutate context tables directly.
+Likewise, a reusable inbox executor may coordinate technical admission but cannot
+own ACL mapping, semantic deduplication, business transactions, or terminal
+meaning.
+
+No generic `BaseEventHandler`, `BaseRepository`, `BaseProcessManager`, universal
+notification pipeline, service locator, or cross-context domain package is
+introduced. A new platform capability is extracted only after at least two
+concrete context implementations prove an identical technical contract.
+
 ## NATS JetStream
 
 NATS JetStream is the first production event-bus adapter because it supports
@@ -324,6 +446,19 @@ The outbound adapter may use `eventId` as the JetStream publication deduplicatio
 identity, but the broker deduplication window never replaces durable business
 idempotency. Inbound durable consumers use explicit acknowledgement and acknowledge
 only after inbox and business effects commit.
+
+Integration-event fan-out uses `LimitsPolicy` streams by default. Each logical
+bounded-context subscription gets its own durable pull consumer; horizontally
+scaled handler replicas share that consumer. Consumers are not created per tenant,
+process, or replica. `WorkQueuePolicy` is not used for integration fan-out because
+overlapping consumers are prohibited, and `InterestPolicy` is not the default
+because events published before consumer interest exists may be removed.
+
+Consumer pull batch, concurrency, `MaxAckPending`, acknowledgement timeout,
+redelivery backoff, and per-tenant admission are bounded deployment settings.
+`MaxDeliver` is not a dead-letter store: exhaustion produces an advisory while the
+message remains in the stream. A poison-message reconciler records redacted
+quarantine evidence and controls terminal acknowledgement explicitly.
 
 JetStream is not the authoritative source of aggregate state. Exact local store
 backup, corruption handling, journal completeness, and historical replay remain

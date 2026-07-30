@@ -41,6 +41,7 @@ Agents should also follow the short repository-level
 | Change repository tooling | [Repository tooling](architecture/repository-tooling.md) | [Testing strategy](architecture/testing-strategy.md) |
 | Change strategic relationships | [Machine-readable architecture model](architecture/architecture-model.md) | [Context map](architecture/context-map.md), owning context dossiers |
 | Define SLI, SLO, invariants, or resource budgets | [Reliability objectives](architecture/reliability-objectives.md) | [Testing strategy](architecture/testing-strategy.md), `OD-030` |
+| Determine whether production implementation may start | [Implementation readiness gates](architecture/implementation-readiness-gates.md) | [Open decisions](open-decisions/README.md), [Testing strategy](architecture/testing-strategy.md) |
 | Record a decision | [Decision index](decisions/README.md) | [ADR template](templates/adr.md), [open-decision index](open-decisions/README.md) |
 | Add or reorganize documentation | [Documentation standards](standards/README.md) | [Templates](templates/README.md) |
 | Inspect experimental evidence | [Research index](research/README.md) | owning ADR or open decision |

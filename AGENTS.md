@@ -24,6 +24,11 @@ The repository is in architecture definition. Do not introduce production
 behavior, runtime dependencies, transports, databases, or framework scaffolding
 until the owning boundary and required decision are accepted.
 
+The first production vertical slice is additionally blocked by the four
+[implementation readiness gates](docs/architecture/implementation-readiness-gates.md).
+Research, deterministic contract fixtures, diagrams, and disposable spikes may
+proceed while a gate is in review.
+
 When work depends on an unresolved choice:
 
 1. name the owning open-decision ID;

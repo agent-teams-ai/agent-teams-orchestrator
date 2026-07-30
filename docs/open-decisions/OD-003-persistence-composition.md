@@ -42,6 +42,17 @@ must recheck the current GA release, verify the actual
 `drizzle-orm/node-sqlite` import, and run persistence conformance before changing
 this decision's readiness state.
 
+Node.js 24.18.0 still classifies `node:sqlite` as Stability 1.2, Release
+Candidate. It is accepted only behind the asynchronous persistence adapter and
+the SQLite/PostgreSQL conformance suites. Its API, synchronous execution model,
+backup behavior, packaging, and failure classification cannot leak into domain or
+application code.
+
+If that readiness gate fails, a driver-level fallback such as `better-sqlite3`
+may replace only the local persistence adapter behind the same ports and
+conformance suite. The project does not maintain two local drivers in parallel by
+default.
+
 The 2026-07-26 cross-dialect tooling review found no stable library that satisfies
 the accepted `node:sqlite`, `node-postgres`, exact-value, migration, and
 capability-concurrency requirements while safely collapsing both repository
@@ -165,6 +176,8 @@ bounded-context restore remains a separate logical and reconciliation workflow.
 
 - the pre-production Drizzle readiness result and exact materialized dependency
   versions after checking for a compatible GA release;
+- a pre-production `node:sqlite` stability, API, crash, backup, packaging, and
+  conformance review against the pinned Node runtime;
 - concrete capability Unit of Work and hosted concurrency profiles after initial
   aggregate discovery;
 - migration contribution API, online-step state machine, and dialect execution

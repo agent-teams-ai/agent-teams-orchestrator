@@ -11,6 +11,8 @@ related:
   - ADR-0033
   - architecture.local-host-lifecycle
   - architecture.overview
+supersedes:
+  - ADR-0033
 ---
 
 # ADR-0060: Single Local Supervisor Lifecycle Owner

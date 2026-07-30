@@ -9,9 +9,7 @@ related:
   - ADR-0015
   - ADR-0016
   - ADR-0017
-  - ADR-0018
   - ADR-0019
-  - ADR-0033
   - ADR-0045
   - ADR-0046
   - ADR-0047
@@ -21,6 +19,10 @@ related:
   - ADR-0055
   - ADR-0057
   - ADR-0058
+  - ADR-0060
+  - ADR-0061
+  - ADR-0064
+  - ADR-0065
   - architecture.local-host-lifecycle
   - architecture.security
 ---
@@ -98,6 +100,13 @@ duplicate `eventId`, malformed JSON, and redacted terminal rejection. A closed
 producer schema passing validation is not evidence that an older consumer can
 read a newer additive payload.
 
+Cross-context fan-out conformance publishes one producer-owned source fact to
+independent durable consumers. It proves that one unavailable consumer does not
+block the others, redelivery creates no duplicate local effect, the same
+producer/event identity deduplicates across migration routes, and human
+notification mute or digest state cannot suppress Agent Attention or context
+invalidation.
+
 All official SDK transports run one behavioral conformance suite covering:
 
 - validation, authorization context, and project scoping;
@@ -129,8 +138,9 @@ All official SDK transports run one behavioral conformance suite covering:
 - concurrent CLI and Desktop discovery converging on one compatible Host;
 - incompatible client, Supervisor, Host, and component versions with no silent
   replacement or fallback;
-- client disconnect, terminal closure, and `Ctrl+C` without durable-work
-  cancellation;
+- generic SDK disconnect and observer `Ctrl+C` without durable-work cancellation;
+- attached CLI clean exit, abrupt death, sponsorship expiry, stale heartbeat,
+  bounded cancellation, and detached Run survival;
 - unknown additive fields, event variants, and enum values;
 - binary and ProtoJSON golden fixtures for TypeScript browser, TypeScript Node,
   Go, and the accepted Rust transport;
@@ -141,6 +151,13 @@ and the current SDK against supported previous servers. Public API reports, Buf
 format/lint/breaking checks, generated-code drift checks, package consumer
 fixtures, and documentation examples are release gates once package
 implementation begins.
+
+During Desktop migration, the same application-capability fixtures run through
+Electron IPC, hosted HTTP compatibility routes, Connect, and the direct
+handwritten SDK backend. They verify equivalent authorization, durable command
+identity, Operation recovery, progress projection, cancellation, feed resume,
+errors, and redaction. Provider-specific compatibility routes are excluded from
+the target public Orchestrator API.
 
 TypeScript SDK publication tests install the real packed artifact and cover the
 publish allowlist, explicit Node ESM and CommonJS entry points, browser conditional
@@ -179,6 +196,29 @@ Shared contract tests verify that execution fences never enter the Runtime
 Published Language, Runtime ACL, persistence, SDK models, public schemas,
 snapshots, logs, or safe diagnostics. AR-owned tests verify stale-fence enforcement
 internally.
+
+The migration-derived runtime matrix additionally verifies:
+
+- process liveness, session availability, context application, pending
+  interaction, participant readiness, and completion remain distinct;
+- context application without a model turn produces no assistant or tool effect;
+- partial participant failure does not disturb healthy siblings without an
+  explicit Run policy outcome;
+- late reconciliation can promote a pending participant without relaunching
+  healthy runtime sessions;
+- stale launch, input, permission, reconcile, and stop commands are rejected
+  before an external effect;
+- accepted input, provider processing, visible output, and product processing
+  acknowledgement remain distinct outcomes;
+- uncertain delivery and stop preserve evidence and enter reconciliation;
+- shared provider-host adoption and release never transfer or stop another
+  session's ownership.
+
+AR-owned provider-adapter conformance additionally covers exact host-adoption
+identity, cross-process startup single-flight, PID reuse, execution-proof
+freshness, provider message ordering, and precedence when provider status and
+durable transcript evidence disagree.
+
 Operational rejection tests verify that credentials, prompts, attachments, raw
 payloads, and unkeyed digests of secret-bearing content never enter audit or
 quarantine records.

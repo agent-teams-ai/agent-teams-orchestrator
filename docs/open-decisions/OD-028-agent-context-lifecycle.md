@@ -11,6 +11,7 @@ blocked_by:
   - OD-031
   - OD-032
 related:
+  - ADR-0068
   - architecture.context-map
   - architecture.runtime-boundary
   - domain.contexts.run-orchestration
@@ -21,6 +22,7 @@ related:
   - OD-031
   - OD-032
   - OD-033
+  - research.pre-implementation-gate-critique-2026-07-30
 ---
 
 # OD-028: Agent Context Lifecycle
@@ -79,6 +81,9 @@ These are discovery candidates, not accepted aggregate names.
   context for an action-capable runtime generation.
 - AR owns provider formatting, roles, tokenization, native cache and compaction
   mechanics, provider-session state, and actual materialization.
+- Context application is not an AR `RuntimeOperation` and does not imply a model
+  turn. A declared no-turn application that produces assistant or tool output is
+  a typed materialization anomaly.
 - Tool availability is enforced technically by AR and policy. Hiding tool text from
   a prompt is not authorization.
 - A model-generated summary is lossy and cannot replace lossless control state,
@@ -120,8 +125,8 @@ Source ownership remains outside this context:
 - a future Memory capability, if accepted, owns its own facts, evidence,
   confidence, expiry, and supersession rather than donating that ownership to
   Agent Context;
-- the candidate Attention boundary in OD-026 owns recipient relevance, urgency,
-  digest, and interruption intent only if that boundary is accepted;
+- Agent Attention owns agent-specific relevance, novelty, coalescing, expiry,
+  orientation need, and bounded disruption intent;
 - the still-unaccepted integration boundary owns connector installation, vendor
   authentication, webhook cursors, raw dedupe, and reconciliation only after
   event storming and context-map acceptance;
@@ -216,15 +221,17 @@ Act      the owning use case performs product effects; AR enforces runtime effec
 Feedback typed owner facts pass through admission before a new cycle
 ```
 
-One semantic source change may emit two independent facts:
+One semantic owner publishes one producer-owned fact, such as
+`TaskCommentAdded`. Independent consumer ACLs may translate that fact into local
+commands such as `InvalidateContextContribution` and
+`AdmitAttentionObservation`. Source contexts never publish downstream-specific
+context or attention candidates.
 
-- `ContextSourceInvalidated` says a previously usable contribution may be stale;
-- `AttentionCandidate` says a recipient may need to act or re-orient now.
-
-Attention suppression never hides invalidation. Invalidation never grants wake or
-interrupt authority. Frequent source changes are coalesced; they do not rebuild a
-manifest per webhook. Missing or out-of-order vendor events are repaired through
-current-state retrieval and periodic reconciliation.
+Human notification suppression never hides context invalidation or Agent
+Attention. Context invalidation never grants wake or interrupt authority.
+Frequent source changes are coalesced; they do not rebuild a manifest per webhook.
+Missing or out-of-order vendor events are repaired through current-state retrieval
+and periodic reconciliation.
 
 Stateful sources converge on their latest head rather than replaying every
 change. The reconciliation record must distinguish desired, claimed, and applied

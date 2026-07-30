@@ -12,6 +12,7 @@ related:
   - ADR-0020
   - ADR-0023
   - OD-008
+  - research.pre-implementation-gate-critique-2026-07-30
 ---
 
 # OD-016: Public Error Model
@@ -41,6 +42,24 @@ The taxonomy must distinguish at least:
 
 Each error declares whether retry, reconciliation, user action, or operator action
 is appropriate. Connect/gRPC codes are mappings, not canonical public codes.
+
+## Current leading envelope
+
+```text
+code
+category
+recommendedAction
+correlationId
+retryAfter?
+operationRef?
+typedDetails[]
+```
+
+`recommendedAction` is one of `DO_NOT_RETRY`, `RETRY`, `RECONCILE`,
+`REFRESH_AUTH`, `USER_ACTION`, or `OPERATOR_ACTION`. Human-readable text remains
+safe diagnostics and is never parsed by a client. Each feature owns its error
+codes and typed details; the Control API owns the common profile, validation,
+transport mapping, and generation tooling.
 
 ## Resolution
 

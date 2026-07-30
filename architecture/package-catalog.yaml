@@ -9,7 +9,7 @@ packages:
     role: app
     path: apps/local-supervisor
     package_name: "@agent-teams/app-local-supervisor"
-    owner_document: ADR-0033
+    owner_document: ADR-0060
   - id: app.orchestrator-local
     role: app
     path: apps/orchestrator-local
@@ -65,6 +65,16 @@ packages:
     path: packages/contexts/agent-communication
     package_name: "@agent-teams/agent-communication"
     owner_document: domain.contexts.agent-communication
+  - id: context.human-notification
+    role: bounded-context
+    path: packages/contexts/human-notification
+    package_name: "@agent-teams/human-notification"
+    owner_document: domain.contexts.human-notification
+  - id: context.agent-attention
+    role: bounded-context
+    path: packages/contexts/agent-attention
+    package_name: "@agent-teams/agent-attention"
+    owner_document: domain.contexts.agent-attention
   - id: context.policy-risk
     role: bounded-context
     path: packages/contexts/policy-risk

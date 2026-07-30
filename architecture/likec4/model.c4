@@ -62,6 +62,20 @@ model {
     }
   }
 
+  humanNotification = boundedContext 'Human Notification Management' {
+    metadata {
+      package_id 'context.human-notification'
+      document_id 'domain.contexts.human-notification'
+    }
+  }
+
+  agentAttention = boundedContext 'Agent Attention' {
+    metadata {
+      package_id 'context.agent-attention'
+      document_id 'domain.contexts.agent-attention'
+    }
+  }
+
   policyRisk = boundedContext 'Policy and Risk' {
     metadata {
       package_id 'context.policy-risk'
@@ -173,7 +187,7 @@ model {
   tenantProjectRegistry -[publishedFacts]-> runOrchestration 'Project identity' {
     metadata {
       integration_style 'Published tenant and project references'
-      authority 'Registry owns lifecycle; Run owns business execution'
+      authority 'Registry owns lifecycle; Run owns Run lifecycle and placement'
       status 'proposed'
     }
   }
@@ -243,21 +257,21 @@ model {
   workspaceRegistry -[publishedFacts]-> runOrchestration 'Workspace identity' {
     metadata {
       integration_style 'Workspace facts and opaque references'
-      authority 'Workspace owns registration; Run owns execution policy'
+      authority 'Workspace owns allocations; Run owns activation consequences'
       status 'proposed'
     }
   }
-  workCoordination -[publishedFacts]-> runOrchestration 'Execution requested' {
+  workCoordination -[publishedFacts]-> runOrchestration 'Work execution requested' {
     metadata {
       integration_style 'Versioned execution requests'
-      authority 'Work owns work lifecycle; Run owns business execution'
+      authority 'Work owns WorkExecution and work lifecycle; Run owns placement'
       status 'proposed'
     }
   }
-  runOrchestration -[publishedFacts]-> workCoordination 'Execution facts' {
+  runOrchestration -[publishedFacts]-> workCoordination 'Placement and execution facts' {
     metadata {
       integration_style 'Versioned execution facts'
-      authority 'Run owns execution; Work owns work lifecycle consequences'
+      authority 'Run owns placement; Work owns execution lifecycle consequences'
       status 'proposed'
     }
   }
@@ -314,6 +328,41 @@ model {
     metadata {
       integration_style 'Versioned handoff facts'
       authority 'Communication owns delivery; Work owns work consequence'
+      status 'proposed'
+    }
+  }
+  workCoordination -[publishedFacts]-> humanNotification 'Work facts' {
+    metadata {
+      integration_style 'Producer-owned versioned work facts'
+      authority 'Work owns source facts; Notification owns human presentation'
+      status 'proposed'
+    }
+  }
+  workCoordination -[publishedFacts]-> agentAttention 'Work facts' {
+    metadata {
+      integration_style 'Producer-owned versioned work facts'
+      authority 'Work owns source facts; Attention owns agent orientation need'
+      status 'proposed'
+    }
+  }
+  agentCommunication -[publishedFacts]-> humanNotification 'Conversation facts' {
+    metadata {
+      integration_style 'Producer-owned versioned conversation facts'
+      authority 'Communication owns dialogue; Notification owns human presentation'
+      status 'proposed'
+    }
+  }
+  agentCommunication -[publishedFacts]-> agentAttention 'Conversation facts' {
+    metadata {
+      integration_style 'Producer-owned versioned conversation facts'
+      authority 'Communication owns dialogue; Attention owns agent orientation need'
+      status 'proposed'
+    }
+  }
+  agentAttention -[publishedFacts]-> runOrchestration 'Orientation intent' {
+    metadata {
+      integration_style 'Versioned orientation intent'
+      authority 'Attention owns orientation need; Run owns activation consequences'
       status 'proposed'
     }
   }

@@ -186,8 +186,10 @@ business dependencies.
 The consuming application declares a narrow capability:
 
 ```ts
-interface RuntimeLifecyclePort {
-  startRun(command: StartRunCommand): Promise<StartRunResult>;
+interface RuntimeSessionLifecyclePort {
+  startSession(
+    command: StartRuntimeSessionCommand,
+  ): Promise<StartRuntimeSessionResult>;
 }
 ```
 

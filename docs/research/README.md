@@ -20,6 +20,15 @@ and limitations. They are evidence, not normative architecture.
 
 - [Centrifugo Desktop spike, 2026-07-28](centrifugo-desktop-spike-2026-07-28.md)
 
+## Legacy migration evidence
+
+- [Legacy Electron and OpenCode behavior audit, 2026-07-30](legacy-electron-opencode-behavior-audit-2026-07-30.md)
+
+## Implementation readiness
+
+- [Pre-implementation gate critique, 2026-07-30](pre-implementation-gate-critique-2026-07-30.md)
+- [Human Notification and Agent Attention boundary critique, 2026-07-30](human-notification-agent-attention-boundary-critique-2026-07-30.md)
+
 ## Domain value and persistence evidence
 
 - [Exact values spike, 2026-07-26](exact-values-spike-2026-07-26.md)

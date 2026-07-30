@@ -10,6 +10,7 @@ blocked_by:
   - OD-026
   - OD-027
 related:
+  - ADR-0066
   - architecture.context-map
   - OD-006
   - OD-015

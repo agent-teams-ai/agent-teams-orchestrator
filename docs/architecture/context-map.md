@@ -14,6 +14,8 @@ related:
   - ADR-0045
   - ADR-0046
   - ADR-0054
+  - ADR-0062
+  - ADR-0068
   - OD-011
   - OD-023
   - OD-024
@@ -51,12 +53,14 @@ These concepts often align, but they are not interchangeable.
 | Identity Registry | Generic | Proposed | Human and machine principal identity | [Dossier](../domain/contexts/identity-registry/README.md) |
 | Access Control | Supporting | Proposed | Membership, grants, and authorization facts | [Dossier](../domain/contexts/access-control/README.md) |
 | Tenant and Project Registry | Supporting | Proposed | Tenant/project identity, lifecycle, and ownership | [Dossier](../domain/contexts/tenant-project-registry/README.md) |
-| Workspace Registry | Supporting | Proposed | Workspace registration, binding generations, and metadata | [Dossier](../domain/contexts/workspace-registry/README.md) |
+| Workspace Registry | Supporting | Proposed | Workspace registration, execution allocation, materialization lifecycle, and cleanup | [Dossier](../domain/contexts/workspace-registry/README.md) |
 | Team Topology | Core | Proposed | Agent-team composition, roles, capabilities, and roster rules | [Dossier](../domain/contexts/team-topology/README.md) |
 | Agent Organization | Core | Accepted by ADR-0044 | Tenant-scoped organizations, units, structures, and team placements | [Dossier](../domain/contexts/agent-organization/README.md) |
 | Work Coordination | Core | Proposed | Tasks, assignments, dependencies, handoffs, and work lifecycle | [Dossier](../domain/contexts/work-coordination/README.md) |
-| Run Orchestration | Core | Proposed | Durable business execution coordination and recovery policy | [Dossier](../domain/contexts/run-orchestration/README.md) |
+| Run Orchestration | Core | Proposed | Durable Run coordination and application of accepted execution policy consequences | [Dossier](../domain/contexts/run-orchestration/README.md) |
 | Agent Communication | Core | Proposed | Typed team communication, delivery intent, inbox policy, and receipts | [Dossier](../domain/contexts/agent-communication/README.md) |
+| Human Notification Management | Supporting | Accepted by ADR-0068 | Human inbox, presentation preference, acknowledgement, and escalation lifecycle | [Dossier](../domain/contexts/human-notification/README.md) |
+| Agent Attention | Core | Accepted by ADR-0068 | Agent relevance, orientation need, bounded disruption intent, and attention-loop control | [Dossier](../domain/contexts/agent-attention/README.md) |
 | Policy and Risk | Supporting | Proposed | Workspace trust, execution policy, risk classification, and controls | [Dossier](../domain/contexts/policy-risk/README.md) |
 | Approval Management | Supporting | Proposed | Product approval lifecycle, routing, decisions, and audit | [Dossier](../domain/contexts/approval-management/README.md) |
 | Usage Metering | Supporting | Accepted by ADR-0045 | Observations, normalization, corrections, meters, and quantities | [Dossier](../domain/contexts/usage-metering/README.md) |

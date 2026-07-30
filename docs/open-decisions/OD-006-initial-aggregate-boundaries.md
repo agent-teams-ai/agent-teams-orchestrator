@@ -5,8 +5,10 @@ status: open
 owner: architecture/domain
 summary: Validate initial aggregate and consistency boundaries using concrete invariants and concurrency.
 related:
+  - ADR-0065
   - domain.modeling-standard
   - OD-011
+  - research.pre-implementation-gate-critique-2026-07-30
 ---
 
 # OD-006: Initial Aggregate Boundaries
@@ -21,8 +23,9 @@ Validate candidate boundaries:
 - `TaskSubscription` and work-execution process ownership;
 - Task-scoped discussion and comment growth/concurrency boundaries;
 - Task-to-OrchestrationRun cardinality, retry authority, and late completion;
-- `OrchestrationRun` versus `RunPlan`;
-- `RuntimeBinding` lifecycle and consistency boundary;
+- remaining internal invariants of `OrchestrationRun`, immutable
+  `RunPlanVersion`, `ParticipantActivation`, and `ManagedRuntimeBinding` after
+  ADR-0065;
 - active Run behavior when the referenced Team topology version changes;
 - `Conversation`, append-only message records, audience snapshots, membership,
   subscriptions, per-recipient delivery, and inbox projections;
@@ -35,9 +38,40 @@ Boundaries must follow invariants, consistency, lifecycle, and concurrency rathe
 than nouns or folders. Avoid aggregates requiring global locks or unbounded
 collections.
 
+ADR-0065 already fixes the cross-context ownership:
+
+- `OrchestrationRun` is the Run authority aggregate;
+- plan versions are immutable and promoted by durable application process state;
+- Work Coordination owns `WorkExecution`;
+- Run Orchestration owns `WorkPlacement`;
+- AR owns `RuntimeOperation`.
+
+This decision cannot reopen those owners. It still validates exact entity,
+aggregate, repository, and concurrency boundaries inside each owner.
+
 OD-026 owns the strategic distinction among conversations, notifications, alerts,
 and runtime delivery. This decision validates tactical aggregates only after that
 ownership boundary is resolved.
+
+## Current leading Run matrix
+
+| Model | Leading tactical role |
+|---|---|
+| `OrchestrationRun` | Small aggregate root with no participant, activation, Work, runtime, or history collections |
+| `RunPlanVersion` | Immutable domain artifact |
+| `RunPlanTransitionProcess` | Application process state that requests a separate revision-checked Run promotion |
+| `RunParticipant` | Run-scoped aggregate candidate for one concrete occupant |
+| `ParticipantActivationProcess` | Application process state for one participant and plan generation |
+| `ManagedRuntimeBinding` | Opaque application integration record, not imported AR state |
+| `WorkExecution` | Work Coordination aggregate root |
+| `WorkPlacementProcess` | Run-owned application process state |
+| `RuntimeOperation` | AR aggregate outside this repository |
+
+The unresolved proof is the exact repository, containment, cardinality, and
+transaction boundary for `RunParticipant`, activation, and runtime-binding
+records. No process manager may atomically persist its own state and another
+aggregate. It commits a dispatch intent and invokes a revision-checked command in
+a later local transaction.
 
 ## Resolution
 
