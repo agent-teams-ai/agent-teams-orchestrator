@@ -7,6 +7,7 @@ summary: Proposed model boundary for project workspace registration and binding 
 blocked_by:
   - OD-011
 related:
+  - ADR-0062
   - architecture.context-map
   - OD-011
 ---
@@ -14,8 +15,13 @@ related:
 # Workspace Registry
 
 Proposed scope: project-scoped workspace registrations, binding generations,
-location references, metadata, and lifecycle facts. Trust decisions and runtime
-isolation remain outside this context.
+location references, execution-workspace allocations, materialization lifecycle,
+release, cleanup reconciliation, metadata, and lifecycle facts.
+
+Git worktree, clone, snapshot, and remote-workspace mechanics belong to replaceable
+outbound adapters. Trust decisions and runtime sandbox enforcement remain outside
+this context. An `ExecutionWorkspaceAllocation` records normalized guarantees and
+an opaque materialization reference, never a claim that a worktree is a sandbox.
 
 Discovery artifacts are not yet complete. Use the
 [bounded-context template](../../../templates/bounded-context.md) before changing

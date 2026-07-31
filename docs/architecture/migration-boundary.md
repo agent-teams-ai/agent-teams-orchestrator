@@ -6,6 +6,7 @@ owner: migration/desktop
 summary: Normative compatibility, ownership, cutover, rollback, and legacy-code rules for desktop migration.
 related:
   - ADR-0029
+  - ADR-0065
   - OD-010
   - OD-015
 ---
@@ -72,6 +73,45 @@ obsolete
 Classification never authorizes copying legacy domain/application structure into
 the new core. New behavior follows accepted Ubiquitous Language, invariants,
 ownership, ports, and transaction boundaries.
+
+The read-only legacy Electron and OpenCode audit is recorded in the
+[research report](../research/legacy-electron-opencode-behavior-audit-2026-07-30.md).
+Its provider-specific code remains evidence, not a target package layout.
+
+In particular:
+
+- process hosts, provider sessions, execution proof, credentials, private
+  fencing, technical cancellation, and recovery move behind the AR boundary;
+- partial participant failure, product readiness, Run policy, and Work placement
+  remain Orchestrator behavior;
+- IPC and shared Team DTOs remain compatibility contracts mapped by the Desktop
+  facade;
+- the broad legacy `TeamsAPI` remains a compatibility facade and is decomposed
+  into narrow SDK and application capabilities;
+- the broad legacy runtime adapter is replaced by narrow consumer-owned
+  capability ports and separate inbound and outbound ACL modules;
+- provider-specific diagnostic strings remain migration projections rather than
+  public SDK or domain enums.
+
+Legacy runtime snapshots are reconstructed from canonical Run and runtime
+projections. The target projection exposes source revision, cursor, observation
+time, freshness, and typed evidence. Renderer anti-flicker windows, snapshot
+equality shortcuts, and stale-response smoothing remain client policies and do
+not enter domain or application state.
+
+Electron IPC, hosted HTTP, Connect, and direct SDK entry points invoke the same
+application capabilities through separate inbound adapters. Migration does not
+preserve provider-specific HTTP endpoints as public Orchestrator contracts.
+Transport parity is proven by conformance rather than by sharing controller
+classes.
+
+Legacy message DTOs that combine team communication, system notification, and
+runtime diagnostics are split by the compatibility ACL before dispatch to their
+owning capabilities. Similar display shape never creates shared domain ownership.
+
+The curated migration conformance matrix includes partial lane failure, pending
+permission, stale owner, late reconcile, context application without a model
+turn, ambiguous delivery, uncertain stop, and restart recovery.
 
 ## Verification and rollback
 

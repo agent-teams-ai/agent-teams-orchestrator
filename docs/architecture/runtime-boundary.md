@@ -9,7 +9,11 @@ related:
   - ADR-0008
   - ADR-0026
   - ADR-0028
-  - ADR-0033
+  - ADR-0060
+  - ADR-0062
+  - ADR-0065
+  - ADR-0069
+  - ADR-0070
   - architecture.local-host-lifecycle
   - OD-004
 ---
@@ -67,7 +71,11 @@ flowchart LR
 | Orchestration-run continuation | Run Orchestration |
 | Business cancellation, timeout, retry, and recovery policy | Run Orchestration |
 | Runtime cancellation, timeout, and recovery mechanism | `ar` |
-| Leases, fencing, sandbox, workspace isolation | `ar` |
+| Workspace registration, materialization allocation, and cleanup | Workspace Registry |
+| Authority to use a workspace | Access Control |
+| Workspace trust and required isolation properties | Policy and Risk |
+| Runtime sandbox, mounts, process isolation, network enforcement, and technical fencing | `ar` |
+| Git worktree, clone, snapshot, or remote materialization mechanics | Workspace adapters |
 | Provider API, CLI, SSE, and protocol translation | `ar` provider driver |
 | User-facing projections | Orchestrator projections and client applications |
 | Local Orchestrator Host and managed component availability | Local Supervisor |
@@ -78,15 +86,15 @@ There must never be two writers for one runtime mutation or two supervisors for
 one agent process.
 
 Run Orchestration owns the durable `RuntimeBinding`, desired state, observation
-projection, runtime-event inbox, and source cursor. `ar` owns the runtime run,
-session, process, lease, fencing epoch, and provider cursor.
+projection, runtime-event inbox, and source cursor. `ar` owns runtime sessions,
+operations, processes, custody, technical fencing, and provider cursors.
 
 The Runtime ACL owns only translation and technical connection state. It must not
 become a second durable owner of a binding, observation revision, or recovery state.
 
-The same word may describe different concepts on each side of the boundary:
+Similar concepts on each side of the boundary remain distinct:
 
-- an orchestration run and an `ar` runtime run have different lifecycles;
+- an orchestration Run and an AR runtime session have different lifecycles;
 - orchestration continuation and technical session resume/reattach are different
   operations;
 - product team messages and runtime input/provider output are different contracts;
@@ -127,6 +135,43 @@ The contract must support different topology models:
 - providers with or without native resume.
 
 The orchestrator must not infer process topology from provider identity.
+
+## Readiness and context application
+
+The boundary preserves distinct technical observations:
+
+```text
+runtime capability admitted
+runtime session available
+context application accepted
+runtime input accepted
+pending technical interaction
+provider output active
+runtime outcome observed
+```
+
+No single observation means that a product participant is ready. Run
+Orchestration combines current runtime evidence with the promoted
+`RunPlanVersion` and `RunPolicySnapshot` to derive participant readiness, Run
+health, and continuation behavior.
+
+Applying a context manifest is not a provider-visible Work operation. AR exposes
+a capability-specific context-application result with stable idempotency and
+binding identity. A provider adapter that supports a no-turn or `noReply`
+mechanism uses it internally. Unexpected assistant or tool output during a
+declared no-turn application is a typed anomaly, not successful Work.
+
+Technical evidence carries the freshness and binding information required by the
+AR Published Language. The orchestrator never treats cached installation,
+authentication, model inventory, process liveness, or an old bootstrap response
+as current execution proof.
+
+AR may use one provider host for several sessions. Releasing or cancelling one
+product binding cannot imply stopping a shared host. Host adoption, cross-process
+startup serialization, process-identity checks, provider-message ordering, and
+precedence among contradictory provider observations are AR and provider-adapter
+invariants. The orchestrator consumes their normalized provider-neutral outcomes;
+it does not reproduce those algorithms.
 
 ## Published Language and anti-corruption boundary
 
@@ -224,7 +269,7 @@ recovery.
 Commands must carry enough identity to reject stale ownership:
 
 - orchestration run ID;
-- runtime run reference;
+- runtime session reference;
 - aggregate generation or expected revision;
 - idempotency key;
 - correlation and causation IDs;
@@ -331,8 +376,8 @@ guarantee. The contract defines:
 
 Internal fencing remains AR-owned and unpublished.
 
-A retry of `startRun` after an unknown transport outcome must not create a second
-runtime run.
+A retry of `requestRuntimeSession` after an unknown transport outcome must not
+create a second runtime session.
 
 The orchestrator interprets an expired-window outcome only within the
 reuse-detection horizon promised by the Runtime Published Language. Runtime

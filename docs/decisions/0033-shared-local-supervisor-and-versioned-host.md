@@ -1,7 +1,7 @@
 ---
 id: ADR-0033
 type: adr
-status: accepted
+status: superseded
 owner: platform/local-host
 summary: Use a shared local supervisor for zero-touch lifecycle of versioned local orchestrator components.
 related:
@@ -12,6 +12,9 @@ related:
   - OD-021
 supersedes:
   - ADR-0022
+superseded_by:
+  - ADR-0060
+  - ADR-0064
 ---
 
 # ADR-0033: Shared Local Supervisor and Versioned Host

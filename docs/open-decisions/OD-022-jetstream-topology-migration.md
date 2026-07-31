@@ -34,15 +34,16 @@ effects, or unreviewed destructive changes.
 
 ## Decisions to make
 
-1. Canonical desired-topology manifest shape, ownership, and version identity.
-2. Allowlist of safe in-place changes and mandatory approval for destructive
-   diffs.
-3. Versioned stream and consumer naming without leaking broker names into feature
-   contracts.
-4. Dual-publish or dual-consume handoff, cursor checkpoint, and completion proof.
-5. Rollback policy when old and new topologies have both accepted traffic.
-6. Recovery after a crash during topology migration.
-7. Compatibility checks across local and hosted NATS versions.
+The spike fixed the expand, parallel-consume, coexist, route-scoped backfill,
+prove, cutover, and retire migration shape. Remaining production decisions are:
+
+1. Exact abort thresholds, proof windows, and maximum mixed-version dwell.
+2. Backup and restore manifests required before each destructive stage.
+3. Supported version matrix, store-feature compatibility, and downgrade limits.
+4. Corruption, disk-full, and sustained disk-pressure behavior during migration.
+5. TLS credential rotation while old and new routes coexist.
+6. Multi-region placement and failover, if that deployment profile is accepted.
+7. Required soak duration and evidence before retirement.
 
 ## Acceptance criteria
 

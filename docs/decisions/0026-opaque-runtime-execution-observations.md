@@ -1,7 +1,7 @@
 ---
 id: ADR-0026
 type: adr
-status: accepted
+status: superseded
 owner: integration/runtime
 summary: Consume AR execution identity and lifecycle as opaque observations without mirroring its internal domain.
 related:
@@ -10,6 +10,8 @@ related:
   - ADR-0028
   - OD-004
   - architecture.runtime-boundary
+superseded_by:
+  - ADR-0069
 ---
 
 # ADR-0026: Opaque Runtime Execution Observations

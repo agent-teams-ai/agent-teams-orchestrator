@@ -20,6 +20,13 @@ The stable product identity of an agent definition owned by Team Topology and
 represented by `AgentProfileId`. It is distinct from an authenticated principal,
 team membership, and every AR runtime session.
 
+## Agent Attention
+
+The bounded context that decides whether an admitted source fact is relevant and
+novel enough to re-orient a specific agent for a purpose. It owns coalescing,
+expiry, disruption intent, and feedback-loop suppression, but cannot wake,
+interrupt, or command a Run.
+
 ## Aggregate
 
 A DDD consistency boundary with one aggregate root. All state changes preserve its
@@ -42,10 +49,18 @@ boundary.
 A request to perform an action. Commands may be rejected and must carry an
 idempotency identity when retries are possible.
 
+## Command family
+
+A stable, server-owned semantic identifier for one durable command capability,
+such as `runs.create`. Together with canonical resource scope and `CommandId`, it
+defines the complete idempotency identity. It is derived from the invoked API
+capability rather than trusted from caller payload.
+
 ## Command ID
 
-The one public idempotency identity of a durable control command. A crash-safe
-caller persists it before sending and uses it to locate the resulting operation.
+The one caller-supplied idempotency identity of a durable control command. A
+crash-safe caller persists it before sending. Its uniqueness and reconciliation
+scope also include canonical resource scope and server-owned command family.
 
 ## Client Profile
 
@@ -100,6 +115,13 @@ bounded context by default.
 A monotonic or otherwise authoritative ownership token used to reject stale
 runtime mutations.
 
+## Human Notification Management
+
+The bounded context that owns human-facing notification inbox, presentation
+preferences, read, snooze, digest, acknowledgement, and escalation semantics. It
+does not own the source fact and cannot suppress Agent Attention or context
+freshness.
+
 ## ETag
 
 An opaque public concurrency token representing the observed version of a
@@ -121,8 +143,16 @@ consumed too quickly or is exhausted.
 ## Execution epoch
 
 A non-authorizing AR observation used to distinguish technical custody
-generations. It may change while execution-attempt identity remains unchanged. It
-is not an `ExecutionFence`, capability token, or orchestrator aggregate revision.
+generations. It may change while the published runtime-session identity remains
+unchanged. It is not an `ExecutionFence`, capability token, or orchestrator
+aggregate revision.
+
+## Execution workspace allocation
+
+A durable Workspace Registry resource representing one materialized workspace
+view and its normalized sharing, access, consistency, lifecycle, and cleanup
+guarantees. A Git worktree may implement an allocation but is not a security
+sandbox.
 
 ## Inbox
 
@@ -163,12 +193,35 @@ deployment platform.
 ## Orchestration run
 
 A durable product-level coordination lifecycle. It may involve multiple runtime
-runs, tasks, messages, retries, and approvals.
+sessions and operations, tasks, messages, retries, and approvals.
+
+## Run plan version
+
+An immutable, validated Run Orchestration artifact containing the topology
+reference, policy snapshot, capability requirements, and placement intent for one
+Run plan revision. It is promoted by `OrchestrationRun`; it is not a second
+mutable authority aggregate.
+
+## Work execution
+
+A Work Coordination business resource representing one execution lifecycle of
+accepted Work. Work Coordination alone changes its lifecycle and related Task
+consequences.
+
+## Work placement
+
+Run Orchestration durable process state that places one `WorkExecution` onto an
+eligible Run participant. It stores opaque references and expected revisions but
+does not own Work lifecycle or AR execution.
 
 ## Operation
 
 An addressable, durable result handle created when a long-running command is
 accepted. It survives client disconnects and has one immutable terminal outcome.
+Its state is owned by the command's feature; a common Operations API only routes
+to that owner and composes cross-feature read projections.
+
+An orchestrator `Operation` is not an AR `RuntimeOperation`.
 
 ## Outbox
 
@@ -242,11 +295,6 @@ aggregates or writing context storage.
 An agent implementation such as Claude, Codex, or OpenCode. Provider-specific
 logic belongs in an `ar` driver.
 
-## Runtime run
-
-An opaque execution lifecycle owned by `ar`, referenced by the orchestrator but
-not reconstructed from provider internals.
-
 ## Runtime session reference
 
 An opaque orchestrator-side reference to an AR-owned technical runtime session,
@@ -260,11 +308,29 @@ An `ar`-owned technical request to grant or deny a scoped runtime capability.
 decision acceptance, and provider enforcement. The orchestrator may correlate it
 to a separate product approval through an opaque authority decision reference.
 
+## Runtime operation
+
+An AR-owned provider-visible technical unit of runtime input or work. It is
+distinct from an orchestrator public `Operation`, a `WorkExecution`, and a
+`WorkPlacement`.
+
 ## Runtime ACL
 
 The stateless anti-corruption adapter that implements consumer-owned runtime
 capability ports and translates between orchestration concepts and opaque `ar`
 contracts. It does not own runtime bindings or orchestration observation state.
+
+## Run lifetime policy
+
+The immutable choice between client-bound and durable orchestration Run lifetime.
+Client-bound Runs use explicit fenced sponsorship; durable Runs survive every
+client disconnect. It never controls shared Host or infrastructure lifetime.
+
+## Runtime isolation requirement
+
+The provider-neutral security properties that AR must enforce for one runtime,
+including filesystem, process, network, and capability restrictions. It is
+independent from workspace checkout or materialization strategy.
 
 ## Resource budget
 
@@ -289,7 +355,7 @@ value and grants no authority by itself.
 
 ## Workspace registration
 
-A project-owned record that identifies an approved workspace binding and its
+A project-owned record that identifies a registered workspace binding and its
 generation without exposing arbitrary paths as domain identity.
 
 ## Sidecar
@@ -299,7 +365,7 @@ deployment relationship, not business ownership.
 
 ## Sidecar supervisor
 
-A generic host-owned lifecycle component for one child sidecar. ADR-0033
+A generic host-owned lifecycle component for one child sidecar. ADR-0060
 superseded Desktop-owned orchestrator sidecar supervision with the shared Local
 Supervisor model.
 

@@ -9,7 +9,7 @@ related:
   - ADR-0042
   - ADR-0012
   - ADR-0047
-  - ADR-0033
+  - ADR-0060
   - ADR-0037
   - ADR-0038
 code_anchors:

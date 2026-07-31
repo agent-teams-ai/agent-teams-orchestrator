@@ -6,8 +6,10 @@ owner: run-orchestration
 summary: Select initial Run Orchestration workflows, worker topology, versioning, and reconciliation.
 related:
   - ADR-0027
+  - ADR-0067
   - architecture.extensions
   - domain.contexts.run-orchestration
+  - research.pre-implementation-gate-critique-2026-07-30
 ---
 
 # OD-005: Temporal Workflow Boundary
@@ -19,6 +21,11 @@ state remains authoritative in context persistence. Temporal client adapters
 implement consumer-owned scheduling ports, Activity Workers invoke idempotent
 application use cases, workflow code remains deterministic, and Temporal types do
 not enter domain or application code.
+
+The first official Temporal adapter and worker use the Temporal TypeScript SDK on
+the repository's pinned Node.js baseline. A Go, Rust, or mixed-language workflow
+worker is not the default and requires measured operational need plus a new ADR.
+The exact worker process topology remains open.
 
 ## Decisions required
 
@@ -63,6 +70,35 @@ The retained `Temporal workflow boundary` fingerprint is in the
 Exact initial workflow state, signal schemas, history thresholds, retry budgets,
 worker topology, rollout policy, HA or Cloud deployment, and reconciliation
 operations remain unresolved.
+
+## Current leading process matrix
+
+The first in-process implementation should prove four independent feature-owned
+process states:
+
+- `RunPlanTransitionProcess`;
+- `ParticipantActivationProcess`;
+- `WorkPlacementProcess`;
+- `RunClosureProcess`.
+
+`ContextActivationProcess` is designed with Agent Context but may be implemented
+in a later slice. `WorkPlacementProcess` is the leading first Temporal workflow
+candidate because it proves cross-context commands, AR ambiguity, cancellation,
+stale authority, and reconciliation without turning the whole Run into one
+workflow.
+
+There is no generic `RunWorkflow`, saga base class, business step DSL, or retry
+engine. Shared scheduling infrastructure is limited to clocks, wake-up,
+inbox/outbox, idempotency, dispatch records, ownership fencing, and deterministic
+fixtures.
+
+Application persistence remains authoritative for process state. An in-process
+scheduler and Temporal may not coordinate the same process generation without a
+scheduler-ownership fence.
+
+ADR-0067 removes caller-specific readiness waits from process-manager ownership.
+SDK `waitFor` observes a readiness snapshot and feed; it is not a Temporal or
+in-process business workflow.
 
 ## Resolution
 

@@ -10,6 +10,7 @@ blocked_by:
   - OD-026
   - OD-027
 related:
+  - ADR-0066
   - architecture.context-map
   - OD-006
   - OD-015
@@ -27,6 +28,12 @@ Work Coordination is the only authority that changes Task or Work lifecycle. It
 executes versioned work commands and publishes work facts. Run cancellation,
 participant-failure, late-completion, and compensation policy remain owned by the
 Run Orchestration process manager rather than being inferred here.
+
+A handoff is a durable Work-owned collaboration record, not free-form message
+text or an AR operation. Its candidate contract carries source and target,
+reason, bounded summary, priority, expected outcome, context and artifact
+references, deadline, acceptance policy, provenance, and revision. Exact
+aggregate boundaries and acceptance transitions remain open in OD-006.
 
 Kanban columns, lists, timelines, calendars, review queues, and external boards are
 views or adapters over Work state. They cannot become an additional lifecycle

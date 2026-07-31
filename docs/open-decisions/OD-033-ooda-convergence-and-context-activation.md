@@ -14,6 +14,7 @@ blocked_by:
   - OD-031
   - OD-032
 related:
+  - ADR-0068
   - architecture.eventing
   - architecture.runtime-boundary
   - domain.contexts.run-orchestration
@@ -44,11 +45,10 @@ context.
 
 - Source owners remain authoritative for their facts and issue coverage or gap
   evidence for requested scopes.
-- The candidate Agent Context boundary composes semantic manifests and readiness
+- The context owner selected by OD-028 composes semantic manifests and readiness
   evidence. It does not wake runtimes, authorize product actions, or command AR.
-- The candidate Attention boundary in OD-026 owns recipient relevance and
-  disruption intent only if accepted. It does not own source freshness or Run
-  authority.
+- Agent Attention owns agent-specific relevance, orientation need, and bounded
+  disruption intent. It does not own source freshness or Run authority.
 - Run Orchestration owns the process that binds one manifest and its current
   decisions to one action-capable runtime generation.
 - Product side effects enter the owning feature use case. AR owns technical
@@ -208,21 +208,19 @@ required commitments survive compaction and resume.
 ## Decisions still open
 
 1. Exact aggregate and process boundary for Run-owned context activation.
-2. Whether Attention becomes one bounded context or features under another
-   accepted owner.
-3. Exact source integration ownership and source-head contract.
-4. Instruction conflict, path-scope, correction, and supersession semantics.
-5. Safety watermark and gap policy for revocation-sensitive actions.
-6. Fair scheduling, overload admission, and cell placement or transfer protocol.
-7. Privacy-preserving evidence retention, crypto-erasure, and backup behavior.
-8. Initial OODA SLIs, evaluation corpus, and accepted targets.
+2. Exact source integration ownership and source-head contract.
+3. Instruction conflict, path-scope, correction, and supersession semantics.
+4. Safety watermark and gap policy for revocation-sensitive actions.
+5. Fair scheduling, overload admission, and cell placement or transfer protocol.
+6. Privacy-preserving evidence retention, crypto-erasure, and backup behavior.
+7. Initial OODA SLIs, evaluation corpus, and accepted targets.
 
 ## Options
 
-1. Separate Agent Context plus focused Attention boundary and Run-owned activation
+1. Separate Agent Context plus accepted Agent Attention and Run-owned activation
    process. This is the leading option.
-2. Agent Context and Attention as focused features inside Run Orchestration while
-   preserving the same ports and owner rules.
+2. Agent Context as a focused feature inside Run Orchestration, with accepted
+   Agent Attention remaining separate and the same ports and owner rules.
 3. One global OODA coordinator owning observation, context, decisions, and action.
    This is not viable because it duplicates semantic owners and creates a
    cross-context god-component.

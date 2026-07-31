@@ -8,10 +8,14 @@ related:
   - ADR-0015
   - ADR-0016
   - ADR-0021
+  - ADR-0036
   - OD-008
 ---
 
 # ADR-0024: SDK Package Roles and Names
+
+ADR-0036 subsequently fixed dual Node publication plus browser ESM. OD-008
+retains registry, release-channel, and support-policy decisions only.
 
 ## Context
 
@@ -51,10 +55,10 @@ The orchestrator-to-`ar` anti-corruption integration uses:
 It is an integration package, not a public control SDK. Orchestrator
 domain/application packages and external applications cannot import it.
 
-Browser-safe remote SDK code and Node-specific local/embedded connectors have
-separate package entry points or packages. Package `exports` prohibit deep imports.
-OD-008 still decides registry policy, ESM-only versus dual publication, exact Node
-connector boundaries, and future Go/Rust module names.
+Browser-safe remote SDK code and Node-specific local connectors have separate
+package entry points or packages. Package `exports` prohibit deep imports.
+ADR-0036 defines the publication formats. OD-008 still decides registry policy,
+exact Node connector boundaries, and future Go/Rust module names.
 
 ## Consequences
 

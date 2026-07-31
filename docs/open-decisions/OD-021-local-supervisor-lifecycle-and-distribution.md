@@ -9,6 +9,8 @@ related:
   - ADR-0033
   - ADR-0035
   - ADR-0058
+  - ADR-0060
+  - ADR-0064
   - architecture.local-host-lifecycle
   - OD-001
   - OD-003
@@ -20,7 +22,8 @@ related:
 ## Decision required
 
 Define the implementation-level lifecycle and distribution contract beneath
-ADR-0033 without changing its ownership boundaries.
+ADR-0060, ADR-0064, ADR-0035, and ADR-0058 without changing their ownership
+boundaries.
 
 ## Constraints
 
@@ -60,7 +63,9 @@ ADR-0033 without changing its ownership boundaries.
    coordination with OD-009.
 10. Bundled Centrifugo implementation beneath ADR-0058: exact platform binaries,
     nested signing and notarization, endpoint and credential rotation, memory
-    limits, crash-loop policy, staged update, and Windows/Linux lifecycle.
+    limits, crash-loop policy, staged update, Windows/Linux lifecycle, and the
+    retention, coalescing, retry horizon, and garbage collection of durable
+    realtime-publication work after a long edge outage.
 11. Whether the Supervisor uses the repository's Node runtime or a smaller native
     implementation after a measured packaging and reliability spike.
 

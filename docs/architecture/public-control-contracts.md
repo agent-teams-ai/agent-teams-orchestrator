@@ -7,13 +7,15 @@ summary: Canonical control IDL, resource, operation, mutation, pagination, and f
 related:
   - ADR-0016
   - ADR-0017
-  - ADR-0018
   - ADR-0019
   - ADR-0020
   - ADR-0021
   - ADR-0023
   - ADR-0046
   - ADR-0055
+  - ADR-0061
+  - ADR-0065
+  - ADR-0067
   - OD-016
   - OD-019
   - architecture.security
@@ -99,7 +101,7 @@ for example:
 ```text
 tenants/{tenant}/projects/{project}/teams/{team}
 tenants/{tenant}/projects/{project}/runs/{run}
-tenants/{tenant}/projects/{project}/operations/{commandId}
+tenants/{tenant}/projects/{project}/operations/{operation}
 ```
 
 Exact collection names remain feature-owned, but every name is globally
@@ -115,11 +117,25 @@ OD-019 completes exact resource patterns.
 Immediate validation failure before durable acceptance is an RPC error. Durable
 acceptance returns an operation.
 
-`commandId` is the one public idempotency identity. A crash-safe caller persists
-it before sending. Operation lookup by deterministic project-scoped name supports
-reconciliation after an unknown response.
+`commandId` is the one caller-supplied idempotency identity. A crash-safe caller
+persists it before sending. The server derives a stable `CommandFamily` from the
+invoked API capability. Complete command identity is canonical authenticated
+resource scope plus command family plus command ID.
 
-Operation handles are serializable and connection-free. They expose:
+The same command ID may be used in another family without collision. Within one
+family and scope, the same semantic fingerprint returns the retained Operation
+and another fingerprint is a conflict. API aliases or versions share a family
+only when their application semantics and fingerprint rules are compatible.
+
+Each feature atomically owns its receipts, Operation state, domain changes, and
+outbox. The common Operations API is a stateless federated routing facade over
+feature-owned Operations, not a central write registry. Its deterministic opaque
+resource name incorporates command scope, family, and command ID. Cross-feature
+Operation lists are query-composed projections.
+
+Operation handles are serializable and connection-free. They persist the complete
+Operation name rather than reconstructing ownership from a bare command ID. They
+expose:
 
 - operation name and command ID;
 - accepted and last-update times;
@@ -130,6 +146,49 @@ Operation handles are serializable and connection-free. They expose:
 
 Waiting cancellation affects only the wait. Business cancellation and privileged
 force termination are explicit commands.
+
+## Run creation semantics
+
+`CreateRun` durably accepts product intent; it is not a synchronous alias for
+starting provider processes. The response is an addressable Operation plus the
+stable Run resource name.
+
+ADR-0067 fixes one command result: the Run resource is durably created and the
+creation request is admitted. Caller-specific wait preferences never enter the
+request fingerprint or Operation identity.
+
+Run readiness is observed independently:
+
+```text
+GetRunReadiness
+SubscribeRunReadiness
+SDK RunReadiness.waitFor(typedCondition)
+```
+
+The snapshot carries a revision and matching resume cursor. The SDK evaluates a
+typed condition against that snapshot, then consumes the feed strictly after the
+cursor. A condition may target a specific plan or explicitly follow current Run
+authority. There is no raw readiness string, hidden server default, arbitrary
+condition DSL, or durable server process per client wait.
+
+Clients observe the distinct resources defined by ADR-0065:
+
+```text
+Run
+Operation
+WorkExecution
+```
+
+Plan transitions, participant activations, runtime bindings, and Work placements
+remain internal domain or application models unless a later public-use-case ADR
+promotes a dedicated projection. The public orchestrator `Operation` never
+aliases an AR `RuntimeOperation`.
+
+`RunReadinessSnapshot` exposes separate lifecycle, planning, required and
+optional participant readiness, context readiness, operational availability,
+health, and pending-interaction axes. A typed event advances one observable fact;
+it does not collapse these axes into a percentage or one enum. An impossible
+condition returns `READINESS_UNREACHABLE`.
 
 ## Mutations and concurrency
 

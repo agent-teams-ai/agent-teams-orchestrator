@@ -8,7 +8,9 @@ related:
   - ADR-0001
   - ADR-0003
   - ADR-0030
-  - ADR-0033
+  - ADR-0060
+  - ADR-0064
+  - ADR-0065
 ---
 
 # Architecture Overview
@@ -95,12 +97,16 @@ The orchestrator decides:
 - when to send, queue, retry, escalate, or complete work;
 - what desired runtime state should be requested.
 
+Workspace Registry owns execution-workspace allocation and materialization through
+replaceable worktree, clone, snapshot, or remote-workspace adapters.
+
 The runtime decides and enforces:
 
 - how a provider session is created and resumed;
 - how agent processes are supervised;
 - how cancellation and recovery are performed;
-- how credentials, leases, fencing, sandboxing, and workspace isolation work;
+- how credentials, leases, fencing, sandboxing, mounts, process isolation, and
+  network restrictions work;
 - how provider events become normalized runtime events.
 
 The boundary is detailed in [Runtime boundary](runtime-boundary.md).
@@ -125,8 +131,8 @@ implementations. Deployment mode must not change domain behavior.
 
 The shared per-user Local Supervisor is the only local process-lifecycle owner.
 Desktop, CLI, and other applications bootstrap or discover it and then connect to
-the Host; they do not supervise their own Host sidecars. The proposed ADR-0060
-exists only to remove the remaining historical ambiguity in ADR-0030.
+the Host; they do not supervise their own Host sidecars. ADR-0060 removes the
+remaining historical ambiguity in ADR-0030.
 
 One bounded context has one authoritative persistence profile in a running
 deployment. A Desktop using Orchestrator Server does not keep a second local
@@ -147,8 +153,9 @@ Client configuration distinguishes:
 - a `Workspace`, which is a project-owned domain resource.
 
 Workspace or project configuration cannot redirect a client, choose credentials,
-or lower target trust. Client exit detaches only the client; durable work requires
-an explicit cancellation command.
+or lower target trust. Durable work always survives client exit. Attached CLI
+work uses an explicit client-bound Run sponsorship whose clean exit or fenced
+expiry requests business cancellation without stopping shared infrastructure.
 
 ## Persistence model
 
@@ -185,8 +192,9 @@ invariants from explicit facts.
 
 The public control plane uses feature-owned Protobuf through Connect and compatible
 gRPC adapters. Integration events use separate feature-owned JSON Schemas. The
-handwritten SDK maps both remote and in-process backends to one behavioral surface
-without exposing generated wire messages.
+handwritten SDK maps local-Host and hosted Connect targets to one behavioral
+surface without exposing generated wire messages. An in-process backend exists
+only in the embedded test composition and is not a production SDK mode.
 
 ## Read models
 

@@ -5,6 +5,7 @@ status: open
 owner: architecture/domain
 summary: Define boundaries among conversations, notifications, alerts, subscriptions, attention, and runtime delivery.
 related:
+  - ADR-0068
   - architecture.context-map
   - architecture.runtime-boundary
   - domain.contexts.agent-communication
@@ -12,13 +13,16 @@ related:
   - OD-004
   - OD-006
   - OD-028
+  - research.human-notification-agent-attention-boundary-critique-2026-07-30
+  - research.pre-implementation-gate-critique-2026-07-30
 ---
 
 # OD-026: Communication, Notification, and Attention
 
 ## Decision required
 
-Define the exact bounded-context and feature ownership for:
+ADR-0068 fixed separate Human Notification Management and Agent Attention bounded
+contexts. Define the remaining tactical ownership and behavior for:
 
 - human-to-agent and agent-to-agent conversations;
 - task comments and other source-owned collaboration facts;
@@ -27,12 +31,16 @@ Define the exact bounded-context and feature ownership for:
 - product delivery timing, wake, safe-point, and interruption intent;
 - technical runtime-input application and reconciliation.
 
-The decision must determine whether Notification and Attention Management is one
-new bounded context, several focused contexts, or separate features behind an
-accepted context boundary. Package count and symmetry are not decision criteria.
+The strategic split is no longer open. The contexts share technical platform
+primitives but no domain model, database transaction, repository, status enum,
+subscription aggregate, or delivery pipeline. The complete evidence, tactical
+candidates, failure matrix, and deferred scope are in the
+[boundary critique](../research/human-notification-agent-attention-boundary-critique-2026-07-30.md).
 
 ## Already fixed constraints
 
+- Human Notification Management and Agent Attention are separate bounded contexts
+  under one conceptual subdomain, as accepted by ADR-0068.
 - Product Conversation belongs to the Orchestrator. AR owns technical runtime input,
   provider output, transcript, compaction, and input-application mechanisms.
 - A task comment remains owned by Work Coordination and never creates a
@@ -61,52 +69,64 @@ accepted context boundary. Package count and symmetry are not decision criteria.
 ```text
 External source
   -> Integration Management verification, cursor, and reconciliation
-  -> semantic owner and anti-corruption layer
-       -> ContextSourceInvalidated -> Agent Context freshness processing
-       -> AttentionCandidate -> relevance, subscription, and policy evaluation
-  -> AttentionIntent
-  -> Run Orchestration wake, checkpoint, or interruption decision
-  -> Agent Context delta manifest
-  -> Runtime ACL
-  -> AR technical context application
+  -> semantic owner admits the change and publishes one source-owned fact
+       -> Human Notification ACL -> local notification command
+       -> Agent Attention ACL -> local attention command -> orientation intent
+       -> context-owner ACL selected by OD-028 -> invalidation or refresh command
+  -> Run Orchestration alone decides wake, checkpoint, or interruption
+  -> Runtime ACL -> AR technical context application
 ```
 
-One source change may produce both `ContextSourceInvalidated` and
-`AttentionCandidate`. Suppressing, snoozing, or digesting attention must not leave
-an already disclosed context contribution falsely marked as fresh. Conversely, a
-source invalidation does not by itself authorize waking or interrupting an agent.
+The producer does not know which consumers exist and does not publish
+downstream-specific candidates. Each consumer independently maps the same
+producer-owned fact through its anti-corruption layer and durable inbox.
+Suppressing, snoozing, or digesting a human notification cannot suppress agent
+orientation or leave an already disclosed context contribution falsely marked as
+fresh. Context invalidation does not by itself authorize waking or interrupting
+an agent.
 
 The following subscriptions have separate owners and must not collapse into one
 generic subscription table:
 
 - a connector subscription selects upstream Jira, Notion, Discord, A2A, or other
   events and belongs to Integration Management;
-- an attention subscription expresses recipient interest, mute, snooze, digest,
-  and escalation policy and belongs to the candidate Attention boundary;
+- a human notification subscription or preference expresses presentation,
+  mute, snooze, digest, acknowledgement, and escalation policy and belongs to
+  Human Notification Management;
+- an agent attention subscription expresses agent, purpose, source, novelty,
+  budget, coalescing, and expiry policy and belongs to Agent Attention;
 - a context binding authorizes a source to contribute to a team, agent, purpose,
-  or Run and belongs to Agent Context.
+  or Run and belongs to the context owner selected by OD-028.
 
 Jira, Notion, Discord, A2A, and similar systems are adapters. Their raw schemas do
 not become internal domain events, notification kinds, or Agent Context models.
 
 ## Candidate delivery policy
 
-Product intent should not expose an unrestricted priority-by-timing matrix. A
-small profile plus explicit constraints is a stronger candidate:
+Human notification intent and agent attention intent must not share one public
+or domain type. The earlier generic candidate is split:
 
 ```text
-AttentionIntent
-  recipientSelector
-  profile: fyi | action-required | critical
+HumanNotificationIntent
+  humanRecipientSelector
+  presentationProfile
   deliverBy?
   expiresAt?
   acknowledgementRequirement?
   aggregationPolicy?
-  businessPreconditions
+
+AgentAttentionIntent
+  agentRef
+  purposeRef
+  semanticSubjectRef
+  orientationProfile
+  deliverBy?
+  expiresAt?
+  sourceRevision
+  policySnapshotRef
 ```
 
-Policy and Run Orchestration normalize that intent into independent technical
-dimensions:
+Agent Attention may normalize its intent into:
 
 ```text
 importance and urgency
@@ -118,8 +138,9 @@ required evidence
 ordering lane
 ```
 
-The names, exact profiles, and authority matrix remain unresolved. `Critical` does
-not automatically grant process-start or interruption authority. `When idle`
+Human presentation preferences never modify these dimensions. The names and exact
+profiles remain unresolved. `Critical` does not automatically grant process-start
+or interruption authority. `When idle`
 cannot be inferred from silence, prompt text, or UI status; it requires a current
 runtime observation and matching execution generation. Interruption is a
 cooperative request to reach a supported safe point, not an alias for process kill.
@@ -133,7 +154,7 @@ reconciliation ledger, not mandatory event sourcing of Conversation state.
 
 ```text
 message.committed
-broker.published
+dispatch.committed
 mailbox.committed
 runtime.accepted
 context.applied
@@ -144,6 +165,10 @@ agent.replied
 human.presented
 human.read
 ```
+
+`transport.publication-accepted` is operational delivery evidence only. A broker
+acknowledgement cannot advance product delivery state because it proves neither
+mailbox commit nor runtime application.
 
 `turn.observed` and `context.applied` never claim that a model understood the
 content. `AgentAcknowledged`, a causally linked domain action, and a reply are
@@ -160,16 +185,17 @@ may advance to the desired revision. After application, a material correction is
 a successor contribution with explicit supersession. Revocation prevents future
 application but cannot erase data already disclosed to a provider.
 
-## Options
+## Remaining decisions
 
-1. Add focused Notification/Attention and Delivery ownership beside Agent
-   Communication, connected by integration events and process managers.
-2. Keep separate conversation, notification, alert, and delivery features inside a
-   broader accepted context after proving one cohesive language and consistency
-   boundary.
-3. Retain one typed mailbox with segregated lanes. This is acceptable only if it
-   proves that unrelated lifecycles, authorization, retention, and acknowledgement
-   do not form a god aggregate.
+- exact Human Notification aggregates, preference precedence, presentation
+  channels, acknowledgement, escalation, and retention;
+- exact Agent Attention aggregates, orientation profiles, coalescing, budgets,
+  expiry, feedback-loop prevention, and reconciliation;
+- the producer facts and consumer ACL mappings in the first vertical slice;
+- the capability and evidence contract between Agent Attention, Agent Context, and
+  Run Orchestration;
+- exact downgrade and recovery behavior for unsupported safe-point or wake
+  capabilities.
 
 ## Acceptance criteria
 
@@ -194,4 +220,4 @@ application but cannot erase data already disclosed to a provider.
 
 ## Resolution
 
-Open. When resolved, set `status: resolved` and link the deciding ADR.
+Open for tactical decisions. ADR-0068 resolves the strategic context split.

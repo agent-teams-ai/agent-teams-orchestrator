@@ -4,6 +4,8 @@ owners:
     kind: bounded-context
   agent-communication:
     kind: bounded-context
+  agent-attention:
+    kind: bounded-context
   agent-organization:
     kind: bounded-context
   approval-management:
@@ -11,6 +13,8 @@ owners:
   consumption-governance:
     kind: bounded-context
   identity-registry:
+    kind: bounded-context
+  human-notification:
     kind: bounded-context
   policy-risk:
     kind: bounded-context
