@@ -150,12 +150,39 @@ delivery, and conformance fixtures. Feature-owned mappings still call narrow
 application ports in their owning contexts. The gateway owns no Work, Run,
 Conversation, or authorization state.
 
+## Agent Client Protocol
+
+ACP connects a coding agent runtime to an editor or client environment. Its
+sessions, terminal/tool interactions, filesystem capabilities, and provider
+execution semantics belong to AR and an AR-owned protocol adapter.
+
+The orchestrator may request provider-neutral runtime capabilities and consume
+normalized observations through the Runtime Gateway. It does not import ACP
+messages, sessions, task state, transport DTOs, or editor lifecycle into Work,
+Run, Conversation, or the public orchestrator SDK. An ACP task-like operation is
+runtime evidence, not an internal Task or `WorkExecution`.
+
+ACP and A2A are independent extension points: ACP is runtime/client integration
+behind AR, while A2A enters feature-owned orchestrator ACLs.
+
 ## MCP and tool surfaces
 
 Runtime MCP/tool execution belongs in `ar` and provider drivers. The orchestrator
 may own tool policy and auditable risk decisions through Policy and Risk, and
 approval lifecycle through Approval Management, but it does not execute provider
 tools.
+
+Coordination MCP is different from runtime tool execution. Team communication,
+Work commands, Run observation, inbox queries, and other product coordination
+tools are inbound adapters over their owning orchestrator application ports. One
+app-owned backend in the Orchestrator Host remains authoritative; lightweight
+stdio shims may translate MCP transport but own no controller, product state,
+repository, process lifecycle, or cross-feature policy.
+
+Every coordination tool maps through the same validation, authenticated scope,
+authorization, idempotency, and application command as SDK or Connect callers.
+An MCP process cannot access another bounded context's database or create a
+parallel product mailbox.
 
 Slash commands are public command aliases or client conveniences. They must map to
 versioned application commands and cannot bypass authorization or invariants.

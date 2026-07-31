@@ -21,6 +21,8 @@ Validate candidate boundaries:
 - `Project` versus `WorkspaceRegistration`;
 - `Task` versus dependency-graph ownership;
 - `TaskSubscription` and work-execution process ownership;
+- durable handoff identity, acceptance, rejection, supersession, deadline, and
+  concurrency boundaries;
 - Task-scoped discussion and comment growth/concurrency boundaries;
 - Task-to-OrchestrationRun cardinality, retry authority, and late completion;
 - remaining internal invariants of `OrchestrationRun`, immutable
@@ -52,6 +54,12 @@ aggregate, repository, and concurrency boundaries inside each owner.
 OD-026 owns the strategic distinction among conversations, notifications, alerts,
 and runtime delivery. This decision validates tactical aggregates only after that
 ownership boundary is resolved.
+
+Work handoff remains a typed Work Coordination concept rather than a Conversation
+message or runtime command. Candidate data includes source and target, reason,
+summary, priority, expected outcome, `contextRefs`, `artifactRefs`, deadline,
+acceptance policy, provenance, and revision. This list is a discovery contract,
+not an accepted aggregate shape.
 
 ## Current leading Run matrix
 

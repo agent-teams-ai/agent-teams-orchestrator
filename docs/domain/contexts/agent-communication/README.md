@@ -45,6 +45,9 @@ durable owner on either side.
 - Conversation membership, notification subscription, message audience, and
   per-recipient delivery are different concepts.
 - Conversation history is not an unbounded collection inside one aggregate.
+- Messages reference attachments and large artifacts through typed, authorized
+  artifact references. Conversation owns message provenance, audience, and
+  visibility of the reference, not blob bytes or provider storage.
 - A task comment, domain notification, approval, alert, or control signal never
   becomes a conversation message implicitly.
 - Promoting provider output into a visible product message is an explicit
