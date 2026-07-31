@@ -11,6 +11,17 @@ messaging, provider-neutral runtime integration, and versioned public contracts.
 The repository is in architecture definition. Production code is gated by
 accepted boundaries, accepted decisions, and the first approved vertical slice.
 
+## Canonical repositories
+
+- [`agent-teams-ai/agent-teams-orchestrator`](https://github.com/agent-teams-ai/agent-teams-orchestrator)
+  is the public canonical orchestrator repository.
+- [`agent-teams-ai/agent-runtime`](https://github.com/agent-teams-ai/agent-runtime)
+  is the public canonical agent-runtime repository.
+
+Both repositories are licensed under Apache-2.0. Repository location does not
+replace versioned Published Languages, SDK contracts, or anti-corruption
+boundaries between the systems. ADR-0070 records the governance decision.
+
 ## Start here
 
 - [Agent navigation and guardrails](AGENTS.md)

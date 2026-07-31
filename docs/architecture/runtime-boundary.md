@@ -13,6 +13,7 @@ related:
   - ADR-0062
   - ADR-0065
   - ADR-0069
+  - ADR-0070
   - architecture.local-host-lifecycle
   - OD-004
 ---
