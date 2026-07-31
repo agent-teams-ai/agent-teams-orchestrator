@@ -32,8 +32,9 @@ Every mapped capability declares:
 
 The compatibility facade owns migration-only reliability state that the legacy
 DTO never modeled. Before its first durable SDK command, it allocates and
-persists a stable `commandId` and enough routing state to recover the operation
-after a client or Host crash. A timeout never causes the facade to allocate a new
+persists a stable `requestId` plus the command descriptor needed to resolve the
+outcome after a client or Host crash. After acceptance it persists the complete
+opaque Operation name. A timeout never causes the facade to allocate a new
 identity and try the other owner.
 
 Legacy progress callbacks are convenience notifications, not a durable feed. The

@@ -65,8 +65,8 @@ browser use and at least 20 return degraded placeholders in the pinned snapshot.
 
 The spike also confirmed three migration requirements:
 
-1. `TeamCreateRequest` has no durable command identity. The facade must persist
-   its SDK `commandId` before first send rather than adding retry guesses to the
+1. `TeamCreateRequest` has no durable request identity. The facade must persist
+   its SDK `requestId` before first send rather than adding retry guesses to the
    renderer DTO.
 2. `TeamProvisioningProgress` has no cursor or sequence. The facade owns SDK
    checkpointing and query-based reconciliation.

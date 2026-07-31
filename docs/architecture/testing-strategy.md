@@ -20,7 +20,7 @@ related:
   - ADR-0057
   - ADR-0058
   - ADR-0060
-  - ADR-0061
+  - ADR-0071
   - ADR-0064
   - ADR-0065
   - architecture.local-host-lifecycle
