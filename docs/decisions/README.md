@@ -23,11 +23,11 @@ discovery. The lifecycle lists below remain the complete status ledger.
 | Runtime ownership and AR integration | [ADR-0003](0003-ar-owns-runtime-lifecycle.md), [ADR-0008](0008-consumer-owned-runtime-ports.md), [ADR-0028](0028-runtime-published-language-and-internal-fence.md), [ADR-0069](0069-opaque-runtime-execution-identity.md) | [Runtime boundary](../architecture/runtime-boundary.md) |
 | Eventing, delivery, and replay | [ADR-0004](0004-broker-neutral-events-with-jetstream.md), [ADR-0010](0010-broker-neutral-partition-ordering.md), [ADR-0019](0019-resumable-feed-contracts.md), [ADR-0035](0035-managed-local-nats-jetstream.md) | [Eventing and reliability](../architecture/eventing-and-reliability.md) |
 | Persistence, migrations, and exact values | [ADR-0011](0011-context-isolated-sqlite-and-postgres-topology.md), [ADR-0025](0025-context-scoped-unit-of-work-and-local-command-lanes.md), [ADR-0046](0046-exact-usage-and-money-values.md), [ADR-0052](0052-adapter-local-drizzle-and-bounded-dialect-duplication.md) | [Persistence boundary](../architecture/persistence-boundary.md) |
-| Public contracts and SDK | [ADR-0016](0016-protobuf-buf-connect-control-api.md), [ADR-0019](0019-resumable-feed-contracts.md), [ADR-0036](0036-typescript-sdk-publication-format.md), [ADR-0037](0037-single-initial-contract-version.md), [ADR-0058](0058-centrifugo-default-replaceable-client-realtime-edge.md), [ADR-0061](0061-command-family-scoped-durable-operations.md), [ADR-0067](0067-separate-run-creation-from-readiness-observation.md) | [SDK and transports](../architecture/sdk-and-transports.md), [public contracts](../architecture/public-control-contracts.md) |
+| Public contracts and SDK | [ADR-0016](0016-protobuf-buf-connect-control-api.md), [ADR-0019](0019-resumable-feed-contracts.md), [ADR-0036](0036-typescript-sdk-publication-format.md), [ADR-0037](0037-single-initial-contract-version.md), [ADR-0058](0058-centrifugo-default-replaceable-client-realtime-edge.md), [ADR-0067](0067-separate-run-creation-from-readiness-observation.md), [ADR-0071](0071-separate-request-id-and-routed-operation-identity.md) | [SDK and transports](../architecture/sdk-and-transports.md), [public contracts](../architecture/public-control-contracts.md) |
 | Local and hosted composition | [ADR-0030](0030-shared-core-with-local-and-server-compositions.md), [ADR-0058](0058-centrifugo-default-replaceable-client-realtime-edge.md), [ADR-0060](0060-single-local-supervisor-lifecycle-owner.md), [ADR-0064](0064-explicit-attached-and-durable-run-lifetime.md) | [Local Host lifecycle](../architecture/local-host-lifecycle.md), [composition](../architecture/composition-and-dependency-injection.md) |
 | Workflow and migration | [ADR-0027](0027-temporal-as-run-orchestration-adapter.md), [ADR-0029](0029-compatibility-facade-and-strangler-migration.md), [ADR-0063](0063-typed-run-resilience-policy-snapshot.md), [ADR-0065](0065-immutable-run-plan-and-work-placement.md) | [Extension points](../architecture/extension-points.md), [migration boundary](../architecture/migration-boundary.md) |
 | Repository publication and enforcement | [ADR-0031](0031-native-typescript-7-primary-toolchain.md), [ADR-0032](0032-staged-architecture-conformance-tooling.md), [ADR-0039](0039-staged-nx-foundation.md), [ADR-0053](0053-repository-local-documentation-workflow.md), [ADR-0056](0056-oxlint-first-quality-gates.md), [ADR-0059](0059-versioned-engineering-foundation.md), [ADR-0070](0070-public-canonical-repositories.md) | [Repository tooling](../architecture/repository-tooling.md), [documentation standard](../standards/documentation.md), [testing](../architecture/testing-strategy.md) |
-| Domain capability boundaries | [ADR-0044](0044-tenant-scoped-agent-organization.md), [ADR-0045](0045-three-usage-bounded-contexts.md), [ADR-0046](0046-exact-usage-and-money-values.md), [ADR-0068](0068-separate-human-notification-and-agent-attention-contexts.md) | [Context map](../architecture/context-map.md), [context dossiers](../domain/contexts/README.md) |
+| Domain capability boundaries | [ADR-0044](0044-tenant-scoped-agent-organization.md), [ADR-0045](0045-three-usage-bounded-contexts.md), [ADR-0046](0046-exact-usage-and-money-values.md), [ADR-0068](0068-separate-human-notification-and-agent-attention-contexts.md), [ADR-0072](0072-atomic-work-completion-evaluation.md) | [Context map](../architecture/context-map.md), [context dossiers](../domain/contexts/README.md) |
 | Security boundaries and data handling | [ADR-0021](0021-immutable-sdk-scope-and-credentials.md), [ADR-0028](0028-runtime-published-language-and-internal-fence.md), [ADR-0055](0055-security-boundaries-and-data-classification.md) | [Security architecture](../architecture/security-architecture.md), [runtime boundary](../architecture/runtime-boundary.md) |
 | Reliability objectives | [ADR-0057](0057-measurement-first-reliability-objectives.md) | [Reliability objectives](../architecture/reliability-objectives.md), [testing](../architecture/testing-strategy.md) |
 
@@ -84,7 +84,6 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0058: Centrifugo default replaceable client realtime edge](0058-centrifugo-default-replaceable-client-realtime-edge.md)
 - [ADR-0059: Versioned engineering foundation](0059-versioned-engineering-foundation.md)
 - [ADR-0060: Single Local Supervisor lifecycle owner](0060-single-local-supervisor-lifecycle-owner.md)
-- [ADR-0061: Command-family-scoped durable operations](0061-command-family-scoped-durable-operations.md)
 - [ADR-0062: Workspace materialization and runtime isolation](0062-workspace-materialization-and-runtime-isolation.md)
 - [ADR-0063: Typed Run resilience policy snapshot](0063-typed-run-resilience-policy-snapshot.md)
 - [ADR-0064: Explicit attached and durable Run lifetime](0064-explicit-attached-and-durable-run-lifetime.md)
@@ -94,6 +93,8 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0068: Separate Human Notification and Agent Attention contexts](0068-separate-human-notification-and-agent-attention-contexts.md)
 - [ADR-0069: Opaque runtime execution identity](0069-opaque-runtime-execution-identity.md)
 - [ADR-0070: Public canonical repositories](0070-public-canonical-repositories.md)
+- [ADR-0071: Separate request ID and routed Operation identity](0071-separate-request-id-and-routed-operation-identity.md)
+- [ADR-0072: Atomic Work completion evaluation](0072-atomic-work-completion-evaluation.md)
 
 ## Superseded decisions
 
@@ -103,6 +104,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0013: Runtime Published Language and permission boundary](0013-runtime-published-language-and-permission-boundary.md), superseded by ADR-0028
 - [ADR-0014: Feature-owned migrations with context-level assembly](0014-feature-owned-migrations-with-context-assembly.md), superseded by ADR-0047
 - [ADR-0018: Durable command operations](0018-durable-command-operations.md), superseded by ADR-0061
+- [ADR-0061: Command-family-scoped durable operations](0061-command-family-scoped-durable-operations.md), superseded by ADR-0071
 - [ADR-0022: Host-owned sidecar supervision](0022-host-owned-sidecar-supervision.md), superseded by ADR-0033
 - [ADR-0026: Opaque runtime execution observations](0026-opaque-runtime-execution-observations.md), superseded by ADR-0069
 - [ADR-0033: Shared local supervisor and versioned host](0033-shared-local-supervisor-and-versioned-host.md), superseded jointly by ADR-0060 and ADR-0064

@@ -34,7 +34,7 @@ question. `Resolved` is historical and must relate to at least one deciding ADR.
 | OD-014 | [Observability and OpenTelemetry](OD-014-observability-and-opentelemetry.md) | platform/observability | Open |
 | OD-015 | [External task-board migration](OD-015-external-task-board-migration.md) | work-coordination | Open |
 | OD-016 | [Public error model](OD-016-public-error-model.md) | platform/control-api | Open |
-| OD-017 | [Long-running command lifecycle](OD-017-long-running-command-lifecycle.md) | clients/sdk | Resolved by ADR-0061 |
+| OD-017 | [Long-running command lifecycle](OD-017-long-running-command-lifecycle.md) | clients/sdk | Resolved by ADR-0071 |
 | OD-018 | [SDK subscriptions and recovery](OD-018-sdk-subscriptions-and-recovery.md) | clients/sdk | Resolved by ADR-0019 |
 | OD-019 | [Public resource identity and scope](OD-019-public-resource-identity-and-scope.md) | platform/control-api | Open |
 | OD-020 | [Architecture conformance tooling](OD-020-architecture-conformance-tooling.md) | engineering/tooling | Resolved by ADR-0032 |

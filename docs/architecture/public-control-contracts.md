@@ -13,7 +13,7 @@ related:
   - ADR-0023
   - ADR-0046
   - ADR-0055
-  - ADR-0061
+  - ADR-0071
   - ADR-0065
   - ADR-0067
   - OD-016
@@ -117,27 +117,36 @@ OD-019 completes exact resource patterns.
 Immediate validation failure before durable acceptance is an RPC error. Durable
 acceptance returns an operation.
 
-`commandId` is the one caller-supplied idempotency identity. A crash-safe caller
-persists it before sending. The server derives a stable `CommandFamily` from the
-invoked API capability. Complete command identity is canonical authenticated
-resource scope plus command family plus command ID.
+`requestId` is the one caller-supplied idempotency identity. A crash-safe caller
+persists it before sending. The server derives a stable `CommandDescriptor` from
+the invoked API capability. Complete idempotency identity is canonical
+authenticated resource scope plus command descriptor plus request ID.
 
-The same command ID may be used in another family without collision. Within one
-family and scope, the same semantic fingerprint returns the retained Operation
-and another fingerprint is a conflict. API aliases or versions share a family
-only when their application semantics and fingerprint rules are compatible.
+The same request ID may be used under another descriptor without collision.
+Within one descriptor and scope, the same semantic fingerprint returns the
+retained outcome and another fingerprint is a conflict. API aliases share a
+descriptor only when their application semantics and fingerprint rules are
+compatible.
 
 Each feature atomically owns its receipts, Operation state, domain changes, and
 outbox. The common Operations API is a stateless federated routing facade over
-feature-owned Operations, not a central write registry. Its deterministic opaque
-resource name incorporates command scope, family, and command ID. Cross-feature
-Operation lists are query-composed projections.
+feature-owned Operations, not a central write registry. The server-generated
+opaque resource name follows:
+
+```text
+tenants/{tenant}/projects/{project}/operations/{kind}-{routeKey}-{serverId}
+```
+
+`kind` is a broad stable routing family. `routeKey` is an immutable opaque
+serving bucket used to drain old ownership generations. Neither exposes a bounded
+context, service, region, or database. Cross-feature Operation lists are
+query-composed projections.
 
 Operation handles are serializable and connection-free. They persist the complete
 Operation name rather than reconstructing ownership from a bare command ID. They
 expose:
 
-- operation name and command ID;
+- operation name, request ID, and command descriptor;
 - accepted and last-update times;
 - current non-terminal phase;
 - immutable terminal result or error;

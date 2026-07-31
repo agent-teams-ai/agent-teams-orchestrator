@@ -5,7 +5,7 @@ status: accepted
 owner: architecture
 summary: Mandatory evidence gates that must pass before the first production orchestration vertical slice is implemented.
 related:
-  - ADR-0061
+  - ADR-0071
   - ADR-0062
   - ADR-0063
   - ADR-0064

@@ -5,6 +5,7 @@ status: open
 owner: work-coordination
 summary: Define configurable Work lifecycle, workflow versioning, migrations, and board projections.
 related:
+  - ADR-0072
   - architecture.context-map
   - domain.contexts.work-coordination
   - OD-006
@@ -104,6 +105,26 @@ These concerns must not become state traits merely for scheduler convenience:
 - actual agent activity is an expiring projection;
 - successful, failed, cancelled, or other completion outcome is an explicit
   completion record, not inferred from a localized state label.
+
+## Accepted completion boundary
+
+ADR-0072 resolves the completion-evaluation portion of this decision without
+closing the configurable Work lifecycle question:
+
+- Work Coordination and `WorkItem` remain the only terminal Work authority;
+- transaction-local plans may use a synchronous fast path;
+- asynchronous or multi-step plans use one atomically linked
+  `CompletionEvaluation` per immutable candidate;
+- the evaluation owns typed gate readiness, while its process manager owns only
+  timers, delivery, retries, and reconciliation;
+- material rework supersedes the candidate, and reopening Work creates a new
+  completion epoch;
+- Review Management and Automation and Scheduling remain open strategic
+  candidates with no packages or package-catalog entries.
+
+The exact configurable workflow language, material-change rules, review outcome
+taxonomy, gates that can be waived, retention, and lifecycle migration remain
+open here.
 
 ## Transition and automation draft
 

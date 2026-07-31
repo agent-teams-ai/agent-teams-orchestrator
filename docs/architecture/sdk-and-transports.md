@@ -14,7 +14,7 @@ related:
   - ADR-0037
   - ADR-0058
   - ADR-0060
-  - ADR-0061
+  - ADR-0071
   - ADR-0064
   - ADR-0067
   - architecture.local-host-lifecycle
@@ -277,13 +277,14 @@ The SDK contract includes behavior, not only request and response types:
   authority, audience, tenant, scope set, and delegation context;
 - one logical call performs at most one compare-and-refresh after authentication
   failure; a stale failure cannot evict a newer credential;
-- one durable command has one public `commandId`, which is also its idempotency
-  identity;
+- one durable command has one caller-supplied `requestId`, used only for
+  idempotency and unknown-outcome recovery;
 - complete idempotency scope is the authenticated canonical resource scope plus
-  a stable server-derived command family plus `commandId`;
+  a stable server-derived command descriptor plus `requestId`;
 - Operation state and receipts remain feature-owned; the common Operations API
-  routes by family and owns no central write registry;
-- crash-safe callers persist a caller-selected command ID before first send;
+  routes by server-owned kind and route bucket and owns no central write
+  registry;
+- crash-safe callers persist a caller-selected request ID before first send;
 - accepted durable commands return recoverable, serializable operation handles;
 - `CreateRun` command completion and Run readiness observation are independent;
 - Run readiness exposes a typed snapshot, resumable feed, and SDK-local
@@ -296,9 +297,9 @@ The SDK contract includes behavior, not only request and response types:
 - a product CLI may explicitly sponsor `CLIENT_BOUND` Run lifetime and translate
   clean exit or sponsorship expiry into an idempotent business cancellation;
 - automatic retries are limited to reads and commands declared idempotent;
-- one logical command keeps the same `commandId` across transport retries;
+- one logical command keeps the same `requestId` across transport retries;
 - SDK Operation handles persist the complete opaque Operation name rather than
-  relying on a bare command ID;
+  relying on a request ID;
 - idempotency fingerprints use versioned semantic canonicalization rather than
   raw serialized bytes;
 - full-result retention and historical key-reuse detection are separate

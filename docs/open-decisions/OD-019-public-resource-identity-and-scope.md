@@ -9,7 +9,7 @@ related:
   - ADR-0017
   - ADR-0020
   - ADR-0023
-  - ADR-0061
+  - ADR-0071
   - architecture.sdk-transports
   - OD-012
   - research.pre-implementation-gate-critique-2026-07-30
