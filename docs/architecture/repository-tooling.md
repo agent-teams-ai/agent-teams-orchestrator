@@ -56,7 +56,7 @@ is complete.
 | Capability | Decision state | Implementation state |
 |---|---|---|
 | Repository-local Stage 0 validators, lint, docs, security, and reliability gates | Accepted | Implemented and blocking |
-| Versioned engineering foundation distribution | Accepted in ADR-0059 | Blocked on the first public npm release; the consumer dependency and wrappers are not installed |
+| Versioned engineering foundation distribution | Accepted in ADR-0059 | Implemented with exact public npm dependency, explicit local lifecycle, consumer E2E proof, and fail-closed CI registry checks |
 | Nx package graph and affected foundation | Accepted in ADR-0039 | Implemented with pinned Nx Core and blocking pnpm-workspace discovery validation |
 | Nx task pipelines and local cache | Accepted in ADR-0039 | Planned; no task is cacheable until its complete inputs and outputs are proven |
 | Structural AST rules | Accepted in ADR-0041 | Planned for the first matching production source and invariant fixture |
@@ -75,21 +75,25 @@ ADR-0059 places reusable engineering tooling in the versioned
 source of truth for its business architecture and supplies project-specific facts
 through a narrow local adapter. Production packages cannot import the foundation.
 
-Registry mode will become the reproducible default after the first public npm
-release. Local sibling development will use only
+Registry mode is the reproducible default. Local sibling development uses only
 the guarded `foundation:attach`, `foundation:status`, and `foundation:detach`
 workflow. CI, packaging, and release paths fail closed unless
 `foundation:assert-registry` proves that the exact lockfile package is active.
-`foundation:pack-test` verifies the publishable artifact independently from local
-symlinks.
+The foundation release repository owns package tarball verification; this
+consumer additionally runs `foundation:e2e` to prove registry restoration and
+manifest and lockfile immutability around the local link lifecycle.
 
-Foundation adoption is incremental. Existing repository-local tooling moves only
-after the extracted capability has equivalent fixtures, a migration path, and a
-consumer conformance test. Until then, the local implementation remains
+Capability adoption remains incremental. Existing repository-local tooling moves
+only after the extracted capability has equivalent fixtures, a migration path,
+and a consumer conformance test. Until then, the local implementation remains
 authoritative; two independently evolving copies are prohibited. The foundation
-repository being available locally is not sufficient evidence for adoption:
-`@agent-teams/engineering-foundation` must first exist as an immutable public npm
-version.
+checkout is accepted only through the guarded local lifecycle and is rejected by
+CI.
+
+The first-party foundation package alone is exempt from the pnpm release-age
+delay. Its exact manifest version, registry integrity, reviewed upgrade, and npm
+Trusted Publisher remain mandatory. The exemption does not apply to the rest of
+the `@agent-teams` scope or to third-party dependencies.
 
 ## Sources of truth
 

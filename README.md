@@ -32,6 +32,28 @@ boundaries between the systems. ADR-0070 records the governance decision.
 The machine-readable package topology is reserved in
 [`architecture/package-catalog.yaml`](architecture/package-catalog.yaml).
 
+## Engineering foundation
+
+Normal development and CI use the exact public
+`@agent-teams/engineering-foundation` version recorded in the manifest and
+lockfile. Cross-repository foundation work uses the guarded local lifecycle:
+
+```bash
+pnpm foundation:attach -- /absolute/path/to/engineering-foundation
+pnpm foundation:status
+pnpm foundation:detach
+pnpm foundation:check
+```
+
+Run the complete consumer lifecycle proof with:
+
+```bash
+pnpm foundation:e2e -- /absolute/path/to/engineering-foundation
+```
+
+CI requires registry mode. Product code cannot import the development-only
+foundation package.
+
 ## Product shape
 
 The orchestrator is headless. Desktop, web, CLI, automation, and third-party
