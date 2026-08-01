@@ -57,12 +57,18 @@ requests; no consumer follows an unpinned branch or floating package range.
 Sibling-repository development uses only repository wrappers:
 
 ```text
+foundation:check
 foundation:attach <absolute-path>
 foundation:status
 foundation:detach
 foundation:assert-registry
 foundation:pack-test
 ```
+
+`foundation:check` executes every capability declared by strict
+`foundation.config.yaml` and returns one deterministic aggregate report. The
+first blocking capability is `workspace.dependency-declarations`; consumer-owned
+policy input remains in `architecture/foundation/`.
 
 Raw `pnpm link` is an implementation detail, not the documented agent workflow.
 `foundation:attach` verifies package identity, compatible foundation metadata,
