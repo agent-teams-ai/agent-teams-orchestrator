@@ -43,6 +43,7 @@ minimumReleaseAge: 1440
 minimumReleaseAgeStrict: true
 
 minimumReleaseAgeExclude:
+  - "@agent-teams/engineering-foundation"
   - js-yaml@5.2.2
 
 overrides:

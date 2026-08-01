@@ -36,6 +36,14 @@
     "docs:spell": "cspell --config .cspell.json --no-progress",
     "docs:prose": "pnpm run docs:vale && pnpm run docs:spell",
     "docs:check": "pnpm run docs:validate && pnpm run docs:test && pnpm run skills:check && pnpm run architecture:model:check && pnpm run docs:lint && pnpm run docs:prose",
+    "foundation:assert-dev-only": "agent-teams-foundation assert-dev-only",
+    "foundation:assert-registry": "agent-teams-foundation assert-registry",
+    "foundation:attach": "agent-teams-foundation attach",
+    "foundation:check": "pnpm run foundation:config:check && pnpm run foundation:assert-dev-only && pnpm run foundation:assert-registry",
+    "foundation:config:check": "node foundation.config.mjs",
+    "foundation:detach": "agent-teams-foundation detach",
+    "foundation:e2e": "node scripts/foundation/verify-local-mode.mjs",
+    "foundation:status": "agent-teams-foundation status",
     "lint": "pnpm run lint:fast && pnpm run lint:type-aware && pnpm run lint:suppressions && pnpm run lint:test",
     "lint:advisory": "oxlint --config .oxlintrc.advisory.json --disable-nested-config . && node scripts/lint/run-type-aware.mjs --advisory",
     "lint:boundaries": "pnpm run lint:fast",
@@ -59,6 +67,7 @@
     "typecheck": "tsc --project tsconfig.json --noEmit --pretty false"
   },
   "devDependencies": {
+    "@agent-teams/engineering-foundation": "0.1.1",
     "ajv": "catalog:",
     "ajv-formats": "catalog:",
     "cspell": "catalog:",

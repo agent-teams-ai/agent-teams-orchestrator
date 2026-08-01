@@ -89,6 +89,9 @@ importers:
 
   .:
     devDependencies:
+      '@agent-teams/engineering-foundation':
+        specifier: 0.1.1
+        version: 0.1.1
       ajv:
         specifier: 'catalog:'
         version: 8.20.0
@@ -166,6 +169,11 @@ importers:
         version: 6.0.3
 
 packages:
+
+  '@agent-teams/engineering-foundation@0.1.1':
+    resolution: {integrity: sha512-+fq3gWbdgavq/cxHK2CuDN1Ehz5yPckBdo5wc5Waw9useG4OMKVHopDpx96CuBbqn6x1fKWro1Ks/HbGdFjFag==}
+    engines: {node: '>=24.18.0 <25', pnpm: '>=11.17.0 <12'}
+    hasBin: true
 
   '@antfu/install-pkg@1.1.0':
     resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
@@ -2948,6 +2956,9 @@ packages:
     resolution: {integrity: sha512-NxNv/kLguCA7p3jE8oL2aEBsrJWgAakBpgmgK6lpPWV+WuOmY6r2/zbAVnP+T8bQlA0nzHXSJSJW0Hq7ylaD2Q==}
     engines: {node: '>= 6'}
 
+  proper-lockfile@4.1.2:
+    resolution: {integrity: sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA==}
+
   proxy-from-env@2.1.0:
     resolution: {integrity: sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==}
     engines: {node: '>=10'}
@@ -3024,6 +3035,10 @@ packages:
   restore-cursor@3.1.0:
     resolution: {integrity: sha512-l+sSefzHpj5qimhFSE5a8nufZYAM3sBSVMAPtYkmC+4EH2anSGaEMXSD0izRQbu9nfyQ9y5JrVmp7E8oZrUjvA==}
     engines: {node: '>=8'}
+
+  retry@0.12.0:
+    resolution: {integrity: sha512-9LkiTwjUh6rT555DtE9rTX+BKByPfrMzEAtnlEtdEwr3Nkffwiihqe2bWADg+OQRjt9gl6ICdmB/ZFDCGAtSow==}
+    engines: {node: '>= 4'}
 
   reusify@1.1.0:
     resolution: {integrity: sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==}
@@ -3423,6 +3438,11 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
+
+  '@agent-teams/engineering-foundation@0.1.1':
+    dependencies:
+      proper-lockfile: 4.1.2
+      yaml: 2.9.0
 
   '@antfu/install-pkg@1.1.0':
     dependencies:
@@ -6288,6 +6308,12 @@ snapshots:
       kleur: 3.0.3
       sisteransi: 1.0.5
 
+  proper-lockfile@4.1.2:
+    dependencies:
+      graceful-fs: 4.2.11
+      retry: 0.12.0
+      signal-exit: 3.0.7
+
   proxy-from-env@2.1.0: {}
 
   punycode.js@2.3.1: {}
@@ -6371,6 +6397,8 @@ snapshots:
     dependencies:
       onetime: 5.1.2
       signal-exit: 3.0.7
+
+  retry@0.12.0: {}
 
   reusify@1.1.0: {}
 

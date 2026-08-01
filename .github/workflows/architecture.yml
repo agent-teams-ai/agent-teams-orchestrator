@@ -30,6 +30,7 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm foundation:check
       - run: pnpm docs:check
       - if: github.event_name == 'pull_request'
         run: pnpm docs:impact -- --base "${{ github.event.pull_request.base.sha }}" --strict
