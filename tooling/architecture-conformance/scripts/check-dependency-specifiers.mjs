@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { createRequire } from "node:module";
 import {
   mkdtemp,
   mkdir,
@@ -15,6 +16,13 @@ const toolingRoot = path.resolve(
   "..",
 );
 const repositoryRoot = path.resolve(toolingRoot, "../..");
+const requireFromTooling = createRequire(import.meta.url);
+const foundationPackageRoot = path.dirname(
+  requireFromTooling.resolve(
+    "@agent-teams/engineering-foundation/package.json",
+  ),
+);
+const foundationCli = path.join(foundationPackageRoot, "dist/cli.js");
 const validator = path.join(
   repositoryRoot,
   "scripts/architecture/validate-dependency-specifiers.mjs",
@@ -26,6 +34,18 @@ function run(root) {
     encoding: "utf8",
     env: { ...process.env, NO_COLOR: "1" },
   });
+}
+
+function runFoundation(root) {
+  return spawnSync(
+    process.execPath,
+    [foundationCli, "check", "--consumer", root, "--format", "json"],
+    {
+      cwd: repositoryRoot,
+      encoding: "utf8",
+      env: { ...process.env, NO_COLOR: "1" },
+    },
+  );
 }
 
 function output(result) {
@@ -43,6 +63,37 @@ function requireFailure(label, result, expectedText) {
   if (result.status === 0 || !actual.includes(expectedText)) {
     throw new Error(
       `${label} did not fail with ${expectedText}:\n${actual}`,
+    );
+  }
+}
+
+function foundationReport(label, result) {
+  try {
+    return JSON.parse(result.stdout);
+  } catch {
+    throw new Error(`${label} returned invalid foundation JSON:\n${output(result)}`);
+  }
+}
+
+function requireFoundationSuccess(label, result) {
+  const report = foundationReport(label, result);
+  if (result.status !== 0 || report.outcome !== "passed") {
+    throw new Error(`${label} failed foundation validation:\n${output(result)}`);
+  }
+}
+
+function requireFoundationViolation(label, result, expectedRuleId) {
+  const report = foundationReport(label, result);
+  const ruleIds = report.capabilities.flatMap((capability) =>
+    capability.diagnostics.map((diagnostic) => diagnostic.ruleId),
+  );
+  if (
+    result.status !== 1 ||
+    report.outcome !== "violations" ||
+    !ruleIds.includes(expectedRuleId)
+  ) {
+    throw new Error(
+      `${label} did not report ${expectedRuleId}:\n${output(result)}`,
     );
   }
 }
@@ -74,10 +125,47 @@ catalogs:
     external-tool: 2.0.0
 `,
   );
+  await mkdir(path.join(temporaryRoot, "architecture/foundation"), {
+    recursive: true,
+  });
+  await writeFile(
+    path.join(temporaryRoot, "foundation.config.yaml"),
+    `schemaVersion: 1
+project:
+  id: dependency-conformance
+capabilities:
+  workspace.dependency-declarations:
+    configPath: architecture/foundation/dependency-declarations.yaml
+`,
+  );
+  await writeFile(
+    path.join(
+      temporaryRoot,
+      "architecture/foundation/dependency-declarations.yaml",
+    ),
+    `schemaVersion: 1
+packageManager:
+  kind: pnpm
+  workspaceManifest: pnpm-workspace.yaml
+policies:
+  externalDependencies: catalog
+  catalogVersions: exact
+  internalDependencies: workspace-protocol
+  reservedScopes:
+    - "@agent-teams/"
+  developmentOnlyPackages: []
+  exactRegistryDevelopmentOnlyPackages:
+    - "@agent-teams/engineering-foundation"
+`,
+  );
   await writeJson(path.join(temporaryRoot, "package.json"), {
     name: "@agent-teams/test-root",
     private: true,
-    devDependencies: { "external-one": "catalog:" },
+    packageManager: "pnpm@11.18.0",
+    devDependencies: {
+      "@agent-teams/engineering-foundation": "0.2.0",
+      "external-one": "catalog:",
+    },
   });
   await writeJson(
     path.join(temporaryRoot, "packages/internal/package.json"),
@@ -101,6 +189,10 @@ catalogs:
   };
   await writeJson(consumerManifestPath, validConsumerManifest);
   requireSuccess("valid dependency specifiers", run(temporaryRoot));
+  requireFoundationSuccess(
+    "valid dependency specifiers",
+    runFoundation(temporaryRoot),
+  );
 
   validConsumerManifest.dependencies["external-one"] = "1.2.3";
   await writeJson(consumerManifestPath, validConsumerManifest);
@@ -108,6 +200,11 @@ catalogs:
     "direct external version",
     run(temporaryRoot),
     "external and must use catalog:",
+  );
+  requireFoundationViolation(
+    "direct external version",
+    runFoundation(temporaryRoot),
+    "workspace.dependency-declarations.external-version-not-cataloged",
   );
 
   validConsumerManifest.dependencies["external-one"] = "catalog:";
@@ -118,6 +215,11 @@ catalogs:
     run(temporaryRoot),
     "internal and must use the workspace: protocol",
   );
+  requireFoundationViolation(
+    "direct internal version",
+    runFoundation(temporaryRoot),
+    "workspace.dependency-declarations.internal-dependency-without-workspace-protocol",
+  );
 
   validConsumerManifest.dependencies["@agent-teams/internal"] = "workspace:*";
   validConsumerManifest.dependencies["external-missing"] = "catalog:";
@@ -126,6 +228,11 @@ catalogs:
     "missing catalog entry",
     run(temporaryRoot),
     "external-missing is missing from catalog default",
+  );
+  requireFoundationViolation(
+    "missing catalog entry",
+    runFoundation(temporaryRoot),
+    "workspace.dependency-declarations.catalog-reference-missing",
   );
   delete validConsumerManifest.dependencies["external-missing"];
 
@@ -137,6 +244,11 @@ catalogs:
     "foundation runtime dependency",
     run(temporaryRoot),
     "allowed only as an exact devDependency",
+  );
+  requireFoundationViolation(
+    "foundation runtime dependency",
+    runFoundation(temporaryRoot),
+    "workspace.dependency-declarations.development-only-package-in-runtime-section",
   );
   delete validConsumerManifest.dependencies[
     "@agent-teams/engineering-foundation"
@@ -150,6 +262,11 @@ catalogs:
     "inexact foundation dev dependency",
     run(temporaryRoot),
     "must use an exact registry version",
+  );
+  requireFoundationViolation(
+    "inexact foundation dev dependency",
+    runFoundation(temporaryRoot),
+    "workspace.dependency-declarations.exact-registry-development-only-package-version-not-exact",
   );
   validConsumerManifest.devDependencies[
     "@agent-teams/engineering-foundation"
@@ -171,6 +288,10 @@ catalogs:
     run(temporaryRoot),
     "production source cannot import @agent-teams/engineering-foundation",
   );
+  requireFoundationSuccess(
+    "production import is outside declaration capability",
+    runFoundation(temporaryRoot),
+  );
   await writeFile(
     consumerSourcePath,
     `// import "@agent-teams/engineering-foundation";
@@ -191,6 +312,10 @@ export const documentationExample =
     run(temporaryRoot),
     "production source cannot import @agent-teams/engineering-foundation",
   );
+  requireFoundationSuccess(
+    "dynamic production import is outside declaration capability",
+    runFoundation(temporaryRoot),
+  );
   await rm(path.join(temporaryRoot, "packages/consumer/src"), {
     recursive: true,
   });
@@ -209,6 +334,11 @@ export const documentationExample =
     "inexact catalog version",
     run(temporaryRoot),
     "must use an exact registry version",
+  );
+  requireFoundationViolation(
+    "inexact catalog version",
+    runFoundation(temporaryRoot),
+    "workspace.dependency-declarations.catalog-version-not-exact",
   );
 } finally {
   await rm(temporaryRoot, { recursive: true, force: true });

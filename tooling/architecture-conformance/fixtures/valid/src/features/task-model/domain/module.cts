@@ -1,1 +1,3 @@
-export const moduleKind = "commonjs";
+const moduleKind = "commonjs";
+
+export = moduleKind;
