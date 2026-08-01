@@ -175,15 +175,17 @@ Production source under `apps/**/src` and `packages/**/src` cannot import it.
 Architecture fixtures prove both the valid dev-only declaration and invalid
 declaration and import cases.
 
-Foundation 0.2 owns reusable declaration checks through
-`workspace.dependency-declarations`: catalog exactness, catalog references,
-workspace protocols, reserved-scope resolution, unique package identities, and
+Foundation 0.3 provides reusable declaration checks through
+`workspace.dependency-declarations` and a separately activated
+`architecture.source-dependencies` capability. This repository currently enables
+only the declaration capability: catalog exactness, catalog references, workspace
+protocols, reserved-scope resolution, unique package identities, and
 development-only placement. The repository-local dependency validator remains a
 temporary blocking donor oracle and continues to own production source import
-checks until `architecture.source-dependencies` is parity-proven. One conformance
-fixture runs both validators over the same declaration mutations and asserts the
-foundation's stable rule IDs; source-import mutations are expected to fail only
-the donor during this observation window.
+checks until the foundation source capability is parity-proven here. One
+conformance fixture runs both declaration validators over the same mutations and
+asserts the foundation's stable rule IDs; source-import mutations are expected to
+fail only the donor during this observation window.
 
 Cross-package source imports must name a declared manifest dependency and use a
 subpath exposed by the target package `exports`. Imports through another package's
