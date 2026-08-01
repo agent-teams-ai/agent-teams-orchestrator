@@ -1,11 +1,8 @@
 {
+  "extends": "@agent-teams/engineering-foundation/presets/typescript/node.json",
   "compilerOptions": {
     "jsx": "preserve",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "noEmit": true,
-    "strict": true,
-    "target": "ES2024"
+    "noEmit": true
   },
   "include": [
     "tooling/architecture-conformance/fixtures/valid/**/*.ts",
