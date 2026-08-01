@@ -90,13 +90,14 @@ authoritative; two independently evolving copies are prohibited. The foundation
 checkout is accepted only through the guarded local lifecycle and is rejected by
 CI.
 
-Foundation version 0.2 makes `workspace.dependency-declarations` blocking through
-strict `foundation.config.yaml`. The existing dependency-specifier validator is
-retained temporarily as a donor oracle and because it also enforces production
-source import placement. That source rule remains consumer-owned until
-`architecture.source-dependencies` is implemented and parity-proven. New
-declaration rules belong to foundation rather than the donor during this
-observation window.
+Foundation version 0.3 keeps `workspace.dependency-declarations` blocking through
+strict `foundation.config.yaml` and makes `architecture.source-dependencies`
+available as an independently activated capability. The existing
+dependency-specifier validator is retained temporarily as a donor oracle and
+because it also enforces production source import placement. That source rule
+remains consumer-owned until the foundation capability is enabled and
+parity-proven in this repository. New declaration rules belong to foundation
+rather than the donor during this observation window.
 
 The first-party foundation package alone is exempt from the pnpm release-age
 delay. Its exact manifest version, registry integrity, reviewed upgrade, and npm
