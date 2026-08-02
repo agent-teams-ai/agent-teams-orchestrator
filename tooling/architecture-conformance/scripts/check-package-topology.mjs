@@ -529,6 +529,39 @@ try {
 
   await writeFile(
     appFeaturePath,
+    "await import(`@agent-teams/work-coordination/module`);\n",
+  );
+  requireSuccess("static template import", run(temporaryRoot));
+  await writeFile(
+    appFeaturePath,
+    "await import(`@agent-teams/work-coordination/private`);\n",
+  );
+  requireFailure(
+    "template import outside allowed surface",
+    run(temporaryRoot),
+    "is not an allowed surface",
+  );
+  await writeFile(
+    appFeaturePath,
+    "const surface = 'module';\nawait import(`@agent-teams/work-coordination/${surface}`);\n",
+  );
+  requireFailure(
+    "dynamic template import",
+    run(temporaryRoot),
+    "non-static import()",
+  );
+  await writeFile(
+    appFeaturePath,
+    "const surface = 'module';\nawait import('@agent-teams/work-coordination/' + surface);\n",
+  );
+  requireFailure(
+    "concatenated import",
+    run(temporaryRoot),
+    "non-static import()",
+  );
+
+  await writeFile(
+    appFeaturePath,
     'import "../../../../../packages/contexts/work-coordination/src/module.ts";\n',
   );
   requireFailure(

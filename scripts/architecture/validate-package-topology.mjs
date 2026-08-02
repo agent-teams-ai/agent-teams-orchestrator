@@ -14,7 +14,7 @@ import {
   relative,
   walk,
 } from "./package-catalog-lib.mjs";
-import { extractModuleSpecifiers } from "./source-imports.mjs";
+import { analyzeModuleSpecifiers } from "./source-imports.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
@@ -270,7 +270,13 @@ async function validateInternalPackageImports(
 
     for (const filePath of current.sourceFiles.filter(isProductionSourceFile)) {
       const source = await readFile(filePath, "utf8");
-      for (const specifier of extractModuleSpecifiers(source)) {
+      const moduleSpecifiers = analyzeModuleSpecifiers(source);
+      for (const load of moduleSpecifiers.nonStaticModuleLoads) {
+        errors.push(
+          `${relative(repositoryRoot, filePath)}: non-static ${load.kind}() at source offset ${load.offset} bypasses the source dependency policy`,
+        );
+      }
+      for (const specifier of moduleSpecifiers.specifiers) {
         if (specifier.startsWith(".") && !isWithin(
           currentRoot,
           path.resolve(path.dirname(filePath), specifier),

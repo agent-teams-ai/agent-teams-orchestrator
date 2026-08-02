@@ -18,35 +18,63 @@ function readString(source, start, quote) {
     if (character === "\\") {
       const escaped = source[index + 1];
       if (escaped === undefined) {
-        return { end: source.length, type: "invalid-string", value };
+        return { end: source.length, start, type: "invalid-string", value };
       }
       value += escaped;
       index += 2;
       continue;
     }
     if (character === quote) {
-      return { end: index + 1, type: "string", value };
+      return { end: index + 1, start, type: "string", value };
     }
     value += character;
     index += 1;
   }
 
-  return { end: source.length, type: "invalid-string", value };
+  return { end: source.length, start, type: "invalid-string", value };
 }
 
-function skipTemplate(source, start) {
+function readTemplate(source, start) {
   let index = start + 1;
+  let value = "";
+  let hasSubstitution = false;
+
   while (index < source.length) {
     if (source[index] === "\\") {
+      const escaped = source[index + 1];
+      if (escaped === undefined) {
+        return {
+          end: source.length,
+          start,
+          type: "invalid-template",
+          value,
+        };
+      }
+      value += escaped;
       index += 2;
       continue;
     }
     if (source[index] === "`") {
-      return index + 1;
+      return {
+        end: index + 1,
+        start,
+        type: hasSubstitution ? "dynamic-template" : "string",
+        value,
+      };
     }
+    if (source[index] === "$" && source[index + 1] === "{") {
+      hasSubstitution = true;
+    }
+    value += source[index];
     index += 1;
   }
-  return source.length;
+
+  return {
+    end: source.length,
+    start,
+    type: "invalid-template",
+    value,
+  };
 }
 
 function tokenize(source) {
@@ -80,7 +108,9 @@ function tokenize(source) {
       continue;
     }
     if (character === "`") {
-      index = skipTemplate(source, index);
+      const token = readTemplate(source, index);
+      tokens.push(token);
+      index = token.end;
       continue;
     }
     if (isIdentifierStart(character)) {
@@ -90,6 +120,7 @@ function tokenize(source) {
       }
       tokens.push({
         end,
+        start: index,
         type: "identifier",
         value: source.slice(index, end),
       });
@@ -97,7 +128,12 @@ function tokenize(source) {
       continue;
     }
 
-    tokens.push({ end: index + 1, type: "punctuator", value: character });
+    tokens.push({
+      end: index + 1,
+      start: index,
+      type: "punctuator",
+      value: character,
+    });
     index += 1;
   }
 
@@ -109,9 +145,22 @@ function stringAfter(tokens, index) {
   return token?.type === "string" ? token.value : undefined;
 }
 
-export function extractModuleSpecifiers(source) {
+function staticCallSpecifier(tokens, index, allowOptions) {
+  const specifier = stringAfter(tokens, index);
+  const terminator = tokens[index + 1]?.value;
+  if (
+    specifier !== undefined &&
+    (terminator === ")" || (allowOptions && terminator === ","))
+  ) {
+    return specifier;
+  }
+  return;
+}
+
+export function analyzeModuleSpecifiers(source) {
   const tokens = tokenize(source);
   const specifiers = new Set();
+  const nonStaticModuleLoads = [];
 
   for (let index = 0; index < tokens.length; index += 1) {
     const token = tokens[index];
@@ -120,18 +169,22 @@ export function extractModuleSpecifiers(source) {
     }
 
     if (token.value === "require" && tokens[index + 1]?.value === "(") {
-      const specifier = stringAfter(tokens, index + 2);
+      const specifier = staticCallSpecifier(tokens, index + 2, false);
       if (specifier !== undefined) {
         specifiers.add(specifier);
+      } else {
+        nonStaticModuleLoads.push({ kind: "require", offset: token.start });
       }
       continue;
     }
 
     if (token.value === "import") {
       if (tokens[index + 1]?.value === "(") {
-        const specifier = stringAfter(tokens, index + 2);
+        const specifier = staticCallSpecifier(tokens, index + 2, true);
         if (specifier !== undefined) {
           specifiers.add(specifier);
+        } else {
+          nonStaticModuleLoads.push({ kind: "import", offset: token.start });
         }
         continue;
       }
@@ -160,5 +213,12 @@ export function extractModuleSpecifiers(source) {
     }
   }
 
-  return [...specifiers].toSorted();
+  return {
+    nonStaticModuleLoads,
+    specifiers: [...specifiers].toSorted(),
+  };
+}
+
+export function extractModuleSpecifiers(source) {
+  return analyzeModuleSpecifiers(source).specifiers;
 }
