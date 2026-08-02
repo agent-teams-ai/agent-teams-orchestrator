@@ -96,8 +96,10 @@ before a high-cost boundary violation.
 - Authoritative exact values never use JavaScript `number`, SQLite `REAL`, or JSON
   numbers. Follow the exact-value profile in
   [persistence](docs/architecture/persistence-boundary.md#exact-quantities-money-and-instants).
-- Product authorization belongs to Access Control and owning use cases; runtime,
-  sandbox, capability, and technical permission enforcement belongs to `ar`.
+- Product identity and grant facts belong to the configured authority provider;
+  each owning use case owns its authorization port and business invariants.
+  Runtime, sandbox, capability, and technical permission enforcement belongs to
+  `ar`.
 - Trusted tenant scope comes from authenticated context and canonical resources,
   never from payload or workspace configuration. Untrusted content never becomes
   a command without a typed authenticated control boundary.

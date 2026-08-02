@@ -29,7 +29,7 @@ question. `Resolved` is historical and must relate to at least one deciding ADR.
 | OD-009 | [Event-journal retention and replay](OD-009-event-journal-retention-and-replay.md) | platform/eventing | Open |
 | OD-010 | [Legacy desktop migration boundary](OD-010-legacy-desktop-migration-boundary.md) | migration/desktop | Open |
 | OD-011 | [Context-map validation](OD-011-context-map-validation.md) | architecture/domain | Open |
-| OD-012 | [Identity, authorization, and tenant isolation](OD-012-identity-authorization-tenant-isolation.md) | access-control | Open |
+| OD-012 | [Identity, authorization, and tenant isolation](OD-012-identity-authorization-tenant-isolation.md) | architecture/security | Open |
 | OD-013 | [Partial failure and compensation](OD-013-partial-failure-and-compensation.md) | run-orchestration | Open |
 | OD-014 | [Observability and OpenTelemetry](OD-014-observability-and-opentelemetry.md) | platform/observability | Open |
 | OD-015 | [External task-board migration](OD-015-external-task-board-migration.md) | work-coordination | Open |

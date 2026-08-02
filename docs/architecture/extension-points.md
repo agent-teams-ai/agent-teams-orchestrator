@@ -142,8 +142,9 @@ foreign domain model imported into Agent Communication:
 - A2A task status is external execution evidence. It cannot directly change
   internal Work lifecycle;
 - work handoff and acceptance remain Work Coordination semantics;
-- protocol identity and authorization pass through Identity Registry and Access
-  Control before binding lookup or domain commands.
+- protocol identity and authorization pass through the configured product
+  authority provider and feature-owned authorization ports before binding lookup
+  or domain commands.
 
 An A2A gateway may share codecs, protocol-version negotiation, streaming, push
 delivery, and conformance fixtures. Feature-owned mappings still call narrow
@@ -157,7 +158,8 @@ sessions, terminal/tool interactions, filesystem capabilities, and provider
 execution semantics belong to AR and an AR-owned protocol adapter.
 
 The orchestrator may request provider-neutral runtime capabilities and consume
-normalized observations through the Runtime Gateway. It does not import ACP
+normalized observations through consumer-owned ports implemented by the
+stateless Runtime ACL. It does not import ACP
 messages, sessions, task state, transport DTOs, or editor lifecycle into Work,
 Run, Conversation, or the public orchestrator SDK. An ACP task-like operation is
 runtime evidence, not an internal Task or `WorkExecution`.

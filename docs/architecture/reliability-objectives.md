@@ -7,6 +7,8 @@ summary: Measurement-first SLI, SLO, invariant, error-budget, and resource-budge
 related:
   - ADR-0043
   - ADR-0057
+  - ADR-0079
+  - ADR-0080
   - OD-014
   - OD-030
   - architecture.eventing
@@ -29,10 +31,10 @@ service is the error budget, whose policy defines what the organization changes
 when reliability degrades.
 
 A strict invariant is not an SLO. Losing an accepted command, duplicating a
-business effect, or crossing a tenant boundary is always a defect. A resource
-budget limits internal saturation such as event-loop delay, queue depth, disk
-headroom, memory, or metric cardinality; it does not claim that a user journey
-succeeded.
+business effect, dispatching a prevented runtime operation, or crossing a tenant
+boundary is always a defect. A resource budget limits internal saturation such
+as event-loop delay, queue depth, disk headroom, memory, or metric cardinality;
+it does not claim that a user journey succeeded.
 
 The machine-readable
 [reliability catalog](../../architecture/reliability/reliability-catalog.yaml)
@@ -41,7 +43,7 @@ OpenTelemetry Views, alerts, and OpenSLO documents are derived adapters.
 
 ## Initial user journeys
 
-The initial catalog deliberately contains four candidate indicators:
+The initial catalog deliberately contains five candidate indicators:
 
 | Indicator | User-visible question |
 |---|---|
@@ -49,6 +51,7 @@ The initial catalog deliberately contains four candidate indicators:
 | Dispatch age | Did accepted work reach the responsible external capability? |
 | Observation freshness | Can a subscriber see recent durable progress? |
 | Recovery duration | Did orchestration return to a known state after continuity loss? |
+| Scope disposition duration | Did Project retirement reach a truthful outcome across all required owners? |
 
 Candidate means the instrumentation contract is being designed. It is not a
 promise to users and has no error budget.

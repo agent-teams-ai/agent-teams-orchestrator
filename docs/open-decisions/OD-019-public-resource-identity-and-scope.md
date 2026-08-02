@@ -10,6 +10,8 @@ related:
   - ADR-0020
   - ADR-0023
   - ADR-0061
+  - ADR-0079
+  - ADR-0080
   - architecture.sdk-transports
   - OD-012
   - research.pre-implementation-gate-critique-2026-07-30
@@ -27,6 +29,8 @@ select and validate authorization context.
 ## Constraints
 
 - every team, task, run, message, and runtime binding is project-scoped;
+- external Platform or standalone authority IDs, stable Orchestrator scope IDs,
+  and AR runtime IDs remain separate namespaces joined by explicit bindings;
 - public identity is not reconstructed from filesystem paths, process IDs,
   provider session names, or display names;
 - authorization context is explicit and cannot be changed by request payload

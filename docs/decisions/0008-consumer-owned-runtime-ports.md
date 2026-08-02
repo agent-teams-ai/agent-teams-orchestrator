@@ -1,9 +1,11 @@
 ---
 id: ADR-0008
 type: adr
-status: accepted
+status: superseded
 owner: integration/runtime
 summary: Give runtime consumers narrow ports and keep the Runtime ACL stateless.
+superseded_by:
+  - ADR-0079
 related:
   - ADR-0003
   - ADR-0028

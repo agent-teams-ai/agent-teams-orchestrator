@@ -185,10 +185,12 @@ project. Workspace registrations belong to Workspace Registry and are referenced
 by opaque workspace identities rather than arbitrary paths.
 
 Authentication may be delegated to an external identity provider. Inbound adapters
-authenticate and establish a principal. Access Control provides membership and
-grant facts. Every application use case authorizes its business operation before
-mutating or disclosing state; domain behavior enforces identity-dependent
-invariants from explicit facts.
+authenticate and establish a principal. The configured product authority provider
+supplies membership and grant facts through ACLs implementing feature-owned
+authorization ports. Every application use case authorizes its business operation
+before mutating or disclosing state; domain behavior enforces identity-dependent
+invariants from explicit facts. Exact managed and standalone provider topology
+remains open under OD-012.
 
 The public control plane uses feature-owned Protobuf through Connect and compatible
 gRPC adapters. Integration events use separate feature-owned JSON Schemas. The

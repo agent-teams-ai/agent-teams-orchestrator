@@ -9,6 +9,8 @@ blocked_by:
   - OD-013
   - OD-031
 related:
+  - ADR-0079
+  - ADR-0080
   - architecture.eventing
   - architecture.security
   - domain.contexts.access-control
@@ -42,7 +44,7 @@ The responsibility chain is:
 proposal
   -> feature-owned typed intent and expected domain revisions
   -> risk and approval decisions
-  -> access authorization
+  -> feature-owned authorization decision
   -> feature-owned durable execution process
   -> dispatch claim and fence
   -> capability-specific outbound policy-enforcement point
@@ -52,7 +54,8 @@ proposal
 
 - The semantic owner owns intent, business invariants, expected revisions,
   result, cancellation, and compensation policy.
-- Access Control owns grant, delegation, revocation, and authorization evidence.
+- The configured product authority provider owns grant, delegation, revocation,
+  and authorization evidence; a feature-owned port consumes that decision.
 - Policy and Risk owns risk and automation decisions.
 - Approval Management owns approval facts.
 - Run Orchestration owns Run authority and a product

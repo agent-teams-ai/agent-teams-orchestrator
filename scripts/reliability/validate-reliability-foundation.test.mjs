@@ -55,8 +55,8 @@ function minimalCatalog() {
 test("accepts the canonical reliability foundation", async () => {
   const result = await validateReliabilityFoundation(repositoryRoot);
   assert.deepEqual(result.errors, []);
-  assert.equal(result.catalog.indicators.length, 4);
-  assert.equal(result.catalog.invariants.length, 4);
+  assert.equal(result.catalog.indicators.length, 5);
+  assert.equal(result.catalog.invariants.length, 5);
   assert.equal(result.catalog.resourceBudgets.length, 4);
 });
 

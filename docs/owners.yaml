@@ -22,7 +22,7 @@ owners:
     kind: bounded-context
   team-topology:
     kind: bounded-context
-  tenant-project-registry:
+  orchestration-scope:
     kind: bounded-context
   usage-accounting:
     kind: bounded-context

@@ -2,13 +2,15 @@
 id: OD-012
 type: open-decision
 status: open
-owner: access-control
+owner: architecture/security
 summary: Define principal, authorization, service identity, and hosted tenant-isolation semantics.
 related:
   - architecture.context-map
   - domain.contexts.access-control
-  - domain.contexts.tenant-project-registry
+  - domain.contexts.orchestration-scope
   - ADR-0021
+  - ADR-0079
+  - ADR-0080
   - OD-031
   - OD-032
 ---
@@ -22,11 +24,15 @@ authorization checks, API authentication, secret references, and hosted isolatio
 
 ## Constraints
 
-Identity Registry owns principal facts. Tenant and Project Registry owns tenant
-and project lifecycle. Access Control owns grants. Every application use case
-authorizes its business operation. Decide which operations require authoritative
-synchronous decisions and which may use local grant projections, including
-revocation and fail-closed behavior.
+A configured product authority provider owns external principal, membership,
+grant, and external Tenant or Project lifecycle facts. Orchestration Scope owns
+stable provider-neutral Orchestrator scope identity, binding, admission, and
+disposition coordination. Every application feature owns the authorization port
+and business invariants it consumes; ACLs translate provider decisions without
+becoming durable authorities. This decision selects the managed and standalone
+provider topology and which operations require authoritative synchronous
+decisions or bounded local projections, including revocation and fail-closed
+behavior.
 
 ADR-0021 fixes the client boundary:
 
@@ -42,8 +48,9 @@ This decision still selects concrete identity providers, grant flows, token
 validation, revocation propagation, service identities, and authorization
 consistency.
 
-OD-031 separately owns semantic claim admission and conflict resolution. Access
-Control determines whether a principal may attempt an operation; it does not
+OD-031 separately owns semantic claim admission and conflict resolution. The
+configured authority provider determines whether a principal may attempt an
+operation; it does not
 decide whether a Jira observation, agent statement, comment, or model summary is
 the accepted business fact. OD-032 separately owns the final pre-side-effect
 enforcement chain. Neither concern may be absorbed into one authorization

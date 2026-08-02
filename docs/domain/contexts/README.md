@@ -24,7 +24,7 @@ dossier readiness, not boundary existence.
 |---|---|---|---|
 | Identity Registry | Proposed | `OD-011` | [Identity Registry](identity-registry/README.md) |
 | Access Control | Proposed | `OD-012` | [Access Control](access-control/README.md) |
-| Tenant and Project Registry | Proposed | `OD-011`, `OD-012` | [Tenant and Project Registry](tenant-project-registry/README.md) |
+| Orchestration Scope | Proposed | `OD-006`, `OD-012`, `OD-019`, `OD-029` | [Orchestration Scope](orchestration-scope/README.md) |
 | Workspace Registry | Proposed | `OD-011` | [Workspace Registry](workspace-registry/README.md) |
 
 ## Coordination

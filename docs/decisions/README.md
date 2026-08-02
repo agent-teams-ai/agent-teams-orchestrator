@@ -20,7 +20,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 |---|---|---|
 | System shape and long-term evolution | [ADR-0001](0001-headless-event-driven-modular-monolith.md), [ADR-0042](0042-evidence-driven-bounded-context-topology.md), [ADR-0051](0051-full-ddd-operating-model.md), [ADR-0054](0054-likec4-strategic-relationship-model.md), [ADR-0062](0062-workspace-materialization-and-runtime-isolation.md), [ADR-0065](0065-immutable-run-plan-and-work-placement.md) | [Overview](../architecture/overview.md), [context map](../architecture/context-map.md), [architecture model](../architecture/architecture-model.md) |
 | Feature and dependency boundaries | [ADR-0012](0012-feature-owned-inbound-and-outbound-adapters.md), [ADR-0038](0038-machine-enforced-package-catalog.md), [ADR-0040](0040-context-private-awilix-containers.md) | [Feature standard](../architecture/feature-module-standard.md), [dependency rules](../architecture/dependency-rules.md) |
-| Runtime ownership and AR integration | [ADR-0003](0003-ar-owns-runtime-lifecycle.md), [ADR-0008](0008-consumer-owned-runtime-ports.md), [ADR-0028](0028-runtime-published-language-and-internal-fence.md), [ADR-0069](0069-opaque-runtime-execution-identity.md) | [Runtime boundary](../architecture/runtime-boundary.md) |
+| Runtime ownership and AR integration | [ADR-0003](0003-ar-owns-runtime-lifecycle.md), [ADR-0028](0028-runtime-published-language-and-internal-fence.md), [ADR-0069](0069-opaque-runtime-execution-identity.md), [ADR-0079](0079-runtime-authority-binding-cutoff-and-disposition.md), [ADR-0080](0080-orchestration-scope-project-authority-and-disposition.md) | [Runtime boundary](../architecture/runtime-boundary.md) |
 | Eventing, delivery, and replay | [ADR-0004](0004-broker-neutral-events-with-jetstream.md), [ADR-0010](0010-broker-neutral-partition-ordering.md), [ADR-0019](0019-resumable-feed-contracts.md), [ADR-0035](0035-managed-local-nats-jetstream.md) | [Eventing and reliability](../architecture/eventing-and-reliability.md) |
 | Persistence, migrations, and exact values | [ADR-0011](0011-context-isolated-sqlite-and-postgres-topology.md), [ADR-0025](0025-context-scoped-unit-of-work-and-local-command-lanes.md), [ADR-0046](0046-exact-usage-and-money-values.md), [ADR-0052](0052-adapter-local-drizzle-and-bounded-dialect-duplication.md) | [Persistence boundary](../architecture/persistence-boundary.md) |
 | Public contracts and SDK | [ADR-0016](0016-protobuf-buf-connect-control-api.md), [ADR-0019](0019-resumable-feed-contracts.md), [ADR-0036](0036-typescript-sdk-publication-format.md), [ADR-0037](0037-single-initial-contract-version.md), [ADR-0058](0058-centrifugo-default-replaceable-client-realtime-edge.md), [ADR-0061](0061-command-family-scoped-durable-operations.md), [ADR-0067](0067-separate-run-creation-from-readiness-observation.md) | [SDK and transports](../architecture/sdk-and-transports.md), [public contracts](../architecture/public-control-contracts.md) |
@@ -37,7 +37,6 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0003: Runtime lifecycle belongs to ar](0003-ar-owns-runtime-lifecycle.md)
 - [ADR-0004: Broker-neutral core with NATS JetStream adapter](0004-broker-neutral-events-with-jetstream.md)
 - [ADR-0005: Public contracts are outside application and domain](0005-public-contracts-outside-application.md)
-- [ADR-0008: Consumer-owned runtime ports and stateless ACL](0008-consumer-owned-runtime-ports.md)
 - [ADR-0009: Commands and events have distinct contracts](0009-commands-and-events-are-distinct.md)
 - [ADR-0010: Broker-neutral partition ordering](0010-broker-neutral-partition-ordering.md)
 - [ADR-0011: Context-isolated SQLite and PostgreSQL topology](0011-context-isolated-sqlite-and-postgres-topology.md)
@@ -94,9 +93,12 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0068: Separate Human Notification and Agent Attention contexts](0068-separate-human-notification-and-agent-attention-contexts.md)
 - [ADR-0069: Opaque runtime execution identity](0069-opaque-runtime-execution-identity.md)
 - [ADR-0070: Public canonical repositories](0070-public-canonical-repositories.md)
+- [ADR-0079: Runtime authority, binding, cutoff, and disposition](0079-runtime-authority-binding-cutoff-and-disposition.md)
+- [ADR-0080: Orchestration Scope project authority and disposition](0080-orchestration-scope-project-authority-and-disposition.md)
 
 ## Superseded decisions
 
+- [ADR-0008: Consumer-owned runtime ports and stateless ACL](0008-consumer-owned-runtime-ports.md), superseded by ADR-0079
 - [ADR-0002: Bounded-context packages with feature-owned slices](0002-bounded-context-packages-and-feature-slices.md), superseded by ADR-0007
 - [ADR-0007: Focused contexts and domain-capability slices](0007-focused-contexts-and-domain-capability-slices.md), superseded by ADR-0042
 - [ADR-0006: Ordering is declared per contract](0006-contract-specific-event-ordering.md), superseded by ADR-0010

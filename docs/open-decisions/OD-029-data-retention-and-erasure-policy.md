@@ -6,6 +6,8 @@ owner: architecture/security
 summary: Decide product and legal retention sources, erasure semantics, legal holds, and backup interaction without embedding arbitrary durations in contracts.
 related:
   - ADR-0055
+  - ADR-0079
+  - ADR-0080
   - architecture.security
   - OD-009
   - OD-012
@@ -66,11 +68,13 @@ It is not used for:
   without remote or externally retained data;
 - speculative future integrations that do not exist yet.
 
-The candidate first owner is Tenant and Project Registry because Project
-lifecycle supplies the initiating business intent. That ownership is provisional.
-If legal holds, subject exports, jurisdiction-specific policy versions, and
-independent governance workflows become a coherent domain, a Data Governance
-bounded context may take ownership through a new ADR and Published Language.
+ADR-0080 fixes Orchestration Scope as the coordinator for whole-Project
+Orchestrator disposition because it owns Project lifecycle and terminal
+retirement. Each bounded context and AR still owns its local disposition rules
+and evidence. If legal holds, subject exports, jurisdiction-specific policy
+versions, and independent governance workflows become a coherent domain, a Data
+Governance bounded context may own policy and case management through a new ADR
+and Published Language without taking over Project lifecycle coordination.
 
 The process is one durable instance per erasure request, not a global listener or
 a shared cleanup service:

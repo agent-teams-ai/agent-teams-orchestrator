@@ -6,7 +6,6 @@ owner: integration/runtime
 summary: Ownership and contract boundary between product orchestration and the ar runtime.
 related:
   - ADR-0003
-  - ADR-0008
   - ADR-0026
   - ADR-0028
   - ADR-0060
@@ -14,6 +13,8 @@ related:
   - ADR-0065
   - ADR-0069
   - ADR-0070
+  - ADR-0079
+  - ADR-0080
   - architecture.local-host-lifecycle
   - OD-004
 ---
@@ -32,21 +33,26 @@ only integration authority.
 
 ```mermaid
 flowchart LR
+    Scope["Orchestration Scope Application"]
     Run["Run Orchestration Application"]
-    OutPorts["Consumer-Owned Runtime Capability Ports"]
+    ScopePorts["Scope Admission and Disposition Ports"]
+    RunPorts["Target, Session, and Operation Ports"]
     OutACL["Runtime Command ACL (Outbound Adapter)"]
     InACL["Runtime Event ACL (Inbound Adapter)"]
-    InPorts["Runtime Event Ingestion Use Cases"]
+    ScopeIn["Scope Observation Ingestion"]
+    RunIn["Target Observation Ingestion"]
     AR["ar Runtime"]
     Driver["Provider Driver"]
     Provider["Claude / Codex / OpenCode"]
 
-    Run --> OutPorts
-    OutACL -. "implements" .-> OutPorts
+    Scope --> ScopePorts
+    Run --> RunPorts
+    OutACL -. "implements" .-> ScopePorts
+    OutACL -. "implements" .-> RunPorts
     OutACL --> AR
     AR --> InACL
-    InACL --> InPorts
-    InPorts --> Run
+    InACL --> ScopeIn --> Scope
+    InACL --> RunIn --> Run
     AR --> Driver
     Driver --> Provider
 ```
@@ -59,6 +65,7 @@ flowchart LR
 | Team messages, product inboxes, and coordination delivery | Agent Communication |
 | Runtime input and provider output | `ar` |
 | Assignment and completion policy | Orchestrator |
+| Orchestration tenant and Project identity, coarse admission, runtime-scope bindings, and whole-Project disposition coordination | Orchestration Scope |
 | Desired runtime state | Orchestrator |
 | Provider capability selection policy | Orchestrator using runtime facts |
 | Product approval policy, eligible approvers, and decision routing | Orchestrator |
@@ -72,9 +79,10 @@ flowchart LR
 | Business cancellation, timeout, retry, and recovery policy | Run Orchestration |
 | Runtime cancellation, timeout, and recovery mechanism | `ar` |
 | Workspace registration, materialization allocation, and cleanup | Workspace Registry |
-| Authority to use a workspace | Access Control |
+| Authority to use a workspace | Configured product authority provider through a feature-owned authorization port |
 | Workspace trust and required isolation properties | Policy and Risk |
 | Runtime sandbox, mounts, process isolation, network enforcement, and technical fencing | `ar` |
+| Runtime-scope cutoff, technical disposition actions, and runtime evidence | `ar` |
 | Git worktree, clone, snapshot, or remote materialization mechanics | Workspace adapters |
 | Provider API, CLI, SSE, and protocol translation | `ar` provider driver |
 | User-facing projections | Orchestrator projections and client applications |
@@ -85,9 +93,18 @@ flowchart LR
 There must never be two writers for one runtime mutation or two supervisors for
 one agent process.
 
-Run Orchestration owns the durable `RuntimeBinding`, desired state, observation
-projection, runtime-event inbox, and source cursor. `ar` owns runtime sessions,
-operations, processes, custody, technical fencing, and provider cursors.
+Orchestration Scope owns project-level `RuntimeScopeBinding`, scope admission and
+disposition intent, and the scope-ingestion inboxes, checkpoints, and
+projections. Run Orchestration owns participant-level `ManagedRuntimeBinding`,
+`RunRuntimeTarget`, Run cutoff obligations, and target/session-ingestion state.
+`ar` owns runtime scopes, sessions, operations, processes, custody, technical
+fencing, provider cursors, and the pre-materialization negative operation-intent
+guard.
+
+Whole-Project disposition is coordinated by Orchestration Scope. Its runtime
+feature is one participant per binding lineage and calls `ar` only through a
+narrow consumer-owned port and the stateless Runtime ACL. Neither Run
+Orchestration nor the ACL becomes a Project registry or runtime evidence owner.
 
 The Runtime ACL owns only translation and technical connection state. It must not
 become a second durable owner of a binding, observation revision, or recovery state.
@@ -108,12 +125,12 @@ capabilities they do not use. Each consuming application capability owns the
 narrowest port it requires, for example:
 
 ```text
-RuntimeCapabilitiesPort
-RuntimeAdmissionPort
-RuntimeLifecyclePort
-RuntimeObservationPort
-RuntimeEventStreamPort
-RuntimeInputPort
+RuntimeScopeAdmissionPort
+RuntimeScopeDispositionPort
+RuntimeTargetDispatchPort
+RuntimeOperationCutoffPort
+RuntimeSessionCutoffPort
+RuntimeTargetObservationPort
 RuntimePermissionDecisionPort
 RuntimeRecoveryPort
 ```
@@ -121,6 +138,18 @@ RuntimeRecoveryPort
 Names remain proposed until OD-004 is resolved. The Runtime ACL adapter may
 implement several ports for convenient composition, but it does not own or export
 those abstractions. Consumers request only the capabilities they use.
+
+The accepted v1 integration invariants are:
+
+- one RuntimeSession is associated with at most one independent Run for its
+  entire lifetime, including after active use is released;
+- reauthorization creates a successor RuntimeOperation and never reopens a cut
+  predecessor operation;
+- Run dispatch admission and AR dispatch claim are separate linearization
+  points joined by durable intent, idempotency, and reconciliation;
+- when prevention reaches AR before operation materialization, AR's durable
+  negative operation-intent guard prevents the delayed original command from
+  reaching a provider.
 
 Capability discovery is explicit. Unsupported resume, runtime-permission
 interaction, streaming, or recovery behavior is represented as a typed
@@ -195,14 +224,15 @@ versions.
 
 ## Runtime permissions and product approvals
 
-The permission flow crosses two independently owned state machines:
+The permission flow crosses two independently owned state machines. The labels
+below are semantic roles, not accepted AR wire command or event names:
 
 ```text
-ar: RuntimePermissionRequested
+ar: technical permission request fact
   -> Runtime ACL
-  -> Orchestrator: ApprovalRequest
+  -> Orchestrator: product approval request
   -> Authority decides
-  -> Orchestrator: ResolveRuntimePermission
+  -> Orchestrator: technical permission decision intent
   -> Runtime ACL
   -> ar: decision acceptance and technical enforcement lifecycle
 ```
@@ -212,8 +242,9 @@ and the durable audit record. The selected human or machine authority makes the
 decision. `ar` owns the technical request, capability scope, pending runtime state,
 decision acceptance, capability grant, and provider enforcement.
 
-The consumer-side decision command must carry the information required by the
-canonical `ar` contract:
+The consumer-side normalized decision model must represent the following
+semantic inputs. These are placeholders, not an accepted AR wire schema; exact
+Published Language fields remain under OD-004:
 
 ```text
 permissionRequestId
@@ -337,20 +368,23 @@ The `ar` published contract defines:
 - canonical schema versions and compatibility policy;
 - typed command outcomes and safe error semantics;
 - delivery semantics and replay support;
-- runtime instance epoch and source cursor;
+- public session execution epoch plus feed-specific identity and source cursor;
 - duplicate, gap, and out-of-order signals available at the source;
 - reconnect and replay from a supplied cursor;
 - snapshot retrieval when replay is unavailable;
 - behavior when a source cursor is explicitly unavailable.
 
 Control/lifecycle observations, bounded-retention output, and large artifacts
-have different retention and ordering requirements. The Runtime ACL tracks their
-source feeds and cursors independently. A merged convenience view cannot invent a
-global ordering guarantee or one durable cursor; exact feed names and the runtime
-SDK surface remain owned by `ar`.
+have different retention and ordering requirements. The Runtime ACL transports
+and translates those feeds without owning their checkpoints. A merged
+convenience view cannot invent a global ordering guarantee or one durable cursor;
+exact feed names and the runtime SDK surface remain owned by `ar`.
 
 The consumer-owned runtime integration contract defines normalized observation
-semantics. Run Orchestration's internal persistence protocol defines:
+semantics. Orchestration Scope persists scope provisioning, deployment-authority,
+admission, revocation, and disposition observations. Run Orchestration persists
+participant, session, operation, output-fence, and cutoff observations. Each
+owning capability defines:
 
 - atomic persistence of inbox, cursor, and projection changes;
 - local duplicate and out-of-order handling;
@@ -371,13 +405,13 @@ guarantee. The contract defines:
 - payload hash validation for reused keys;
 - replay of the original accepted result;
 - unknown-outcome recovery after transport timeout;
-- published stale-ownership outcomes and observable runtime-epoch behavior;
+- published stale-ownership outcomes and observable public execution-epoch behavior;
 - safe retry rules for every mutation.
 
 Internal fencing remains AR-owned and unpublished.
 
-A retry of `requestRuntimeSession` after an unknown transport outcome must not
-create a second runtime session.
+A retry of a session-request command after an unknown transport outcome must not
+create a second runtime session. Exact command names remain AR-owned.
 
 The orchestrator interprets an expired-window outcome only within the
 reuse-detection horizon promised by the Runtime Published Language. Runtime
