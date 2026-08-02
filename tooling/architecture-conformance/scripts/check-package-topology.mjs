@@ -548,7 +548,7 @@ try {
   requireFailure(
     "dynamic template import",
     run(temporaryRoot),
-    "non-static import()",
+    "non-literal import module specifier",
   );
   await writeFile(
     appFeaturePath,
@@ -557,7 +557,25 @@ try {
   requireFailure(
     "concatenated import",
     run(temporaryRoot),
-    "non-static import()",
+    "non-literal import module specifier",
+  );
+  await writeFile(
+    appFeaturePath,
+    "await import(`@agent-teams\\\\u002fwork-coordination/private`);\n",
+  );
+  requireFailure(
+    "escaped template import",
+    run(temporaryRoot),
+    "non-literal import module specifier",
+  );
+  await writeFile(
+    appFeaturePath,
+    "import '@agent-teams\\\\u002fwork-coordination/private';\n",
+  );
+  requireFailure(
+    "escaped side-effect import",
+    run(temporaryRoot),
+    "non-literal import module specifier",
   );
 
   await writeFile(

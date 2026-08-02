@@ -12,10 +12,12 @@ function isIdentifierPart(character) {
 function readString(source, start, quote) {
   let index = start + 1;
   let value = "";
+  let hasEscape = false;
 
   while (index < source.length) {
     const character = source[index];
     if (character === "\\") {
+      hasEscape = true;
       const escaped = source[index + 1];
       if (escaped === undefined) {
         return { end: source.length, start, type: "invalid-string", value };
@@ -25,7 +27,12 @@ function readString(source, start, quote) {
       continue;
     }
     if (character === quote) {
-      return { end: index + 1, start, type: "string", value };
+      return {
+        end: index + 1,
+        start,
+        type: hasEscape ? "escaped-string" : "string",
+        value,
+      };
     }
     value += character;
     index += 1;
@@ -37,10 +44,12 @@ function readString(source, start, quote) {
 function readTemplate(source, start) {
   let index = start + 1;
   let value = "";
+  let hasEscape = false;
   let hasSubstitution = false;
 
   while (index < source.length) {
     if (source[index] === "\\") {
+      hasEscape = true;
       const escaped = source[index + 1];
       if (escaped === undefined) {
         return {
@@ -58,7 +67,11 @@ function readTemplate(source, start) {
       return {
         end: index + 1,
         start,
-        type: hasSubstitution ? "dynamic-template" : "string",
+        type: hasSubstitution
+          ? "dynamic-template"
+          : hasEscape
+            ? "escaped-template"
+            : "string",
         value,
       };
     }
@@ -145,6 +158,16 @@ function stringAfter(tokens, index) {
   return token?.type === "string" ? token.value : undefined;
 }
 
+function isRejectedModuleString(token) {
+  return new Set([
+    "dynamic-template",
+    "escaped-string",
+    "escaped-template",
+    "invalid-string",
+    "invalid-template",
+  ]).has(token?.type);
+}
+
 function staticCallSpecifier(tokens, index, allowOptions) {
   const specifier = stringAfter(tokens, index);
   const terminator = tokens[index + 1]?.value;
@@ -194,6 +217,10 @@ export function analyzeModuleSpecifiers(source) {
         specifiers.add(sideEffectSpecifier);
         continue;
       }
+      if (isRejectedModuleString(tokens[index + 1])) {
+        nonStaticModuleLoads.push({ kind: "import", offset: token.start });
+        continue;
+      }
     } else if (token.value !== "export") {
       continue;
     }
@@ -203,13 +230,18 @@ export function analyzeModuleSpecifiers(source) {
       if (candidate.value === ";") {
         break;
       }
-      if (candidate.type === "identifier" && candidate.value === "from") {
-        const specifier = stringAfter(tokens, cursor + 1);
-        if (specifier !== undefined) {
-          specifiers.add(specifier);
+        if (candidate.type === "identifier" && candidate.value === "from") {
+          const specifier = stringAfter(tokens, cursor + 1);
+          if (specifier !== undefined) {
+            specifiers.add(specifier);
+          } else if (isRejectedModuleString(tokens[cursor + 1])) {
+            nonStaticModuleLoads.push({
+              kind: token.value,
+              offset: token.start,
+            });
+          }
           break;
         }
-      }
     }
   }
 

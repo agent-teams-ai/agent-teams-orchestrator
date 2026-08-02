@@ -273,7 +273,7 @@ async function validateInternalPackageImports(
       const moduleSpecifiers = analyzeModuleSpecifiers(source);
       for (const load of moduleSpecifiers.nonStaticModuleLoads) {
         errors.push(
-          `${relative(repositoryRoot, filePath)}: non-static ${load.kind}() at source offset ${load.offset} bypasses the source dependency policy`,
+          `${relative(repositoryRoot, filePath)}: non-literal ${load.kind} module specifier at source offset ${load.offset} bypasses the source dependency policy`,
         );
       }
       for (const specifier of moduleSpecifiers.specifiers) {
