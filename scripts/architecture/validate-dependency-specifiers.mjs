@@ -253,7 +253,7 @@ async function validateProductionFoundationImports(repositoryRoot, errors) {
 
   for (const filePath of sourceFiles) {
     const source = await readFile(filePath, "utf8");
-    const importsFoundation = extractModuleSpecifiers(source).some(
+    const importsFoundation = extractModuleSpecifiers(source, filePath).some(
       (specifier) =>
         specifier === engineeringFoundationPackage ||
         specifier.startsWith(`${engineeringFoundationPackage}/`),

@@ -270,7 +270,12 @@ async function validateInternalPackageImports(
 
     for (const filePath of current.sourceFiles.filter(isProductionSourceFile)) {
       const source = await readFile(filePath, "utf8");
-      const moduleSpecifiers = analyzeModuleSpecifiers(source);
+      const moduleSpecifiers = analyzeModuleSpecifiers(source, filePath);
+      for (const parseError of moduleSpecifiers.parseErrors) {
+        errors.push(
+          `${relative(repositoryRoot, filePath)}: source parser error at offset ${parseError.offset}: ${parseError.message}`,
+        );
+      }
       for (const load of moduleSpecifiers.nonStaticModuleLoads) {
         errors.push(
           `${relative(repositoryRoot, filePath)}: non-literal ${load.kind} module specifier at source offset ${load.offset} bypasses the source dependency policy`,

@@ -79,6 +79,7 @@
     "mdast-util-to-string": "catalog:",
     "mermaid": "catalog:",
     "nx": "catalog:",
+    "oxc-parser": "catalog:",
     "oxc-resolver": "catalog:",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",

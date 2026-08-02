@@ -561,21 +561,30 @@ try {
   );
   await writeFile(
     appFeaturePath,
-    "await import(`@agent-teams\\\\u002fwork-coordination/private`);\n",
+    "await import(`@agent-teams\\u002fwork-coordination/private`);\n",
   );
   requireFailure(
     "escaped template import",
     run(temporaryRoot),
-    "non-literal import module specifier",
+    "is not an allowed surface",
   );
   await writeFile(
     appFeaturePath,
-    "import '@agent-teams\\\\u002fwork-coordination/private';\n",
+    "import '@agent-teams\\u002fwork-coordination/private';\n",
   );
   requireFailure(
     "escaped side-effect import",
     run(temporaryRoot),
-    "non-literal import module specifier",
+    "is not an allowed surface",
+  );
+  await writeFile(
+    appFeaturePath,
+    "const marker = /https?:\\/\\/example/;\nawait import(`@agent-teams/work-coordination/private`);\n",
+  );
+  requireFailure(
+    "regex before template import",
+    run(temporaryRoot),
+    "is not an allowed surface",
   );
 
   await writeFile(
