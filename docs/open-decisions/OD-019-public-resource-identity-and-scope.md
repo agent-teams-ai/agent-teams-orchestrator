@@ -12,7 +12,6 @@ related:
   - ADR-0079
   - ADR-0080
   - ADR-0071
-  - ADR-0080
   - architecture.sdk-transports
   - domain.contexts.orchestration-scope
   - OD-012

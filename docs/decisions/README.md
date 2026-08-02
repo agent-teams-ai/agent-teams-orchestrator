@@ -33,8 +33,6 @@ discovery. The lifecycle lists below remain the complete status ledger.
 
 ## Proposed decisions
 
-- [ADR-0079: Runtime authority, binding, cutoff, and disposition](0079-runtime-authority-binding-cutoff-and-disposition.md)
-
 ## Accepted decisions
 
 - [ADR-0001: Headless event-driven modular monolith](0001-headless-event-driven-modular-monolith.md)
