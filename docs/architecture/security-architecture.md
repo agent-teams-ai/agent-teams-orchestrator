@@ -9,6 +9,7 @@ related:
   - ADR-0028
   - ADR-0055
   - ADR-0058
+  - ADR-0080
   - OD-012
   - OD-014
   - OD-029
@@ -36,18 +37,25 @@ business authorization, runtime enforcement, secret storage, or feature policy.
 
 | Concern | Authority |
 |---|---|
-| Product identity facts | Identity Registry |
-| Product grants and authorization facts | Access Control |
+| Product identity, membership, and grant facts | Configured product authority provider |
 | Operation-specific business policy | Owning bounded context |
+| Authorization-consumption semantics | Feature-owned application port |
 | Runtime permission, sandbox, and capability enforcement | `ar` |
 | Raw secret storage and retrieval | Composed secret-store adapter |
 | Cross-system classification and trust-boundary rules | This architecture standard |
 
-Access Control answers product authorization questions. An application use case
-still owns the requested operation, validates its resource state, and applies the
-decision. The Runtime ACL translates a consumer-owned runtime port into the `ar`
-Published Language without becoming an authorization owner. `ar` independently
-enforces technical runtime permissions, sandbox boundaries, and capabilities.
+The configured product authority provider answers product authorization
+questions. In managed composition this can be the Platform authority; standalone
+composition supplies an independent local authority. Each application feature
+owns the narrow authorization port it consumes, validates current aggregate
+state, and applies operation-specific invariants. An ACL translates provider
+evidence without becoming an authorization owner. Exact provider and principal
+topology remains open under OD-012.
+
+The Runtime ACL separately translates a consumer-owned runtime port into the
+`ar` Published Language without becoming an authorization owner. `ar`
+independently enforces technical runtime permissions, sandbox boundaries, and
+capabilities.
 
 ## Trust boundaries
 
@@ -144,6 +152,12 @@ or mutation.
 lifecycle intent without inventing a legal duration. Exact periods, jurisdiction
 rules, legal holds, erasure, and backup interaction remain unresolved in
 `OD-029`.
+
+An immutable policy snapshot records intended disposition but is not perpetual
+erase authority. Before every irreversible owner-local action, the owner checks
+fresh typed authorization for the exact Project epoch, category, action, and
+revision. Missing or changed hold evidence fails closed as retention plus
+reconciliation; it never reopens Project admission.
 
 ### Redaction and export
 

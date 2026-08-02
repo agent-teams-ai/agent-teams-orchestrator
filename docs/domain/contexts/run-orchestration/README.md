@@ -9,6 +9,8 @@ blocked_by:
   - OD-006
   - OD-013
 related:
+  - ADR-0079
+  - ADR-0080
   - ADR-0063
   - ADR-0064
   - ADR-0065
@@ -25,7 +27,9 @@ related:
 Proposed scope: `OrchestrationRun` authority, immutable `RunPlanVersion`
 artifacts, `RunPlanTransitionProcess`, resilience-policy snapshots, Run
 participants and activation, `ManagedRuntimeBinding`, business checkpoints,
-retry, escalation, completion, compensation, Work placement, and
+separate `RunRuntimeTarget` inventory, Run authority generation and cutoff
+obligations, lifetime runtime-session allocation tombstones, business-effect
+references, retry, escalation, completion, compensation, Work placement, and
 desired-versus-observed reconciliation. Technical execution remains owned by
 `ar`.
 
@@ -41,6 +45,21 @@ ADR-0065 fixes the following consistency boundaries:
 - `WorkExecution` and all Task or Work lifecycle changes remain in Work
   Coordination;
 - `RuntimeOperation` remains in AR.
+
+ADR-0079 further fixes the runtime integration boundaries:
+
+- `ManagedRuntimeBinding` is a bounded participant-to-runtime association and
+  never an unbounded operation or receipt collection;
+- `RunRuntimeTarget` is separate durable process state for one accepted runtime
+  target and its exact authority evidence;
+- Run authority admission, suspension high-water marks, and target registration
+  serialize through one Run-owned authority gate;
+- one RuntimeSession is permanently associated with at most one independent Run
+  in v1 and leaves a non-reusable allocation tombstone;
+- reauthorization creates a successor RuntimeOperation and never reopens its
+  predecessor;
+- consumer-owned ports express Run intent, while the Runtime ACL only translates
+  representations and owns no binding, cursor, checkpoint, or recovery state.
 
 `WorkPlacement` stores opaque Work references, expected revisions, participant
 and binding references, checkpoints, and process state. It never copies the Work

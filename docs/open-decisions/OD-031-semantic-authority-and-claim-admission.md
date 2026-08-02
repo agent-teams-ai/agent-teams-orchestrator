@@ -44,11 +44,13 @@ external payload
   -> optional ContextContribution
 ```
 
-- Identity Registry owns principals and external identity bindings.
+- The configured product authority provider owns external principal and identity
+  binding facts; exact Orchestrator principal-binding ownership remains OD-012.
 - The still-unaccepted integration boundary owns installation identity, source
   incarnation, signature verification, deduplication, compromise, and retrieval
   only after event storming and context-map acceptance.
-- Access Control owns grants, delegation, revocation, and authorization decisions.
+- The configured product authority provider owns grants, delegation, revocation,
+  and authorization decisions consumed through feature-owned ports.
 - The semantic owner owns typed claims, authority bindings for its semantic
   facets, domain invariants, conflict resolution, and accepted facts.
 - Policy and Risk owns risk, approval requirement, and automation constraints.
@@ -69,8 +71,8 @@ external payload
 No separate `Authority Governance` bounded context is introduced now. A new
 context becomes justified only if cross-domain mandate administration develops
 its own users, language, invariant-rich lifecycle, policies, and independently
-deployable capability. Until then it would duplicate Access Control and semantic
-owners.
+deployable capability. Until then it would duplicate the configured authority
+provider and semantic owners.
 
 ## Leading model
 
@@ -90,7 +92,7 @@ AuthorizationDecisionRef
 ```
 
 The `*Ref` terms are opaque evidence references owned by the consuming semantic
-context. They do not duplicate Integration or Access Control aggregates.
+context. They do not duplicate integration or authority-provider state.
 
 `SemanticFacet` is defined and versioned by its owner, for example
 `work.task.lifecycle.v1`. It is not a global free-form namespace or universal JSON
@@ -140,8 +142,8 @@ separate typed admission or sanitization decision.
    `ClaimCase`, and `ConflictCase`.
 2. Initial authority modes and which business capabilities require quorum.
 3. Authorization consistency tokens, cache freshness, and multi-region failover.
-4. Whether Cedar, OpenFGA, SpiceDB, or another engine is useful behind Access
-   Control ports; no engine model may leak into domain code.
+4. Whether Cedar, OpenFGA, SpiceDB, or another engine is useful behind a
+   configured authority adapter; no engine model may leak into domain code.
 5. Conflict operator UX, expiry, supersession, and escalation.
 6. Provenance storage, tenant-scoped keyed fingerprints, retention, and erasure.
 7. Shadow-mode migration from legacy implicit authority.
@@ -150,8 +152,8 @@ separate typed admission or sanitization decision.
 
 ## Options
 
-1. Feature-owned semantic authority with Access Control and provenance-aware
-   claim admission. This is the leading option.
+1. Feature-owned semantic authority with configured product authority decisions
+   and provenance-aware claim admission. This is the leading option.
 2. A separate Authority Governance bounded context after independent domain
    evidence exists.
 3. A static global authority matrix. This is not considered viable for

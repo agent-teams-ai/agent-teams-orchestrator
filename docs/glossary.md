@@ -376,9 +376,11 @@ cursor begins strictly after that position.
 
 ## Tenant
 
-The top-level hosted ownership and isolation identity for projects, principals,
-grants, and tenant-scoped policy. Tenant and Project Registry owns its lifecycle;
-other contexts hold opaque local references.
+The top-level ownership and isolation identity for projects, principals, grants,
+and tenant-scoped policy. The configured product authority owns external Tenant
+lifecycle. Orchestration Scope owns stable, provider-neutral Orchestrator tenant
+and Project identities and their bindings; other contexts hold opaque local
+references.
 
 ## Trust boundary
 

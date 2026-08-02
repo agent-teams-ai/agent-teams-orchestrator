@@ -72,7 +72,8 @@ These are discovery candidates, not accepted aggregate names.
   and other product facts. Context planning cannot copy their aggregates.
 - Hard product invariants remain domain/application code and never rely on prompt
   obedience.
-- Access Control owns grants, delegation, revocation, and product authorization.
+- The configured product authority provider owns grants, delegation,
+  revocation, and product authorization; feature-owned ports consume decisions.
   Policy and Risk owns risk, approval requirements, automation limits, and egress
   policy. Consumption Governance owns monetary budgets and quotas. Context
   planning consumes their decisions.
@@ -130,7 +131,8 @@ Source ownership remains outside this context:
 - the still-unaccepted integration boundary owns connector installation, vendor
   authentication, webhook cursors, raw dedupe, and reconciliation only after
   event storming and context-map acceptance;
-- Access Control owns grants, delegation, revocation, and authorization decisions;
+- the configured product authority provider owns grants, delegation, revocation,
+  and authorization decisions consumed through feature-owned ports;
 - Policy and Risk owns trust, risk, approval requirements, automation, and egress
   decisions;
 - Consumption Governance owns money and quota;

@@ -6,7 +6,7 @@ owner: architecture
 summary: Enforceable source dependency and package boundary rules.
 related:
   - ADR-0005
-  - ADR-0008
+  - ADR-0079
   - ADR-0012
   - ADR-0037
   - ADR-0038

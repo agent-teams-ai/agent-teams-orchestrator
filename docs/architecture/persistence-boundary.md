@@ -161,7 +161,7 @@ Each bounded context receives its own database file and connection lifecycle:
 
 ```text
 data/
-  tenant-project-registry.sqlite3
+  orchestration-scope.sqlite3
   team-topology.sqlite3
   work-coordination.sqlite3
   run-orchestration.sqlite3

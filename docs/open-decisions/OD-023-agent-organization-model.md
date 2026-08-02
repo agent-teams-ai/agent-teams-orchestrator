@@ -28,8 +28,8 @@ ADR-0044 establishes:
 - semantic Groups are OrganizationalUnits with stable identity and lifecycle;
 - an Organization may expose multiple named, cycle-free structures;
 - matrix semantics use another structure or typed non-containment relationships;
-- Team Topology, Access Control, and process-owning contexts retain their
-  authority.
+- Team Topology, the configured product authority provider, and process-owning
+  contexts retain their authority.
 
 ## Confirmed constraints
 

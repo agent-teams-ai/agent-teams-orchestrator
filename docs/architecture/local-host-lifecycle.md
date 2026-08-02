@@ -91,7 +91,7 @@ select channels, or proxy live publications.
 | Local Centrifugo binary, endpoint, process health, staged activation, and cleanup | Local Supervisor |
 | Realtime channel mapping, token encoding, publication projection, and recovery signaling | Centrifugo adapter |
 | Durable client feed, cursor, snapshot, feed-scope validation, and classification | Owning feature |
-| Product grant, delegation, revocation, and authorization decision | Access Control |
+| Product grant, delegation, revocation, and authorization decision | Configured product authority provider; feature-owned ports consume decisions |
 | AR host availability when locally managed | Local Supervisor |
 | Runtime sessions, AR execution identity and custody, provider processes, sandbox, and permission enforcement | Agent Runtime |
 | User defaults for target and scope | Client Profile |

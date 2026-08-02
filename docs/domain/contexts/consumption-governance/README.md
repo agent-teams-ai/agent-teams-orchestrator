@@ -38,7 +38,7 @@ owned by their respective contexts.
 - usage observation normalization, pricing, task/run lifecycle, or provider
   execution;
 - notification transport delivery;
-- Access Control grants or general Policy and Risk rules.
+- Product authority grants or general Policy and Risk rules.
 
 ## Initial invariants
 

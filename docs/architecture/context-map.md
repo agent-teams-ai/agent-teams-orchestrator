@@ -16,6 +16,8 @@ related:
   - ADR-0054
   - ADR-0062
   - ADR-0068
+  - ADR-0079
+  - ADR-0080
   - OD-011
   - OD-023
   - OD-024
@@ -52,7 +54,7 @@ These concepts often align, but they are not interchangeable.
 |---|---|---|---|---|
 | Identity Registry | Generic | Proposed | Human and machine principal identity | [Dossier](../domain/contexts/identity-registry/README.md) |
 | Access Control | Supporting | Proposed | Membership, grants, and authorization facts | [Dossier](../domain/contexts/access-control/README.md) |
-| Tenant and Project Registry | Supporting | Proposed | Tenant/project identity, lifecycle, and ownership | [Dossier](../domain/contexts/tenant-project-registry/README.md) |
+| Orchestration Scope | Supporting | Accepted by ADR-0080 | Stable Orchestrator tenant/project identity, admission, project-level runtime binding, and disposition coordination | [Dossier](../domain/contexts/orchestration-scope/README.md) |
 | Workspace Registry | Supporting | Proposed | Workspace registration, execution allocation, materialization lifecycle, and cleanup | [Dossier](../domain/contexts/workspace-registry/README.md) |
 | Team Topology | Core | Proposed | Agent-team composition, roles, capabilities, and roster rules | [Dossier](../domain/contexts/team-topology/README.md) |
 | Agent Organization | Core | Accepted by ADR-0044 | Tenant-scoped organizations, units, structures, and team placements | [Dossier](../domain/contexts/agent-organization/README.md) |
@@ -111,7 +113,7 @@ Three identities must never be aliased:
 
 | Identity | Owner | Meaning |
 |---|---|---|
-| `PrincipalId` | Identity Registry | Authenticated human or machine actor |
+| `OrchestrationPrincipalId` | Open under OD-012 | Stable tenant-scoped product actor reference; exact binding owner and provider topology remain unresolved |
 | `AgentProfileId` | Team Topology | Product-level agent definition |
 | `RuntimeSessionRef` | AR | Opaque technical runtime session reference |
 

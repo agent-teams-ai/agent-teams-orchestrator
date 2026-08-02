@@ -30,11 +30,11 @@ packages:
     path: packages/contexts/access-control
     package_name: "@agent-teams/access-control"
     owner_document: domain.contexts.access-control
-  - id: context.tenant-project-registry
+  - id: context.orchestration-scope
     role: bounded-context
-    path: packages/contexts/tenant-project-registry
-    package_name: "@agent-teams/tenant-project-registry"
-    owner_document: domain.contexts.tenant-project-registry
+    path: packages/contexts/orchestration-scope
+    package_name: "@agent-teams/orchestration-scope"
+    owner_document: domain.contexts.orchestration-scope
   - id: context.workspace-registry
     role: bounded-context
     path: packages/contexts/workspace-registry

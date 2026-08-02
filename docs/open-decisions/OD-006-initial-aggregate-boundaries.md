@@ -6,6 +6,8 @@ owner: architecture/domain
 summary: Validate initial aggregate and consistency boundaries using concrete invariants and concurrency.
 related:
   - ADR-0065
+  - ADR-0079
+  - ADR-0080
   - domain.modeling-standard
   - OD-011
   - research.pre-implementation-gate-critique-2026-07-30
@@ -28,6 +30,9 @@ Validate candidate boundaries:
 - remaining internal invariants of `OrchestrationRun`, immutable
   `RunPlanVersion`, `ParticipantActivation`, and `ManagedRuntimeBinding` after
   ADR-0065;
+- exact repository and consistency boundaries for `RuntimeScopeBinding`,
+  `RunRuntimeTarget`, authority gates, allocation tombstones, and cutoff process
+  records after ADR-0079 and ADR-0080;
 - active Run behavior when the referenced Team topology version changes;
 - `Conversation`, append-only message records, audience snapshots, membership,
   subscriptions, per-recipient delivery, and inbox projections;
@@ -50,6 +55,12 @@ ADR-0065 already fixes the cross-context ownership:
 
 This decision cannot reopen those owners. It still validates exact entity,
 aggregate, repository, and concurrency boundaries inside each owner.
+
+ADR-0079 and ADR-0080 additionally fix Orchestration Scope as the owner of
+project-level runtime placement and disposition coordination, and Run
+Orchestration as the owner of participant bindings, target inventory, and cutoff
+obligations. Tactical discovery cannot move either responsibility into an ACL,
+AR, or the other bounded context.
 
 OD-026 owns the strategic distinction among conversations, notifications, alerts,
 and runtime delivery. This decision validates tactical aggregates only after that
