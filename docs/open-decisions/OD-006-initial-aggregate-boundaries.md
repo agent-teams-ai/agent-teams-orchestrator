@@ -9,6 +9,7 @@ related:
   - ADR-0079
   - ADR-0080
   - domain.modeling-standard
+  - domain.contexts.orchestration-scope
   - OD-011
   - research.pre-implementation-gate-critique-2026-07-30
 ---
@@ -37,7 +38,10 @@ Validate candidate boundaries:
 - `Conversation`, append-only message records, audience snapshots, membership,
   subscriptions, per-recipient delivery, and inbox projections;
 - `ApprovalRequest` versus reusable approval or grant state;
-- feature-specific durable process-manager state.
+- feature-specific durable process-manager state;
+- the exact consistency splits among `OrchestrationTenant`,
+  `OrchestrationProject`, `ProjectAdmissionAuthority`, `RuntimeScopeBinding`,
+  and `OrchestrationProjectDispositionProcess` after ADR-0080.
 
 ## Constraints
 
@@ -52,6 +56,12 @@ ADR-0065 already fixes the cross-context ownership:
 - Work Coordination owns `WorkExecution`;
 - Run Orchestration owns `WorkPlacement`;
 - AR owns `RuntimeOperation`.
+
+ADR-0080 separately fixes Orchestration Scope as the sole owner of stable
+orchestration tenant and Project identity, coarse admission, Project-level
+runtime bindings, and whole-Project disposition coordination. This decision may
+split those responsibilities into focused aggregates and features, but cannot
+move them back to Run Orchestration or recreate Tenant and Project Registry.
 
 This decision cannot reopen those owners. It still validates exact entity,
 aggregate, repository, and concurrency boundaries inside each owner.

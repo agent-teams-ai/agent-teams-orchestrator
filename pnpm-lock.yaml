@@ -42,6 +42,9 @@ catalogs:
     nx:
       specifier: 23.1.0
       version: 23.1.0
+    oxc-parser:
+      specifier: 0.142.0
+      version: 0.142.0
     oxc-resolver:
       specifier: 11.24.2
       version: 11.24.2
@@ -128,6 +131,9 @@ importers:
       nx:
         specifier: 'catalog:'
         version: 23.1.0
+      oxc-parser:
+        specifier: 'catalog:'
+        version: 0.142.0
       oxc-resolver:
         specifier: 'catalog:'
         version: 11.24.2

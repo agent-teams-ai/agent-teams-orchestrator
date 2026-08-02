@@ -13,6 +13,7 @@ related:
   - OD-004
   - OD-006
   - OD-028
+  - OD-034
   - research.human-notification-agent-attention-boundary-critique-2026-07-30
   - research.pre-implementation-gate-critique-2026-07-30
 ---
@@ -68,11 +69,11 @@ candidates, failure matrix, and deferred scope are in the
 
 ```text
 External source
-  -> Integration Management verification, cursor, and reconciliation
+  -> future integration owner selected by OD-034 verifies and reconciles source input
   -> semantic owner admits the change and publishes one source-owned fact
        -> Human Notification ACL -> local notification command
        -> Agent Attention ACL -> local attention command -> orientation intent
-       -> context-owner ACL selected by OD-028 -> invalidation or refresh command
+       -> Agent Context ACL -> invalidation or refresh command
   -> Run Orchestration alone decides wake, checkpoint, or interruption
   -> Runtime ACL -> AR technical context application
 ```
@@ -89,14 +90,14 @@ The following subscriptions have separate owners and must not collapse into one
 generic subscription table:
 
 - a connector subscription selects upstream Jira, Notion, Discord, A2A, or other
-  events and belongs to Integration Management;
+  events and belongs to the future integration owner selected by OD-034;
 - a human notification subscription or preference expresses presentation,
   mute, snooze, digest, acknowledgement, and escalation policy and belongs to
   Human Notification Management;
 - an agent attention subscription expresses agent, purpose, source, novelty,
   budget, coalescing, and expiry policy and belongs to Agent Attention;
 - a context binding authorizes a source to contribute to a team, agent, purpose,
-  or Run and belongs to the context owner selected by OD-028.
+  or Run and belongs to Agent Context.
 
 Jira, Notion, Discord, A2A, and similar systems are adapters. Their raw schemas do
 not become internal domain events, notification kinds, or Agent Context models.

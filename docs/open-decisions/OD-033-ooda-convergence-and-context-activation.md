@@ -10,7 +10,6 @@ blocked_by:
   - OD-013
   - OD-026
   - OD-027
-  - OD-028
   - OD-031
   - OD-032
 related:
@@ -45,7 +44,7 @@ context.
 
 - Source owners remain authoritative for their facts and issue coverage or gap
   evidence for requested scopes.
-- The context owner selected by OD-028 composes semantic manifests and readiness
+- Agent Context composes semantic manifests and readiness
   evidence. It does not wake runtimes, authorize product actions, or command AR.
 - Agent Attention owns agent-specific relevance, orientation need, and bounded
   disruption intent. It does not own source freshness or Run authority.
@@ -208,7 +207,8 @@ required commitments survive compaction and resume.
 ## Decisions still open
 
 1. Exact aggregate and process boundary for Run-owned context activation.
-2. Exact source integration ownership and source-head contract.
+2. Exact internal source-head admission contract; external connector ownership is
+   deferred to OD-034 and is not required by the first slice.
 3. Instruction conflict, path-scope, correction, and supersession semantics.
 4. Safety watermark and gap policy for revocation-sensitive actions.
 5. Fair scheduling, overload admission, and cell placement or transfer protocol.
@@ -217,13 +217,13 @@ required commitments survive compaction and resume.
 
 ## Options
 
-1. Separate Agent Context plus accepted Agent Attention and Run-owned activation
-   process. This is the leading option.
-2. Agent Context as a focused feature inside Run Orchestration, with accepted
-   Agent Attention remaining separate and the same ports and owner rules.
-3. One global OODA coordinator owning observation, context, decisions, and action.
-   This is not viable because it duplicates semantic owners and creates a
-   cross-context god-component.
+1. A Run-owned durable `ContextActivationProcess` consumes accepted Agent Context
+   evidence and commands AR through consumer-owned ports. This is the leading
+   option.
+2. Agent Context owns runtime activation. This conflicts with ADR-0073 because
+   semantic readiness would gain execution authority.
+3. One global OODA coordinator owns observation, context, decisions, and action.
+   This duplicates semantic owners and creates a cross-context god-component.
 
 ## Acceptance criteria
 
@@ -242,6 +242,7 @@ required commitments survive compaction and resume.
 
 ## Resolution
 
-Open. The leading option requires one embedded vertical slice, one external
-integration slice, failure injection, and shadow comparison against the legacy
-prompt flow before an ADR accepts aggregate or deployment boundaries.
+Open. The leading option requires one embedded vertical slice with synthetic
+source facts, failure injection, and shadow comparison against the legacy prompt
+flow before an ADR accepts aggregate or deployment boundaries. An external
+connector is not required and remains deferred by ADR-0074.

@@ -9,11 +9,12 @@ import {
   exists,
   loadDocuments,
   loadPackageCatalog,
+  loadSourceDependencyPolicy,
   parseFrontmatter,
   relative,
   walk,
 } from "./package-catalog-lib.mjs";
-import { extractModuleSpecifiers } from "./source-imports.mjs";
+import { analyzeModuleSpecifiers } from "./source-imports.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
@@ -86,6 +87,32 @@ const allowedInternalDependencyRoles = {
 
 function isProductionSourceFile(filePath) {
   return productionSourceExtensions.has(path.extname(filePath));
+}
+
+function dependencyEdgeKey(fromId, toId) {
+  return `${fromId}\0${toId}`;
+}
+
+function isWithin(parentPath, childPath) {
+  const pathFromParent = path.relative(parentPath, childPath);
+  return (
+    pathFromParent === "" ||
+    (!pathFromParent.startsWith(`..${path.sep}`) && pathFromParent !== ".." &&
+      !path.isAbsolute(pathFromParent))
+  );
+}
+
+function stringTargets(value) {
+  if (typeof value === "string") {
+    return [value];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap(stringTargets);
+  }
+  if (value && typeof value === "object") {
+    return Object.values(value).flatMap(stringTargets);
+  }
+  return [];
 }
 
 function packageNameFromSpecifier(specifier) {
@@ -225,9 +252,11 @@ async function validateInternalPackageImports(
   repositoryRoot,
   materializedPackages,
   byPackageName,
+  dependencyEdges,
   errors,
 ) {
   for (const current of materializedPackages.values()) {
+    const currentRoot = path.join(repositoryRoot, current.entry.path);
     const declaredDependencies = new Set(
       [
         "dependencies",
@@ -241,7 +270,34 @@ async function validateInternalPackageImports(
 
     for (const filePath of current.sourceFiles.filter(isProductionSourceFile)) {
       const source = await readFile(filePath, "utf8");
-      for (const specifier of extractModuleSpecifiers(source)) {
+      const moduleSpecifiers = analyzeModuleSpecifiers(source, filePath);
+      for (const parseError of moduleSpecifiers.parseErrors) {
+        errors.push(
+          `${relative(repositoryRoot, filePath)}: source parser error at offset ${parseError.offset}: ${parseError.message}`,
+        );
+      }
+      for (const load of moduleSpecifiers.nonStaticModuleLoads) {
+        errors.push(
+          `${relative(repositoryRoot, filePath)}: non-literal ${load.kind} module specifier at source offset ${load.offset} bypasses the source dependency policy`,
+        );
+      }
+      for (const specifier of moduleSpecifiers.specifiers) {
+        if (specifier.startsWith(".") && !isWithin(
+          currentRoot,
+          path.resolve(path.dirname(filePath), specifier),
+        )) {
+          errors.push(
+            `${relative(repositoryRoot, filePath)}: cross-package relative import ${specifier} bypasses the source dependency policy`,
+          );
+          continue;
+        }
+        if (specifier.startsWith("/") || specifier.startsWith("file:")) {
+          errors.push(
+            `${relative(repositoryRoot, filePath)}: absolute or file import ${specifier} is prohibited in production packages`,
+          );
+          continue;
+        }
+
         const dependencyName = packageNameFromSpecifier(specifier);
         if (
           !dependencyName ||
@@ -284,6 +340,20 @@ async function validateInternalPackageImports(
         }
 
         const requestedExport = subpath.length === 0 ? "." : `.${subpath}`;
+        if (dependencyName !== current.manifest.name) {
+          const edge = dependencyEdges.get(
+            dependencyEdgeKey(current.entry.id, dependency.id),
+          );
+          if (!edge) {
+            errors.push(
+              `${relative(repositoryRoot, filePath)}: source dependency ${current.entry.id} -> ${dependency.id} is denied by default`,
+            );
+          } else if (!(edge.imports ?? []).includes(requestedExport)) {
+            errors.push(
+              `${relative(repositoryRoot, filePath)}: import ${specifier} is not an allowed surface for source dependency ${current.entry.id} -> ${dependency.id}`,
+            );
+          }
+        }
         if (!isExportedSubpath(target.manifest.exports, requestedExport)) {
           errors.push(
             `${relative(repositoryRoot, filePath)}: internal package subpath ${specifier} is not exported by ${dependencyName}`,
@@ -292,6 +362,91 @@ async function validateInternalPackageImports(
       }
     }
   }
+}
+
+function validateSourceDependencyPolicy(policy, catalog, errors) {
+  const byId = new Map(
+    (catalog.packages ?? []).map((entry) => [entry.id, entry]),
+  );
+  const dependencyEdges = new Map();
+  const adjacency = new Map();
+
+  for (const edge of policy.edges ?? []) {
+    if (
+      !edge ||
+      typeof edge.from !== "string" ||
+      typeof edge.to !== "string" ||
+      !Array.isArray(edge.imports)
+    ) {
+      continue;
+    }
+    const from = byId.get(edge.from);
+    const to = byId.get(edge.to);
+    if (!from) {
+      errors.push(
+        `architecture/source-dependency-policy.yaml: unknown consumer package ${edge.from}`,
+      );
+    }
+    if (!to) {
+      errors.push(
+        `architecture/source-dependency-policy.yaml: unknown provider package ${edge.to}`,
+      );
+    }
+    if (edge.from === edge.to) {
+      errors.push(
+        `architecture/source-dependency-policy.yaml: self dependency ${edge.from} is prohibited`,
+      );
+    }
+    if (from && to && !allowedInternalDependencyRoles[from.role]?.has(to.role)) {
+      errors.push(
+        `architecture/source-dependency-policy.yaml: role ${from.role} cannot depend on ${to.role} package in edge ${edge.from} -> ${edge.to}`,
+      );
+    }
+
+    const key = dependencyEdgeKey(edge.from, edge.to);
+    if (dependencyEdges.has(key)) {
+      errors.push(
+        `architecture/source-dependency-policy.yaml: duplicate edge ${edge.from} -> ${edge.to}`,
+      );
+    } else {
+      dependencyEdges.set(key, edge);
+    }
+    if (from && to) {
+      const targets = adjacency.get(edge.from) ?? new Set();
+      targets.add(edge.to);
+      adjacency.set(edge.from, targets);
+    }
+  }
+
+  const visited = new Set();
+  const visiting = new Set();
+  const pathStack = [];
+  function visit(packageId) {
+    if (visiting.has(packageId)) {
+      const cycleStart = pathStack.indexOf(packageId);
+      const cycle = [...pathStack.slice(cycleStart), packageId];
+      errors.push(
+        `architecture/source-dependency-policy.yaml: source dependency cycle ${cycle.join(" -> ")}`,
+      );
+      return;
+    }
+    if (visited.has(packageId)) {
+      return;
+    }
+    visiting.add(packageId);
+    pathStack.push(packageId);
+    for (const target of adjacency.get(packageId) ?? []) {
+      visit(target);
+    }
+    pathStack.pop();
+    visiting.delete(packageId);
+    visited.add(packageId);
+  }
+  for (const packageId of byId.keys()) {
+    visit(packageId);
+  }
+
+  return dependencyEdges;
 }
 
 function parseArguments(argv) {
@@ -380,6 +535,7 @@ async function validateMaterializedPackage(
   entry,
   owner,
   byPackageName,
+  dependencyEdges,
   errors,
 ) {
   const packageRoot = path.join(repositoryRoot, entry.path);
@@ -433,6 +589,25 @@ async function validateMaterializedPackage(
 
   if (!(await exists(tsconfigPath))) {
     errors.push(`${entry.path}: materialized package is missing tsconfig.json`);
+  } else {
+    try {
+      const tsconfig = JSON.parse(await readFile(tsconfigPath, "utf8"));
+      if (tsconfig.compilerOptions?.paths) {
+        errors.push(
+          `${entry.path}/tsconfig.json: compilerOptions.paths is prohibited in production packages; use package exports`,
+        );
+      }
+    } catch (error) {
+      errors.push(`${entry.path}/tsconfig.json: invalid JSON: ${error.message}`);
+    }
+  }
+
+  for (const target of stringTargets(manifest.imports)) {
+    if (!target.startsWith("./")) {
+      errors.push(
+        `${entry.path}/package.json: package imports aliases must remain package-local and cannot target ${target}`,
+      );
+    }
   }
 
   for (const section of [
@@ -473,6 +648,14 @@ async function validateMaterializedPackage(
       ) {
         errors.push(
           `${entry.path}/package.json: role ${entry.role} cannot depend on ${dependency.role} package ${dependencyName} in ${section}`,
+        );
+      }
+      if (
+        dependencyName !== manifest.name &&
+        !dependencyEdges.has(dependencyEdgeKey(entry.id, dependency.id))
+      ) {
+        errors.push(
+          `${entry.path}/package.json: source dependency ${entry.id} -> ${dependency.id} is denied by default`,
         );
       }
     }
@@ -525,12 +708,24 @@ async function main() {
     repositoryRoot,
     "architecture/package-catalog.schema.json",
   );
+  const dependencyPolicySchemaPath = path.join(
+    repositoryRoot,
+    "architecture/source-dependency-policy.schema.json",
+  );
   const errors = [];
 
-  const [catalog, schemaSource, documents] = await Promise.all([
+  const [
+    catalog,
+    schemaSource,
+    documents,
+    dependencyPolicy,
+    dependencyPolicySchemaSource,
+  ] = await Promise.all([
     loadPackageCatalog(repositoryRoot),
     readFile(schemaPath, "utf8"),
     loadDocuments(repositoryRoot),
+    loadSourceDependencyPolicy(repositoryRoot),
+    readFile(dependencyPolicySchemaPath, "utf8"),
   ]);
   const schema = JSON.parse(schemaSource);
   const ajv = new Ajv2020({
@@ -538,11 +733,21 @@ async function main() {
     strict: true,
   });
   const validateCatalog = ajv.compile(schema);
+  const validateDependencyPolicy = ajv.compile(
+    JSON.parse(dependencyPolicySchemaSource),
+  );
 
   if (!validateCatalog(catalog)) {
     for (const validationError of validateCatalog.errors ?? []) {
       errors.push(
         `architecture/package-catalog.yaml${validationError.instancePath}: ${validationError.message}`,
+      );
+    }
+  }
+  if (!validateDependencyPolicy(dependencyPolicy)) {
+    for (const validationError of validateDependencyPolicy.errors ?? []) {
+      errors.push(
+        `architecture/source-dependency-policy.yaml${validationError.instancePath}: ${validationError.message}`,
       );
     }
   }
@@ -552,6 +757,15 @@ async function main() {
       ? catalog
       : { packages: [] },
     documents,
+    errors,
+  );
+  const dependencyEdges = validateSourceDependencyPolicy(
+    dependencyPolicy && Array.isArray(dependencyPolicy.edges)
+      ? dependencyPolicy
+      : { edges: [] },
+    catalog && Array.isArray(catalog.packages)
+      ? catalog
+      : { packages: [] },
     errors,
   );
   const productionFiles = (
@@ -595,6 +809,7 @@ async function main() {
         entry,
         owner,
         byPackageName,
+        dependencyEdges,
         errors,
       );
       if (materializedPackage) {
@@ -606,6 +821,7 @@ async function main() {
     repositoryRoot,
     materializedPackages,
     byPackageName,
+    dependencyEdges,
     errors,
   );
 

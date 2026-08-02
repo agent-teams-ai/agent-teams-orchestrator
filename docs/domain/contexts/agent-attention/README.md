@@ -6,7 +6,6 @@ owner: agent-attention
 summary: Model boundary for agent relevance, orientation need, bounded disruption intent, and attention-loop control.
 blocked_by:
   - OD-026
-  - OD-028
   - OD-033
 related:
   - ADR-0068
@@ -106,7 +105,7 @@ decide its business policy.
 
 ## Open questions
 
-OD-026, OD-028, and OD-033 own exact aggregates, orientation profiles, convergence,
+OD-026 and OD-033 own exact aggregates, orientation profiles, convergence,
 context activation handshake, capability negotiation, and first-slice scenarios.
 
 ## Implementation links

@@ -1,7 +1,7 @@
 ---
 id: ADR-0061
 type: adr
-status: accepted
+status: superseded
 owner: clients/sdk
 summary: Scope durable command identity by canonical resource scope and server-owned command family without a central operation write registry.
 approved_by: product-owner
@@ -14,6 +14,8 @@ related:
   - architecture.public-control-contracts
 supersedes:
   - ADR-0018
+superseded_by:
+  - ADR-0071
 ---
 
 # ADR-0061: Command-Family-Scoped Durable Operations

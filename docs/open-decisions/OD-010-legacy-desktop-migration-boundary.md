@@ -6,6 +6,7 @@ owner: migration/desktop
 summary: Inventory desktop contracts and define capability cutover, rollback, and sequencing.
 related:
   - ADR-0029
+  - ADR-0076
   - architecture.runtime-boundary
   - architecture.migration-boundary
   - research.legacy-electron-opencode-behavior-audit-2026-07-30
@@ -21,6 +22,12 @@ ADR-0029 fixes a compatibility facade and strangler rollout. Existing desktop IP
 and shared DTO behavior remain stable while one capability at a time moves behind
 the new orchestrator. The legacy system and new orchestrator never write or
 supervise the same runtime capability concurrently.
+
+ADR-0076 fixes the target decomposition for legacy Team provisioning:
+create-only, clone, template, placement, Team activation, and runtime execution
+do not become one target capability. The compatibility facade may preserve one
+legacy progress surface, but it maps facts from their authoritative owners and
+does not recreate a provisioning aggregate.
 
 ## Decision required
 
@@ -65,8 +72,8 @@ browser use and at least 20 return degraded placeholders in the pinned snapshot.
 
 The spike also confirmed three migration requirements:
 
-1. `TeamCreateRequest` has no durable command identity. The facade must persist
-   its SDK `commandId` before first send rather than adding retry guesses to the
+1. `TeamCreateRequest` has no durable request identity. The facade must persist
+   its SDK `requestId` before first send rather than adding retry guesses to the
    renderer DTO.
 2. `TeamProvisioningProgress` has no cursor or sequence. The facade owns SDK
    checkpointing and query-based reconciliation.

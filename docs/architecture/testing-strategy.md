@@ -20,7 +20,9 @@ related:
   - ADR-0057
   - ADR-0058
   - ADR-0060
-  - ADR-0061
+  - ADR-0071
+  - ADR-0078
+  - ADR-0080
   - ADR-0064
   - ADR-0065
   - architecture.local-host-lifecycle
@@ -286,6 +288,14 @@ These runtime contract suites are separate from provider-adapter conformance own
 by `ar` and from platform or bounded-context persistence conformance. Passing one
 suite never substitutes for another.
 
+Project retirement conformance races restriction add and clear, cancellation and
+irreversible commit, binding rebind, queued owner writes, participant catalog
+upgrade, legal-hold change, lost receipt acknowledgement, and backup restore.
+Every owner proves a local freeze before inventory, exact receipt replay, and
+truthful policy-retained, unsupported, unknown, and reconcile-required outcomes.
+Managed Shared fixtures additionally attempt cross-tenant substitution during
+inventory, credential detach, workspace unlink, evidence query, and restore.
+
 ### Adapter integration tests
 
 Test concrete adapters against disposable infrastructure:
@@ -405,6 +415,14 @@ Automated checks must reject:
   or driver types in domain/application models or public contracts;
 - integration-event schemas without complete manifests or with broker-specific
   semantics in canonical contract metadata.
+- durable write entry points that do not resolve to exactly one mutation and one
+  ADR-0078 consistency contract;
+- mutations without a compatible binding for every enabled deployment profile;
+- concurrency strategies without independent semantic and required adapter
+  evidence;
+- process-local mutexes presented as hosted or multi-instance correctness;
+- write-capable query contexts, direct inbound-to-handler imports, dynamic write
+  registrations, and runtime database access outside owning adapters.
 
 ## Replay and simulation
 

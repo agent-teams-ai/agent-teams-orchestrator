@@ -37,7 +37,8 @@ dossier readiness, not boundary existence.
 | Run Orchestration | Proposed | `OD-005`, `OD-006`, `OD-013` | [Run Orchestration](run-orchestration/README.md) |
 | Agent Communication | Proposed | `OD-006`, `OD-013`, `OD-026` | [Agent Communication](agent-communication/README.md) |
 | Human Notification Management | Proposed | `OD-026` | [Human Notification Management](human-notification/README.md) |
-| Agent Attention | Proposed | `OD-026`, `OD-028`, `OD-033` | [Agent Attention](agent-attention/README.md) |
+| Agent Attention | Proposed | `OD-026`, `OD-033` | [Agent Attention](agent-attention/README.md) |
+| Agent Context | Proposed | `OD-006`, `OD-029`, `OD-031`, `OD-032`, `OD-033` | [Agent Context](agent-context/README.md) |
 
 ## Governance
 

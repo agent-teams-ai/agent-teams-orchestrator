@@ -17,6 +17,7 @@ related:
   - ADR-0062
   - ADR-0068
   - ADR-0079
+  - ADR-0073
   - ADR-0080
   - OD-011
   - OD-023
@@ -63,6 +64,7 @@ These concepts often align, but they are not interchangeable.
 | Agent Communication | Core | Proposed | Typed team communication, delivery intent, inbox policy, and receipts | [Dossier](../domain/contexts/agent-communication/README.md) |
 | Human Notification Management | Supporting | Accepted by ADR-0068 | Human inbox, presentation preference, acknowledgement, and escalation lifecycle | [Dossier](../domain/contexts/human-notification/README.md) |
 | Agent Attention | Core | Accepted by ADR-0068 | Agent relevance, orientation need, bounded disruption intent, and attention-loop control | [Dossier](../domain/contexts/agent-attention/README.md) |
+| Agent Context | Core | Accepted by ADR-0073 | Provenance-aware semantic context composition, validity, and continuity evidence | [Dossier](../domain/contexts/agent-context/README.md) |
 | Policy and Risk | Supporting | Proposed | Workspace trust, execution policy, risk classification, and controls | [Dossier](../domain/contexts/policy-risk/README.md) |
 | Approval Management | Supporting | Proposed | Product approval lifecycle, routing, decisions, and audit | [Dossier](../domain/contexts/approval-management/README.md) |
 | Usage Metering | Supporting | Accepted by ADR-0045 | Observations, normalization, corrections, meters, and quantities | [Dossier](../domain/contexts/usage-metering/README.md) |
@@ -84,6 +86,10 @@ These are architectural integration modules, not business bounded contexts:
 - persistence drivers;
 - schema registry;
 - observability.
+
+External vendor installation management remains a deferred strategic candidate,
+not an accepted integration module or bounded context. ADR-0074 and OD-034 keep
+its future ownership seam explicit without adding a v1 package.
 
 They translate, transport, persist, or compose information. They do not invent
 business aggregates or become authorities for business lifecycle.

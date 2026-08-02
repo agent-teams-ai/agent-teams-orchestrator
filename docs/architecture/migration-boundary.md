@@ -7,6 +7,7 @@ summary: Normative compatibility, ownership, cutover, rollback, and legacy-code 
 related:
   - ADR-0029
   - ADR-0065
+  - ADR-0076
   - OD-010
   - OD-015
 ---
@@ -32,8 +33,9 @@ Every mapped capability declares:
 
 The compatibility facade owns migration-only reliability state that the legacy
 DTO never modeled. Before its first durable SDK command, it allocates and
-persists a stable `commandId` and enough routing state to recover the operation
-after a client or Host crash. A timeout never causes the facade to allocate a new
+persists a stable `requestId` plus the command descriptor needed to resolve the
+outcome after a client or Host crash. After acceptance it persists the complete
+opaque Operation name. A timeout never causes the facade to allocate a new
 identity and try the other owner.
 
 Legacy progress callbacks are convenience notifications, not a durable feed. The
@@ -80,6 +82,9 @@ Its provider-specific code remains evidence, not a target package layout.
 
 In particular:
 
+- legacy Team provisioning is decomposed into Team Topology creation, optional
+  Agent Organization placement, Run Orchestration Team activation, and AR-owned
+  runtime execution rather than copied as one target service;
 - process hosts, provider sessions, execution proof, credentials, private
   fencing, technical cancellation, and recovery move behind the AR boundary;
 - partial participant failure, product readiness, Run policy, and Work placement

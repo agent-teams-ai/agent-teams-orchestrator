@@ -28,6 +28,10 @@ const catalogSchema = path.join(
   repositoryRoot,
   "architecture/package-catalog.schema.json",
 );
+const dependencyPolicySchema = path.join(
+  repositoryRoot,
+  "architecture/source-dependency-policy.schema.json",
+);
 
 function run(root) {
   return spawnSync(process.execPath, [validator, "--root", root], {
@@ -149,6 +153,10 @@ async function writeCatalog(root) {
     catalogSchema,
     path.join(architectureRoot, "package-catalog.schema.json"),
   );
+  await cp(
+    dependencyPolicySchema,
+    path.join(architectureRoot, "source-dependency-policy.schema.json"),
+  );
   await writeFile(
     path.join(architectureRoot, "package-catalog.yaml"),
     `version: 1
@@ -168,6 +176,17 @@ packages:
     path: apps/test
     package_name: "@agent-teams/app-test"
     owner_document: architecture.platform-test
+`,
+  );
+  await writeFile(
+    path.join(architectureRoot, "source-dependency-policy.yaml"),
+    `version: 1
+default: deny
+edges:
+  - from: app.test
+    to: context.work-coordination
+    imports:
+      - ./module
 `,
   );
 }
@@ -247,7 +266,7 @@ async function materializeApp(root) {
   );
   await writeFile(
     path.join(featureRoot, "index.ts"),
-    'import "@agent-teams/work-coordination";\n',
+    'import "@agent-teams/work-coordination/module";\n',
   );
   await writeFeatureReadme(featureRoot, {
     id: "feature.app-test.launch",
@@ -393,6 +412,18 @@ try {
   delete manifest.dependencies;
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
   await rm(unknownRoot, { recursive: true });
+  manifest.exports = {
+    ".": "./src/index.ts",
+    "./module": "./src/module.ts",
+  };
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  await writeFile(
+    path.join(
+      temporaryRoot,
+      "packages/contexts/work-coordination/src/module.ts",
+    ),
+    "export const workCoordinationModuleFixture = true;\n",
+  );
   await materializeApp(temporaryRoot);
   requireSuccess(
     "materialized app with accepted feature and public package import",
@@ -415,6 +446,23 @@ try {
     "@agent-teams/work-coordination": "workspace:*",
   };
   await writeFile(appManifestPath, JSON.stringify(appManifest, null, 2));
+  const dependencyPolicyPath = path.join(
+    temporaryRoot,
+    "architecture/source-dependency-policy.yaml",
+  );
+  await writeFile(
+    dependencyPolicyPath,
+    "version: 1\ndefault: deny\nedges: []\n",
+  );
+  requireFailure(
+    "undeclared source dependency edge",
+    run(temporaryRoot),
+    "source dependency app.test -> context.work-coordination is denied by default",
+  );
+  await writeFile(
+    dependencyPolicyPath,
+    "version: 1\ndefault: deny\nedges:\n  - from: app.test\n    to: context.work-coordination\n    imports:\n      - ./module\n",
+  );
   await writeFile(
     appFeaturePath,
     'import "@agent-teams/work-coordination/src/features/task-model";\n',
@@ -438,6 +486,7 @@ try {
   );
   contextManifest.exports = {
     ".": "./src/index.ts",
+    "./module": "./src/module.ts",
     "./*": "./src/*.ts",
     "./blocked/*": null,
   };
@@ -456,6 +505,7 @@ try {
   );
   contextManifest.exports = {
     ".": "./src/index.ts",
+    "./module": "./src/module.ts",
   };
   await writeFile(
     manifestPath,
@@ -463,7 +513,7 @@ try {
   );
   await writeFile(
     appFeaturePath,
-    'import "@agent-teams/work-coordination";\n',
+    'import "@agent-teams/work-coordination/module";\n',
   );
   await writeFile(
     path.join(temporaryRoot, "apps/test/src/rogue.ts"),
@@ -476,6 +526,94 @@ try {
   );
   await rm(path.join(temporaryRoot, "apps/test/src/rogue.ts"));
   requireSuccess("restored valid app topology", run(temporaryRoot));
+
+  await writeFile(
+    appFeaturePath,
+    "await import(`@agent-teams/work-coordination/module`);\n",
+  );
+  requireSuccess("static template import", run(temporaryRoot));
+  await writeFile(
+    appFeaturePath,
+    "await import(`@agent-teams/work-coordination/private`);\n",
+  );
+  requireFailure(
+    "template import outside allowed surface",
+    run(temporaryRoot),
+    "is not an allowed surface",
+  );
+  await writeFile(
+    appFeaturePath,
+    "const surface = 'module';\nawait import(`@agent-teams/work-coordination/${surface}`);\n",
+  );
+  requireFailure(
+    "dynamic template import",
+    run(temporaryRoot),
+    "non-literal import module specifier",
+  );
+  await writeFile(
+    appFeaturePath,
+    "const surface = 'module';\nawait import('@agent-teams/work-coordination/' + surface);\n",
+  );
+  requireFailure(
+    "concatenated import",
+    run(temporaryRoot),
+    "non-literal import module specifier",
+  );
+  await writeFile(
+    appFeaturePath,
+    "await import(`@agent-teams\\u002fwork-coordination/private`);\n",
+  );
+  requireFailure(
+    "escaped template import",
+    run(temporaryRoot),
+    "is not an allowed surface",
+  );
+  await writeFile(
+    appFeaturePath,
+    "import '@agent-teams\\u002fwork-coordination/private';\n",
+  );
+  requireFailure(
+    "escaped side-effect import",
+    run(temporaryRoot),
+    "is not an allowed surface",
+  );
+  await writeFile(
+    appFeaturePath,
+    "const marker = /https?:\\/\\/example/;\nawait import(`@agent-teams/work-coordination/private`);\n",
+  );
+  requireFailure(
+    "regex before template import",
+    run(temporaryRoot),
+    "is not an allowed surface",
+  );
+
+  await writeFile(
+    appFeaturePath,
+    'import "../../../../../packages/contexts/work-coordination/src/module.ts";\n',
+  );
+  requireFailure(
+    "cross-package relative import",
+    run(temporaryRoot),
+    "bypasses the source dependency policy",
+  );
+  await writeFile(
+    appFeaturePath,
+    'import "@agent-teams/work-coordination/module";\n',
+  );
+  await writeFile(
+    dependencyPolicyPath,
+    "version: 1\ndefault: deny\nedges:\n  - from: app.test\n    to: context.work-coordination\n    imports:\n      - ./module\n  - from: context.work-coordination\n    to: app.test\n    imports:\n      - ./module\n",
+  );
+  requireFailure(
+    "source dependency cycle",
+    run(temporaryRoot),
+    "source dependency cycle",
+  );
+  await writeFile(
+    dependencyPolicyPath,
+    "version: 1\ndefault: deny\nedges:\n  - from: app.test\n    to: context.work-coordination\n    imports:\n      - ./module\n",
+  );
+  requireSuccess("restored source dependency policy", run(temporaryRoot));
 
   requireSuccess(
     "scaffold platform package",

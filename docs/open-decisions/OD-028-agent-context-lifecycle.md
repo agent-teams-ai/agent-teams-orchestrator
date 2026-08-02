@@ -1,16 +1,12 @@
 ---
 id: OD-028
 type: open-decision
-status: open
+status: resolved
 owner: architecture/domain
 summary: Decide Agent Context ownership, lifecycle, manifests, checkpoints, and runtime materialization boundary.
-blocked_by:
-  - OD-006
-  - OD-026
-  - OD-029
-  - OD-031
-  - OD-032
+resolved_by: ADR-0073
 related:
+  - ADR-0073
   - ADR-0068
   - architecture.context-map
   - architecture.runtime-boundary
@@ -101,10 +97,10 @@ These are discovery candidates, not accepted aggregate names.
 - Agent Context may prove semantic readiness, but it cannot authorize a product
   action, wake a runtime, or command AR.
 
-## Current draft hypothesis
+## Accepted strategic boundary
 
-A separate Agent Context bounded context inside the modular monolith is the
-leading candidate. It owns verified composition of versioned contributions, not
+A separate Agent Context bounded context inside the modular monolith is accepted
+by ADR-0073. It owns verified composition of versioned contributions, not
 all information known by an agent. It has its own application, domain,
 persistence, inbox, outbox, and Published Language boundaries, but does not become
 a separately deployed service in the first version.
@@ -420,9 +416,10 @@ user instruction and is forbidden without reconciliation or controlled recovery.
 
 ## First slice and deferred complexity
 
-The first vertical slice should prove one Work contribution, one Conversation
-contribution, one managed instruction module, one immutable manifest, one AR
-materialization adapter, one receipt, one invalidation, and one rehydration path.
+The first vertical slice should prove one identity and role contribution, one
+Work contribution, one managed instruction module, one immutable manifest, one
+AR materialization adapter, one receipt, one invalidation, and one rehydration
+path. Conversation-derived context is explicitly deferred from this slice.
 
 Do not initially build a separate microservice, mandatory vector database,
 universal merge DSL, full branch graph, event sourcing of all context state, or
@@ -472,4 +469,7 @@ or later models after measured use cases prove them.
 
 ## Resolution
 
-Open. When resolved, set `status: resolved` and link the deciding ADR.
+Resolved by ADR-0073. Agent Context is a separate bounded context and its package
+identity is reserved. Exact tactical aggregates and the broader OODA activation
+model remain gated by its proposed dossier and OD-033; they do not reopen the
+strategic ownership decision.

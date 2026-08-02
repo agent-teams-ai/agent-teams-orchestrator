@@ -15,6 +15,7 @@ related:
   - ADR-0064
   - ADR-0065
   - ADR-0067
+  - ADR-0076
   - architecture.context-map
   - architecture.runtime-boundary
   - OD-005
@@ -32,6 +33,26 @@ obligations, lifetime runtime-session allocation tombstones, business-effect
 references, retry, escalation, completion, compensation, Work placement, and
 desired-versus-observed reconciliation. Technical execution remains owned by
 `ar`.
+
+The `team-activation` feature owns the durable composite process that creates or
+selects a Team, optionally requests organizational placement, and admits a Run.
+Team persistence remains in Team Topology, placement remains in Agent
+Organization, and technical execution remains in AR. The process stores only
+opaque references, child command identities, typed step requirements, partial
+outcomes, cancellation state, and reconciliation evidence.
+
+```mermaid
+flowchart LR
+    Activation["Team Activation"] -->|"Create or select"| Team["Team Topology"]
+    Activation -->|"Optional placement"| Organization["Agent Organization"]
+    Activation -->|"Admit"| Run["OrchestrationRun"]
+    Run -->|"Runtime capability"| Gateway["Runtime Gateway"]
+    Gateway --> AR["Agent Runtime"]
+```
+
+Failure after Team creation never causes implicit Team deletion. Successful
+activation means durable Run admission, not participant or provider readiness.
+ADR-0076 owns the complete boundary.
 
 ADR-0065 fixes the following consistency boundaries:
 

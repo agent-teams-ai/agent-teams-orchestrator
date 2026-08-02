@@ -8,6 +8,7 @@ blocked_by:
   - OD-023
 related:
   - ADR-0044
+  - ADR-0076
   - architecture.context-map
   - OD-023
 ---
@@ -53,6 +54,11 @@ absorbing team, task, runtime, budget, policy, or authorization ownership.
 - changing a Team does not mutate Team Topology state;
 - hierarchy never grants security authority implicitly;
 - stale structural mutations have no side effects.
+
+Team activation may request placement through Agent Organization's narrow
+application boundary. Placement outcome is independent from Team persistence and
+Run admission; a placement failure never authorizes another context to delete or
+mutate the Team.
 
 ## Open questions
 

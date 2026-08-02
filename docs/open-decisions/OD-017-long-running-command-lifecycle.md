@@ -4,11 +4,13 @@ type: open-decision
 status: resolved
 owner: clients/sdk
 summary: Define public lifecycle, receipts, reconciliation, and cancellation for long-running commands.
-resolved_by: ADR-0061
+resolved_by: ADR-0071
 related:
   - ADR-0015
   - ADR-0018
   - ADR-0061
+  - ADR-0071
+  - ADR-0077
   - architecture.sdk-transports
   - architecture.eventing
 ---
@@ -42,8 +44,10 @@ disconnects, full-result retention, and compact idempotency tombstones interact.
 
 ## Resolution
 
-Originally resolved by ADR-0018; the current contract is ADR-0061. Canonical
-resource scope, server-owned command family, and caller-supplied `commandId`
-together identify one durable command. Durable acceptance creates a recoverable
-feature-owned Operation, receipt and reuse-detection horizons remain separate,
-and local wait cancellation is distinct from business cancellation.
+Originally resolved by ADR-0018 and revised by ADR-0061; the current contract is
+ADR-0071. Canonical resource scope, command descriptor, and caller-supplied
+`requestId` identify idempotency, while a separately generated routed Operation
+name identifies the durable result. Receipt and reuse-detection horizons remain
+separate. ADR-0077 fixes cancellation semantics: local wait abortion has no
+business effect, the generic Operation facade has no v1 cancellation command,
+and business owners expose explicit durable cancellation commands.
