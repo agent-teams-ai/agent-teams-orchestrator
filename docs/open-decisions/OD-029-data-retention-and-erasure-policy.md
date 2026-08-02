@@ -6,6 +6,7 @@ owner: architecture/security
 summary: Decide product and legal retention sources, erasure semantics, legal holds, and backup interaction without embedding arbitrary durations in contracts.
 related:
   - ADR-0055
+  - ADR-0080
   - architecture.security
   - OD-009
   - OD-012
@@ -66,11 +67,18 @@ It is not used for:
   without remote or externally retained data;
 - speculative future integrations that do not exist yet.
 
-The candidate first owner is Tenant and Project Registry because Project
-lifecycle supplies the initiating business intent. That ownership is provisional.
-If legal holds, subject exports, jurisdiction-specific policy versions, and
+ADR-0080 assigns Orchestrator-side Project coordination to
+`OrchestrationProjectDispositionProcess` inside Orchestration Scope because
+OrchestrationProject lifecycle supplies the initiating local intent and deletion
+epoch. External Platform or Standalone Authority still owns the product
+retirement workflow. Every participant remains the sole disposition owner for
+its data.
+
+This decision does not assign product legal policy to Orchestration Scope. If
+legal holds, subject exports, jurisdiction-specific policy versions, and
 independent governance workflows become a coherent domain, a Data Governance
-bounded context may take ownership through a new ADR and Published Language.
+bounded context may take policy ownership through a new ADR and Published
+Language.
 
 The process is one durable instance per erasure request, not a global listener or
 a shared cleanup service:
@@ -78,8 +86,9 @@ a shared cleanup service:
 ```text
 Authorized erasure command
   -> establish deletion epoch and stop new writes
-  -> persist participant plan and dispatch intents
-  -> each owning context erases or anonymizes its own data
+  -> pin a static versioned participant plan and dispatch intents
+  -> each owner freezes Project writes in its local transaction
+  -> each owning context erases, anonymizes, unlinks, retains, or proves absence
   -> collect idempotent acknowledgements and reconcile unknown outcomes
   -> verify required participants
   -> retain a minimal non-sensitive tombstone
@@ -90,6 +99,11 @@ reference, policy version, deletion epoch, participant statuses, deadlines, and
 opaque evidence references. It never reads or mutates another context's tables.
 Participants are selected from a versioned declared catalog rather than
 discovered by subscribing to every event.
+
+An immutable policy snapshot defines intended actions but cannot authorize every
+later irreversible step indefinitely. Each owner performs a fresh typed policy
+and hold check immediately before its irreversible action. A changed or unknown
+hold fails closed as retention plus reconciliation without reopening access.
 
 Each bounded context owns its local transaction, including projections, inbox or
 outbox records, and blob references. External AR or integration effects use typed
@@ -108,5 +122,7 @@ engine.
 
 ## Resolution
 
-Open. No legal duration, identity provider, or jurisdiction behavior is selected
-by ADR-0055 or the security fixtures.
+Open for policy source selection, concrete retention classes and durations,
+legal-hold and export semantics, backup expiry, and jurisdiction behavior.
+ADR-0080 resolves only the Orchestrator Project coordination owner and its
+owner-local process constraints.

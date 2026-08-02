@@ -7,6 +7,7 @@ summary: Normative compatibility, ownership, cutover, rollback, and legacy-code 
 related:
   - ADR-0029
   - ADR-0065
+  - ADR-0076
   - OD-010
   - OD-015
 ---
@@ -81,6 +82,9 @@ Its provider-specific code remains evidence, not a target package layout.
 
 In particular:
 
+- legacy Team provisioning is decomposed into Team Topology creation, optional
+  Agent Organization placement, Run Orchestration Team activation, and AR-owned
+  runtime execution rather than copied as one target service;
 - process hosts, provider sessions, execution proof, credentials, private
   fencing, technical cancellation, and recovery move behind the AR boundary;
 - partial participant failure, product readiness, Run policy, and Work placement

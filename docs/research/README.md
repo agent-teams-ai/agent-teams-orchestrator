@@ -28,6 +28,7 @@ and limitations. They are evidence, not normative architecture.
 
 - [Pre-implementation gate critique, 2026-07-30](pre-implementation-gate-critique-2026-07-30.md)
 - [Human Notification and Agent Attention boundary critique, 2026-07-30](human-notification-agent-attention-boundary-critique-2026-07-30.md)
+- [Pre-code expensive decision audit, 2026-08-01](pre-code-expensive-decision-audit-2026-08-01.md)
 
 ## Domain value and persistence evidence
 

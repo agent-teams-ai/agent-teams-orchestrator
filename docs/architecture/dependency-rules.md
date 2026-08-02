@@ -11,6 +11,7 @@ related:
   - ADR-0037
   - ADR-0038
   - ADR-0040
+  - ADR-0075
   - architecture.composition
 code_anchors:
   - pattern: scripts/architecture/validate-dependency-specifiers.mjs
@@ -18,6 +19,10 @@ code_anchors:
   - pattern: scripts/architecture/source-imports.mjs
     enforcement: required
   - pattern: scripts/architecture/validate-package-topology.mjs
+    enforcement: required
+  - pattern: architecture/source-dependency-policy.yaml
+    enforcement: required
+  - pattern: architecture/source-dependency-policy.schema.json
     enforcement: required
   - pattern: tooling/architecture-conformance/scripts/check-dependency-specifiers.mjs
     enforcement: required
@@ -190,8 +195,15 @@ fail only the donor during this observation window.
 Cross-package source imports must name a declared manifest dependency and use a
 subpath exposed by the target package `exports`. Imports through another package's
 `src/**` are always prohibited. These checks enforce package encapsulation only;
-the package-role matrix and context map remain the authorities for allowed
-business dependencies.
+the exact `architecture/source-dependency-policy.yaml` edge and package-role
+matrix decide whether a source dependency is allowed. LikeC4 remains the
+authority for semantic relationships and never grants source imports by itself.
+
+The source dependency policy is default-deny. Every edge names one consumer, one
+provider, and exact provider export subpaths. Cross-package relative imports,
+package-root and wildcard imports, `file:` or absolute imports, and package-local
+aliases that target another package are prohibited. Type-only, dynamic,
+re-exported, test, generated, and composition imports follow the same policy.
 
 ## Dependency inversion examples
 

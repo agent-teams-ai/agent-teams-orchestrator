@@ -9,6 +9,7 @@ related:
   - ADR-0028
   - ADR-0055
   - ADR-0058
+  - ADR-0080
   - OD-012
   - OD-014
   - OD-029
@@ -144,6 +145,12 @@ or mutation.
 lifecycle intent without inventing a legal duration. Exact periods, jurisdiction
 rules, legal holds, erasure, and backup interaction remain unresolved in
 `OD-029`.
+
+An immutable policy snapshot records intended disposition but is not perpetual
+erase authority. Before every irreversible owner-local action, the owner checks
+fresh typed authorization for the exact Project epoch, category, action, and
+revision. Missing or changed hold evidence fails closed as retention plus
+reconciliation; it never reopens Project admission.
 
 ### Redaction and export
 

@@ -14,6 +14,7 @@ related:
   - ADR-0065
   - ADR-0069
   - ADR-0070
+  - ADR-0080
   - architecture.local-host-lifecycle
   - OD-004
 ---
@@ -59,6 +60,7 @@ flowchart LR
 | Team messages, product inboxes, and coordination delivery | Agent Communication |
 | Runtime input and provider output | `ar` |
 | Assignment and completion policy | Orchestrator |
+| Orchestration tenant and Project identity, coarse admission, runtime-scope bindings, and whole-Project disposition coordination | Orchestration Scope |
 | Desired runtime state | Orchestrator |
 | Provider capability selection policy | Orchestrator using runtime facts |
 | Product approval policy, eligible approvers, and decision routing | Orchestrator |
@@ -75,6 +77,7 @@ flowchart LR
 | Authority to use a workspace | Access Control |
 | Workspace trust and required isolation properties | Policy and Risk |
 | Runtime sandbox, mounts, process isolation, network enforcement, and technical fencing | `ar` |
+| Runtime-scope cutoff, technical disposition actions, and runtime evidence | `ar` |
 | Git worktree, clone, snapshot, or remote materialization mechanics | Workspace adapters |
 | Provider API, CLI, SSE, and protocol translation | `ar` provider driver |
 | User-facing projections | Orchestrator projections and client applications |
@@ -85,9 +88,17 @@ flowchart LR
 There must never be two writers for one runtime mutation or two supervisors for
 one agent process.
 
-Run Orchestration owns the durable `RuntimeBinding`, desired state, observation
-projection, runtime-event inbox, and source cursor. `ar` owns runtime sessions,
-operations, processes, custody, technical fencing, and provider cursors.
+Orchestration Scope owns each durable `RuntimeScopeBinding`, its generation,
+Project-level placement, scope observations, and runtime-scope disposition
+intent. Run Orchestration owns each Run's `ManagedRuntimeBinding`, desired
+participant state, Run observations, event inbox, and source cursor. `ar` owns
+runtime scopes, sessions, operations, processes, custody, technical fencing,
+technical disposition, and provider cursors.
+
+Whole-Project disposition is coordinated by Orchestration Scope. Its runtime
+feature is one participant per binding lineage and calls `ar` only through a
+narrow consumer-owned port and the stateless Runtime ACL. Neither Run
+Orchestration nor the ACL becomes a Project registry or runtime evidence owner.
 
 The Runtime ACL owns only translation and technical connection state. It must not
 become a second durable owner of a binding, observation revision, or recovery state.

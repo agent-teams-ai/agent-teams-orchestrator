@@ -14,6 +14,7 @@ related:
   - ADR-0054
   - ADR-0056
   - ADR-0059
+  - ADR-0078
   - architecture.dependency-rules
   - architecture.feature-module-standard
   - architecture.machine-readable-model
@@ -63,6 +64,7 @@ is complete.
 | Dead-code analysis | Accepted in ADR-0041 | Planned after the first production vertical slice |
 | Publishable API and package validation | Accepted in ADR-0041 | Planned before the first publishable package release |
 | Production package graph | Catalog reservations accepted | Not materialized; validators currently exercise conformance fixtures |
+| Federated Consistency Evidence Gate | Accepted in ADR-0078 | Planned; Phase 1 starts with the first real durable mutation and remains build-time only |
 
 The implementation state changes only with executable evidence in this
 repository. Documentation must not describe a planned dependency, wrapper, or
@@ -98,6 +100,15 @@ because it also enforces production source import placement. That source rule
 remains consumer-owned until the foundation capability is enabled and
 parity-proven in this repository. New declaration rules belong to foundation
 rather than the donor during this observation window.
+
+Foundation's suppression-governance, public-API-compatibility, and repository-
+security capabilities are not enabled here merely because candidate
+implementations exist. Suppression governance requires accepted Foundation
+ADR-0003 plus an Orchestrator-owned waiver and protected-rule policy. Public API
+compatibility starts only for a real versioned package surface with
+release-owned baselines. Repository security requires accepted Foundation
+ADR-0005 plus the exact Orchestrator workflow, privileged-job, SBOM, and package
+inventory. Each adoption is a separate parity-proven tooling change.
 
 The first-party foundation package alone is exempt from the pnpm release-age
 delay. Its exact manifest version, registry integrity, reviewed upgrade, and npm
@@ -402,6 +413,22 @@ official migration flow in an isolated tooling change. The change must verify:
 
 Do not accept an automated migration that introduces integrated layout, executors,
 remote services, telemetry, or new project metadata without an explicit review.
+
+## Consistency evidence gate
+
+Status: accepted, implementation begins with the first real durable mutation.
+
+The generic engine, strategy vocabulary, generators, diagnostics, and bundle
+formats belong to `@agent-teams/engineering-foundation`. This repository owns
+its mutation contracts, invariant identities, enabled deployment profiles,
+bindings, semantic oracles, and evidence fixtures. The initial gate generates
+agent dossiers and build-time indexes, not a production handler registry.
+
+The normal agent entrypoint is `foundation context --changed`, followed by the
+mutation generator and `foundation consistency:check --changed --explain`.
+Release CI still runs complete write-path discovery so an affected-graph omission
+cannot hide an unregistered mutation. ADR-0078 owns the complete policy and
+staged rollout.
 
 ## Structural architecture rules
 

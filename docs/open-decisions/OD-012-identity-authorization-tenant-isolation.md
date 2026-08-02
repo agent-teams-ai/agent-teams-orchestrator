@@ -7,7 +7,8 @@ summary: Define principal, authorization, service identity, and hosted tenant-is
 related:
   - architecture.context-map
   - domain.contexts.access-control
-  - domain.contexts.tenant-project-registry
+  - domain.contexts.orchestration-scope
+  - ADR-0080
   - ADR-0021
   - OD-031
   - OD-032
@@ -22,8 +23,9 @@ authorization checks, API authentication, secret references, and hosted isolatio
 
 ## Constraints
 
-Identity Registry owns principal facts. Tenant and Project Registry owns tenant
-and project lifecycle. Access Control owns grants. Every application use case
+Identity Registry owns principal facts. Orchestration Scope owns stable
+orchestration tenant and Project identity, lifecycle, and coarse admission.
+Access Control owns grants. Every application use case
 authorizes its business operation. Decide which operations require authoritative
 synchronous decisions and which may use local grant projections, including
 revocation and fail-closed behavior.

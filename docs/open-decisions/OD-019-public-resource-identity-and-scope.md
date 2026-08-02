@@ -10,7 +10,9 @@ related:
   - ADR-0020
   - ADR-0023
   - ADR-0071
+  - ADR-0080
   - architecture.sdk-transports
+  - domain.contexts.orchestration-scope
   - OD-012
   - research.pre-implementation-gate-critique-2026-07-30
 ---
@@ -37,9 +39,9 @@ select and validate authorization context.
   ownership hierarchy;
 - public ETags are opaque and do not expose aggregate or database revisions;
 - page tokens and operation names remain scoped to the resource hierarchy.
-- an Operation name deterministically includes canonical command scope, command
-  family, and command ID without exposing database keys or requiring a central
-  Operation registry;
+- an Operation name is server-generated and carries opaque kind, route, and
+  server identity components without exposing database keys or requiring a
+  central Operation write registry;
 
 ## Current leading first-slice resources
 
@@ -59,6 +61,12 @@ runtime operations remain private implementation concepts.
 `WorkExecution` remains project-scoped so placement may move between Runs without
 changing business identity. Operations are feature-owned and exposed through a
 composition-owned static routing facade rather than a central repository.
+
+ADR-0080 already fixes stable non-reusable `OrchestrationTenant` and
+`OrchestrationProject` identities plus private Project-level
+`RuntimeScopeBinding` ownership. This open decision selects their public resource
+representation and whether bindings receive any public surface; it cannot move
+identity authority or binding lifecycle to a transport, SDK, or Run aggregate.
 
 ## Resolution
 

@@ -5,11 +5,13 @@ status: accepted
 owner: architecture
 summary: Placement and ownership rules for deferred engines, protocols, plugins, and observability.
 related:
+  - ADR-0074
   - ADR-0027
   - ADR-0045
   - OD-005
   - OD-014
   - OD-015
+  - OD-034
 ---
 
 # Extension Points
@@ -115,14 +117,22 @@ Work Coordination ACL adapters. Work Coordination owns a consumer-facing
 `TaskBoardPort`; each external system implements it through an adapter and
 published mapping contracts.
 
-The Work Coordination model remains canonical for orchestrator behavior. Adapters
-own:
+Jira, Notion, Discord, and other vendor connectors are excluded from v1 by
+ADR-0074. Before the first one is implemented, OD-034 must resolve installation,
+credential-reference, source-incarnation, webhook-cursor, raw deduplication, and
+reconciliation ownership. A task-board ACL does not acquire those lifecycle
+responsibilities merely because it translates Work semantics.
+
+The Work Coordination model remains canonical for orchestrator behavior.
+Work-facing ACL adapters own:
 
 - external ID mappings;
 - status and field translation;
-- webhook or polling cursors;
-- conflict and reconciliation state;
-- provider-specific rate limits.
+- translation conflicts and semantic mapping revisions.
+
+The future installation owner, if accepted, owns webhook or polling cursors, raw
+deduplication, source continuity, connector health, and provider-specific rate
+limits. Raw credentials remain behind a secret-provider adapter.
 
 An external board must not become a repository implementation for the Task
 aggregate without a separate consistency ADR.

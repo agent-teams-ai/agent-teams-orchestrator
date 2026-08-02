@@ -6,6 +6,9 @@ owner: architecture
 summary: Mandatory evidence gates that must pass before the first production orchestration vertical slice is implemented.
 related:
   - ADR-0071
+  - ADR-0073
+  - ADR-0074
+  - ADR-0080
   - ADR-0062
   - ADR-0063
   - ADR-0064
@@ -28,7 +31,6 @@ related:
   - OD-017
   - OD-018
   - OD-026
-  - OD-028
   - OD-033
 ---
 
@@ -50,8 +52,8 @@ expensive architecture decision.
 | Gate | Current state | Owning authorities |
 |---|---|---|
 | Run, Work, and topology semantics | In review | Run Orchestration, Work Coordination, Team Topology |
-| Communication, Attention, and Agent Context boundary | In review | Agent Communication, Human Notification Management, Agent Attention, and the Agent Context owner selected by OD-028 |
-| Public SDK and legacy compatibility boundary | In review | Feature owners, Control API, SDK, Desktop migration |
+| Communication, Attention, and Agent Context boundary | In review | Agent Communication, Human Notification Management, Agent Attention, Agent Context, and Run Orchestration |
+| Public SDK and Desktop compatibility boundary | In review | Feature owners, Control API, SDK, Desktop integration |
 | Temporal-ready durable process boundaries | In review | Run Orchestration application and workflow scheduling adapters |
 
 `In review` is blocking. A gate becomes `passed` only when its exit evidence is
@@ -63,6 +65,12 @@ The current independent critique and candidate evidence matrices are recorded in
 the [pre-implementation gate critique](../research/pre-implementation-gate-critique-2026-07-30.md).
 That report is evidence, not a substitute for the accepted artifacts required to
 pass a gate.
+
+ADR-0080 separately gates deployment qualification: Managed Shared SaaS cannot
+be declared qualified until Project retirement, owner-local disposition,
+cross-tenant isolation, and anti-resurrection conformance pass. That deployment
+gate does not require every first vertical slice to implement offboarding, but
+no slice may contradict the accepted ownership, epoch, freeze, or receipt model.
 
 ## Gate 1: Run, Work, and topology semantics
 
@@ -107,10 +115,13 @@ Required evidence:
   notification, comment, webhook, or model output gains business authority by
   entering context.
 
-The gate does not require implementing every connector, A2A, full memory, or a
-hosted realtime fanout deployment.
+The gate does not require implementing external vendor connectors, A2A, full
+memory, RAG, Conversation-derived context, or a hosted realtime fanout deployment.
+ADR-0074 excludes vendor connector management from v1; the minimum Agent Context
+slice is identity/role, one Work snapshot, one managed instruction module, one
+immutable manifest, and one typed AR application outcome.
 
-## Gate 3: Public SDK and legacy compatibility boundary
+## Gate 3: Public SDK and Desktop compatibility boundary
 
 Required evidence:
 
@@ -126,11 +137,13 @@ Required evidence:
   `TeamAgentRuntimeSnapshot`, messages, tasks, and logs;
 - one behavioral fixture suite runnable through direct SDK, Connect, and every
   affected compatibility adapter;
-- cutover, single-writer, unknown-outcome, rollback, and deletion criteria for
-  the migrated capability.
+- activation, single-writer, unknown-outcome, rollback-before-admission, and
+  deletion criteria for the affected Desktop adapter. Once the new orchestrator
+  accepts a mutation, that mutation is never retried through the old
+  orchestrator.
 
-The gate does not require publishing every language SDK or migrating the entire
-legacy `TeamsAPI`.
+The gate does not require publishing every language SDK or preserving the
+current `TeamsAPI` as a public legacy contract.
 
 ## Gate 4: Temporal-ready durable process boundaries
 

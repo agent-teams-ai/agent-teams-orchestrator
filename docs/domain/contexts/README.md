@@ -24,7 +24,7 @@ dossier readiness, not boundary existence.
 |---|---|---|---|
 | Identity Registry | Proposed | `OD-011` | [Identity Registry](identity-registry/README.md) |
 | Access Control | Proposed | `OD-012` | [Access Control](access-control/README.md) |
-| Tenant and Project Registry | Proposed | `OD-011`, `OD-012` | [Tenant and Project Registry](tenant-project-registry/README.md) |
+| Orchestration Scope | Proposed | `OD-006`, `OD-012`, `OD-019`, `OD-029` | [Orchestration Scope](orchestration-scope/README.md) |
 | Workspace Registry | Proposed | `OD-011` | [Workspace Registry](workspace-registry/README.md) |
 
 ## Coordination
@@ -37,7 +37,8 @@ dossier readiness, not boundary existence.
 | Run Orchestration | Proposed | `OD-005`, `OD-006`, `OD-013` | [Run Orchestration](run-orchestration/README.md) |
 | Agent Communication | Proposed | `OD-006`, `OD-013`, `OD-026` | [Agent Communication](agent-communication/README.md) |
 | Human Notification Management | Proposed | `OD-026` | [Human Notification Management](human-notification/README.md) |
-| Agent Attention | Proposed | `OD-026`, `OD-028`, `OD-033` | [Agent Attention](agent-attention/README.md) |
+| Agent Attention | Proposed | `OD-026`, `OD-033` | [Agent Attention](agent-attention/README.md) |
+| Agent Context | Proposed | `OD-006`, `OD-029`, `OD-031`, `OD-032`, `OD-033` | [Agent Context](agent-context/README.md) |
 
 ## Governance
 

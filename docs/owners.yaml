@@ -4,6 +4,8 @@ owners:
     kind: bounded-context
   agent-communication:
     kind: bounded-context
+  agent-context:
+    kind: bounded-context
   agent-attention:
     kind: bounded-context
   agent-organization:
@@ -18,11 +20,11 @@ owners:
     kind: bounded-context
   policy-risk:
     kind: bounded-context
+  orchestration-scope:
+    kind: bounded-context
   run-orchestration:
     kind: bounded-context
   team-topology:
-    kind: bounded-context
-  tenant-project-registry:
     kind: bounded-context
   usage-accounting:
     kind: bounded-context

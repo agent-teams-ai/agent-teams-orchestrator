@@ -13,10 +13,10 @@ model {
     }
   }
 
-  tenantProjectRegistry = boundedContext 'Tenant and Project Registry' {
+  orchestrationScope = boundedContext 'Orchestration Scope' {
     metadata {
-      package_id 'context.tenant-project-registry'
-      document_id 'domain.contexts.tenant-project-registry'
+      package_id 'context.orchestration-scope'
+      document_id 'domain.contexts.orchestration-scope'
     }
   }
 
@@ -73,6 +73,13 @@ model {
     metadata {
       package_id 'context.agent-attention'
       document_id 'domain.contexts.agent-attention'
+    }
+  }
+
+  agentContext = boundedContext 'Agent Context' {
+    metadata {
+      package_id 'context.agent-context'
+      document_id 'domain.contexts.agent-context'
     }
   }
 
@@ -142,10 +149,10 @@ model {
       status 'proposed'
     }
   }
-  tenantProjectRegistry -[publishedFacts]-> accessControl 'Tenant and project facts' {
+  orchestrationScope -[publishedFacts]-> accessControl 'Tenant and Project facts' {
     metadata {
       integration_style 'Published tenant and project references'
-      authority 'Registry owns lifecycle; Access owns authorization facts'
+      authority 'Orchestration Scope owns lifecycle; Access owns authorization facts'
       status 'proposed'
     }
   }
@@ -156,59 +163,59 @@ model {
       status 'proposed'
     }
   }
-  tenantProjectRegistry -[publishedFacts]-> workspaceRegistry 'Project identity' {
+  orchestrationScope -[publishedFacts]-> workspaceRegistry 'Project identity' {
     metadata {
       integration_style 'Published tenant and project references'
-      authority 'Registry owns lifecycle; Workspace owns registration'
+      authority 'Orchestration Scope owns lifecycle; Workspace owns registration'
       status 'proposed'
     }
   }
-  tenantProjectRegistry -[publishedFacts]-> teamTopology 'Project identity' {
+  orchestrationScope -[publishedFacts]-> teamTopology 'Project identity' {
     metadata {
       integration_style 'Published tenant and project references'
-      authority 'Registry owns lifecycle; Team owns roster and team lifecycle'
+      authority 'Orchestration Scope owns lifecycle; Team owns roster and team lifecycle'
       status 'proposed'
     }
   }
-  tenantProjectRegistry -[publishedFacts]-> agentOrganization 'Tenant and project identity' {
+  orchestrationScope -[publishedFacts]-> agentOrganization 'Tenant and Project identity' {
     metadata {
       integration_style 'Published tenant and project references'
-      authority 'Registry owns lifecycle; Organization owns semantic hierarchy'
+      authority 'Orchestration Scope owns lifecycle; Organization owns semantic hierarchy'
       status 'proposed'
     }
   }
-  tenantProjectRegistry -[publishedFacts]-> workCoordination 'Project identity' {
+  orchestrationScope -[publishedFacts]-> workCoordination 'Project identity' {
     metadata {
       integration_style 'Published tenant and project references'
-      authority 'Registry owns lifecycle; Work owns work lifecycle'
+      authority 'Orchestration Scope owns lifecycle; Work owns work lifecycle'
       status 'proposed'
     }
   }
-  tenantProjectRegistry -[publishedFacts]-> runOrchestration 'Project identity' {
+  orchestrationScope -[publishedFacts]-> runOrchestration 'Project identity' {
     metadata {
       integration_style 'Published tenant and project references'
-      authority 'Registry owns lifecycle; Run owns Run lifecycle and placement'
+      authority 'Orchestration Scope owns lifecycle; Run owns Run lifecycle and placement'
       status 'proposed'
     }
   }
-  tenantProjectRegistry -[publishedFacts]-> usageMetering 'Scope identity' {
+  orchestrationScope -[publishedFacts]-> usageMetering 'Scope identity' {
     metadata {
       integration_style 'Published tenant and project references'
-      authority 'Registry owns lifecycle; Metering owns measurement'
+      authority 'Orchestration Scope owns lifecycle; Metering owns measurement'
       status 'proposed'
     }
   }
-  tenantProjectRegistry -[publishedFacts]-> usageAccounting 'Scope identity' {
+  orchestrationScope -[publishedFacts]-> usageAccounting 'Scope identity' {
     metadata {
       integration_style 'Published tenant and project references'
-      authority 'Registry owns lifecycle; Accounting owns attribution and rating'
+      authority 'Orchestration Scope owns lifecycle; Accounting owns attribution and rating'
       status 'proposed'
     }
   }
-  tenantProjectRegistry -[publishedFacts]-> consumptionGovernance 'Scope identity' {
+  orchestrationScope -[publishedFacts]-> consumptionGovernance 'Scope identity' {
     metadata {
       integration_style 'Published tenant and project references'
-      authority 'Registry owns lifecycle; Governance owns budget and quota decisions'
+      authority 'Orchestration Scope owns lifecycle; Governance owns budget and quota decisions'
       status 'proposed'
     }
   }
@@ -359,6 +366,34 @@ model {
       status 'proposed'
     }
   }
+  workCoordination -[publishedFacts]-> agentContext 'Work context facts' {
+    metadata {
+      integration_style 'Producer-owned versioned Work facts through a consumer ACL'
+      authority 'Work owns source facts; Agent Context owns disclosed semantic composition'
+      status 'proposed'
+    }
+  }
+  agentCommunication -[publishedFacts]-> agentContext 'Conversation context facts' {
+    metadata {
+      integration_style 'Producer-owned versioned Conversation facts through a consumer ACL'
+      authority 'Communication owns dialogue; Agent Context owns disclosed semantic composition'
+      status 'proposed'
+    }
+  }
+  agentAttention -[publishedFacts]-> agentContext 'Orientation evidence' {
+    metadata {
+      integration_style 'Versioned orientation intent without source content'
+      authority 'Attention owns orientation need; Agent Context owns semantic composition'
+      status 'proposed'
+    }
+  }
+  agentContext -[publishedFacts]-> runOrchestration 'Context readiness evidence' {
+    metadata {
+      integration_style 'Versioned manifest readiness and materialization evidence'
+      authority 'Agent Context owns semantic evidence; Run owns activation consequences'
+      status 'proposed'
+    }
+  }
   agentAttention -[publishedFacts]-> runOrchestration 'Orientation intent' {
     metadata {
       integration_style 'Versioned orientation intent'
@@ -371,6 +406,13 @@ model {
       integration_style 'Consumer-owned runtime ports'
       authority 'Run owns orchestration intent; ACL translates only'
       status 'proposed'
+    }
+  }
+  orchestrationScope -[consumerPort]-> runtimeAcl 'Runtime scope commands' {
+    metadata {
+      integration_style 'Scope-owned consumer ports through stateless ACL'
+      authority 'Orchestration Scope owns binding and disposition intent; AR owns technical scope authority'
+      status 'accepted'
     }
   }
   runtimeAcl -[aclTranslation]-> agentRuntime 'Runtime Published Language' {
@@ -392,6 +434,13 @@ model {
       integration_style 'Consumer-owned observation projection'
       authority 'AR owns runtime facts; Run owns its observation projection'
       status 'proposed'
+    }
+  }
+  runtimeAcl -[observation]-> orchestrationScope 'Runtime scope observations' {
+    metadata {
+      integration_style 'Typed scope receipts and resumable observations'
+      authority 'AR owns runtime truth; Orchestration Scope owns bindings and local projections'
+      status 'accepted'
     }
   }
   runtimeAcl -[observation]-> usageMetering 'Usage observations' {

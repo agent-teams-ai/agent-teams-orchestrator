@@ -13,6 +13,7 @@ related:
   - ADR-0048
   - ADR-0049
   - ADR-0050
+  - ADR-0078
   - OD-003
 ---
 
@@ -161,7 +162,7 @@ Each bounded context receives its own database file and connection lifecycle:
 
 ```text
 data/
-  tenant-project-registry.sqlite3
+  orchestration-scope.sqlite3
   team-topology.sqlite3
   work-coordination.sqlite3
   run-orchestration.sqlite3
@@ -246,6 +247,14 @@ rule, constraints, lock order, isolation level, complete-Unit-of-Work retry
 policy, and unknown-commit reconciliation. Local command-lane tests do not prove
 hosted safety. Critical capabilities run real concurrent PostgreSQL conformance
 scenarios as required by ADR-0050.
+
+ADR-0078 makes that obligation executable through a federated build-time evidence
+gate. Each discovered write entry point belongs to one mutation, every mutation
+owns one consistency contract, every enabled persistence profile resolves a
+compatible binding, and every selected strategy requires independent evidence.
+Standard SQLite and PostgreSQL strategy mappings are declared once per context
+adapter or profile rather than copied into every mutation. The gate does not
+provide locks, transactions, or a production handler registry.
 
 Primary-only reads are the default hosted consistency profile. Replica reads are
 an explicit query capability with declared eventual-consistency or required-LSN
