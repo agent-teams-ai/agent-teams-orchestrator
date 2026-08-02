@@ -45,12 +45,13 @@ question. `Resolved` is historical and must relate to at least one deciding ADR.
 | OD-025 | [ECMAScript Temporal calendar engine](OD-025-ecmascript-temporal-calendar-engine.md) | architecture/domain | Open |
 | OD-026 | [Communication, notification, and attention](OD-026-communication-notification-and-attention.md) | architecture/domain | Open |
 | OD-027 | [Configurable Work lifecycle](OD-027-configurable-work-lifecycle.md) | work-coordination | Open |
-| OD-028 | [Agent Context lifecycle](OD-028-agent-context-lifecycle.md) | architecture/domain | Open |
+| OD-028 | [Agent Context lifecycle](OD-028-agent-context-lifecycle.md) | architecture/domain | Resolved by ADR-0073 |
 | OD-029 | [Data retention and erasure policy](OD-029-data-retention-and-erasure-policy.md) | architecture/security | Open |
 | OD-030 | [SLO targets and error-budget policy](OD-030-slo-targets-and-error-budget-policy.md) | architecture/reliability | Open |
 | OD-031 | [Semantic authority and claim admission](OD-031-semantic-authority-and-claim-admission.md) | architecture/domain | Open |
 | OD-032 | [Last-mile side-effect safety](OD-032-last-mile-side-effect-safety.md) | architecture/security | Open |
 | OD-033 | [OODA convergence and context activation](OD-033-ooda-convergence-and-context-activation.md) | architecture/domain | Open |
+| OD-034 | [External Integration Management](OD-034-external-integration-management.md) | architecture/domain | Deferred |
 
 Use the [open-decision template](../templates/open-decision.md) for new entries.
 CI verifies that every record is listed and that table owner and status match its

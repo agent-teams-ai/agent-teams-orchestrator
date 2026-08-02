@@ -10,6 +10,7 @@ related:
   - ADR-0018
   - ADR-0061
   - ADR-0071
+  - ADR-0077
   - architecture.sdk-transports
   - architecture.eventing
 ---
@@ -47,4 +48,6 @@ Originally resolved by ADR-0018 and revised by ADR-0061; the current contract is
 ADR-0071. Canonical resource scope, command descriptor, and caller-supplied
 `requestId` identify idempotency, while a separately generated routed Operation
 name identifies the durable result. Receipt and reuse-detection horizons remain
-separate, and local wait cancellation is distinct from business cancellation.
+separate. ADR-0077 fixes cancellation semantics: local wait abortion has no
+business effect, the generic Operation facade has no v1 cancellation command,
+and business owners expose explicit durable cancellation commands.

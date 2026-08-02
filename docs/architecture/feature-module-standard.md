@@ -12,10 +12,15 @@ related:
   - ADR-0060
   - ADR-0037
   - ADR-0038
+  - ADR-0075
 code_anchors:
   - pattern: scripts/architecture/validate-package-topology.mjs
     enforcement: required
   - pattern: tooling/architecture-conformance/scripts/check-package-topology.mjs
+    enforcement: required
+  - pattern: architecture/source-dependency-policy.yaml
+    enforcement: required
+  - pattern: architecture/source-dependency-policy.schema.json
     enforcement: required
 ---
 
@@ -230,6 +235,11 @@ Feature ownership is enforced mechanically rather than remembered during review.
 `architecture/package-catalog.yaml` is the default-deny registry of allowed
 production package identities, roles, paths, names, and owner documents. A
 proposed owner reserves a name and path but cannot materialize production files.
+`architecture/source-dependency-policy.yaml` separately allows each production
+source dependency by exact consumer, provider, and exported subpath. A manifest
+dependency, package-role-compatible direction, or LikeC4 relationship alone does
+not grant a source import. Cross-package relative, absolute, `file:`, wildcard,
+package-root, deep, and package-alias bypasses remain prohibited.
 Before implementation packages are accepted, repository tooling must:
 
 1. classify every workspace package by architectural role;

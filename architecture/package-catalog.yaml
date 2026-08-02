@@ -75,6 +75,11 @@ packages:
     path: packages/contexts/agent-attention
     package_name: "@agent-teams/agent-attention"
     owner_document: domain.contexts.agent-attention
+  - id: context.agent-context
+    role: bounded-context
+    path: packages/contexts/agent-context
+    package_name: "@agent-teams/agent-context"
+    owner_document: domain.contexts.agent-context
   - id: context.policy-risk
     role: bounded-context
     path: packages/contexts/policy-risk

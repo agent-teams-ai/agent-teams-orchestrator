@@ -151,10 +151,12 @@ expose:
 - current non-terminal phase;
 - immutable terminal result or error;
 - result-retention and reuse-detection expiry when disclosed;
-- explicit poll, wait, refresh, and cancellation-request methods.
+- explicit poll, wait, and refresh methods.
 
-Waiting cancellation affects only the wait. Business cancellation and privileged
-force termination are explicit commands.
+Waiting cancellation affects only the wait. ADR-0077 excludes a generic
+`CancelOperation` from v1. `CancelRun`, `CancelWorkExecution`, and privileged force
+termination are explicit, independently authorized commands owned by their
+business or runtime capability.
 
 ## Run creation semantics
 

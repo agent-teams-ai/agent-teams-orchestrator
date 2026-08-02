@@ -46,3 +46,8 @@ related:
 An accepted feature document must contain at least `Scope`, `Public surface`, and
 `Verification`. Add the other sections only when they describe real behavior;
 link to canonical context or architecture sources instead of copying them.
+
+When the feature contains a durable mutation, `Persistence and concurrency`
+links its stable capability and invariant identities and names its ADR-0078
+consistency contract. The contract, resolved deployment bindings, and independent
+evidence remain feature-owned; the feature document does not copy their fields.

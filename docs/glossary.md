@@ -49,18 +49,18 @@ boundary.
 A request to perform an action. Commands may be rejected and must carry an
 idempotency identity when retries are possible.
 
-## Command family
+## Command descriptor
 
 A stable, server-owned semantic identifier for one durable command capability,
-such as `runs.create`. Together with canonical resource scope and `CommandId`, it
-defines the complete idempotency identity. It is derived from the invoked API
+such as `runs.create.v1`. Together with canonical resource scope and `requestId`,
+it defines the complete idempotency identity. It is derived from the invoked API
 capability rather than trusted from caller payload.
 
-## Command ID
+## Request ID
 
 The one caller-supplied idempotency identity of a durable control command. A
 crash-safe caller persists it before sending. Its uniqueness and reconciliation
-scope also include canonical resource scope and server-owned command family.
+scope also include canonical resource scope and server-owned command descriptor.
 
 ## Client Profile
 
