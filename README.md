@@ -53,9 +53,9 @@ pnpm foundation:e2e -- /absolute/path/to/engineering-foundation
 
 CI requires registry mode. Product code cannot import the development-only
 foundation package.
-The organization Renovate policy opens reviewed exact-version update pull
-requests for new Foundation releases; floating ranges and automerge are
-forbidden, and adding a capability is separate from updating package bytes.
+Dependabot checks npm every weekday and opens a dedicated reviewed exact-version
+update pull request for new Foundation releases; floating ranges and automerge
+are forbidden, and adding a capability is separate from updating package bytes.
 
 ## Product shape
 

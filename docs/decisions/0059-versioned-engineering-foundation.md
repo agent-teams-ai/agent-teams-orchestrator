@@ -51,8 +51,9 @@ repository adapter may supply those facts to the foundation. The foundation
 cannot infer or redefine them.
 
 Normal development and CI use the exact version recorded in `package.json` and
-the committed lockfile. Renovate proposes version updates through ordinary pull
-requests; no consumer follows an unpinned branch or floating package range.
+the committed lockfile. Dependabot checks every weekday and proposes Foundation
+version updates through dedicated ordinary pull requests; no consumer follows
+an unpinned branch or floating package range.
 
 Sibling-repository development uses only repository wrappers:
 
