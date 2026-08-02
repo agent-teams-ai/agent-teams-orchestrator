@@ -92,7 +92,7 @@ authoritative; two independently evolving copies are prohibited. The foundation
 checkout is accepted only through the guarded local lifecycle and is rejected by
 CI.
 
-Foundation version 0.3 keeps `workspace.dependency-declarations` blocking through
+Foundation version 0.4.1 keeps `workspace.dependency-declarations` blocking through
 strict `foundation.config.yaml` and makes `architecture.source-dependencies`
 available as an independently activated capability. The existing
 dependency-specifier validator is retained temporarily as a donor oracle and
@@ -101,14 +101,16 @@ remains consumer-owned until the foundation capability is enabled and
 parity-proven in this repository. New declaration rules belong to foundation
 rather than the donor during this observation window.
 
-Foundation's suppression-governance, public-API-compatibility, and repository-
-security capabilities are not enabled here merely because candidate
-implementations exist. Suppression governance requires accepted Foundation
-ADR-0003 plus an Orchestrator-owned waiver and protected-rule policy. Public API
+Foundation ADR-0003, ADR-0004, and ADR-0005 are accepted, but their suppression-
+governance, public-API-compatibility, and repository-security capabilities are
+not enabled here merely because version 0.4.1 implements them. Suppression
+governance requires an Orchestrator-owned waiver and protected-rule policy plus
+consumer parity evidence. Public API
 compatibility starts only for a real versioned package surface with
-release-owned baselines. Repository security requires accepted Foundation
-ADR-0005 plus the exact Orchestrator workflow, privileged-job, SBOM, and package
-inventory. Each adoption is a separate parity-proven tooling change.
+release-owned baselines. The accepted combined repository-security profile does
+not apply while Orchestrator publishes no package and must not be enabled with
+fabricated package evidence. Each adoption is a separate parity-proven tooling
+change.
 
 The first-party foundation package alone is exempt from the pnpm release-age
 delay. Its exact manifest version, registry integrity, reviewed upgrade, and npm
