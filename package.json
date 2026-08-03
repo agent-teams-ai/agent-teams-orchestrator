@@ -27,6 +27,9 @@
     "architecture:nx:check": "node scripts/architecture/validate-nx-workspace.mjs",
     "architecture:scaffold-package": "node scripts/architecture/scaffold-package.mjs",
     "architecture:topology": "node scripts/architecture/validate-package-topology.mjs",
+    "check": "pnpm foundation:check && pnpm docs:check && pnpm typecheck && pnpm architecture:check",
+    "check:changed": "agent-teams-foundation agent-workflow changed --consumer .",
+    "check:fast": "pnpm foundation:check && pnpm lint:fast && pnpm typecheck && pnpm architecture:model:check && pnpm architecture:nx:check",
     "docs:validate": "node scripts/docs/validate-docs.mjs",
     "docs:test": "node --test --test-concurrency=1 scripts/docs/check-doc-impact.test.mjs scripts/docs/validate-docs.test.mjs scripts/docs/validate-prose.test.mjs",
     "docs:impact": "node scripts/docs/check-doc-impact.mjs",
@@ -66,7 +69,7 @@
     "typecheck": "tsc --project tsconfig.json --noEmit --pretty false"
   },
   "devDependencies": {
-    "@agent-teams/engineering-foundation": "0.4.1",
+    "@agent-teams/engineering-foundation": "0.5.0",
     "ajv": "catalog:",
     "ajv-formats": "catalog:",
     "cspell": "catalog:",
