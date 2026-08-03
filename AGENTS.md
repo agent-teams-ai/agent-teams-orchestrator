@@ -123,12 +123,14 @@ For architecture or implementation work:
 6. add adapters and composition at the edge;
 7. add tests and conformance evidence proportional to risk;
 8. update canonical documentation in the same change;
-9. run `pnpm lint:fast:files -- <changed source files>` during iteration;
-10. run `pnpm lint:type-aware:files -- <changed TypeScript files>` after typed
-    behavior changes;
-11. use `pnpm nx:projects` and `pnpm nx:affected -- --base=<base> --head=<head>`
+9. run `pnpm check:changed` during iteration; Foundation routes the current Git
+   delta to the configured path-aware and project-wide checks;
+10. run `pnpm check:fast` before handoff;
+11. run the authoritative `pnpm check` before opening or merging a pull request;
+12. use `pnpm nx:projects` and `pnpm nx:affected -- --base=<base> --head=<head>`
     for repository-pinned project discovery and impact inspection;
-12. run the relevant full repository gates before handoff.
+13. run additional surface-specific gates when the owning documentation requires
+    them. A passing changed-file or fast check never replaces the complete gate.
 
 For governed documentation changes, follow the repository-local
 `docs-authoring` Skill. Run `pnpm docs:impact` before the final documentation
