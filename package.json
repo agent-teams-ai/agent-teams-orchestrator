@@ -27,7 +27,7 @@
     "architecture:nx:check": "node scripts/architecture/validate-nx-workspace.mjs",
     "architecture:scaffold-package": "node scripts/architecture/scaffold-package.mjs",
     "architecture:topology": "node scripts/architecture/validate-package-topology.mjs",
-    "check": "pnpm foundation:check && pnpm docs:check && pnpm typecheck && pnpm architecture:check",
+    "check": "pnpm foundation:check && pnpm docs:check && pnpm packages:check && pnpm typecheck:root && pnpm architecture:check",
     "check:changed": "agent-teams-foundation agent-workflow changed --consumer .",
     "check:fast": "pnpm foundation:check && pnpm lint:fast && pnpm typecheck && pnpm architecture:model:check && pnpm architecture:nx:check",
     "docs:validate": "node scripts/docs/validate-docs.mjs",
@@ -57,6 +57,8 @@
     "lint:type-aware:files": "node scripts/lint/run-type-aware.mjs",
     "nx:affected": "NX_NO_CLOUD=true NX_DAEMON=false nx show projects --affected",
     "nx:projects": "NX_NO_CLOUD=true NX_DAEMON=false nx show projects",
+    "packages:check": "pnpm --filter \"./packages/**\" run check",
+    "packages:typecheck": "pnpm --filter \"./packages/**\" run typecheck",
     "reliability:check": "pnpm run reliability:validate && pnpm run reliability:test",
     "reliability:test": "node --test --test-concurrency=1 scripts/reliability/validate-reliability-foundation.test.mjs",
     "reliability:validate": "node scripts/reliability/validate-reliability-foundation.mjs",
@@ -66,7 +68,8 @@
     "skills:check": "pnpm run skills:validate && pnpm run skills:test",
     "skills:test": "node --test --test-concurrency=1 scripts/skills/validate-skills.test.mjs",
     "skills:validate": "node scripts/skills/validate-skills.mjs",
-    "typecheck": "tsc --project tsconfig.json --noEmit --pretty false"
+    "typecheck": "pnpm run typecheck:root && pnpm run packages:typecheck",
+    "typecheck:root": "tsc --project tsconfig.json --noEmit --pretty false"
   },
   "devDependencies": {
     "@agent-teams/engineering-foundation": "0.5.0",

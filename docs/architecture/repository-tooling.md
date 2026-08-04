@@ -145,6 +145,8 @@ The baseline consists of:
 - strict pnpm catalogs for reusable external dependency versions;
 - TypeScript 7 as the primary compiler;
 - the default-deny package catalog and package scaffolder;
+- blocking materialized-library typecheck, test, build, declaration-consumer,
+  and built-export gates;
 - Oxlint with boundary rules as a blocking source gate;
 - dependency-cruiser in the isolated TypeScript 6 tooling package as an advisory
   complete-graph gate;

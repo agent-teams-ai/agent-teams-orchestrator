@@ -115,6 +115,20 @@ function stringTargets(value) {
   return [];
 }
 
+function normalizedRootReference(referencePath) {
+  if (typeof referencePath !== "string" || path.isAbsolute(referencePath)) {
+    return null;
+  }
+  const normalized = path.posix.normalize(referencePath.replaceAll("\\", "/"));
+  const withoutPrefix = normalized.startsWith("./")
+    ? normalized.slice(2)
+    : normalized;
+  if (withoutPrefix === ".." || withoutPrefix.startsWith("../")) {
+    return null;
+  }
+  return withoutPrefix;
+}
+
 function packageNameFromSpecifier(specifier) {
   const match = specifier.match(/^(@agent-teams\/[^/]+)(?:\/.*)?$/);
   return match?.[1];
@@ -586,6 +600,45 @@ async function validateMaterializedPackage(
   if (entry.role !== "app" && !manifest.exports) {
     errors.push(`${entry.path}/package.json: library package requires exports`);
   }
+  if (entry.role !== "app") {
+    for (const script of ["build", "check", "test", "typecheck"]) {
+      if (typeof manifest.scripts?.[script] !== "string") {
+        errors.push(
+          `${entry.path}/package.json: materialized library requires a ${script} script`,
+        );
+      }
+    }
+
+    const rootExport = manifest.exports?.["."];
+    if (
+      !rootExport ||
+      typeof rootExport !== "object" ||
+      typeof rootExport.types !== "string" ||
+      typeof rootExport.import !== "string"
+    ) {
+      errors.push(
+        `${entry.path}/package.json: library root export requires built types and import targets`,
+      );
+    }
+    for (const target of stringTargets(manifest.exports)) {
+      const normalizedTarget = target.startsWith("./")
+        ? `./${path.posix.normalize(target.slice(2))}`
+        : path.posix.normalize(target);
+      if (!target.startsWith("./dist/") || normalizedTarget !== target) {
+        errors.push(
+          `${entry.path}/package.json: library exports must reference built artifacts, not ${target}`,
+        );
+      }
+    }
+    if (
+      !Array.isArray(manifest.files) ||
+      !manifest.files.includes("dist")
+    ) {
+      errors.push(
+        `${entry.path}/package.json: materialized library files must include dist`,
+      );
+    }
+  }
 
   if (!(await exists(tsconfigPath))) {
     errors.push(`${entry.path}: materialized package is missing tsconfig.json`);
@@ -816,6 +869,51 @@ async function main() {
         materializedPackages.set(entry.package_name, materializedPackage);
       }
     }
+  }
+
+  const rootTsconfigPath = path.join(repositoryRoot, "tsconfig.json");
+  if (await exists(rootTsconfigPath)) {
+    try {
+      const rootTsconfig = JSON.parse(await readFile(rootTsconfigPath, "utf8"));
+      const referenceCounts = new Map();
+      const references = rootTsconfig.references ?? [];
+      if (!Array.isArray(references)) {
+        errors.push("tsconfig.json: references must be an array");
+      } else {
+        for (const reference of references) {
+          const normalized = normalizedRootReference(reference?.path);
+          if (!normalized) {
+            errors.push(
+              "tsconfig.json: every project reference requires a relative in-repository path",
+            );
+            continue;
+          }
+          referenceCounts.set(
+            normalized,
+            (referenceCounts.get(normalized) ?? 0) + 1,
+          );
+        }
+      }
+      for (const materializedPath of [...materializedPaths].toSorted()) {
+        const count = referenceCounts.get(materializedPath) ?? 0;
+        if (count !== 1) {
+          errors.push(
+            `tsconfig.json: materialized package ${materializedPath} must appear exactly once in project references (found ${count})`,
+          );
+        }
+      }
+      for (const [referencePath] of referenceCounts) {
+        if (byPath.has(referencePath) && !materializedPaths.has(referencePath)) {
+          errors.push(
+            `tsconfig.json: project reference ${referencePath} points to an unmaterialized catalog package`,
+          );
+        }
+      }
+    } catch (error) {
+      errors.push(`tsconfig.json: invalid JSON: ${error.message}`);
+    }
+  } else if (materializedPaths.size > 0) {
+    errors.push("tsconfig.json: materialized packages require root project references");
   }
   await validateInternalPackageImports(
     repositoryRoot,
