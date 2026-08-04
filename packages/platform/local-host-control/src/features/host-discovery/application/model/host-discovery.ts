@@ -20,38 +20,80 @@ export type SupervisorInstanceId = TaggedText<"SupervisorInstanceId">;
 export type TargetId = TaggedText<"TargetId">;
 
 const identifierMaximumLength = 160;
+const int64Magnitude = 1n << 63n;
+const int64Minimum = -int64Magnitude;
+const int64Maximum = int64Magnitude - 1n;
+const uint64Maximum = (1n << 64n) - 1n;
 
 function parseString(value: string, label: string): string {
-  if (typeof value !== "string") {
-    throw new TypeError(`${label} must be a bounded non-empty string`);
-  }
-  const containsControlCharacter = Array.from(value).some((character) => {
-    const codePoint = character.codePointAt(0);
-    return codePoint !== undefined && (codePoint <= 31 || codePoint === 127);
-  });
   if (
+    typeof value !== "string" ||
     value.length === 0 ||
-    value.length > identifierMaximumLength ||
-    value.trim() !== value ||
-    containsControlCharacter
+    value.length > identifierMaximumLength
   ) {
     throw new TypeError(`${label} must be a bounded non-empty string`);
   }
-  return value;
-}
-
-function parseNonNegativeBigInt(value: bigint, label: string): bigint {
-  if (typeof value !== "bigint" || value < 0n) {
-    throw new TypeError(`${label} must be a non-negative bigint`);
+  if (value.trim() !== value) {
+    throw new TypeError(`${label} must be a bounded non-empty string`);
+  }
+  for (let index = 0; index < value.length; index += 1) {
+    const codeUnit = value.charCodeAt(index);
+    if (codeUnit <= 31 || codeUnit === 127) {
+      throw new TypeError(`${label} must be a bounded non-empty string`);
+    }
   }
   return value;
 }
 
-function parsePositiveBigInt(value: bigint, label: string): bigint {
-  if (typeof value !== "bigint" || value <= 0n) {
-    throw new TypeError(`${label} must be a positive bigint`);
+function parseInt64BigInt(value: unknown, label: string): bigint {
+  if (
+    typeof value !== "bigint" ||
+    value < int64Minimum ||
+    value > int64Maximum
+  ) {
+    throw new TypeError(`${label} must be an int64 bigint`);
   }
   return value;
+}
+
+function parseUint64BigInt(value: unknown, label: string): bigint {
+  if (typeof value !== "bigint" || value < 0n || value > uint64Maximum) {
+    throw new TypeError(`${label} must be a uint64 bigint`);
+  }
+  return value;
+}
+
+function parsePositiveUint64BigInt(value: unknown, label: string): bigint {
+  const parsed = parseUint64BigInt(value, label);
+  if (parsed === 0n) {
+    throw new TypeError(`${label} must be a positive uint64 bigint`);
+  }
+  return parsed;
+}
+
+function parseHostProtocolVersion(
+  value: unknown,
+  label: string,
+): HostProtocolVersion {
+  try {
+    if (typeof value !== "object" || value === null) {
+      throw new TypeError("invalid protocol token");
+    }
+    const candidate = value as {
+      readonly type?: unknown;
+      readonly value?: unknown;
+    };
+    const tokenType = candidate.type;
+    if (tokenType !== "HostProtocolVersion") {
+      throw new TypeError("invalid protocol token type");
+    }
+    const tokenValue = candidate.value;
+    return hostProtocolVersion(
+      parsePositiveUint64BigInt(tokenValue, `${label} value`),
+    );
+  } catch {
+    throw new TypeError(`${label} must be a HostProtocolVersion`);
+  }
 }
 
 export function componentVersion(value: string): ComponentVersion {
@@ -62,16 +104,16 @@ export function componentVersion(value: string): ComponentVersion {
 }
 
 export function epochMicroseconds(value: bigint): EpochMicroseconds {
-  if (typeof value !== "bigint") {
-    throw new TypeError("EpochMicroseconds must be a bigint");
-  }
-  return Object.freeze({ type: "EpochMicroseconds", value });
+  return Object.freeze({
+    type: "EpochMicroseconds",
+    value: parseInt64BigInt(value, "EpochMicroseconds"),
+  });
 }
 
 export function hostBootGeneration(value: bigint): HostBootGeneration {
   return Object.freeze({
     type: "HostBootGeneration",
-    value: parseNonNegativeBigInt(value, "HostBootGeneration"),
+    value: parseUint64BigInt(value, "HostBootGeneration"),
   });
 }
 
@@ -101,14 +143,14 @@ export function hostInstanceId(value: string): HostInstanceId {
 export function hostProtocolVersion(value: bigint): HostProtocolVersion {
   return Object.freeze({
     type: "HostProtocolVersion",
-    value: parsePositiveBigInt(value, "HostProtocolVersion"),
+    value: parsePositiveUint64BigInt(value, "HostProtocolVersion"),
   });
 }
 
 export function microseconds(value: bigint): Microseconds {
   return Object.freeze({
     type: "Microseconds",
-    value: parseNonNegativeBigInt(value, "Microseconds"),
+    value: parseUint64BigInt(value, "Microseconds"),
   });
 }
 
@@ -135,10 +177,18 @@ export function hostProtocolRange(
   minimum: HostProtocolVersion,
   maximum: HostProtocolVersion,
 ): HostProtocolRange {
-  if (minimum.value > maximum.value) {
+  const parsedMinimum = parseHostProtocolVersion(
+    minimum,
+    "HostProtocolRange minimum",
+  );
+  const parsedMaximum = parseHostProtocolVersion(
+    maximum,
+    "HostProtocolRange maximum",
+  );
+  if (parsedMinimum.value > parsedMaximum.value) {
     throw new TypeError("HostProtocolRange minimum must not exceed maximum");
   }
-  return Object.freeze({ maximum, minimum });
+  return Object.freeze({ maximum: parsedMaximum, minimum: parsedMinimum });
 }
 
 export interface HostFreshnessEvidence {

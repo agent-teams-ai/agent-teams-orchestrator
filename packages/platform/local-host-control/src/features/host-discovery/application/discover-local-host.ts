@@ -44,139 +44,226 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isValidTextToken(
+function snapshotTextToken<Value>(
   value: unknown,
   expectedType: string,
-): value is { readonly type: string; readonly value: string } {
-  if (
-    !isRecord(value) ||
-    value.type !== expectedType ||
-    typeof value.value !== "string"
-  ) {
-    return false;
+  create: (rawValue: string) => Value,
+): Value | undefined {
+  if (!isRecord(value)) {
+    return undefined;
   }
-  const hasControlCharacter = Array.from(value.value).some((character) => {
-    const codePoint = character.codePointAt(0);
-    return codePoint !== undefined && (codePoint <= 31 || codePoint === 127);
-  });
-  return (
-    value.value.length > 0 &&
-    value.value.length <= 160 &&
-    value.value.trim() === value.value &&
-    !hasControlCharacter
-  );
+  const tokenType = value.type;
+  if (tokenType !== expectedType) {
+    return undefined;
+  }
+  const rawValue = value.value;
+  if (typeof rawValue !== "string") {
+    return undefined;
+  }
+  try {
+    return create(rawValue);
+  } catch {
+    return undefined;
+  }
 }
 
-function isValidBigIntToken(
+function snapshotBigIntToken<Value>(
   value: unknown,
   expectedType: string,
-  minimum?: bigint,
-): value is { readonly type: string; readonly value: bigint } {
-  return (
-    isRecord(value) &&
-    value.type === expectedType &&
-    typeof value.value === "bigint" &&
-    (minimum === undefined || value.value >= minimum)
-  );
+  create: (rawValue: bigint) => Value,
+): Value | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+  const tokenType = value.type;
+  if (tokenType !== expectedType) {
+    return undefined;
+  }
+  const rawValue = value.value;
+  if (typeof rawValue !== "bigint") {
+    return undefined;
+  }
+  try {
+    return create(rawValue);
+  } catch {
+    return undefined;
+  }
 }
 
-function isTargetId(value: unknown): value is TargetId {
-  return isValidTextToken(value, "TargetId");
+function snapshotTargetId(value: unknown): TargetId | undefined {
+  return snapshotTextToken(value, "TargetId", targetId);
 }
 
-function isSupervisorInstanceId(value: unknown): value is SupervisorInstanceId {
-  return isValidTextToken(value, "SupervisorInstanceId");
-}
-
-function isHostInstanceId(value: unknown): value is HostInstanceId {
-  return isValidTextToken(value, "HostInstanceId");
-}
-
-function isComponentVersion(value: unknown): value is ComponentVersion {
-  return isValidTextToken(value, "ComponentVersion");
-}
-
-function isCapabilityId(value: unknown): value is HostCapabilityId {
-  return isValidTextToken(value, "HostCapabilityId");
-}
-
-function isFreshnessEvidenceRef(
+function snapshotSupervisorInstanceId(
   value: unknown,
-): value is HostFreshnessEvidenceRef {
-  return isValidTextToken(value, "HostFreshnessEvidenceRef");
-}
-
-function isHostBootGeneration(value: unknown): value is HostBootGeneration {
-  return isValidBigIntToken(value, "HostBootGeneration", 0n);
-}
-
-function isProtocolVersion(value: unknown): value is HostProtocolVersion {
-  return isValidBigIntToken(value, "HostProtocolVersion", 1n);
-}
-
-function isEpochMicroseconds(value: unknown): value is EpochMicroseconds {
-  return isValidBigIntToken(value, "EpochMicroseconds");
-}
-
-function isMicroseconds(value: unknown): value is Microseconds {
-  return isValidBigIntToken(value, "Microseconds", 0n);
-}
-
-function isValidProtocolRange(value: unknown): value is HostProtocolRange {
-  return (
-    isRecord(value) &&
-    isProtocolVersion(value.minimum) &&
-    isProtocolVersion(value.maximum) &&
-    value.minimum.value <= value.maximum.value
+): SupervisorInstanceId | undefined {
+  return snapshotTextToken(
+    value,
+    "SupervisorInstanceId",
+    supervisorInstanceId,
   );
+}
+
+function snapshotHostInstanceId(value: unknown): HostInstanceId | undefined {
+  return snapshotTextToken(value, "HostInstanceId", hostInstanceId);
+}
+
+function snapshotComponentVersion(
+  value: unknown,
+): ComponentVersion | undefined {
+  return snapshotTextToken(value, "ComponentVersion", componentVersion);
+}
+
+function snapshotCapabilityId(value: unknown): HostCapabilityId | undefined {
+  return snapshotTextToken(value, "HostCapabilityId", hostCapabilityId);
+}
+
+function snapshotFreshnessEvidenceRef(
+  value: unknown,
+): HostFreshnessEvidenceRef | undefined {
+  return snapshotTextToken(
+    value,
+    "HostFreshnessEvidenceRef",
+    hostFreshnessEvidenceRef,
+  );
+}
+
+function snapshotHostBootGeneration(
+  value: unknown,
+): HostBootGeneration | undefined {
+  return snapshotBigIntToken(
+    value,
+    "HostBootGeneration",
+    hostBootGeneration,
+  );
+}
+
+function snapshotProtocolVersion(
+  value: unknown,
+): HostProtocolVersion | undefined {
+  return snapshotBigIntToken(
+    value,
+    "HostProtocolVersion",
+    hostProtocolVersion,
+  );
+}
+
+function snapshotEpochMicroseconds(
+  value: unknown,
+): EpochMicroseconds | undefined {
+  return snapshotBigIntToken(
+    value,
+    "EpochMicroseconds",
+    epochMicroseconds,
+  );
+}
+
+function snapshotMicroseconds(value: unknown): Microseconds | undefined {
+  return snapshotBigIntToken(value, "Microseconds", microseconds);
+}
+
+function snapshotProtocolRange(
+  value: unknown,
+): HostProtocolRange | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+  const rawMinimum = value.minimum;
+  const rawMaximum = value.maximum;
+  const minimum = snapshotProtocolVersion(rawMinimum);
+  const maximum = snapshotProtocolVersion(rawMaximum);
+  if (minimum === undefined || maximum === undefined) {
+    return undefined;
+  }
+  try {
+    return hostProtocolRange(minimum, maximum);
+  } catch {
+    return undefined;
+  }
 }
 
 function hasUniqueCapabilities(values: readonly HostCapabilityId[]): boolean {
   return new Set(values.map(({ value }) => value)).size === values.length;
 }
 
-function isValidQuery(value: unknown): value is DiscoverLocalHostQuery {
-  if (
-    !isRecord(value) ||
-    !isTargetId(value.targetId) ||
-    !isValidProtocolRange(value.supportedProtocolRange) ||
-    !Array.isArray(value.requiredCapabilities) ||
-    value.requiredCapabilities.length > maximumCapabilityCount ||
-    !value.requiredCapabilities.every(isCapabilityId)
-  ) {
-    return false;
+function snapshotCapabilities(
+  value: unknown,
+): readonly HostCapabilityId[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
   }
-  return hasUniqueCapabilities(value.requiredCapabilities);
+  const length = value.length;
+  if (
+    !Number.isSafeInteger(length) ||
+    length < 0 ||
+    length > maximumCapabilityCount
+  ) {
+    return undefined;
+  }
+  const capabilities: HostCapabilityId[] = [];
+  for (let index = 0; index < length; index += 1) {
+    const capability = snapshotCapabilityId(value[index]);
+    if (capability === undefined) {
+      return undefined;
+    }
+    capabilities.push(capability);
+  }
+  return hasUniqueCapabilities(capabilities)
+    ? Object.freeze(capabilities)
+    : undefined;
 }
 
-function isValidFreshness(value: unknown): boolean {
-  return (
-    isRecord(value) &&
-    (value.kind === "expiry" || value.kind === "liveness") &&
-    isFreshnessEvidenceRef(value.evidenceRef) &&
-    isEpochMicroseconds(value.observedAt) &&
-    isEpochMicroseconds(value.validUntil) &&
-    value.observedAt.value <= value.validUntil.value
-  );
+function snapshotQuery(value: unknown): DiscoverLocalHostQuery | undefined {
+  try {
+    if (!isRecord(value)) {
+      return undefined;
+    }
+    const rawTargetId = value.targetId;
+    const rawProtocolRange = value.supportedProtocolRange;
+    const rawCapabilities = value.requiredCapabilities;
+    const resolvedTargetId = snapshotTargetId(rawTargetId);
+    const supportedProtocolRange = snapshotProtocolRange(rawProtocolRange);
+    const requiredCapabilities = snapshotCapabilities(rawCapabilities);
+    if (
+      resolvedTargetId === undefined ||
+      supportedProtocolRange === undefined ||
+      requiredCapabilities === undefined
+    ) {
+      return undefined;
+    }
+    return Object.freeze({
+      requiredCapabilities,
+      supportedProtocolRange,
+      targetId: resolvedTargetId,
+    });
+  } catch {
+    return undefined;
+  }
 }
 
-function isValidObservation(value: unknown): value is HostDiscoveryObservation {
-  if (
-    !isRecord(value) ||
-    !isTargetId(value.targetId) ||
-    !isSupervisorInstanceId(value.supervisorInstanceId) ||
-    !isHostInstanceId(value.hostInstanceId) ||
-    !isHostBootGeneration(value.hostBootGeneration) ||
-    !isComponentVersion(value.componentVersion) ||
-    !isValidProtocolRange(value.protocolRange) ||
-    !isValidFreshness(value.freshness) ||
-    !Array.isArray(value.capabilities) ||
-    value.capabilities.length > maximumCapabilityCount ||
-    !value.capabilities.every(isCapabilityId)
-  ) {
-    return false;
+function snapshotFreshness(
+  value: unknown,
+): HostDiscoveryObservation["freshness"] | undefined {
+  if (!isRecord(value)) {
+    return undefined;
   }
-  return hasUniqueCapabilities(value.capabilities);
+  const kind = value.kind;
+  const rawEvidenceRef = value.evidenceRef;
+  const rawObservedAt = value.observedAt;
+  const rawValidUntil = value.validUntil;
+  const evidenceRef = snapshotFreshnessEvidenceRef(rawEvidenceRef);
+  const observedAt = snapshotEpochMicroseconds(rawObservedAt);
+  const validUntil = snapshotEpochMicroseconds(rawValidUntil);
+  if (
+    (kind !== "expiry" && kind !== "liveness") ||
+    evidenceRef === undefined ||
+    observedAt === undefined ||
+    validUntil === undefined ||
+    observedAt.value > validUntil.value
+  ) {
+    return undefined;
+  }
+  return Object.freeze({ evidenceRef, kind, observedAt, validUntil });
 }
 
 function isUnavailableReason(
@@ -209,85 +296,135 @@ function isSourceRejectedReason(
   );
 }
 
-function isValidSourceResult(value: unknown): boolean {
-  if (!isRecord(value) || typeof value.kind !== "string") {
-    return false;
-  }
-  if (value.kind === "observed") {
-    return Object.hasOwn(value, "observation");
-  }
-  if (!isTargetId(value.targetId)) {
-    return false;
-  }
-  if (value.kind === "not-found") {
-    return true;
-  }
-  if (value.kind === "stale") {
-    return isSourceStaleReason(value.reason);
-  }
-  if (value.kind === "rejected") {
-    return isSourceRejectedReason(value.reason);
-  }
-  if (value.kind === "unavailable") {
-    return isUnavailableReason(value.reason);
-  }
-  return false;
-}
-
-function sourceTargetId(
-  sourceResult: HostDiscoverySourceResult,
-): TargetId | undefined {
-  return sourceResult.kind === "observed"
-    ? sourceResult.observation?.targetId
-    : sourceResult.targetId;
-}
-
 function sameTarget(left: TargetId | undefined, right: TargetId): boolean {
   return left?.value === right.value;
 }
 
-function snapshotQuery(query: DiscoverLocalHostQuery): DiscoverLocalHostQuery {
-  return Object.freeze({
-    requiredCapabilities: Object.freeze(
-      query.requiredCapabilities.map(({ value }) => hostCapabilityId(value)),
-    ),
-    supportedProtocolRange: hostProtocolRange(
-      hostProtocolVersion(query.supportedProtocolRange.minimum.value),
-      hostProtocolVersion(query.supportedProtocolRange.maximum.value),
-    ),
-    targetId: targetId(query.targetId.value),
-  });
+function snapshotObservation(
+  value: unknown,
+): HostDiscoveryObservation | undefined {
+  try {
+    if (!isRecord(value)) {
+      return undefined;
+    }
+    const rawCapabilities = value.capabilities;
+    const rawComponentVersion = value.componentVersion;
+    const rawFreshness = value.freshness;
+    const rawHostBootGeneration = value.hostBootGeneration;
+    const rawHostInstanceId = value.hostInstanceId;
+    const rawProtocolRange = value.protocolRange;
+    const rawSupervisorInstanceId = value.supervisorInstanceId;
+    const rawTargetId = value.targetId;
+    const capabilities = snapshotCapabilities(rawCapabilities);
+    const resolvedComponentVersion = snapshotComponentVersion(
+      rawComponentVersion,
+    );
+    const freshness = snapshotFreshness(rawFreshness);
+    const resolvedHostBootGeneration = snapshotHostBootGeneration(
+      rawHostBootGeneration,
+    );
+    const resolvedHostInstanceId = snapshotHostInstanceId(rawHostInstanceId);
+    const protocolRange = snapshotProtocolRange(rawProtocolRange);
+    const resolvedSupervisorInstanceId = snapshotSupervisorInstanceId(
+      rawSupervisorInstanceId,
+    );
+    const resolvedTargetId = snapshotTargetId(rawTargetId);
+    if (
+      capabilities === undefined ||
+      resolvedComponentVersion === undefined ||
+      freshness === undefined ||
+      resolvedHostBootGeneration === undefined ||
+      resolvedHostInstanceId === undefined ||
+      protocolRange === undefined ||
+      resolvedSupervisorInstanceId === undefined ||
+      resolvedTargetId === undefined
+    ) {
+      return undefined;
+    }
+    return Object.freeze({
+      capabilities,
+      componentVersion: resolvedComponentVersion,
+      freshness,
+      hostBootGeneration: resolvedHostBootGeneration,
+      hostInstanceId: resolvedHostInstanceId,
+      protocolRange,
+      supervisorInstanceId: resolvedSupervisorInstanceId,
+      targetId: resolvedTargetId,
+    });
+  } catch {
+    return undefined;
+  }
 }
 
-function snapshotObservation(
-  observation: HostDiscoveryObservation,
-): HostDiscoveryObservation {
-  return Object.freeze({
-    capabilities: Object.freeze(
-      observation.capabilities.map(({ value }) => hostCapabilityId(value)),
-    ),
-    componentVersion: componentVersion(observation.componentVersion.value),
-    freshness: Object.freeze({
-      evidenceRef: hostFreshnessEvidenceRef(
-        observation.freshness.evidenceRef.value,
-      ),
-      kind: observation.freshness.kind,
-      observedAt: epochMicroseconds(observation.freshness.observedAt.value),
-      validUntil: epochMicroseconds(observation.freshness.validUntil.value),
-    }),
-    hostBootGeneration: hostBootGeneration(
-      observation.hostBootGeneration.value,
-    ),
-    hostInstanceId: hostInstanceId(observation.hostInstanceId.value),
-    protocolRange: hostProtocolRange(
-      hostProtocolVersion(observation.protocolRange.minimum.value),
-      hostProtocolVersion(observation.protocolRange.maximum.value),
-    ),
-    supervisorInstanceId: supervisorInstanceId(
-      observation.supervisorInstanceId.value,
-    ),
-    targetId: targetId(observation.targetId.value),
-  });
+type SourceResultSnapshot =
+  | { readonly kind: "invalid-observation" }
+  | { readonly kind: "invalid-source-response" }
+  | {
+      readonly kind: "valid";
+      readonly result: HostDiscoverySourceResult;
+    };
+
+function snapshotSourceResult(value: unknown): SourceResultSnapshot {
+  try {
+    if (!isRecord(value)) {
+      return { kind: "invalid-source-response" };
+    }
+    const kind = value.kind;
+    if (kind === "observed") {
+      const rawObservation = value.observation;
+      const resolvedObservation = snapshotObservation(rawObservation);
+      return resolvedObservation === undefined
+        ? { kind: "invalid-observation" }
+        : {
+            kind: "valid",
+            result: Object.freeze({
+              kind: "observed",
+              observation: resolvedObservation,
+            }),
+          };
+    }
+    if (
+      kind !== "not-found" &&
+      kind !== "stale" &&
+      kind !== "rejected" &&
+      kind !== "unavailable"
+    ) {
+      return { kind: "invalid-source-response" };
+    }
+    const rawTargetId = value.targetId;
+    const resolvedTargetId = snapshotTargetId(rawTargetId);
+    if (resolvedTargetId === undefined) {
+      return { kind: "invalid-source-response" };
+    }
+    if (kind === "not-found") {
+      return {
+        kind: "valid",
+        result: Object.freeze({ kind, targetId: resolvedTargetId }),
+      };
+    }
+    const reason = value.reason;
+    if (kind === "stale" && isSourceStaleReason(reason)) {
+      return {
+        kind: "valid",
+        result: Object.freeze({ kind, reason, targetId: resolvedTargetId }),
+      };
+    }
+    if (kind === "rejected" && isSourceRejectedReason(reason)) {
+      return {
+        kind: "valid",
+        result: Object.freeze({ kind, reason, targetId: resolvedTargetId }),
+      };
+    }
+    if (kind === "unavailable" && isUnavailableReason(reason)) {
+      return {
+        kind: "valid",
+        result: Object.freeze({ kind, reason, targetId: resolvedTargetId }),
+      };
+    }
+    return { kind: "invalid-source-response" };
+  } catch {
+    return { kind: "invalid-source-response" };
+  }
 }
 
 function evaluateCompatibility(
@@ -308,8 +445,10 @@ function evaluateCompatibility(
   const advertisedCapabilities = new Set(
     observation.capabilities.map(({ value }) => value),
   );
-  const missingCapabilities = query.requiredCapabilities.filter(
-    ({ value }) => !advertisedCapabilities.has(value),
+  const missingCapabilities = Object.freeze(
+    query.requiredCapabilities.filter(
+      ({ value }) => !advertisedCapabilities.has(value),
+    ),
   );
 
   if (protocolCompatible && missingCapabilities.length === 0) {
@@ -331,14 +470,28 @@ function evaluateCompatibility(
   };
 }
 
-function validateFreshnessPolicy(
-  freshnessPolicy: HostDiscoveryFreshnessPolicy,
-): void {
-  if (
-    !isMicroseconds(freshnessPolicy.maximumFutureSkew) ||
-    !isMicroseconds(freshnessPolicy.maximumObservationAge)
-  ) {
-    throw new TypeError("Host discovery freshness policy is invalid");
+function snapshotFreshnessPolicy(
+  value: unknown,
+): HostDiscoveryFreshnessPolicy | undefined {
+  try {
+    if (!isRecord(value)) {
+      return undefined;
+    }
+    const rawMaximumFutureSkew = value.maximumFutureSkew;
+    const rawMaximumObservationAge = value.maximumObservationAge;
+    const maximumFutureSkew = snapshotMicroseconds(rawMaximumFutureSkew);
+    const maximumObservationAge = snapshotMicroseconds(
+      rawMaximumObservationAge,
+    );
+    if (
+      maximumFutureSkew === undefined ||
+      maximumObservationAge === undefined
+    ) {
+      return undefined;
+    }
+    return Object.freeze({ maximumFutureSkew, maximumObservationAge });
+  } catch {
+    return undefined;
   }
 }
 
@@ -348,29 +501,51 @@ export interface HostDiscoveryDependencies {
   readonly source: HostDiscoverySource;
 }
 
-export function createHostDiscovery({
-  clock,
-  freshnessPolicy,
-  source,
-}: HostDiscoveryDependencies): HostDiscovery {
-  validateFreshnessPolicy(freshnessPolicy);
-  const resolvedFreshnessPolicy = Object.freeze({
-    maximumFutureSkew: microseconds(freshnessPolicy.maximumFutureSkew.value),
-    maximumObservationAge: microseconds(
-      freshnessPolicy.maximumObservationAge.value,
-    ),
-  });
+export function createHostDiscovery(
+  dependencies: HostDiscoveryDependencies,
+): HostDiscovery {
+  let clockNow: () => unknown;
+  let sourceRead: (requestedTarget: TargetId) => unknown;
+  let resolvedFreshnessPolicy: HostDiscoveryFreshnessPolicy | undefined;
+  try {
+    if (!isRecord(dependencies)) {
+      throw new TypeError("invalid dependency container");
+    }
+    const rawClock = dependencies.clock;
+    const rawSource = dependencies.source;
+    const rawFreshnessPolicy = dependencies.freshnessPolicy;
+    if (!isRecord(rawClock) || !isRecord(rawSource)) {
+      throw new TypeError("invalid dependency port");
+    }
+    const rawClockNow: unknown = Reflect.get(rawClock, "now");
+    const rawSourceRead: unknown = Reflect.get(rawSource, "read");
+    if (
+      typeof rawClockNow !== "function" ||
+      typeof rawSourceRead !== "function"
+    ) {
+      throw new TypeError("invalid dependency operation");
+    }
+    clockNow = () => Reflect.apply(rawClockNow, rawClock, []);
+    sourceRead = (requestedTarget) =>
+      Reflect.apply(rawSourceRead, rawSource, [requestedTarget]);
+    resolvedFreshnessPolicy = snapshotFreshnessPolicy(rawFreshnessPolicy);
+  } catch {
+    throw new TypeError("Host discovery dependencies are invalid");
+  }
+  if (resolvedFreshnessPolicy === undefined) {
+    throw new TypeError("Host discovery freshness policy is invalid");
+  }
 
   return {
     async discover(query) {
-      if (!isValidQuery(query)) {
+      const resolvedQuery = snapshotQuery(query);
+      if (resolvedQuery === undefined) {
         return { kind: "rejected", reason: "invalid-query" };
       }
-      const resolvedQuery = snapshotQuery(query);
 
-      let sourceResult: HostDiscoverySourceResult;
+      let rawSourceResult: unknown;
       try {
-        sourceResult = await source.read(resolvedQuery.targetId);
+        rawSourceResult = await sourceRead(resolvedQuery.targetId);
       } catch {
         return {
           kind: "unavailable",
@@ -379,24 +554,27 @@ export function createHostDiscovery({
         };
       }
 
-      if (!isValidSourceResult(sourceResult)) {
+      const sourceSnapshot = snapshotSourceResult(rawSourceResult);
+      if (sourceSnapshot.kind === "invalid-source-response") {
         return {
           kind: "rejected",
           reason: "invalid-source-response",
           targetId: resolvedQuery.targetId,
         };
       }
-      if (
-        sourceResult.kind === "observed" &&
-        !isValidObservation(sourceResult.observation)
-      ) {
+      if (sourceSnapshot.kind === "invalid-observation") {
         return {
           kind: "rejected",
           reason: "invalid-observation",
           targetId: resolvedQuery.targetId,
         };
       }
-      if (!sameTarget(sourceTargetId(sourceResult), resolvedQuery.targetId)) {
+      const sourceResult = sourceSnapshot.result;
+      const resolvedSourceTargetId =
+        sourceResult.kind === "observed"
+          ? sourceResult.observation.targetId
+          : sourceResult.targetId;
+      if (!sameTarget(resolvedSourceTargetId, resolvedQuery.targetId)) {
         return {
           kind: "rejected",
           reason: "target-mismatch",
@@ -428,12 +606,9 @@ export function createHostDiscovery({
         };
       }
 
-      let currentTime;
+      let currentTime: EpochMicroseconds | undefined;
       try {
-        currentTime = clock.now();
-        if (!isEpochMicroseconds(currentTime)) {
-          throw new TypeError("Clock returned an invalid exact instant");
-        }
+        currentTime = snapshotEpochMicroseconds(clockNow());
       } catch {
         return {
           kind: "unavailable",
@@ -441,7 +616,14 @@ export function createHostDiscovery({
           targetId: resolvedQuery.targetId,
         };
       }
-      const observation = snapshotObservation(sourceResult.observation);
+      if (currentTime === undefined) {
+        return {
+          kind: "unavailable",
+          reason: "clock-failure",
+          targetId: resolvedQuery.targetId,
+        };
+      }
+      const observation = sourceResult.observation;
       if (
         currentTime.value >= observation.freshness.validUntil.value
       ) {

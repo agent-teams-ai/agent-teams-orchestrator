@@ -317,6 +317,35 @@ test("returns a typed clock failure without consulting another source", async ()
   assert.equal(sourceCalls, 1);
 });
 
+test("snapshots a stateful clock instant exactly once", async () => {
+  let instantReads = 0;
+  const discovery = createHostDiscovery({
+    clock: {
+      now: () => ({
+        type: "EpochMicroseconds",
+        get value() {
+          instantReads += 1;
+          return instantReads === 1 ? 1_500_000n : 3_000_000n;
+        },
+      }),
+    },
+    freshnessPolicy: {
+      maximumFutureSkew: microseconds(100_000n),
+      maximumObservationAge: microseconds(1_000_000n),
+    },
+    source: {
+      async read() {
+        return { kind: "observed", observation: observation() };
+      },
+    },
+  });
+
+  const result = await discovery.discover(query());
+
+  assert.equal(result.kind, "candidate");
+  assert.equal(instantReads, 1);
+});
+
 test("accepts exact freshness-policy boundaries", async () => {
   const fixture = discoveryFor({
     kind: "observed",
@@ -356,6 +385,121 @@ test("maps malformed source unions to a closed rejected outcome", async () => {
 
   assert.equal(result.kind, "rejected");
   assert.equal(result.reason, "invalid-source-response");
+});
+
+test("snapshots a stateful observation identity exactly once", async () => {
+  let targetReads = 0;
+  const sourceObservation = observation();
+  Object.defineProperty(sourceObservation, "targetId", {
+    configurable: true,
+    enumerable: true,
+    get() {
+      targetReads += 1;
+      return targetReads === 1 ? requestedTarget : targetId("foreign-target");
+    },
+  });
+  const fixture = discoveryFor({
+    kind: "observed",
+    observation: sourceObservation,
+  });
+
+  const result = await fixture.discovery.discover(query());
+
+  assert.equal(result.kind, "candidate");
+  assert.equal(result.observation.targetId.value, requestedTarget.value);
+  assert.equal(targetReads, 1);
+});
+
+test("closes throwing source accessors into invalid-source-response", async () => {
+  const fixture = discoveryFor({
+    kind: "not-found",
+    get targetId() {
+      throw new Error("secret-path");
+    },
+  });
+
+  const result = await fixture.discovery.discover(query());
+
+  assert.deepEqual(result, {
+    kind: "rejected",
+    reason: "invalid-source-response",
+    targetId: requestedTarget,
+  });
+});
+
+test("rejects throwing query accessors without consulting the source", async () => {
+  const fixture = discoveryFor({ kind: "not-found", targetId: requestedTarget });
+  const invalidQuery = query();
+  Object.defineProperty(invalidQuery, "targetId", {
+    configurable: true,
+    enumerable: true,
+    get() {
+      throw new Error("untrusted-query-accessor");
+    },
+  });
+
+  const result = await fixture.discovery.discover(invalidQuery);
+
+  assert.deepEqual(result, { kind: "rejected", reason: "invalid-query" });
+  assert.equal(fixture.sourceCalls(), 0);
+});
+
+test("does not read a token payload after its discriminant is rejected", async () => {
+  let payloadReads = 0;
+  const fixture = discoveryFor({ kind: "not-found", targetId: requestedTarget });
+  const invalidQuery = query({
+    targetId: {
+      type: "HostInstanceId",
+      get value() {
+        payloadReads += 1;
+        throw new Error("payload-must-remain-unread");
+      },
+    },
+  });
+
+  const result = await fixture.discovery.discover(invalidQuery);
+
+  assert.deepEqual(result, { kind: "rejected", reason: "invalid-query" });
+  assert.equal(payloadReads, 0);
+  assert.equal(fixture.sourceCalls(), 0);
+});
+
+test("does not read source payload for an unknown result kind", async () => {
+  let payloadReads = 0;
+  const fixture = discoveryFor({
+    kind: "unknown-result",
+    get targetId() {
+      payloadReads += 1;
+      throw new Error("payload-must-remain-unread");
+    },
+  });
+
+  const result = await fixture.discovery.discover(query());
+
+  assert.deepEqual(result, {
+    kind: "rejected",
+    reason: "invalid-source-response",
+    targetId: requestedTarget,
+  });
+  assert.equal(payloadReads, 0);
+});
+
+test("redacts dependency accessor failures during construction", () => {
+  const dependencies = new Proxy(
+    {},
+    {
+      get() {
+        throw new Error("secret-dependency-path");
+      },
+    },
+  );
+
+  assert.throws(
+    () => createHostDiscovery(dependencies),
+    (error) =>
+      error instanceof TypeError &&
+      error.message === "Host discovery dependencies are invalid",
+  );
 });
 
 test("projects a closed candidate without source-only authority fields", async () => {
@@ -445,6 +589,72 @@ test("bounds query and source capability collections", async () => {
   const invalidObservation = await observationFixture.discovery.discover(query());
   assert.equal(invalidObservation.kind, "rejected");
   assert.equal(invalidObservation.reason, "invalid-observation");
+});
+
+test("rejects forged exact values outside signed and unsigned 64-bit bounds", async () => {
+  const uint64Overflow = 1n << 64n;
+  const int64Overflow = 1n << 63n;
+  const invalidQueryFixture = discoveryFor({
+    kind: "not-found",
+    targetId: requestedTarget,
+  });
+  const invalidQuery = await invalidQueryFixture.discovery.discover(
+    query({
+      supportedProtocolRange: {
+        minimum: { type: "HostProtocolVersion", value: 1n },
+        maximum: { type: "HostProtocolVersion", value: uint64Overflow },
+      },
+    }),
+  );
+  assert.deepEqual(invalidQuery, { kind: "rejected", reason: "invalid-query" });
+  assert.equal(invalidQueryFixture.sourceCalls(), 0);
+
+  const invalidObservationFixture = discoveryFor({
+    kind: "observed",
+    observation: observation({
+      hostBootGeneration: {
+        type: "HostBootGeneration",
+        value: uint64Overflow,
+      },
+    }),
+  });
+  const invalidObservation = await invalidObservationFixture.discovery.discover(
+    query(),
+  );
+  assert.equal(invalidObservation.kind, "rejected");
+  assert.equal(invalidObservation.reason, "invalid-observation");
+
+  const invalidClockFixture = discoveryFor(
+    { kind: "observed", observation: observation() },
+    {
+      now: { type: "EpochMicroseconds", value: int64Overflow },
+    },
+  );
+  const invalidClock = await invalidClockFixture.discovery.discover(query());
+  assert.equal(invalidClock.kind, "unavailable");
+  assert.equal(invalidClock.reason, "clock-failure");
+
+  assert.throws(
+    () =>
+      createHostDiscovery({
+        clock: { now: () => epochMicroseconds(0n) },
+        freshnessPolicy: {
+          maximumFutureSkew: {
+            type: "Microseconds",
+            value: uint64Overflow,
+          },
+          maximumObservationAge: microseconds(1n),
+        },
+        source: {
+          async read() {
+            return { kind: "not-found", targetId: requestedTarget };
+          },
+        },
+      }),
+    (error) =>
+      error instanceof TypeError &&
+      error.message === "Host discovery freshness policy is invalid",
+  );
 });
 
 test("exports the feature through the package root", async () => {

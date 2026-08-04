@@ -39,8 +39,9 @@ trusted, or connected.
   directory, project configuration, or environment fallback.
 - Supervisor, Host, boot, target, endpoint, component, capability, and freshness
   identities remain distinct.
-- Protocol versions and boot generations use exact `bigint` values. Instants use
-  the repository-wide signed epoch-microseconds representation.
+- Protocol versions, boot generations, and durations use exact unsigned 64-bit
+  `bigint` values; protocol versions are positive. Instants use the
+  repository-wide signed 64-bit epoch-microseconds representation.
 - Expired, stale, incompatible, malformed, unavailable, and missing observations
   remain different outcomes.
 - No serializable endpoint, connection handle, credential, or bearer-token type
@@ -64,6 +65,6 @@ reinterpreted locally.
 ## Verification
 
 Package checks cover valid observations, every typed outcome, forged or malformed
-input, target substitution, exact expiry boundaries, compatibility, duplicate
-capabilities, one-call behavior, exception redaction, declaration build, and root
-package export.
+input, signed and unsigned 64-bit boundaries, target substitution, exact expiry
+boundaries, compatibility, duplicate capabilities, one-call behavior, exception
+redaction, declaration build, and root package export.
