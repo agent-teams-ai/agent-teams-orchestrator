@@ -161,11 +161,22 @@ CI architecture gates test:
 - adapters classified from network direction instead of application-core
   direction;
 - one broad adapter module combining inbound and outbound responsibilities.
+- materialized libraries without built ESM and declaration exports under
+  `dist/**`, without `dist` in their packed files, or without blocking `build`,
+  `check`, `test`, and `typecheck` scripts;
+- root TypeScript project references that omit, duplicate, or retain a stale
+  materialized package entry.
 
 TypeScript path aliases are conveniences, not boundaries. `package.json` exports,
 workspace dependencies, lint rules, and architecture tests enforce boundaries.
 The package catalog reserves approved topology; it does not replace import-graph
 enforcement inside materialized packages.
+
+Every materialized package appears exactly once in the root TypeScript project
+references. Removing or adding a package updates the catalog, filesystem, manifest,
+and root reference in the same change. A materialized library is consumed through
+its built `dist/**` exports; source-only exports and packed artifacts without
+declarations are prohibited.
 
 The package-role gate prevents platform packages from depending on business
 contexts, integrations from depending on contexts or SDKs, and SDKs from depending
