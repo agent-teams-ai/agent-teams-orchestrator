@@ -419,6 +419,54 @@ try {
     "scaffolded accepted context",
     run(temporaryRoot),
   );
+  await writeRootReferences(temporaryRoot, [
+    "packages/contexts/work-coordination/",
+  ]);
+  requireSuccess(
+    "project reference with trailing slash",
+    run(temporaryRoot),
+  );
+  await writeRootReferences(temporaryRoot, [
+    "packages/contexts/work-coordination/tsconfig.json",
+  ]);
+  requireSuccess(
+    "project reference to explicit tsconfig",
+    run(temporaryRoot),
+  );
+  await writeFile(
+    path.join(temporaryRoot, "tsconfig.json"),
+    JSON.stringify(
+      {
+        compilerOptions: { noEmit: true },
+        files: [],
+        references: [{ path: "C:\\outside\\tsconfig.json" }],
+      },
+      null,
+      2,
+    ),
+  );
+  requireFailure(
+    "Windows absolute project reference",
+    run(temporaryRoot),
+    "every project reference requires a relative in-repository path",
+  );
+  await writeFile(
+    path.join(temporaryRoot, "tsconfig.json"),
+    JSON.stringify(
+      {
+        compilerOptions: { noEmit: true },
+        files: [],
+        references: [{ path: "\\\\server\\share\\tsconfig.json" }],
+      },
+      null,
+      2,
+    ),
+  );
+  requireFailure(
+    "UNC absolute project reference",
+    run(temporaryRoot),
+    "every project reference requires a relative in-repository path",
+  );
   await writeRootReferences(temporaryRoot, []);
   requireFailure(
     "missing project reference",
@@ -426,8 +474,8 @@ try {
     "must appear exactly once in project references (found 0)",
   );
   await writeRootReferences(temporaryRoot, [
-    "packages/contexts/work-coordination",
-    "packages/contexts/work-coordination",
+    "packages/contexts/work-coordination/",
+    "packages/contexts/work-coordination/tsconfig.json",
   ]);
   requireFailure(
     "duplicate project reference",
@@ -468,6 +516,7 @@ try {
     run(temporaryRoot),
     "production file is outside the package catalog",
   );
+  await rm(unknownRoot, { recursive: true });
 
   const manifestPath = path.join(
     temporaryRoot,
@@ -482,6 +531,57 @@ try {
     "materialized library requires a test script",
   );
   manifest.scripts.test = "node --test";
+  delete manifest.type;
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library without module type",
+    run(temporaryRoot),
+    "materialized library requires type module",
+  );
+  manifest.type = "module";
+  manifest.exports = qualifiedLibraryExports();
+  manifest.exports["."].types = "./dist/index.js";
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library with invalid declaration export",
+    run(temporaryRoot),
+    "library export . requires a normalized dist declaration target",
+  );
+  manifest.exports = qualifiedLibraryExports();
+  delete manifest.exports["."].types;
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library without declaration export",
+    run(temporaryRoot),
+    "library export . requires a normalized dist declaration target",
+  );
+  manifest.exports = qualifiedLibraryExports();
+  manifest.exports["."].import = "./dist/index.d.ts";
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library with invalid ESM export",
+    run(temporaryRoot),
+    "library export . requires a normalized dist ESM import target",
+  );
+  manifest.exports = qualifiedLibraryExports();
+  delete manifest.exports["."].import;
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library without ESM export",
+    run(temporaryRoot),
+    "library export . requires a normalized dist ESM import target",
+  );
+  manifest.exports = qualifiedLibraryExports({
+    "./module": {
+      import: "./dist/module.js",
+    },
+  });
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library subpath without declaration export",
+    run(temporaryRoot),
+    "library export ./module requires a normalized dist declaration target",
+  );
   manifest.exports = { ".": "./src/index.ts" };
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
   requireFailure(
@@ -495,6 +595,14 @@ try {
     "library export traversal",
     run(temporaryRoot),
     "library exports must reference built artifacts",
+  );
+  manifest.exports = qualifiedLibraryExports();
+  manifest.exports["."].import = "./dist/%2e/index.js";
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library export with encoded dot segment",
+    run(temporaryRoot),
+    "library export . requires a normalized dist ESM import target",
   );
   manifest.exports = qualifiedLibraryExports();
   manifest.files = [];
@@ -525,8 +633,17 @@ try {
   );
 
   delete manifest.dependencies;
+  manifest.exports = qualifiedLibraryExports({
+    "./generated": {
+      types: "./dist/generated/index.d.ts",
+      import: "./dist/generated/index.js",
+    },
+  });
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
-  await rm(unknownRoot, { recursive: true });
+  requireSuccess(
+    "library exports may precede generated build output",
+    run(temporaryRoot),
+  );
   manifest.exports = qualifiedLibraryExports({
     "./module": {
       types: "./dist/module.d.ts",
@@ -612,7 +729,10 @@ try {
         import: "./dist/module.js",
       },
     }),
-    "./*": "./dist/*.js",
+    "./*": {
+      types: "./dist/*.d.ts",
+      import: "./dist/*.js",
+    },
     "./blocked/*": null,
   };
   await writeFile(

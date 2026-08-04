@@ -174,9 +174,19 @@ enforcement inside materialized packages.
 
 Every materialized package appears exactly once in the root TypeScript project
 references. Removing or adding a package updates the catalog, filesystem, manifest,
-and root reference in the same change. A materialized library is consumed through
-its built `dist/**` exports; source-only exports and packed artifacts without
-declarations are prohibited.
+and root reference in the same change. Directory references with a trailing slash
+and references ending in `/tsconfig.json` are canonicalized to the same package
+path, including for duplicate detection. A materialized library is consumed
+through its built `dist/**` exports; source-only exports and packed artifacts
+without declarations are prohibited.
+
+Every non-app library declares `"type": "module"`. Each non-null exported subpath
+provides a normalized `./dist/**` declaration target through `types` and a
+normalized `./dist/**` ESM target through `import`. Declaration targets end in
+`.d.ts`, `.d.mts`, or `.d.cts`; ESM targets end in `.js` or `.mjs`. Topology
+validation checks the target shape and suffix before build output exists; package
+build and packed-artifact tests separately prove that generated targets exist and
+are consumable.
 
 The package-role gate prevents platform packages from depending on business
 contexts, integrations from depending on contexts or SDKs, and SDKs from depending

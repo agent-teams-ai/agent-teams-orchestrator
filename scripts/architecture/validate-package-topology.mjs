@@ -115,11 +115,85 @@ function stringTargets(value) {
   return [];
 }
 
+function isObjectRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isNormalizedBuiltExportTarget(target) {
+  if (typeof target !== "string" || !target.startsWith("./dist/")) {
+    return false;
+  }
+  if (/%(?:2e|2f|5c)/iu.test(target)) {
+    return false;
+  }
+  return `./${path.posix.normalize(target.slice(2))}` === target;
+}
+
+function isDeclarationExportTarget(target) {
+  return (
+    isNormalizedBuiltExportTarget(target) &&
+    /\.d\.(?:c|m)?ts$/u.test(target)
+  );
+}
+
+function isEsmExportTarget(target) {
+  return (
+    isNormalizedBuiltExportTarget(target) && /\.(?:js|mjs)$/u.test(target)
+  );
+}
+
+function validateQualifiedLibraryExports(entry, exportsField, errors) {
+  const packageJson = `${entry.path}/package.json`;
+  const rootExport = isObjectRecord(exportsField)
+    ? exportsField["."]
+    : undefined;
+  if (!isObjectRecord(rootExport)) {
+    errors.push(
+      `${packageJson}: library root export requires built types and import targets`,
+    );
+  }
+  if (!isObjectRecord(exportsField)) {
+    return;
+  }
+
+  for (const [exportKey, exportValue] of Object.entries(exportsField)) {
+    if (!exportKey.startsWith(".") || exportValue === null) {
+      continue;
+    }
+    if (!isObjectRecord(exportValue)) {
+      errors.push(
+        `${packageJson}: library export ${exportKey} requires built declaration and ESM import targets`,
+      );
+      continue;
+    }
+    if (!isDeclarationExportTarget(exportValue.types)) {
+      errors.push(
+        `${packageJson}: library export ${exportKey} requires a normalized dist declaration target`,
+      );
+    }
+    if (!isEsmExportTarget(exportValue.import)) {
+      errors.push(
+        `${packageJson}: library export ${exportKey} requires a normalized dist ESM import target`,
+      );
+    }
+  }
+}
+
 function normalizedRootReference(referencePath) {
-  if (typeof referencePath !== "string" || path.isAbsolute(referencePath)) {
+  if (
+    typeof referencePath !== "string" ||
+    path.posix.isAbsolute(referencePath) ||
+    path.win32.isAbsolute(referencePath)
+  ) {
     return null;
   }
-  const normalized = path.posix.normalize(referencePath.replaceAll("\\", "/"));
+  let normalized = path.posix.normalize(referencePath.replaceAll("\\", "/"));
+  if (normalized.endsWith("/")) {
+    normalized = normalized.slice(0, -1);
+  }
+  if (normalized.endsWith("/tsconfig.json")) {
+    normalized = normalized.slice(0, -"/tsconfig.json".length);
+  }
   const withoutPrefix = normalized.startsWith("./")
     ? normalized.slice(2)
     : normalized;
@@ -601,6 +675,11 @@ async function validateMaterializedPackage(
     errors.push(`${entry.path}/package.json: library package requires exports`);
   }
   if (entry.role !== "app") {
+    if (manifest.type !== "module") {
+      errors.push(
+        `${entry.path}/package.json: materialized library requires type module`,
+      );
+    }
     for (const script of ["build", "check", "test", "typecheck"]) {
       if (typeof manifest.scripts?.[script] !== "string") {
         errors.push(
@@ -609,22 +688,9 @@ async function validateMaterializedPackage(
       }
     }
 
-    const rootExport = manifest.exports?.["."];
-    if (
-      !rootExport ||
-      typeof rootExport !== "object" ||
-      typeof rootExport.types !== "string" ||
-      typeof rootExport.import !== "string"
-    ) {
-      errors.push(
-        `${entry.path}/package.json: library root export requires built types and import targets`,
-      );
-    }
+    validateQualifiedLibraryExports(entry, manifest.exports, errors);
     for (const target of stringTargets(manifest.exports)) {
-      const normalizedTarget = target.startsWith("./")
-        ? `./${path.posix.normalize(target.slice(2))}`
-        : path.posix.normalize(target);
-      if (!target.startsWith("./dist/") || normalizedTarget !== target) {
+      if (!isNormalizedBuiltExportTarget(target)) {
         errors.push(
           `${entry.path}/package.json: library exports must reference built artifacts, not ${target}`,
         );
