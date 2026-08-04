@@ -183,7 +183,8 @@ function normalizedRootReference(referencePath) {
   if (
     typeof referencePath !== "string" ||
     path.posix.isAbsolute(referencePath) ||
-    path.win32.isAbsolute(referencePath)
+    path.win32.isAbsolute(referencePath) ||
+    /^[a-z]:/iu.test(referencePath)
   ) {
     return null;
   }

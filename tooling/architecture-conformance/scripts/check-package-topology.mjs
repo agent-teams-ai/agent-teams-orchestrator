@@ -456,6 +456,23 @@ try {
       {
         compilerOptions: { noEmit: true },
         files: [],
+        references: [{ path: "C:outside\\tsconfig.json" }],
+      },
+      null,
+      2,
+    ),
+  );
+  requireFailure(
+    "Windows drive-relative project reference",
+    run(temporaryRoot),
+    "every project reference requires a relative in-repository path",
+  );
+  await writeFile(
+    path.join(temporaryRoot, "tsconfig.json"),
+    JSON.stringify(
+      {
+        compilerOptions: { noEmit: true },
+        files: [],
         references: [{ path: "\\\\server\\share\\tsconfig.json" }],
       },
       null,
