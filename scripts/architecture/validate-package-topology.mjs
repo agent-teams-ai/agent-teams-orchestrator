@@ -115,6 +115,95 @@ function stringTargets(value) {
   return [];
 }
 
+function isObjectRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function isNormalizedBuiltExportTarget(target) {
+  if (typeof target !== "string" || !target.startsWith("./dist/")) {
+    return false;
+  }
+  if (/%(?:2e|2f|5c)/iu.test(target)) {
+    return false;
+  }
+  return `./${path.posix.normalize(target.slice(2))}` === target;
+}
+
+function isDeclarationExportTarget(target) {
+  return (
+    isNormalizedBuiltExportTarget(target) &&
+    /\.d\.(?:c|m)?ts$/u.test(target)
+  );
+}
+
+function isEsmExportTarget(target) {
+  return (
+    isNormalizedBuiltExportTarget(target) && /\.(?:js|mjs)$/u.test(target)
+  );
+}
+
+function validateQualifiedLibraryExports(entry, exportsField, errors) {
+  const packageJson = `${entry.path}/package.json`;
+  const rootExport = isObjectRecord(exportsField)
+    ? exportsField["."]
+    : undefined;
+  if (!isObjectRecord(rootExport)) {
+    errors.push(
+      `${packageJson}: library root export requires built types and import targets`,
+    );
+  }
+  if (!isObjectRecord(exportsField)) {
+    return;
+  }
+
+  for (const [exportKey, exportValue] of Object.entries(exportsField)) {
+    if (!exportKey.startsWith(".") || exportValue === null) {
+      continue;
+    }
+    if (!isObjectRecord(exportValue)) {
+      errors.push(
+        `${packageJson}: library export ${exportKey} requires built declaration and ESM import targets`,
+      );
+      continue;
+    }
+    if (!isDeclarationExportTarget(exportValue.types)) {
+      errors.push(
+        `${packageJson}: library export ${exportKey} requires a normalized dist declaration target`,
+      );
+    }
+    if (!isEsmExportTarget(exportValue.import)) {
+      errors.push(
+        `${packageJson}: library export ${exportKey} requires a normalized dist ESM import target`,
+      );
+    }
+  }
+}
+
+function normalizedRootReference(referencePath) {
+  if (
+    typeof referencePath !== "string" ||
+    path.posix.isAbsolute(referencePath) ||
+    path.win32.isAbsolute(referencePath) ||
+    /^[a-z]:/iu.test(referencePath)
+  ) {
+    return null;
+  }
+  let normalized = path.posix.normalize(referencePath.replaceAll("\\", "/"));
+  if (normalized.endsWith("/")) {
+    normalized = normalized.slice(0, -1);
+  }
+  if (normalized.endsWith("/tsconfig.json")) {
+    normalized = normalized.slice(0, -"/tsconfig.json".length);
+  }
+  const withoutPrefix = normalized.startsWith("./")
+    ? normalized.slice(2)
+    : normalized;
+  if (withoutPrefix === ".." || withoutPrefix.startsWith("../")) {
+    return null;
+  }
+  return withoutPrefix;
+}
+
 function packageNameFromSpecifier(specifier) {
   const match = specifier.match(/^(@agent-teams\/[^/]+)(?:\/.*)?$/);
   return match?.[1];
@@ -586,6 +675,37 @@ async function validateMaterializedPackage(
   if (entry.role !== "app" && !manifest.exports) {
     errors.push(`${entry.path}/package.json: library package requires exports`);
   }
+  if (entry.role !== "app") {
+    if (manifest.type !== "module") {
+      errors.push(
+        `${entry.path}/package.json: materialized library requires type module`,
+      );
+    }
+    for (const script of ["build", "check", "test", "typecheck"]) {
+      if (typeof manifest.scripts?.[script] !== "string") {
+        errors.push(
+          `${entry.path}/package.json: materialized library requires a ${script} script`,
+        );
+      }
+    }
+
+    validateQualifiedLibraryExports(entry, manifest.exports, errors);
+    for (const target of stringTargets(manifest.exports)) {
+      if (!isNormalizedBuiltExportTarget(target)) {
+        errors.push(
+          `${entry.path}/package.json: library exports must reference built artifacts, not ${target}`,
+        );
+      }
+    }
+    if (
+      !Array.isArray(manifest.files) ||
+      !manifest.files.includes("dist")
+    ) {
+      errors.push(
+        `${entry.path}/package.json: materialized library files must include dist`,
+      );
+    }
+  }
 
   if (!(await exists(tsconfigPath))) {
     errors.push(`${entry.path}: materialized package is missing tsconfig.json`);
@@ -816,6 +936,51 @@ async function main() {
         materializedPackages.set(entry.package_name, materializedPackage);
       }
     }
+  }
+
+  const rootTsconfigPath = path.join(repositoryRoot, "tsconfig.json");
+  if (await exists(rootTsconfigPath)) {
+    try {
+      const rootTsconfig = JSON.parse(await readFile(rootTsconfigPath, "utf8"));
+      const referenceCounts = new Map();
+      const references = rootTsconfig.references ?? [];
+      if (!Array.isArray(references)) {
+        errors.push("tsconfig.json: references must be an array");
+      } else {
+        for (const reference of references) {
+          const normalized = normalizedRootReference(reference?.path);
+          if (!normalized) {
+            errors.push(
+              "tsconfig.json: every project reference requires a relative in-repository path",
+            );
+            continue;
+          }
+          referenceCounts.set(
+            normalized,
+            (referenceCounts.get(normalized) ?? 0) + 1,
+          );
+        }
+      }
+      for (const materializedPath of [...materializedPaths].toSorted()) {
+        const count = referenceCounts.get(materializedPath) ?? 0;
+        if (count !== 1) {
+          errors.push(
+            `tsconfig.json: materialized package ${materializedPath} must appear exactly once in project references (found ${count})`,
+          );
+        }
+      }
+      for (const [referencePath] of referenceCounts) {
+        if (byPath.has(referencePath) && !materializedPaths.has(referencePath)) {
+          errors.push(
+            `tsconfig.json: project reference ${referencePath} points to an unmaterialized catalog package`,
+          );
+        }
+      }
+    } catch (error) {
+      errors.push(`tsconfig.json: invalid JSON: ${error.message}`);
+    }
+  } else if (materializedPaths.size > 0) {
+    errors.push("tsconfig.json: materialized packages require root project references");
   }
   await validateInternalPackageImports(
     repositoryRoot,

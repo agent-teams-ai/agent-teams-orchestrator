@@ -259,6 +259,19 @@ the catalog and cannot invent a package, role, path, or owner. Run it with
 first slice are accepted. The generated boundary does not pass CI until a real
 feature slice is added in the same change.
 
+Every materialized TypeScript library exposes built ESM and declaration targets
+under `dist/**`, declares `"type": "module"`, and gives every non-null exported
+subpath both `types` and ESM `import` targets; source-only package exports are
+prohibited. Topology checks validate normalized targets and their declaration or
+ESM suffixes without requiring generated `dist/**` files before the build. Its
+manifest provides blocking `check`, `typecheck`, `build`, and `test` scripts. Root
+package gates run these scripts without `--if-present`, so a newly materialized
+package cannot silently disappear from CI. The package build is tested through
+its actual root export, a declaration consumer, and an isolated packed-artifact
+consumer, not only by importing source files. Root TypeScript project references
+contain every materialized package exactly once; directory, trailing-slash, and
+explicit `/tsconfig.json` spellings resolve to the same package reference.
+
 Durable process managers are owned by the feature or bounded context whose
 business process they coordinate. Shared platform code may provide timers,
 dispatch, persistence primitives, and test harnesses, but it must not become a

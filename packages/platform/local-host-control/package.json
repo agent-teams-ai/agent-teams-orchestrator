@@ -1,0 +1,28 @@
+{
+  "name": "@agent-teams/local-host-control",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --project tsconfig.json --pretty false",
+    "check": "pnpm run clean && pnpm run typecheck && pnpm run build && pnpm run test && pnpm run test:types",
+    "clean": "node -e \"const fs=require('node:fs'); for (const path of ['dist','.cache']) fs.rmSync(path, { recursive: true, force: true })\"",
+    "prepack": "pnpm run clean && pnpm run build",
+    "test": "node --test --test-concurrency=1",
+    "test:types": "tsc --project tests/consumer/tsconfig.json --noEmit --pretty false",
+    "typecheck": "tsc --project tsconfig.json --noEmit --pretty false"
+  },
+  "agentTeamsArchitecture": {
+    "role": "platform",
+    "ownerDocument": "architecture.local-host-lifecycle"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

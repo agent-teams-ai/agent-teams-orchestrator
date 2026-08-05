@@ -88,6 +88,13 @@ function packageFiles(repositoryRoot, entry) {
     private: true,
     type: "module",
     scripts: {
+      build: "tsc --project tsconfig.json --pretty false",
+      check:
+        "pnpm run clean && pnpm run typecheck && pnpm run build && pnpm run test",
+      clean:
+        "node -e \"const fs=require('node:fs'); for (const path of ['dist','.cache']) fs.rmSync(path, { recursive: true, force: true })\"",
+      prepack: "pnpm run clean && pnpm run build",
+      test: "node --test --test-concurrency=1",
       typecheck: "tsc --project tsconfig.json --noEmit --pretty false",
     },
     agentTeamsArchitecture: {
@@ -97,8 +104,12 @@ function packageFiles(repositoryRoot, entry) {
   };
 
   if (entry.role !== "app") {
+    manifest.files = ["dist"];
     manifest.exports = {
-      ".": "./src/index.ts",
+      ".": {
+        types: "./dist/index.d.ts",
+        import: "./dist/index.js",
+      },
     };
   }
 
@@ -116,7 +127,7 @@ function packageFiles(repositoryRoot, entry) {
             noEmit: false,
             outDir: "dist",
             rootDir: "src",
-            tsBuildInfoFile: "dist/.tsbuildinfo",
+            tsBuildInfoFile: ".cache/tsconfig.tsbuildinfo",
           },
           include: ["src/**/*.ts", "src/**/*.tsx", "src/**/*.mts", "src/**/*.cts"],
         },

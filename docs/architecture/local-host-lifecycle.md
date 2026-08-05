@@ -33,6 +33,11 @@ defines client-bound and durable product Run lifetime. Desktop, CLI, and other
 clients may bootstrap and discover the Host, but never supervise it directly.
 ADR-0030 remains authoritative for separate local and hosted compositions.
 
+The first substrate-neutral implementation slice is indexed by the
+[local Host control package](../../packages/platform/local-host-control/README.md).
+It validates discovery observations only; it does not resolve the open transport
+or lifecycle decisions below.
+
 ## Process topology
 
 ```mermaid

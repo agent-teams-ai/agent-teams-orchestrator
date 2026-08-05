@@ -9,5 +9,10 @@
     "tooling/architecture-conformance/fixtures/valid/**/*.tsx",
     "tooling/architecture-conformance/fixtures/valid/**/*.mts",
     "tooling/architecture-conformance/fixtures/valid/**/*.cts"
+  ],
+  "references": [
+    {
+      "path": "./packages/platform/local-host-control"
+    }
   ]
 }

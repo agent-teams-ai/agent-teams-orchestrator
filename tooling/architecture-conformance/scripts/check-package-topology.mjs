@@ -85,6 +85,44 @@ function requireFailure(label, result, expectedText) {
   }
 }
 
+function qualifiedLibraryScripts() {
+  return {
+    build: "tsc --project tsconfig.json --pretty false",
+    check:
+      "pnpm run clean && pnpm run typecheck && pnpm run build && pnpm run test",
+    clean:
+      "node -e \"const fs=require('node:fs'); for (const path of ['dist','.cache']) fs.rmSync(path, { recursive: true, force: true })\"",
+    prepack: "pnpm run clean && pnpm run build",
+    test: "node --test --test-concurrency=1",
+    typecheck: "tsc --project tsconfig.json --noEmit --pretty false",
+  };
+}
+
+function qualifiedLibraryExports(additional = {}) {
+  return {
+    ".": {
+      types: "./dist/index.d.ts",
+      import: "./dist/index.js",
+    },
+    ...additional,
+  };
+}
+
+async function writeRootReferences(root, references) {
+  await writeFile(
+    path.join(root, "tsconfig.json"),
+    JSON.stringify(
+      {
+        compilerOptions: { noEmit: true },
+        files: [],
+        references: references.map((reference) => ({ path: `./${reference}` })),
+      },
+      null,
+      2,
+    ),
+  );
+}
+
 async function writeDossier(root, status) {
   const dossierRoot = path.join(
     root,
@@ -206,9 +244,9 @@ async function materializeContext(root) {
         name: "@agent-teams/work-coordination",
         private: true,
         type: "module",
-        exports: {
-          ".": "./src/index.ts",
-        },
+        files: ["dist"],
+        scripts: qualifiedLibraryScripts(),
+        exports: qualifiedLibraryExports(),
         agentTeamsArchitecture: {
           role: "bounded-context",
           ownerDocument: "domain.contexts.work-coordination",
@@ -294,6 +332,9 @@ try {
   );
 
   await materializeContext(temporaryRoot);
+  await writeRootReferences(temporaryRoot, [
+    "packages/contexts/work-coordination",
+  ]);
   requireFailure(
     "materialized proposed context",
     run(temporaryRoot),
@@ -310,10 +351,35 @@ try {
     path.join(temporaryRoot, "packages/contexts/work-coordination"),
     { recursive: true },
   );
+  requireFailure(
+    "stale project reference",
+    run(temporaryRoot),
+    "points to an unmaterialized catalog package",
+  );
+  await writeRootReferences(temporaryRoot, []);
   requireSuccess(
     "scaffold accepted context",
     runScaffolder(temporaryRoot, "context.work-coordination"),
   );
+  const scaffoldedManifestPath = path.join(
+    temporaryRoot,
+    "packages/contexts/work-coordination/package.json",
+  );
+  const scaffoldedManifest = JSON.parse(
+    await readFile(scaffoldedManifestPath, "utf8"),
+  );
+  if (
+    JSON.stringify(scaffoldedManifest.scripts) !==
+      JSON.stringify(qualifiedLibraryScripts()) ||
+    JSON.stringify(scaffoldedManifest.exports) !==
+      JSON.stringify(qualifiedLibraryExports()) ||
+    JSON.stringify(scaffoldedManifest.files) !== JSON.stringify(["dist"])
+  ) {
+    throw new Error("scaffolder did not emit the qualified library manifest");
+  }
+  await writeRootReferences(temporaryRoot, [
+    "packages/contexts/work-coordination",
+  ]);
   requireFailure(
     "package-only scaffold",
     run(temporaryRoot),
@@ -353,6 +419,89 @@ try {
     "scaffolded accepted context",
     run(temporaryRoot),
   );
+  await writeRootReferences(temporaryRoot, [
+    "packages/contexts/work-coordination/",
+  ]);
+  requireSuccess(
+    "project reference with trailing slash",
+    run(temporaryRoot),
+  );
+  await writeRootReferences(temporaryRoot, [
+    "packages/contexts/work-coordination/tsconfig.json",
+  ]);
+  requireSuccess(
+    "project reference to explicit tsconfig",
+    run(temporaryRoot),
+  );
+  await writeFile(
+    path.join(temporaryRoot, "tsconfig.json"),
+    JSON.stringify(
+      {
+        compilerOptions: { noEmit: true },
+        files: [],
+        references: [{ path: "C:\\outside\\tsconfig.json" }],
+      },
+      null,
+      2,
+    ),
+  );
+  requireFailure(
+    "Windows absolute project reference",
+    run(temporaryRoot),
+    "every project reference requires a relative in-repository path",
+  );
+  await writeFile(
+    path.join(temporaryRoot, "tsconfig.json"),
+    JSON.stringify(
+      {
+        compilerOptions: { noEmit: true },
+        files: [],
+        references: [{ path: "C:outside\\tsconfig.json" }],
+      },
+      null,
+      2,
+    ),
+  );
+  requireFailure(
+    "Windows drive-relative project reference",
+    run(temporaryRoot),
+    "every project reference requires a relative in-repository path",
+  );
+  await writeFile(
+    path.join(temporaryRoot, "tsconfig.json"),
+    JSON.stringify(
+      {
+        compilerOptions: { noEmit: true },
+        files: [],
+        references: [{ path: "\\\\server\\share\\tsconfig.json" }],
+      },
+      null,
+      2,
+    ),
+  );
+  requireFailure(
+    "UNC absolute project reference",
+    run(temporaryRoot),
+    "every project reference requires a relative in-repository path",
+  );
+  await writeRootReferences(temporaryRoot, []);
+  requireFailure(
+    "missing project reference",
+    run(temporaryRoot),
+    "must appear exactly once in project references (found 0)",
+  );
+  await writeRootReferences(temporaryRoot, [
+    "packages/contexts/work-coordination/",
+    "packages/contexts/work-coordination/tsconfig.json",
+  ]);
+  requireFailure(
+    "duplicate project reference",
+    run(temporaryRoot),
+    "must appear exactly once in project references (found 2)",
+  );
+  await writeRootReferences(temporaryRoot, [
+    "packages/contexts/work-coordination",
+  ]);
 
   await writeFile(
     path.join(
@@ -384,12 +533,103 @@ try {
     run(temporaryRoot),
     "production file is outside the package catalog",
   );
+  await rm(unknownRoot, { recursive: true });
 
   const manifestPath = path.join(
     temporaryRoot,
     "packages/contexts/work-coordination/package.json",
   );
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  delete manifest.scripts.test;
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library without test gate",
+    run(temporaryRoot),
+    "materialized library requires a test script",
+  );
+  manifest.scripts.test = "node --test";
+  delete manifest.type;
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library without module type",
+    run(temporaryRoot),
+    "materialized library requires type module",
+  );
+  manifest.type = "module";
+  manifest.exports = qualifiedLibraryExports();
+  manifest.exports["."].types = "./dist/index.js";
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library with invalid declaration export",
+    run(temporaryRoot),
+    "library export . requires a normalized dist declaration target",
+  );
+  manifest.exports = qualifiedLibraryExports();
+  delete manifest.exports["."].types;
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library without declaration export",
+    run(temporaryRoot),
+    "library export . requires a normalized dist declaration target",
+  );
+  manifest.exports = qualifiedLibraryExports();
+  manifest.exports["."].import = "./dist/index.d.ts";
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library with invalid ESM export",
+    run(temporaryRoot),
+    "library export . requires a normalized dist ESM import target",
+  );
+  manifest.exports = qualifiedLibraryExports();
+  delete manifest.exports["."].import;
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library without ESM export",
+    run(temporaryRoot),
+    "library export . requires a normalized dist ESM import target",
+  );
+  manifest.exports = qualifiedLibraryExports({
+    "./module": {
+      import: "./dist/module.js",
+    },
+  });
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library subpath without declaration export",
+    run(temporaryRoot),
+    "library export ./module requires a normalized dist declaration target",
+  );
+  manifest.exports = { ".": "./src/index.ts" };
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library with source-only export",
+    run(temporaryRoot),
+    "library exports must reference built artifacts",
+  );
+  manifest.exports = { ".": "./dist/../src/index.js" };
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library export traversal",
+    run(temporaryRoot),
+    "library exports must reference built artifacts",
+  );
+  manifest.exports = qualifiedLibraryExports();
+  manifest.exports["."].import = "./dist/%2e/index.js";
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library export with encoded dot segment",
+    run(temporaryRoot),
+    "library export . requires a normalized dist ESM import target",
+  );
+  manifest.exports = qualifiedLibraryExports();
+  manifest.files = [];
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  requireFailure(
+    "library without packed dist",
+    run(temporaryRoot),
+    "materialized library files must include dist",
+  );
+  manifest.files = ["dist"];
   manifest.name = "@agent-teams/wrong-name";
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
   requireFailure(
@@ -410,12 +650,23 @@ try {
   );
 
   delete manifest.dependencies;
+  manifest.exports = qualifiedLibraryExports({
+    "./generated": {
+      types: "./dist/generated/index.d.ts",
+      import: "./dist/generated/index.js",
+    },
+  });
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
-  await rm(unknownRoot, { recursive: true });
-  manifest.exports = {
-    ".": "./src/index.ts",
-    "./module": "./src/module.ts",
-  };
+  requireSuccess(
+    "library exports may precede generated build output",
+    run(temporaryRoot),
+  );
+  manifest.exports = qualifiedLibraryExports({
+    "./module": {
+      types: "./dist/module.d.ts",
+      import: "./dist/module.js",
+    },
+  });
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
   await writeFile(
     path.join(
@@ -425,6 +676,10 @@ try {
     "export const workCoordinationModuleFixture = true;\n",
   );
   await materializeApp(temporaryRoot);
+  await writeRootReferences(temporaryRoot, [
+    "packages/contexts/work-coordination",
+    "apps/test",
+  ]);
   requireSuccess(
     "materialized app with accepted feature and public package import",
     run(temporaryRoot),
@@ -485,9 +740,16 @@ try {
     await readFile(manifestPath, "utf8"),
   );
   contextManifest.exports = {
-    ".": "./src/index.ts",
-    "./module": "./src/module.ts",
-    "./*": "./src/*.ts",
+    ...qualifiedLibraryExports({
+      "./module": {
+        types: "./dist/module.d.ts",
+        import: "./dist/module.js",
+      },
+    }),
+    "./*": {
+      types: "./dist/*.d.ts",
+      import: "./dist/*.js",
+    },
     "./blocked/*": null,
   };
   await writeFile(
@@ -503,10 +765,12 @@ try {
     run(temporaryRoot),
     "is not exported by @agent-teams/work-coordination",
   );
-  contextManifest.exports = {
-    ".": "./src/index.ts",
-    "./module": "./src/module.ts",
-  };
+  contextManifest.exports = qualifiedLibraryExports({
+    "./module": {
+      types: "./dist/module.d.ts",
+      import: "./dist/module.js",
+    },
+  });
   await writeFile(
     manifestPath,
     JSON.stringify(contextManifest, null, 2),
@@ -619,6 +883,11 @@ try {
     "scaffold platform package",
     runScaffolder(temporaryRoot, "platform.test"),
   );
+  await writeRootReferences(temporaryRoot, [
+    "packages/contexts/work-coordination",
+    "apps/test",
+    "packages/platform/test",
+  ]);
   const platformFeatureRoot = path.join(
     temporaryRoot,
     "packages/platform/test/src/features/test-capability",
