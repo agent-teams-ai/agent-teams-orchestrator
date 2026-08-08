@@ -2,6 +2,8 @@
 id: ADR-0062
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/domain
 summary: Separate execution-workspace materialization from runtime security isolation and compose them through explicit requirements.
 approved_by: product-owner

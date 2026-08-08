@@ -2,6 +2,8 @@
 id: ADR-0046
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: usage-capability
 summary: Represent usage quantities and money with native BigInt, context-owned exact value objects, and lossless persistence mappings.
 approved_by: product-owner

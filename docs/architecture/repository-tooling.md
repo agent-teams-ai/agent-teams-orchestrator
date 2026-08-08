@@ -85,27 +85,31 @@ The foundation release repository owns package tarball verification; this
 consumer additionally runs `foundation:e2e` to prove registry restoration and
 manifest and lockfile immutability around the local link lifecycle.
 
-Capability adoption remains incremental. Existing repository-local tooling moves
-only after the extracted capability has equivalent fixtures, a migration path,
-and a consumer conformance test. Until then, the local implementation remains
-authoritative; two independently evolving copies are prohibited. The foundation
-checkout is accepted only through the guarded local lifecycle and is rejected by
-CI.
+Capability adoption is explicit. Existing repository-local tooling moves only
+after the extracted capability has equivalent fixtures, a migration path, and a
+consumer conformance test. During a measured parity window the donor remains a
+blocking oracle; after parity, only Orchestrator-specific residue remains. The
+foundation checkout is accepted only through the guarded local lifecycle and is
+rejected by CI.
 
-The current exact Foundation release keeps `workspace.dependency-declarations` blocking through
-strict `foundation.config.yaml` and makes `architecture.source-dependencies`
-available as an independently activated capability. The existing
-dependency-specifier validator is retained temporarily as a donor oracle and
-because it also enforces production source import placement. That source rule
-remains consumer-owned until the foundation capability is enabled and
-parity-proven in this repository. New declaration rules belong to foundation
-rather than the donor during this observation window.
+The current exact Foundation release keeps `workspace.dependency-declarations`,
+`architecture.source-dependencies`, `documentation.local-references`, and
+`quality.suppression-governance` blocking through strict
+`foundation.config.yaml`. Source dependency policy starts with materialized
+production roots and expands in the same change that scaffolds a new package.
+Generic local-reference and suppression policy belongs to Foundation; the local
+documentation and lint gates retain project-specific metadata, diagram, owner,
+and protected-rule checks.
 
-Foundation ADR-0003, ADR-0004, and ADR-0005 are accepted, but their suppression-
-governance, public-API-compatibility, and repository-security capabilities are
-not enabled here merely because the installed release implements them. Suppression
-governance requires an Orchestrator-owned waiver and protected-rule policy plus
-consumer parity evidence. Public API
+`governance.architecture-decisions` is also blocking. Every ADR declares both
+directions of supersession explicitly, the lifecycle sections in
+`docs/decisions/README.md` list each ADR exactly once, and the generated accepted
+baseline makes accepted history immutable. The concern map uses stable IDs as
+navigation labels rather than duplicating lifecycle links.
+
+Foundation ADR-0003, ADR-0004, and ADR-0005 are accepted. Suppression governance
+is enabled with an Orchestrator-owned expiring waiver ledger while the local donor
+continues as a parity oracle. Public API
 compatibility starts only for a real versioned package surface with
 release-owned baselines. The accepted combined repository-security profile does
 not apply while Orchestrator publishes no package and must not be enabled with

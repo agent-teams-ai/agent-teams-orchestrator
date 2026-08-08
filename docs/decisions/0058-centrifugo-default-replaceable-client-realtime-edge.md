@@ -2,6 +2,8 @@
 id: ADR-0058
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: clients/sdk
 summary: Use Centrifugo as the default replaceable client realtime edge while context-owned durable feeds remain authoritative.
 approved_by: product-owner

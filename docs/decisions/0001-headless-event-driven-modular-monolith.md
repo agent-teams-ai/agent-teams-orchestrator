@@ -2,6 +2,8 @@
 id: ADR-0001
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture
 summary: Start as a headless event-driven modular monolith with extractable bounded contexts.
 ---

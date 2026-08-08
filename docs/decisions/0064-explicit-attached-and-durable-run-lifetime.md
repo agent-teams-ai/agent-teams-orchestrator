@@ -2,6 +2,7 @@
 id: ADR-0064
 type: adr
 status: accepted
+superseded_by: []
 owner: run-orchestration
 summary: Separate attached client-bound Run lifetime from explicitly durable work without transferring shared process ownership.
 approved_by: product-owner

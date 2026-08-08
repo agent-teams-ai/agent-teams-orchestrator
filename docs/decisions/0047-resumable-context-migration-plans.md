@@ -2,6 +2,7 @@
 id: ADR-0047
 type: adr
 status: accepted
+superseded_by: []
 owner: platform/persistence
 summary: Assemble feature-owned migrations into context plans with transactional and online-resumable steps.
 approved_by: product-owner

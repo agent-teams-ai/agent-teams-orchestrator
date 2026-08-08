@@ -2,6 +2,8 @@
 id: ADR-0017
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: platform/control-api
 summary: Constrain public Protobuf contracts to a predictable cross-language type and evolution profile.
 related:

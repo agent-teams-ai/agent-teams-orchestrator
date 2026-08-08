@@ -2,6 +2,8 @@
 id: ADR-0043
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/governance
 summary: Optimize the orchestrator for controlled long-term evolution without speculative domain abstractions.
 approved_by: product-owner

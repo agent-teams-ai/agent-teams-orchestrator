@@ -2,6 +2,8 @@
 id: ADR-0076
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: run-orchestration
 summary: Keep Team creation and placement with their semantic owners while Run Orchestration owns the durable Team activation process.
 approved_by: product-owner

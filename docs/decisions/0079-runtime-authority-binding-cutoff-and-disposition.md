@@ -2,6 +2,7 @@
 id: ADR-0079
 type: adr
 status: accepted
+superseded_by: []
 owner: integration/runtime
 summary: Split project and Run runtime bindings and coordinate target-specific cutoff, successor admission, and scope disposition through consumer-owned ports.
 approved_by: product-owner

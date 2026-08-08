@@ -2,6 +2,8 @@
 id: ADR-0068
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/domain
 summary: Separate human notification management from agent attention while reusing only technical platform mechanisms.
 approved_by: product-owner

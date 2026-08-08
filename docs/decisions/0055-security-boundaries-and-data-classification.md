@@ -2,6 +2,8 @@
 id: ADR-0055
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/security
 summary: Establish trust boundaries, feature-owned data classification, controlled egress, and executable security checks without a Security bounded context.
 approved_by: product-owner

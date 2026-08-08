@@ -2,6 +2,8 @@
 id: ADR-0020
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: platform/control-api
 summary: Use typed business commands and field-mask updates guarded by opaque ETags.
 related:

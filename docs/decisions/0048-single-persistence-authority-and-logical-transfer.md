@@ -2,6 +2,8 @@
 id: ADR-0048
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: platform/persistence
 summary: Select exactly one authoritative persistence profile per bounded context and transfer data through logical contracts.
 approved_by: product-owner

@@ -2,6 +2,7 @@
 id: ADR-0042
 type: adr
 status: accepted
+superseded_by: []
 owner: architecture/domain
 summary: Determine bounded-context topology from domain evidence without a numerical target or ceiling.
 approved_by: product-owner

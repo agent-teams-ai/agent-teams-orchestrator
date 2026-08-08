@@ -2,6 +2,7 @@
 id: ADR-0018
 type: adr
 status: superseded
+supersedes: []
 owner: clients/sdk
 summary: Represent accepted durable commands as recoverable operations with one public command identity.
 related:

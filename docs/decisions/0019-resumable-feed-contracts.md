@@ -2,6 +2,8 @@
 id: ADR-0019
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: clients/sdk
 summary: Use feed-scoped cursors, explicit checkpoints, and snapshot watermarks for resumable SDK subscriptions.
 related:

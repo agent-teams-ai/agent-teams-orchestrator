@@ -2,6 +2,8 @@
 id: ADR-0037
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/contracts
 summary: Begin every contract surface with one v1 schema family and prohibit speculative parallel versions.
 approved_by: product-owner

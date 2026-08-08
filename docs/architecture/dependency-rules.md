@@ -201,17 +201,20 @@ Production source under `apps/**/src` and `packages/**/src` cannot import it.
 Architecture fixtures prove both the valid dev-only declaration and invalid
 declaration and import cases.
 
-The current exact Foundation release provides reusable declaration checks through
-`workspace.dependency-declarations` and a separately activated
-`architecture.source-dependencies` capability. This repository currently enables
-only the declaration capability: catalog exactness, catalog references, workspace
-protocols, reserved-scope resolution, unique package identities, and
-development-only placement. The repository-local dependency validator remains a
-temporary blocking donor oracle and continues to own production source import
-checks until the foundation source capability is parity-proven here. One
-conformance fixture runs both declaration validators over the same mutations and
-asserts the foundation's stable rule IDs; source-import mutations are expected to
-fail only the donor during this observation window.
+The current exact Foundation release provides reusable declaration and source
+dependency checks through `workspace.dependency-declarations` and
+`architecture.source-dependencies`. Both are blocking. The source policy governs
+the materialized Local Host Control production source with explicit public API,
+application, model, and port boundaries. Package-local consumer tests live outside
+that governed production root so a self-package black-box import is not mistaken
+for a production dependency.
+
+The repository-local dependency validator remains a blocking donor oracle for
+Orchestrator-specific package roles, catalog completeness, and production import
+placement. A newly materialized package must add its existing `src` root and
+boundary entrypoints to the Foundation policy in the same change. Donor rules are
+removed only after a consumer mutation proves semantic parity; the two tools must
+not become independent authorities for the same rule.
 
 Cross-package source imports must name a declared manifest dependency and use a
 subpath exposed by the target package `exports`. Imports through another package's

@@ -2,6 +2,8 @@
 id: ADR-0039
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: engineering/tooling
 summary: Adopt Nx incrementally as a package-based task and project graph without making it the source of architecture topology.
 approved_by: product-owner

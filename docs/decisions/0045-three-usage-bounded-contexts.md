@@ -2,6 +2,8 @@
 id: ADR-0045
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/domain
 summary: Separate usage measurement, accounting, and consumption governance into three bounded contexts.
 approved_by: product-owner

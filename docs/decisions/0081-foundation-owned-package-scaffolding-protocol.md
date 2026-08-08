@@ -2,6 +2,8 @@
 id: ADR-0081
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/tooling
 summary: Use the versioned Foundation Plan, Apply, and Recover protocol for library package boundaries while keeping Orchestrator topology authority local.
 approved_by: product-owner

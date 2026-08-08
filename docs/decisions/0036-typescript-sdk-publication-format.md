@@ -2,6 +2,8 @@
 id: ADR-0036
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: clients/sdk
 summary: Publish the TypeScript SDK with explicit Node ESM and CommonJS outputs plus an isolated browser export.
 approved_by: product-owner

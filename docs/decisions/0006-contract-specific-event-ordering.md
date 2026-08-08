@@ -2,6 +2,7 @@
 id: ADR-0006
 type: adr
 status: superseded
+supersedes: []
 owner: platform/eventing
 summary: Original event ordering decision superseded by broker-neutral partition ordering.
 superseded_by:

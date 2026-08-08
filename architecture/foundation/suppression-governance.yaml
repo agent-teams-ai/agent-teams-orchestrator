@@ -1,0 +1,25 @@
+schemaVersion: 1
+governedRoots:
+  - packages/platform/local-host-control/src
+  - packages/platform/local-host-control/tests
+  - scripts/architecture
+  - scripts/docs
+  - scripts/foundation
+  - scripts/reliability
+  - scripts/security
+  - scripts/skills
+  - tooling/architecture-conformance/scripts
+nonWaivableRulePrefixes:
+  - architecture.
+waivers:
+  - id: LINT-PROMISE-MULTIPLE-RESOLVED-001
+    path: scripts/docs/validate-docs.mjs
+    line: 668
+    directive: oxlint-disable-next-line
+    rules:
+      - promise/no-multiple-resolved
+    owner: architecture/tooling
+    reason: The settled guard makes child process error and close callbacks idempotent.
+    createdOn: 2026-08-08
+    expiresOn: 2026-11-05
+    decisionRef: ADR-0056

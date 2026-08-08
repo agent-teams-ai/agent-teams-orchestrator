@@ -2,6 +2,7 @@
 id: ADR-0069
 type: adr
 status: accepted
+superseded_by: []
 owner: integration/runtime
 summary: Keep AR execution identity, custody, and process continuity opaque behind the Runtime Published Language.
 approved_by: product-owner

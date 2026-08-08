@@ -2,6 +2,7 @@
 id: ADR-0028
 type: adr
 status: accepted
+superseded_by: []
 owner: integration/runtime
 summary: Keep execution fences inside AR while preserving the product approval and runtime permission boundary.
 related:

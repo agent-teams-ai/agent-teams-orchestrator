@@ -2,6 +2,8 @@
 id: ADR-0031
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: engineering/tooling
 summary: Use native TypeScript 7 as the primary compiler while isolating legacy Compiler API tools.
 related:

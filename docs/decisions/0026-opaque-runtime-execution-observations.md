@@ -2,6 +2,7 @@
 id: ADR-0026
 type: adr
 status: superseded
+supersedes: []
 owner: integration/runtime
 summary: Consume AR execution identity and lifecycle as opaque observations without mirroring its internal domain.
 related:

@@ -2,6 +2,8 @@
 id: ADR-0003
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: integration/runtime
 summary: Assign technical agent execution and provider lifecycle ownership to ar.
 related:

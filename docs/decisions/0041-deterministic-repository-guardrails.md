@@ -2,6 +2,8 @@
 id: ADR-0041
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: engineering/tooling
 summary: Add dependency catalogs, structural AST rules, dead-code analysis, API reports, and packed-package validation in evidence-driven stages.
 approved_by: product-owner
