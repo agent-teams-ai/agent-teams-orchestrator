@@ -44,16 +44,41 @@ function run(root) {
   });
 }
 
-function runScaffolder(root, id, options = {}) {
-  return spawnSync(
+function runScaffolder(root, id) {
+  const planPath = `.agent-teams-local/scaffolding-plans/${id}.json`;
+  const planned = spawnSync(
     process.execPath,
     [
       scaffolder,
+      "plan",
       "--root",
       root,
       "--id",
       id,
-      ...(options.dryRun ? ["--dry-run"] : []),
+      "--plan",
+      planPath,
+    ],
+    {
+      cwd: repositoryRoot,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        NO_COLOR: "1",
+      },
+    },
+  );
+  if (planned.status !== 0) {
+    return planned;
+  }
+  return spawnSync(
+    process.execPath,
+    [
+      scaffolder,
+      "apply",
+      "--root",
+      root,
+      "--plan",
+      planPath,
     ],
     {
       cwd: repositoryRoot,
@@ -197,7 +222,7 @@ async function writeCatalog(root) {
   );
   await writeFile(
     path.join(architectureRoot, "package-catalog.yaml"),
-    `version: 1
+    `version: 2
 packages:
   - id: context.work-coordination
     role: bounded-context
@@ -214,6 +239,43 @@ packages:
     path: apps/test
     package_name: "@agent-teams/app-test"
     owner_document: architecture.platform-test
+`,
+  );
+  const foundationRoot = path.join(architectureRoot, "foundation");
+  await mkdir(foundationRoot, { recursive: true });
+  await writeFile(
+    path.join(foundationRoot, "scaffolding.yaml"),
+    `schemaVersion: 2
+projectId: package-topology-conformance
+targetCatalogPath: architecture/package-catalog.yaml
+compositions:
+  - id: orchestrator-library-boundary
+    scaffoldProfile:
+      ref:
+        id: foundation.node-typescript-pnpm-esm
+        contractVersion: 1
+      parameters:
+        tsconfigBase: tsconfig.json
+    recipe:
+      ref:
+        id: foundation.node-typescript-library-boundary
+        contractVersion: 1
+    targetRoles:
+      - bounded-context
+      - integration
+      - platform
+      - sdk
+      - testing
+    authorityVerifiers:
+      - id: foundation.markdown-yaml-owner
+        contractVersion: 1
+        parameters:
+          allowedStatuses:
+            - accepted
+            - active
+          documentRoots:
+            - docs
+    policies: []
 `,
   );
   await writeFile(
@@ -328,7 +390,7 @@ try {
   requireFailure(
     "scaffold proposed context",
     runScaffolder(temporaryRoot, "context.work-coordination"),
-    "must be accepted or active before scaffolding",
+    "Owner document status is not admitted by the selected Composition",
   );
 
   await materializeContext(temporaryRoot);

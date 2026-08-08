@@ -57,6 +57,18 @@ Dependabot checks npm every weekday and opens a dedicated reviewed exact-version
 update pull request for new Foundation releases; floating ranges and automerge
 are forbidden, and adding a capability is separate from updating package bytes.
 
+The package catalog remains Orchestrator-owned. A qualified library boundary uses
+the Foundation Plan, Apply, and Recover protocol:
+
+```bash
+pnpm architecture:scaffold-package -- plan --id <catalog-id>
+pnpm architecture:scaffold-package -- apply --plan <saved-plan-path>
+pnpm architecture:scaffold-package -- recover
+```
+
+There is no one-shot command. Review the saved Plan before Apply, then add the
+accepted first feature and root project reference in the same change.
+
 ## Product shape
 
 The orchestrator is headless. Desktop, web, CLI, automation, and third-party

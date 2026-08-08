@@ -57,10 +57,13 @@ accepted context can materialize a valid package, and an uncataloged package is
 rejected.
 
 The package scaffolder reads this catalog and cannot invent a package, role, path,
-or owner. It refuses proposed owners and existing targets, writes package boundary
-files atomically, and never generates ceremonial DDD artifacts. The accepted first
-feature slice is added deliberately in the same change. A library package without
-at least one feature slice remains CI-invalid.
+or owner. The Orchestrator binds the catalog and owner documents to the versioned
+Foundation Plan, Apply, and Recover protocol through a consumer-owned Composition.
+It refuses proposed owners and existing targets, writes only the qualified library
+boundary, and never generates ceremonial DDD artifacts. The accepted first feature
+slice is added deliberately in the same change. A library package without at least
+one feature slice remains CI-invalid. ADR-0081 owns the compiler delegation and
+qualification details.
 
 ## Consequences
 

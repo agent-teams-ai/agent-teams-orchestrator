@@ -25,6 +25,7 @@
     "architecture:model:test": "node --test --test-concurrency=1 scripts/architecture/validate-architecture-model.test.mjs",
     "architecture:model:validate": "likec4 validate --no-layout architecture/likec4",
     "architecture:nx:check": "node scripts/architecture/validate-nx-workspace.mjs",
+    "architecture:scaffolding:check": "node tooling/architecture-conformance/scripts/check-package-scaffolding.mjs",
     "architecture:scaffold-package": "node scripts/architecture/scaffold-package.mjs",
     "architecture:topology": "node scripts/architecture/validate-package-topology.mjs",
     "check": "pnpm foundation:check && pnpm docs:check && pnpm packages:check && pnpm typecheck:root && pnpm architecture:check",
@@ -72,7 +73,7 @@
     "typecheck:root": "tsc --project tsconfig.json --noEmit --pretty false"
   },
   "devDependencies": {
-    "@agent-teams/engineering-foundation": "0.5.0",
+    "@agent-teams/engineering-foundation": "0.8.0",
     "ajv": "catalog:",
     "ajv-formats": "catalog:",
     "cspell": "catalog:",

@@ -2,6 +2,7 @@ node_modules/
 dist/
 .nx/
 .cache/
+.agent-teams-local/
 .DS_Store
 *.log
 *.tsbuildinfo

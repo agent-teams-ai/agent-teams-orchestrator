@@ -253,11 +253,19 @@ Before implementation packages are accepted, repository tooling must:
 8. provide generators for new packages and features so the compliant path is the
    easiest path.
 
-ADR-0038 owns the catalog and materialization policy. The package scaffolder reads
-the catalog and cannot invent a package, role, path, or owner. Run it with
-`pnpm architecture:scaffold-package -- --id <catalog-id>` only after the owner and
-first slice are accepted. The generated boundary does not pass CI until a real
-feature slice is added in the same change.
+ADR-0038 owns the catalog and materialization policy; ADR-0081 owns delegation to
+the versioned Foundation scaffolding protocol. The adapter cannot invent a package,
+role, path, or owner. After the owner and first slice are accepted, run:
+
+```bash
+pnpm architecture:scaffold-package -- plan --id <catalog-id>
+pnpm architecture:scaffold-package -- apply --plan <saved-plan-path>
+```
+
+Review the saved immutable Plan between the commands. If Apply is interrupted,
+run `pnpm architecture:scaffold-package -- recover`; recovery intentionally does
+not depend on unrelated topology validity. The generated boundary does not pass CI
+until a real feature slice and root project reference are added in the same change.
 
 Every materialized TypeScript library exposes built ESM and declaration targets
 under `dist/**`, declares `"type": "module"`, and gives every non-null exported

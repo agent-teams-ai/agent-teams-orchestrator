@@ -10,7 +10,7 @@
   ],
   "properties": {
     "version": {
-      "const": 1
+      "const": 2
     },
     "packages": {
       "type": "array",

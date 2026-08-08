@@ -57,3 +57,4 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @agent-teams/local-host-control run check
+      - run: pnpm architecture:scaffolding:check
