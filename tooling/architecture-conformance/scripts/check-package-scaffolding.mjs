@@ -149,7 +149,7 @@ async function createFixture(entries) {
   await writeFile(
     path.join(architectureRoot, "package-catalog.yaml"),
     YAML.stringify({
-      version: 2,
+      version: 1,
       packages: entries.map(({ ownerStatus: _ownerStatus, ...entry }) => entry),
     }),
   );
@@ -536,7 +536,7 @@ function journalPath(root) {
 
 async function writeJournal(root, plan, stateFor = () => "pending") {
   const journal = {
-    schemaVersion: 2,
+    schemaVersion: 1,
     state: "PREPARED",
     plan,
     operations: plan.operations.map((operation, index) => ({

@@ -222,7 +222,7 @@ async function writeCatalog(root) {
   );
   await writeFile(
     path.join(architectureRoot, "package-catalog.yaml"),
-    `version: 2
+    `version: 1
 packages:
   - id: context.work-coordination
     role: bounded-context
@@ -245,7 +245,7 @@ packages:
   await mkdir(foundationRoot, { recursive: true });
   await writeFile(
     path.join(foundationRoot, "scaffolding.yaml"),
-    `schemaVersion: 2
+    `schemaVersion: 1
 projectId: package-topology-conformance
 targetCatalogPath: architecture/package-catalog.yaml
 compositions:

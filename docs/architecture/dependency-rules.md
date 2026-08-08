@@ -201,7 +201,7 @@ Production source under `apps/**/src` and `packages/**/src` cannot import it.
 Architecture fixtures prove both the valid dev-only declaration and invalid
 declaration and import cases.
 
-Foundation 0.8.0 provides reusable declaration checks through
+The current exact Foundation release provides reusable declaration checks through
 `workspace.dependency-declarations` and a separately activated
 `architecture.source-dependencies` capability. This repository currently enables
 only the declaration capability: catalog exactness, catalog references, workspace

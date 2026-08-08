@@ -92,7 +92,7 @@ authoritative; two independently evolving copies are prohibited. The foundation
 checkout is accepted only through the guarded local lifecycle and is rejected by
 CI.
 
-Foundation version 0.8.0 keeps `workspace.dependency-declarations` blocking through
+The current exact Foundation release keeps `workspace.dependency-declarations` blocking through
 strict `foundation.config.yaml` and makes `architecture.source-dependencies`
 available as an independently activated capability. The existing
 dependency-specifier validator is retained temporarily as a donor oracle and
@@ -103,7 +103,7 @@ rather than the donor during this observation window.
 
 Foundation ADR-0003, ADR-0004, and ADR-0005 are accepted, but their suppression-
 governance, public-API-compatibility, and repository-security capabilities are
-not enabled here merely because version 0.8.0 implements them. Suppression
+not enabled here merely because the installed release implements them. Suppression
 governance requires an Orchestrator-owned waiver and protected-rule policy plus
 consumer parity evidence. Public API
 compatibility starts only for a real versioned package surface with
