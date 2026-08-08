@@ -91,6 +91,32 @@ test("blocking and advisory lanes exclude the same non-production fixtures", () 
   assert.deepEqual(advisoryConfig.ignorePatterns, blockingConfig.ignorePatterns);
 });
 
+test("maintainability profiles stay aligned with Foundation", () => {
+  const blockingConfig = JSON.parse(
+    readFileSync(path.join(repositoryRoot, ".oxlintrc.json"), "utf8"),
+  );
+  const foundationTestProfile = JSON.parse(
+    readFileSync(
+      path.join(
+        repositoryRoot,
+        "node_modules/@agent-teams/engineering-foundation/presets/oxlint/maintainability-tests.json",
+      ),
+      "utf8",
+    ),
+  );
+  assert.ok(
+    blockingConfig.extends.includes(
+      "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/maintainability.json",
+    ),
+    "production maintainability preset must stay explicit",
+  );
+  const testOverride = blockingConfig.overrides.find((override) =>
+    override.files?.includes("packages/**/tests/**"),
+  );
+  assert.ok(testOverride, "test maintainability override must exist");
+  assert.deepEqual(testOverride.rules, foundationTestProfile.rules);
+});
+
 test("fast lane accepts valid source", () => {
   const result = runOxlint(".oxlintrc.json", "fast-valid.ts");
   assert.equal(result.status, 0, result.diagnostics);
