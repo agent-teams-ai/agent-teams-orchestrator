@@ -1,0 +1,14 @@
+schemaVersion: 1
+governedRoots:
+  - packages/platform/local-host-control/src
+  - packages/platform/local-host-control/tests
+  - scripts/architecture
+  - scripts/docs
+  - scripts/foundation
+  - scripts/reliability
+  - scripts/security
+  - scripts/skills
+  - tooling/architecture-conformance/scripts
+nonWaivableRulePrefixes:
+  - architecture.
+waivers: []

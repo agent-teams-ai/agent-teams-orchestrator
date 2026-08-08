@@ -2,6 +2,8 @@
 id: ADR-0054
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/domain
 summary: Use LikeC4 as the canonical machine-readable topology for strategic context relationships and integration boundaries.
 approved_by: product-owner

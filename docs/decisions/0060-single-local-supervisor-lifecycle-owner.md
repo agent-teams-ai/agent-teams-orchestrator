@@ -2,6 +2,7 @@
 id: ADR-0060
 type: adr
 status: accepted
+superseded_by: []
 owner: platform/local-host
 summary: Clarify that one shared Local Supervisor exclusively owns local orchestrator process lifecycle.
 approved_by: product-owner

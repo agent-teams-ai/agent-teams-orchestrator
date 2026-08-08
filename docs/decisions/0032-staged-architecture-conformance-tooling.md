@@ -2,6 +2,8 @@
 id: ADR-0032
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: engineering/tooling
 summary: Enforce fast source boundaries with Oxlint and stage dependency-cruiser as an isolated advisory graph gate.
 related:

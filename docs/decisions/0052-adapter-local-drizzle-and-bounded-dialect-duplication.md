@@ -2,6 +2,8 @@
 id: ADR-0052
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: platform/persistence
 summary: Use adapter-local Drizzle by default while keeping only irreducible SQLite and PostgreSQL behavior separate.
 approved_by: product-owner

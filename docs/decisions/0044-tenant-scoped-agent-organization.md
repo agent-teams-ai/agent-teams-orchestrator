@@ -2,6 +2,8 @@
 id: ADR-0044
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: agent-organization
 summary: Model Agent Organization as a tenant-scoped bounded context with semantic organizational units and project-qualified team placements.
 approved_by: product-owner

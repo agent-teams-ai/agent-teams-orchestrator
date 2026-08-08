@@ -2,6 +2,8 @@
 id: ADR-0078
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: engineering/tooling
 summary: Enforce capability-owned concurrency through a federated build-time evidence gate without creating a custom runtime or global registry.
 approved_by: product-owner

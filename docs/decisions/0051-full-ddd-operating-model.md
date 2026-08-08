@@ -2,6 +2,8 @@
 id: ADR-0051
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/domain
 summary: Adopt Full DDD as the operating model for business bounded contexts without imposing ceremonial domain artifacts on technical packages.
 approved_by: product-owner

@@ -1,0 +1,64 @@
+schemaVersion: 1
+workspace:
+  kind: pnpm
+  manifest: pnpm-workspace.yaml
+governedRoots:
+  - packages/platform/local-host-control/src
+boundaries:
+  - id: platform.local-host-control.public-api
+    roots:
+      - packages/platform/local-host-control/src/index.ts
+    entrypoints: []
+    allow:
+      boundaries:
+        - platform.local-host-control.host-discovery.api
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: platform.local-host-control.host-discovery.api
+    roots:
+      - packages/platform/local-host-control/src/features/host-discovery/index.ts
+    entrypoints:
+      - packages/platform/local-host-control/src/features/host-discovery/index.ts
+    allow:
+      boundaries:
+        - platform.local-host-control.host-discovery.application
+        - platform.local-host-control.host-discovery.model
+        - platform.local-host-control.host-discovery.ports
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: platform.local-host-control.host-discovery.application
+    roots:
+      - packages/platform/local-host-control/src/features/host-discovery/application/discover-local-host.ts
+      - packages/platform/local-host-control/src/features/host-discovery/application/host-discovery-validation.ts
+    entrypoints:
+      - packages/platform/local-host-control/src/features/host-discovery/application/discover-local-host.ts
+    allow:
+      boundaries:
+        - platform.local-host-control.host-discovery.model
+        - platform.local-host-control.host-discovery.ports
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: platform.local-host-control.host-discovery.model
+    roots:
+      - packages/platform/local-host-control/src/features/host-discovery/application/model
+    entrypoints:
+      - packages/platform/local-host-control/src/features/host-discovery/application/model/host-discovery.ts
+    allow:
+      boundaries: []
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: platform.local-host-control.host-discovery.ports
+    roots:
+      - packages/platform/local-host-control/src/features/host-discovery/application/ports
+    entrypoints:
+      - packages/platform/local-host-control/src/features/host-discovery/application/ports/host-discovery-source.ts
+    allow:
+      boundaries:
+        - platform.local-host-control.host-discovery.model
+      packages: []
+      builtins: []
+      runtimeReferences: []

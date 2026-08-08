@@ -2,6 +2,8 @@
 id: ADR-0075
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: engineering/tooling
 summary: Require an exact default-deny source dependency policy for every cross-package import.
 approved_by: product-owner

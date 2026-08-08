@@ -2,6 +2,8 @@
 id: ADR-0065
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: run-orchestration
 summary: Keep Run authority, immutable planning, participant activation, Work placement, and runtime execution as distinct consistency boundaries.
 approved_by: product-owner

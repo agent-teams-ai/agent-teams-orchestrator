@@ -2,6 +2,8 @@
 id: ADR-0025
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: platform/persistence
 summary: Use capability-scoped units of work and per-context local command lanes over replaceable persistence adapters.
 related:

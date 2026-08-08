@@ -2,6 +2,8 @@
 id: ADR-0040
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/composition
 summary: Compose each bounded context through an independent private Awilix container while keeping features and public APIs container-agnostic.
 approved_by: product-owner

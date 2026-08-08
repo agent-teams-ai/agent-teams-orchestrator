@@ -2,6 +2,7 @@
 id: ADR-0022
 type: adr
 status: superseded
+supersedes: []
 owner: apps/desktop-sidecar
 summary: Make the host composition the sole owner of sidecar supervision and local trust bootstrap.
 related:

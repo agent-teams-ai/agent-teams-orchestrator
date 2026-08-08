@@ -175,15 +175,15 @@ function validateManifestNames(manifests, errors) {
   return names;
 }
 
-function validateDependency(
-  entry,
-  section,
+function validateDependency({
+  catalogs,
   dependencyName,
   dependencySpecifier,
-  workspaceNames,
-  catalogs,
+  entry,
   errors,
-) {
+  section,
+  workspaceNames,
+}) {
   const location = `${entry.relativePath}: ${section}.${dependencyName}`;
   if (typeof dependencySpecifier !== "string") {
     errors.push(`${location} must be a string specifier`);
@@ -307,15 +307,15 @@ async function main() {
       for (const [dependencyName, dependencySpecifier] of Object.entries(
         entry.manifest[section] ?? {},
       ).toSorted(([left], [right]) => left.localeCompare(right))) {
-        validateDependency(
-          entry,
-          section,
+        validateDependency({
+          catalogs,
           dependencyName,
           dependencySpecifier,
-          workspaceNames,
-          catalogs,
+          entry,
           errors,
-        );
+          section,
+          workspaceNames,
+        });
       }
     }
   }

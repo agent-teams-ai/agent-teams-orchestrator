@@ -2,6 +2,8 @@
 id: ADR-0066
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: work-coordination
 summary: Resolve concurrent Work completion and cancellation by the first valid terminal commit in Work Coordination.
 approved_by: product-owner

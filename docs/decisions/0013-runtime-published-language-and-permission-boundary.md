@@ -2,6 +2,7 @@
 id: ADR-0013
 type: adr
 status: superseded
+supersedes: []
 owner: integration/runtime
 summary: Separate product approvals from runtime permissions and assign Runtime Published Language ownership to ar.
 related:

@@ -2,6 +2,8 @@
 id: ADR-0027
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: run-orchestration
 summary: Keep Temporal behind Run Orchestration ports as a durable workflow execution adapter.
 related:

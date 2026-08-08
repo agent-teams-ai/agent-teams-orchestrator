@@ -267,6 +267,12 @@ The fixture rules are architecture fitness functions, not the complete runtime
 authorization implementation. Feature, adapter, transport, and `ar` conformance
 suites add their own threat cases while preserving these invariants.
 
+The security command remains one fail-closed gate even when its implementation
+is split into schema, discovery, policy, and threat-fixture modules to satisfy
+maintainability budgets. Generated or vendor code may be exempt from the five
+size and complexity budgets, but it is not exempt from security discovery,
+classification, suppression governance, or the allow/deny fixture contract.
+
 `pnpm architecture:check` includes this gate. The documentation and architecture
 CI workflows execute it independently so changes to prose, schemas, fixtures, or
 LikeC4 cannot bypass validation.

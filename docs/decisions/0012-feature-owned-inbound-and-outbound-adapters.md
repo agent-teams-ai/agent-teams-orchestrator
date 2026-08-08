@@ -2,6 +2,8 @@
 id: ADR-0012
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture
 summary: Colocate role-specific inbound and outbound adapters inside owning feature slices.
 ---

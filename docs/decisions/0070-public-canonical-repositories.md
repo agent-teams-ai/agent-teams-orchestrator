@@ -2,6 +2,8 @@
 id: ADR-0070
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/governance
 summary: Publish the orchestrator and agent runtime from one public canonical repository each.
 approved_by: product-owner

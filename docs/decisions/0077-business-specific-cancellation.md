@@ -2,6 +2,8 @@
 id: ADR-0077
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: clients/sdk
 summary: Keep wait abortion local and expose business-specific cancellation instead of a generic Operation cancellation command.
 approved_by: product-owner

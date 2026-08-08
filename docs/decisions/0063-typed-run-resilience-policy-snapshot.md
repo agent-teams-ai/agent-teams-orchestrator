@@ -2,6 +2,8 @@
 id: ADR-0063
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: run-orchestration
 summary: Use an immutable typed policy snapshot for Run activation, continuity, completion, and participant replacement.
 approved_by: product-owner
