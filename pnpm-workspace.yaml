@@ -14,7 +14,7 @@ catalog:
   github-slugger: 2.0.0
   jsdom: 29.1.1
   likec4: 1.59.2
-  markdownlint-cli2: 0.23.1
+  markdownlint-cli2: 0.23.2
   mdast-util-to-string: 4.0.0
   mermaid: 11.16.0
   nx: 23.1.1
