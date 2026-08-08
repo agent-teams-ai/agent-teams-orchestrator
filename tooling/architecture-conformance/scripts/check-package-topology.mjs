@@ -44,7 +44,7 @@ function run(root) {
   });
 }
 
-function runScaffolder(root, id, options = {}) {
+function runScaffolder(root, id) {
   const planPath = `.agent-teams-local/scaffolding-plans/${id}.json`;
   const planned = spawnSync(
     process.execPath,
@@ -67,7 +67,7 @@ function runScaffolder(root, id, options = {}) {
       },
     },
   );
-  if (planned.status !== 0 || options.planOnly) {
+  if (planned.status !== 0) {
     return planned;
   }
   return spawnSync(
