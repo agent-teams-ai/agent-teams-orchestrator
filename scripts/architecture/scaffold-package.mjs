@@ -1,18 +1,27 @@
 import { spawnSync } from "node:child_process";
 import {
+  lstat,
   mkdir,
-  mkdtemp,
-  rename,
+  readFile,
+  realpath,
   rm,
+  stat,
   writeFile,
 } from "node:fs/promises";
 import path from "node:path";
+import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
+import YAML from "yaml";
+
 import {
-  acceptedOwnerStatuses,
-  exists,
-  loadDocuments,
+  applyFilesystemScaffold,
+  planScaffoldFromFile,
+  readScaffoldPlanFile,
+  recoverFilesystemScaffold,
+} from "@agent-teams/engineering-foundation/scaffolding";
+
+import {
   loadPackageCatalog,
   relative,
 } from "./package-catalog-lib.mjs";
@@ -23,36 +32,76 @@ const validatorPath = path.join(
   scriptDirectory,
   "validate-package-topology.mjs",
 );
+const localStateDirectory = ".agent-teams-local";
+const defaultCompositionId = "orchestrator-library-boundary";
+const canonicalScaffoldingConfigPath =
+  "architecture/foundation/scaffolding.yaml";
+const scaffoldingJournalPath =
+  `${localStateDirectory}/scaffolding-transaction.json`;
+const maximumScaffoldingJournalBytes = 32 * 1024 * 1024;
+const successfulOutcomes = new Set([
+  "applied",
+  "already-applied",
+  "failed-recovered",
+]);
+
+function requiredValue(argv, index, option) {
+  const value = argv[index + 1];
+  if (!value || value.startsWith("--")) {
+    throw new Error(`${option} requires a value`);
+  }
+  return value;
+}
 
 function parseArguments(argv) {
+  const normalizedArgv = argv[0] === "--" ? argv.slice(1) : argv;
+  const command = normalizedArgv[0];
+  if (!new Set(["plan", "apply", "recover"]).has(command)) {
+    throw new Error("expected one command: plan, apply, or recover");
+  }
+
   const values = {
-    dryRun: argv.includes("--dry-run"),
+    command,
     id: undefined,
+    json: false,
+    planPath: undefined,
     repositoryRoot: defaultRepositoryRoot,
   };
 
-  for (let index = 0; index < argv.length; index += 1) {
-    const argument = argv[index];
+  for (let index = 1; index < normalizedArgv.length; index += 1) {
+    const argument = normalizedArgv[index];
     if (argument === "--") {
       continue;
     }
     if (argument === "--id") {
-      values.id = argv[index + 1];
+      values.id = requiredValue(normalizedArgv, index, argument);
+      index += 1;
+    } else if (argument === "--json") {
+      values.json = true;
+    } else if (argument === "--plan") {
+      values.planPath = requiredValue(normalizedArgv, index, argument);
       index += 1;
     } else if (argument === "--root") {
-      const root = argv[index + 1];
-      if (!root) {
-        throw new Error("--root requires a path");
-      }
-      values.repositoryRoot = path.resolve(root);
+      values.repositoryRoot = path.resolve(
+        requiredValue(normalizedArgv, index, argument),
+      );
       index += 1;
-    } else if (argument !== "--dry-run") {
+    } else {
       throw new Error(`unknown argument: ${argument}`);
     }
   }
 
-  if (!values.id) {
-    throw new Error("--id requires a catalog package ID");
+  if (command === "plan" && !values.id) {
+    throw new Error("plan requires --id <catalog-id>");
+  }
+  if (command === "apply" && !values.planPath) {
+    throw new Error("apply requires --plan <repository-relative-path>");
+  }
+  if (command !== "plan" && values.id) {
+    throw new Error(`--id is not valid for ${command}`);
+  }
+  if (command === "recover" && values.planPath) {
+    throw new Error("--plan is not valid for recover");
   }
 
   return values;
@@ -74,132 +123,330 @@ function validateRepository(repositoryRoot) {
 
   if (result.status !== 0) {
     throw new Error(
-      `package topology must be valid before scaffolding:\n${result.stdout ?? ""}${result.stderr ?? ""}`,
+      `package topology must be valid before planning:\n${result.stdout ?? ""}${result.stderr ?? ""}`,
     );
   }
 }
 
-function packageFiles(repositoryRoot, entry) {
-  const packageRoot = path.join(repositoryRoot, entry.path);
-  const rootTsconfig = relative(packageRoot, path.join(repositoryRoot, "tsconfig.json"));
-  const manifest = {
-    name: entry.package_name,
-    version: "0.0.0",
-    private: true,
-    type: "module",
-    scripts: {
-      build: "tsc --project tsconfig.json --pretty false",
-      check:
-        "pnpm run clean && pnpm run typecheck && pnpm run build && pnpm run test",
-      clean:
-        "node -e \"const fs=require('node:fs'); for (const path of ['dist','.cache']) fs.rmSync(path, { recursive: true, force: true })\"",
-      prepack: "pnpm run clean && pnpm run build",
-      test: "node --test --test-concurrency=1",
-      typecheck: "tsc --project tsconfig.json --noEmit --pretty false",
-    },
-    agentTeamsArchitecture: {
-      role: entry.role,
-      ownerDocument: entry.owner_document,
-    },
-  };
-
-  if (entry.role !== "app") {
-    manifest.files = ["dist"];
-    manifest.exports = {
-      ".": {
-        types: "./dist/index.d.ts",
-        import: "./dist/index.js",
-      },
-    };
+async function ensureLocalStateDirectory(repositoryRoot, child) {
+  let current = repositoryRoot;
+  for (const segment of [localStateDirectory, child]) {
+    current = path.join(current, segment);
+    try {
+      await mkdir(current, { mode: 0o700 });
+    } catch (error) {
+      if (!(error instanceof Error) || error.code !== "EEXIST") {
+        throw error;
+      }
+    }
+    const metadata = await lstat(current);
+    if (!metadata.isDirectory() || metadata.isSymbolicLink()) {
+      throw new Error(`${relative(repositoryRoot, current)} must be a real directory`);
+    }
+    const resolved = await realpath(current);
+    const relation = path.relative(repositoryRoot, resolved);
+    if (relation === ".." || relation.startsWith(`..${path.sep}`)) {
+      throw new Error(`${relative(repositoryRoot, current)} escapes the repository`);
+    }
   }
-
-  return new Map([
-    ["package.json", `${JSON.stringify(manifest, null, 2)}\n`],
-    [
-      "tsconfig.json",
-      `${JSON.stringify(
-        {
-          extends: rootTsconfig,
-          compilerOptions: {
-            composite: true,
-            declaration: true,
-            declarationMap: true,
-            noEmit: false,
-            outDir: "dist",
-            rootDir: "src",
-            tsBuildInfoFile: ".cache/tsconfig.tsbuildinfo",
-          },
-          include: ["src/**/*.ts", "src/**/*.tsx", "src/**/*.mts", "src/**/*.cts"],
-        },
-        null,
-        2,
-      )}\n`,
-    ],
-    ["src/index.ts", "export {};\n"],
-  ]);
+  return current;
 }
 
-async function writeAtomically(targetRoot, files) {
-  const parent = path.dirname(targetRoot);
-  await mkdir(parent, { recursive: true });
-  const stagingRoot = await mkdtemp(
-    path.join(parent, `.${path.basename(targetRoot)}.tmp-`),
-  );
+function normalizePlanStoragePath(candidate) {
+  const normalized = candidate.replaceAll("\\", "/");
+  const directory = `${localStateDirectory}/scaffolding-plans`;
+  if (
+    candidate !== normalized ||
+    path.posix.normalize(normalized) !== normalized ||
+    path.posix.dirname(normalized) !== directory ||
+    !/^[A-Za-z0-9._-]+\.json$/u.test(path.posix.basename(normalized))
+  ) {
+    throw new Error(`Plan output must be a JSON file directly under ${directory}`);
+  }
+  return normalized;
+}
 
+async function writeExclusive(pathname, source) {
+  await mkdir(path.dirname(pathname), { recursive: true });
   try {
-    for (const [fileRelative, source] of files) {
-      const filePath = path.join(stagingRoot, fileRelative);
-      await mkdir(path.dirname(filePath), { recursive: true });
-      await writeFile(filePath, source);
-    }
-    await rename(stagingRoot, targetRoot);
+    await writeFile(pathname, source, {
+      encoding: "utf8",
+      flag: "wx",
+      mode: 0o600,
+    });
+    return "created";
   } catch (error) {
-    await rm(stagingRoot, { recursive: true, force: true });
+    if (!(error instanceof Error) || error.code !== "EEXIST") {
+      throw error;
+    }
+    if ((await readFile(pathname, "utf8")) !== source) {
+      throw new Error(`${pathname}: existing Plan has different content`, {
+        cause: error,
+      });
+    }
+    return "existing";
+  }
+}
+
+async function canonicalRepositoryRoot(repositoryRoot) {
+  const metadata = await stat(repositoryRoot);
+  if (!metadata.isDirectory()) {
+    throw new Error(`${repositoryRoot}: repository root is not a directory`);
+  }
+  return realpath(repositoryRoot);
+}
+
+async function pathEntryExists(pathname) {
+  try {
+    await lstat(pathname);
+    return true;
+  } catch (error) {
+    if (error instanceof Error && error.code === "ENOENT") {
+      return false;
+    }
     throw error;
   }
 }
 
-async function main() {
-  const { dryRun, id, repositoryRoot } = parseArguments(
-    process.argv.slice(2),
-  );
-  validateRepository(repositoryRoot);
-
-  const [catalog, documents] = await Promise.all([
-    loadPackageCatalog(repositoryRoot),
-    loadDocuments(repositoryRoot),
-  ]);
-  const entry = catalog.packages.find((candidate) => candidate.id === id);
-  if (!entry) {
-    throw new Error(`${id}: package ID is not registered in the catalog`);
-  }
-
-  const owner = documents.get(entry.owner_document);
-  if (!owner || !acceptedOwnerStatuses.has(owner.metadata.status)) {
-    throw new Error(
-      `${id}: owner ${entry.owner_document} must be accepted or active before scaffolding`,
-    );
-  }
-
-  const targetRoot = path.join(repositoryRoot, entry.path);
-  if (await exists(targetRoot)) {
-    throw new Error(`${entry.path}: target already exists`);
-  }
-
-  const files = packageFiles(repositoryRoot, entry);
-  if (dryRun) {
-    console.log(`Would scaffold ${id} at ${entry.path}:`);
-    for (const filePath of files.keys()) {
-      console.log(`- ${filePath}`);
-    }
-    return;
-  }
-
-  await writeAtomically(targetRoot, files);
-  console.log(`Scaffolded ${id} at ${entry.path}.`);
-  console.log(
-    "Add the accepted first feature slice in the same change; the scaffolder does not invent DDD artifacts.",
+function sameDefinitionRef(actual, expected) {
+  return (
+    actual?.id === expected?.id &&
+    actual?.contractVersion === expected?.contractVersion
   );
 }
 
-await main();
+async function assertCanonicalOrchestratorPlan(repositoryRoot, plan) {
+  const config = YAML.parse(
+    await readFile(
+      path.join(repositoryRoot, canonicalScaffoldingConfigPath),
+      "utf8",
+    ),
+  );
+  const composition = config.compositions?.find(
+    (candidate) => candidate.id === defaultCompositionId,
+  );
+  const catalog = await loadPackageCatalog(repositoryRoot);
+  const target = catalog.packages?.find(
+    (candidate) => candidate.id === plan.target?.id,
+  );
+  const canonical =
+    composition &&
+    target &&
+    plan.projectId === config.projectId &&
+    plan.authorityEvidence?.projectId === config.projectId &&
+    plan.authority?.configPath === canonicalScaffoldingConfigPath &&
+    plan.authority?.targetCatalogPath === config.targetCatalogPath &&
+    plan.composition?.id === composition.id &&
+    sameDefinitionRef(
+      plan.composition?.scaffoldProfile,
+      composition.scaffoldProfile?.ref,
+    ) &&
+    sameDefinitionRef(plan.composition?.recipe, composition.recipe?.ref) &&
+    Array.isArray(plan.composition?.facets) &&
+    plan.composition.facets.length === 0 &&
+    Array.isArray(plan.composition?.policies) &&
+    plan.composition.policies.length === 0 &&
+    composition.targetRoles?.includes(plan.target.role) &&
+    plan.target.path === target.path &&
+    plan.target.packageName === target.package_name &&
+    plan.target.ownerDocument?.id === target.owner_document;
+
+  if (!canonical) {
+    throw new Error(
+      "Plan is not bound to the canonical Orchestrator Composition and package catalog",
+    );
+  }
+}
+
+async function planCommand(options) {
+  const repositoryRoot = await canonicalRepositoryRoot(
+    options.repositoryRoot,
+  );
+  const catalog = await loadPackageCatalog(repositoryRoot);
+  const entry = catalog.packages?.find(
+    (candidate) => candidate.id === options.id,
+  );
+  if (!entry) {
+    throw new Error(`${options.id}: package ID is not registered in the catalog`);
+  }
+  if (await pathEntryExists(path.join(repositoryRoot, entry.path))) {
+    throw new Error(`${entry.path}: target already exists`);
+  }
+  validateRepository(repositoryRoot);
+
+  const intentDirectory = await ensureLocalStateDirectory(
+    repositoryRoot,
+    "scaffolding-intents",
+  );
+  const intentRelative = path.posix.join(
+    localStateDirectory,
+    "scaffolding-intents",
+    `${randomUUID()}.json`,
+  );
+  const intentAbsolute = path.join(intentDirectory, path.basename(intentRelative));
+  await writeFile(
+    intentAbsolute,
+    `${JSON.stringify(
+      {
+        schemaVersion: 1,
+        compositionId: defaultCompositionId,
+        targetRef: options.id,
+      },
+      null,
+      2,
+    )}\n`,
+    { encoding: "utf8", flag: "wx", mode: 0o600 },
+  );
+
+  let plan;
+  try {
+    plan = await planScaffoldFromFile({
+      consumerRoot: repositoryRoot,
+      intentPath: intentRelative,
+    });
+  } finally {
+    await rm(intentAbsolute, { force: true });
+  }
+
+  await assertCanonicalOrchestratorPlan(repositoryRoot, plan);
+
+  if (
+    plan.target.id !== options.id ||
+    (await pathEntryExists(path.join(repositoryRoot, plan.target.path)))
+  ) {
+    throw new Error(`${plan.target.path}: target already exists or identity changed`);
+  }
+
+  const digestSuffix = plan.planDigest.slice("sha256:".length, "sha256:".length + 16);
+  const planRelative = normalizePlanStoragePath(
+    options.planPath ??
+      path.posix.join(
+        localStateDirectory,
+        "scaffolding-plans",
+        `${options.id}.${digestSuffix}.json`,
+      ),
+  );
+  const planDirectory = await ensureLocalStateDirectory(
+    repositoryRoot,
+    "scaffolding-plans",
+  );
+  const planAbsolute = path.join(planDirectory, path.basename(planRelative));
+  const source = `${JSON.stringify(plan, null, 2)}\n`;
+  const writeOutcome = await writeExclusive(planAbsolute, source);
+  const normalizedPlanPath = relative(repositoryRoot, planAbsolute);
+
+  if (options.json) {
+    process.stdout.write(
+      `${JSON.stringify(
+        { plan, planPath: normalizedPlanPath, writeOutcome },
+        null,
+        2,
+      )}\n`,
+    );
+    return;
+  }
+
+  process.stdout.write(
+    `Scaffold Plan: ${plan.planDigest}\nTarget: ${plan.target.id} -> ${plan.target.path}\nOperations: ${plan.operations.length}\nSaved: ${normalizedPlanPath} (${writeOutcome})\nReview the saved Plan, then run architecture:scaffold-package apply --plan ${normalizedPlanPath}.\n`,
+  );
+}
+
+function renderReceipt(receipt, phase) {
+  return `${phase} result for Scaffold Plan: ${receipt.planDigest}\nOutcome: ${receipt.outcome}\nOperations: ${receipt.operations.length}\n`;
+}
+
+async function applyCommand(options) {
+  const repositoryRoot = await canonicalRepositoryRoot(
+    options.repositoryRoot,
+  );
+  const plan = await readScaffoldPlanFile(
+    repositoryRoot,
+    options.planPath,
+  );
+  await assertCanonicalOrchestratorPlan(repositoryRoot, plan);
+  const receipt = await applyFilesystemScaffold(repositoryRoot, plan);
+  process.stdout.write(
+    options.json
+      ? `${JSON.stringify(receipt, null, 2)}\n`
+      : renderReceipt(receipt, "Apply"),
+  );
+  if (!successfulOutcomes.has(receipt.outcome)) {
+    process.exitCode = 1;
+  }
+}
+
+async function readPendingCanonicalPlan(repositoryRoot) {
+  const pathname = path.join(repositoryRoot, scaffoldingJournalPath);
+  let metadata;
+  try {
+    metadata = await lstat(pathname);
+  } catch (error) {
+    if (error instanceof Error && error.code === "ENOENT") {
+      return;
+    }
+    throw error;
+  }
+  if (
+    !metadata.isFile() ||
+    metadata.isSymbolicLink() ||
+    metadata.size > maximumScaffoldingJournalBytes
+  ) {
+    throw new Error("Pending scaffolding journal is not a bounded regular file");
+  }
+
+  let journal;
+  try {
+    journal = JSON.parse(await readFile(pathname, "utf8"));
+  } catch (error) {
+    throw new Error("Pending scaffolding journal is not valid JSON", {
+      cause: error,
+    });
+  }
+  if (!journal?.plan) {
+    throw new Error("Pending scaffolding journal does not contain a Plan");
+  }
+  await assertCanonicalOrchestratorPlan(repositoryRoot, journal.plan);
+  return journal.plan;
+}
+
+async function recoverCommand(options) {
+  const repositoryRoot = await canonicalRepositoryRoot(
+    options.repositoryRoot,
+  );
+  const pendingPlan = await readPendingCanonicalPlan(repositoryRoot);
+  const receipt = pendingPlan
+    ? await applyFilesystemScaffold(repositoryRoot, pendingPlan)
+    : await recoverFilesystemScaffold(repositoryRoot);
+  if (!receipt) {
+    process.stdout.write(
+      options.json
+        ? `${JSON.stringify({ outcome: "no-pending-transaction" }, null, 2)}\n`
+        : "No pending scaffolding transaction.\n",
+    );
+    return;
+  }
+  process.stdout.write(
+    options.json
+      ? `${JSON.stringify(receipt, null, 2)}\n`
+      : renderReceipt(receipt, "Recovery"),
+  );
+  if (!successfulOutcomes.has(receipt.outcome)) {
+    process.exitCode = 1;
+  }
+}
+
+async function main() {
+  const options = parseArguments(process.argv.slice(2));
+  if (options.command === "plan") {
+    await planCommand(options);
+  } else if (options.command === "apply") {
+    await applyCommand(options);
+  } else {
+    await recoverCommand(options);
+  }
+}
+
+await main().catch((error) => {
+  process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+  process.exitCode = 1;
+});

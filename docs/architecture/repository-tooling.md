@@ -92,7 +92,7 @@ authoritative; two independently evolving copies are prohibited. The foundation
 checkout is accepted only through the guarded local lifecycle and is rejected by
 CI.
 
-Foundation version 0.4.1 keeps `workspace.dependency-declarations` blocking through
+Foundation version 0.8.0 keeps `workspace.dependency-declarations` blocking through
 strict `foundation.config.yaml` and makes `architecture.source-dependencies`
 available as an independently activated capability. The existing
 dependency-specifier validator is retained temporarily as a donor oracle and
@@ -103,7 +103,7 @@ rather than the donor during this observation window.
 
 Foundation ADR-0003, ADR-0004, and ADR-0005 are accepted, but their suppression-
 governance, public-API-compatibility, and repository-security capabilities are
-not enabled here merely because version 0.4.1 implements them. Suppression
+not enabled here merely because version 0.8.0 implements them. Suppression
 governance requires an Orchestrator-owned waiver and protected-rule policy plus
 consumer parity evidence. Public API
 compatibility starts only for a real versioned package surface with
@@ -334,8 +334,9 @@ Evaluate the matching `@nx/js` version in an isolated compatibility spike. Adopt
   rules;
 - CI is non-interactive and fails on drift rather than modifying tracked files.
 
-Until this gate passes, Project References remain explicit and the package
-scaffolder owns their initial shape.
+Until this gate passes, Project References remain explicit. The Foundation Recipe
+owns only the initial library boundary; the Orchestrator change owns the matching
+root reference and accepted first feature.
 
 ### Stage 3: architecture-aware generators
 
@@ -343,7 +344,7 @@ Trigger: one complete vertical slice has passed package, architecture, test, and
 build gates and is accepted as the reference shape.
 
 Create local Nx commands only as adapters over the existing catalog and
-scaffolder. A generator must:
+Foundation scaffolding protocol. A generator must:
 
 - accept a catalog ID, never an arbitrary package role or path;
 - refuse a proposed owner or an existing target;
@@ -353,7 +354,25 @@ scaffolder. A generator must:
 - pass fixture and idempotency tests;
 - leave no partial output after failure.
 
-Nx generators do not own templates independently from the repository scaffolder.
+Nx generators do not own templates independently from the Foundation Recipe.
+
+### Package scaffolding protocol
+
+Status: `IMPLEMENTED` and `ORCHESTRATOR_QUALIFIED`.
+
+The exact Foundation package owns deterministic compilation, final boundary bytes,
+journaled filesystem publication, replay, and recovery. Orchestrator owns
+`architecture/package-catalog.yaml`, owner evidence, the admitted library roles,
+and all post-Apply topology checks. The Composition is declared in
+`architecture/foundation/scaffolding.yaml`; qualification evidence is recorded in
+`architecture/foundation/scaffolding-qualification.yaml` and rerun by architecture
+conformance.
+
+`platform.local-host-control` is the only real donor. Synthetic fixtures vary
+consumer roles, paths, and npm names without claiming a second product donor.
+Applications are deliberately excluded from the current Composition. The legacy
+renderer is not retained as a fallback after donor-byte parity passes. The same
+consumer qualification suite runs on Linux, macOS, and Windows.
 
 ### Stage 4: derived architecture metadata
 

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-teams.ai/schemas/orchestrator-scaffolding-qualification.json",
+  "title": "Orchestrator Scaffolding Qualification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "consumer",
+    "foundationVersion",
+    "composition",
+    "recipe",
+    "implementationStatus",
+    "qualificationStatus",
+    "donorTarget",
+    "evidence"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "consumer": { "const": "agent-teams-orchestrator" },
+    "foundationVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "configPath", "targetCatalogPath"],
+      "properties": {
+        "id": { "const": "orchestrator-library-boundary" },
+        "configPath": {
+          "const": "architecture/foundation/scaffolding.yaml"
+        },
+        "targetCatalogPath": {
+          "const": "architecture/package-catalog.yaml"
+        }
+      }
+    },
+    "recipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "contractVersion"],
+      "properties": {
+        "id": { "const": "foundation.node-typescript-library-boundary" },
+        "contractVersion": { "const": 1 }
+      }
+    },
+    "implementationStatus": { "const": "IMPLEMENTED" },
+    "qualificationStatus": { "const": "ORCHESTRATOR_QUALIFIED" },
+    "donorTarget": { "const": "platform.local-host-control" },
+    "evidence": {
+      "type": "array",
+      "minItems": 12,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "donor-byte-parity",
+          "package-script-plan-apply",
+          "synthetic-role-and-path-variance",
+          "authority-staleness",
+          "apply-replay",
+          "journal-recovery",
+          "partial-journal-recovery",
+          "recovery-conflict-preservation",
+          "tampered-plan-rejection",
+          "canonical-composition-binding",
+          "filesystem-boundary-rejection",
+          "local-state-untracked"
+        ]
+      }
+    }
+  }
+}
