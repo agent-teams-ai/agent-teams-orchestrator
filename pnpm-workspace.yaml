@@ -20,7 +20,7 @@ catalog:
   nx: 23.1.1
   oxc-parser: 0.142.0
   oxc-resolver: 11.24.2
-  oxlint: 1.75.0
+  oxlint: 1.77.0
   oxlint-tsgolint: 7.0.2001
   remark-frontmatter: 5.0.0
   remark-gfm: 4.0.1
