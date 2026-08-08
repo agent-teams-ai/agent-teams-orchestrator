@@ -35,3 +35,4 @@ jobs:
       max_changed_lines: ${{ vars.REVIEW_ROUTER_MAX_CHANGED_LINES || '250000' }}
     secrets:
       CODEX_AUTH_JSON: ${{ secrets.REVIEWROUTER_CODEX_AUTH_JSON }}
+      REVIEW_ROUTER_LEDGER_KEY: ${{ secrets.REVIEWROUTER_LEDGER_KEY }}
