@@ -23,6 +23,10 @@ concurrency:
 
 jobs:
   review:
+    if: >-
+      ${{ github.event_name != 'pull_request' ||
+          (github.event.pull_request.head.repo.full_name == github.repository &&
+           github.actor != 'dependabot[bot]') }}
     uses: 777genius/review-router/.github/workflows/reviewrouter-reusable.yml@41d84b36d5f593c33207f0b2375a000e2c4ede6f
     with:
       runtime_ref: 41d84b36d5f593c33207f0b2375a000e2c4ede6f
@@ -48,4 +52,13 @@ jobs:
       - name: Verify review result
         env:
           REVIEW_RESULT: ${{ needs.review.result }}
-        run: test "$REVIEW_RESULT" = success
+          REVIEW_REQUIRED: >-
+            ${{ github.event_name != 'pull_request' ||
+                (github.event.pull_request.head.repo.full_name == github.repository &&
+                 github.actor != 'dependabot[bot]') }}
+        run: |
+          if [ "$REVIEW_REQUIRED" = true ]; then
+            test "$REVIEW_RESULT" = success
+          else
+            test "$REVIEW_RESULT" = skipped
+          fi
