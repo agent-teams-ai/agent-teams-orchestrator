@@ -10,11 +10,23 @@ import {
   loadDocuments,
   loadPackageCatalog,
   loadSourceDependencyPolicy,
-  parseFrontmatter,
   relative,
   walk,
 } from "./package-catalog-lib.mjs";
-import { analyzeModuleSpecifiers } from "./source-imports.mjs";
+import {
+  isNormalizedBuiltExport,
+  stringTargets,
+  validateQualifiedLibraryExports,
+} from "./package-topology-exports.mjs";
+import {
+  allowedInternalDependencyRoles,
+  dependencyEdgeKey,
+  engineeringFoundationPackage,
+  validateFeatureDocumentation,
+  validateInternalPackageImports,
+  validateSourceDependencyPolicy,
+} from "./package-topology-source.mjs";
+import { validateRootTsconfig } from "./package-topology-tsconfig.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
@@ -44,500 +56,6 @@ const allowedPackageAssemblyPaths = [
   /^migrations\//,
   /^published-language\//,
 ];
-const productionSourceExtensions = new Set([
-  ".cjs",
-  ".cts",
-  ".js",
-  ".jsx",
-  ".mjs",
-  ".mts",
-  ".ts",
-  ".tsx",
-]);
-const documentIdPattern =
-  /^(ADR-[0-9]{4}|OD-[0-9]{3}|[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+)$/;
-const documentOwnerPattern =
-  /^[a-z][a-z0-9-]*(\/[a-z][a-z0-9-]*)*$/;
-const engineeringFoundationPackage =
-  "@agent-teams/engineering-foundation";
-const allowedInternalDependencyRoles = {
-  app: new Set([
-    "bounded-context",
-    "integration",
-    "platform",
-    "sdk",
-  ]),
-  "bounded-context": new Set([
-    "bounded-context",
-    "integration",
-    "platform",
-  ]),
-  integration: new Set(["integration", "platform"]),
-  platform: new Set(["platform"]),
-  sdk: new Set(["sdk"]),
-  testing: new Set([
-    "app",
-    "bounded-context",
-    "integration",
-    "platform",
-    "sdk",
-    "testing",
-  ]),
-};
-
-function isProductionSourceFile(filePath) {
-  return productionSourceExtensions.has(path.extname(filePath));
-}
-
-function dependencyEdgeKey(fromId, toId) {
-  return `${fromId}\0${toId}`;
-}
-
-function isWithin(parentPath, childPath) {
-  const pathFromParent = path.relative(parentPath, childPath);
-  return (
-    pathFromParent === "" ||
-    (!pathFromParent.startsWith(`..${path.sep}`) && pathFromParent !== ".." &&
-      !path.isAbsolute(pathFromParent))
-  );
-}
-
-function stringTargets(value) {
-  if (typeof value === "string") {
-    return [value];
-  }
-  if (Array.isArray(value)) {
-    return value.flatMap(stringTargets);
-  }
-  if (value && typeof value === "object") {
-    return Object.values(value).flatMap(stringTargets);
-  }
-  return [];
-}
-
-function isObjectRecord(value) {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
-function isNormalizedBuiltExportTarget(target) {
-  if (typeof target !== "string" || !target.startsWith("./dist/")) {
-    return false;
-  }
-  if (/%(?:2e|2f|5c)/iu.test(target)) {
-    return false;
-  }
-  return `./${path.posix.normalize(target.slice(2))}` === target;
-}
-
-function isDeclarationExportTarget(target) {
-  return (
-    isNormalizedBuiltExportTarget(target) &&
-    /\.d\.(?:c|m)?ts$/u.test(target)
-  );
-}
-
-function isEsmExportTarget(target) {
-  return (
-    isNormalizedBuiltExportTarget(target) && /\.(?:js|mjs)$/u.test(target)
-  );
-}
-
-function validateQualifiedLibraryExports(entry, exportsField, errors) {
-  const packageJson = `${entry.path}/package.json`;
-  const rootExport = isObjectRecord(exportsField)
-    ? exportsField["."]
-    : undefined;
-  if (!isObjectRecord(rootExport)) {
-    errors.push(
-      `${packageJson}: library root export requires built types and import targets`,
-    );
-  }
-  if (!isObjectRecord(exportsField)) {
-    return;
-  }
-
-  for (const [exportKey, exportValue] of Object.entries(exportsField)) {
-    if (!exportKey.startsWith(".") || exportValue === null) {
-      continue;
-    }
-    if (!isObjectRecord(exportValue)) {
-      errors.push(
-        `${packageJson}: library export ${exportKey} requires built declaration and ESM import targets`,
-      );
-      continue;
-    }
-    if (!isDeclarationExportTarget(exportValue.types)) {
-      errors.push(
-        `${packageJson}: library export ${exportKey} requires a normalized dist declaration target`,
-      );
-    }
-    if (!isEsmExportTarget(exportValue.import)) {
-      errors.push(
-        `${packageJson}: library export ${exportKey} requires a normalized dist ESM import target`,
-      );
-    }
-  }
-}
-
-function normalizedRootReference(referencePath) {
-  if (
-    typeof referencePath !== "string" ||
-    path.posix.isAbsolute(referencePath) ||
-    path.win32.isAbsolute(referencePath) ||
-    /^[a-z]:/iu.test(referencePath)
-  ) {
-    return null;
-  }
-  let normalized = path.posix.normalize(referencePath.replaceAll("\\", "/"));
-  if (normalized.endsWith("/")) {
-    normalized = normalized.slice(0, -1);
-  }
-  if (normalized.endsWith("/tsconfig.json")) {
-    normalized = normalized.slice(0, -"/tsconfig.json".length);
-  }
-  const withoutPrefix = normalized.startsWith("./")
-    ? normalized.slice(2)
-    : normalized;
-  if (withoutPrefix === ".." || withoutPrefix.startsWith("../")) {
-    return null;
-  }
-  return withoutPrefix;
-}
-
-function packageNameFromSpecifier(specifier) {
-  const match = specifier.match(/^(@agent-teams\/[^/]+)(?:\/.*)?$/);
-  return match?.[1];
-}
-
-function exportKeyMatches(exportKey, requestedKey) {
-  if (exportKey === requestedKey) {
-    return true;
-  }
-  const wildcardIndex = exportKey.indexOf("*");
-  if (wildcardIndex === -1) {
-    return false;
-  }
-  return (
-    requestedKey.startsWith(exportKey.slice(0, wildcardIndex)) &&
-    requestedKey.endsWith(exportKey.slice(wildcardIndex + 1))
-  );
-}
-
-function hasExportTarget(value) {
-  if (typeof value === "string") {
-    return true;
-  }
-  if (Array.isArray(value)) {
-    return value.some(hasExportTarget);
-  }
-  if (value && typeof value === "object") {
-    return Object.values(value).some(hasExportTarget);
-  }
-  return false;
-}
-
-function isExportedSubpath(exportsField, requestedKey) {
-  if (typeof exportsField === "string" || Array.isArray(exportsField)) {
-    return requestedKey === "." && hasExportTarget(exportsField);
-  }
-  if (!exportsField || typeof exportsField !== "object") {
-    return false;
-  }
-
-  const exportKeys = Object.keys(exportsField);
-  const subpathKeys = exportKeys.filter((key) => key.startsWith("."));
-  if (subpathKeys.length === 0) {
-    return requestedKey === "." && hasExportTarget(exportsField);
-  }
-  if (Object.hasOwn(exportsField, requestedKey)) {
-    return hasExportTarget(exportsField[requestedKey]);
-  }
-  const matchingPatterns = subpathKeys
-    .filter(
-      (key) => key.includes("*") && exportKeyMatches(key, requestedKey),
-    )
-    .toSorted((left, right) => {
-      const leftWildcard = left.indexOf("*");
-      const rightWildcard = right.indexOf("*");
-      return (
-        rightWildcard - leftWildcard ||
-        right.length - left.length ||
-        left.localeCompare(right)
-      );
-    });
-  return (
-    matchingPatterns.length > 0 &&
-    hasExportTarget(exportsField[matchingPatterns[0]])
-  );
-}
-
-async function validateFeatureDocumentation(
-  repositoryRoot,
-  entry,
-  sourceRoot,
-  sourceFiles,
-  errors,
-) {
-  const featureNames = new Set(
-    sourceFiles
-      .filter(isProductionSourceFile)
-      .map((filePath) =>
-        relative(sourceRoot, filePath).match(/^features\/([^/]+)\//)?.[1],
-      )
-      .filter(Boolean),
-  );
-
-  if (featureNames.size === 0) {
-    errors.push(
-      `${entry.path}: package requires at least one real source file in an accepted feature slice; package-only scaffolding cannot pass CI`,
-    );
-    return;
-  }
-
-  for (const featureName of [...featureNames].toSorted()) {
-    const readmePath = path.join(
-      sourceRoot,
-      "features",
-      featureName,
-      "README.md",
-    );
-    const readmeRelative = relative(repositoryRoot, readmePath);
-    if (!(await exists(readmePath))) {
-      errors.push(
-        `${entry.path}: feature ${featureName} requires colocated ${readmeRelative}`,
-      );
-      continue;
-    }
-
-    let metadata;
-    try {
-      metadata = parseFrontmatter(
-        await readFile(readmePath, "utf8"),
-        readmeRelative,
-      );
-    } catch (error) {
-      errors.push(error.message);
-      continue;
-    }
-
-    if (
-      metadata?.type !== "feature" ||
-      metadata?.status !== "accepted" ||
-      !documentIdPattern.test(metadata?.id ?? "") ||
-      !documentOwnerPattern.test(metadata?.owner ?? "") ||
-      typeof metadata?.summary !== "string" ||
-      metadata.summary.length < 20 ||
-      !Array.isArray(metadata?.related) ||
-      !metadata.related.includes(entry.owner_document)
-    ) {
-      errors.push(
-        `${readmeRelative}: feature metadata must declare a valid feature id, type feature, status accepted, owner, summary, and related ${entry.owner_document}`,
-      );
-    }
-  }
-}
-
-async function validateInternalPackageImports(
-  repositoryRoot,
-  materializedPackages,
-  byPackageName,
-  dependencyEdges,
-  errors,
-) {
-  for (const current of materializedPackages.values()) {
-    const currentRoot = path.join(repositoryRoot, current.entry.path);
-    const declaredDependencies = new Set(
-      [
-        "dependencies",
-        "devDependencies",
-        "optionalDependencies",
-        "peerDependencies",
-      ].flatMap((section) =>
-        Object.keys(current.manifest[section] ?? {}),
-      ),
-    );
-
-    for (const filePath of current.sourceFiles.filter(isProductionSourceFile)) {
-      const source = await readFile(filePath, "utf8");
-      const moduleSpecifiers = analyzeModuleSpecifiers(source, filePath);
-      for (const parseError of moduleSpecifiers.parseErrors) {
-        errors.push(
-          `${relative(repositoryRoot, filePath)}: source parser error at offset ${parseError.offset}: ${parseError.message}`,
-        );
-      }
-      for (const load of moduleSpecifiers.nonStaticModuleLoads) {
-        errors.push(
-          `${relative(repositoryRoot, filePath)}: non-literal ${load.kind} module specifier at source offset ${load.offset} bypasses the source dependency policy`,
-        );
-      }
-      for (const specifier of moduleSpecifiers.specifiers) {
-        if (specifier.startsWith(".") && !isWithin(
-          currentRoot,
-          path.resolve(path.dirname(filePath), specifier),
-        )) {
-          errors.push(
-            `${relative(repositoryRoot, filePath)}: cross-package relative import ${specifier} bypasses the source dependency policy`,
-          );
-          continue;
-        }
-        if (specifier.startsWith("/") || specifier.startsWith("file:")) {
-          errors.push(
-            `${relative(repositoryRoot, filePath)}: absolute or file import ${specifier} is prohibited in production packages`,
-          );
-          continue;
-        }
-
-        const dependencyName = packageNameFromSpecifier(specifier);
-        if (
-          !dependencyName ||
-          dependencyName === engineeringFoundationPackage
-        ) {
-          continue;
-        }
-
-        const dependency = byPackageName.get(dependencyName);
-        if (!dependency) {
-          errors.push(
-            `${relative(repositoryRoot, filePath)}: internal package import ${dependencyName} is not registered in the package catalog`,
-          );
-          continue;
-        }
-
-        if (
-          dependencyName !== current.manifest.name &&
-          !declaredDependencies.has(dependencyName)
-        ) {
-          errors.push(
-            `${relative(repositoryRoot, filePath)}: internal package import ${dependencyName} is not declared in ${current.entry.path}/package.json`,
-          );
-        }
-
-        const subpath = specifier.slice(dependencyName.length);
-        if (subpath === "/src" || subpath.startsWith("/src/")) {
-          errors.push(
-            `${relative(repositoryRoot, filePath)}: deep src import ${specifier} bypasses package exports`,
-          );
-          continue;
-        }
-
-        const target = materializedPackages.get(dependencyName);
-        if (!target) {
-          errors.push(
-            `${relative(repositoryRoot, filePath)}: imported internal package ${dependencyName} is not materialized`,
-          );
-          continue;
-        }
-
-        const requestedExport = subpath.length === 0 ? "." : `.${subpath}`;
-        if (dependencyName !== current.manifest.name) {
-          const edge = dependencyEdges.get(
-            dependencyEdgeKey(current.entry.id, dependency.id),
-          );
-          if (!edge) {
-            errors.push(
-              `${relative(repositoryRoot, filePath)}: source dependency ${current.entry.id} -> ${dependency.id} is denied by default`,
-            );
-          } else if (!(edge.imports ?? []).includes(requestedExport)) {
-            errors.push(
-              `${relative(repositoryRoot, filePath)}: import ${specifier} is not an allowed surface for source dependency ${current.entry.id} -> ${dependency.id}`,
-            );
-          }
-        }
-        if (!isExportedSubpath(target.manifest.exports, requestedExport)) {
-          errors.push(
-            `${relative(repositoryRoot, filePath)}: internal package subpath ${specifier} is not exported by ${dependencyName}`,
-          );
-        }
-      }
-    }
-  }
-}
-
-function validateSourceDependencyPolicy(policy, catalog, errors) {
-  const byId = new Map(
-    (catalog.packages ?? []).map((entry) => [entry.id, entry]),
-  );
-  const dependencyEdges = new Map();
-  const adjacency = new Map();
-
-  for (const edge of policy.edges ?? []) {
-    if (
-      !edge ||
-      typeof edge.from !== "string" ||
-      typeof edge.to !== "string" ||
-      !Array.isArray(edge.imports)
-    ) {
-      continue;
-    }
-    const from = byId.get(edge.from);
-    const to = byId.get(edge.to);
-    if (!from) {
-      errors.push(
-        `architecture/source-dependency-policy.yaml: unknown consumer package ${edge.from}`,
-      );
-    }
-    if (!to) {
-      errors.push(
-        `architecture/source-dependency-policy.yaml: unknown provider package ${edge.to}`,
-      );
-    }
-    if (edge.from === edge.to) {
-      errors.push(
-        `architecture/source-dependency-policy.yaml: self dependency ${edge.from} is prohibited`,
-      );
-    }
-    if (from && to && !allowedInternalDependencyRoles[from.role]?.has(to.role)) {
-      errors.push(
-        `architecture/source-dependency-policy.yaml: role ${from.role} cannot depend on ${to.role} package in edge ${edge.from} -> ${edge.to}`,
-      );
-    }
-
-    const key = dependencyEdgeKey(edge.from, edge.to);
-    if (dependencyEdges.has(key)) {
-      errors.push(
-        `architecture/source-dependency-policy.yaml: duplicate edge ${edge.from} -> ${edge.to}`,
-      );
-    } else {
-      dependencyEdges.set(key, edge);
-    }
-    if (from && to) {
-      const targets = adjacency.get(edge.from) ?? new Set();
-      targets.add(edge.to);
-      adjacency.set(edge.from, targets);
-    }
-  }
-
-  const visited = new Set();
-  const visiting = new Set();
-  const pathStack = [];
-  function visit(packageId) {
-    if (visiting.has(packageId)) {
-      const cycleStart = pathStack.indexOf(packageId);
-      const cycle = [...pathStack.slice(cycleStart), packageId];
-      errors.push(
-        `architecture/source-dependency-policy.yaml: source dependency cycle ${cycle.join(" -> ")}`,
-      );
-      return;
-    }
-    if (visited.has(packageId)) {
-      return;
-    }
-    visiting.add(packageId);
-    pathStack.push(packageId);
-    for (const target of adjacency.get(packageId) ?? []) {
-      visit(target);
-    }
-    pathStack.pop();
-    visiting.delete(packageId);
-    visited.add(packageId);
-  }
-  for (const packageId of byId.keys()) {
-    visit(packageId);
-  }
-
-  return dependencyEdges;
-}
-
 function parseArguments(argv) {
   const rootIndex = argv.indexOf("--root");
   if (rootIndex === -1) {
@@ -619,14 +137,139 @@ function validateCatalogSemantics(catalog, documents, errors) {
   };
 }
 
-async function validateMaterializedPackage(
-  repositoryRoot,
-  entry,
-  owner,
-  byPackageName,
-  dependencyEdges,
-  errors,
-) {
+function validateLibraryManifest(entry, manifest, errors) {
+  if (entry.role === "app") {
+    return;
+  }
+  if (!manifest.exports) {
+    errors.push(`${entry.path}/package.json: library package requires exports`);
+  }
+  if (manifest.type !== "module") {
+    errors.push(
+      `${entry.path}/package.json: materialized library requires type module`,
+    );
+  }
+  for (const script of ["build", "check", "test", "typecheck"]) {
+    if (typeof manifest.scripts?.[script] !== "string") {
+      errors.push(
+        `${entry.path}/package.json: materialized library requires a ${script} script`,
+      );
+    }
+  }
+  validateQualifiedLibraryExports(entry, manifest.exports, errors);
+  for (const target of stringTargets(manifest.exports)) {
+    if (!isNormalizedBuiltExport(target)) {
+      errors.push(
+        `${entry.path}/package.json: library exports must reference built artifacts, not ${target}`,
+      );
+    }
+  }
+  if (!Array.isArray(manifest.files) || !manifest.files.includes("dist")) {
+    errors.push(
+      `${entry.path}/package.json: materialized library files must include dist`,
+    );
+  }
+}
+
+async function validatePackageTsconfig(entry, tsconfigPath, errors) {
+  if (!(await exists(tsconfigPath))) {
+    errors.push(`${entry.path}: materialized package is missing tsconfig.json`);
+    return;
+  }
+  try {
+    const tsconfig = JSON.parse(await readFile(tsconfigPath, "utf8"));
+    if (tsconfig.compilerOptions?.paths) {
+      errors.push(
+        `${entry.path}/tsconfig.json: compilerOptions.paths is prohibited in production packages; use package exports`,
+      );
+    }
+  } catch (error) {
+    errors.push(`${entry.path}/tsconfig.json: invalid JSON: ${error.message}`);
+  }
+}
+
+function validateManifestDependencies(context) {
+  const { byPackageName, dependencyEdges, entry, errors, manifest } = context;
+  for (const section of [
+    "dependencies",
+    "devDependencies",
+    "optionalDependencies",
+    "peerDependencies",
+  ]) {
+    for (const [dependencyName, dependencyRange] of Object.entries(
+      manifest[section] ?? {},
+    ).toSorted(([left], [right]) => left.localeCompare(right))) {
+      if (
+        !dependencyName.startsWith("@agent-teams/") ||
+        dependencyName === engineeringFoundationPackage
+      ) {
+        continue;
+      }
+      const dependency = byPackageName.get(dependencyName);
+      if (!dependency) {
+        errors.push(
+          `${entry.path}/package.json: internal dependency ${dependencyName} is not registered in the package catalog`,
+        );
+        continue;
+      }
+      if (!String(dependencyRange).startsWith("workspace:")) {
+        errors.push(
+          `${entry.path}/package.json: internal dependency ${dependencyName} must use the workspace: protocol`,
+        );
+      }
+      const isTestingDependency =
+        section === "devDependencies" && dependency.role === "testing";
+      if (
+        !isTestingDependency &&
+        !allowedInternalDependencyRoles[entry.role].has(dependency.role)
+      ) {
+        errors.push(
+          `${entry.path}/package.json: role ${entry.role} cannot depend on ${dependency.role} package ${dependencyName} in ${section}`,
+        );
+      }
+      if (
+        dependencyName !== manifest.name &&
+        !dependencyEdges.has(dependencyEdgeKey(entry.id, dependency.id))
+      ) {
+        errors.push(
+          `${entry.path}/package.json: source dependency ${entry.id} -> ${dependency.id} is denied by default`,
+        );
+      }
+    }
+  }
+}
+
+function validateSourceLayout(repositoryRoot, sourceRoot, sourceFiles, errors) {
+  for (const filePath of sourceFiles) {
+    const sourceRelative = relative(sourceRoot, filePath);
+    const [firstSegment] = sourceRelative.split("/");
+    if (forbiddenPackageRootDirectories.has(firstSegment)) {
+      errors.push(
+        `${relative(repositoryRoot, filePath)}: source root ${firstSegment} is prohibited; assign code to a feature or accepted package assembly surface`,
+      );
+    }
+    if (!allowedPackageAssemblyPaths.some((pattern) => pattern.test(sourceRelative))) {
+      errors.push(
+        `${relative(repositoryRoot, filePath)}: production source must belong to src/features/** or an accepted package assembly surface`,
+      );
+    }
+    if (/^features\/[^/]+\/projections\//.test(sourceRelative)) {
+      errors.push(
+        `${relative(repositoryRoot, filePath)}: feature-level projections is not a universal layer; place projection policy in application and persistence in adapters`,
+      );
+    }
+  }
+}
+
+async function validateMaterializedPackage(context) {
+  const {
+    byPackageName,
+    dependencyEdges,
+    entry,
+    errors,
+    owner,
+    repositoryRoot,
+  } = context;
   const packageRoot = path.join(repositoryRoot, entry.path);
   const packageJsonPath = path.join(packageRoot, "package.json");
   const tsconfigPath = path.join(packageRoot, "tsconfig.json");
@@ -672,55 +315,8 @@ async function validateMaterializedPackage(
     );
   }
 
-  if (entry.role !== "app" && !manifest.exports) {
-    errors.push(`${entry.path}/package.json: library package requires exports`);
-  }
-  if (entry.role !== "app") {
-    if (manifest.type !== "module") {
-      errors.push(
-        `${entry.path}/package.json: materialized library requires type module`,
-      );
-    }
-    for (const script of ["build", "check", "test", "typecheck"]) {
-      if (typeof manifest.scripts?.[script] !== "string") {
-        errors.push(
-          `${entry.path}/package.json: materialized library requires a ${script} script`,
-        );
-      }
-    }
-
-    validateQualifiedLibraryExports(entry, manifest.exports, errors);
-    for (const target of stringTargets(manifest.exports)) {
-      if (!isNormalizedBuiltExportTarget(target)) {
-        errors.push(
-          `${entry.path}/package.json: library exports must reference built artifacts, not ${target}`,
-        );
-      }
-    }
-    if (
-      !Array.isArray(manifest.files) ||
-      !manifest.files.includes("dist")
-    ) {
-      errors.push(
-        `${entry.path}/package.json: materialized library files must include dist`,
-      );
-    }
-  }
-
-  if (!(await exists(tsconfigPath))) {
-    errors.push(`${entry.path}: materialized package is missing tsconfig.json`);
-  } else {
-    try {
-      const tsconfig = JSON.parse(await readFile(tsconfigPath, "utf8"));
-      if (tsconfig.compilerOptions?.paths) {
-        errors.push(
-          `${entry.path}/tsconfig.json: compilerOptions.paths is prohibited in production packages; use package exports`,
-        );
-      }
-    } catch (error) {
-      errors.push(`${entry.path}/tsconfig.json: invalid JSON: ${error.message}`);
-    }
-  }
+  validateLibraryManifest(entry, manifest, errors);
+  await validatePackageTsconfig(entry, tsconfigPath, errors);
 
   for (const target of stringTargets(manifest.imports)) {
     if (!target.startsWith("./")) {
@@ -730,94 +326,27 @@ async function validateMaterializedPackage(
     }
   }
 
-  for (const section of [
-    "dependencies",
-    "devDependencies",
-    "optionalDependencies",
-    "peerDependencies",
-  ]) {
-    for (const [dependencyName, dependencyRange] of Object.entries(
-      manifest[section] ?? {},
-    ).toSorted(([left], [right]) => left.localeCompare(right))) {
-      if (!dependencyName.startsWith("@agent-teams/")) {
-        continue;
-      }
-      if (dependencyName === engineeringFoundationPackage) {
-        continue;
-      }
-
-      const dependency = byPackageName.get(dependencyName);
-      if (!dependency) {
-        errors.push(
-          `${entry.path}/package.json: internal dependency ${dependencyName} is not registered in the package catalog`,
-        );
-        continue;
-      }
-
-      if (!String(dependencyRange).startsWith("workspace:")) {
-        errors.push(
-          `${entry.path}/package.json: internal dependency ${dependencyName} must use the workspace: protocol`,
-        );
-      }
-
-      const isTestingDependency =
-        section === "devDependencies" && dependency.role === "testing";
-      if (
-        !isTestingDependency &&
-        !allowedInternalDependencyRoles[entry.role].has(dependency.role)
-      ) {
-        errors.push(
-          `${entry.path}/package.json: role ${entry.role} cannot depend on ${dependency.role} package ${dependencyName} in ${section}`,
-        );
-      }
-      if (
-        dependencyName !== manifest.name &&
-        !dependencyEdges.has(dependencyEdgeKey(entry.id, dependency.id))
-      ) {
-        errors.push(
-          `${entry.path}/package.json: source dependency ${entry.id} -> ${dependency.id} is denied by default`,
-        );
-      }
-    }
-  }
+  validateManifestDependencies({
+    byPackageName,
+    dependencyEdges,
+    entry,
+    errors,
+    manifest,
+  });
 
   const sourceRoot = path.join(packageRoot, "src");
   const sourceFiles = await walk(sourceRoot, () => true, {
     skipDirectories: ["node_modules", "dist", "coverage"],
   });
-  await validateFeatureDocumentation(
-    repositoryRoot,
+  await validateFeatureDocumentation({
     entry,
-    sourceRoot,
-    sourceFiles,
     errors,
-  );
+    repositoryRoot,
+    sourceFiles,
+    sourceRoot,
+  });
 
-  for (const filePath of sourceFiles) {
-    const sourceRelative = relative(sourceRoot, filePath);
-    const [firstSegment] = sourceRelative.split("/");
-    if (forbiddenPackageRootDirectories.has(firstSegment)) {
-      errors.push(
-        `${relative(repositoryRoot, filePath)}: source root ${firstSegment} is prohibited; assign code to a feature or accepted package assembly surface`,
-      );
-    }
-
-    if (
-      !allowedPackageAssemblyPaths.some((pattern) =>
-        pattern.test(sourceRelative),
-      )
-    ) {
-      errors.push(
-        `${relative(repositoryRoot, filePath)}: production source must belong to src/features/** or an accepted package assembly surface`,
-      );
-    }
-
-    if (/^features\/[^/]+\/projections\//.test(sourceRelative)) {
-      errors.push(
-        `${relative(repositoryRoot, filePath)}: feature-level projections is not a universal layer; place projection policy in application and persistence in adapters`,
-      );
-    }
-  }
+  validateSourceLayout(repositoryRoot, sourceRoot, sourceFiles, errors);
 
   return { entry, manifest, sourceFiles };
 }
@@ -924,71 +453,33 @@ async function main() {
     const entry = byPath.get(materializedPath);
     const owner = documents.get(entry.owner_document);
     if (owner) {
-      const materializedPackage = await validateMaterializedPackage(
-        repositoryRoot,
-        entry,
-        owner,
+      const materializedPackage = await validateMaterializedPackage({
         byPackageName,
         dependencyEdges,
+        entry,
         errors,
-      );
+        owner,
+        repositoryRoot,
+      });
       if (materializedPackage) {
         materializedPackages.set(entry.package_name, materializedPackage);
       }
     }
   }
 
-  const rootTsconfigPath = path.join(repositoryRoot, "tsconfig.json");
-  if (await exists(rootTsconfigPath)) {
-    try {
-      const rootTsconfig = JSON.parse(await readFile(rootTsconfigPath, "utf8"));
-      const referenceCounts = new Map();
-      const references = rootTsconfig.references ?? [];
-      if (!Array.isArray(references)) {
-        errors.push("tsconfig.json: references must be an array");
-      } else {
-        for (const reference of references) {
-          const normalized = normalizedRootReference(reference?.path);
-          if (!normalized) {
-            errors.push(
-              "tsconfig.json: every project reference requires a relative in-repository path",
-            );
-            continue;
-          }
-          referenceCounts.set(
-            normalized,
-            (referenceCounts.get(normalized) ?? 0) + 1,
-          );
-        }
-      }
-      for (const materializedPath of [...materializedPaths].toSorted()) {
-        const count = referenceCounts.get(materializedPath) ?? 0;
-        if (count !== 1) {
-          errors.push(
-            `tsconfig.json: materialized package ${materializedPath} must appear exactly once in project references (found ${count})`,
-          );
-        }
-      }
-      for (const [referencePath] of referenceCounts) {
-        if (byPath.has(referencePath) && !materializedPaths.has(referencePath)) {
-          errors.push(
-            `tsconfig.json: project reference ${referencePath} points to an unmaterialized catalog package`,
-          );
-        }
-      }
-    } catch (error) {
-      errors.push(`tsconfig.json: invalid JSON: ${error.message}`);
-    }
-  } else if (materializedPaths.size > 0) {
-    errors.push("tsconfig.json: materialized packages require root project references");
-  }
-  await validateInternalPackageImports(
+  await validateRootTsconfig(
     repositoryRoot,
-    materializedPackages,
+    byPath,
+    materializedPaths,
+    errors,
+  );
+  await validateInternalPackageImports({
     byPackageName,
     dependencyEdges,
     errors,
-  );
+    materializedPackages,
+    repositoryRoot,
+  });
 
   if (errors.length > 0) {
     for (const error of [...new Set(errors)].toSorted()) {

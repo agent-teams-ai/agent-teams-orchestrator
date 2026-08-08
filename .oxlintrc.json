@@ -1,5 +1,9 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": [
+    "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/node.json",
+    "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/maintainability.json"
+  ],
   "categories": {
     "correctness": "error",
     "nursery": "off",
@@ -399,6 +403,48 @@
     ]
   },
   "overrides": [
+    {
+      "files": [
+        "**/generated/**",
+        "**/vendor/**"
+      ],
+      "rules": {
+        "complexity": "off",
+        "max-depth": "off",
+        "max-lines": "off",
+        "max-lines-per-function": "off",
+        "max-params": "off"
+      }
+    },
+    {
+      "files": [
+        "packages/**/tests/**",
+        "scripts/**/*.test.mjs",
+        "scripts/**/fixtures/**",
+        "tooling/architecture-conformance/**"
+      ],
+      "rules": {
+        "complexity": ["error", 30],
+        "max-depth": ["error", 5],
+        "max-lines": [
+          "error",
+          {
+            "max": 800,
+            "skipBlankLines": true,
+            "skipComments": true
+          }
+        ],
+        "max-lines-per-function": [
+          "error",
+          {
+            "max": 250,
+            "skipBlankLines": true,
+            "skipComments": true
+          }
+        ],
+        "max-params": ["error", 6]
+      }
+    },
     {
       "files": [
         "**/*.{ts,tsx,mts,cts}"

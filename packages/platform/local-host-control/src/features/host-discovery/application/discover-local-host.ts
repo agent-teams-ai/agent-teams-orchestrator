@@ -95,6 +95,12 @@ function snapshotClock(
   }
 }
 
+function assertNeverSourceResult(value: never): never {
+  throw new TypeError(
+    `Host discovery source result is not exhaustive: ${String(value)}`,
+  );
+}
+
 function sourceTerminalResult(
   query: DiscoverLocalHostQuery,
   rawSourceResult: unknown,
@@ -149,6 +155,8 @@ function sourceTerminalResult(
         reason: sourceResult.reason,
         targetId: query.targetId,
       };
+    default:
+      return assertNeverSourceResult(sourceResult);
   }
 }
 

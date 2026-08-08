@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
   copyFile,
-  lstat,
   mkdir,
   mkdtemp,
   readFile,
@@ -17,6 +16,15 @@ import { fileURLToPath } from "node:url";
 import Ajv2020 from "ajv/dist/2020.js";
 import { planScaffoldFromFile } from "@agent-teams/engineering-foundation/scaffolding";
 import YAML from "yaml";
+
+import {
+  journalPath,
+  operationBytes,
+  operationSources,
+  pathExists,
+  writeJournal,
+  writeOperationPostimage,
+} from "./scaffolding-transaction-fixture.mjs";
 
 const toolingRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -201,24 +209,6 @@ function applyPlan(root, id) {
     "--json",
   ]);
   return { result, receipt: parseJsonOutput(`apply ${id}`, result) };
-}
-
-function operationSources(plan) {
-  return new Map(
-    plan.operations.map((operation) => [
-      operation.path,
-      Buffer.from(operation.after.contentBase64, "base64").toString("utf8"),
-    ]),
-  );
-}
-
-function operationBytes(plan) {
-  return new Map(
-    plan.operations.map((operation) => [
-      operation.path,
-      Buffer.from(operation.after.contentBase64, "base64"),
-    ]),
-  );
 }
 
 async function addAcceptedFeature(root, entry) {
@@ -516,45 +506,6 @@ async function verifyStaleAuthority() {
     assert.equal(applied.receipt.outcome, "authority-stale");
     assert.equal(await pathExists(path.join(root, entry.path)), false);
   }
-}
-
-async function pathExists(pathname) {
-  try {
-    await lstat(pathname);
-    return true;
-  } catch (error) {
-    if (error instanceof Error && error.code === "ENOENT") {
-      return false;
-    }
-    throw error;
-  }
-}
-
-function journalPath(root) {
-  return path.join(root, ".agent-teams-local/scaffolding-transaction.json");
-}
-
-async function writeJournal(root, plan, stateFor = () => "pending") {
-  const journal = {
-    schemaVersion: 1,
-    state: "PREPARED",
-    plan,
-    operations: plan.operations.map((operation, index) => ({
-      operationId: operation.id,
-      path: operation.path,
-      state: stateFor(operation, index),
-    })),
-  };
-  await writeFile(journalPath(root), `${JSON.stringify(journal, null, 2)}\n`);
-}
-
-async function writeOperationPostimage(root, operation, source) {
-  const pathname = path.join(root, operation.path);
-  await mkdir(path.dirname(pathname), { recursive: true });
-  await writeFile(
-    pathname,
-    source ?? Buffer.from(operation.after.contentBase64, "base64"),
-  );
 }
 
 async function verifyRecoveryWithoutTopologyGate() {

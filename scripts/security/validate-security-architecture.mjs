@@ -145,134 +145,165 @@ export function validateClassificationSemantics(manifest) {
   return errors;
 }
 
-export function evaluateThreatScenario(scenario) {
-  const { input, threat } = scenario;
+function evaluateCrossTenantSubstitution(input) {
   const ruleIds = [];
+  if (
+    input.resourceTenantId !== input.authenticatedTenantId &&
+    (input.operationKind !== "cross-tenant-administration" ||
+      input.authenticatedAuthorityScope !== "cross-tenant-administrator")
+  ) {
+    ruleIds.push("SEC-TENANT-001");
+  }
+  if (input.payloadTenantId !== input.resourceTenantId) {
+    ruleIds.push("SEC-TENANT-002");
+  }
+  return ruleIds;
+}
 
-  switch (threat) {
-    case "cross-tenant-substitution": {
-      if (
-        input.resourceTenantId !== input.authenticatedTenantId &&
-        (input.operationKind !== "cross-tenant-administration" ||
-          input.authenticatedAuthorityScope !==
-            "cross-tenant-administrator")
-      ) {
-        ruleIds.push("SEC-TENANT-001");
-      }
-      if (input.payloadTenantId !== input.resourceTenantId) {
-        ruleIds.push("SEC-TENANT-002");
-      }
-      break;
-    }
-    case "malicious-workspace-config": {
-      if (input.requestsEndpointOverride) {
-        ruleIds.push("SEC-WORKSPACE-001");
-      }
-      if (input.requestsExecutableOverride) {
-        ruleIds.push("SEC-WORKSPACE-002");
-      }
-      if (!input.workspaceTrusted && !input.validatedByWorkspacePolicy) {
-        ruleIds.push("SEC-WORKSPACE-003");
-      }
-      break;
-    }
-    case "prompt-authority-confusion": {
-      if (
-        input.action === "execute-control-command" &&
-        input.sourceChannel !== "control-api"
-      ) {
-        ruleIds.push("SEC-AUTHORITY-001");
-      }
-      if (
-        input.action === "execute-control-command" &&
-        (!input.typedCommandEnvelope || !input.authenticatedAuthority)
-      ) {
-        ruleIds.push("SEC-AUTHORITY-002");
-      }
-      break;
-    }
-    case "ssrf-egress-policy": {
-      if (!input.usesControlledEgress) {
-        ruleIds.push("SEC-EGRESS-001");
-      }
-      if (!["http", "https"].includes(input.scheme)) {
-        ruleIds.push("SEC-EGRESS-002");
-      }
-      if (
-        ["loopback", "link-local", "metadata-service"].includes(
-          input.destinationClass,
-        )
-      ) {
-        ruleIds.push("SEC-EGRESS-003");
-      }
-      if (!input.policyAllowsDestination || !input.resolvedAddressesPinned) {
-        ruleIds.push("SEC-EGRESS-004");
-      }
-      break;
-    }
-    case "replay-stale-authority": {
-      if (!input.idempotencyKey) {
-        ruleIds.push("SEC-REPLAY-001");
-      }
-      if (input.expectedRevision !== input.currentRevision) {
-        ruleIds.push("SEC-REPLAY-002");
-      }
-      if (
-        Date.parse(input.authorityValidUntil) <= Date.parse(input.now)
-      ) {
-        ruleIds.push("SEC-REPLAY-003");
-      }
-      if (input.expectedScopeHash !== input.authorityScopeHash) {
-        ruleIds.push("SEC-REPLAY-004");
-      }
-      break;
-    }
-    case "credential-leakage": {
-      if (
-        input.valueKind === "raw-secret" &&
-        input.location !== "secret-adapter"
-      ) {
-        ruleIds.push("SEC-SECRET-001");
-      }
-      if (
-        input.valueKind === "raw-secret" &&
-        ["integration-event", "log", "public-contract", "telemetry"].includes(
-          input.location,
-        )
-      ) {
-        ruleIds.push("SEC-SECRET-002");
-      }
-      break;
-    }
-    case "unredacted-output": {
-      if (input.classification === "secret") {
-        ruleIds.push("SEC-REDACTION-001");
-      }
-      if (
-        input.containsAuthorityEvidence &&
-        !["authority-evidence", "metadata-only"].includes(
-          input.redactionProfile,
-        )
-      ) {
-        ruleIds.push("SEC-REDACTION-002");
-      }
-      if (
-        input.containsUserContent &&
-        ["none", "authority-evidence"].includes(input.redactionProfile)
-      ) {
-        ruleIds.push("SEC-REDACTION-003");
-      }
-      break;
-    }
-    default:
-      throw new Error(`unsupported threat scenario ${String(threat)}`);
+function evaluateMaliciousWorkspaceConfig(input) {
+  const ruleIds = [];
+  if (input.requestsEndpointOverride) {
+    ruleIds.push("SEC-WORKSPACE-001");
+  }
+  if (input.requestsExecutableOverride) {
+    ruleIds.push("SEC-WORKSPACE-002");
+  }
+  if (!input.workspaceTrusted && !input.validatedByWorkspacePolicy) {
+    ruleIds.push("SEC-WORKSPACE-003");
+  }
+  return ruleIds;
+}
+
+function evaluatePromptAuthorityConfusion(input) {
+  const ruleIds = [];
+  const executesControlCommand = input.action === "execute-control-command";
+  if (executesControlCommand && input.sourceChannel !== "control-api") {
+    ruleIds.push("SEC-AUTHORITY-001");
+  }
+  if (
+    executesControlCommand &&
+    (!input.typedCommandEnvelope || !input.authenticatedAuthority)
+  ) {
+    ruleIds.push("SEC-AUTHORITY-002");
+  }
+  return ruleIds;
+}
+
+function evaluateSsrfEgressPolicy(input) {
+  const ruleIds = [];
+  if (!input.usesControlledEgress) {
+    ruleIds.push("SEC-EGRESS-001");
+  }
+  if (!["http", "https"].includes(input.scheme)) {
+    ruleIds.push("SEC-EGRESS-002");
+  }
+  if (
+    ["loopback", "link-local", "metadata-service"].includes(
+      input.destinationClass,
+    )
+  ) {
+    ruleIds.push("SEC-EGRESS-003");
+  }
+  if (!input.policyAllowsDestination || !input.resolvedAddressesPinned) {
+    ruleIds.push("SEC-EGRESS-004");
+  }
+  return ruleIds;
+}
+
+function evaluateReplayStaleAuthority(input) {
+  const ruleIds = [];
+  if (!input.idempotencyKey) {
+    ruleIds.push("SEC-REPLAY-001");
+  }
+  if (input.expectedRevision !== input.currentRevision) {
+    ruleIds.push("SEC-REPLAY-002");
+  }
+  if (Date.parse(input.authorityValidUntil) <= Date.parse(input.now)) {
+    ruleIds.push("SEC-REPLAY-003");
+  }
+  if (input.expectedScopeHash !== input.authorityScopeHash) {
+    ruleIds.push("SEC-REPLAY-004");
+  }
+  return ruleIds;
+}
+
+function evaluateCredentialLeakage(input) {
+  const ruleIds = [];
+  const containsRawSecret = input.valueKind === "raw-secret";
+  if (containsRawSecret && input.location !== "secret-adapter") {
+    ruleIds.push("SEC-SECRET-001");
+  }
+  if (
+    containsRawSecret &&
+    ["integration-event", "log", "public-contract", "telemetry"].includes(
+      input.location,
+    )
+  ) {
+    ruleIds.push("SEC-SECRET-002");
+  }
+  return ruleIds;
+}
+
+function evaluateUnredactedOutput(input) {
+  const ruleIds = [];
+  if (input.classification === "secret") {
+    ruleIds.push("SEC-REDACTION-001");
+  }
+  if (
+    input.containsAuthorityEvidence &&
+    !["authority-evidence", "metadata-only"].includes(input.redactionProfile)
+  ) {
+    ruleIds.push("SEC-REDACTION-002");
+  }
+  if (
+    input.containsUserContent &&
+    ["none", "authority-evidence"].includes(input.redactionProfile)
+  ) {
+    ruleIds.push("SEC-REDACTION-003");
+  }
+  return ruleIds;
+}
+
+const threatEvaluators = new Map([
+  ["credential-leakage", evaluateCredentialLeakage],
+  ["cross-tenant-substitution", evaluateCrossTenantSubstitution],
+  ["malicious-workspace-config", evaluateMaliciousWorkspaceConfig],
+  ["prompt-authority-confusion", evaluatePromptAuthorityConfusion],
+  ["replay-stale-authority", evaluateReplayStaleAuthority],
+  ["ssrf-egress-policy", evaluateSsrfEgressPolicy],
+  ["unredacted-output", evaluateUnredactedOutput],
+]);
+
+export function evaluateThreatScenario({ input, threat }) {
+  const evaluate = threatEvaluators.get(threat);
+  if (!evaluate) {
+    throw new Error(`unsupported threat scenario ${String(threat)}`);
   }
 
-  const normalizedRuleIds = sorted(ruleIds);
+  const normalizedRuleIds = sorted(evaluate(input));
   return {
     decision: normalizedRuleIds.length === 0 ? "allow" : "deny",
     ruleIds: normalizedRuleIds,
   };
+}
+
+function validateThreatCoverage(allowedThreats, deniedThreats) {
+  const errors = [];
+  const requiredThreats = threatEvaluators.keys();
+  for (const threat of requiredThreats) {
+    const hasAllowed = allowedThreats.some(
+      (scenario) => scenario.threat === threat,
+    );
+    const hasDenied = deniedThreats.some(
+      (scenario) => scenario.threat === threat,
+    );
+    if (!hasAllowed || !hasDenied) {
+      errors.push(
+        `SEC-FIXTURE-005 ${threat} requires both allow and deny fixtures`,
+      );
+    }
+  }
+  return errors;
 }
 
 export async function validateSecurityFoundation(repositoryRoot) {
@@ -408,28 +439,7 @@ export async function validateSecurityFoundation(repositoryRoot) {
     }
   }
 
-  const requiredThreats = new Set([
-    "credential-leakage",
-    "cross-tenant-substitution",
-    "malicious-workspace-config",
-    "prompt-authority-confusion",
-    "replay-stale-authority",
-    "ssrf-egress-policy",
-    "unredacted-output",
-  ]);
-  for (const threat of requiredThreats) {
-    const hasAllowed = allowedThreats.some(
-      (scenario) => scenario.threat === threat,
-    );
-    const hasDenied = deniedThreats.some(
-      (scenario) => scenario.threat === threat,
-    );
-    if (!hasAllowed || !hasDenied) {
-      errors.push(
-        `SEC-FIXTURE-005 ${threat} requires both allow and deny fixtures`,
-      );
-    }
-  }
+  errors.push(...validateThreatCoverage(allowedThreats, deniedThreats));
 
   return {
     errors,

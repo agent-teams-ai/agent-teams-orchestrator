@@ -84,6 +84,11 @@ before a high-cost boundary violation.
 - Production package paths and owners must be declared in
   [`architecture/package-catalog.yaml`](architecture/package-catalog.yaml).
   Proposed owners reserve topology but do not authorize production code.
+- Plan modules within the blocking Foundation maintainability budgets. Product
+  and repository-tooling source uses 500 effective lines per file, 150 per
+  function, complexity 20, depth 4, and 5 parameters; tests and conformance
+  harnesses use 800, 250, 30, 5, and 6. Split responsibilities before the gate,
+  rather than adding a local lint exception.
 - Process-wide resources and private Awilix containers are created only in
   `composition/**`. Features export typed factories and public contracts, never
   containers.

@@ -1,11 +1,9 @@
-import { readFile, readdir, stat } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
-import GithubSlugger from "github-slugger";
 import { toString } from "mdast-util-to-string";
 import { visit } from "unist-util-visit";
 import YAML from "yaml";
@@ -16,7 +14,13 @@ import {
   validateCodeAnchorPattern,
 } from "./code-anchors.mjs";
 import { discoverGovernedMarkdown } from "./document-files.mjs";
+import { validateDocumentIndexes } from "./document-indexes.mjs";
+import {
+  validateLocalLinks,
+} from "./document-links.mjs";
 import { parseFrontmatter, parseMarkdown } from "./document-parser.mjs";
+import { validateDocumentRelations } from "./document-relations.mjs";
+import { validateMermaid } from "./mermaid-runner.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = process.env.DOCS_REPOSITORY_ROOT
@@ -74,32 +78,6 @@ function validateCodeAnchors(document, repositoryFiles) {
   }
 }
 
-function headingAnchors(tree) {
-  const anchors = new Set();
-  const slugger = new GithubSlugger();
-  visit(tree, "heading", (node) => {
-    anchors.add(slugger.slug(toString(node)));
-  });
-
-  return anchors;
-}
-
-function markdownLinks(tree) {
-  const links = [];
-  visit(tree, (node) => {
-    if (
-      (node.type === "link" ||
-        node.type === "image" ||
-        node.type === "definition") &&
-      typeof node.url === "string"
-    ) {
-      links.push(node.url);
-    }
-  });
-
-  return links;
-}
-
 function validateDocumentStructure(filePath, tree) {
   const topLevelHeadings = [];
   visit(tree, "heading", (node) => {
@@ -141,50 +119,6 @@ function mermaidDiagrams(tree, filePath) {
   });
 
   return diagrams;
-}
-
-function resolveMarkdownTarget(sourcePath, rawTarget) {
-  if (
-    /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(rawTarget) ||
-    rawTarget.startsWith("/")
-  ) {
-    return null;
-  }
-
-  const [rawPath, rawAnchor = ""] = rawTarget.split("#", 2);
-  let targetPath = rawPath
-    ? path.resolve(path.dirname(sourcePath), decodeURIComponent(rawPath))
-    : sourcePath;
-
-  const repositoryRelative = path.relative(repositoryRoot, targetPath);
-  if (
-    repositoryRelative === ".." ||
-    repositoryRelative.startsWith(`..${path.sep}`)
-  ) {
-    return {
-      anchor: decodeURIComponent(rawAnchor).toLowerCase(),
-      escapedRepository: true,
-      targetPath,
-    };
-  }
-
-  return {
-    anchor: decodeURIComponent(rawAnchor).toLowerCase(),
-    escapedRepository: false,
-    targetPath,
-  };
-}
-
-async function normalizeExistingTarget(targetPath) {
-  try {
-    const targetStat = await stat(targetPath);
-    if (targetStat.isDirectory()) {
-      return path.join(targetPath, "README.md");
-    }
-    return targetPath;
-  } catch {
-    return targetPath;
-  }
 }
 
 function validateFilename(document) {
@@ -401,314 +335,28 @@ function validateAdrApproval(document) {
   }
 }
 
-function linkedLocalMarkdownPaths(indexDocument) {
-  return new Set(
-    markdownLinks(indexDocument.tree)
-      .map((target) => resolveMarkdownTarget(indexDocument.filePath, target))
-      .filter((target) => target && !target.escapedRepository)
-      .map(({ targetPath }) => path.normalize(targetPath)),
+async function validateDocumentDiagrams(documents) {
+  const diagrams = documents.flatMap((document) =>
+    mermaidDiagrams(document.tree, document.filePath),
   );
-}
-
-async function validateDirectoryIndexes(markdownFiles, documentsByPath) {
-  const directories = new Set([docsRoot]);
-  for (const filePath of markdownFiles) {
-    let directory = path.dirname(filePath);
-    while (
-      directory === docsRoot ||
-      directory.startsWith(`${docsRoot}${path.sep}`)
-    ) {
-      directories.add(directory);
-      if (directory === docsRoot) {
-        break;
-      }
-      directory = path.dirname(directory);
-    }
-  }
-
-  for (const directory of [...directories].toSorted()) {
-    const entries = await readdir(directory, { withFileTypes: true });
-    const directDocuments = entries
-      .filter(
-        (entry) =>
-          entry.isFile() &&
-          path.extname(entry.name) === ".md" &&
-          entry.name !== "README.md",
-      )
-      .map((entry) => path.join(directory, entry.name));
-    const childDocumentationDirectories = entries
-      .filter((entry) => entry.isDirectory())
-      .map((entry) => path.join(directory, entry.name))
-      .filter((childDirectory) =>
-        markdownFiles.some((filePath) =>
-          filePath.startsWith(`${childDirectory}${path.sep}`),
-        ),
-      );
-    const childIndexes = childDocumentationDirectories.map((childDirectory) =>
-      path.join(childDirectory, "README.md"),
-    );
-    const requiredTargets = [...directDocuments, ...childIndexes];
-    const indexPath = path.join(directory, "README.md");
-    const indexDocument = documentsByPath.get(indexPath);
-
-    if (requiredTargets.length > 0 && !indexDocument) {
-      errors.push(
-        `${relative(directory)}: documentation directory requires README.md`,
-      );
-      continue;
-    }
-
-    if (!indexDocument) {
-      continue;
-    }
-
-    if (requiredTargets.length > 0 && indexDocument.metadata?.type !== "index") {
-      errors.push(
-        `${relative(indexPath)}: collection README.md must have type index`,
-      );
-    }
-
-    const linked = linkedLocalMarkdownPaths(indexDocument);
-    for (const targetPath of requiredTargets) {
-      if (!documentsByPath.has(targetPath)) {
-        errors.push(
-          `${relative(targetPath)}: child documentation directory requires README.md`,
-        );
-        continue;
-      }
-      if (!linked.has(path.normalize(targetPath))) {
-        errors.push(
-          `${relative(targetPath)}: not directly listed in ${relative(indexPath)}`,
-        );
-      }
-    }
-  }
-}
-
-function validateIndexTables(documentsByPath) {
-  for (const document of documentsByPath.values()) {
-    if (document.metadata?.type !== "index") {
-      continue;
-    }
-
-    visit(document.tree, "table", (table) => {
-      const [headerRow, ...rows] = table.children;
-      const headers = (headerRow?.children ?? []).map((cell) =>
-        toString(cell).trim().toLowerCase(),
-      );
-      const idColumn = headers.indexOf("id");
-      const ownerColumn = headers.indexOf("owner");
-      const blockerColumn = headers.indexOf("primary gate");
-      const statusColumn = Math.max(
-        headers.indexOf("status"),
-        headers.indexOf("readiness"),
-      );
-
-      for (const row of rows) {
-        const cells = row.children ?? [];
-        const targets = cells.flatMap((cell) => markdownLinks(cell));
-
-        for (const rawTarget of targets) {
-          const resolved = resolveMarkdownTarget(document.filePath, rawTarget);
-          if (!resolved || resolved.escapedRepository) {
-            continue;
-          }
-
-          const target = documentsByPath.get(path.normalize(resolved.targetPath));
-          if (!target?.metadata) {
-            continue;
-          }
-
-          if (
-            idColumn >= 0 &&
-            toString(cells[idColumn]).trim() !== target.metadata.id
-          ) {
-            errors.push(
-              `${relative(document.filePath)}: table id for ${relative(target.filePath)} must be ${target.metadata.id}`,
-            );
-          }
-
-          if (
-            ownerColumn >= 0 &&
-            toString(cells[ownerColumn]).trim() !== target.metadata.owner
-          ) {
-            errors.push(
-              `${relative(document.filePath)}: table owner for ${target.metadata.id} must be ${target.metadata.owner}`,
-            );
-          }
-
-          if (blockerColumn >= 0) {
-            const renderedBlockers = toString(cells[blockerColumn])
-              .split(",")
-              .map((value) => value.trim())
-              .filter(Boolean)
-              .toSorted();
-            const expectedBlockers = [
-              ...(target.metadata.blocked_by ?? []),
-            ].toSorted();
-            if (
-              JSON.stringify(renderedBlockers) !==
-              JSON.stringify(expectedBlockers)
-            ) {
-              errors.push(
-                `${relative(document.filePath)}: primary gate for ${target.metadata.id} must match blocked_by metadata`,
-              );
-            }
-          }
-
-          if (statusColumn >= 0) {
-            const renderedStatus = toString(cells[statusColumn])
-              .trim()
-              .toLowerCase();
-            const expectedStatus =
-              target.metadata.type === "open-decision" &&
-              target.metadata.status === "resolved"
-                ? `resolved by ${target.metadata.resolved_by}`.toLowerCase()
-                : target.metadata.status;
-            if (renderedStatus !== expectedStatus) {
-              errors.push(
-                `${relative(document.filePath)}: table status for ${target.metadata.id} must be ${expectedStatus}`,
-              );
-            }
-          }
-        }
-      }
-    });
-  }
-}
-
-function validateAdrLifecycleIndex(documentsByPath) {
-  const indexPath = path.join(docsRoot, "decisions/README.md");
-  const indexDocument = documentsByPath.get(indexPath);
-  if (!indexDocument) {
-    errors.push(`${relative(indexPath)}: ADR index is missing`);
+  if (diagrams.length === 0 || process.env.DOCS_SKIP_MERMAID === "1") {
     return;
   }
-
-  const linksBySection = new Map();
-  let section = "";
-  for (const node of indexDocument.tree.children) {
-    if (node.type === "heading" && node.depth === 2) {
-      section = toString(node).trim().toLowerCase();
-      continue;
-    }
-
-    for (const rawTarget of markdownLinks(node)) {
-      const resolved = resolveMarkdownTarget(indexPath, rawTarget);
-      if (!resolved || resolved.escapedRepository) {
-        continue;
-      }
-      const target = documentsByPath.get(path.normalize(resolved.targetPath));
-      if (target?.metadata?.type !== "adr") {
-        continue;
-      }
-
-      const sections = linksBySection.get(target.metadata.id) ?? new Set();
-      sections.add(section);
-      linksBySection.set(target.metadata.id, sections);
-    }
+  const mermaidResult = await validateMermaid(diagrams, {
+    repositoryRoot,
+    validatorPath: mermaidValidatorPath,
+  });
+  if (!mermaidResult.results) {
+    errors.push(`Mermaid validation failed: ${mermaidResult.error}`);
+    return;
   }
-
-  const expectedSectionByStatus = {
-    accepted: "accepted decisions",
-    proposed: "proposed decisions",
-    superseded: "superseded decisions",
-  };
-
-  for (const document of documentsByPath.values()) {
-    if (document.metadata?.type !== "adr") {
-      continue;
-    }
-
-    const expectedSection = expectedSectionByStatus[document.metadata.status];
-    const sections = linksBySection.get(document.metadata.id) ?? new Set();
-    if (!sections.has(expectedSection)) {
+  for (const result of mermaidResult.results) {
+    if (!result.valid) {
       errors.push(
-        `${relative(document.filePath)}: ${document.metadata.status} ADR must be listed under "${expectedSection}" in ${relative(indexPath)}`,
+        `${result.key.replace(/:(\d+)$/, ": Mermaid diagram $1")} is invalid: ${result.error}`,
       );
     }
-
-    for (const lifecycleSection of [
-      "accepted decisions",
-      "proposed decisions",
-      "superseded decisions",
-    ]) {
-      if (lifecycleSection !== expectedSection && sections.has(lifecycleSection)) {
-        errors.push(
-          `${relative(document.filePath)}: ADR is also listed under incorrect lifecycle section "${lifecycleSection}"`,
-        );
-      }
-    }
   }
-}
-
-function validateMermaid(diagrams) {
-  const { promise, resolve } = Promise.withResolvers();
-    const child = spawn(process.execPath, [mermaidValidatorPath], {
-      cwd: repositoryRoot,
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-    let stdout = "";
-    let stderr = "";
-    let timedOut = false;
-    let settled = false;
-
-    const timeout = setTimeout(() => {
-      timedOut = true;
-      child.kill("SIGKILL");
-    }, 120_000);
-
-    const resolveOnce = (result) => {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      clearTimeout(timeout);
-      resolve(result);
-    };
-
-    child.stdout.setEncoding("utf8");
-    child.stdout.on("data", (chunk) => {
-      stdout += chunk;
-    });
-    child.stderr.setEncoding("utf8");
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk;
-    });
-
-    child.on("error", (error) => {
-      resolveOnce({
-        error: error.message,
-        results: null,
-      });
-    });
-
-    child.on("close", (code) => {
-      if (timedOut || code !== 0) {
-        resolveOnce({
-          error: timedOut
-            ? "parser timed out after 120 seconds"
-            : stderr.trim() || `parser exited with code ${code}`,
-          results: null,
-        });
-        return;
-      }
-
-      try {
-        resolveOnce({
-          error: null,
-          results: JSON.parse(stdout),
-        });
-      } catch (error) {
-        resolveOnce({
-          error: `parser returned invalid JSON: ${error.message}`,
-          results: null,
-        });
-      }
-    });
-
-    child.stdin.end(JSON.stringify(diagrams));
-  return promise;
 }
 
 async function main() {
@@ -798,231 +446,34 @@ async function main() {
     validateCodeAnchors(document, repositoryFiles);
   }
 
-  for (const document of documents) {
-    for (const field of [
-      "blocked_by",
-      "related",
-      "supersedes",
-      "superseded_by",
-    ]) {
-      for (const targetId of document.metadata?.[field] ?? []) {
-        if (targetId === document.metadata.id) {
-          errors.push(
-            `${relative(document.filePath)}: ${field} must not reference the document itself`,
-          );
-        }
-        if (!documentsById.has(targetId)) {
-          errors.push(
-            `${relative(document.filePath)}: ${field} references unknown id ${targetId}`,
-          );
-        }
-      }
-    }
+  validateDocumentRelations({
+    documents,
+    documentsById,
+    errors,
+    relative,
+  });
 
-    if (
-      document.metadata?.status === "superseded" &&
-      (document.metadata.superseded_by?.length ?? 0) === 0
-    ) {
-      errors.push(
-        `${relative(document.filePath)}: superseded document must declare superseded_by`,
-      );
-    }
+  await validateLocalLinks({
+    allMarkdownFiles,
+    documents,
+    documentsByPath,
+    entrypoint,
+    errors,
+    markdownTrees,
+    relative,
+    repositoryRoot,
+  });
 
-    for (const blockerId of document.metadata?.blocked_by ?? []) {
-      const blocker = documentsById.get(blockerId);
-      if (
-        blocker?.metadata?.type !== "open-decision" ||
-        !["open", "deferred"].includes(blocker.metadata.status)
-      ) {
-        errors.push(
-          `${relative(document.filePath)}: blocked_by must reference an open or deferred decision`,
-        );
-      }
-      if (!(document.metadata.related ?? []).includes(blockerId)) {
-        errors.push(
-          `${relative(document.filePath)}: blocked_by ${blockerId} must also appear in related`,
-        );
-      }
-    }
+  await validateDocumentIndexes({
+    docsRoot,
+    documentsByPath,
+    errors,
+    markdownFiles: docsMarkdownFiles,
+    relative,
+    repositoryRoot,
+  });
 
-    if (
-      ["accepted", "active"].includes(document.metadata?.status) &&
-      (document.metadata.blocked_by?.length ?? 0) > 0
-    ) {
-      errors.push(
-        `${relative(document.filePath)}: accepted or active document cannot retain blocked_by`,
-      );
-    }
-
-    if (document.metadata?.resolved_by) {
-      if (document.metadata.type !== "open-decision") {
-        errors.push(
-          `${relative(document.filePath)}: resolved_by is allowed only on open decisions`,
-        );
-      } else {
-        const decidingAdr = documentsById.get(document.metadata.resolved_by);
-        if (
-          decidingAdr?.metadata?.type !== "adr" ||
-          !["accepted", "superseded"].includes(decidingAdr.metadata.status)
-        ) {
-          errors.push(
-            `${relative(document.filePath)}: resolved_by must reference an accepted or superseded ADR`,
-          );
-        }
-        if (
-          !(document.metadata.related ?? []).includes(
-            document.metadata.resolved_by,
-          )
-        ) {
-          errors.push(
-            `${relative(document.filePath)}: resolved_by ADR must also appear in related`,
-          );
-        }
-      }
-    }
-
-    if (
-      document.metadata?.type === "open-decision" &&
-      document.metadata.status === "resolved" &&
-      !document.metadata.resolved_by
-    ) {
-      errors.push(
-        `${relative(document.filePath)}: resolved open decision requires resolved_by`,
-      );
-    }
-
-    if (
-      document.metadata?.type === "open-decision" &&
-      document.metadata.status !== "resolved" &&
-      document.metadata.resolved_by
-    ) {
-      errors.push(
-        `${relative(document.filePath)}: unresolved open decision must not declare resolved_by`,
-      );
-    }
-  }
-
-  for (const document of documents) {
-    for (const targetId of document.metadata?.supersedes ?? []) {
-      const target = documentsById.get(targetId);
-      if (
-        target &&
-        !(target.metadata?.superseded_by ?? []).includes(document.metadata.id)
-      ) {
-        errors.push(
-          `${relative(document.filePath)}: supersedes ${targetId}, but the target does not declare superseded_by ${document.metadata.id}`,
-        );
-      }
-    }
-
-    for (const targetId of document.metadata?.superseded_by ?? []) {
-      const target = documentsById.get(targetId);
-      if (
-        target &&
-        !(target.metadata?.supersedes ?? []).includes(document.metadata.id)
-      ) {
-        errors.push(
-          `${relative(document.filePath)}: superseded_by ${targetId}, but the target does not declare supersedes ${document.metadata.id}`,
-        );
-      }
-    }
-  }
-
-  const localGraph = new Map();
-  for (const filePath of allMarkdownFiles) {
-    const tree = markdownTrees.get(filePath);
-    const targets = new Set();
-
-    for (const rawTarget of markdownLinks(tree)) {
-      const resolved = resolveMarkdownTarget(filePath, rawTarget);
-      if (!resolved) {
-        continue;
-      }
-
-      if (resolved.escapedRepository) {
-        errors.push(
-          `${relative(filePath)}: local link escapes repository root: ${rawTarget}`,
-        );
-        continue;
-      }
-
-      const targetPath = await normalizeExistingTarget(resolved.targetPath);
-      try {
-        const targetStat = await stat(targetPath);
-        if (!targetStat.isFile()) {
-          throw new Error("not a file");
-        }
-      } catch {
-        errors.push(
-          `${relative(filePath)}: broken local link ${rawTarget}`,
-        );
-        continue;
-      }
-
-      if (path.extname(targetPath) === ".md") {
-        targets.add(targetPath);
-      }
-
-      if (resolved.anchor && path.extname(targetPath) === ".md") {
-        const targetTree =
-          markdownTrees.get(targetPath) ??
-          parseMarkdown(await readFile(targetPath, "utf8"));
-        if (!headingAnchors(targetTree).has(resolved.anchor)) {
-          errors.push(
-            `${relative(filePath)}: missing anchor #${resolved.anchor} in ${relative(targetPath)}`,
-          );
-        }
-      }
-    }
-
-    localGraph.set(filePath, targets);
-  }
-
-  const reachable = new Set([entrypoint]);
-  const queue = [entrypoint];
-  while (queue.length > 0) {
-    const current = queue.shift();
-    for (const target of localGraph.get(current) ?? []) {
-      if (
-        documentsByPath.has(target) &&
-        !reachable.has(target)
-      ) {
-        reachable.add(target);
-        queue.push(target);
-      }
-    }
-  }
-
-  for (const document of documents) {
-    if (!reachable.has(document.filePath)) {
-      errors.push(
-        `${relative(document.filePath)}: unreachable from docs/README.md`,
-      );
-    }
-  }
-
-  await validateDirectoryIndexes(docsMarkdownFiles, documentsByPath);
-  validateIndexTables(documentsByPath);
-  validateAdrLifecycleIndex(documentsByPath);
-
-  const diagrams = documents.flatMap((document) =>
-    mermaidDiagrams(document.tree, document.filePath),
-  );
-
-  if (diagrams.length > 0 && process.env.DOCS_SKIP_MERMAID !== "1") {
-    const mermaidResult = await validateMermaid(diagrams);
-    if (!mermaidResult.results) {
-      errors.push(`Mermaid validation failed: ${mermaidResult.error}`);
-    } else {
-      for (const result of mermaidResult.results) {
-        if (!result.valid) {
-          errors.push(
-            `${result.key.replace(/:(\d+)$/, ": Mermaid diagram $1")} is invalid: ${result.error}`,
-          );
-        }
-      }
-    }
-  }
+  await validateDocumentDiagrams(documents);
 
   if (errors.length > 0) {
     for (const error of errors.toSorted()) {

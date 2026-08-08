@@ -197,6 +197,15 @@ Capability-specific plugins such as React, JSX accessibility, Next.js, Vue, or
 Jest are activated only when a real package needs them. Every promotion requires
 valid and invalid fixtures and a clean baseline review.
 
+The root policy explicitly extends the Foundation Node and production
+maintainability presets. Handwritten product and repository-tooling source is
+limited to 500 effective lines per file, 150 per function, complexity 20,
+nesting depth 4, and 5 parameters. Package tests, `*.test.mjs`, intentional
+fixtures, and architecture-conformance harnesses use the Foundation test profile:
+800, 250, 30, 5, and 6 respectively. Generated and vendored paths disable only
+these five budgets. Agents must split responsibilities before crossing a budget;
+there is no untracked per-file maintainability exception.
+
 TypeScript 7 remains the authoritative compiler. Type-aware Oxlint supplements it
 through the exact pinned `oxlint-tsgolint` release and never replaces
 `pnpm typecheck`. Unsupported rules are not listed as protection; the conformance
