@@ -36,3 +36,16 @@ jobs:
     secrets:
       CODEX_AUTH_JSON: ${{ secrets.REVIEWROUTER_CODEX_AUTH_JSON }}
       REVIEW_ROUTER_LEDGER_KEY: ${{ secrets.REVIEWROUTER_LEDGER_KEY }}
+
+  required-check:
+    name: ReviewRouter
+    needs: review
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions: {}
+    steps:
+      - name: Verify review result
+        env:
+          REVIEW_RESULT: ${{ needs.review.result }}
+        run: test "$REVIEW_RESULT" = success
