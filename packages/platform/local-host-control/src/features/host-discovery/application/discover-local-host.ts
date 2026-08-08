@@ -37,6 +37,7 @@ function resolveDependencies(
   dependencies: HostDiscoveryDependencies,
 ): ResolvedHostDiscoveryDependencies {
   let clockNow: () => unknown;
+  let rawFreshnessPolicy: unknown;
   let sourceRead: (requestedTarget: TargetId) => unknown;
   try {
     if (!isRecord(dependencies)) {
@@ -44,6 +45,7 @@ function resolveDependencies(
     }
     const rawClock = dependencies.clock;
     const rawSource = dependencies.source;
+    rawFreshnessPolicy = dependencies.freshnessPolicy;
     if (!isRecord(rawClock) || !isRecord(rawSource)) {
       throw new TypeError("invalid dependency port");
     }
@@ -61,9 +63,7 @@ function resolveDependencies(
   } catch {
     throw new TypeError("Host discovery dependencies are invalid");
   }
-  const freshnessPolicy = snapshotFreshnessPolicy(
-    dependencies.freshnessPolicy,
-  );
+  const freshnessPolicy = snapshotFreshnessPolicy(rawFreshnessPolicy);
   if (freshnessPolicy === undefined) {
     throw new TypeError("Host discovery freshness policy is invalid");
   }
