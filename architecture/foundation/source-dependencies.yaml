@@ -31,6 +31,7 @@ boundaries:
   - id: platform.local-host-control.host-discovery.application
     roots:
       - packages/platform/local-host-control/src/features/host-discovery/application/discover-local-host.ts
+      - packages/platform/local-host-control/src/features/host-discovery/application/host-discovery-validation.ts
     entrypoints:
       - packages/platform/local-host-control/src/features/host-discovery/application/discover-local-host.ts
     allow:

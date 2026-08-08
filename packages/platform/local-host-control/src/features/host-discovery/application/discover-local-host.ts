@@ -1,499 +1,25 @@
 import type {
-  ComponentVersion,
   DiscoverLocalHostQuery,
   DiscoverLocalHostResult,
   EpochMicroseconds,
-  HostBootGeneration,
-  HostCapabilityId,
   HostDiscovery,
   HostDiscoveryFreshnessPolicy,
   HostDiscoveryObservation,
-  HostDiscoverySourceRejectedReason,
-  HostDiscoveryStaleReason,
-  HostDiscoveryUnavailableReason,
-  HostFreshnessEvidenceRef,
-  HostInstanceId,
-  HostProtocolRange,
-  HostProtocolVersion,
-  Microseconds,
-  SupervisorInstanceId,
   TargetId,
-} from "./model/host-discovery.js";
-import {
-  componentVersion,
-  epochMicroseconds,
-  hostBootGeneration,
-  hostCapabilityId,
-  hostFreshnessEvidenceRef,
-  hostInstanceId,
-  hostProtocolRange,
-  hostProtocolVersion,
-  microseconds,
-  supervisorInstanceId,
-  targetId,
 } from "./model/host-discovery.js";
 import type {
   HostDiscoveryClock,
   HostDiscoverySource,
-  HostDiscoverySourceResult,
 } from "./ports/host-discovery-source.js";
-
-const maximumCapabilityCount = 64;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function snapshotTextToken<Value>(
-  value: unknown,
-  expectedType: string,
-  create: (rawValue: string) => Value,
-): Value | undefined {
-  if (!isRecord(value)) {
-    return undefined;
-  }
-  const tokenType = value.type;
-  if (tokenType !== expectedType) {
-    return undefined;
-  }
-  const rawValue = value.value;
-  if (typeof rawValue !== "string") {
-    return undefined;
-  }
-  try {
-    return create(rawValue);
-  } catch {
-    return undefined;
-  }
-}
-
-function snapshotBigIntToken<Value>(
-  value: unknown,
-  expectedType: string,
-  create: (rawValue: bigint) => Value,
-): Value | undefined {
-  if (!isRecord(value)) {
-    return undefined;
-  }
-  const tokenType = value.type;
-  if (tokenType !== expectedType) {
-    return undefined;
-  }
-  const rawValue = value.value;
-  if (typeof rawValue !== "bigint") {
-    return undefined;
-  }
-  try {
-    return create(rawValue);
-  } catch {
-    return undefined;
-  }
-}
-
-function snapshotTargetId(value: unknown): TargetId | undefined {
-  return snapshotTextToken(value, "TargetId", targetId);
-}
-
-function snapshotSupervisorInstanceId(
-  value: unknown,
-): SupervisorInstanceId | undefined {
-  return snapshotTextToken(
-    value,
-    "SupervisorInstanceId",
-    supervisorInstanceId,
-  );
-}
-
-function snapshotHostInstanceId(value: unknown): HostInstanceId | undefined {
-  return snapshotTextToken(value, "HostInstanceId", hostInstanceId);
-}
-
-function snapshotComponentVersion(
-  value: unknown,
-): ComponentVersion | undefined {
-  return snapshotTextToken(value, "ComponentVersion", componentVersion);
-}
-
-function snapshotCapabilityId(value: unknown): HostCapabilityId | undefined {
-  return snapshotTextToken(value, "HostCapabilityId", hostCapabilityId);
-}
-
-function snapshotFreshnessEvidenceRef(
-  value: unknown,
-): HostFreshnessEvidenceRef | undefined {
-  return snapshotTextToken(
-    value,
-    "HostFreshnessEvidenceRef",
-    hostFreshnessEvidenceRef,
-  );
-}
-
-function snapshotHostBootGeneration(
-  value: unknown,
-): HostBootGeneration | undefined {
-  return snapshotBigIntToken(
-    value,
-    "HostBootGeneration",
-    hostBootGeneration,
-  );
-}
-
-function snapshotProtocolVersion(
-  value: unknown,
-): HostProtocolVersion | undefined {
-  return snapshotBigIntToken(
-    value,
-    "HostProtocolVersion",
-    hostProtocolVersion,
-  );
-}
-
-function snapshotEpochMicroseconds(
-  value: unknown,
-): EpochMicroseconds | undefined {
-  return snapshotBigIntToken(
-    value,
-    "EpochMicroseconds",
-    epochMicroseconds,
-  );
-}
-
-function snapshotMicroseconds(value: unknown): Microseconds | undefined {
-  return snapshotBigIntToken(value, "Microseconds", microseconds);
-}
-
-function snapshotProtocolRange(
-  value: unknown,
-): HostProtocolRange | undefined {
-  if (!isRecord(value)) {
-    return undefined;
-  }
-  const rawMinimum = value.minimum;
-  const rawMaximum = value.maximum;
-  const minimum = snapshotProtocolVersion(rawMinimum);
-  const maximum = snapshotProtocolVersion(rawMaximum);
-  if (minimum === undefined || maximum === undefined) {
-    return undefined;
-  }
-  try {
-    return hostProtocolRange(minimum, maximum);
-  } catch {
-    return undefined;
-  }
-}
-
-function hasUniqueCapabilities(values: readonly HostCapabilityId[]): boolean {
-  return new Set(values.map(({ value }) => value)).size === values.length;
-}
-
-function snapshotCapabilities(
-  value: unknown,
-): readonly HostCapabilityId[] | undefined {
-  if (!Array.isArray(value)) {
-    return undefined;
-  }
-  const length = value.length;
-  if (
-    !Number.isSafeInteger(length) ||
-    length < 0 ||
-    length > maximumCapabilityCount
-  ) {
-    return undefined;
-  }
-  const capabilities: HostCapabilityId[] = [];
-  for (let index = 0; index < length; index += 1) {
-    const capability = snapshotCapabilityId(value[index]);
-    if (capability === undefined) {
-      return undefined;
-    }
-    capabilities.push(capability);
-  }
-  return hasUniqueCapabilities(capabilities)
-    ? Object.freeze(capabilities)
-    : undefined;
-}
-
-function snapshotQuery(value: unknown): DiscoverLocalHostQuery | undefined {
-  try {
-    if (!isRecord(value)) {
-      return undefined;
-    }
-    const rawTargetId = value.targetId;
-    const rawProtocolRange = value.supportedProtocolRange;
-    const rawCapabilities = value.requiredCapabilities;
-    const resolvedTargetId = snapshotTargetId(rawTargetId);
-    const supportedProtocolRange = snapshotProtocolRange(rawProtocolRange);
-    const requiredCapabilities = snapshotCapabilities(rawCapabilities);
-    if (
-      resolvedTargetId === undefined ||
-      supportedProtocolRange === undefined ||
-      requiredCapabilities === undefined
-    ) {
-      return undefined;
-    }
-    return Object.freeze({
-      requiredCapabilities,
-      supportedProtocolRange,
-      targetId: resolvedTargetId,
-    });
-  } catch {
-    return undefined;
-  }
-}
-
-function snapshotFreshness(
-  value: unknown,
-): HostDiscoveryObservation["freshness"] | undefined {
-  if (!isRecord(value)) {
-    return undefined;
-  }
-  const kind = value.kind;
-  const rawEvidenceRef = value.evidenceRef;
-  const rawObservedAt = value.observedAt;
-  const rawValidUntil = value.validUntil;
-  const evidenceRef = snapshotFreshnessEvidenceRef(rawEvidenceRef);
-  const observedAt = snapshotEpochMicroseconds(rawObservedAt);
-  const validUntil = snapshotEpochMicroseconds(rawValidUntil);
-  if (
-    (kind !== "expiry" && kind !== "liveness") ||
-    evidenceRef === undefined ||
-    observedAt === undefined ||
-    validUntil === undefined ||
-    observedAt.value > validUntil.value
-  ) {
-    return undefined;
-  }
-  return Object.freeze({ evidenceRef, kind, observedAt, validUntil });
-}
-
-function isUnavailableReason(
-  value: unknown,
-): value is HostDiscoveryUnavailableReason {
-  return (
-    value === "permission-denied" ||
-    value === "source-failure" ||
-    value === "temporarily-unavailable"
-  );
-}
-
-function isSourceStaleReason(
-  value: unknown,
-): value is Exclude<HostDiscoveryStaleReason, "observation-too-old"> {
-  return (
-    value === "liveness-unproven" ||
-    value === "ownership-unproven" ||
-    value === "superseded"
-  );
-}
-
-function isSourceRejectedReason(
-  value: unknown,
-): value is HostDiscoverySourceRejectedReason {
-  return (
-    value === "foreign-identity" ||
-    value === "malformed" ||
-    value === "unsafe-state"
-  );
-}
-
-function sameTarget(left: TargetId | undefined, right: TargetId): boolean {
-  return left?.value === right.value;
-}
-
-function snapshotObservation(
-  value: unknown,
-): HostDiscoveryObservation | undefined {
-  try {
-    if (!isRecord(value)) {
-      return undefined;
-    }
-    const rawCapabilities = value.capabilities;
-    const rawComponentVersion = value.componentVersion;
-    const rawFreshness = value.freshness;
-    const rawHostBootGeneration = value.hostBootGeneration;
-    const rawHostInstanceId = value.hostInstanceId;
-    const rawProtocolRange = value.protocolRange;
-    const rawSupervisorInstanceId = value.supervisorInstanceId;
-    const rawTargetId = value.targetId;
-    const capabilities = snapshotCapabilities(rawCapabilities);
-    const resolvedComponentVersion = snapshotComponentVersion(
-      rawComponentVersion,
-    );
-    const freshness = snapshotFreshness(rawFreshness);
-    const resolvedHostBootGeneration = snapshotHostBootGeneration(
-      rawHostBootGeneration,
-    );
-    const resolvedHostInstanceId = snapshotHostInstanceId(rawHostInstanceId);
-    const protocolRange = snapshotProtocolRange(rawProtocolRange);
-    const resolvedSupervisorInstanceId = snapshotSupervisorInstanceId(
-      rawSupervisorInstanceId,
-    );
-    const resolvedTargetId = snapshotTargetId(rawTargetId);
-    if (
-      capabilities === undefined ||
-      resolvedComponentVersion === undefined ||
-      freshness === undefined ||
-      resolvedHostBootGeneration === undefined ||
-      resolvedHostInstanceId === undefined ||
-      protocolRange === undefined ||
-      resolvedSupervisorInstanceId === undefined ||
-      resolvedTargetId === undefined
-    ) {
-      return undefined;
-    }
-    return Object.freeze({
-      capabilities,
-      componentVersion: resolvedComponentVersion,
-      freshness,
-      hostBootGeneration: resolvedHostBootGeneration,
-      hostInstanceId: resolvedHostInstanceId,
-      protocolRange,
-      supervisorInstanceId: resolvedSupervisorInstanceId,
-      targetId: resolvedTargetId,
-    });
-  } catch {
-    return undefined;
-  }
-}
-
-type SourceResultSnapshot =
-  | { readonly kind: "invalid-observation" }
-  | { readonly kind: "invalid-source-response" }
-  | {
-      readonly kind: "valid";
-      readonly result: HostDiscoverySourceResult;
-    };
-
-function snapshotSourceResult(value: unknown): SourceResultSnapshot {
-  try {
-    if (!isRecord(value)) {
-      return { kind: "invalid-source-response" };
-    }
-    const kind = value.kind;
-    if (kind === "observed") {
-      const rawObservation = value.observation;
-      const resolvedObservation = snapshotObservation(rawObservation);
-      return resolvedObservation === undefined
-        ? { kind: "invalid-observation" }
-        : {
-            kind: "valid",
-            result: Object.freeze({
-              kind: "observed",
-              observation: resolvedObservation,
-            }),
-          };
-    }
-    if (
-      kind !== "not-found" &&
-      kind !== "stale" &&
-      kind !== "rejected" &&
-      kind !== "unavailable"
-    ) {
-      return { kind: "invalid-source-response" };
-    }
-    const rawTargetId = value.targetId;
-    const resolvedTargetId = snapshotTargetId(rawTargetId);
-    if (resolvedTargetId === undefined) {
-      return { kind: "invalid-source-response" };
-    }
-    if (kind === "not-found") {
-      return {
-        kind: "valid",
-        result: Object.freeze({ kind, targetId: resolvedTargetId }),
-      };
-    }
-    const reason = value.reason;
-    if (kind === "stale" && isSourceStaleReason(reason)) {
-      return {
-        kind: "valid",
-        result: Object.freeze({ kind, reason, targetId: resolvedTargetId }),
-      };
-    }
-    if (kind === "rejected" && isSourceRejectedReason(reason)) {
-      return {
-        kind: "valid",
-        result: Object.freeze({ kind, reason, targetId: resolvedTargetId }),
-      };
-    }
-    if (kind === "unavailable" && isUnavailableReason(reason)) {
-      return {
-        kind: "valid",
-        result: Object.freeze({ kind, reason, targetId: resolvedTargetId }),
-      };
-    }
-    return { kind: "invalid-source-response" };
-  } catch {
-    return { kind: "invalid-source-response" };
-  }
-}
-
-function evaluateCompatibility(
-  query: DiscoverLocalHostQuery,
-  observation: HostDiscoveryObservation,
-): DiscoverLocalHostResult {
-  const commonMinimum =
-    query.supportedProtocolRange.minimum.value >
-    observation.protocolRange.minimum.value
-      ? query.supportedProtocolRange.minimum
-      : observation.protocolRange.minimum;
-  const commonMaximum =
-    query.supportedProtocolRange.maximum.value <
-    observation.protocolRange.maximum.value
-      ? query.supportedProtocolRange.maximum
-      : observation.protocolRange.maximum;
-  const protocolCompatible = commonMinimum.value <= commonMaximum.value;
-  const advertisedCapabilities = new Set(
-    observation.capabilities.map(({ value }) => value),
-  );
-  const missingCapabilities = Object.freeze(
-    query.requiredCapabilities.filter(
-      ({ value }) => !advertisedCapabilities.has(value),
-    ),
-  );
-
-  if (protocolCompatible && missingCapabilities.length === 0) {
-    return {
-      authenticatedHandshakeRequired: true,
-      kind: "candidate",
-      observation,
-      proposedProtocolVersion: commonMaximum,
-    };
-  }
-  return {
-    advertisedCapabilities: observation.capabilities,
-    advertisedProtocolRange: observation.protocolRange,
-    componentVersion: observation.componentVersion,
-    kind: "incompatible",
-    missingCapabilities,
-    protocolCompatible,
-    targetId: query.targetId,
-  };
-}
-
-function snapshotFreshnessPolicy(
-  value: unknown,
-): HostDiscoveryFreshnessPolicy | undefined {
-  try {
-    if (!isRecord(value)) {
-      return undefined;
-    }
-    const rawMaximumFutureSkew = value.maximumFutureSkew;
-    const rawMaximumObservationAge = value.maximumObservationAge;
-    const maximumFutureSkew = snapshotMicroseconds(rawMaximumFutureSkew);
-    const maximumObservationAge = snapshotMicroseconds(
-      rawMaximumObservationAge,
-    );
-    if (
-      maximumFutureSkew === undefined ||
-      maximumObservationAge === undefined
-    ) {
-      return undefined;
-    }
-    return Object.freeze({ maximumFutureSkew, maximumObservationAge });
-  } catch {
-    return undefined;
-  }
-}
+import {
+  evaluateCompatibility,
+  isRecord,
+  sameTarget,
+  snapshotEpochMicroseconds,
+  snapshotFreshnessPolicy,
+  snapshotQuery,
+  snapshotSourceResult,
+} from "./host-discovery-validation.js";
 
 export interface HostDiscoveryDependencies {
   readonly clock: HostDiscoveryClock;
@@ -501,19 +27,23 @@ export interface HostDiscoveryDependencies {
   readonly source: HostDiscoverySource;
 }
 
-export function createHostDiscovery(
+interface ResolvedHostDiscoveryDependencies {
+  readonly clockNow: () => unknown;
+  readonly freshnessPolicy: HostDiscoveryFreshnessPolicy;
+  readonly sourceRead: (requestedTarget: TargetId) => unknown;
+}
+
+function resolveDependencies(
   dependencies: HostDiscoveryDependencies,
-): HostDiscovery {
+): ResolvedHostDiscoveryDependencies {
   let clockNow: () => unknown;
   let sourceRead: (requestedTarget: TargetId) => unknown;
-  let resolvedFreshnessPolicy: HostDiscoveryFreshnessPolicy | undefined;
   try {
     if (!isRecord(dependencies)) {
       throw new TypeError("invalid dependency container");
     }
     const rawClock = dependencies.clock;
     const rawSource = dependencies.source;
-    const rawFreshnessPolicy = dependencies.freshnessPolicy;
     if (!isRecord(rawClock) || !isRecord(rawSource)) {
       throw new TypeError("invalid dependency port");
     }
@@ -526,136 +56,186 @@ export function createHostDiscovery(
       throw new TypeError("invalid dependency operation");
     }
     clockNow = () => Reflect.apply(rawClockNow, rawClock, []);
-    sourceRead = (requestedTarget) =>
+    sourceRead = (requestedTarget: TargetId) =>
       Reflect.apply(rawSourceRead, rawSource, [requestedTarget]);
-    resolvedFreshnessPolicy = snapshotFreshnessPolicy(rawFreshnessPolicy);
   } catch {
     throw new TypeError("Host discovery dependencies are invalid");
   }
-  if (resolvedFreshnessPolicy === undefined) {
+  const freshnessPolicy = snapshotFreshnessPolicy(
+    dependencies.freshnessPolicy,
+  );
+  if (freshnessPolicy === undefined) {
     throw new TypeError("Host discovery freshness policy is invalid");
   }
+  return Object.freeze({ clockNow, freshnessPolicy, sourceRead });
+}
 
+async function readSource(
+  sourceRead: (requestedTarget: TargetId) => unknown,
+  targetId: TargetId,
+): Promise<unknown> {
+  try {
+    return await sourceRead(targetId);
+  } catch {
+    return {
+      kind: "unavailable",
+      reason: "source-failure",
+      targetId,
+    } satisfies DiscoverLocalHostResult;
+  }
+}
+
+function snapshotClock(
+  clockNow: () => unknown,
+): EpochMicroseconds | undefined {
+  try {
+    return snapshotEpochMicroseconds(clockNow());
+  } catch {
+    return undefined;
+  }
+}
+
+function sourceTerminalResult(
+  query: DiscoverLocalHostQuery,
+  rawSourceResult: unknown,
+): DiscoverLocalHostResult | HostDiscoveryObservation {
+  const sourceSnapshot = snapshotSourceResult(rawSourceResult);
+  if (sourceSnapshot.kind === "invalid-source-response") {
+    return {
+      kind: "rejected",
+      reason: "invalid-source-response",
+      targetId: query.targetId,
+    };
+  }
+  if (sourceSnapshot.kind === "invalid-observation") {
+    return {
+      kind: "rejected",
+      reason: "invalid-observation",
+      targetId: query.targetId,
+    };
+  }
+  const sourceResult = sourceSnapshot.result;
+  const resolvedTargetId =
+    sourceResult.kind === "observed"
+      ? sourceResult.observation.targetId
+      : sourceResult.targetId;
+  if (!sameTarget(resolvedTargetId, query.targetId)) {
+    return {
+      kind: "rejected",
+      reason: "target-mismatch",
+      targetId: query.targetId,
+    };
+  }
+  switch (sourceResult.kind) {
+    case "observed":
+      return sourceResult.observation;
+    case "not-found":
+      return { kind: "not-found", targetId: query.targetId };
+    case "stale":
+      return {
+        kind: "stale",
+        reason: sourceResult.reason,
+        targetId: query.targetId,
+      };
+    case "rejected":
+      return {
+        kind: "source-rejected",
+        reason: sourceResult.reason,
+        targetId: query.targetId,
+      };
+    case "unavailable":
+      return {
+        kind: "unavailable",
+        reason: sourceResult.reason,
+        targetId: query.targetId,
+      };
+  }
+}
+
+function isObservation(
+  result: DiscoverLocalHostResult | HostDiscoveryObservation,
+): result is HostDiscoveryObservation {
+  return "freshness" in result;
+}
+
+function evaluateFreshness(
+  query: DiscoverLocalHostQuery,
+  observation: HostDiscoveryObservation,
+  currentTime: EpochMicroseconds,
+  policy: HostDiscoveryFreshnessPolicy,
+): DiscoverLocalHostResult | undefined {
+  if (currentTime.value >= observation.freshness.validUntil.value) {
+    return {
+      kind: "expired",
+      targetId: query.targetId,
+      validUntil: observation.freshness.validUntil,
+    };
+  }
+  if (
+    observation.freshness.observedAt.value >
+    currentTime.value + policy.maximumFutureSkew.value
+  ) {
+    return {
+      kind: "rejected",
+      reason: "future-observation",
+      targetId: query.targetId,
+    };
+  }
+  const observationAge = currentTime.value - observation.freshness.observedAt.value;
+  if (
+    observationAge > 0n &&
+    observationAge > policy.maximumObservationAge.value
+  ) {
+    return {
+      kind: "stale",
+      reason: "observation-too-old",
+      targetId: query.targetId,
+    };
+  }
+  return undefined;
+}
+
+async function discoverLocalHost(
+  dependencies: ResolvedHostDiscoveryDependencies,
+  query: unknown,
+): Promise<DiscoverLocalHostResult> {
+  const resolvedQuery = snapshotQuery(query);
+  if (resolvedQuery === undefined) {
+    return { kind: "rejected", reason: "invalid-query" };
+  }
+  const rawSourceResult = await readSource(
+    dependencies.sourceRead,
+    resolvedQuery.targetId,
+  );
+  const sourceResult = sourceTerminalResult(resolvedQuery, rawSourceResult);
+  if (!isObservation(sourceResult)) {
+    return sourceResult;
+  }
+  const currentTime = snapshotClock(dependencies.clockNow);
+  if (currentTime === undefined) {
+    return {
+      kind: "unavailable",
+      reason: "clock-failure",
+      targetId: resolvedQuery.targetId,
+    };
+  }
+  return (
+    evaluateFreshness(
+      resolvedQuery,
+      sourceResult,
+      currentTime,
+      dependencies.freshnessPolicy,
+    ) ?? evaluateCompatibility(resolvedQuery, sourceResult)
+  );
+}
+
+export function createHostDiscovery(
+  dependencies: HostDiscoveryDependencies,
+): HostDiscovery {
+  const resolvedDependencies = resolveDependencies(dependencies);
   return {
-    async discover(query) {
-      const resolvedQuery = snapshotQuery(query);
-      if (resolvedQuery === undefined) {
-        return { kind: "rejected", reason: "invalid-query" };
-      }
-
-      let rawSourceResult: unknown;
-      try {
-        rawSourceResult = await sourceRead(resolvedQuery.targetId);
-      } catch {
-        return {
-          kind: "unavailable",
-          reason: "source-failure",
-          targetId: resolvedQuery.targetId,
-        };
-      }
-
-      const sourceSnapshot = snapshotSourceResult(rawSourceResult);
-      if (sourceSnapshot.kind === "invalid-source-response") {
-        return {
-          kind: "rejected",
-          reason: "invalid-source-response",
-          targetId: resolvedQuery.targetId,
-        };
-      }
-      if (sourceSnapshot.kind === "invalid-observation") {
-        return {
-          kind: "rejected",
-          reason: "invalid-observation",
-          targetId: resolvedQuery.targetId,
-        };
-      }
-      const sourceResult = sourceSnapshot.result;
-      const resolvedSourceTargetId =
-        sourceResult.kind === "observed"
-          ? sourceResult.observation.targetId
-          : sourceResult.targetId;
-      if (!sameTarget(resolvedSourceTargetId, resolvedQuery.targetId)) {
-        return {
-          kind: "rejected",
-          reason: "target-mismatch",
-          targetId: resolvedQuery.targetId,
-        };
-      }
-      if (sourceResult.kind === "not-found") {
-        return { kind: "not-found", targetId: resolvedQuery.targetId };
-      }
-      if (sourceResult.kind === "stale") {
-        return {
-          kind: "stale",
-          reason: sourceResult.reason,
-          targetId: resolvedQuery.targetId,
-        };
-      }
-      if (sourceResult.kind === "rejected") {
-        return {
-          kind: "source-rejected",
-          reason: sourceResult.reason,
-          targetId: resolvedQuery.targetId,
-        };
-      }
-      if (sourceResult.kind === "unavailable") {
-        return {
-          kind: "unavailable",
-          reason: sourceResult.reason,
-          targetId: resolvedQuery.targetId,
-        };
-      }
-
-      let currentTime: EpochMicroseconds | undefined;
-      try {
-        currentTime = snapshotEpochMicroseconds(clockNow());
-      } catch {
-        return {
-          kind: "unavailable",
-          reason: "clock-failure",
-          targetId: resolvedQuery.targetId,
-        };
-      }
-      if (currentTime === undefined) {
-        return {
-          kind: "unavailable",
-          reason: "clock-failure",
-          targetId: resolvedQuery.targetId,
-        };
-      }
-      const observation = sourceResult.observation;
-      if (
-        currentTime.value >= observation.freshness.validUntil.value
-      ) {
-        return {
-          kind: "expired",
-          targetId: resolvedQuery.targetId,
-          validUntil: observation.freshness.validUntil,
-        };
-      }
-      if (
-        observation.freshness.observedAt.value >
-        currentTime.value + resolvedFreshnessPolicy.maximumFutureSkew.value
-      ) {
-        return {
-          kind: "rejected",
-          reason: "future-observation",
-          targetId: resolvedQuery.targetId,
-        };
-      }
-      if (
-        currentTime.value > observation.freshness.observedAt.value &&
-        currentTime.value - observation.freshness.observedAt.value >
-          resolvedFreshnessPolicy.maximumObservationAge.value
-      ) {
-        return {
-          kind: "stale",
-          reason: "observation-too-old",
-          targetId: resolvedQuery.targetId,
-        };
-      }
-
-      return evaluateCompatibility(resolvedQuery, observation);
+    discover(query) {
+      return discoverLocalHost(resolvedDependencies, query);
     },
   };
 }
