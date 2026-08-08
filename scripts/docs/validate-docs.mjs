@@ -643,7 +643,7 @@ function validateAdrLifecycleIndex(documentsByPath) {
 }
 
 function validateMermaid(diagrams) {
-  return new Promise((resolve) => {
+  const { promise, resolve } = Promise.withResolvers();
     const child = spawn(process.execPath, [mermaidValidatorPath], {
       cwd: repositoryRoot,
       stdio: ["pipe", "pipe", "pipe"],
@@ -664,8 +664,6 @@ function validateMermaid(diagrams) {
       }
       settled = true;
       clearTimeout(timeout);
-      // The settled guard makes this callback idempotent across error/close races.
-      // oxlint-disable-next-line promise/no-multiple-resolved
       resolve(result);
     };
 
@@ -710,7 +708,7 @@ function validateMermaid(diagrams) {
     });
 
     child.stdin.end(JSON.stringify(diagrams));
-  });
+  return promise;
 }
 
 async function main() {
