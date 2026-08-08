@@ -405,19 +405,6 @@
   "overrides": [
     {
       "files": [
-        "**/generated/**",
-        "**/vendor/**"
-      ],
-      "rules": {
-        "complexity": "off",
-        "max-depth": "off",
-        "max-lines": "off",
-        "max-lines-per-function": "off",
-        "max-params": "off"
-      }
-    },
-    {
-      "files": [
         "packages/**/tests/**",
         "scripts/**/*.test.mjs",
         "scripts/**/fixtures/**",
@@ -443,6 +430,19 @@
           }
         ],
         "max-params": ["error", 6]
+      }
+    },
+    {
+      "files": [
+        "**/generated/**",
+        "**/vendor/**"
+      ],
+      "rules": {
+        "complexity": "off",
+        "max-depth": "off",
+        "max-lines": "off",
+        "max-lines-per-function": "off",
+        "max-params": "off"
       }
     },
     {

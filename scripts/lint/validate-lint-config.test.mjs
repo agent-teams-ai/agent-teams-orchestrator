@@ -117,6 +117,14 @@ test("maintainability profiles stay aligned with Foundation", () => {
   assert.deepEqual(testOverride.rules, foundationTestProfile.rules);
 });
 
+test("generated fixtures keep maintainability budgets disabled", () => {
+  const result = runOxlint(
+    ".oxlintrc.json",
+    "generated/maintainability-overlap.js",
+  );
+  assert.equal(result.status, 0, result.diagnostics);
+});
+
 test("fast lane accepts valid source", () => {
   const result = runOxlint(".oxlintrc.json", "fast-valid.ts");
   assert.equal(result.status, 0, result.diagnostics);
