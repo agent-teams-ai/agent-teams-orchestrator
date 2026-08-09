@@ -16,7 +16,7 @@ catalog:
   likec4: 1.59.2
   markdownlint-cli2: 0.23.1
   mdast-util-to-string: 4.0.0
-  mermaid: 11.16.0
+  mermaid: 11.16.1
   nx: 23.1.1
   oxc-parser: 0.142.0
   oxc-resolver: 11.24.2
@@ -48,7 +48,12 @@ minimumReleaseAgeExclude:
   - js-yaml@5.2.2
 
 overrides:
+  "ajv@8>fast-uri": "3.1.5"
   "js-yaml": "5.2.2"
+  "jsdom@29>undici": "7.29.0"
+  "minimatch@10>brace-expansion": "5.0.9"
+  "nx@23>brace-expansion": "5.0.9"
+  "postcss@8>nanoid": "3.3.18"
 
 allowBuilds:
   esbuild: true
