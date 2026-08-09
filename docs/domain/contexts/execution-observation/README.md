@@ -6,7 +6,6 @@ owner: execution-observation
 summary: Strategic dossier for admitted runtime evidence, protected diagnostics, normalized activity, durable feeds, and authorized search.
 blocked_by:
   - OD-004
-  - OD-006
   - OD-029
 related:
   - ADR-0019
@@ -16,12 +15,14 @@ related:
   - ADR-0069
   - ADR-0083
   - ADR-0084
+  - ADR-0088
+  - ADR-0091
+  - ADR-0093
   - architecture.context-map
   - architecture.runtime-boundary
   - architecture.security
   - OD-029
   - OD-004
-  - OD-006
 ---
 
 # Execution Observation
@@ -60,13 +61,17 @@ materialized from this dossier alone.
 | Activity Effect | A typed claim about a target with its own evidence strength, such as an attempted command or causally confirmed file modification. |
 | Activity Evidence Link | A versioned many-to-many relation describing how evidence originates, progresses, terminates, supports, contradicts, or supersedes activity. |
 | Semantic Registry | The versioned registry of activity kinds, detail schemas, safe fields, correlation rules, and renderer profiles. |
-| Live Fragment | A provisional bounded-lifetime streaming update without a durable application cursor. |
+| Live Fragment | A future provisional streaming protocol excluded from V1 until its own admission, redaction, deletion, and recovery decision is accepted. |
 | Durable Activity Feed | The context-owned committed activity-change stream used for replay and recovery. |
 | Search Projection | A disposable, authorized, rebuildable index of allowlisted safe activity fields. |
-| Index Generation | One complete immutable search projection generation selected atomically after verification. |
+| Index Generation | A search container with immutable identity, schema, and analyzer configuration plus append-only document revisions; it is selected atomically after verification and sealed when superseded. |
 | Source Watermark | The source or context cursor through which projection or index input is known to be applied. |
 | Diagnostic Gap | Explicit evidence that expected raw, source history, or processing continuity is unavailable. |
 | Deletion Epoch | Monotonic scope-local disposition evidence preventing deleted data from returning through replay, indexing, or restore. |
+| Current Disclosure Fence | Context-local safety dispositions over Activity revision intervals that can immediately hide affected historical revisions after redaction, quarantine, retraction, or invalidation without hiding unrelated safe history. |
+| Run Attribution State | Local `pending`, `bound`, or `explicitly-unbound` evidence controlling whether and where an Activity may first be published. |
+| Index Commit Position | Monotonic generation-local position assigned only when a document revision becomes queryable; it freezes search snapshot membership independently from source watermarks. |
+| Protected Payload Disposition | Current payload-specific safety state checked for raw read, export, artifact download, and physical lifecycle. |
 
 Do not use `log` as a domain synonym for all of these concepts. Operational logs,
 runtime output, Observation Evidence, Activity Projection, durable feed, and
@@ -76,7 +81,8 @@ search index have different authorities and guarantees.
 
 ### Owned here
 
-- evidence admission, source identity, canonical digest, and conflict quarantine;
+- evidence admission, source identity, tenant-keyed comparison digest, protected
+  integrity digest, and conflict quarantine;
 - observation classification and disclosure-safe representation;
 - deterministic normalization and semantic registry;
 - evidence-to-activity correlation and per-effect evidence strength;
@@ -122,7 +128,8 @@ execution-observation/
 ```
 
 - `evidence-ingestion` owns authenticated admission, idempotency, conflict,
-  quarantine, source checkpoints, and gap records.
+  quarantine, source checkpoints, context-local Scope and Run reference
+  projections, and gap records.
 - `activity-normalization` owns the semantic registry, deterministic mapping,
   correlation, effects, corrections, and projector versions.
 - `activity-feed` owns committed changes, snapshots, public cursors, reset, and
@@ -160,10 +167,12 @@ read projections.
 ### Value objects
 
 Expected value objects include `EvidenceId`, `SourceCoordinates`,
-`AuthenticatedRuntimeBindingRef`, `EvidenceDigest`, `ActivityId`,
+`AuthenticatedRuntimeBindingRef`, `ComparisonDigest`, `PayloadIntegrityDigest`,
+`ActivityFeedPartition`, `ActivityId`,
 `ActivitySequence`, `ActivityRevision`, `ActivityKind`, `EffectClaim`,
 `Completeness`, `ProjectionGeneration`, `SourceWatermark`, `ProtectedPayloadRef`,
-`RedactionProfileVersion`, `DeletionEpoch`, and opaque authorized search cursors.
+`IndexCommitPosition`, `RedactionProfileVersion`, `DisclosureEpoch`,
+`DeletionEpoch`, and opaque authorized search cursors.
 
 ### Records and projections
 
@@ -209,7 +218,8 @@ EvidenceEnvelope
   ingestedAt
   classification
   redactionProfileVersion
-  canonicalDigest
+  comparisonDigest + comparisonKeyVersion
+  payloadIntegrityDigest? + integrityKeyVersion?
   completeness
   safePreview?
   protectedPayloadRef?
@@ -330,6 +340,13 @@ source receipt and checkpoint
 + indexing outbox work
 ```
 
+The same transaction verifies the current local freeze revision, deletion epoch,
+runtime binding revision, and scope state against the admission preconditions.
+A mismatch commits none of these records. Scope and Run reference inputs arrive
+through separate idempotent inbox consumers and are stored with source revision,
+checkpoint, schema version, and deletion epoch; replay never queries another
+context's current state.
+
 Physical blob write happens before this transaction as staged durable content.
 Search indexing happens after commit through an idempotent outbox consumer.
 Neither blob storage nor search backend joins the database transaction.
@@ -342,11 +359,22 @@ writers to the same generation.
 ## Ordering, feed, and realtime
 
 - Source order exists only within a source stream that promises it.
-- `activitySequence` is stable UI order, not causal proof.
+- The feed partition is `(tenant, project, run)`; admitted evidence without a Run
+  uses a dedicated Project-system partition only after an authoritative
+  explicitly-unbound Run attribution. Pending attribution is not published.
+- `activitySequence` is monotonic only within its feed partition and is stable UI
+  order, not causal proof.
 - Late evidence may update an existing activity at a later activity revision
   without inserting a new sequence between already-read pages.
+- A later authoritative attribution correction retracts the old-partition
+  Activity and creates a linked successor in the new partition; it never moves a
+  sequence already observed by a cursor.
+- Attribution applies monotonic compare-and-advance by source revision. Stale
+  revisions cannot regress state, same-revision conflicts quarantine, and gaps
+  keep publication pending until reconciliation restores continuity.
 - Committed changes use `upsert`, `retract`, `invalidate`, or `reset`.
-- `LiveFragment` is provisional, expires, and has no durable application cursor.
+- V1 publishes no public `LiveFragment`; all user-visible realtime changes come
+  from committed evidence, projection, feed, and publication intent.
 - Gap, authorization epoch change, projection generation change, or expired
   cursor requires snapshot plus a new cursor.
 - Centrifugo history can bridge a short reconnect only. The durable activity feed
@@ -360,6 +388,20 @@ writers to the same generation.
 - Query scope is derived from authenticated context.
 - Cursor is encrypted, signed, expiring, and bound to query, scope,
   authorization epoch, snapshot watermark, and generation.
+- Search authorization and deletion predicates execute before matching, ranking,
+  count, pagination, and cursor advancement; post-filter authorization is
+  prohibited.
+- Search documents retain revision validity positions for the supported cursor
+  horizon. An adapter that cannot preserve the cursor snapshot returns
+  `CursorExpired` or a typed unsupported outcome.
+- Current disclosure fences are evaluated before matching and rendering. A
+  redaction, quarantine, retraction, or security invalidation hides stale
+  revisions immediately even when an old cursor or generation still exists.
+- Disclosure safety is interval-based: an ordinary newer safe revision does not
+  hide an older safe snapshot revision. Only an explicit current safety
+  disposition withdraws the affected interval.
+- Search cursors bind a monotonic index commit position. Source watermarks report
+  completeness but cannot admit a late index commit into an older snapshot.
 - Chronological search is a required baseline. Relevance, phrase, prefix,
   language stemming, and deep snapshot pagination are adapter capabilities.
 - SQLite FTS5 and PostgreSQL FTS are semantically conformant for the baseline,
@@ -367,6 +409,10 @@ writers to the same generation.
 - Search generation rebuild is blue/green and cannot expose partial results.
 - A current deletion tombstone hides data even through old search generations,
   open cursors, realtime cache, and delayed indexing work.
+- Feed resume, snapshots, exports, and protected payload access hydrate through
+  current authorization, deletion, Activity disclosure, and payload disposition.
+  Realtime history carries bounded wake-ups and feed positions, not replayable
+  Activity content.
 
 ## Security and privacy invariants
 
@@ -384,6 +430,8 @@ writers to the same generation.
    are prohibited.
 9. PostgreSQL RLS is defense in depth and never replaces application scope.
 10. Unknown schemas fail closed for rendering, indexing, export, and effects.
+11. Ingress enforces item size, chunk count, expansion ratio, nesting, object
+    count, and per-partition rate before unbounded allocation.
 
 ## Failure and edge-case matrix
 
@@ -397,12 +445,21 @@ writers to the same generation.
 | Stale public execution epoch | Apply the AR-published stale disposition; do not infer or expose the private fence. |
 | Runtime binding mismatch | Reject or quarantine before persistence outside the evidence-conflict area. |
 | Blob write succeeds, DB transaction fails | Blob remains staged and is removed by fenced orphan collection after grace and recheck. |
+| Project freezes or deletes after blob staging | Admission transaction rejects the stale freeze revision or deletion epoch; no manifest becomes reachable. |
 | DB commit succeeds, index fails | Timeline remains available; outbox retries with the same idempotency key. |
 | Index acknowledgement is lost | Repeat the upsert for the same revision safely. |
 | Committed blob is missing or corrupt | Return typed payload-unavailable state and preserve operational evidence. |
-| Disk or quota is exhausted | Drop provisional fragments first, restrict verbose raw and indexing next, never silently lose mandatory evidence. |
+| Disk or quota is exhausted | Reject optional verbose payload and indexing first; never silently lose mandatory evidence. |
+| Compressed or chunked input exceeds limits | Reject or quarantine before expansion exhausts Host memory, while retaining a typed incomplete or rejected outcome. |
 | Rebuild while ingestion continues | Build a new generation from watermark, catch up, verify, then atomically switch. |
-| Permission changes between pages | Reauthorize, invalidate the cursor when required, and return no now-hidden result. |
+| Permission changes between pages | Reauthorize inside the query before matching or ranking, invalidate the cursor when required, and return no now-hidden result. |
+| Redaction or security invalidation after a cursor opens | Commit the current disclosure fence first; old document revisions disappear immediately and the safe replacement appears only after indexing. |
+| Newer safe revision after a cursor opens | Keep the older revision visible to that snapshot unless an explicit safety disposition withdraws it. |
+| Old source item indexes after a cursor opens | Assign a later index commit position and exclude it from the older snapshot regardless of source watermark. |
+| Runtime evidence arrives before Run attribution | Admit it as pending evidence, publish nothing, and reconcile after a bound or explicitly-unbound source revision arrives. |
+| Authoritative Run attribution changes after publication | Retract in the original partition and append a linked successor in the destination partition without moving historical sequence values. |
+| Stale, conflicting, or gapped Run attribution arrives | Reject stale state regression, quarantine same-revision conflicts, and keep a gap pending until source reconciliation. |
+| Protected payload is quarantined after reference issuance | Current payload disposition denies raw read, export, and artifact download even when the reference remains syntactically valid. |
 | Deletion races indexing or replay | Tombstone wins immediately; delayed work cannot resurrect content. |
 | Key rotation crashes | Continue reading allowed old/new versions and resume reconciliation without plaintext fallback. |
 | Retention races export | Recheck disposition and authorization before artifact creation and download. |

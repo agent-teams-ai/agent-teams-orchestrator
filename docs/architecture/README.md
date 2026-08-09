@@ -28,6 +28,7 @@ that contributors must implement now.
 - [Composition and dependency injection](composition-and-dependency-injection.md)
 - [Repository tooling plan](repository-tooling.md)
 - [Machine-readable package catalog](../../architecture/package-catalog.yaml)
+- [Machine-readable deployment and reliability profiles](../../architecture/reliability/reliability-catalog.yaml)
 - [Machine-readable LikeC4 sources](../../architecture/likec4/model.c4)
 
 ## Integration and data boundaries

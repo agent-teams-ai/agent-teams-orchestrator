@@ -23,6 +23,9 @@ related:
   - ADR-0071
   - ADR-0078
   - ADR-0080
+  - ADR-0088
+  - ADR-0091
+  - ADR-0093
   - ADR-0064
   - ADR-0065
   - architecture.local-host-lifecycle
@@ -422,9 +425,29 @@ Automated checks must reject:
   truth;
 - blob, database, and search writes presented as one atomic Unit of Work;
 - observation cursors that are not bound to authorization scope, snapshot
-  watermark, and projection or index generation;
+  watermark, projection or index generation, and index-local commit position;
+- search authorization applied after matching, ranking, count, pagination, or
+  cursor advancement;
+- latest-only search documents presented as snapshot-stable pagination;
+- observation safety modeled as one latest-revision pointer instead of explicit
+  revision intervals and current payload disposition;
+- Run attribution updates without monotonic compare-and-advance, conflict, gap,
+  and idempotent correction semantics;
+- realtime history replaying materialized Activity content without current Host
+  authorization, deletion, and disclosure hydration;
+- public runtime fragments emitted before durable evidence and feed commit;
+- observation admission that does not compare current freeze revision and
+  deletion epoch in its database transaction;
+- rebuild code that queries another bounded context's current state instead of a
+  context-local versioned reference projection;
 - full raw provider payload indexed by default or globally deduplicated across
   tenants;
+- compressed or chunked provider input without expansion, nesting, object-count,
+  and per-partition limits;
+- client resources, caches, cursors, subscriptions, or late responses not fenced
+  by Target identity and client generation;
+- local-device execution advertised before OD-038 connectivity conformance;
+- materialization of a package marked `deferred` in the package catalog;
 - durable write entry points that do not resolve to exactly one mutation and one
   ADR-0078 consistency contract;
 - mutations without a compatible binding for every enabled deployment profile;

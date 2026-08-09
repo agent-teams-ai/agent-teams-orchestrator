@@ -8,6 +8,7 @@ related:
   - ADR-0055
   - ADR-0086
   - ADR-0087
+  - ADR-0089
   - architecture.deployment-profiles
   - architecture.security
   - OD-012
@@ -38,24 +39,34 @@ self-hosted deployments while clients continue to call Orchestrator directly.
 - Baseline Standalone Self-Hosted operation remains possible without Platform.
 - Closed implementation modules cannot be treated as an authority merely because
   they are installed.
+- A commercial decision never blocks cancellation, containment, recovery,
+  deletion, or baseline access and export of customer-owned data.
 
 ## Preferred direction
 
 An external Commercial Access authority issues a signed, audience-bound,
-tenant-scoped capability entitlement or short-lived capability lease. A managed
-adapter verifies or refreshes it and implements a consumer-owned feature port.
-The Orchestrator command admission path validates entitlement itself, so direct
+tenant-scoped short-lived capability lease to a Host identity. The lease is a
+host-to-host authority artifact: the client never stores or presents it. The Host
+proves possession of its deployment key when refreshing or using the lease; a
+copied lease is not a reusable bearer credential. A managed adapter verifies or
+refreshes it and implements a consumer-owned feature port. The Orchestrator
+command admission path validates entitlement itself, so direct
 client-to-Orchestrator transport remains safe.
 
-Candidate evidence includes capability ID and revision, subject scope, target
-audience, validity interval, revocation epoch, policy version, issuer, and opaque
-commercial decision reference. It never contains billing internals or becomes a
-reusable user authorization credential.
+Candidate evidence includes capability ID and revision, operation class, tenant
+scope, authority realm, target deployment identity, Host-key thumbprint, target
+audience, validity interval, signed offline grace, revocation and issuer-key
+epochs, policy version, issuer, and opaque commercial decision reference. It
+never contains billing internals or becomes a reusable user authorization
+credential. Verification uses a trusted clock policy plus durable highest-seen
+epochs to resist time and signed-state rollback.
 
-New work may fail closed when required entitlement freshness cannot be proven.
-Each feature must define whether already accepted durable work completes, enters
-grace, pauses, or requires reconciliation after expiry or revocation. One global
-commercial kill switch is prohibited.
+New restricted effects fail closed whenever required lease authenticity, binding,
+possession, freshness, or revocation state cannot be proven. Any offline grace is
+pre-authorized inside the signed lease; a Host cannot invent or extend it. Each
+feature must define whether already accepted durable work completes, enters that
+bounded grace, pauses, or requires reconciliation after expiry or revocation.
+One global commercial kill switch is prohibited.
 
 Potential adapters are:
 
@@ -79,10 +90,14 @@ Potential adapters are:
 
 - Threat-model token theft, replay, tenant substitution, clock skew, rollback,
   offline operation, issuer-key rotation, and stale revocation.
+- Prove client custody is impossible and copied lease material cannot authorize a
+  different Host, deployment, realm, tenant, or operation class.
 - Define command admission and in-flight behavior for each capability category.
 - Prove a client cannot bypass entitlement by calling Host or realtime directly.
 - Prove Platform outage does not corrupt accepted durable work.
 - Prove Standalone baseline operation without Platform.
+- Prove expiry cannot block cancellation, containment, recovery, deletion, or
+  baseline access and export of customer-owned data.
 - Keep commercial provider schemas behind an ACL and out of domain models.
 - Define capability discovery without leaking hidden module or customer details.
 

@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
+  validateQualificationReferences,
   validateReliabilityFoundation,
   validateReliabilitySemantics,
 } from "./validate-reliability-foundation.mjs";
@@ -23,12 +24,97 @@ const owners = new Set([
 
 function minimalCatalog() {
   return {
-    profiles: [{ id: "local" }, { id: "hosted" }],
+    qualificationFramework: {
+      blockedBy: ["OD-039"],
+      id: "deployment-qualification",
+      qualification: "blocked",
+      qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
+    },
+    profiles: [
+      {
+        blockedBy: ["OD-003", "OD-012"],
+        commercialAuthorityAdapter: "optional-managed-platform",
+        id: "managed-saas",
+        productAuthorityAdapter: "managed-platform",
+        qualification: "blocked",
+        qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
+        releaseScope: "v1-target",
+        requiredCapabilities: ["server-runtime-execution"],
+      },
+      {
+        blockedBy: ["OD-003", "OD-012"],
+        commercialAuthorityAdapter: "none",
+        id: "standalone-self-hosted",
+        productAuthorityAdapter: "standalone",
+        qualification: "blocked",
+        qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
+        releaseScope: "v1-target",
+        requiredCapabilities: ["server-runtime-execution"],
+      },
+      {
+        blockedBy: ["OD-003", "OD-012"],
+        commercialAuthorityAdapter: "optional-managed-platform",
+        id: "connected-self-hosted",
+        productAuthorityAdapter: "standalone",
+        qualification: "deferred",
+        qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
+        releaseScope: "future",
+        requiredCapabilities: ["server-runtime-execution"],
+      },
+      {
+        blockedBy: ["OD-001", "OD-003", "OD-009", "OD-021", "OD-035"],
+        commercialAuthorityAdapter: "none",
+        id: "fully-local",
+        productAuthorityAdapter: "local-standalone",
+        qualification: "deferred",
+        qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
+        releaseScope: "future",
+        requiredCapabilities: ["local-host-runtime-execution"],
+      },
+    ],
+    capabilities: [
+      {
+        blockedBy: ["OD-004"],
+        id: "server-runtime-execution",
+        profiles: [
+          "connected-self-hosted",
+          "managed-saas",
+          "standalone-self-hosted",
+        ],
+        qualification: "blocked",
+        qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
+      },
+      {
+        blockedBy: ["OD-004"],
+        id: "local-host-runtime-execution",
+        profiles: ["fully-local"],
+        qualification: "blocked",
+        qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
+      },
+      {
+        blockedBy: ["OD-038"],
+        id: "local-device-execution",
+        profiles: [
+          "connected-self-hosted",
+          "managed-saas",
+          "standalone-self-hosted",
+        ],
+        qualification: "blocked",
+        qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
+      },
+      {
+        blockedBy: ["OD-037"],
+        id: "managed-commercial-entitlements",
+        profiles: ["connected-self-hosted", "managed-saas"],
+        qualification: "blocked",
+        qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
+      },
+    ],
     metricAttributes: [
       {
         cardinality: "low",
         id: "deployment.profile",
-        maxDistinct: 2,
+        maxDistinct: 4,
       },
     ],
     prohibitedMetricAttributes: [
@@ -66,7 +152,7 @@ test("rejects a high-cardinality metric attribute", () => {
     allowedAttributes: ["tenant.id"],
     id: "orchestrator.invalid-cardinality",
     owner: "platform/control-api",
-    profiles: ["local"],
+    profiles: ["fully-local"],
     status: "candidate",
   });
 
@@ -82,7 +168,7 @@ test("rejects an active SLO without an approved objective", () => {
     allowedAttributes: ["deployment.profile"],
     id: "orchestrator.unapproved-slo",
     owner: "platform/control-api",
-    profiles: ["hosted"],
+    profiles: ["managed-saas"],
     status: "active",
   });
 
@@ -103,7 +189,7 @@ test("rejects a 100 percent objective", () => {
       targetRatio: "1",
     },
     owner: "platform/control-api",
-    profiles: ["hosted"],
+    profiles: ["standalone-self-hosted"],
     status: "active",
   });
 
@@ -111,4 +197,115 @@ test("rejects a 100 percent objective", () => {
     validateReliabilitySemantics(catalog, owners).join("\n"),
     /REL-SLO-003/u,
   );
+});
+
+test("rejects a qualified profile that retains blockers", () => {
+  const catalog = minimalCatalog();
+  catalog.profiles[0].qualification = "qualified";
+
+  assert.match(
+    validateReliabilitySemantics(catalog, owners).join("\n"),
+    /REL-PROFILE-004/u,
+  );
+});
+
+test("rejects qualified state without decision and conformance evidence", () => {
+  const catalog = minimalCatalog();
+  catalog.profiles[0].blockedBy = [];
+  catalog.profiles[0].qualification = "qualified";
+
+  assert.match(
+    validateReliabilitySemantics(catalog, owners).join("\n"),
+    /REL-PROFILE-007/u,
+  );
+});
+
+test("rejects qualification while the attestation framework is blocked", () => {
+  const catalog = minimalCatalog();
+  catalog.profiles[0].blockedBy = [];
+  catalog.profiles[0].qualification = "qualified";
+  catalog.profiles[0].qualificationEvidence = {
+    conformanceRefs: ["architecture/qualification-evidence/managed.json"],
+    decisionRefs: ["ADR-0092"],
+  };
+
+  assert.match(
+    validateReliabilitySemantics(catalog, owners).join("\n"),
+    /REL-PROFILE-018/u,
+  );
+});
+
+test("rejects enabling the qualification framework before its verifier exists", () => {
+  const catalog = minimalCatalog();
+  catalog.qualificationFramework.blockedBy = [];
+  catalog.qualificationFramework.qualification = "qualified";
+  catalog.qualificationFramework.qualificationEvidence = {
+    conformanceRefs: ["architecture/qualification-evidence/framework.json"],
+    decisionRefs: ["ADR-0092"],
+  };
+
+  assert.match(
+    validateReliabilitySemantics(catalog, owners).join("\n"),
+    /REL-PROFILE-017/u,
+  );
+});
+
+test("rejects deleting or rebinding a required deployment capability", () => {
+  const catalog = minimalCatalog();
+  catalog.capabilities = catalog.capabilities.filter(
+    (capability) => capability.id !== "local-device-execution",
+  );
+  catalog.capabilities[0].profiles = ["managed-saas"];
+
+  const output = validateReliabilitySemantics(catalog, owners).join("\n");
+  assert.match(output, /REL-PROFILE-020/u);
+  assert.match(output, /REL-PROFILE-021/u);
+});
+
+test("rejects making optional commercial work a profile blocker", () => {
+  const catalog = minimalCatalog();
+  const connectedProfile = catalog.profiles.find(
+    (profile) => profile.id === "connected-self-hosted",
+  );
+  connectedProfile.blockedBy.push("OD-037");
+
+  assert.match(
+    validateReliabilitySemantics(catalog, owners).join("\n"),
+    /REL-PROFILE-008/u,
+  );
+});
+
+test("rejects a qualified profile whose mandatory capability is not qualified", () => {
+  const catalog = minimalCatalog();
+  catalog.profiles[0].blockedBy = [];
+  catalog.profiles[0].qualification = "qualified";
+  catalog.profiles[0].qualificationEvidence = {
+    conformanceRefs: ["architecture/qualification-evidence/managed.json"],
+    decisionRefs: ["ADR-0092"],
+  };
+
+  assert.match(
+    validateReliabilitySemantics(catalog, owners).join("\n"),
+    /REL-PROFILE-022/u,
+  );
+});
+
+test("rejects unknown blockers and missing conformance artifacts", async () => {
+  const catalog = minimalCatalog();
+  catalog.profiles[0].blockedBy = [];
+  catalog.profiles[0].qualification = "qualified";
+  catalog.profiles[0].qualificationEvidence = {
+    conformanceRefs: [
+      "architecture/qualification-evidence/missing-managed-saas.json",
+    ],
+    decisionRefs: ["ADR-0089"],
+  };
+  catalog.capabilities[0].blockedBy = ["OD-999"];
+
+  const errors = await validateQualificationReferences(
+    catalog,
+    repositoryRoot,
+  );
+  assert.match(errors.join("\n"), /REL-PROFILE-011/u);
+  assert.match(errors.join("\n"), /REL-PROFILE-016/u);
 });

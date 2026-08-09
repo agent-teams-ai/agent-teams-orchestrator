@@ -11,12 +11,18 @@ related:
   - ADR-0085
   - ADR-0086
   - ADR-0087
+  - ADR-0089
+  - ADR-0090
+  - ADR-0092
   - architecture.local-host-lifecycle
   - architecture.sdk-transports
   - architecture.security
   - OD-012
   - OD-035
   - OD-037
+  - OD-038
+  - OD-039
+  - OD-040
 ---
 
 # Deployment Profiles
@@ -27,7 +33,7 @@ Deployment, client, and execution placement are separate choices:
 
 ```text
 Orchestrator deployment profile
-  Managed SaaS | Standalone Self-Hosted | future Fully Local
+  Managed SaaS | Standalone Self-Hosted | future Connected | future Fully Local
 
 Client surface
   Web | Desktop | CLI | SDK consumer
@@ -40,35 +46,57 @@ No axis is inferred from another. Desktop is not automatically local authority,
 Web is not automatically managed, and local AR execution does not mean that
 orchestration state is local.
 
-## Qualified profile matrix
+## Profile matrix
 
 | Profile | Orchestrator authority | Product authority | Persistence | V1 | Clients |
 |---|---|---|---|---|---|
-| Managed SaaS | Agent Teams-managed Server Host | Managed Platform authority adapter | Managed PostgreSQL and server infrastructure | Qualified target | Managed Web, Desktop, CLI, SDK |
-| Standalone Self-Hosted Server | Customer-operated Server Host | Standalone authority adapter | Customer PostgreSQL and server infrastructure | Qualified target | Co-deployed Web, Desktop, CLI, SDK |
-| Fully Local Desktop | Local Host on user device | Local standalone authority adapter | Context-owned SQLite and protected local components | Architecture only, implementation deferred | Desktop, local CLI, SDK |
+| Managed SaaS | Agent Teams-managed Server Host | Managed Platform authority adapter | Managed PostgreSQL and server infrastructure | V1 target, qualification blocked | Managed Web, Desktop, CLI, SDK |
+| Standalone Self-Hosted Server | Customer-operated Server Host | Standalone authority adapter | Customer PostgreSQL and server infrastructure | V1 target, qualification blocked | Co-deployed Web, Desktop, CLI, SDK |
+| Connected Self-Hosted Server | Customer-operated Server Host | Standalone authority plus optional managed capabilities | Customer PostgreSQL and server infrastructure | Future, qualification deferred | Co-deployed Web, Desktop, CLI, SDK |
+| Fully Local Desktop | Local Host on user device | Local standalone authority adapter | Context-owned SQLite and protected local components | Future, implementation deferred | Desktop, local CLI, SDK |
 
 The Managed and Self-Hosted profiles use the same logical Orchestrator core and
 public contracts. Composition validates one complete compatible adapter set. A
 profile name never appears as a business-rule branch.
 
+The reliability catalog is the machine-readable profile registry. `V1 target`
+does not mean `qualified`: Managed and Standalone remain blocked by their listed
+authority and persistence decisions. Connected Self-Hosted is a fourth
+future profile in that registry even though it is not a V1 target.
+
+Each profile binds exactly one product-authority adapter and an independent
+commercial-authority mode. Managed Product Authority, Standalone Authority, and
+Commercial Access Authority are separate logical ports even when one Platform
+deployment implements more than one. Managed commercial access is optional and
+qualified as a separate capability, so OD-037 cannot block baseline Managed SaaS.
+
+Qualification is closed over mandatory capabilities. Managed and Standalone
+require qualified `server-runtime-execution`; Fully Local requires qualified
+`local-host-runtime-execution`. Optional `local-device-execution` and
+`managed-commercial-entitlements` cannot be advertised until independently
+qualified. The global qualification framework remains blocked by OD-039; an
+accepted ADR plus an arbitrary file is not evidence.
+
 ## Managed SaaS topology
 
 Managed SaaS means that an Orchestrator Host is running in Agent Teams-managed
-infrastructure. Agent execution may still be local or remote.
+infrastructure. The architecture permits local or remote agent execution, but a
+placement is advertised only after its own connectivity conformance passes.
 
 ```mermaid
 flowchart LR
     Client["Managed Web or Desktop"] -->|"login and target discovery"| Platform["Agent Teams Platform"]
     Platform -->|"short-lived scoped authority"| Client
     Client -->|"commands and queries"| Host["Managed Orchestrator Host"]
+    Client -->|"request scoped subscription"| Host["Managed Orchestrator Host"]
+    Host -->|"short-lived subscription authority"| Client
     Client -->|"authorized live feeds"| Realtime["Managed realtime edge"]
-    Host --> Runtime["Local or remote AR capacity"]
+    Host --> Runtime["Qualified AR capacity"]
 ```
 
 Platform is the managed product authority and control plane for customer
-identity, tenancy, membership and grants, product-project binding, commercial
-access, managed deployment placement, and target discovery. It does not own
+identity, tenancy, membership and grants, product-project binding, optional
+commercial access, managed deployment placement, and target discovery. It does not own
 Orchestrator Runs, Teams, Work, messages, Observation Evidence, Activity Views,
 or diagnostic payload.
 
@@ -77,6 +105,13 @@ connect directly to the scoped Orchestrator and realtime edge. Direct transport
 does not bypass authority: the Host validates Platform-issued, audience-bound,
 short-lived authority and current revocation requirements. Exact commercial
 capability semantics remain open under OD-037.
+
+Local-device execution behind a server Host is a separately gated deployment
+capability, not a blocker for a server profile that has independently qualified
+remote capacity.
+OD-038 owns device enrollment, outbound connectivity, revocation, reconnect, and
+custody. Until it passes, server profiles advertise only runtime placements whose
+connectivity has independent qualification evidence.
 
 ## Standalone Self-Hosted topology
 
@@ -114,6 +149,11 @@ Such a profile requires explicit data-flow, offline, revocation, licensing,
 privacy, recovery, and degraded-mode decisions. It cannot be created merely by
 letting a local Host call arbitrary Platform endpoints.
 
+The baseline Standalone profile remains usable without Platform. A connected
+commercial adapter may add selected capabilities, but lease expiry cannot block
+cancellation, containment, recovery, deletion, or baseline access and export of
+customer-owned data.
+
 ## Client Target Profiles
 
 A Client Profile owns user-facing connection selection, not server state. It
@@ -136,6 +176,13 @@ Target metadata cannot grant authorization. Secrets are resolved by the client
 credential adapter. Capability snapshots are presentation hints and are
 revalidated by the Host before commands.
 
+Every client resource reference combines `TargetIdentity` with the public
+resource reference. The active profile also owns a monotonically changing local
+client generation. Switching profiles retires the old generation and closes or
+discards its requests, subscriptions, cursors, caches, optimistic state,
+operation handles, and late responses. These client fields never enter the
+server-side Project Aggregate.
+
 The first-use choices are Agent Teams Cloud, Connect to your server, and future
 This device. Profiles are persistent and explicitly switched. Project identity
 is bound to one Target; profile switching never migrates data, retries a command
@@ -152,5 +199,11 @@ Every qualified profile proves:
 - current authorization on command, query, feed resume, and raw data access;
 - typed unsupported and degraded outcomes;
 - target identity preserved across restart, update, and reconnect;
+- stale client-target generations cannot update the active view;
 - execution placement changes without changing Orchestrator target identity;
+- every mandatory execution capability is independently qualified and no
+  undeclared capability is advertised;
+- advertised local-device execution passes OD-038 connectivity conformance;
+- qualification evidence passes the OD-039 trusted attestation verifier;
+- Managed authority and tenant isolation pass OD-012 before qualification;
 - profile-specific backup, recovery, deletion, and operational readiness.

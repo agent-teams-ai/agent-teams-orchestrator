@@ -68,6 +68,20 @@ User-owned defaults that select an orchestrator Target and optional default
 tenant or project scope. A Client Profile is not a deployment, process, Workspace,
 or trust authority.
 
+## Client Target Generation
+
+A client-local fence combining Profile identity, Target identity, and a monotonic
+generation. Requests, subscriptions, cursors, caches, Operation handles, and late
+responses from a retired generation cannot update the active client view. It is
+not stored in the server-side Project Aggregate.
+
+## Commercial Capability Lease
+
+Short-lived Host-custodied evidence that a specific commercial capability may be
+admitted for a bound deployment, authority realm, tenant, operation class, and
+validity interval. It is distinct from product authorization and cannot be used
+as a client bearer credential.
+
 ## Application model
 
 A transport-independent input or output type owned by an application use case. It
@@ -321,11 +335,47 @@ full.
 An authorized, disposable, rebuildable index of allowlisted safe activity fields.
 It never owns timeline history, deletion authority, or product truth.
 
+## Index Generation
+
+An Execution Observation search container with immutable identity, schema, and
+analyzer configuration plus append-only document revisions. It is selected
+atomically after verification and sealed when superseded.
+
+## Current Disclosure Fence
+
+Context-local safety dispositions over Activity revision intervals. They preserve
+ordinary safe snapshot history but override historical cursor visibility for
+revisions explicitly withdrawn by redaction, quarantine, retraction, or security
+invalidation.
+
+## Index Commit Position
+
+A monotonic position assigned when one search document revision becomes
+queryable inside an index generation. Search cursors use it to exclude later
+index commits even when those documents carry older source positions.
+
+## Protected Payload Disposition
+
+The current payload-specific safety state checked independently from product
+authorization for raw read, export, artifact download, restore, and cleanup.
+
+## Run Attribution State
+
+Execution Observation's local `pending`, `bound`, or `explicitly-unbound`
+reference evidence from Run Orchestration. Pending evidence is not assigned to a
+public activity-feed partition.
+
 ## Live Fragment
 
-A provisional bounded-lifetime runtime streaming update without a durable
-application cursor. It must be visually and contractually distinct from committed
-activity history.
+A possible future provisional runtime streaming protocol without a durable
+application cursor. It is excluded from V1 until separate admission, redaction,
+deletion, bounded-loss, and recovery semantics are accepted.
+
+## Product Grant
+
+Authority-provider evidence that a principal may perform an action on a product
+resource. It is distinct from a Commercial Capability Lease, deployment adapter
+availability, and the owning feature's domain policy.
 
 ## Runtime session reference
 

@@ -13,6 +13,7 @@ import {
   relative,
   walk,
 } from "./package-catalog-lib.mjs";
+import { validateMaterializationGates } from "./package-materialization-validation.mjs";
 import {
   isNormalizedBuiltExport,
   stringTargets,
@@ -112,6 +113,8 @@ function validateCatalogSemantics(catalog, documents, errors) {
         `architecture/package-catalog.yaml: ${entry.id} must be owned by a bounded-context dossier`,
       );
     }
+
+    validateMaterializationGates(entry, documents, errors);
   }
 
   const catalogPaths = [...byPath.keys()].toSorted();
@@ -273,6 +276,12 @@ async function validateMaterializedPackage(context) {
   const packageRoot = path.join(repositoryRoot, entry.path);
   const packageJsonPath = path.join(packageRoot, "package.json");
   const tsconfigPath = path.join(packageRoot, "tsconfig.json");
+
+  if (entry.materialization === "deferred") {
+    errors.push(
+      `${entry.path}: package materialization is deferred by the package catalog`,
+    );
+  }
 
   if (!acceptedOwnerStatuses.has(owner.metadata.status)) {
     errors.push(

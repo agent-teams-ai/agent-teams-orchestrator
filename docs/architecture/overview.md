@@ -152,8 +152,9 @@ only owner of provider sessions and processes. See
 [Local Host Lifecycle](local-host-lifecycle.md).
 
 ADR-0086 defers Fully Local implementation from V1 without removing these
-boundaries. The qualified V1 profiles and independent client and execution axes
-are defined in [Deployment Profiles](deployment-profiles.md).
+boundaries. The selected V1 targets, their still-blocking qualification gates,
+and independent client and execution axes are defined in
+[Deployment Profiles](deployment-profiles.md) and ADR-0089.
 
 Client configuration distinguishes:
 

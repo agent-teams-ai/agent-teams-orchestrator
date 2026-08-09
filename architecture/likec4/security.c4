@@ -29,6 +29,15 @@ model {
         }
       }
 
+      runtimeConnector = securityProcess 'Local Runtime Connector' {
+        metadata {
+          owner_document 'OD-038'
+          security_role 'runtime-connector'
+          trust_zone 'local-device'
+          decision_status 'connectivity-unresolved'
+        }
+      }
+
       supervisor = securityProcess 'Local Supervisor' {
         metadata {
           owner_document 'architecture.security'
@@ -174,6 +183,33 @@ model {
         }
       }
 
+      managedProductAuthority = externalIntegration 'Managed Product Authority' {
+        metadata {
+          owner_document 'OD-012'
+          security_role 'managed-product-authority'
+          trust_zone 'external'
+          decision_status 'authority-unresolved'
+        }
+      }
+
+      commercialAccessAuthority = externalIntegration 'Commercial Access Authority' {
+        metadata {
+          owner_document 'OD-037'
+          security_role 'commercial-access-authority'
+          trust_zone 'external'
+          decision_status 'commercial-authority-unresolved'
+        }
+      }
+
+      standaloneAuthority = externalIntegration 'Standalone Deployment Authority' {
+        metadata {
+          owner_document 'OD-012'
+          security_role 'standalone-product-authority'
+          trust_zone 'external'
+          decision_status 'authority-unresolved'
+        }
+      }
+
       taskBoards = externalIntegration 'Task Boards' {
         metadata {
           owner_document 'domain.contexts.work-coordination'
@@ -255,6 +291,20 @@ model {
       status 'accepted'
     }
   }
+  securityLandscape.hostedControlPlane.host -[authenticatedControl]-> securityLandscape.browserDevice.browser 'Issue scoped hosted subscription authority' {
+    metadata {
+      integration_style 'Short-lived audience-bound realtime subscription token'
+      authority 'Host authorizes channels before edge connection; client fields never grant scope'
+      status 'accepted'
+    }
+  }
+  securityLandscape.hostedControlPlane.host -[authenticatedControl]-> securityLandscape.localDevice.desktop 'Issue scoped remote subscription authority' {
+    metadata {
+      integration_style 'Short-lived audience-bound realtime subscription token'
+      authority 'Host authorizes channels before edge connection; client fields never grant scope'
+      status 'accepted'
+    }
+  }
   securityLandscape.localDevice.desktop -[eventDelivery]-> securityLandscape.localDevice.realtime 'Scoped local live subscriptions' {
     metadata {
       integration_style 'Centrifugo live edge with bounded recovery cache'
@@ -304,6 +354,27 @@ model {
       status 'accepted'
     }
   }
+  securityLandscape.localDevice.runtimeConnector -[authenticatedControl]-> securityLandscape.hostedControlPlane.host 'Outbound enrolled runtime channel' {
+    metadata {
+      integration_style 'Mutually authenticated target-bound channel with connection generation'
+      authority 'OD-038 must qualify enrollment, revocation, reconnect, and custody before this placement is advertised'
+      status 'proposed'
+    }
+  }
+  securityLandscape.hostedControlPlane.host -[runtimeControl]-> securityLandscape.localDevice.runtimeConnector 'Logical runtime control over enrolled channel' {
+    metadata {
+      integration_style 'Consumer-owned runtime ports over the connector channel'
+      authority 'Desktop does not own the Run or RuntimeSession; stale channel generations cannot mutate execution'
+      status 'proposed'
+    }
+  }
+  securityLandscape.localDevice.runtimeConnector -[runtimeControl]-> securityLandscape.localDevice.runtimeWorker.runtime 'Forward qualified runtime control locally' {
+    metadata {
+      integration_style 'Versioned local AR protocol through stateless connector ACL'
+      authority 'AR owns technical enforcement; connector owns connectivity only'
+      status 'proposed'
+    }
+  }
   securityLandscape.localDevice.host -[eventDelivery]-> securityLandscape.localDevice.nats 'Integration events and durable delivery' {
     metadata {
       integration_style 'Broker-neutral event ports through managed local JetStream adapter'
@@ -350,6 +421,27 @@ model {
     metadata {
       integration_style 'Provider-neutral identity adapter'
       authority 'Identity provider selection is unresolved; Access Control owns product authorization'
+      status 'proposed'
+    }
+  }
+  securityLandscape.hostedControlPlane.host -[authenticatedControl]-> securityLandscape.externalZone.managedProductAuthority 'Verify managed product authority' {
+    metadata {
+      integration_style 'Managed product authority adapter with short-lived target-bound evidence'
+      authority 'OD-012 gates identity, grants, tenant isolation, and revocation; Platform does not proxy normal data traffic'
+      status 'proposed'
+    }
+  }
+  securityLandscape.hostedControlPlane.host -[authenticatedControl]-> securityLandscape.externalZone.commercialAccessAuthority 'Optionally verify commercial capability evidence' {
+    metadata {
+      integration_style 'Host-custodied capability lease through feature-owned decision ports'
+      authority 'OD-037 gates only the independently advertised managed-commercial-entitlements capability, not baseline profile availability'
+      status 'proposed'
+    }
+  }
+  securityLandscape.hostedControlPlane.host -[authenticatedControl]-> securityLandscape.externalZone.standaloneAuthority 'Verify standalone deployment authority' {
+    metadata {
+      integration_style 'Replaceable standalone authority adapter selected by composition'
+      authority 'Standalone baseline does not depend on managed Platform authority'
       status 'proposed'
     }
   }

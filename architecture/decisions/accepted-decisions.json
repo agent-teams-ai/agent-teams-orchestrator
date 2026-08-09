@@ -431,6 +431,36 @@
       "id": "ADR-0087",
       "path": "docs/decisions/0087-explicit-client-target-profiles.md",
       "immutableDigest": "sha256:cf0dd76853b0d07d507e3c2908c34663896b269e125fda2a53b8c2618a6b443f"
+    },
+    {
+      "id": "ADR-0088",
+      "path": "docs/decisions/0088-observation-protocol-safety-constraints.md",
+      "immutableDigest": "sha256:6a3a3587fbf6dca0bf766385e4a97badf123d2c03b7256f246492e31f56fe91b"
+    },
+    {
+      "id": "ADR-0089",
+      "path": "docs/decisions/0089-deployment-qualification-and-client-target-fencing.md",
+      "immutableDigest": "sha256:a984fc518e8910b9771165fd1a45233f0e8de194db94a62750660e2d6db582db"
+    },
+    {
+      "id": "ADR-0090",
+      "path": "docs/decisions/0090-evidence-derived-profile-and-capability-qualification.md",
+      "immutableDigest": "sha256:2d62f29a2826d282b12ffbe66285d2d3d4778c8bb6842dae7d565a4b53063b04"
+    },
+    {
+      "id": "ADR-0091",
+      "path": "docs/decisions/0091-current-disclosure-and-attribution-fencing.md",
+      "immutableDigest": "sha256:5c493d28ad53869858d08d48f47060dffe5580771b155075201de2ab1c654fd2"
+    },
+    {
+      "id": "ADR-0092",
+      "path": "docs/decisions/0092-closed-deployment-qualification-and-materialization-gates.md",
+      "immutableDigest": "sha256:12ea63af7e03208d98dfdd1c7ace27455270ad8aea82823be9eac267adc25066"
+    },
+    {
+      "id": "ADR-0093",
+      "path": "docs/decisions/0093-observation-snapshot-and-replay-closure.md",
+      "immutableDigest": "sha256:41e87eb01f1e3dc810d9013fad84ceb7ab36c2242ddb78476c6c78453fb4f16a"
     }
   ]
 }

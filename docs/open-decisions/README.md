@@ -55,6 +55,9 @@ question. `Resolved` is historical and must relate to at least one deciding ADR.
 | OD-035 | [Local durable workflow engine](OD-035-local-durable-workflow-engine.md) | run-orchestration | Open |
 | OD-036 | [First usable deployment profile](OD-036-first-usable-deployment-profile.md) | architecture/composition | Resolved by ADR-0086 |
 | OD-037 | [Commercial capability entitlements](OD-037-commercial-capability-entitlements.md) | architecture/contracts | Open |
+| OD-038 | [Runtime worker connectivity and enrollment](OD-038-runtime-worker-connectivity-and-enrollment.md) | integration/runtime | Open |
+| OD-039 | [Deployment qualification attestation](OD-039-deployment-qualification-attestation.md) | architecture/reliability | Open |
+| OD-040 | [Fully Local package materialization](OD-040-fully-local-package-materialization.md) | architecture/composition | Open |
 
 Use the [open-decision template](../templates/open-decision.md) for new entries.
 CI verifies that every record is listed and that table owner and status match its

@@ -12,6 +12,7 @@ related:
   - ADR-0038
   - ADR-0040
   - ADR-0075
+  - ADR-0089
   - architecture.composition
 code_anchors:
   - pattern: scripts/architecture/validate-dependency-specifiers.mjs
@@ -142,6 +143,8 @@ CI architecture gates test:
 - packages without an explicit architectural role;
 - production packages absent from `architecture/package-catalog.yaml`;
 - packages whose owner document remains proposed;
+- packages marked `materialization: deferred`, or packages whose declared
+  materialization gate still has an unresolved status;
 - package manifests whose name, role, or owner differs from the catalog;
 - empty ceremonial DDD layers;
 - package export boundaries;
@@ -171,6 +174,15 @@ TypeScript path aliases are conveniences, not boundaries. `package.json` exports
 workspace dependencies, lint rules, and architecture tests enforce boundaries.
 The package catalog reserves approved topology; it does not replace import-graph
 enforcement inside materialized packages.
+
+Package materialization is fail closed. A deferred catalog entry names at least
+one unresolved decision in `materialization_blocked_by`; the validator and
+scaffolder reject filesystem creation while that gate is unresolved. Changing or
+removing the marker cannot bypass the gate: the catalog may allow materialization
+only after the declared blockers no longer have an unresolved status and
+`materialization_decision` names the accepted ADR that resolves the explicit
+implementation-start gate. This authorizes package creation, not deployment
+qualification; final profile qualification requires its independent evidence.
 
 Every materialized package appears exactly once in the root TypeScript project
 references. Removing or adding a package updates the catalog, filesystem, manifest,

@@ -6,6 +6,13 @@ import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import YAML from "yaml";
 
+import {
+  validateQualificationReferences,
+  validateQualificationSemantics,
+} from "./qualification-validation.mjs";
+
+export { validateQualificationReferences } from "./qualification-validation.mjs";
+
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
 const maximumSeriesCombinations = 512;
@@ -44,6 +51,7 @@ async function readJson(filePath) {
 async function readYaml(filePath) {
   return YAML.parse(await readFile(filePath, "utf8"));
 }
+
 
 function schemaErrors(validate) {
   return (validate.errors ?? []).map(
@@ -235,6 +243,7 @@ function validateResourceBudgetPolicies(catalog, errors) {
 
 export function validateReliabilitySemantics(catalog, ownerIds) {
   const errors = [];
+  validateQualificationSemantics(catalog, errors);
   const { attributeById, prohibitedAttributes } = buildAttributeRegistry(
     catalog,
     errors,
@@ -282,6 +291,9 @@ export async function validateReliabilityFoundation(repositoryRoot) {
       new Set(Object.keys(owners.owners ?? {})),
     ),
   );
+  errors.push(
+    ...(await validateQualificationReferences(catalog, repositoryRoot)),
+  );
 
   return {
     catalog,
@@ -301,7 +313,7 @@ async function main() {
   }
 
   console.log(
-    `Reliability foundation valid: ${result.catalog.indicators.length} indicators, ${result.catalog.invariants.length} invariants, ${result.catalog.resourceBudgets.length} resource budgets.`,
+    `Reliability foundation valid: ${result.catalog.profiles.length} profiles, ${result.catalog.capabilities.length} deployment capabilities, ${result.catalog.indicators.length} indicators, ${result.catalog.invariants.length} invariants, ${result.catalog.resourceBudgets.length} resource budgets.`,
   );
 }
 

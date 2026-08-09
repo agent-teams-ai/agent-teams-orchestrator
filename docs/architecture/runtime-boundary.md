@@ -417,7 +417,15 @@ through its own consumer port. It stores authenticated source coordinates before
 deterministic normalization, keeps protected provider payload behind stricter
 access, and publishes a context-owned activity feed. It does not replace the Run
 observation projection, use output as lifecycle authority, or expose arbitrary AR
-payload to clients. ADR-0083 and ADR-0084 define this boundary.
+payload to clients. Scope and Run facts enter as separate idempotent reference
+projections; rebuild never queries another context's current tables or API.
+ADR-0083, ADR-0084, and ADR-0088 define this boundary.
+
+A Hosted Orchestrator may control AR on a user device only through a qualified
+runtime-connectivity adapter. OD-038 must close enrollment, target-bound device
+identity, outbound channel, revocation, reconnect, connection generation, stale
+custody, and Desktop-exit semantics before that placement is advertised. Desktop
+and the connector own neither business Run lifecycle nor AR technical state.
 
 ## Runtime-command idempotency
 
