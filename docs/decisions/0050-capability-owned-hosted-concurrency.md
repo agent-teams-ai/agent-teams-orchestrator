@@ -2,6 +2,8 @@
 id: ADR-0050
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: platform/persistence
 summary: Require every mutating capability to declare and prove its hosted concurrency strategy.
 approved_by: product-owner

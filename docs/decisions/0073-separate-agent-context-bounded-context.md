@@ -2,6 +2,8 @@
 id: ADR-0073
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/domain
 summary: Establish Agent Context as a separate bounded context with a minimal provider-neutral first slice.
 approved_by: product-owner

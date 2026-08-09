@@ -2,6 +2,8 @@
 id: ADR-0074
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/domain
 summary: Exclude vendor connector management from v1 while preserving a future integration boundary.
 approved_by: product-owner

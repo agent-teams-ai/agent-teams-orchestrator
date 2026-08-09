@@ -502,6 +502,26 @@ test("redacts dependency accessor failures during construction", () => {
   );
 });
 
+test("redacts a throwing freshness policy accessor during construction", () => {
+  const dependencies = {
+    clock: { now: () => epochMicroseconds(1_500_000n) },
+    get freshnessPolicy() {
+      throw new Error("secret-freshness-policy-path");
+    },
+    source: {
+      read: async () => ({ kind: "not-found", targetId: requestedTarget }),
+    },
+  };
+
+  assert.throws(
+    () => createHostDiscovery(dependencies),
+    (error) =>
+      error instanceof TypeError &&
+      error.message === "Host discovery dependencies are invalid" &&
+      !error.message.includes("secret-freshness-policy-path"),
+  );
+});
+
 test("projects a closed candidate without source-only authority fields", async () => {
   const sourceObservation = observation();
   sourceObservation.ready = true;

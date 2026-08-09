@@ -2,6 +2,7 @@
 id: ADR-0002
 type: adr
 status: superseded
+supersedes: []
 owner: architecture
 summary: Original package and feature-slice boundary decision superseded by ADR-0007.
 superseded_by:

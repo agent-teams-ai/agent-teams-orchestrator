@@ -2,6 +2,8 @@
 id: ADR-0016
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: platform/control-api
 summary: Use feature-owned Protobuf contracts, Buf checks, and Connect for the public control API.
 related:

@@ -2,6 +2,8 @@
 id: ADR-0056
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: engineering/tooling
 summary: Use Oxlint as the sole lint runtime with separate fast, type-aware, and advisory quality lanes.
 approved_by: product-owner

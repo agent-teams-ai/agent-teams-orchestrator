@@ -2,6 +2,8 @@
 id: ADR-0024
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: clients/sdk
 summary: Fix the TypeScript SDK, generated contract, and runtime integration package roles and names.
 related:

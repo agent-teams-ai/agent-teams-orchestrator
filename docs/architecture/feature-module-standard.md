@@ -240,6 +240,14 @@ source dependency by exact consumer, provider, and exported subpath. A manifest
 dependency, package-role-compatible direction, or LikeC4 relationship alone does
 not grant a source import. Cross-package relative, absolute, `file:`, wildcard,
 package-root, deep, and package-alias bypasses remain prohibited.
+
+The Orchestrator policy owns package identity, role, and allowed exported
+subpaths. Foundation's `architecture.source-dependencies` capability provides an
+independent physical-boundary check for ambiguous classification, runtime and
+type-only cycles, declared entrypoints, and relative-import bypasses. Both gates
+must pass; a broad Foundation boundary never widens an Orchestrator-owned edge,
+and a local edge never bypasses Foundation's cycle or entrypoint checks.
+
 Before implementation packages are accepted, repository tooling must:
 
 1. classify every workspace package by architectural role;

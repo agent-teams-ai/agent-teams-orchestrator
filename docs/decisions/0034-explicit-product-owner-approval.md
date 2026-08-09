@@ -2,6 +2,8 @@
 id: ADR-0034
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/governance
 summary: Require explicit product-owner approval metadata before a new ADR becomes accepted.
 approved_by: product-owner

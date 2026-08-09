@@ -2,6 +2,8 @@
 id: ADR-0057
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/reliability
 summary: Establish user-centric reliability indicators, strict invariants, and resource budgets before approving numerical SLO targets.
 approved_by: product-owner

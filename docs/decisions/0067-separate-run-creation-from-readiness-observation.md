@@ -2,6 +2,8 @@
 id: ADR-0067
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: platform/control-api
 summary: Keep CreateRun command completion separate from independently observable Run readiness.
 approved_by: product-owner

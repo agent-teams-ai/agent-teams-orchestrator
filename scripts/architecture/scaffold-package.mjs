@@ -215,6 +215,39 @@ function sameDefinitionRef(actual, expected) {
   );
 }
 
+function matchesCanonicalAuthority(config, plan) {
+  return [
+    plan.projectId === config.projectId,
+    plan.authorityEvidence?.projectId === config.projectId,
+    plan.authority?.configPath === canonicalScaffoldingConfigPath,
+    plan.authority?.targetCatalogPath === config.targetCatalogPath,
+  ].every(Boolean);
+}
+
+function matchesCanonicalComposition(composition, plan) {
+  return [
+    plan.composition?.id === composition.id,
+    sameDefinitionRef(
+      plan.composition?.scaffoldProfile,
+      composition.scaffoldProfile?.ref,
+    ),
+    sameDefinitionRef(plan.composition?.recipe, composition.recipe?.ref),
+    Array.isArray(plan.composition?.facets),
+    plan.composition?.facets.length === 0,
+    Array.isArray(plan.composition?.policies),
+    plan.composition?.policies.length === 0,
+  ].every(Boolean);
+}
+
+function matchesCanonicalTarget(composition, target, plan) {
+  return [
+    composition.targetRoles?.includes(plan.target.role),
+    plan.target.path === target.path,
+    plan.target.packageName === target.package_name,
+    plan.target.ownerDocument?.id === target.owner_document,
+  ].every(Boolean);
+}
+
 async function assertCanonicalOrchestratorPlan(repositoryRoot, plan) {
   const config = YAML.parse(
     await readFile(
@@ -229,29 +262,13 @@ async function assertCanonicalOrchestratorPlan(repositoryRoot, plan) {
   const target = catalog.packages?.find(
     (candidate) => candidate.id === plan.target?.id,
   );
-  const canonical =
-    composition &&
-    target &&
-    plan.projectId === config.projectId &&
-    plan.authorityEvidence?.projectId === config.projectId &&
-    plan.authority?.configPath === canonicalScaffoldingConfigPath &&
-    plan.authority?.targetCatalogPath === config.targetCatalogPath &&
-    plan.composition?.id === composition.id &&
-    sameDefinitionRef(
-      plan.composition?.scaffoldProfile,
-      composition.scaffoldProfile?.ref,
-    ) &&
-    sameDefinitionRef(plan.composition?.recipe, composition.recipe?.ref) &&
-    Array.isArray(plan.composition?.facets) &&
-    plan.composition.facets.length === 0 &&
-    Array.isArray(plan.composition?.policies) &&
-    plan.composition.policies.length === 0 &&
-    composition.targetRoles?.includes(plan.target.role) &&
-    plan.target.path === target.path &&
-    plan.target.packageName === target.package_name &&
-    plan.target.ownerDocument?.id === target.owner_document;
-
-  if (!canonical) {
+  if (
+    !composition ||
+    !target ||
+    !matchesCanonicalAuthority(config, plan) ||
+    !matchesCanonicalComposition(composition, plan) ||
+    !matchesCanonicalTarget(composition, target, plan)
+  ) {
     throw new Error(
       "Plan is not bound to the canonical Orchestrator Composition and package catalog",
     );

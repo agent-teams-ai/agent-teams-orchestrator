@@ -2,6 +2,8 @@
 id: ADR-0059
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: engineering/tooling
 summary: Distribute shared engineering policy as an exact dev-only package with explicit local-link and registry modes.
 approved_by: product-owner

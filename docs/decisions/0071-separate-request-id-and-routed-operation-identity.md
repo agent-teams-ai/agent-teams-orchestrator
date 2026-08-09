@@ -2,6 +2,7 @@
 id: ADR-0071
 type: adr
 status: accepted
+superseded_by: []
 owner: clients/sdk
 summary: Separate caller request idempotency from server-owned Operation identity and route Operations without a central write registry.
 approved_by: product-owner

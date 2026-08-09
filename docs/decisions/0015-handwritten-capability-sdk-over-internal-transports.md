@@ -2,6 +2,8 @@
 id: ADR-0015
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: clients/sdk
 summary: Use handwritten capability-oriented SDK facades over generated contracts and internal official transports.
 related:

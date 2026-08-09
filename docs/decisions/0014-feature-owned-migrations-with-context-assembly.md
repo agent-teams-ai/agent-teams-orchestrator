@@ -2,6 +2,7 @@
 id: ADR-0014
 type: adr
 status: superseded
+supersedes: []
 owner: platform/persistence
 summary: Keep migrations feature-owned while assembling one deterministic bundle per bounded context.
 superseded_by:

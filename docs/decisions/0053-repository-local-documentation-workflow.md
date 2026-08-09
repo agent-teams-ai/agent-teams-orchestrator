@@ -2,6 +2,8 @@
 id: ADR-0053
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: engineering/tooling
 summary: Govern documentation changes with one repository-local authoring Skill and machine-validated code impact anchors.
 approved_by: product-owner

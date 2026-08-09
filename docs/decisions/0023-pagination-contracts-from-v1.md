@@ -2,6 +2,8 @@
 id: ADR-0023
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: platform/control-api
 summary: Paginate every unbounded collection from v1 with opaque scope-bound keyset tokens.
 related:

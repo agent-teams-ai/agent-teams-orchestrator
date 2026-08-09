@@ -2,6 +2,8 @@
 id: ADR-0072
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: work-coordination
 summary: Evaluate one immutable Work completion candidate atomically while keeping Work Coordination as the sole terminal authority.
 approved_by: product-owner

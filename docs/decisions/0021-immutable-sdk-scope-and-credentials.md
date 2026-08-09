@@ -2,6 +2,8 @@
 id: ADR-0021
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: clients/sdk
 summary: Use immutable scoped SDK clients and an asynchronous credential-provider boundary.
 related:

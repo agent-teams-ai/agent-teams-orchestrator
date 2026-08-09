@@ -2,6 +2,8 @@
 id: ADR-0038
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/tooling
 summary: Reserve package identities in a catalog and materialize code only after the owning architecture document is accepted.
 approved_by: product-owner

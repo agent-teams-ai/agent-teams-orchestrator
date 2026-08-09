@@ -2,6 +2,8 @@
 id: ADR-0009
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: platform/eventing
 summary: Model commands and events as distinct contracts with different semantics.
 ---

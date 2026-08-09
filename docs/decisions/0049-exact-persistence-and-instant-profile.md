@@ -2,6 +2,8 @@
 id: ADR-0049
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: platform/persistence
 summary: Use one lossless exact-value and microsecond-instant mapping profile across SQLite, PostgreSQL, and wire contracts.
 approved_by: product-owner

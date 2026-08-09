@@ -191,6 +191,14 @@ function validateRelationships(project, errors) {
   }
 }
 
+function isSecurityLandscape(element) {
+  return element.metadata.security_role === "security-landscape";
+}
+
+function appearsInSecurityView(element, securityViewNodeIds) {
+  return isSecurityLandscape(element) || securityViewNodeIds.has(element.id);
+}
+
 function validateSecurityTopology(project, errors) {
   const securityElements = Object.values(project.elements ?? {}).filter(
     (element) => typeof element.metadata?.security_role === "string",
@@ -230,10 +238,7 @@ function validateSecurityTopology(project, errors) {
     ),
   );
   for (const element of securityElements) {
-    if (
-      element.metadata.security_role !== "security-landscape" &&
-      !securityViewNodeIds.has(element.id)
-    ) {
+    if (!appearsInSecurityView(element, securityViewNodeIds)) {
       errors.push(
         `LikeC4 securityTrustBoundaries view omits security element ${element.id}`,
       );

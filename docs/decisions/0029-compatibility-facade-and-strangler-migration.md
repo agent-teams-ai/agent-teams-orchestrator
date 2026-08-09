@@ -2,6 +2,8 @@
 id: ADR-0029
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: migration/desktop
 summary: Migrate desktop capabilities through a compatibility facade and single-owner strangler rollout.
 related:

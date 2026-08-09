@@ -2,6 +2,8 @@
 id: ADR-0030
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: apps
 summary: Build one orchestrator core with separate local and server composition roots.
 related:

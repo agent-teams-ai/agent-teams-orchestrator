@@ -2,6 +2,8 @@
 id: ADR-0080
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: orchestration-scope
 summary: Make Orchestration Scope the sole owner of orchestration tenant and Project authority, admission, bindings, and owner-local disposition coordination.
 approved_by: product-owner

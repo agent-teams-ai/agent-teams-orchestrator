@@ -2,6 +2,8 @@
 id: ADR-0005
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: architecture/contracts
 summary: Keep public transport and SDK contracts outside domain and application models.
 ---

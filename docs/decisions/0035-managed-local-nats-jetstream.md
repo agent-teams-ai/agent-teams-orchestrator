@@ -2,6 +2,8 @@
 id: ADR-0035
 type: adr
 status: accepted
+superseded_by: []
+supersedes: []
 owner: platform/eventing
 summary: Bundle and supervise local NATS JetStream while keeping event contracts and orchestration core broker-neutral.
 approved_by: product-owner
