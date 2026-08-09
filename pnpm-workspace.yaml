@@ -48,11 +48,12 @@ minimumReleaseAgeExclude:
   - js-yaml@5.2.2
 
 overrides:
-  "brace-expansion": "5.0.9"
-  "fast-uri": "3.1.5"
+  "ajv@8>fast-uri": "3.1.5"
   "js-yaml": "5.2.2"
-  "nanoid": "3.3.18"
-  "undici": "7.29.0"
+  "jsdom@29>undici": "7.29.0"
+  "minimatch@10>brace-expansion": "5.0.9"
+  "nx@23>brace-expansion": "5.0.9"
+  "postcss@8>nanoid": "3.3.18"
 
 allowBuilds:
   esbuild: true
