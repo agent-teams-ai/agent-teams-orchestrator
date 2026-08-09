@@ -401,10 +401,10 @@ model {
       status 'proposed'
     }
   }
-  orchestrationScope -[consumerPort]-> runtimeAcl 'Runtime scope admission and disposition commands' {
+  orchestrationScope -[consumerPort]-> runtimeAcl 'Runtime scope admission, binding, and disposition commands' {
     metadata {
-      integration_style 'Consumer-owned runtime scope ports'
-      authority 'Scope owns project-level intent; ACL translates only'
+      integration_style 'Scope-owned consumer ports through stateless ACL'
+      authority 'Orchestration Scope owns project admission, binding, and disposition intent; AR owns technical scope authority; ACL translates only'
       status 'accepted'
     }
   }
@@ -412,13 +412,6 @@ model {
     metadata {
       integration_style 'Consumer-owned runtime ports'
       authority 'Run owns orchestration intent; ACL translates only'
-      status 'accepted'
-    }
-  }
-  orchestrationScope -[consumerPort]-> runtimeAcl 'Runtime scope commands' {
-    metadata {
-      integration_style 'Scope-owned consumer ports through stateless ACL'
-      authority 'Orchestration Scope owns binding and disposition intent; AR owns technical scope authority'
       status 'accepted'
     }
   }
@@ -436,10 +429,10 @@ model {
       status 'accepted'
     }
   }
-  runtimeAcl -[observation]-> orchestrationScope 'Runtime scope observations' {
+  runtimeAcl -[observation]-> orchestrationScope 'Runtime scope receipts and observations' {
     metadata {
-      integration_style 'Consumer-owned scope observation ingestion'
-      authority 'AR owns runtime facts; Scope owns its checkpoints and projections'
+      integration_style 'Typed receipts and resumable consumer-owned scope observation ingestion'
+      authority 'AR owns runtime truth; Orchestration Scope owns bindings, checkpoints, and local projections; ACL translates only'
       status 'accepted'
     }
   }
@@ -447,13 +440,6 @@ model {
     metadata {
       integration_style 'Consumer-owned observation projection'
       authority 'AR owns runtime facts; Run owns its observation projection'
-      status 'accepted'
-    }
-  }
-  runtimeAcl -[observation]-> orchestrationScope 'Runtime scope observations' {
-    metadata {
-      integration_style 'Typed scope receipts and resumable observations'
-      authority 'AR owns runtime truth; Orchestration Scope owns bindings and local projections'
       status 'accepted'
     }
   }

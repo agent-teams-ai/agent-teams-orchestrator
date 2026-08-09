@@ -158,7 +158,8 @@ capability/result, not an absent optional method or provider-name branch.
 The contract must support different topology models:
 
 - one process per agent;
-- one provider host with multiple sessions;
+- provider systems with shared-host topology, normalized by AR v1 without
+  reusing one `ProviderHostInstance` across `RuntimeSession` identities;
 - remote managed execution;
 - providers with or without interactive approvals;
 - providers with or without native resume.
@@ -195,12 +196,16 @@ AR Published Language. The orchestrator never treats cached installation,
 authentication, model inventory, process liveness, or an old bootstrap response
 as current execution proof.
 
-AR may use one provider host for several sessions. Releasing or cancelling one
-product binding cannot imply stopping a shared host. Host adoption, cross-process
-startup serialization, process-identity checks, provider-message ordering, and
-precedence among contradictory provider observations are AR and provider-adapter
-invariants. The orchestrator consumes their normalized provider-neutral outcomes;
-it does not reproduce those algorithms.
+AR v1 never reuses one `ProviderHostInstance` across `RuntimeSession`
+identities. A backing provider service, machine, or process topology may still
+be shared outside that private instance identity. Releasing or cancelling one
+product binding therefore cannot authorize an inferred whole-host stop. Host
+adoption, cross-process startup serialization, process-identity checks,
+provider-message ordering, and precedence among contradictory provider
+observations are AR and provider-adapter invariants. The orchestrator consumes
+their normalized provider-neutral outcomes; it does not reproduce those
+algorithms. Any future cross-session `ProviderHostInstance` reuse requires new
+AR contract and qualification evidence.
 
 ## Published Language and anti-corruption boundary
 

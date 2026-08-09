@@ -99,6 +99,28 @@ test("rejects missing relationship ownership metadata", async () => {
   }
 });
 
+test("rejects duplicate semantic relationships", async () => {
+  const root = await createFixture();
+  try {
+    const relationship = `  identityRegistry -[publishedFacts]-> accessControl 'Principal facts' {
+    metadata {
+      integration_style 'Published principal facts'
+      authority 'Identity owns identity; Access owns grants'
+      status 'proposed'
+    }
+  }`;
+    await replaceModel(root, relationship, `${relationship}\n${relationship}`);
+    const result = await runValidator(root);
+    assert.equal(result.code, 1);
+    assert.match(
+      result.output,
+      /duplicate semantic edge identityRegistry -\[publishedFacts\]-> accessControl/,
+    );
+  } finally {
+    await rm(root, { force: true, recursive: true });
+  }
+});
+
 test("rejects unresolved LikeC4 references", async () => {
   const root = await createFixture();
   try {
