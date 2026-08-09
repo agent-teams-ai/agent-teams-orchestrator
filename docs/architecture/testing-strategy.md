@@ -415,6 +415,16 @@ Automated checks must reject:
   or driver types in domain/application models or public contracts;
 - integration-event schemas without complete manifests or with broker-specific
   semantics in canonical contract metadata.
+- provider payload rendered, indexed, exported, or promoted into activity without
+  Execution Observation admission, classification, redaction, and registered
+  deterministic normalization;
+- search indexes or realtime history used as canonical activity or lifecycle
+  truth;
+- blob, database, and search writes presented as one atomic Unit of Work;
+- observation cursors that are not bound to authorization scope, snapshot
+  watermark, and projection or index generation;
+- full raw provider payload indexed by default or globally deduplicated across
+  tenants;
 - durable write entry points that do not resolve to exactly one mutation and one
   ADR-0078 consistency contract;
 - mutations without a compatible binding for every enabled deployment profile;

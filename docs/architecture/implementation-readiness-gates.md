@@ -9,6 +9,10 @@ related:
   - ADR-0073
   - ADR-0074
   - ADR-0080
+  - ADR-0083
+  - ADR-0084
+  - ADR-0086
+  - ADR-0087
   - ADR-0062
   - ADR-0063
   - ADR-0064
@@ -32,6 +36,9 @@ related:
   - OD-018
   - OD-026
   - OD-033
+  - OD-035
+  - OD-036
+  - OD-037
 ---
 
 # Implementation Readiness Gates
@@ -135,6 +142,9 @@ Required evidence:
 - compatibility disposition and mapping for affected legacy IPC methods,
   `TeamCreateRequest`, `TeamProvisioningProgress`,
   `TeamAgentRuntimeSnapshot`, messages, tasks, and logs;
+- accepted Execution Observation ownership plus v1 evidence, Activity View,
+  protected diagnostic payload, feed, cursor, search, deletion, and recovery
+  fixtures for every runtime-output surface used by the slice;
 - one behavioral fixture suite runnable through direct SDK, Connect, and every
   affected compatibility adapter;
 - activation, single-writer, unknown-outcome, rollback-before-admission, and
@@ -164,7 +174,10 @@ Required evidence:
   queries, versioning, deployment routing, continue-as-new, and divergence
   reconciliation.
 
-The gate does not require deploying Temporal in the first production slice.
+The gate does not require deploying Temporal in every profile or implementing a
+Fully Local workflow engine in the first production slice. ADR-0086 defers Fully
+Local implementation from V1, while OD-035 keeps the local engine decision
+explicit for the future profile.
 
 ## Review rule
 

@@ -10,6 +10,8 @@ related:
   - ADR-0055
   - ADR-0058
   - ADR-0080
+  - ADR-0083
+  - ADR-0084
   - OD-012
   - OD-014
   - OD-029
@@ -216,6 +218,26 @@ Ambiguous outcomes are reconciled rather than blindly retried.
 Orchestrator never stores or validates an AR-private execution fence. It sends
 only the published preconditions accepted by the `ar` contract; `ar` owns the
 technical enforcement decision.
+
+## Execution Observation data boundary
+
+Execution Observation admits provider output only through an authenticated
+runtime binding. Provider payload cannot select tenant, project, principal, Run,
+Work, visibility, retention, or authorization. Unknown schemas remain restricted
+evidence and cannot be rendered, indexed, exported, or promoted into activity
+effects automatically.
+
+Canonical evidence, safe Activity Views, protected diagnostic payload, search
+documents, realtime changes, exports, and telemetry are separate disclosure
+surfaces. Each materialized surface has its own classification manifest. Full
+diagnostic payload uses envelope encryption and a distinct access capability;
+default feeds and exports contain only bounded redacted Activity Views.
+
+Search cursors are encrypted, integrity-protected, expiring, and bound to query,
+subject, authorization epoch, scope, snapshot watermark, and index generation.
+Every page and raw-payload read repeats current authorization. A deletion
+tombstone overrides old cursors, index generations, realtime cache, replay, and
+delayed work. ADR-0083 and ADR-0084 define the complete ownership and lifecycle.
 
 ## Client realtime boundary
 

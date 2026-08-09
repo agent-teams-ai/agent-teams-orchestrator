@@ -60,6 +60,11 @@ packages:
     path: packages/contexts/run-orchestration
     package_name: "@agent-teams/run-orchestration"
     owner_document: domain.contexts.run-orchestration
+  - id: context.execution-observation
+    role: bounded-context
+    path: packages/contexts/execution-observation
+    package_name: "@agent-teams/execution-observation"
+    owner_document: domain.contexts.execution-observation
   - id: context.agent-communication
     role: bounded-context
     path: packages/contexts/agent-communication
@@ -140,11 +145,11 @@ packages:
     path: packages/sdk/orchestrator
     package_name: "@agent-teams/orchestrator-sdk"
     owner_document: ADR-0036
-  - id: sdk.orchestrator-local
+  - id: sdk.orchestrator-local-host
     role: sdk
-    path: packages/sdk/orchestrator-local
-    package_name: "@agent-teams/orchestrator-local"
-    owner_document: ADR-0036
+    path: packages/sdk/orchestrator-local-host
+    package_name: "@agent-teams/orchestrator-local-host"
+    owner_document: ADR-0085
   - id: testing.conformance
     role: testing
     path: packages/testing/conformance

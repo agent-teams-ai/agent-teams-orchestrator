@@ -295,6 +295,38 @@ aggregates or writing context storage.
 An agent implementation such as Claude, Codex, or OpenCode. Provider-specific
 logic belongs in an `ar` driver.
 
+## Observation Evidence
+
+An Execution Observation-owned admitted record of what AR published, preserving
+authenticated scope, source coordinates, integrity, classification, versions,
+and completeness. It is distinct from raw provider payload and user-facing
+activity.
+
+## Activity Projection
+
+A deterministic, rebuildable, provider-neutral interpretation of one or more
+Observation Evidence records. It supports user-facing timeline and feed views but
+is not runtime truth, a business lifecycle authority, or an Aggregate Root by
+default.
+
+## Protected Diagnostic Payload
+
+Encrypted provider-native diagnostic content referenced by Observation Evidence
+and available only through stricter authorization, redaction, retention, export,
+and deletion capabilities. It is not canonical evidence and is not indexed in
+full.
+
+## Search Projection
+
+An authorized, disposable, rebuildable index of allowlisted safe activity fields.
+It never owns timeline history, deletion authority, or product truth.
+
+## Live Fragment
+
+A provisional bounded-lifetime runtime streaming update without a durable
+application cursor. It must be visually and contractually distinct from committed
+activity history.
+
 ## Runtime session reference
 
 An opaque orchestrator-side reference to an AR-owned technical runtime session,

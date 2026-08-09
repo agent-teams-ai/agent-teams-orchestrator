@@ -11,6 +11,9 @@ related:
   - ADR-0060
   - ADR-0064
   - ADR-0065
+  - ADR-0086
+  - ADR-0087
+  - architecture.deployment-profiles
 ---
 
 # Architecture Overview
@@ -115,21 +118,23 @@ The boundary is detailed in [Runtime boundary](runtime-boundary.md).
 
 The same core supports multiple compositions:
 
-- **Local Supervisor**: a small per-user technical deployment-control process. It
+- **Future Local Supervisor**: a small per-user technical deployment-control process. It
   ensures, discovers, monitors, drains, and activates versioned local components.
   It owns no orchestration behavior and is not on the normal SDK request path.
-- **Orchestrator Local**: a versioned local Host composition with protected local
+- **Future Orchestrator Local**: a versioned local Host composition with protected local
   control, SQLite, local runtime integration, and the JetStream adapter. CLI,
   Desktop, and other local applications share it through the SDK.
-- **Orchestrator Server**: a hosted deployable artifact with network control,
-  PostgreSQL, hosted identity/tenancy, and JetStream adapters.
+- **Orchestrator Server**: the V1 server artifact family with network control,
+  PostgreSQL, authority-provider, and JetStream adapters. Managed SaaS and
+  Standalone Self-Hosted compositions use the same logical core.
 - **Embedded testing composition**: tests use in-memory adapters and a fake
   runtime without launching real agents.
 
 The local and server artifacts are thin composition roots, not separate product
 implementations. Deployment mode must not change domain behavior.
 
-The shared per-user Local Supervisor is the only local process-lifecycle owner.
+When the Fully Local profile is implemented, the shared per-user Local Supervisor
+is the only local process-lifecycle owner.
 Desktop, CLI, and other applications bootstrap or discover it and then connect to
 the Host; they do not supervise their own Host sidecars. ADR-0060 removes the
 remaining historical ambiguity in ADR-0030.
@@ -140,11 +145,15 @@ business write model; any local cache is disposable. Moving context state betwee
 profiles is a versioned logical transfer, never generic SQLite/PostgreSQL table
 synchronization.
 
-Normal local use is zero-touch. The Local Supervisor manages the bundled
+Future normal local use is zero-touch. The Local Supervisor manages the bundled
 `nats-server` process and physical store lifecycle; the Host's JetStream adapters
 own broker interaction. It may supervise AR host availability, but AR remains the
 only owner of provider sessions and processes. See
 [Local Host Lifecycle](local-host-lifecycle.md).
+
+ADR-0086 defers Fully Local implementation from V1 without removing these
+boundaries. The qualified V1 profiles and independent client and execution axes
+are defined in [Deployment Profiles](deployment-profiles.md).
 
 Client configuration distinguishes:
 

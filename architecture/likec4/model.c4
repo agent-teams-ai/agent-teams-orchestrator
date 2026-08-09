@@ -55,6 +55,13 @@ model {
     }
   }
 
+  executionObservation = boundedContext 'Execution Observation' {
+    metadata {
+      package_id 'context.execution-observation'
+      document_id 'domain.contexts.execution-observation'
+    }
+  }
+
   agentCommunication = boundedContext 'Agent Communication' {
     metadata {
       package_id 'context.agent-communication'
@@ -198,6 +205,13 @@ model {
       status 'accepted'
     }
   }
+  orchestrationScope -[publishedFacts]-> executionObservation 'Project identity and disposition facts' {
+    metadata {
+      integration_style 'Published tenant, project, admission, freeze, and deletion-epoch facts'
+      authority 'Scope owns orchestration identity and disposition; Observation owns its evidence and projections'
+      status 'accepted'
+    }
+  }
   orchestrationScope -[publishedFacts]-> usageMetering 'Scope identity' {
     metadata {
       integration_style 'Published tenant and project references'
@@ -280,6 +294,13 @@ model {
       integration_style 'Versioned execution facts'
       authority 'Run owns placement; Work owns execution lifecycle consequences'
       status 'proposed'
+    }
+  }
+  runOrchestration -[publishedFacts]-> executionObservation 'Run attribution and cutoff facts' {
+    metadata {
+      integration_style 'Versioned Run, participant, binding, and cutoff facts'
+      authority 'Run owns execution intent and lifecycle; Observation owns user-facing evidence interpretation'
+      status 'accepted'
     }
   }
   policyRisk -[decisionContract]-> runOrchestration 'Policy decisions' {
@@ -440,6 +461,13 @@ model {
     metadata {
       integration_style 'Consumer-owned observation projection'
       authority 'AR owns runtime facts; Run owns its observation projection'
+      status 'accepted'
+    }
+  }
+  runtimeAcl -[observation]-> executionObservation 'Runtime control and output evidence' {
+    metadata {
+      integration_style 'Consumer-owned evidence admission through stateless ACL translation'
+      authority 'AR owns runtime facts; Observation owns admitted product evidence and activity; ACL translates only'
       status 'accepted'
     }
   }

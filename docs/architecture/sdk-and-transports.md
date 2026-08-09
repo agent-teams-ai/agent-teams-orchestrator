@@ -15,6 +15,7 @@ related:
   - ADR-0058
   - ADR-0060
   - ADR-0071
+  - ADR-0085
   - ADR-0064
   - ADR-0067
   - architecture.local-host-lifecycle
@@ -106,7 +107,7 @@ The TypeScript publication boundary is:
   Node require -> explicit CommonJS output
   Browser      -> isolated ESM conditional export
 
-@agent-teams/orchestrator-local
+@agent-teams/orchestrator-local-host
   Node only    -> Supervisor discovery, local auth, and lifecycle control
 ```
 

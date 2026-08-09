@@ -7,6 +7,8 @@ summary: Current ownership, topology, discovery, lifecycle, and deployment rules
 related:
   - ADR-0030
   - ADR-0060
+  - ADR-0086
+  - ADR-0087
   - ADR-0064
   - ADR-0035
   - ADR-0058
@@ -17,6 +19,11 @@ related:
 ---
 
 # Local Host Lifecycle
+
+ADR-0086 preserves this document as the target architecture for the future Fully
+Local profile but defers its implementation and production qualification from
+V1. Statements below describe that future profile and must not be read as a V1
+availability claim.
 
 ## Purpose
 

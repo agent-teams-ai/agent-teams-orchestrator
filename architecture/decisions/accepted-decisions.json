@@ -406,6 +406,31 @@
       "id": "ADR-0081",
       "path": "docs/decisions/0081-foundation-owned-package-scaffolding-protocol.md",
       "immutableDigest": "sha256:3afccfd98883f9353114414927ff399c9a841ac3082ec9ec8fd1de0f816b9355"
+    },
+    {
+      "id": "ADR-0083",
+      "path": "docs/decisions/0083-execution-observation-evidence-and-activity-model.md",
+      "immutableDigest": "sha256:83d1a798b4226bf0e47cf753b4e7373c1f95c1783865b7898a569dc4eb15f538"
+    },
+    {
+      "id": "ADR-0084",
+      "path": "docs/decisions/0084-protected-observation-payload-and-rebuildable-search.md",
+      "immutableDigest": "sha256:10512ded2533acd0285d6eb6a58866d623cb388edf0dfc2f32b9f199ae842a4b"
+    },
+    {
+      "id": "ADR-0085",
+      "path": "docs/decisions/0085-local-host-package-name.md",
+      "immutableDigest": "sha256:38d551e83071b536d731412dbe8b182bae7e346be1f39f08d17387e41c46da7a"
+    },
+    {
+      "id": "ADR-0086",
+      "path": "docs/decisions/0086-server-first-v1-deployment-scope.md",
+      "immutableDigest": "sha256:ce3f6f00e274ab6a69b0d9fc7132342f28df822133d217ae6b72010d26ef1f5b"
+    },
+    {
+      "id": "ADR-0087",
+      "path": "docs/decisions/0087-explicit-client-target-profiles.md",
+      "immutableDigest": "sha256:cf0dd76853b0d07d507e3c2908c34663896b269e125fda2a53b8c2618a6b443f"
     }
   ]
 }

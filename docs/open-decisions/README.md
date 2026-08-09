@@ -52,6 +52,9 @@ question. `Resolved` is historical and must relate to at least one deciding ADR.
 | OD-032 | [Last-mile side-effect safety](OD-032-last-mile-side-effect-safety.md) | architecture/security | Open |
 | OD-033 | [OODA convergence and context activation](OD-033-ooda-convergence-and-context-activation.md) | architecture/domain | Open |
 | OD-034 | [External Integration Management](OD-034-external-integration-management.md) | architecture/domain | Deferred |
+| OD-035 | [Local durable workflow engine](OD-035-local-durable-workflow-engine.md) | run-orchestration | Open |
+| OD-036 | [First usable deployment profile](OD-036-first-usable-deployment-profile.md) | architecture/composition | Resolved by ADR-0086 |
+| OD-037 | [Commercial capability entitlements](OD-037-commercial-capability-entitlements.md) | architecture/contracts | Open |
 
 Use the [open-decision template](../templates/open-decision.md) for new entries.
 CI verifies that every record is listed and that table owner and status match its
