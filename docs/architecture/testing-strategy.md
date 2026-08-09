@@ -27,6 +27,11 @@ related:
   - ADR-0065
   - architecture.local-host-lifecycle
   - architecture.security
+code_anchors:
+  - pattern: architecture/executable-specs/**
+    enforcement: advisory
+  - pattern: scripts/orchestration-specs/**
+    enforcement: advisory
 ---
 
 # Testing Strategy
@@ -48,6 +53,33 @@ command-trace tests, invalid-state construction tests, and explicit assertions
 that domain events remain distinct from public integration-event fixtures.
 
 They use no mocks for infrastructure because infrastructure is absent.
+
+### Pre-production executable state specifications
+
+Accepted Orchestrator-owned semantics may be captured before production package
+admission as strict [canonical JSON specifications](../../architecture/executable-specs/orchestrator-state-machine.schema.json)
+with deterministic traces and fault cases. The current specifications cover only
+ADR-0079 `RunAuthorityState` plus `RunAuthorityGeneration`, and ADR-0080
+`OrchestrationProject` identity lifecycle.
+
+The JSON files are authoritative for this harness. Strict schema validation,
+property tests, and a semantic mutation pack protect their invariants. XState and
+its graph package derive pure test and Mermaid views without actors, services,
+timers, actions, persisted snapshots, or Agent Runtime state. Generated Mermaid
+files change only through the explicit generation command; the blocking check
+compares expected content without writing files.
+
+This is partial evidence only. It does not accept the proposed tactical dossiers,
+activate a production package, define Agent Runtime contracts, or pass an
+implementation-readiness gate.
+
+Foundation 0.9.0 treats every governed source root as published runtime source,
+so it correctly rejects dev-only XState, graph, schema, and property-test imports
+from such a root. These dependencies are declared development-only through the
+active dependency-declaration capability; the tooling remains outside the
+production source policy until a future Foundation release supports an explicit
+development-tooling source classification. That later adoption must be a separate
+parity-proven change and must not add an unknown capability ID now.
 
 ### Application tests
 

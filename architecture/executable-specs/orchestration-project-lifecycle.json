@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "id": "orchestrator.orchestration-project-lifecycle",
+  "kind": "orchestrator-owned-executable-spec",
+  "title": "OrchestrationProject terminal identity lifecycle",
+  "authority": {
+    "owner": "orchestration-scope",
+    "adrRefs": ["ADR-0080", "ADR-0079"],
+    "acceptanceScope": "OrchestrationProject OPEN to RETIRED identity transition only"
+  },
+  "scopeBoundary": {
+    "models": [
+      "single terminal OPEN to RETIRED identity transition",
+      "retirement cancellation before terminal commit without adding an identity state",
+      "stale deletion epoch rejection",
+      "non-reopen after retirement",
+      "opaque late runtime evidence as non-authoritative input"
+    ],
+    "excludes": [
+      "Agent Runtime state, technical disposition, and receipt semantics",
+      "ProjectAdmissionAuthority restriction details",
+      "participant disposition progress, policy, retention, and physical erasure",
+      "aggregate shape, public identity representation, and production readiness"
+    ],
+    "readinessClaim": "PARTIAL_EVIDENCE_ONLY"
+  },
+  "axes": [
+    {
+      "id": "project-identity-lifecycle",
+      "owner": "orchestration-scope",
+      "modeled": true,
+      "values": ["OPEN", "RETIRED"]
+    },
+    {
+      "id": "project-admission-authority",
+      "owner": "orchestration-scope",
+      "modeled": false,
+      "values": ["INDEPENDENT_AXIS"]
+    },
+    {
+      "id": "disposition-progress",
+      "owner": "orchestration-scope-process",
+      "modeled": false,
+      "values": ["INDEPENDENT_AXIS"]
+    },
+    {
+      "id": "runtime-evidence",
+      "owner": "agent-runtime",
+      "modeled": false,
+      "values": ["OPAQUE_EXTERNAL_INPUT"]
+    }
+  ],
+  "initialState": "open-epoch-1",
+  "states": [
+    {
+      "id": "open-epoch-1",
+      "label": "OPEN deletion epoch 1",
+      "terminal": false,
+      "coordinates": {
+        "project-identity-lifecycle": "OPEN",
+        "deletion-epoch": 1
+      }
+    },
+    {
+      "id": "retired-epoch-2",
+      "label": "RETIRED deletion epoch 2",
+      "terminal": true,
+      "coordinates": {
+        "project-identity-lifecycle": "RETIRED",
+        "deletion-epoch": 2
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "COMMIT_RETIREMENT",
+      "label": "Winning irreversible retirement commit",
+      "category": "authority-mutation",
+      "sourceOwner": "orchestration-scope"
+    },
+    {
+      "id": "CANCEL_RETIREMENT",
+      "label": "Cancellation wins before retirement commit",
+      "category": "business-cancellation",
+      "sourceOwner": "orchestration-scope"
+    },
+    {
+      "id": "REOPEN_PROJECT",
+      "label": "Attempt to reopen retired Project identity",
+      "category": "forbidden",
+      "sourceOwner": "orchestration-scope"
+    },
+    {
+      "id": "STALE_DELETION_EPOCH_COMMAND",
+      "label": "Command carrying a stale deletion epoch",
+      "category": "stale-command",
+      "sourceOwner": "orchestration-scope"
+    },
+    {
+      "id": "LATE_OPAQUE_AR_EVIDENCE",
+      "label": "Late opaque Agent Runtime evidence",
+      "category": "opaque-evidence",
+      "sourceOwner": "agent-runtime"
+    },
+    {
+      "id": "FRESH_EXTERNAL_AUTHORIZATION",
+      "label": "Fresh external authorization for a retired identity",
+      "category": "forbidden",
+      "sourceOwner": "external-authority"
+    }
+  ],
+  "transitions": [
+    {
+      "source": "open-epoch-1",
+      "event": "COMMIT_RETIREMENT",
+      "disposition": "accepted",
+      "target": "retired-epoch-2",
+      "authorityMutation": true,
+      "reason": "The winning Project CAS makes identity terminal and advances the deletion epoch.",
+      "adrRef": "ADR-0080"
+    },
+    {
+      "source": "open-epoch-1",
+      "event": "CANCEL_RETIREMENT",
+      "disposition": "ignored",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Cancellation before commit leaves identity OPEN; commitment state is a separate process axis.",
+      "adrRef": "ADR-0080"
+    },
+    {
+      "source": "retired-epoch-2",
+      "event": "CANCEL_RETIREMENT",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Cancellation cannot reverse an already committed retirement.",
+      "adrRef": "ADR-0080"
+    },
+    {
+      "source": "retired-epoch-2",
+      "event": "REOPEN_PROJECT",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "A retired Project identity never reopens.",
+      "adrRef": "ADR-0080"
+    },
+    {
+      "source": "open-epoch-1",
+      "event": "STALE_DELETION_EPOCH_COMMAND",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Stale deletion epoch evidence fails closed.",
+      "adrRef": "ADR-0080"
+    },
+    {
+      "source": "retired-epoch-2",
+      "event": "STALE_DELETION_EPOCH_COMMAND",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "A stale command cannot resurrect or mutate retired identity.",
+      "adrRef": "ADR-0080"
+    },
+    {
+      "source": "open-epoch-1",
+      "event": "LATE_OPAQUE_AR_EVIDENCE",
+      "disposition": "ignored",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Agent Runtime evidence does not own Project identity authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "retired-epoch-2",
+      "event": "LATE_OPAQUE_AR_EVIDENCE",
+      "disposition": "ignored",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Late runtime evidence cannot reopen retired Project identity.",
+      "adrRef": "ADR-0080"
+    },
+    {
+      "source": "retired-epoch-2",
+      "event": "FRESH_EXTERNAL_AUTHORIZATION",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Fresh external authorization requires a new Project identity and bindings.",
+      "adrRef": "ADR-0080"
+    }
+  ],
+  "invariants": [
+    {
+      "id": "project-single-terminal-transition",
+      "statement": "OrchestrationProject identity has only OPEN to RETIRED as an accepted lifecycle transition.",
+      "adrRefs": ["ADR-0080"],
+      "enforcedBy": ["semantics", "property", "mutation", "trace"]
+    },
+    {
+      "id": "project-deletion-epoch-monotonic",
+      "statement": "Retirement advances the Orchestrator-owned deletion epoch monotonically.",
+      "adrRefs": ["ADR-0080"],
+      "enforcedBy": ["semantics", "property", "mutation"]
+    },
+    {
+      "id": "project-retired-never-reopens",
+      "statement": "Backup, replay, delayed delivery, fresh authorization, or opaque runtime evidence cannot reopen retired identity.",
+      "adrRefs": ["ADR-0080"],
+      "enforcedBy": ["semantics", "property", "mutation", "trace"]
+    },
+    {
+      "id": "project-process-state-not-identity-state",
+      "statement": "Retirement cancellation and disposition progress do not add OrchestrationProject identity states.",
+      "adrRefs": ["ADR-0080"],
+      "enforcedBy": ["schema", "semantics", "trace"]
+    },
+    {
+      "id": "project-runtime-evidence-non-authoritative",
+      "statement": "Opaque Agent Runtime evidence cannot mutate OrchestrationProject identity authority.",
+      "adrRefs": ["ADR-0079", "ADR-0080"],
+      "enforcedBy": ["semantics", "property", "mutation", "trace"]
+    }
+  ],
+  "traces": [
+    {
+      "id": "cancel-then-retire",
+      "description": "A cancelled reversible attempt leaves identity OPEN; a later winning commit retires it.",
+      "steps": [
+        { "event": "CANCEL_RETIREMENT", "expectedState": "open-epoch-1" },
+        { "event": "COMMIT_RETIREMENT", "expectedState": "retired-epoch-2" }
+      ]
+    },
+    {
+      "id": "retired-anti-resurrection",
+      "description": "Opaque runtime evidence and fresh external authorization cannot reopen retirement.",
+      "steps": [
+        { "event": "COMMIT_RETIREMENT", "expectedState": "retired-epoch-2" },
+        { "event": "LATE_OPAQUE_AR_EVIDENCE", "expectedState": "retired-epoch-2" },
+        { "event": "FRESH_EXTERNAL_AUTHORIZATION", "expectedState": "retired-epoch-2" },
+        { "event": "REOPEN_PROJECT", "expectedState": "retired-epoch-2" }
+      ]
+    },
+    {
+      "id": "stale-epoch-fails-closed",
+      "description": "A stale deletion epoch cannot mutate Project identity before or after retirement.",
+      "steps": [
+        { "event": "STALE_DELETION_EPOCH_COMMAND", "expectedState": "open-epoch-1" },
+        { "event": "COMMIT_RETIREMENT", "expectedState": "retired-epoch-2" },
+        { "event": "STALE_DELETION_EPOCH_COMMAND", "expectedState": "retired-epoch-2" }
+      ]
+    }
+  ],
+  "faultCases": [
+    {
+      "id": "reopen-retired-project",
+      "source": "retired-epoch-2",
+      "event": "REOPEN_PROJECT",
+      "expectedState": "retired-epoch-2",
+      "expectedDisposition": "rejected",
+      "reason": "Retired identity is terminal and non-reusable."
+    },
+    {
+      "id": "fresh-authorization-resurrection",
+      "source": "retired-epoch-2",
+      "event": "FRESH_EXTERNAL_AUTHORIZATION",
+      "expectedState": "retired-epoch-2",
+      "expectedDisposition": "rejected",
+      "reason": "Re-onboarding creates a new Project identity and bindings."
+    },
+    {
+      "id": "late-runtime-evidence-after-retirement",
+      "source": "retired-epoch-2",
+      "event": "LATE_OPAQUE_AR_EVIDENCE",
+      "expectedState": "retired-epoch-2",
+      "expectedDisposition": "ignored",
+      "reason": "Runtime evidence cannot grant Project identity authority."
+    },
+    {
+      "id": "stale-epoch-after-retirement",
+      "source": "retired-epoch-2",
+      "event": "STALE_DELETION_EPOCH_COMMAND",
+      "expectedState": "retired-epoch-2",
+      "expectedDisposition": "rejected",
+      "reason": "A stale epoch cannot mutate terminal identity."
+    }
+  ]
+}
