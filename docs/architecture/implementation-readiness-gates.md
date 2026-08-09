@@ -9,6 +9,16 @@ related:
   - ADR-0073
   - ADR-0074
   - ADR-0080
+  - ADR-0083
+  - ADR-0084
+  - ADR-0086
+  - ADR-0087
+  - ADR-0088
+  - ADR-0089
+  - ADR-0090
+  - ADR-0091
+  - ADR-0092
+  - ADR-0093
   - ADR-0062
   - ADR-0063
   - ADR-0064
@@ -26,12 +36,19 @@ related:
   - OD-005
   - OD-006
   - OD-010
+  - OD-012
   - OD-013
   - OD-016
   - OD-017
   - OD-018
   - OD-026
   - OD-033
+  - OD-035
+  - OD-036
+  - OD-037
+  - OD-038
+  - OD-039
+  - OD-040
 ---
 
 # Implementation Readiness Gates
@@ -39,8 +56,15 @@ related:
 ## Purpose
 
 The first production orchestration package or vertical slice must not be
-implemented until all four gates below pass. Documentation, research, diagrams,
+implemented until all five gates below pass. Documentation, research, diagrams,
 contract fixtures, deterministic models, and disposable spikes remain allowed.
+
+These gates admit the first V1 orchestration slice and profile advertising. A
+future Fully Local implementation increment follows its separate OD-040
+materialization decision after the relevant lifecycle and workflow boundaries
+are accepted. Package materialization may then start before Fully Local release
+qualification, because the implementation is required to produce that evidence;
+it still grants no availability or shipping claim.
 
 Passing a gate does not require resolving every future feature. It requires
 enough accepted ownership, invariants, contracts, transition behavior, and
@@ -55,6 +79,7 @@ expensive architecture decision.
 | Communication, Attention, and Agent Context boundary | In review | Agent Communication, Human Notification Management, Agent Attention, Agent Context, and Run Orchestration |
 | Public SDK and Desktop compatibility boundary | In review | Feature owners, Control API, SDK, Desktop integration |
 | Temporal-ready durable process boundaries | In review | Run Orchestration application and workflow scheduling adapters |
+| Deployment authority, target fencing, and runtime connectivity | In review | Access Control, composition, clients, runtime gateway |
 
 `In review` is blocking. A gate becomes `passed` only when its exit evidence is
 linked from this document and the owning accepted artifacts. An unresolved
@@ -135,6 +160,16 @@ Required evidence:
 - compatibility disposition and mapping for affected legacy IPC methods,
   `TeamCreateRequest`, `TeamProvisioningProgress`,
   `TeamAgentRuntimeSnapshot`, messages, tasks, and logs;
+- accepted Execution Observation ownership plus v1 evidence, Activity View,
+  protected diagnostic payload, feed, cursor, search, deletion, and recovery
+  fixtures for every runtime-output surface used by the slice;
+- versioned search-snapshot, query-time authorization, freeze-versus-admission,
+  reference-projection replay, resource-limit, and committed-only realtime
+  fixtures required by ADR-0088;
+- disclosure-interval, protected-payload disposition, index commit-position,
+  monotonic Run-attribution, gap reconciliation, cross-partition correction, and
+  disclosure-safe feed/realtime replay fixtures required by ADR-0091 and
+  ADR-0093;
 - one behavioral fixture suite runnable through direct SDK, Connect, and every
   affected compatibility adapter;
 - activation, single-writer, unknown-outcome, rollback-before-admission, and
@@ -164,7 +199,48 @@ Required evidence:
   queries, versioning, deployment routing, continue-as-new, and divergence
   reconciliation.
 
-The gate does not require deploying Temporal in the first production slice.
+The gate does not require deploying Temporal in every profile or implementing a
+Fully Local workflow engine in the first production slice. ADR-0086 defers Fully
+Local implementation from V1, while OD-035 keeps the local engine decision
+explicit for the future profile.
+
+## Gate 5: Deployment authority, target fencing, and runtime connectivity
+
+Required evidence:
+
+- machine-readable Managed SaaS, Standalone Self-Hosted, Connected Self-Hosted,
+  and Fully Local profile states agree with ADR-0086 and ADR-0089;
+- the OD-039 qualification framework has a blocking trusted-attestation verifier
+  before any profile or capability becomes `qualified`;
+- profile qualification is closed over the exact mandatory capability registry
+  and evidence bound to subject, adapters, source revision, suites, environment,
+  result, and trusted issuer; emptying blockers or adding a file never qualifies
+  a subject;
+- composition activates exactly the product-authority adapter and independent
+  commercial-authority mode declared by the selected profile;
+- OD-012 is resolved far enough to prove the selected profile's authentication,
+  tenant isolation, service identity, revocation, browser, and feed authority;
+- every client resource, request, subscription, cursor, cache, optimistic update,
+  and Operation handle is fenced by Target identity and client generation;
+- profile switching closes the old generation and proves that late results
+  cannot update the new view or retry against a different Host;
+- the separately gated `local-device-execution` capability passes OD-038 enrollment, outbound
+  channel, revocation, reconnect, stale-custody, and Desktop-exit conformance;
+- the Host issues scoped short-lived realtime subscription authority before the
+  client connects to the edge;
+- Standalone Self-Hosted passes an offline fixture with no managed endpoint or
+  private registry dependency;
+- commercial capability checks, when present, use Host-custodied evidence and
+  cannot block cancellation, containment, recovery, deletion, or baseline access
+  and export of customer-owned data;
+- deferred Fully Local packages retain the exact OD-021, OD-035, and OD-040 gate
+  set and are rejected by scaffolding and topology checks until OD-040 names the
+  accepted materialization decision.
+
+This gate does not require implementing Fully Local or a commercial capability,
+and optional commercial capability does not block a baseline profile.
+It does require that a server profile advertise only capabilities whose
+authority and connectivity are qualified.
 
 ## Review rule
 

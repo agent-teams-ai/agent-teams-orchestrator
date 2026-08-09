@@ -7,6 +7,10 @@ summary: Current ownership, topology, discovery, lifecycle, and deployment rules
 related:
   - ADR-0030
   - ADR-0060
+  - ADR-0086
+  - ADR-0087
+  - ADR-0089
+  - ADR-0092
   - ADR-0064
   - ADR-0035
   - ADR-0058
@@ -14,9 +18,18 @@ related:
   - OD-003
   - OD-009
   - OD-021
+  - OD-035
+  - OD-040
 ---
 
 # Local Host Lifecycle
+
+ADR-0086 preserves this document as the target architecture for the future Fully
+Local profile but defers its implementation and production qualification from
+V1. ADR-0089 and ADR-0092 mark its package entries as non-materializable until
+OD-040 is resolved by an accepted implementation-start decision. Package
+creation still does not qualify the profile. Statements below describe that
+future profile and must not be read as a V1 availability claim.
 
 ## Purpose
 

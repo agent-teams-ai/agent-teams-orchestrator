@@ -136,6 +136,22 @@ try {
     "reserved proposed context",
     run(temporaryRoot),
   );
+  const fixtureCatalogPath = path.join(
+    temporaryRoot,
+    "architecture/package-catalog.yaml",
+  );
+  const allowedCatalog = await readFile(fixtureCatalogPath, "utf8");
+  const deferredCatalog = allowedCatalog.replace(
+    "    owner_document: domain.contexts.work-coordination\n",
+    "    owner_document: domain.contexts.work-coordination\n    materialization: deferred\n",
+  );
+  await writeFile(fixtureCatalogPath, deferredCatalog);
+  requireFailure(
+    "scaffold deferred context",
+    runScaffolder(temporaryRoot, "context.work-coordination"),
+    "package materialization is deferred",
+  );
+  await writeFile(fixtureCatalogPath, allowedCatalog);
   requireFailure(
     "scaffold proposed context",
     runScaffolder(temporaryRoot, "context.work-coordination"),
@@ -157,6 +173,13 @@ try {
     "materialized accepted context",
     run(temporaryRoot),
   );
+  await writeFile(fixtureCatalogPath, deferredCatalog);
+  requireFailure(
+    "materialized deferred context",
+    run(temporaryRoot),
+    "package materialization is deferred by the package catalog",
+  );
+  await writeFile(fixtureCatalogPath, allowedCatalog);
 
   await rm(
     path.join(temporaryRoot, "packages/contexts/work-coordination"),

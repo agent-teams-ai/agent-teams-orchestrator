@@ -262,6 +262,9 @@ async function assertCanonicalOrchestratorPlan(repositoryRoot, plan) {
   const target = catalog.packages?.find(
     (candidate) => candidate.id === plan.target?.id,
   );
+  if (target?.materialization === "deferred") {
+    throw new Error(`${target.id}: package materialization is deferred`);
+  }
   if (
     !composition ||
     !target ||
@@ -285,6 +288,9 @@ async function planCommand(options) {
   );
   if (!entry) {
     throw new Error(`${options.id}: package ID is not registered in the catalog`);
+  }
+  if (entry.materialization === "deferred") {
+    throw new Error(`${options.id}: package materialization is deferred`);
   }
   if (await pathEntryExists(path.join(repositoryRoot, entry.path))) {
     throw new Error(`${entry.path}: target already exists`);

@@ -13,6 +13,7 @@ related:
   - ADR-0037
   - ADR-0038
   - ADR-0075
+  - ADR-0092
 code_anchors:
   - pattern: scripts/architecture/validate-package-topology.mjs
     enforcement: required
@@ -235,6 +236,14 @@ Feature ownership is enforced mechanically rather than remembered during review.
 `architecture/package-catalog.yaml` is the default-deny registry of allowed
 production package identities, roles, paths, names, and owner documents. A
 proposed owner reserves a name and path but cannot materialize production files.
+An entry marked `materialization: deferred` remains non-materializable even when
+its owner document is accepted. Both the topology validator and scaffolder reject
+it. Reserved Fully Local entries must also retain their machine-readable
+`materialization_blocked_by` decisions; CI permits `allowed` only after every
+listed gate is resolved and `materialization_decision` names the accepted ADR
+that resolves OD-040. This starts implementation but does not claim that the
+Fully Local deployment profile is qualified. Deleting the marker or substituting
+an unrelated accepted ADR is not a valid bypass.
 `architecture/source-dependency-policy.yaml` separately allows each production
 source dependency by exact consumer, provider, and exported subpath. A manifest
 dependency, package-role-compatible direction, or LikeC4 relationship alone does

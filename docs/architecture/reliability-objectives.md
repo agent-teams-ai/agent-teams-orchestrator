@@ -3,12 +3,15 @@ id: architecture.reliability
 type: architecture
 status: accepted
 owner: architecture/reliability
-summary: Measurement-first SLI, SLO, invariant, error-budget, and resource-budget rules for local and hosted profiles.
+summary: Measurement-first SLI, SLO, invariant, error-budget, and resource-budget rules for explicit deployment profiles.
 related:
   - ADR-0043
   - ADR-0057
   - ADR-0079
   - ADR-0080
+  - ADR-0089
+  - ADR-0090
+  - ADR-0092
   - OD-014
   - OD-030
   - architecture.eventing
@@ -65,7 +68,8 @@ candidate -> calibrating -> aspirational | active -> retired
 Activation requires:
 
 1. an implemented measurement close enough to the user journey;
-2. coverage and failure-mode evidence from local and hosted profiles;
+2. coverage and failure-mode evidence from every profile that advertises the
+   measured capability;
 3. an owner empowered to trade feature velocity against reliability;
 4. a target below 100 percent and an explicit window;
 5. product-owner approval and a review date;
@@ -76,17 +80,28 @@ An aspirational objective is measured but does not trigger the active
 error-budget policy. Candidate and calibrating indicators cannot publish an
 objective.
 
-## Local and hosted profiles
+## Deployment profiles
 
-Local and hosted deployments share indicator meaning but not assumed targets or
-failure domains.
+Managed SaaS, Standalone Self-Hosted, future Connected Self-Hosted, and future
+Fully Local share indicator meaning but not assumed targets or failure domains.
+The reliability catalog records their release scope, qualification state,
+mandatory capabilities, and blocking decisions in addition to metric
+applicability. Qualification is disabled globally until OD-039 supplies a trusted
+attestation schema and executable verifier. After that gate is implemented, a
+qualified subject requires evidence bound to its exact identity, adapter set,
+source revision, required suites, environment, result, and trusted issuer. An
+accepted ADR or existing file alone cannot qualify anything.
 
-- Local measurements include Supervisor and Host availability, embedded
+- Fully Local measurements include Supervisor and Host availability, embedded
   persistence, machine sleep, disk pressure, and event-loop delay.
-- Hosted measurements include network control traffic, PostgreSQL, broker and
-  worker queues, deployment failover, and external infrastructure.
-- A Desktop connected to a hosted orchestrator uses the hosted service profile
-  for service reliability and separate client-experience telemetry where needed.
+- Managed and Standalone server measurements include network control traffic,
+  PostgreSQL, broker and worker queues, deployment failover, and external
+  infrastructure.
+- Connected Self-Hosted additionally measures managed-authority reachability and
+  declared degraded behavior without treating it as baseline service authority.
+- A Desktop connected to a server Orchestrator uses that selected deployment
+  profile for service reliability and separate client-experience telemetry where
+  needed.
 
 Aggregating both profiles into one objective is prohibited unless an approved SLO
 explicitly defines the weighting and user population.
