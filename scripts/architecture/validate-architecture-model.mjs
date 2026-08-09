@@ -166,6 +166,8 @@ function validateRelationships(project, errors) {
     return;
   }
 
+  const relationBySemanticEdge = new Map();
+
   for (const relation of relations) {
     if (typeof relation.title !== "string" || !relation.title.trim()) {
       errors.push(`LikeC4 relationship ${relation.id} is missing a title`);
@@ -187,6 +189,24 @@ function validateRelationships(project, errors) {
       errors.push(
         `LikeC4 relationship ${relation.id} has unsupported status ${relation.metadata.status}`,
       );
+    }
+
+    const source = relation.source?.model;
+    const target = relation.target?.model;
+    if (
+      typeof source === "string" &&
+      typeof relation.kind === "string" &&
+      typeof target === "string"
+    ) {
+      const semanticEdge = JSON.stringify([source, relation.kind, target]);
+      const existing = relationBySemanticEdge.get(semanticEdge);
+      if (existing) {
+        errors.push(
+          `LikeC4 relationships ${existing.id} and ${relation.id} duplicate semantic edge ${source} -[${relation.kind}]-> ${target}`,
+        );
+      } else {
+        relationBySemanticEdge.set(semanticEdge, relation);
+      }
     }
   }
 }

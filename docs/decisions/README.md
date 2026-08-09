@@ -33,6 +33,8 @@ discovery. The lifecycle lists below remain the complete status ledger.
 
 ## Proposed decisions
 
+- [ADR-0082: Break-glass reduces Orchestrator authority](0082-break-glass-reduces-orchestrator-authority.md)
+
 ## Accepted decisions
 
 - [ADR-0001: Headless event-driven modular monolith](0001-headless-event-driven-modular-monolith.md)

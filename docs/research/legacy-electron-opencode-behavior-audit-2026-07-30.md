@@ -141,8 +141,12 @@ worktree; old bridge and bootstrap paths are in the legacy orchestrator.
 4. Migration conformance must include partial lane failure, permission wait,
    stale replacement, late reconcile, context-without-turn, ambiguous delivery,
    uncertain stop, and restart recovery.
-5. Provider hosts may be shared by multiple sessions. Product cancellation of
-   one Run must never imply killing a shared provider host.
+5. The inspected legacy implementation allowed a provider host to serve
+   multiple sessions. This is evidence about the donor, not target authority:
+   AR v1 does not reuse one `ProviderHostInstance` across `RuntimeSession`
+   identities. Product cancellation of one Run still must not infer permission
+   to kill a backing provider service, machine, or process shared outside that
+   private instance identity.
 6. AR provider conformance must define exact host-adoption identity,
    cross-process startup single-flight, canonical provider-message ordering, and
    precedence when live status conflicts with durable transcript evidence.
