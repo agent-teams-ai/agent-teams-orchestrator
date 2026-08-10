@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import nodePath from "node:path";
 import test from "node:test";
 
 import { getSimplePaths } from "@xstate/graph";
@@ -9,6 +11,7 @@ import {
   constantFrom,
   property,
 } from "fast-check";
+import { parse } from "yaml";
 
 import {
   assertGeneratedArtifactInventory,
@@ -21,6 +24,7 @@ import {
 } from "./derive-machine.mjs";
 import { loadSchema, loadSpecs } from "./load-specs.mjs";
 import { semanticMutations } from "./mutations.mjs";
+import { repositoryRoot } from "./paths.mjs";
 import {
   assertOwnedSemantics,
   assertSchemaValid,
@@ -256,4 +260,26 @@ test("unexpected stale Mermaid artifacts fail the generated inventory", () => {
       expectedPaths,
     ),
   );
+});
+
+test("changed JSON routing reaches both executable-spec gates", () => {
+  const workflow = parse(
+    fs.readFileSync(
+      nodePath.join(
+        repositoryRoot,
+        "architecture/foundation/repository-agent-workflow.yaml",
+      ),
+      "utf8",
+    ),
+  );
+  const manifest = JSON.parse(
+    fs.readFileSync(nodePath.join(repositoryRoot, "package.json"), "utf8"),
+  );
+  const jsonRoute = workflow.changedChecks.find((check) =>
+    check.extensions.includes(".json"),
+  );
+
+  assert.equal(jsonRoute.script, "architecture:check");
+  assert.match(manifest.scripts[jsonRoute.script], /pnpm run specs:check/);
+  assert.match(manifest.scripts[jsonRoute.script], /pnpm run specs:test/);
 });
