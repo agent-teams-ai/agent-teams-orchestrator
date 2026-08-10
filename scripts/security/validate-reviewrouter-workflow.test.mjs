@@ -36,6 +36,19 @@ for (const [name, mutate, expectedRule] of [
     "RR-WORKFLOW-008",
   ],
   [
+    "rejects static runtime configuration",
+    (source) => source.replace(
+      'runtime_config_mode: "oidc"',
+      'runtime_config_mode: "static"',
+    ),
+    "RR-WORKFLOW-008",
+  ],
+  [
+    "rejects write access for the fallback GitHub token",
+    (source) => source.replace("      issues: read", "      issues: write"),
+    "RR-WORKFLOW-007",
+  ],
+  [
     "rejects missing repository ledger mapping",
     (source) => source.replace(
       "      REVIEW_ROUTER_LEDGER_KEY: ${{ secrets.REVIEW_ROUTER_LEDGER_KEY }}\n",

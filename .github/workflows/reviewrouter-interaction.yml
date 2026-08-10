@@ -16,13 +16,14 @@ jobs:
     permissions:
       actions: write
       contents: read
-      issues: write
-      pull-requests: write
+      issues: read
+      pull-requests: read
       id-token: write
     uses: 777genius/review-router/.github/workflows/reviewrouter-interaction-reusable.yml@5da51b7b71b1db9ce531f946ec2bb90411a31300
     with:
       runtime_ref: "5da51b7b71b1db9ce531f946ec2bb90411a31300"
       api_url: "https://api.reviewrouter.site"
+      runtime_config_mode: "oidc"
       review_workflow_file: "reviewrouter-codex.yml"
       discussion_mode: ${{ vars.REVIEW_ROUTER_DISCUSSION_MODE || 'off' }}
       discussion_model: ${{ vars.REVIEW_CODEX_MODEL || 'gpt-5.5' }}

@@ -18,14 +18,15 @@ const expectedFilter =
 const expectedPermissions = {
   actions: "write",
   contents: "read",
-  issues: "write",
-  "pull-requests": "write",
+  issues: "read",
+  "pull-requests": "read",
   "id-token": "write",
 };
 
 const expectedInputs = {
   runtime_ref: reviewRouterRuntimeSha,
   api_url: "https://api.reviewrouter.site",
+  runtime_config_mode: "oidc",
   review_workflow_file: "reviewrouter-codex.yml",
   discussion_mode: "${{ vars.REVIEW_ROUTER_DISCUSSION_MODE || 'off' }}",
   discussion_model: "${{ vars.REVIEW_CODEX_MODEL || 'gpt-5.5' }}",
