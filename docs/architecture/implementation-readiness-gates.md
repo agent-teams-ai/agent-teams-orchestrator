@@ -95,7 +95,7 @@ Required evidence:
 The gate does not require Temporal or a real AR provider.
 
 The repository now has partial executable evidence for the exact
-[ADR-0079 Run authority submodel](../../architecture/executable-specs/run-authority-state.json)
+[ADR-0079 Run authority state-machine slice](../../architecture/executable-specs/run-authority-state.json)
 and [ADR-0080 Project identity lifecycle](../../architecture/executable-specs/orchestration-project-lifecycle.json).
 These fixtures prove suspension-before-successor, monotonic generation, explicit
 cancellation, stale-generation rejection, terminal retirement, and opaque late

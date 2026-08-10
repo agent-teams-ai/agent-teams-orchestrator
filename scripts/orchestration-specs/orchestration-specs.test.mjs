@@ -5,10 +5,15 @@ import { getSimplePaths } from "@xstate/graph";
 import {
   array,
   assert as assertProperty,
+  constant,
   constantFrom,
   property,
 } from "fast-check";
 
+import {
+  assertGeneratedArtifactInventory,
+  expectedGeneratedArtifacts,
+} from "./generated-artifacts.mjs";
 import {
   applyMachineEvent,
   deriveMachine,
@@ -119,6 +124,63 @@ test("Run authority generation never decreases over arbitrary traces", () => {
   );
 });
 
+test("Run suspension and reauthorization strictly advance generation", () => {
+  const spec = specsById.get("orchestrator.run-authority-state");
+  const stateById = new Map(spec.states.map((state) => [state.id, state]));
+  const authorityAdvancingEvents = new Set([
+    "VERIFIED_REVOCATION",
+    "AUTHORITY_EXPIRED",
+    "EXPLICIT_REAUTHORIZATION",
+  ]);
+  const transitions = spec.transitions.filter(
+    (transition) =>
+      transition.disposition === "accepted" &&
+      authorityAdvancingEvents.has(transition.event),
+  );
+
+  assertProperty(
+    property(constantFrom(...transitions), (transition) => {
+      const sourceGeneration = stateById.get(transition.source).coordinates[
+        "run-authority-generation"
+      ];
+      const targetGeneration = stateById.get(transition.target).coordinates[
+        "run-authority-generation"
+      ];
+      assert.equal(targetGeneration, sourceGeneration + 1);
+    }),
+    { numRuns: 100 },
+  );
+});
+
+test("equal-generation reauthorization fails the generation property", () => {
+  const mutation = semanticMutations.find(
+    (candidate) => candidate.id === "keep-equal-generation-on-reauthorization",
+  );
+  const source = specsById.get(mutation.specId);
+  const mutant = mutation.apply(source);
+  const stateById = new Map(mutant.states.map((state) => [state.id, state]));
+  const reauthorization = mutant.transitions.find(
+    (transition) =>
+      transition.event === "EXPLICIT_REAUTHORIZATION" &&
+      transition.disposition === "accepted",
+  );
+
+  assert.throws(() =>
+    assertProperty(
+      property(constant(reauthorization), (transition) => {
+        const sourceGeneration = stateById.get(transition.source).coordinates[
+          "run-authority-generation"
+        ];
+        const targetGeneration = stateById.get(transition.target).coordinates[
+          "run-authority-generation"
+        ];
+        assert.equal(targetGeneration, sourceGeneration + 1);
+      }),
+      { numRuns: 1 },
+    ),
+  );
+});
+
 test("opaque runtime evidence and stale commands never mutate authority", () => {
   for (const spec of specs) {
     const prohibitedEvents = spec.events
@@ -141,10 +203,57 @@ test("opaque runtime evidence and stale commands never mutate authority", () => 
 test("semantic mutation pack is killed by the owned invariant validator", () => {
   for (const mutation of semanticMutations) {
     const source = specsById.get(mutation.specId);
+    const mutant = mutation.apply(source);
     assert.throws(
-      () => assertOwnedSemantics(mutation.apply(source)),
+      () => assertOwnedSemantics(mutant),
       undefined,
       mutation.id,
     );
   }
+});
+
+test("a missing canonical transition is rejected after mutant construction", () => {
+  const mutation = semanticMutations.find(
+    (candidate) => candidate.id === "remove-authority-expiry-transition",
+  );
+  const source = specsById.get(mutation.specId);
+  const mutant = mutation.apply(source);
+
+  assert.equal(
+    mutant.transitions.some(
+      (transition) => transition.event === "AUTHORITY_EXPIRED",
+    ),
+    false,
+  );
+  assert.throws(() => assertOwnedSemantics(mutant));
+});
+
+test("undeclared trace, fault, and invariant ADR references are rejected", () => {
+  const mutationIds = new Set([
+    "use-undeclared-trace-event",
+    "use-undeclared-fault-event",
+    "use-non-authoritative-invariant-adr",
+  ]);
+
+  for (const mutation of semanticMutations.filter((candidate) =>
+    mutationIds.has(candidate.id),
+  )) {
+    const source = specsById.get(mutation.specId);
+    const mutant = mutation.apply(source);
+    assert.throws(() => assertOwnedSemantics(mutant), undefined, mutation.id);
+  }
+});
+
+test("unexpected stale Mermaid artifacts fail the generated inventory", () => {
+  const expectedPaths = [...expectedGeneratedArtifacts(specs).keys()];
+  const expectedNames = expectedPaths.map((artifactPath) =>
+    artifactPath.split("/").at(-1),
+  );
+
+  assert.throws(() =>
+    assertGeneratedArtifactInventory(
+      [...expectedNames, "retired-state-machine.mmd"],
+      expectedPaths,
+    ),
+  );
 });

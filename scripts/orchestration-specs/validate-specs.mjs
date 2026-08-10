@@ -72,6 +72,17 @@ const assertGenericSemantics = (spec) => {
   }
 
   for (const trace of spec.traces) {
+    for (const step of trace.steps) {
+      assert.ok(
+        eventIds.has(step.event),
+        `${spec.id} trace ${trace.id} event ${step.event} must be declared`,
+      );
+      assert.ok(
+        stateIds.has(step.expectedState),
+        `${spec.id} trace ${trace.id} state ${step.expectedState} must exist`,
+      );
+    }
+
     const actual = runEventSequence(
       spec,
       trace.steps.map((step) => step.event),
@@ -97,11 +108,34 @@ const assertGenericSemantics = (spec) => {
   }
 
   for (const fault of spec.faultCases) {
+    assert.ok(
+      stateIds.has(fault.source),
+      `${spec.id} fault ${fault.id} source must exist`,
+    );
+    assert.ok(
+      eventIds.has(fault.event),
+      `${spec.id} fault ${fault.id} event ${fault.event} must be declared`,
+    );
+    assert.ok(
+      stateIds.has(fault.expectedState),
+      `${spec.id} fault ${fault.id} expected state must exist`,
+    );
     const item = transitionFor(spec, fault.source, fault.event);
-    const disposition = item?.disposition ?? "rejected";
-    assert.equal(disposition, fault.expectedDisposition);
-    assert.ok(stateIds.has(fault.expectedState));
+    assert.ok(
+      item,
+      `${spec.id} fault ${fault.id} must reference an explicit transition`,
+    );
+    assert.equal(item.disposition, fault.expectedDisposition);
     assert.equal(fault.expectedState, fault.source);
+  }
+
+  for (const invariant of spec.invariants) {
+    for (const adrRef of invariant.adrRefs) {
+      assert.ok(
+        spec.authority.adrRefs.includes(adrRef),
+        `${spec.id} invariant ${invariant.id} ADR ${adrRef} must be authoritative`,
+      );
+    }
   }
 };
 
@@ -152,9 +186,10 @@ const assertRunAuthoritySemantics = (spec) => {
   );
 
   const stateById = new Map(spec.states.map((state) => [state.id, state]));
-  for (const item of spec.transitions.filter(
+  const acceptedTransitions = spec.transitions.filter(
     (transition) => transition.disposition === "accepted",
-  )) {
+  );
+  for (const item of acceptedTransitions) {
     const sourceGeneration = stateById.get(item.source).coordinates[
       "run-authority-generation"
     ];
@@ -164,6 +199,27 @@ const assertRunAuthoritySemantics = (spec) => {
     assert.ok(
       targetGeneration >= sourceGeneration,
       "Run authority generation cannot decrease",
+    );
+  }
+
+  const generationAdvancingEvents = new Set([
+    "VERIFIED_REVOCATION",
+    "AUTHORITY_EXPIRED",
+    "EXPLICIT_REAUTHORIZATION",
+  ]);
+  for (const item of acceptedTransitions.filter((transition) =>
+    generationAdvancingEvents.has(transition.event),
+  )) {
+    const sourceGeneration = stateById.get(item.source).coordinates[
+      "run-authority-generation"
+    ];
+    const targetGeneration = stateById.get(item.target).coordinates[
+      "run-authority-generation"
+    ];
+    assert.equal(
+      targetGeneration,
+      sourceGeneration + 1,
+      `${item.event} must advance Run authority generation exactly once`,
     );
   }
 

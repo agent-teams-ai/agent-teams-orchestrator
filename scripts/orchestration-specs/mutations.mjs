@@ -74,6 +74,60 @@ export const semanticMutations = [
     },
   },
   {
+    id: "keep-equal-generation-on-reauthorization",
+    specId: "orchestrator.run-authority-state",
+    apply(spec) {
+      const mutated = clone(spec);
+      const successor = mutated.states.find(
+        (state) => state.id === "active-generation-3-basis-b",
+      );
+      successor.coordinates["run-authority-generation"] = 2;
+      return mutated;
+    },
+  },
+  {
+    id: "remove-authority-expiry-transition",
+    specId: "orchestrator.run-authority-state",
+    apply(spec) {
+      const mutated = clone(spec);
+      mutated.transitions = mutated.transitions.filter(
+        (transition) =>
+          !(
+            transition.source === "active-generation-1-basis-a" &&
+            transition.event === "AUTHORITY_EXPIRED"
+          ),
+      );
+      return mutated;
+    },
+  },
+  {
+    id: "use-undeclared-trace-event",
+    specId: "orchestrator.run-authority-state",
+    apply(spec) {
+      const mutated = clone(spec);
+      mutated.traces[0].steps[0].event = "UNDECLARED_TRACE_EVENT";
+      return mutated;
+    },
+  },
+  {
+    id: "use-undeclared-fault-event",
+    specId: "orchestrator.run-authority-state",
+    apply(spec) {
+      const mutated = clone(spec);
+      mutated.faultCases[0].event = "UNDECLARED_FAULT_EVENT";
+      return mutated;
+    },
+  },
+  {
+    id: "use-non-authoritative-invariant-adr",
+    specId: "orchestrator.run-authority-state",
+    apply(spec) {
+      const mutated = clone(spec);
+      mutated.invariants[0].adrRefs = ["ADR-9999"];
+      return mutated;
+    },
+  },
+  {
     id: "allow-project-reopen",
     specId: "orchestrator.orchestration-project-lifecycle",
     apply(spec) {

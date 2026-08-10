@@ -21,8 +21,29 @@ export const writeGeneratedArtifacts = (specs) => {
   }
 };
 
+export const assertGeneratedArtifactInventory = (actualNames, expectedPaths) => {
+  const actualMermaidNames = actualNames
+    .filter((name) => name.endsWith(".mmd"))
+    .toSorted();
+  const expectedMermaidNames = expectedPaths
+    .map((artifactPath) => path.basename(artifactPath))
+    .toSorted();
+
+  if (JSON.stringify(actualMermaidNames) !== JSON.stringify(expectedMermaidNames)) {
+    throw new Error(
+      `Generated Mermaid inventory differs: expected ${expectedMermaidNames.join(", ")}; found ${actualMermaidNames.join(", ")}`,
+    );
+  }
+};
+
 export const assertGeneratedArtifactsCurrent = (specs) => {
-  for (const [artifactPath, expected] of expectedGeneratedArtifacts(specs)) {
+  const expectedArtifacts = expectedGeneratedArtifacts(specs);
+  assertGeneratedArtifactInventory(
+    fs.readdirSync(generatedDirectory),
+    [...expectedArtifacts.keys()],
+  );
+
+  for (const [artifactPath, expected] of expectedArtifacts) {
     const actual = fs.readFileSync(artifactPath, "utf8");
     if (actual !== expected) {
       throw new Error(
