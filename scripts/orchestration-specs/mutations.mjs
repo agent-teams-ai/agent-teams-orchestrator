@@ -128,6 +128,33 @@ export const semanticMutations = [
     },
   },
   {
+    id: "add-unmodeled-state-coordinate",
+    specId: "orchestrator.run-authority-state",
+    apply(spec) {
+      const mutated = clone(spec);
+      mutated.states[0].coordinates["run-lifecycle"] = "INDEPENDENT_AXIS";
+      return mutated;
+    },
+  },
+  {
+    id: "remove-modeled-state-coordinate",
+    specId: "orchestrator.run-authority-state",
+    apply(spec) {
+      const mutated = clone(spec);
+      delete mutated.states[0].coordinates["run-authority-generation"];
+      return mutated;
+    },
+  },
+  {
+    id: "use-undeclared-coordinate-value",
+    specId: "orchestrator.run-authority-state",
+    apply(spec) {
+      const mutated = clone(spec);
+      mutated.states[0].coordinates["run-authority-generation"] = "1";
+      return mutated;
+    },
+  },
+  {
     id: "allow-project-reopen",
     specId: "orchestrator.orchestration-project-lifecycle",
     apply(spec) {

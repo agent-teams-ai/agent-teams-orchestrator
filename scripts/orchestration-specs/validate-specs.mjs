@@ -44,7 +44,23 @@ const assertGenericSemantics = (spec) => {
 
   const stateIds = new Set(spec.states.map((state) => state.id));
   const eventIds = new Set(spec.events.map((event) => event.id));
+  const modeledAxes = spec.axes.filter((axis) => axis.modeled);
+  const modeledAxisIds = modeledAxes.map((axis) => axis.id).toSorted();
   assert.ok(stateIds.has(spec.initialState), `${spec.id} initial state must exist`);
+
+  for (const state of spec.states) {
+    assert.deepEqual(
+      Object.keys(state.coordinates).toSorted(),
+      modeledAxisIds,
+      `${spec.id} state ${state.id} coordinates must equal modeled axes`,
+    );
+    for (const axis of modeledAxes) {
+      assert.ok(
+        axis.values.some((value) => Object.is(value, state.coordinates[axis.id])),
+        `${spec.id} state ${state.id} coordinate ${axis.id} must use a declared value`,
+      );
+    }
+  }
 
   for (const item of spec.transitions) {
     assert.ok(stateIds.has(item.source), `${item.source} must exist`);
@@ -145,10 +161,9 @@ const assertRunAuthoritySemantics = (spec) => {
     spec.axes.find((axis) => axis.id === "run-authority-state")?.modeled,
     true,
   );
-  assert.equal(
-    spec.axes.filter((axis) => axis.modeled).length,
-    1,
-    "Only RunAuthorityState is modeled",
+  assert.deepEqual(
+    spec.axes.filter((axis) => axis.modeled).map((axis) => axis.id),
+    ["run-authority-state", "run-authority-generation"],
   );
 
   assertTransition(
@@ -238,10 +253,9 @@ const assertProjectSemantics = (spec) => {
     spec.axes.find((axis) => axis.id === "project-identity-lifecycle")?.modeled,
     true,
   );
-  assert.equal(
-    spec.axes.filter((axis) => axis.modeled).length,
-    1,
-    "Only Project identity lifecycle is modeled",
+  assert.deepEqual(
+    spec.axes.filter((axis) => axis.modeled).map((axis) => axis.id),
+    ["project-identity-lifecycle", "deletion-epoch"],
   );
   assert.deepEqual(
     spec.states.map((state) => state.coordinates["project-identity-lifecycle"]),

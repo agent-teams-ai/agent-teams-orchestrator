@@ -32,6 +32,12 @@
       "values": ["ACTIVE", "SUSPENDED", "CANCELLED"]
     },
     {
+      "id": "run-authority-generation",
+      "owner": "run-orchestration",
+      "modeled": true,
+      "values": [1, 2, 3]
+    },
+    {
       "id": "run-lifecycle",
       "owner": "run-orchestration",
       "modeled": false,
@@ -58,8 +64,7 @@
       "terminal": false,
       "coordinates": {
         "run-authority-state": "ACTIVE",
-        "run-authority-generation": 1,
-        "authority-basis": "A"
+        "run-authority-generation": 1
       }
     },
     {
@@ -68,8 +73,7 @@
       "terminal": false,
       "coordinates": {
         "run-authority-state": "SUSPENDED",
-        "run-authority-generation": 2,
-        "authority-basis": "REVOKED_A"
+        "run-authority-generation": 2
       }
     },
     {
@@ -78,8 +82,7 @@
       "terminal": false,
       "coordinates": {
         "run-authority-state": "ACTIVE",
-        "run-authority-generation": 3,
-        "authority-basis": "B"
+        "run-authority-generation": 3
       }
     },
     {
@@ -88,8 +91,7 @@
       "terminal": true,
       "coordinates": {
         "run-authority-state": "CANCELLED",
-        "run-authority-generation": 1,
-        "authority-basis": "A"
+        "run-authority-generation": 1
       }
     },
     {
@@ -98,8 +100,7 @@
       "terminal": true,
       "coordinates": {
         "run-authority-state": "CANCELLED",
-        "run-authority-generation": 2,
-        "authority-basis": "REVOKED_A"
+        "run-authority-generation": 2
       }
     },
     {
@@ -108,8 +109,7 @@
       "terminal": true,
       "coordinates": {
         "run-authority-state": "CANCELLED",
-        "run-authority-generation": 3,
-        "authority-basis": "B"
+        "run-authority-generation": 3
       }
     }
   ],

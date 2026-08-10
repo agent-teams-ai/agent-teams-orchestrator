@@ -32,6 +32,12 @@
       "values": ["OPEN", "RETIRED"]
     },
     {
+      "id": "deletion-epoch",
+      "owner": "orchestration-scope",
+      "modeled": true,
+      "values": [1, 2]
+    },
+    {
       "id": "project-admission-authority",
       "owner": "orchestration-scope",
       "modeled": false,

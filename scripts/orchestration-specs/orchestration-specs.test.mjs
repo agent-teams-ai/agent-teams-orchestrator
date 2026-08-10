@@ -283,3 +283,19 @@ test("changed JSON routing reaches both executable-spec gates", () => {
   assert.match(manifest.scripts[jsonRoute.script], /pnpm run specs:check/);
   assert.match(manifest.scripts[jsonRoute.script], /pnpm run specs:test/);
 });
+
+test("state coordinates are closed over modeled axes and declared values", () => {
+  const mutationIds = new Set([
+    "add-unmodeled-state-coordinate",
+    "remove-modeled-state-coordinate",
+    "use-undeclared-coordinate-value",
+  ]);
+
+  for (const mutation of semanticMutations.filter((candidate) =>
+    mutationIds.has(candidate.id),
+  )) {
+    const source = specsById.get(mutation.specId);
+    const mutant = mutation.apply(source);
+    assert.throws(() => assertOwnedSemantics(mutant), undefined, mutation.id);
+  }
+});
