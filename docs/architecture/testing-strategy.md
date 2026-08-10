@@ -65,8 +65,9 @@ ADR-0079 `RunAuthorityState` plus `RunAuthorityGeneration`, and ADR-0080
 The JSON files are authoritative for this harness. Strict schema validation,
 property tests, and a semantic mutation pack protect their invariants. XState and
 its graph package derive pure test and Mermaid views without actors, services,
-timers, actions, persisted snapshots, or Agent Runtime state. Generated Mermaid
-files change only through the explicit generation command; the blocking check
+timers, actions, persisted snapshots, or Agent Runtime state. Deterministic
+derived evidence lives under `architecture/executable-specs/fixtures/proof-artifacts`
+and changes only through the explicit generation command; the blocking check
 compares expected content without writing files.
 
 This is partial evidence only. It does not accept the proposed tactical dossiers,

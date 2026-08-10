@@ -8,5 +8,8 @@ export const executableSpecRoot = path.join(
   repositoryRoot,
   "architecture/executable-specs",
 );
-export const generatedDirectory = path.join(executableSpecRoot, "generated");
+export const proofArtifactsDirectory = path.join(
+  executableSpecRoot,
+  "fixtures/proof-artifacts",
+);
 export const foundationConfigPath = path.join(repositoryRoot, "foundation.config.yaml");

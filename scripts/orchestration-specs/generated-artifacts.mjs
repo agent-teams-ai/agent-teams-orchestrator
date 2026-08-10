@@ -6,7 +6,7 @@ import { getSimplePaths } from "@xstate/graph";
 import { deriveMachine } from "./derive-machine.mjs";
 import { loadCatalogBundle } from "./load-specs.mjs";
 import {
-  generatedDirectory,
+  proofArtifactsDirectory,
   repositoryRoot,
 } from "./paths.mjs";
 import { renderCombinedMermaid } from "./render-mermaid.mjs";
@@ -36,8 +36,8 @@ const renderPathEvidence = (specs) => {
   )}\n`;
 };
 
-export const expectedGeneratedArtifacts = (specs) => {
-  const { specification } = loadCatalogBundle();
+export const expectedGeneratedArtifacts = (specs, options) => {
+  const { specification } = loadCatalogBundle(undefined, options);
   return new Map([
     [
       path.join(repositoryRoot, specification.stateModel.diagramPath),
@@ -51,8 +51,10 @@ export const expectedGeneratedArtifacts = (specs) => {
 };
 
 export const writeGeneratedArtifacts = (specs) => {
-  fs.mkdirSync(generatedDirectory, { recursive: true });
-  for (const [artifactPath, content] of expectedGeneratedArtifacts(specs)) {
+  fs.mkdirSync(proofArtifactsDirectory, { recursive: true });
+  for (const [artifactPath, content] of expectedGeneratedArtifacts(specs, {
+    allowMissingProofArtifacts: true,
+  })) {
     fs.writeFileSync(artifactPath, content);
   }
 };
@@ -75,7 +77,7 @@ export const assertGeneratedArtifactInventory = (actualNames, expectedPaths) => 
 export const assertGeneratedArtifactsCurrent = (specs) => {
   const expectedArtifacts = expectedGeneratedArtifacts(specs);
   assertGeneratedArtifactInventory(
-    fs.readdirSync(generatedDirectory),
+    fs.readdirSync(proofArtifactsDirectory),
     [...expectedArtifacts.keys()],
   );
 

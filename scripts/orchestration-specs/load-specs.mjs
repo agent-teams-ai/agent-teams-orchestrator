@@ -34,7 +34,7 @@ const jsonFilesUnder = (directory) =>
     return entry.isFile() && entry.name.endsWith(".json") ? [entryPath] : [];
   });
 
-export const loadCatalogBundle = (catalog = loadCatalog()) => {
+export const loadCatalogBundle = (catalog = loadCatalog(), options = {}) => {
   if (catalog.specifications.length !== 1) {
     throw new Error("Orchestrator executable specs must remain one catalog bundle");
   }
@@ -57,9 +57,26 @@ export const loadCatalogBundle = (catalog = loadCatalog()) => {
       (filePath) => path.relative(repositoryRoot, filePath),
     ),
   );
+  const missingJsonPaths = [...expectedJsonPaths].filter(
+    (repositoryPath) => !actualJsonPaths.has(repositoryPath),
+  );
+  const extraJsonPaths = [...actualJsonPaths].filter(
+    (repositoryPath) => !expectedJsonPaths.has(repositoryPath),
+  );
+  const generatableProofPaths = new Set(
+    [specification.stateModel.tracesPath, specification.stateModel.diagramPath].filter(
+      (repositoryPath) => repositoryPath.endsWith(".json"),
+    ),
+  );
+  const onlyGeneratableProofIsMissing =
+    options.allowMissingProofArtifacts === true &&
+    extraJsonPaths.length === 0 &&
+    missingJsonPaths.every((repositoryPath) =>
+      generatableProofPaths.has(repositoryPath),
+    );
   if (
-    JSON.stringify([...actualJsonPaths].toSorted()) !==
-    JSON.stringify([...expectedJsonPaths].toSorted())
+    (missingJsonPaths.length > 0 || extraJsonPaths.length > 0) &&
+    !onlyGeneratableProofIsMissing
   ) {
     throw new Error("Executable-spec JSON filesystem inventory differs from the catalog");
   }
@@ -121,4 +138,5 @@ export const loadSchema = () => {
   return schemas[0];
 };
 
-export const loadSpecs = () => loadCatalogBundle().documents;
+export const loadSpecs = (options) =>
+  loadCatalogBundle(undefined, options).documents;

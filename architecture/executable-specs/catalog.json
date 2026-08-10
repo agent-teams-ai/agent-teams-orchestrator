@@ -45,8 +45,8 @@
         ],
         "modelPath": "scripts/orchestration-specs/state-model.mjs",
         "adapterPath": "scripts/orchestration-specs/derive-machine.mjs",
-        "tracesPath": "architecture/executable-specs/generated/accepted-authority-submodels.paths.json",
-        "diagramPath": "architecture/executable-specs/generated/accepted-authority-submodels.mmd",
+        "tracesPath": "architecture/executable-specs/fixtures/proof-artifacts/accepted-authority-submodels.paths.json",
+        "diagramPath": "architecture/executable-specs/fixtures/proof-artifacts/accepted-authority-submodels.mmd",
         "gateBinding": {
           "packageName": "@agent-teams/orchestrator-repository",
           "script": "specs:model"

@@ -1,4 +1,4 @@
 import { writeGeneratedArtifacts } from "./generated-artifacts.mjs";
 import { loadSpecs } from "./load-specs.mjs";
 
-writeGeneratedArtifacts(loadSpecs());
+writeGeneratedArtifacts(loadSpecs({ allowMissingProofArtifacts: true }));
