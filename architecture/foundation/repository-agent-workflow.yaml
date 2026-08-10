@@ -32,6 +32,7 @@ fullScanPaths:
   - .oxlintrc.advisory.json
   - .oxlintrc.json
   - architecture/foundation
+  - scripts/orchestration-specs
   - nx.json
   - pnpm-lock.yaml
   - pnpm-workspace.yaml

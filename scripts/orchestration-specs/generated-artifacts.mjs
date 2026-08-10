@@ -4,10 +4,10 @@ import path from "node:path";
 import { getSimplePaths } from "@xstate/graph";
 
 import { deriveMachine } from "./derive-machine.mjs";
+import { loadCatalogBundle } from "./load-specs.mjs";
 import {
-  generatedDiagramPath,
   generatedDirectory,
-  generatedPathsPath,
+  repositoryRoot,
 } from "./paths.mjs";
 import { renderCombinedMermaid } from "./render-mermaid.mjs";
 
@@ -36,11 +36,19 @@ const renderPathEvidence = (specs) => {
   )}\n`;
 };
 
-export const expectedGeneratedArtifacts = (specs) =>
-  new Map([
-    [generatedDiagramPath, renderCombinedMermaid(specs)],
-    [generatedPathsPath, renderPathEvidence(specs)],
+export const expectedGeneratedArtifacts = (specs) => {
+  const { specification } = loadCatalogBundle();
+  return new Map([
+    [
+      path.join(repositoryRoot, specification.stateModel.diagramPath),
+      renderCombinedMermaid(specs),
+    ],
+    [
+      path.join(repositoryRoot, specification.stateModel.tracesPath),
+      renderPathEvidence(specs),
+    ],
   ]);
+};
 
 export const writeGeneratedArtifacts = (specs) => {
   fs.mkdirSync(generatedDirectory, { recursive: true });

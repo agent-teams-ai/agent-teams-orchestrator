@@ -86,6 +86,18 @@ export const semanticMutations = [
     },
   },
   {
+    id: "reopen-cut-predecessor-authority",
+    specId: "orchestrator.run-authority-state",
+    apply(spec) {
+      const mutated = clone(spec);
+      acceptAs(
+        findTransition(mutated, "suspended-generation-2", "REOPEN_CUT_PREDECESSOR"),
+        "active-generation-3-basis-b",
+      );
+      return mutated;
+    },
+  },
+  {
     id: "remove-authority-expiry-transition",
     specId: "orchestrator.run-authority-state",
     apply(spec) {
@@ -163,6 +175,16 @@ export const semanticMutations = [
         findTransition(mutated, "retired-epoch-2", "REOPEN_PROJECT"),
         "open-epoch-1",
       );
+      return mutated;
+    },
+  },
+  {
+    id: "keep-project-deletion-epoch-equal",
+    specId: "orchestrator.orchestration-project-lifecycle",
+    apply(spec) {
+      const mutated = clone(spec);
+      const retired = mutated.states.find((state) => state.id === "retired-epoch-2");
+      retired.coordinates["deletion-epoch"] = 1;
       return mutated;
     },
   },

@@ -15,7 +15,12 @@ import {
   assertGeneratedArtifactsCurrent,
   expectedGeneratedArtifacts,
 } from "./generated-artifacts.mjs";
-import { loadSchema, loadSpecs } from "./load-specs.mjs";
+import {
+  loadCatalog,
+  loadCatalogBundle,
+  loadSchema,
+  loadSpecs,
+} from "./load-specs.mjs";
 import { repositoryRoot } from "./paths.mjs";
 import { deriveIndependentStateModels } from "./state-model.mjs";
 import {
@@ -25,6 +30,39 @@ import {
 } from "./validate-specs.mjs";
 
 const specs = loadSpecs();
+
+test("catalog is the only schema, document, and harness inventory", () => {
+  const catalog = loadCatalog();
+  const missingDocument = structuredClone(catalog);
+  missingDocument.specifications[0].documents[0].path =
+    "architecture/executable-specs/not-cataloged.json";
+  assert.throws(() => loadCatalogBundle(missingDocument), /ENOENT/u);
+
+  const missingSchema = structuredClone(catalog);
+  missingSchema.specifications[0].schemaPaths = [];
+  assert.throws(
+    () => loadCatalogBundle(missingSchema),
+    /Document schema is not cataloged/u,
+  );
+
+  const driftedAdapter = structuredClone(catalog);
+  driftedAdapter.specifications[0].stateModel.adapterPath =
+    "scripts/orchestration-specs/state-model.mjs";
+  assert.throws(
+    () => loadCatalogBundle(driftedAdapter),
+    /does not identify the active harness/u,
+  );
+
+  const driftedAxes = structuredClone(catalog);
+  driftedAxes.specifications[0].stateModel.axes = [
+    "project-identity-lifecycle",
+    "deletion-epoch",
+  ];
+  assert.throws(
+    () => loadCatalogBundle(driftedAxes),
+    /axes differ from the modeled document axes/u,
+  );
+});
 
 test("canonical JSON specs satisfy the strict schema and owned semantics", () => {
   const validate = createSchemaValidator(loadSchema());
@@ -122,4 +160,7 @@ test("changed JSON routing reaches all executable-spec gates", () => {
   assert.match(manifest.scripts["specs:test"], /pnpm run specs:property/);
   assert.match(manifest.scripts["specs:test"], /pnpm run specs:mutation/);
   assert.match(manifest.scripts["specs:test"], /pnpm run specs:model/);
+  assert.ok(workflow.fullScanPaths.includes("scripts/orchestration-specs"));
+  assert.match(manifest.scripts["check:fast"], /pnpm run specs:check/);
+  assert.match(manifest.scripts["check:fast"], /pnpm run specs:test/);
 });

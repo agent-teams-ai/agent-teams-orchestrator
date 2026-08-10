@@ -221,7 +221,7 @@
       "id": "project-process-state-not-identity-state",
       "statement": "Retirement cancellation and disposition progress do not add OrchestrationProject identity states.",
       "adrRefs": ["ADR-0080"],
-      "enforcedBy": ["schema", "semantics", "trace"]
+      "enforcedBy": ["semantics", "property", "mutation", "trace"]
     },
     {
       "id": "project-runtime-evidence-non-authoritative",

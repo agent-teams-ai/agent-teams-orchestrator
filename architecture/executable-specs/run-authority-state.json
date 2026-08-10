@@ -285,6 +285,51 @@
       "adrRef": "ADR-0079"
     },
     {
+      "source": "cancelled-generation-1",
+      "event": "STALE_GENERATION_COMMAND",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "A stale command cannot mutate cancelled generation 1 authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "cancelled-generation-1",
+      "event": "LATE_OPAQUE_AR_EVIDENCE",
+      "disposition": "ignored",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Late runtime evidence cannot mutate cancelled generation 1 authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "cancelled-generation-2",
+      "event": "STALE_GENERATION_COMMAND",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "A stale command cannot mutate cancelled generation 2 authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "cancelled-generation-2",
+      "event": "LATE_OPAQUE_AR_EVIDENCE",
+      "disposition": "ignored",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Late runtime evidence cannot mutate cancelled generation 2 authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "cancelled-generation-3",
+      "event": "STALE_GENERATION_COMMAND",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "A stale command cannot mutate cancelled generation 3 authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
       "source": "cancelled-generation-3",
       "event": "LATE_OPAQUE_AR_EVIDENCE",
       "disposition": "ignored",
@@ -311,7 +356,7 @@
       "id": "run-predecessor-never-reopens",
       "statement": "Reauthorization creates successor authority and never reopens a cut predecessor operation.",
       "adrRefs": ["ADR-0079"],
-      "enforcedBy": ["semantics", "mutation", "trace"]
+      "enforcedBy": ["semantics", "property", "mutation", "trace"]
     },
     {
       "id": "run-runtime-evidence-non-authoritative",
