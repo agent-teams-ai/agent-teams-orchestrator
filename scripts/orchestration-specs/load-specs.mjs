@@ -12,19 +12,57 @@ const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const resolveRepositoryPath = (repositoryPath) =>
   path.join(repositoryRoot, repositoryPath);
 
-export const loadCatalog = () => {
+const loadCatalogDescriptor = () => {
   const foundation = readYaml(foundationConfigPath);
   const capabilityPath =
     foundation.capabilities["quality.executable-specifications"].configPath;
   const capability = readYaml(resolveRepositoryPath(capabilityPath));
-  return readJson(resolveRepositoryPath(capability.catalogPath));
+  return {
+    catalog: readJson(resolveRepositoryPath(capability.catalogPath)),
+    catalogPath: capability.catalogPath,
+  };
 };
+
+export const loadCatalog = () => loadCatalogDescriptor().catalog;
+
+const jsonFilesUnder = (directory) =>
+  fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      return jsonFilesUnder(entryPath);
+    }
+    return entry.isFile() && entry.name.endsWith(".json") ? [entryPath] : [];
+  });
 
 export const loadCatalogBundle = (catalog = loadCatalog()) => {
   if (catalog.specifications.length !== 1) {
     throw new Error("Orchestrator executable specs must remain one catalog bundle");
   }
   const specification = catalog.specifications[0];
+  const { catalogPath } = loadCatalogDescriptor();
+  const expectedJsonPaths = new Set(
+    [
+      catalogPath,
+      ...specification.schemaPaths,
+      ...specification.documents.map((document) => document.path),
+      ...specification.generatedTypes.map((generatedType) => generatedType.outputPath),
+      specification.stateModel.modelPath,
+      specification.stateModel.adapterPath,
+      specification.stateModel.tracesPath,
+      specification.stateModel.diagramPath,
+    ].filter((repositoryPath) => repositoryPath.endsWith(".json")),
+  );
+  const actualJsonPaths = new Set(
+    jsonFilesUnder(path.join(repositoryRoot, "architecture/executable-specs")).map(
+      (filePath) => path.relative(repositoryRoot, filePath),
+    ),
+  );
+  if (
+    JSON.stringify([...actualJsonPaths].toSorted()) !==
+    JSON.stringify([...expectedJsonPaths].toSorted())
+  ) {
+    throw new Error("Executable-spec JSON filesystem inventory differs from the catalog");
+  }
   const schemas = specification.schemaPaths.map((schemaPath) =>
     readJson(resolveRepositoryPath(schemaPath)),
   );
@@ -42,6 +80,24 @@ export const loadCatalogBundle = (catalog = loadCatalog()) => {
   for (const [field, expectedPath] of Object.entries(expectedHarnessPaths)) {
     if (resolveRepositoryPath(specification.stateModel[field]) !== expectedPath) {
       throw new Error(`Catalog ${field} does not identify the active harness`);
+    }
+  }
+  const expectedGates = {
+    property: "specs:property",
+    mutation: "specs:mutation",
+    model: "specs:model",
+  };
+  const actualGates = {
+    ...specification.gateBindings,
+    model: specification.stateModel.gateBinding,
+  };
+  for (const [role, expectedScript] of Object.entries(expectedGates)) {
+    const binding = actualGates[role];
+    if (
+      binding.packageName !== "@agent-teams/orchestrator-repository" ||
+      binding.script !== expectedScript
+    ) {
+      throw new Error(`Catalog ${role} gate does not identify ${expectedScript}`);
     }
   }
   const modeledAxes = documents

@@ -36,10 +36,14 @@ test("catalog is the only schema, document, and harness inventory", () => {
   const missingDocument = structuredClone(catalog);
   missingDocument.specifications[0].documents[0].path =
     "architecture/executable-specs/not-cataloged.json";
-  assert.throws(() => loadCatalogBundle(missingDocument), /ENOENT/u);
+  assert.throws(
+    () => loadCatalogBundle(missingDocument),
+    /filesystem inventory differs from the catalog/u,
+  );
 
   const missingSchema = structuredClone(catalog);
-  missingSchema.specifications[0].schemaPaths = [];
+  missingSchema.specifications[0].documents[0].schemaId =
+    "https://agent-teams.dev/schemas/not-cataloged.json";
   assert.throws(
     () => loadCatalogBundle(missingSchema),
     /Document schema is not cataloged/u,
@@ -61,6 +65,30 @@ test("catalog is the only schema, document, and harness inventory", () => {
   assert.throws(
     () => loadCatalogBundle(driftedAxes),
     /axes differ from the modeled document axes/u,
+  );
+
+  for (const [role, expectedScript] of [
+    ["property", "specs:property"],
+    ["mutation", "specs:mutation"],
+    ["model", "specs:model"],
+  ]) {
+    const driftedGate = structuredClone(catalog);
+    const binding =
+      role === "model"
+        ? driftedGate.specifications[0].stateModel.gateBinding
+        : driftedGate.specifications[0].gateBindings[role];
+    binding.script = "docs:check";
+    assert.throws(
+      () => loadCatalogBundle(driftedGate),
+      new RegExp(`${role} gate does not identify ${expectedScript}`, "u"),
+    );
+  }
+
+  const missingCatalogDocument = structuredClone(catalog);
+  missingCatalogDocument.specifications[0].documents.pop();
+  assert.throws(
+    () => loadCatalogBundle(missingCatalogDocument),
+    /filesystem inventory differs from the catalog/u,
   );
 });
 
@@ -161,6 +189,7 @@ test("changed JSON routing reaches all executable-spec gates", () => {
   assert.match(manifest.scripts["specs:test"], /pnpm run specs:mutation/);
   assert.match(manifest.scripts["specs:test"], /pnpm run specs:model/);
   assert.ok(workflow.fullScanPaths.includes("scripts/orchestration-specs"));
+  assert.ok(workflow.fullScanPaths.includes("architecture/executable-specs"));
   assert.match(manifest.scripts["check:fast"], /pnpm run specs:check/);
   assert.match(manifest.scripts["check:fast"], /pnpm run specs:test/);
 });

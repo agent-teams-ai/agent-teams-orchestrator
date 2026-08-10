@@ -73,13 +73,12 @@ This is partial evidence only. It does not accept the proposed tactical dossiers
 activate a production package, define Agent Runtime contracts, or pass an
 implementation-readiness gate.
 
-Foundation 0.9.0 treats every governed source root as published runtime source,
-so it correctly rejects dev-only XState, graph, schema, and property-test imports
-from such a root. These dependencies are declared development-only through the
-active dependency-declaration capability; the tooling remains outside the
-production source policy until a future Foundation release supports an explicit
-development-tooling source classification. That later adoption must be a separate
-parity-proven change and must not add an unknown capability ID now.
+Foundation 0.10.0 validates the consumer-owned executable-specification catalog
+and classifies the harness source boundary as development tooling. XState, graph,
+schema, and property-test dependencies remain exact development dependencies and
+cannot cross into a runtime source boundary. The Foundation capability validates
+static connectivity only; the repository-owned property, mutation, and model
+scripts remain the independent executable evidence gates.
 
 ### Application tests
 
