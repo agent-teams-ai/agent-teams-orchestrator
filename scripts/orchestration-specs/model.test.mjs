@@ -14,6 +14,7 @@ import {
   assertGeneratedArtifactInventory,
   assertGeneratedArtifactsCurrent,
   expectedGeneratedArtifacts,
+  writeGeneratedArtifacts,
 } from "./generated-artifacts.mjs";
 import {
   loadCatalog,
@@ -21,7 +22,7 @@ import {
   loadSchema,
   loadSpecs,
 } from "./load-specs.mjs";
-import { repositoryRoot } from "./paths.mjs";
+import { proofArtifactsDirectory, repositoryRoot } from "./paths.mjs";
 import { deriveIndependentStateModels } from "./state-model.mjs";
 import {
   assertOwnedSemantics,
@@ -149,6 +150,22 @@ test("opaque runtime evidence and stale commands never mutate authority", () => 
 
 test("combined path and diagram evidence is current", () => {
   assertGeneratedArtifactsCurrent(specs);
+});
+
+test("generator bootstrap rejects unexpected proof artifacts", () => {
+  const unexpectedPath = nodePath.join(
+    proofArtifactsDirectory,
+    "unexpected-proof.mmd",
+  );
+  fs.writeFileSync(unexpectedPath, "stateDiagram-v2\n");
+  try {
+    assert.throws(
+      () => writeGeneratedArtifacts(specs),
+      /Unexpected proof artifacts: unexpected-proof\.mmd/u,
+    );
+  } finally {
+    fs.rmSync(unexpectedPath);
+  }
 });
 
 test("unexpected generated artifacts fail the generated inventory", () => {

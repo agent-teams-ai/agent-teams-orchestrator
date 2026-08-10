@@ -52,9 +52,19 @@ export const expectedGeneratedArtifacts = (specs, options) => {
 
 export const writeGeneratedArtifacts = (specs) => {
   fs.mkdirSync(proofArtifactsDirectory, { recursive: true });
-  for (const [artifactPath, content] of expectedGeneratedArtifacts(specs, {
+  const expectedArtifacts = expectedGeneratedArtifacts(specs, {
     allowMissingProofArtifacts: true,
-  })) {
+  });
+  const expectedNames = new Set(
+    [...expectedArtifacts.keys()].map((artifactPath) => path.basename(artifactPath)),
+  );
+  const unexpectedNames = fs
+    .readdirSync(proofArtifactsDirectory)
+    .filter((name) => !expectedNames.has(name));
+  if (unexpectedNames.length > 0) {
+    throw new Error(`Unexpected proof artifacts: ${unexpectedNames.toSorted().join(", ")}`);
+  }
+  for (const [artifactPath, content] of expectedArtifacts) {
     fs.writeFileSync(artifactPath, content);
   }
 };
