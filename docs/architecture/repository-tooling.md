@@ -29,6 +29,8 @@ code_anchors:
     enforcement: required
   - pattern: scripts/lint/**
     enforcement: required
+  - pattern: scripts/security/validate-reviewrouter-workflow.mjs
+    enforcement: required
   - pattern: pnpm-workspace.yaml
     enforcement: advisory
   - pattern: nx.json
@@ -440,6 +442,14 @@ Agents working in this repository must:
    bypass it with an undocumented exclusion;
 6. update a conformance fixture with every new permitted dependency shape or fixed
    false negative.
+
+The ReviewRouter interaction workflow is intentionally a thin caller of the
+centrally maintained reusable workflow. Both the reusable `uses` reference and
+its `runtime_ref` input use the same reviewed commit SHA. Repository-specific
+event filters, discussion variables, and secret mappings remain explicit in the
+caller. The security gate rejects mutable or mismatched refs and rejects copied
+checkout, authentication, or runtime steps so fixes stay DRY and centrally
+auditable.
 
 ## Upgrade policy
 
