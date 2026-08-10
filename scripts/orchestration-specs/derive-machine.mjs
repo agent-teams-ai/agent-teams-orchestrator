@@ -1,37 +1,9 @@
 import { createMachine, initialTransition, transition } from "xstate";
 
-const transitionConfig = (spec, stateId) => {
-  const on = {};
-
-  for (const item of spec.transitions) {
-    if (item.source !== stateId || item.disposition === "rejected") {
-      continue;
-    }
-
-    on[item.event] =
-      item.disposition === "accepted" ? { target: item.target } : {};
-  }
-
-  return on;
-};
+import { deriveStateModel } from "./state-model.mjs";
 
 export const deriveMachine = (spec) =>
-  createMachine({
-    id: spec.id,
-    initial: spec.initialState,
-    states: Object.fromEntries(
-      spec.states.map((state) => [
-        state.id,
-        {
-          meta: {
-            coordinates: state.coordinates,
-            terminal: state.terminal,
-          },
-          on: transitionConfig(spec, state.id),
-        },
-      ]),
-    ),
-  });
+  createMachine(deriveStateModel(spec));
 
 export const initialSnapshot = (machine) => initialTransition(machine)[0];
 

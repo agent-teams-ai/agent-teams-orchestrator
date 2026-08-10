@@ -17,3 +17,11 @@ export const specPaths = [
   path.join(executableSpecRoot, "run-authority-state.json"),
 ];
 export const generatedDirectory = path.join(executableSpecRoot, "generated");
+export const generatedDiagramPath = path.join(
+  generatedDirectory,
+  "accepted-authority-submodels.mmd",
+);
+export const generatedPathsPath = path.join(
+  generatedDirectory,
+  "accepted-authority-submodels.paths.json",
+);

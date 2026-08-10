@@ -1,0 +1,47 @@
+%% Derived from independent accepted authority submodels.
+%% This diagram is not a cross-product or a production runtime machine.
+stateDiagram-v2
+    state "OrchestrationProject terminal identity lifecycle (independent)" as model_0 {
+        [*] --> model_0_state_open_epoch_1
+        state "OPEN deletion epoch 1" as model_0_state_open_epoch_1
+        state "RETIRED deletion epoch 2" as model_0_state_retired_epoch_2
+        model_0_state_open_epoch_1 --> model_0_state_retired_epoch_2: COMMIT_RETIREMENT
+        note right of model_0_state_open_epoch_1
+            Ignored: CANCEL_RETIREMENT, LATE_OPAQUE_AR_EVIDENCE
+            Rejected: STALE_DELETION_EPOCH_COMMAND
+        end note
+        note right of model_0_state_retired_epoch_2
+            Ignored: LATE_OPAQUE_AR_EVIDENCE
+            Rejected: CANCEL_RETIREMENT, FRESH_EXTERNAL_AUTHORIZATION, REOPEN_PROJECT, STALE_DELETION_EPOCH_COMMAND
+        end note
+    }
+    state "RunAuthorityState accepted transition semantics (independent)" as model_1 {
+        [*] --> model_1_state_active_generation_1_basis_a
+        state "ACTIVE generation 1 basis A" as model_1_state_active_generation_1_basis_a
+        state "SUSPENDED generation 2" as model_1_state_suspended_generation_2
+        state "ACTIVE generation 3 basis B" as model_1_state_active_generation_3_basis_b
+        state "CANCELLED generation 1" as model_1_state_cancelled_generation_1
+        state "CANCELLED generation 2" as model_1_state_cancelled_generation_2
+        state "CANCELLED generation 3" as model_1_state_cancelled_generation_3
+        model_1_state_active_generation_1_basis_a --> model_1_state_suspended_generation_2: VERIFIED_REVOCATION
+        model_1_state_active_generation_1_basis_a --> model_1_state_suspended_generation_2: AUTHORITY_EXPIRED
+        model_1_state_suspended_generation_2 --> model_1_state_active_generation_3_basis_b: EXPLICIT_REAUTHORIZATION
+        model_1_state_active_generation_1_basis_a --> model_1_state_cancelled_generation_1: BUSINESS_CANCEL
+        model_1_state_suspended_generation_2 --> model_1_state_cancelled_generation_2: BUSINESS_CANCEL
+        model_1_state_active_generation_3_basis_b --> model_1_state_cancelled_generation_3: BUSINESS_CANCEL
+        note right of model_1_state_active_generation_1_basis_a
+            Ignored: LATE_OPAQUE_AR_EVIDENCE
+            Rejected: EXPLICIT_REAUTHORIZATION, STALE_GENERATION_COMMAND
+        end note
+        note right of model_1_state_suspended_generation_2
+            Ignored: LATE_OPAQUE_AR_EVIDENCE
+            Rejected: REOPEN_CUT_PREDECESSOR, STALE_GENERATION_COMMAND
+        end note
+        note right of model_1_state_active_generation_3_basis_b
+            Ignored: LATE_OPAQUE_AR_EVIDENCE
+            Rejected: STALE_GENERATION_COMMAND
+        end note
+        note right of model_1_state_cancelled_generation_3
+            Ignored: LATE_OPAQUE_AR_EVIDENCE
+        end note
+    }

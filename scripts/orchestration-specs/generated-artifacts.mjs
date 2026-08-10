@@ -1,18 +1,46 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { generatedDirectory } from "./paths.mjs";
-import { renderMermaid } from "./render-mermaid.mjs";
+import { getSimplePaths } from "@xstate/graph";
 
-const filenameFor = (spec) => `${spec.id.replace("orchestrator.", "")}.mmd`;
+import { deriveMachine } from "./derive-machine.mjs";
+import {
+  generatedDiagramPath,
+  generatedDirectory,
+  generatedPathsPath,
+} from "./paths.mjs";
+import { renderCombinedMermaid } from "./render-mermaid.mjs";
+
+const renderPathEvidence = (specs) => {
+  const models = specs.map((spec) => ({
+    id: spec.id,
+    paths: getSimplePaths(deriveMachine(spec))
+      .map((simplePath) => ({
+        targetState: simplePath.state.value,
+        events: simplePath.steps
+          .map((step) => step.event.type)
+          .filter((event) => event !== "xstate.init"),
+      }))
+      .toSorted((left, right) => left.targetState.localeCompare(right.targetState)),
+  }));
+
+  return `${JSON.stringify(
+    {
+      schemaVersion: 1,
+      evidenceKind: "derived-independent-xstate-simple-paths",
+      composition: "independent-machines-no-cross-product",
+      models,
+    },
+    null,
+    2,
+  )}\n`;
+};
 
 export const expectedGeneratedArtifacts = (specs) =>
-  new Map(
-    specs.map((spec) => [
-      path.join(generatedDirectory, filenameFor(spec)),
-      renderMermaid(spec),
-    ]),
-  );
+  new Map([
+    [generatedDiagramPath, renderCombinedMermaid(specs)],
+    [generatedPathsPath, renderPathEvidence(specs)],
+  ]);
 
 export const writeGeneratedArtifacts = (specs) => {
   fs.mkdirSync(generatedDirectory, { recursive: true });
@@ -22,16 +50,16 @@ export const writeGeneratedArtifacts = (specs) => {
 };
 
 export const assertGeneratedArtifactInventory = (actualNames, expectedPaths) => {
-  const actualMermaidNames = actualNames
-    .filter((name) => name.endsWith(".mmd"))
-    .toSorted();
-  const expectedMermaidNames = expectedPaths
+  const actualGeneratedNames = actualNames.toSorted();
+  const expectedGeneratedNames = expectedPaths
     .map((artifactPath) => path.basename(artifactPath))
     .toSorted();
 
-  if (JSON.stringify(actualMermaidNames) !== JSON.stringify(expectedMermaidNames)) {
+  if (
+    JSON.stringify(actualGeneratedNames) !== JSON.stringify(expectedGeneratedNames)
+  ) {
     throw new Error(
-      `Generated Mermaid inventory differs: expected ${expectedMermaidNames.join(", ")}; found ${actualMermaidNames.join(", ")}`,
+      `Generated artifact inventory differs: expected ${expectedGeneratedNames.join(", ")}; found ${actualGeneratedNames.join(", ")}`,
     );
   }
 };

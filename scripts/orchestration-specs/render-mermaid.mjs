@@ -1,5 +1,6 @@
 const quote = (value) => value.replaceAll('"', "'");
-const aliasFor = (stateId) => `state_${stateId.replaceAll("-", "_")}`;
+const aliasFor = (modelIndex, stateId) =>
+  `model_${modelIndex}_state_${stateId.replaceAll("-", "_")}`;
 
 const classifiedEvents = (spec, stateId, disposition) =>
   spec.transitions
@@ -10,22 +11,23 @@ const classifiedEvents = (spec, stateId, disposition) =>
     .map((transition) => transition.event)
     .sort();
 
-export const renderMermaid = (spec) => {
+const renderModel = (spec, modelIndex) => {
   const lines = [
-    `%% Generated from ${spec.id}; edit the JSON spec, not this file.`,
-    "stateDiagram-v2",
-    `    [*] --> ${aliasFor(spec.initialState)}`,
+    `    state "${quote(spec.title)} (independent)" as model_${modelIndex} {`,
+    `        [*] --> ${aliasFor(modelIndex, spec.initialState)}`,
   ];
 
   for (const state of spec.states) {
-    lines.push(`    state "${quote(state.label)}" as ${aliasFor(state.id)}`);
+    lines.push(
+      `        state "${quote(state.label)}" as ${aliasFor(modelIndex, state.id)}`,
+    );
   }
 
   for (const item of spec.transitions.filter(
     (transition) => transition.disposition === "accepted",
   )) {
     lines.push(
-      `    ${aliasFor(item.source)} --> ${aliasFor(item.target)}: ${item.event}`,
+      `        ${aliasFor(modelIndex, item.source)} --> ${aliasFor(modelIndex, item.target)}: ${item.event}`,
     );
   }
 
@@ -43,12 +45,21 @@ export const renderMermaid = (spec) => {
       continue;
     }
 
-    lines.push(`    note right of ${aliasFor(state.id)}`);
+    lines.push(`        note right of ${aliasFor(modelIndex, state.id)}`);
     for (const note of notes) {
-      lines.push(`        ${note}`);
+      lines.push(`            ${note}`);
     }
-    lines.push("    end note");
+    lines.push("        end note");
   }
 
-  return `${lines.join("\n")}\n`;
+  lines.push("    }");
+  return lines;
 };
+
+export const renderCombinedMermaid = (specs) =>
+  `${[
+    "%% Derived from independent accepted authority submodels.",
+    "%% This diagram is not a cross-product or a production runtime machine.",
+    "stateDiagram-v2",
+    ...specs.flatMap(renderModel),
+  ].join("\n")}\n`;

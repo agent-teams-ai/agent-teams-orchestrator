@@ -1,12 +1,11 @@
 import path from "node:path";
 
-import { validateMermaid } from "../docs/mermaid-runner.mjs";
-
 import {
   assertGeneratedArtifactsCurrent,
   expectedGeneratedArtifacts,
 } from "./generated-artifacts.mjs";
 import { loadSchema, loadSpecs } from "./load-specs.mjs";
+import { validateMermaid } from "./mermaid-validator.mjs";
 import { repositoryRoot } from "./paths.mjs";
 import {
   assertOwnedSemantics,
@@ -25,7 +24,9 @@ for (const spec of specs) {
 assertGeneratedArtifactsCurrent(specs);
 
 const mermaidResult = await validateMermaid(
-  [...expectedGeneratedArtifacts(specs)].map(([key, source]) => ({ key, source })),
+  [...expectedGeneratedArtifacts(specs)]
+    .filter(([key]) => key.endsWith(".mmd"))
+    .map(([key, source]) => ({ key, source })),
   {
     repositoryRoot,
     validatorPath: path.join(repositoryRoot, "scripts/docs/validate-mermaid.mjs"),

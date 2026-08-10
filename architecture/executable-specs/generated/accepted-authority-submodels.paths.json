@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "derived-independent-xstate-simple-paths",
+  "composition": "independent-machines-no-cross-product",
+  "models": [
+    {
+      "id": "orchestrator.orchestration-project-lifecycle",
+      "paths": [
+        {
+          "targetState": "open-epoch-1",
+          "events": []
+        },
+        {
+          "targetState": "retired-epoch-2",
+          "events": [
+            "COMMIT_RETIREMENT"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "orchestrator.run-authority-state",
+      "paths": [
+        {
+          "targetState": "active-generation-1-basis-a",
+          "events": []
+        },
+        {
+          "targetState": "active-generation-3-basis-b",
+          "events": [
+            "VERIFIED_REVOCATION",
+            "EXPLICIT_REAUTHORIZATION"
+          ]
+        },
+        {
+          "targetState": "active-generation-3-basis-b",
+          "events": [
+            "AUTHORITY_EXPIRED",
+            "EXPLICIT_REAUTHORIZATION"
+          ]
+        },
+        {
+          "targetState": "cancelled-generation-1",
+          "events": [
+            "BUSINESS_CANCEL"
+          ]
+        },
+        {
+          "targetState": "cancelled-generation-2",
+          "events": [
+            "VERIFIED_REVOCATION",
+            "BUSINESS_CANCEL"
+          ]
+        },
+        {
+          "targetState": "cancelled-generation-2",
+          "events": [
+            "AUTHORITY_EXPIRED",
+            "BUSINESS_CANCEL"
+          ]
+        },
+        {
+          "targetState": "cancelled-generation-3",
+          "events": [
+            "VERIFIED_REVOCATION",
+            "EXPLICIT_REAUTHORIZATION",
+            "BUSINESS_CANCEL"
+          ]
+        },
+        {
+          "targetState": "cancelled-generation-3",
+          "events": [
+            "AUTHORITY_EXPIRED",
+            "EXPLICIT_REAUTHORIZATION",
+            "BUSINESS_CANCEL"
+          ]
+        },
+        {
+          "targetState": "suspended-generation-2",
+          "events": [
+            "VERIFIED_REVOCATION"
+          ]
+        },
+        {
+          "targetState": "suspended-generation-2",
+          "events": [
+            "AUTHORITY_EXPIRED"
+          ]
+        }
+      ]
+    }
+  ]
+}
