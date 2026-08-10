@@ -87,7 +87,7 @@ const negativeCases = [
     mutate: (source) =>
       replaceExactlyOnce(
         source,
-        "reviewrouter-interaction-reusable.yml@5da51b7b71b1db9ce531f946ec2bb90411a31300",
+        "reviewrouter-interaction-reusable.yml@6b35091c824b1d4d5ee6bf8316121ed08d3e4861",
         "reviewrouter-interaction-reusable.yml@main",
       ),
   },
@@ -97,7 +97,7 @@ const negativeCases = [
     mutate: (source) =>
       replaceExactlyOnce(
         source,
-        'runtime_ref: "5da51b7b71b1db9ce531f946ec2bb90411a31300"',
+        'runtime_ref: "6b35091c824b1d4d5ee6bf8316121ed08d3e4861"',
         'runtime_ref: "08f6bc1481fd284fa82adfa47cda05c76b161b00"',
       ),
   },
