@@ -273,6 +273,15 @@ maintainability budgets. Generated or vendor code may be exempt from the five
 size and complexity budgets, but it is not exempt from security discovery,
 classification, suppression governance, or the allow/deny fixture contract.
 
+The ReviewRouter interaction entry point is a least-privilege caller of the
+centrally maintained reusable workflow. Its `uses` reference and `runtime_ref`
+input must match one immutable reviewed commit SHA. The caller keeps OIDC and
+repository-specific event filtering explicit, maps only the required secrets,
+and limits the fallback GitHub token to read-only issue and pull-request access.
+The security validator rejects mutable or mismatched refs, write-capable
+fallback permissions, and local checkout, authentication, or runtime steps that
+would duplicate or bypass the reusable workflow boundary.
+
 `pnpm architecture:check` includes this gate. The documentation and architecture
 CI workflows execute it independently so changes to prose, schemas, fixtures, or
 LikeC4 cannot bypass validation.
