@@ -4,7 +4,31 @@ workspace:
   manifest: pnpm-workspace.yaml
 governedRoots:
   - packages/platform/local-host-control/src
+  - scripts/orchestration-specs
 boundaries:
+  - id: tooling.orchestration-specs
+    dependencyMode: development
+    roots:
+      - scripts/orchestration-specs
+    entrypoints:
+      - scripts/orchestration-specs/check-specs.mjs
+      - scripts/orchestration-specs/generate-specs.mjs
+    allow:
+      boundaries: []
+      packages:
+        - "@xstate/graph"
+        - ajv
+        - fast-check
+        - xstate
+        - yaml
+      builtins:
+        - node:assert/strict
+        - node:child_process
+        - node:fs
+        - node:path
+        - node:test
+        - node:url
+      runtimeReferences: []
   - id: platform.local-host-control.public-api
     roots:
       - packages/platform/local-host-control/src/index.ts

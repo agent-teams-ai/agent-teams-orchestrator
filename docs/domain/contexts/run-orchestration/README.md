@@ -101,6 +101,11 @@ CreateRun
 Runtime liveness, context application, pending interaction, participant
 readiness, Run health, and completion assessment are independent facts.
 
+The [Run authority executable specification](../../../../architecture/executable-specs/run-authority-state.json)
+captures only the accepted ADR-0079 `RunAuthorityState` and generation pattern.
+Its derived XState graph is test and visualization evidence, not a production
+aggregate, Agent Runtime model, or claim that this proposed dossier is accepted.
+
 Discovery artifacts are not yet complete. Use the
 [bounded-context template](../../../templates/bounded-context.md) before changing
 this dossier to accepted.

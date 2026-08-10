@@ -242,6 +242,12 @@ external Platform or Standalone retirement process
   exclusive-key and shared-key cryptographic erasure take opposite outcomes.
 - Unknown provider, backup, key, or hold evidence remains reconcile-required.
 
+The [Project lifecycle executable specification](../../../../architecture/executable-specs/orchestration-project-lifecycle.json)
+proves only the accepted `OPEN -> RETIRED` identity lifecycle slice, cancellation before
+commit, stale-epoch rejection, and anti-resurrection behavior. It does not model
+admission restrictions, disposition progress, policy, or Agent Runtime state and
+does not remove this dossier's open-decision blockers.
+
 ## Context relationships
 
 - Platform or Standalone Authority is upstream through a private managed

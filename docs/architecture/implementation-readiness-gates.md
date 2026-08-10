@@ -94,6 +94,15 @@ Required evidence:
 
 The gate does not require Temporal or a real AR provider.
 
+The repository now has partial executable evidence for the exact
+[ADR-0079 Run authority state-machine slice](../../architecture/executable-specs/run-authority-state.json)
+and [ADR-0080 Project identity lifecycle](../../architecture/executable-specs/orchestration-project-lifecycle.json).
+These fixtures prove suspension-before-successor, monotonic generation, explicit
+cancellation, stale-generation rejection, terminal retirement, and opaque late
+runtime evidence without authority mutation. They do not cover the other required
+Run, Work, topology, fan-out, policy, or recovery evidence above, so Gate 1 remains
+`In review`.
+
 ## Gate 2: Communication, Attention, and Agent Context boundary
 
 Required evidence:

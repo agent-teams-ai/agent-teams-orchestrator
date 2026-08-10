@@ -15,7 +15,7 @@
     "pnpm": "11.18.0"
   },
   "scripts": {
-    "architecture:check": "pnpm run architecture:topology && pnpm run architecture:nx:check && pnpm run architecture:model:check && pnpm run architecture:model:test && pnpm run security:check && pnpm run reliability:check && pnpm run architecture:dependencies && pnpm run lint && pnpm run architecture:conformance && pnpm run architecture:graph:advisory",
+    "architecture:check": "pnpm run specs:check && pnpm run specs:test && pnpm run architecture:topology && pnpm run architecture:nx:check && pnpm run architecture:model:check && pnpm run architecture:model:test && pnpm run security:check && pnpm run reliability:check && pnpm run architecture:dependencies && pnpm run lint && pnpm run architecture:conformance && pnpm run architecture:graph:advisory",
     "architecture:conformance": "pnpm --filter @agent-teams/architecture-conformance run check:conformance",
     "architecture:graph:advisory": "pnpm --filter @agent-teams/architecture-conformance run check:graph",
     "architecture:dependencies": "node scripts/architecture/validate-dependency-specifiers.mjs",
@@ -30,7 +30,7 @@
     "architecture:topology": "node scripts/architecture/validate-package-topology.mjs",
     "check": "pnpm foundation:check && pnpm docs:check && pnpm packages:check && pnpm typecheck:root && pnpm architecture:check",
     "check:changed": "agent-teams-foundation agent-workflow changed --consumer .",
-    "check:fast": "pnpm foundation:check && pnpm docs:check && pnpm lint:fast && pnpm typecheck && pnpm architecture:model:check && pnpm architecture:nx:check",
+    "check:fast": "pnpm foundation:check && pnpm docs:check && pnpm run specs:check && pnpm run specs:test && pnpm lint:fast && pnpm typecheck && pnpm architecture:model:check && pnpm architecture:nx:check",
     "docs:validate": "node scripts/docs/validate-docs.mjs",
     "docs:test": "node --test --test-concurrency=1 scripts/docs/check-doc-impact.test.mjs scripts/docs/validate-docs.test.mjs scripts/docs/validate-prose.test.mjs",
     "docs:impact": "node scripts/docs/check-doc-impact.mjs",
@@ -66,6 +66,12 @@
     "security:check": "pnpm run security:validate && pnpm run security:test",
     "security:test": "node --test --test-concurrency=1 scripts/security/validate-security-architecture.test.mjs",
     "security:validate": "node scripts/security/validate-security-architecture.mjs",
+    "specs:check": "node scripts/orchestration-specs/check-specs.mjs",
+    "specs:generate": "node scripts/orchestration-specs/generate-specs.mjs",
+    "specs:model": "node --test --test-concurrency=1 scripts/orchestration-specs/model.test.mjs",
+    "specs:mutation": "node --test --test-concurrency=1 scripts/orchestration-specs/mutation.test.mjs",
+    "specs:property": "node --test --test-concurrency=1 scripts/orchestration-specs/property.test.mjs",
+    "specs:test": "pnpm run specs:property && pnpm run specs:mutation && pnpm run specs:model",
     "skills:check": "pnpm run skills:validate && pnpm run skills:test",
     "skills:test": "node --test --test-concurrency=1 scripts/skills/validate-skills.test.mjs",
     "skills:validate": "node scripts/skills/validate-skills.mjs",
@@ -73,12 +79,14 @@
     "typecheck:root": "tsc --project tsconfig.json --noEmit --pretty false"
   },
   "devDependencies": {
-    "@agent-teams/engineering-foundation": "0.9.0",
+    "@agent-teams/engineering-foundation": "0.10.0",
+    "@xstate/graph": "catalog:",
     "ajv": "catalog:",
     "ajv-formats": "catalog:",
     "cspell": "catalog:",
     "eslint-import-resolver-oxc": "catalog:",
     "eslint-plugin-boundaries": "catalog:",
+    "fast-check": "catalog:",
     "github-slugger": "catalog:",
     "jsdom": "catalog:",
     "likec4": "catalog:",
@@ -96,6 +104,7 @@
     "typescript": "catalog:",
     "unified": "catalog:",
     "unist-util-visit": "catalog:",
+    "xstate": "catalog:",
     "yaml": "catalog:"
   }
 }
