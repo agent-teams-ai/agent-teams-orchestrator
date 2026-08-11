@@ -74,7 +74,7 @@ This is partial evidence only. It does not accept the proposed tactical dossiers
 activate a production package, define Agent Runtime contracts, or pass an
 implementation-readiness gate.
 
-Foundation 0.10.0 validates the consumer-owned executable-specification catalog
+Foundation 0.11.0 validates the consumer-owned executable-specification catalog
 and classifies the harness source boundary as development tooling. XState, graph,
 schema, and property-test dependencies remain exact development dependencies and
 cannot cross into a runtime source boundary. The Foundation capability validates

@@ -282,6 +282,11 @@ The security validator rejects mutable or mismatched refs, write-capable
 fallback permissions, and local checkout, authentication, or runtime steps that
 would duplicate or bypass the reusable workflow boundary.
 
+The accepted security baseline is ReviewRouter `v1.0.104` at commit
+`c7b7d5c5da0587c9fecdc2b7ec65be3df8e4acf4`. `pnpm security:check` verifies the
+caller and validator use that exact pin and proves that a deliberately different
+runtime SHA is rejected.
+
 `pnpm architecture:check` includes this gate. The documentation and architecture
 CI workflows execute it independently so changes to prose, schemas, fixtures, or
 LikeC4 cannot bypass validation.

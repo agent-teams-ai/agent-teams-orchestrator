@@ -8,7 +8,7 @@ const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
 
 export const reviewRouterRuntimeSha =
-  "6b35091c824b1d4d5ee6bf8316121ed08d3e4861";
+  "c7b7d5c5da0587c9fecdc2b7ec65be3df8e4acf4";
 const reusableWorkflow =
   "777genius/review-router/.github/workflows/reviewrouter-interaction-reusable.yml";
 const expectedUse = `${reusableWorkflow}@${reviewRouterRuntimeSha}`;
