@@ -641,7 +641,10 @@ test("normalizes a CRLF template to the frozen LF document bytes", async () => {
   await withFixture(async (fixtureRoot) => {
     const templatePath = path.join(fixtureRoot, "docs/templates/adr.md");
     const source = await readFile(templatePath, "utf8");
-    await writeFile(templatePath, source.replaceAll("\n", "\r\n"));
+    await writeFile(
+      templatePath,
+      source.replaceAll("\r\n", "\n").replaceAll("\n", "\r\n"),
+    );
     const result = await runCreator(fixtureRoot, adrArguments);
     assert.equal(result.code, 0, result.output);
     assert.equal(
