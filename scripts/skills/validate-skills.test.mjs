@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rename, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -82,6 +82,29 @@ test("rejects broken skill-local links", async () => {
     const result = await runValidator(fixture.root);
     assert.equal(result.code, 1);
     assert.match(result.output, /broken local link references\/missing\.md/);
+  } finally {
+    await rm(fixture.root, { force: true, recursive: true });
+  }
+});
+
+test("rejects a docs-authoring skill that drops a required workflow route", async () => {
+  const fixture = await createFixture();
+  try {
+    const docsSkillDirectory = path.join(
+      fixture.root,
+      ".agents/skills/docs-authoring",
+    );
+    await rename(fixture.skillDirectory, docsSkillDirectory);
+    await writeFile(
+      path.join(docsSkillDirectory, "SKILL.md"),
+      `---\nname: docs-authoring\ndescription: Use when authoring governed documentation through the canonical repository workflow.\n---\n\n# Documentation Authoring\n\nUse docs/standards/documentation.md#authority-by-knowledge-type, pnpm docs:query, pnpm docs:impact, and pnpm docs:check.\n`,
+    );
+    const result = await runValidator(fixture.root);
+    assert.equal(result.code, 1, result.output);
+    assert.match(
+      result.output,
+      /canonical documentation workflow must route pnpm docs:new/,
+    );
   } finally {
     await rm(fixture.root, { force: true, recursive: true });
   }

@@ -8,25 +8,29 @@ description: Use when creating, changing, reorganizing, or reviewing architectur
 Use this workflow to change governed project knowledge without creating a second
 source of truth.
 
-## Workflow
+## Deterministic workflow
 
-1. Read `docs/README.md` and the nearest directory index.
-2. Identify the authoritative artifact type with
-   `docs/standards/documentation.md#authority-by-knowledge-type`.
-3. Discover existing sources with `pnpm docs:query`. Search stable document IDs
-   and related metadata before searching only by filename.
-4. Check related open decisions. Do not implement or document an unresolved
-   choice as accepted architecture.
-5. Update the existing authority. For a new artifact, start from the matching
-   file under `docs/templates/`.
-6. Add or update `code_anchors` when a document must be reviewed after matching
-   implementation or machine-readable sources change.
-7. Run `pnpm docs:impact` while iterating. Use `--strict` when validating a
-   required anchor locally.
-8. If bounded-context relationships change, update `architecture/likec4/` and
-   the owning context dossier or ADR together.
-9. Run `pnpm docs:check`. Run `pnpm architecture:check` when the change affects
-   context topology, package topology, dependency rules, or architecture tools.
+1. **Find.** Read `docs/README.md` and the nearest directory index. Select the
+   authority with
+   `docs/standards/documentation.md#authority-by-knowledge-type`, then discover
+   existing sources with `pnpm docs:query`. Search stable IDs, relations, owner,
+   type, and status before searching only by filename.
+2. **Update or create.** Update the existing authority when it exists. Otherwise
+   run `pnpm docs:new -- --help` and create the governed artifact through that
+   command. It uses the canonical `docs/templates/` skeleton, validates identity,
+   owner, placement, relations, and code anchors, and never overwrites a file.
+3. **Connect.** Link the artifact from its nearest index. Check related open
+   decisions and preserve unresolved choices as blockers. Add `code_anchors`
+   when matching implementation or machine-readable source changes must route a
+   documentation review.
+4. **Synchronize.** If bounded-context relationships change, update
+   `architecture/likec4/` and the owning context dossier or ADR together. Update
+   every authority named by the change-consistency matrix in the documentation
+   standard.
+5. **Verify.** Run `pnpm docs:impact` while iterating and use `--strict` for a
+   required anchor. Run `pnpm docs:check` before completion. Also run
+   `pnpm architecture:check` when context topology, package topology, dependency
+   rules, or architecture tools change.
 
 ## Invariants
 
@@ -38,4 +42,6 @@ source of truth.
 - Generated LikeC4 exports, search indexes, and summaries are disposable views.
 - Code anchors express review impact. They do not replace tests, ownership, or
   compatibility checks.
+- `docs:new` scaffolds from the template authority but never invents domain
+  answers, acceptance, index prose, or relationships.
 - Update indexes and relationships in the same change as the governed document.

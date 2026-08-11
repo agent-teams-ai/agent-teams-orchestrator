@@ -43,7 +43,7 @@ Agents should also follow the short repository-level
 | Define SLI, SLO, invariants, or resource budgets | [Reliability objectives](architecture/reliability-objectives.md) | [Testing strategy](architecture/testing-strategy.md), `OD-030` |
 | Determine whether production implementation may start | [Implementation readiness gates](architecture/implementation-readiness-gates.md) | [Open decisions](open-decisions/README.md), [Testing strategy](architecture/testing-strategy.md) |
 | Record a decision | [Decision index](decisions/README.md) | [ADR template](templates/adr.md), [open-decision index](open-decisions/README.md) |
-| Add or reorganize documentation | [Documentation standards](standards/README.md) | [Templates](templates/README.md) |
+| Add or reorganize documentation | [Documentation standards](standards/README.md) | `pnpm docs:new -- --help`, [templates](templates/README.md) |
 | Inspect experimental evidence | [Research index](research/README.md) | owning ADR or open decision |
 
 ## Knowledge map
@@ -75,6 +75,8 @@ Machine-readable governance:
   owns candidate SLIs, strict reliability invariants, and resource budgets.
 - [The repository-local docs-authoring Skill](../.agents/skills/docs-authoring/SKILL.md)
   provides the canonical agent workflow without becoming architecture authority.
+- `pnpm docs:query`, `pnpm docs:new`, and `pnpm docs:impact` provide the guarded
+  find, create, and review-impact path without storing a generated authority.
 
 ## Authority and lifecycle
 
