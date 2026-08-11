@@ -452,6 +452,11 @@ and pull-request content. The security gate rejects mutable or mismatched refs,
 write-capable fallback permissions, and copied checkout, authentication, or
 runtime steps so fixes stay DRY and centrally auditable.
 
+The current reviewed baseline is ReviewRouter `v1.0.104` at commit
+`c7b7d5c5da0587c9fecdc2b7ec65be3df8e4acf4`. An upgrade must repin every real
+`uses` reference, `runtime_ref`, and canonical validator fixture together while
+retaining a deliberately different SHA in the mismatch rejection fixture.
+
 ## Upgrade policy
 
 All official Nx packages use one exact version. Upgrade them together through the
