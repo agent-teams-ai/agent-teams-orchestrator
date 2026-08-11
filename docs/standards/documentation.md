@@ -258,9 +258,15 @@ The agent must:
 3. search stable IDs, related metadata, and supersession links;
 4. update the existing authority instead of creating a parallel explanation;
 5. preserve unresolved choices as open decisions;
-6. use the matching template for a new governed artifact;
+6. use `pnpm docs:new -- --help` for a new governed artifact so the matching
+   template, identity, owner, placement, relationships, and code anchors are
+   validated before the first write;
 7. run `pnpm docs:impact` to inspect code-anchored documents;
 8. run `pnpm docs:check`.
+
+`docs:new` never overwrites a file, accepts an unregistered owner, records an
+accepted decision, or edits semantic index prose. Its output is incomplete until
+the author fills the evidence sections and links it from the nearest index.
 
 Generated summaries, semantic indexes, search databases, and AI-produced diagrams
 are disposable derived views. They never become a source of truth unless reviewed
@@ -297,6 +303,8 @@ Update related artifacts in one change when their authority requires it:
 - ADR lifecycle placement and metadata-backed collection indexes;
 - status-sensitive required document sections;
 - safe, non-stale code anchors and changed-path impact reporting;
+- guarded creation from the current governed templates, covered by positive and
+  negative fixture tests;
 - Mermaid syntax using the official Mermaid parser;
 - Markdown structure;
 - canonical product and technology terminology through project-owned Vale rules;

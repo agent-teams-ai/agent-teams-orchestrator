@@ -20,6 +20,13 @@ const allowedRootEntries = new Set([
   "scripts",
 ]);
 const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const docsAuthoringRequiredRoutes = [
+  "docs/standards/documentation.md#authority-by-knowledge-type",
+  "pnpm docs:query",
+  "pnpm docs:new",
+  "pnpm docs:impact",
+  "pnpm docs:check",
+];
 
 function relative(repositoryRoot, filePath) {
   return path.relative(repositoryRoot, filePath).split(path.sep).join("/");
@@ -120,6 +127,25 @@ async function validateOpenAiMetadata(
   }
 }
 
+function validateDocsAuthoringRoutes(
+  repositoryRoot,
+  skillDirectory,
+  source,
+  errors,
+) {
+  if (path.basename(skillDirectory) !== "docs-authoring") {
+    return;
+  }
+  const skillPath = path.join(skillDirectory, "SKILL.md");
+  for (const route of docsAuthoringRequiredRoutes) {
+    if (!source.includes(route)) {
+      errors.push(
+        `${relative(repositoryRoot, skillPath)}: canonical documentation workflow must route ${route}`,
+      );
+    }
+  }
+}
+
 async function validateSkill(repositoryRoot, skillDirectory, errors) {
   const folderName = path.basename(skillDirectory);
   const skillPath = path.join(skillDirectory, "SKILL.md");
@@ -174,6 +200,7 @@ async function validateSkill(repositoryRoot, skillDirectory, errors) {
   if (source.split("\n").length > 500) {
     errors.push(`${relative(repositoryRoot, skillPath)}: skill exceeds 500 lines`);
   }
+  validateDocsAuthoringRoutes(repositoryRoot, skillDirectory, source, errors);
   if (!tree.children.some((node) => node.type === "heading" && node.depth === 1)) {
     errors.push(`${relative(repositoryRoot, skillPath)}: missing level-one title`);
   }

@@ -17,6 +17,8 @@ Use the single task router in [the documentation map](docs/README.md#navigate-by
 Do not preload every architecture document when a change touches one boundary.
 Search stable IDs such as `ADR-0051`, `OD-004`, or
 `domain.contexts.run-orchestration`, not only filenames.
+For a new governed document, run `pnpm docs:new -- --help`; do not manually copy
+and edit template frontmatter.
 
 ## Current phase
 

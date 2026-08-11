@@ -59,6 +59,7 @@ is complete.
 | Capability | Decision state | Implementation state |
 |---|---|---|
 | Repository-local Stage 0 validators, lint, docs, security, and reliability gates | Accepted | Implemented and blocking |
+| Repository-local documentation authoring workflow | Accepted in ADR-0053 | Implemented with metadata discovery, template-backed guarded creation, code-impact routing, and blocking validation |
 | Versioned engineering foundation distribution | Accepted in ADR-0059 | Implemented with exact public npm dependency, explicit local lifecycle, consumer E2E proof, and fail-closed CI registry checks |
 | Nx package graph and affected foundation | Accepted in ADR-0039 | Implemented with pinned Nx Core and blocking pnpm-workspace discovery validation |
 | Nx task pipelines and local cache | Accepted in ADR-0039 | Planned; no task is cacheable until its complete inputs and outputs are proven |
@@ -156,9 +157,10 @@ The baseline consists of:
 - Oxlint with boundary rules as a blocking source gate;
 - dependency-cruiser in the isolated TypeScript 6 tooling package as an advisory
   complete-graph gate;
-- fixture-based architecture conformance tests.
+- fixture-based architecture conformance tests;
 - LikeC4 semantic validation and package-catalog consistency checks;
-- repository-local documentation Skill and code impact anchors.
+- repository-local documentation Skill, template-backed `docs:new` scaffolding,
+  metadata query, and code impact anchors.
 
 ### Source-quality lanes
 
