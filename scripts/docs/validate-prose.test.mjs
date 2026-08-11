@@ -9,7 +9,7 @@ import test from "node:test";
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "../..");
 const valeRunnerPath = path.join(scriptDirectory, "run-vale.mjs");
-const cspellCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+const cspellEntrypoint = fileURLToPath(import.meta.resolve("cspell/bin"));
 
 function run(command, args, input) {
   return new Promise((resolve, reject) => {
@@ -65,10 +65,9 @@ test("Vale rejects noncanonical project terminology", async () => {
 
 test("CSpell rejects an unknown spelling error", async () => {
   const result = await run(
-    cspellCommand,
+    process.execPath,
     [
-      "exec",
-      "cspell",
+      cspellEntrypoint,
       "--config",
       ".cspell.json",
       "--no-config-search",
