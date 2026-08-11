@@ -1,6 +1,6 @@
 schemaVersion: 1
 consumer: agent-teams-orchestrator
-foundationVersion: 0.10.0
+foundationVersion: 0.11.0
 composition:
   id: orchestrator-library-boundary
   configPath: architecture/foundation/scaffolding.yaml
