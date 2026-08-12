@@ -14,6 +14,7 @@ catalog:
 
     - kind: frontmatter-readme
       roots:
+        - apps
         - packages
         - tooling
 
@@ -96,6 +97,7 @@ authoring:
       placement:
         kind: explicit
         allowedRoots:
+          - apps
           - packages
           - tooling
         requiredSegmentsInOrder:
