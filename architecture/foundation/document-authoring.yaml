@@ -1,0 +1,124 @@
+schemaVersion: 1
+projectId: agent-teams-orchestrator
+
+catalog:
+  metadataSchemaPath: docs/metadata.schema.json
+
+  ownerCatalog:
+    path: docs/owners.yaml
+    contract: foundation.owner-map/v1
+
+  collections:
+    - kind: markdown-tree
+      root: docs
+
+    - kind: frontmatter-readme
+      roots:
+        - packages
+        - tooling
+
+  excludedPrefixes:
+    - scripts/docs/fixtures
+
+authoring:
+  mode: create-only
+
+  artifactTypes:
+    - type: adr
+      initialStatus: proposed
+      identity:
+        kind: explicit
+        format: adr-four-digits
+      placement:
+        kind: collection
+        directory: docs/decisions
+        filename: numeric-id-slug
+      template:
+        kind: fenced-markdown-body
+        path: docs/templates/adr.md
+      heading:
+        kind: id-colon-title
+
+    - type: open-decision
+      initialStatus: open
+      identity:
+        kind: explicit
+        format: open-decision-three-digits
+      placement:
+        kind: collection
+        directory: docs/open-decisions
+        filename: id-slug
+      template:
+        kind: fenced-markdown-body
+        path: docs/templates/open-decision.md
+      heading:
+        kind: id-colon-title
+
+    - type: bounded-context
+      initialStatus: proposed
+      identity:
+        kind: explicit
+        format: qualified
+      placement:
+        kind: qualified-leaf-index
+        allowedRoots:
+          - docs
+        requiredSegmentsInOrder:
+          - domain
+          - contexts
+        requiredBasename: README.md
+      template:
+        kind: fenced-markdown-body
+        path: docs/templates/bounded-context.md
+      heading:
+        kind: title
+
+    - type: contract
+      initialStatus: proposed
+      identity:
+        kind: explicit
+        format: qualified
+      placement:
+        kind: collection
+        directory: docs/contracts
+        filename: slug
+      template:
+        kind: fenced-markdown-body
+        path: docs/templates/contract.md
+      heading:
+        kind: title
+
+    - type: feature
+      initialStatus: proposed
+      identity:
+        kind: explicit
+        format: qualified
+      placement:
+        kind: explicit
+        allowedRoots:
+          - packages
+          - tooling
+        requiredSegmentsInOrder:
+          - src
+          - features
+        requiredBasename: README.md
+      template:
+        kind: fenced-markdown-body
+        path: docs/templates/feature.md
+      heading:
+        kind: title
+
+    - type: runbook
+      initialStatus: active
+      identity:
+        kind: explicit
+        format: qualified
+      placement:
+        kind: collection
+        directory: docs/operations
+        filename: slug
+      template:
+        kind: fenced-markdown-body
+        path: docs/templates/runbook.md
+      heading:
+        kind: title
