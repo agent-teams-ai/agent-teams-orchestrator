@@ -47,6 +47,7 @@ const forbiddenPackageRootDirectories = new Set([
   "shared",
   "utils",
 ]);
+const ignoredProductionFileNames = new Set([".DS_Store", ".gitkeep"]);
 const allowedPackageAssemblyPaths = [
   /^index\.[cm]?[jt]sx?$/,
   /^module\.[cm]?[jt]sx?$/,
@@ -422,7 +423,7 @@ async function main() {
       ["apps", "packages"].map((directory) =>
         walk(
           path.join(repositoryRoot, directory),
-          (filePath) => path.basename(filePath) !== ".DS_Store",
+          (filePath) => !ignoredProductionFileNames.has(path.basename(filePath)),
           {
             skipDirectories: ["node_modules", "dist", "coverage"],
           },

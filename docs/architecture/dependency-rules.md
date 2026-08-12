@@ -171,6 +171,9 @@ TypeScript path aliases are conveniences, not boundaries. `package.json` exports
 workspace dependencies, lint rules, and architecture tests enforce boundaries.
 The package catalog reserves approved topology; it does not replace import-graph
 enforcement inside materialized packages.
+A root-level `.gitkeep` may preserve an approved workspace family such as `apps/`;
+the topology validator ignores that sentinel, and it neither materializes a
+package nor authorizes any other production file outside a cataloged package.
 
 Every materialized package appears exactly once in the root TypeScript project
 references. Removing or adding a package updates the catalog, filesystem, manifest,

@@ -245,6 +245,16 @@ Use
 for metadata-backed discovery. It derives results from frontmatter and never
 writes a generated source-of-truth file.
 
+The Foundation read-only catalog is currently adopted in shadow mode through
+`pnpm docs:query:shadow`. The required documentation gate compares its complete
+common projection with `docs:query` by stable ID and path; any partial catalog or
+content mismatch fails the gate. Common AND-filter and zero-result probes also
+preserve the query migration contract. Ordering stays engine-specific during shadow:
+the legacy query retains its frozen locale ordering while Foundation uses its
+portable binary order. Agents continue to use `docs:query`, and `docs:new`
+remains the only supported automated writer during this migration phase. The
+Foundation shadow does not write documents or generated indexes.
+
 ## AI-assisted authoring
 
 An agent changing documentation starts with the canonical repository-local
