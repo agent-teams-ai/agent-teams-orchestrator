@@ -235,6 +235,9 @@ Feature ownership is enforced mechanically rather than remembered during review.
 `architecture/package-catalog.yaml` is the default-deny registry of allowed
 production package identities, roles, paths, names, and owner documents. A
 proposed owner reserves a name and path but cannot materialize production files.
+A root-level `.gitkeep` may preserve a supported empty workspace family without
+materializing a package; every other production file still requires a cataloged
+package boundary.
 `architecture/source-dependency-policy.yaml` separately allows each production
 source dependency by exact consumer, provider, and exported subpath. A manifest
 dependency, package-role-compatible direction, or LikeC4 relationship alone does
