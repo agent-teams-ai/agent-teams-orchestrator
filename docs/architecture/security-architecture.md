@@ -10,7 +10,7 @@ related:
   - ADR-0055
   - ADR-0058
   - ADR-0080
-  - ADR-0083
+  - ADR-0084
   - OD-012
   - OD-014
   - OD-029
@@ -58,11 +58,12 @@ The Runtime ACL separately translates a consumer-owned runtime port into the
 independently enforces technical runtime permissions, sandbox boundaries, and
 capabilities.
 
-Product-facing execution-assurance profiles are versioned presets over
-orthogonal requirements. They never name a container, VM, scheduler, cluster,
-or sandbox vendor. Policy and Risk may require stronger guarantees than a
-deployment can provide; composition then fails closed before provider execution
-rather than choosing a weaker backend.
+Product-facing execution-assurance profiles are versioned product-policy
+presets. They never name a container, VM, scheduler, cluster, sandbox vendor,
+or technical AR policy field. Policy and Risk may require stronger guarantees
+than AR can prove; the governing use case then fails closed before provider
+execution rather than choosing a weaker backend. Technical policy compilation,
+capability negotiation, lifecycle, and evidence remain exclusively AR-owned.
 
 ## Trust boundaries
 

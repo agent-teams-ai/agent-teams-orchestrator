@@ -1,17 +1,20 @@
 ---
 id: ADR-0083
 type: adr
-status: accepted
+status: superseded
 owner: architecture/security
 summary: Defines backend-neutral assurance intent while Agent Runtime owns containment compilation and enforcement.
 approved_by: product-owner
 accepted_at: 2026-08-13
+supersedes: []
+superseded_by:
+  - ADR-0084
 related:
   - ADR-0003
   - ADR-0055
   - ADR-0062
   - ADR-0079
-  - research.sandbox-hosting-spike-2026-08-13
+  - ADR-0084
 ---
 
 # ADR-0083: Assurance profiles and replaceable runtime containment
@@ -100,8 +103,8 @@ boundaries, and WorkloadFunnel are preferred candidates rather than normative
 dependencies until conformance, density, recovery, and isolation qualification
 passes for a supported deployment profile.
 
-The initial hosting evidence is recorded in
-[Sandbox hosting spike, 2026-08-13](../research/sandbox-hosting-spike-2026-08-13.md).
+The initial hosting evidence is recorded in Agent Runtime's
+[sandbox backend hosting qualification results](https://github.com/agent-teams-ai/agent-runtime/blob/main/docs/spikes/sandbox-backend-hosting-qualification-results.md).
 It supports this abstraction boundary but does not qualify a production backend.
 
 ## Consequences

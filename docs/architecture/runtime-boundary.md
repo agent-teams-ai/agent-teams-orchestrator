@@ -15,7 +15,7 @@ related:
   - ADR-0070
   - ADR-0079
   - ADR-0080
-  - ADR-0083
+  - ADR-0084
   - architecture.local-host-lifecycle
   - OD-004
 ---
@@ -97,12 +97,13 @@ flowchart LR
 There must never be two writers for one runtime mutation or two supervisors for
 one agent process.
 
-The Orchestrator never selects Docker, Kubernetes, OpenSandbox, gVisor, Kata,
-Firecracker, Docker Sandboxes, WorkloadFunnel, or another concrete runtime
-backend. It supplies a normalized isolation requirement through the consumer-owned
-runtime port. AR compiles that requirement into technical containment and may
-compose replaceable admission and sandbox adapters. Unsupported required
-capabilities fail before provider execution; no profile may silently downgrade.
+The Orchestrator supplies backend-neutral product assurance intent through a
+consumer-owned runtime port. It does not define AR's technical policy shape,
+resource model, sandbox lifecycle, backend choice, capacity algorithm, or
+qualification matrix. AR maps the intent to its Published Language, compiles and
+enforces technical containment, and returns typed capability and evidence
+outcomes. Unsupported required assurance fails before provider execution; no
+profile may silently downgrade.
 
 Orchestration Scope owns project-level `RuntimeScopeBinding`, scope admission and
 disposition intent, and the scope-ingestion inboxes, checkpoints, and
