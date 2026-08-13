@@ -1,9 +1,11 @@
 ---
 id: ADR-0083
 type: adr
-status: proposed
+status: accepted
 owner: architecture/security
 summary: Defines backend-neutral assurance intent while Agent Runtime owns containment compilation and enforcement.
+approved_by: product-owner
+accepted_at: 2026-08-13
 related:
   - ADR-0003
   - ADR-0055

@@ -34,10 +34,10 @@ discovery. The lifecycle lists below remain the complete status ledger.
 ## Proposed decisions
 
 - [ADR-0082: Break-glass reduces Orchestrator authority](0082-break-glass-reduces-orchestrator-authority.md)
-- [ADR-0083: Assurance profiles and replaceable runtime containment](0083-assurance-profiles-and-replaceable-runtime-containment.md)
 
 ## Accepted decisions
 
+- [ADR-0083: Assurance profiles and replaceable runtime containment](0083-assurance-profiles-and-replaceable-runtime-containment.md)
 - [ADR-0001: Headless event-driven modular monolith](0001-headless-event-driven-modular-monolith.md)
 - [ADR-0003: Runtime lifecycle belongs to ar](0003-ar-owns-runtime-lifecycle.md)
 - [ADR-0004: Broker-neutral core with NATS JetStream adapter](0004-broker-neutral-events-with-jetstream.md)
