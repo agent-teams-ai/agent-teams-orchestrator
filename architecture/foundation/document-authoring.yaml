@@ -60,13 +60,15 @@ authoring:
       identity:
         kind: explicit
         format: qualified
+        grammar:
+          prefixSegments:
+            - domain
+            - contexts
+          minSuffixSegments: 1
+          maxSuffixSegments: 1
       placement:
         kind: qualified-leaf-index
-        allowedRoots:
-          - docs
-        requiredSegmentsInOrder:
-          - domain
-          - contexts
+        root: docs/domain/contexts
         requiredBasename: README.md
       template:
         kind: fenced-markdown-body
@@ -79,6 +81,11 @@ authoring:
       identity:
         kind: explicit
         format: qualified
+        grammar:
+          prefixSegments:
+            - contract
+          minSuffixSegments: 2
+          maxSuffixSegments: 16
       placement:
         kind: collection
         directory: docs/contracts
@@ -94,6 +101,11 @@ authoring:
       identity:
         kind: explicit
         format: qualified
+        grammar:
+          prefixSegments:
+            - feature
+          minSuffixSegments: 2
+          maxSuffixSegments: 16
       placement:
         kind: explicit
         allowedRoots:
@@ -104,6 +116,8 @@ authoring:
           - src
           - features
         requiredBasename: README.md
+        minimumSegmentsBeforeRequired: 1
+        minimumSegmentsAfterRequired: 1
       template:
         kind: fenced-markdown-body
         path: docs/templates/feature.md
@@ -115,6 +129,11 @@ authoring:
       identity:
         kind: explicit
         format: qualified
+        grammar:
+          prefixSegments:
+            - runbook
+          minSuffixSegments: 2
+          maxSuffixSegments: 16
       placement:
         kind: collection
         directory: docs/operations
