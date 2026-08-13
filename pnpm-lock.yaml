@@ -107,8 +107,8 @@ importers:
   .:
     devDependencies:
       '@agent-teams/engineering-foundation':
-        specifier: 0.12.0
-        version: 0.12.0(supports-color@7.2.0)
+        specifier: 0.14.0
+        version: 0.14.0(supports-color@7.2.0)
       '@xstate/graph':
         specifier: 'catalog:'
         version: 3.0.4(xstate@5.32.5)
@@ -201,8 +201,8 @@ importers:
 
 packages:
 
-  '@agent-teams/engineering-foundation@0.12.0':
-    resolution: {integrity: sha512-LWey96bQBwA/91eD1T9pZRKrNUPlAt/8NEOQ5gnWfW6Mzs+kdvyOUNQFXUUR2TTrfzfgiYPgjg5aBTUkCrZ0WQ==}
+  '@agent-teams/engineering-foundation@0.14.0':
+    resolution: {integrity: sha512-4wLDBtGKwLvvd9LuD6g6nuI/BE/qD0IlKATegMqo0ItT1eeT8Lhd0x6lnV6QnHkKWx+sX+H6vsKs/9fNSDhm9Q==}
     engines: {node: '>=24.18.0 <25', pnpm: '>=11.17.0 <12'}
     hasBin: true
 
@@ -3743,7 +3743,7 @@ packages:
 
 snapshots:
 
-  '@agent-teams/engineering-foundation@0.12.0(supports-color@7.2.0)':
+  '@agent-teams/engineering-foundation@0.14.0(supports-color@7.2.0)':
     dependencies:
       '@microsoft/api-extractor': 7.58.12
       '@microsoft/api-extractor-model': 7.33.10
