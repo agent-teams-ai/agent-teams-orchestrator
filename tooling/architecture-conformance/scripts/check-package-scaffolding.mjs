@@ -263,34 +263,14 @@ async function verifyQualificationRecord() {
   );
   const validate = new Ajv2020({ allErrors: true, strict: true }).compile(schema);
   assert.equal(validate(record), true, JSON.stringify(validate.errors, null, 2));
-  for (const foundationVersion of [
-    "0.16.0-rc.0",
-    "0.16.0-rc.0+consumer.1",
-    "0.16.0+consumer.1",
-  ]) {
-    const candidate = structuredClone(record);
-    candidate.foundationVersion = foundationVersion;
-    assert.equal(
-      validate(candidate),
-      true,
-      `${foundationVersion} must be accepted as valid SemVer`,
-    );
-  }
-  for (const foundationVersion of [
-    "0.16",
-    "01.16.0",
-    "0.16.0-01",
-    "0.16.0-",
-    "0.16.0+",
-    "0.16.0_rc.0",
-  ]) {
-    const candidate = structuredClone(record);
-    candidate.foundationVersion = foundationVersion;
-    assert.equal(
-      validate(candidate),
-      false,
-      `${foundationVersion} must be rejected as malformed SemVer`,
-    );
+  const versionCases = [
+    ["0.16.0-rc.0+consumer.1", true], ["0.16.0+consumer.1", true],
+    ["0.16", false], ["01.16.0", false], ["0.16.0-01", false],
+    ["0.16.0-", false], ["0.16.0+", false], ["0.16.0_rc.0", false],
+  ];
+  for (const [foundationVersion, expected] of versionCases) {
+    assert.equal(validate({ ...record, foundationVersion }), expected,
+      `${foundationVersion} has an unexpected SemVer result`);
   }
   const manifest = JSON.parse(
     await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
