@@ -86,7 +86,11 @@ spec:
       restartPolicy: Never
 YAML
 "$KUBECTL" wait -n "$NAMESPACE" --for=condition=Ready sandbox/lifecycle --timeout=120s
-"$KUBECTL" exec -n "$NAMESPACE" sandbox/lifecycle -- sh -c 'printf lifecycle-ok' \
+pod_name=$(
+  "$KUBECTL" get sandbox -n "$NAMESPACE" lifecycle \
+    -o jsonpath='{.metadata.annotations.agents\.x-k8s\.io/pod-name}'
+)
+"$KUBECTL" exec -n "$NAMESPACE" "$pod_name" -- sh -c 'printf lifecycle-ok' \
   | grep -Fxq lifecycle-ok
 "$KUBECTL" delete -n "$NAMESPACE" sandbox/lifecycle --wait=true --timeout=120s
 ended=$(date +%s%N)
