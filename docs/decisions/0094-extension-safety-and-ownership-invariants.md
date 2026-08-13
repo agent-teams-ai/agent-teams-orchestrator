@@ -17,6 +17,8 @@ related:
   - architecture.security
   - OD-034
   - OD-037
+  - OD-041
+  - OD-042
 ---
 
 # ADR-0094: Extension Safety and Ownership Invariants

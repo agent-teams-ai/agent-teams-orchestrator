@@ -13,6 +13,8 @@ related:
   - OD-014
   - OD-015
   - OD-034
+  - OD-041
+  - OD-042
 ---
 
 # Extension Points
@@ -293,6 +295,11 @@ extensions. Distribution or publisher ownership does not weaken them.
   two independently exercised implementations, stable ownership, compatibility
   fixtures, and a conformance suite proving substitutability without shared
   internals.
+
+The shared extension foundation, artifact distribution, and catalog boundary
+remain open in OD-041. The Web and Desktop contribution model remains an
+unapproved proposal in OD-042. Neither open decision authorizes implementation
+or publication of a public SPI.
 
 ## Provider capability tiers
 

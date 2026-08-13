@@ -58,6 +58,8 @@ question. `Resolved` is historical and must relate to at least one deciding ADR.
 | OD-038 | [Runtime worker connectivity and enrollment](OD-038-runtime-worker-connectivity-and-enrollment.md) | integration/runtime | Open |
 | OD-039 | [Deployment qualification attestation](OD-039-deployment-qualification-attestation.md) | architecture/reliability | Open |
 | OD-040 | [Fully Local package materialization](OD-040-fully-local-package-materialization.md) | architecture/composition | Open |
+| OD-041 | [Shared extension foundation and artifact distribution](OD-041-shared-extension-foundation-and-artifact-distribution.md) | architecture | Open |
+| OD-042 | [Frontend extension contribution model](OD-042-frontend-extension-contribution-model.md) | architecture | Open |
 
 Use the [open-decision template](../templates/open-decision.md) for new entries.
 CI verifies that every record is listed and that table owner and status match its

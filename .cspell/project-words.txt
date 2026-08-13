@@ -37,6 +37,7 @@ Mikro
 NATS
 OpenCode
 OpenTelemetry
+ORAS
 outbox
 Oxlint
 oxlintrc
