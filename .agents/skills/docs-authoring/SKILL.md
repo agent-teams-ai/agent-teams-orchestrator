@@ -32,6 +32,24 @@ source of truth.
    `pnpm architecture:check` when context topology, package topology, dependency
    rules, or architecture tools change.
 
+## Foundation RC preview
+
+The repository-local `pnpm docs:query` and `pnpm docs:new` commands remain the
+canonical agent workflow. Foundation 0.16 RC authoring coexists behind explicit
+aliases for qualification:
+
+- `pnpm docs:foundation:find -- <filters>` reads the consumer-owned profile;
+- `pnpm docs:foundation:new -- <arguments> --dry-run` previews a plan;
+- `pnpm docs:foundation:doctor` inspects transaction state read-only;
+- `pnpm docs:foundation:recover` is used only when doctor reports an automatic
+  recovery route.
+
+Do not use the RC writer to mutate this repository. Exercise publication and
+recovery only in a disposable fixture copied from the real metadata schema,
+owner catalog, templates, and authoring profile. A successful preview does not
+prove parity with the canonical writer's metadata, identity, placement, index,
+template, or validator contracts.
+
 ## Invariants
 
 - A repo-local Skill is workflow guidance, never architecture authority.

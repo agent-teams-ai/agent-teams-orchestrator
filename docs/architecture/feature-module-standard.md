@@ -61,6 +61,10 @@ A package-level `src/` may contain only:
 
 The final exception requires an architecture decision. A broad `shared`, `common`,
 `utils`, `services`, or `infrastructure` directory is not an acceptable exception.
+Foundation-owned terminal cleanup evidence under the exact
+`.foundation-retired-evidence-` directory is transaction evidence rather than
+production source and is excluded from topology inventory. No other hidden
+directory receives that exclusion.
 
 Feature ownership is structural, while DDD depth is semantic:
 

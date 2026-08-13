@@ -20,6 +20,14 @@ Search stable IDs such as `ADR-0051`, `OD-004`, or
 For a new governed document, run `pnpm docs:new -- --help`; do not manually copy
 and edit template frontmatter.
 
+The Foundation 0.16 RC writer is available only as an explicit preview route:
+`pnpm docs:foundation:find`, `pnpm docs:foundation:new`,
+`pnpm docs:foundation:doctor`, and `pnpm docs:foundation:recover`. Continue to use
+`pnpm docs:query` and `pnpm docs:new` as the canonical local protocol. Use the
+Foundation writer only when intentionally qualifying the RC; start with
+`docs:foundation:new -- --dry-run`, and perform writes only in a disposable
+fixture, never in the real repository.
+
 ## Current phase
 
 The repository is in architecture definition. Do not introduce production
