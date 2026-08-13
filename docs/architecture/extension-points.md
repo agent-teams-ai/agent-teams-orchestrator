@@ -6,6 +6,7 @@ owner: architecture
 summary: Placement and ownership rules for deferred engines, protocols, plugins, and observability.
 related:
   - ADR-0074
+  - ADR-0094
   - ADR-0027
   - ADR-0045
   - OD-005
@@ -257,6 +258,41 @@ capabilities, contract versions, permissions, and isolation requirements.
 Plugins cannot replace domain policies that protect aggregate invariants. Facts
 returned by a plugin remain untrusted input until the owning application and domain
 validate them.
+
+### Non-negotiable extension guardrails
+
+These constraints apply to built-in, private first-party, community, and custom
+extensions. Distribution or publisher ownership does not weaken them.
+
+- There is no global `PluginManager` that resolves arbitrary application
+  services. Composition may own installation and lifecycle coordination, but it
+  cannot become a service locator or acquire business semantics.
+- Plugin code is never invoked inside a database transaction or Unit of Work.
+  The application records durable intent before an external effect, and unknown
+  outcomes are reconciled instead of retried blindly.
+- Registration or discovery order never defines business priority, ownership,
+  routing, or conflict resolution. An owning feature contract defines those
+  semantics explicitly; otherwise duplicate providers fail closed.
+- Manifest permissions are requests, not grants. Effective authority is the
+  intersection of the declared requirement, installation consent, current
+  authorization and policy, deployment qualification, and runtime enforcement.
+- Commercial entitlement, product authorization, and technical capability
+  enforcement remain independent decisions. None implies either of the others.
+- Logical extension identity, publisher identity, artifact digest, installation
+  identity, source incarnation, and active runtime generation remain distinct.
+- Mutable tags such as `latest` may assist discovery but never identify an
+  installed or active artifact. Installation, activation, rollback, and audit
+  pin immutable digests and resolved contract versions.
+- A timeout or lost acknowledgement after a potentially accepted external effect
+  enters reconciliation. Automatic retry is allowed only with a proven
+  idempotency contract or authoritative evidence that the effect did not occur.
+- Uninstalling an extension does not implicitly delete user or bounded-context
+  data. Data export, retention, transfer, and erasure use an explicit
+  owner-controlled disposition process.
+- A public SPI is not published from one implementation. It requires at least
+  two independently exercised implementations, stable ownership, compatibility
+  fixtures, and a conformance suite proving substitutability without shared
+  internals.
 
 ## Provider capability tiers
 

@@ -19,7 +19,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 | Concern | Current decisions | Current architecture |
 |---|---|---|
 | System shape and long-term evolution | `ADR-0001`, `ADR-0042`, `ADR-0051`, `ADR-0054`, `ADR-0062`, `ADR-0065`, `ADR-0076` | [Overview](../architecture/overview.md), [context map](../architecture/context-map.md), [architecture model](../architecture/architecture-model.md) |
-| Feature and dependency boundaries | `ADR-0012`, `ADR-0038`, `ADR-0040`, `ADR-0075` | [Feature standard](../architecture/feature-module-standard.md), [dependency rules](../architecture/dependency-rules.md) |
+| Feature and dependency boundaries | `ADR-0012`, `ADR-0038`, `ADR-0040`, `ADR-0075`, `ADR-0094` | [Feature standard](../architecture/feature-module-standard.md), [dependency rules](../architecture/dependency-rules.md), [extension points](../architecture/extension-points.md) |
 | Runtime ownership and AR integration | `ADR-0003`, `ADR-0028`, `ADR-0069`, `ADR-0079`, `ADR-0080`, `ADR-0083`, `ADR-0084`, `ADR-0088`, `ADR-0091`, `ADR-0093` | [Runtime boundary](../architecture/runtime-boundary.md), [Execution Observation](../domain/contexts/execution-observation/README.md) |
 | Eventing, delivery, and replay | `ADR-0004`, `ADR-0010`, `ADR-0019`, `ADR-0035` | [Eventing and reliability](../architecture/eventing-and-reliability.md) |
 | Persistence, migrations, and exact values | `ADR-0011`, `ADR-0025`, `ADR-0046`, `ADR-0050`, `ADR-0052`, `ADR-0078` | [Persistence boundary](../architecture/persistence-boundary.md), [testing](../architecture/testing-strategy.md) |
@@ -118,6 +118,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0091: Current disclosure and attribution fencing](0091-current-disclosure-and-attribution-fencing.md)
 - [ADR-0092: Closed deployment qualification and materialization gates](0092-closed-deployment-qualification-and-materialization-gates.md)
 - [ADR-0093: Observation snapshot and replay closure](0093-observation-snapshot-and-replay-closure.md)
+- [ADR-0094: Extension safety and ownership invariants](0094-extension-safety-and-ownership-invariants.md)
 
 ## Superseded decisions
 
