@@ -7,6 +7,7 @@ summary: Placement and ownership rules for deferred engines, protocols, plugins,
 related:
   - ADR-0074
   - ADR-0094
+  - ADR-0095
   - ADR-0027
   - ADR-0045
   - OD-005
@@ -15,6 +16,7 @@ related:
   - OD-034
   - OD-041
   - OD-042
+  - OD-043
 ---
 
 # Extension Points
@@ -296,10 +298,11 @@ extensions. Distribution or publisher ownership does not weaken them.
   fixtures, and a conformance suite proving substitutability without shared
   internals.
 
-The shared extension foundation, artifact distribution, and catalog boundary
-remain open in OD-041. The Web and Desktop contribution model remains an
-unapproved proposal in OD-042. Neither open decision authorizes implementation
-or publication of a public SPI.
+The shared extension foundation and OCI artifact distribution are fixed by
+ADR-0095. Exact catalog governance, lifecycle, isolation, hot update, and
+rollback remain open in OD-043. The Web and Desktop contribution model remains
+an unapproved proposal in OD-042. Neither open decision authorizes publication
+of a public SPI.
 
 ## Provider capability tiers
 

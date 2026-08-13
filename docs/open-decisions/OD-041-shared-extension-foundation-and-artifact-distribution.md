@@ -1,13 +1,15 @@
 ---
 id: OD-041
 type: open-decision
-status: open
+status: resolved
+resolved_by: ADR-0095
 owner: architecture
 summary: Decide the shared extension foundation, OCI artifact distribution, catalog boundary, and registry conformance model.
 blocked_by: []
 related:
   - ADR-0074
   - ADR-0094
+  - ADR-0095
   - architecture.extensions
   - architecture.security
   - OD-037
@@ -21,7 +23,7 @@ Should Orchestrator, Agent Runtime, and future Frontend products reuse a shared
 technical extension foundation, and what exact distribution, catalog,
 provenance, compatibility, and lifecycle contracts may that foundation own?
 
-## Candidate direction under review
+## Accepted direction
 
 Create a separately versioned `agent-teams-ai/extension-foundation` repository
 containing only product-neutral extension infrastructure:
@@ -70,9 +72,8 @@ flowchart LR
 - Mutable tags are discovery hints only. Profiles, installation records,
   activation, rollback, and audit pin an immutable OCI digest.
 
-OCI Distribution, ORAS, and Cosign are candidate standards and tools rather than
-domain dependencies. The exact library and process integration remains open
-until spikes prove Node, browser, hosted, and future Fully Local requirements.
+OCI Distribution, ORAS, and Cosign are fixed technical choices behind the shared
+foundation. They do not become product domain dependencies.
 
 ## Required proof before acceptance
 
@@ -102,6 +103,6 @@ until spikes prove Node, browser, hosted, and future Fully Local requirements.
 
 ## Resolution
 
-Open. This document records a candidate direction only. Acceptance requires a
-dedicated ADR after the conformance, security, lifecycle, and product-boundary
-spikes above.
+Resolved by ADR-0095. Exact catalog governance, isolation tiers, lifecycle, hot
+update, and rollback remain open in OD-043. The Frontend contribution model
+remains open in OD-042.

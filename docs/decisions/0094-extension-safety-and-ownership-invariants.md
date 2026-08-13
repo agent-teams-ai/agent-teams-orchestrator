@@ -19,6 +19,7 @@ related:
   - OD-037
   - OD-041
   - OD-042
+  - OD-043
 ---
 
 # ADR-0094: Extension Safety and Ownership Invariants
