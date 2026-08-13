@@ -20,6 +20,10 @@ and limitations. They are evidence, not normative architecture.
 
 - [Centrifugo Desktop spike, 2026-07-28](centrifugo-desktop-spike-2026-07-28.md)
 
+## Runtime containment
+
+- [Sandbox hosting spike, 2026-08-13](sandbox-hosting-spike-2026-08-13.md)
+
 ## Legacy migration evidence
 
 - [Legacy Electron and OpenCode behavior audit, 2026-07-30](legacy-electron-opencode-behavior-audit-2026-07-30.md)

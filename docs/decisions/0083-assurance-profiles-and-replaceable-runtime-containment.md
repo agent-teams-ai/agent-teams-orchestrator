@@ -9,6 +9,7 @@ related:
   - ADR-0055
   - ADR-0062
   - ADR-0079
+  - research.sandbox-hosting-spike-2026-08-13
 ---
 
 # ADR-0083: Assurance profiles and replaceable runtime containment
@@ -96,6 +97,10 @@ Agent Sandbox, gVisor, Kata, Firecracker, Docker Sandboxes, native process
 boundaries, and WorkloadFunnel are preferred candidates rather than normative
 dependencies until conformance, density, recovery, and isolation qualification
 passes for a supported deployment profile.
+
+The initial hosting evidence is recorded in
+[Sandbox hosting spike, 2026-08-13](../research/sandbox-hosting-spike-2026-08-13.md).
+It supports this abstraction boundary but does not qualify a production backend.
 
 ## Consequences
 
