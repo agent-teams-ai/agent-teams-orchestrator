@@ -153,6 +153,16 @@ spec:
   warmPoolRef:
     name: warm-pool
 YAML
+for _ in $(seq 1 60); do
+  if "$KUBECTL" get sandbox -n "$NAMESPACE" warm-claim >/dev/null 2>&1; then
+    break
+  fi
+  sleep 0.2
+done
+if ! "$KUBECTL" get sandbox -n "$NAMESPACE" warm-claim >/dev/null 2>&1; then
+  printf 'warm claim did not materialize a Sandbox\n' >&2
+  exit 1
+fi
 "$KUBECTL" wait -n "$NAMESPACE" --for=condition=Ready sandbox/warm-claim --timeout=60s
 ended=$(date +%s%N)
 record warm-pool-claim ready "$(( (ended - started) / 1000000 ))"
