@@ -34,6 +34,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 ## Proposed decisions
 
 - [ADR-0082: Break-glass reduces Orchestrator authority](0082-break-glass-reduces-orchestrator-authority.md)
+- [ADR-0083: Assurance profiles and replaceable runtime containment](0083-assurance-profiles-and-replaceable-runtime-containment.md)
 
 ## Accepted decisions
 
