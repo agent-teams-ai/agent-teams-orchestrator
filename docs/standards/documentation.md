@@ -255,6 +255,18 @@ portable binary order. Agents continue to use `docs:query`, and `docs:new`
 remains the only supported automated writer during this migration phase. The
 Foundation shadow does not write documents or generated indexes.
 
+Foundation 0.16 RC authoring is additionally exposed through the clearly named
+`docs:foundation:find`, `docs:foundation:new`, `docs:foundation:doctor`, and
+`docs:foundation:recover` aliases. These commands consume the repository-owned
+metadata schema, owner catalog, templates, artifact types, identity rules, and
+placements in `architecture/foundation/document-authoring.yaml`. They are a
+qualification preview, not a replacement for `docs:query` or `docs:new`.
+Publication and recovery must be exercised only in disposable fixtures;
+`docs:foundation:new -- --dry-run` is the only writer form permitted against the
+real checkout. Canonical-route parity remains unclaimed until all six artifact
+types and their extra metadata, IDs, paths, templates, indexes, and validators
+have equivalent consumer evidence.
+
 ## AI-assisted authoring
 
 An agent changing documentation starts with the canonical repository-local
