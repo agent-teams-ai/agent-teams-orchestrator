@@ -126,6 +126,20 @@ spec:
   sandboxTemplateRef:
     name: warm-template
 YAML
+for _ in $(seq 1 120); do
+  pool_count=$(
+    "$KUBECTL" get pods -n "$NAMESPACE" -l agents.x-k8s.io/pool \
+      -o jsonpath='{.items[*].metadata.name}' | wc -w
+  )
+  if (( pool_count >= 2 )); then
+    break
+  fi
+  sleep 1
+done
+if (( pool_count < 2 )); then
+  printf 'warm pool did not create two members\n' >&2
+  exit 1
+fi
 "$KUBECTL" wait -n "$NAMESPACE" --for=condition=Ready pod \
   -l agents.x-k8s.io/pool --timeout=120s
 
