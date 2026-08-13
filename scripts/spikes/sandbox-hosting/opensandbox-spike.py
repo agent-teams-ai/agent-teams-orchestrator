@@ -190,7 +190,7 @@ async def destroy_all(sandboxes: list[Sandbox]) -> None:
 
 
 async def run_density(args: argparse.Namespace) -> None:
-    path = evidence_path("opensandbox-density.jsonl")
+    path = evidence_path(f"opensandbox-density-{args.evidence_label}.jsonl")
     path.write_text("", encoding="utf-8")
     sandboxes: list[Sandbox] = []
     await cleanup_spike_sandboxes()
@@ -198,21 +198,35 @@ async def run_density(args: argparse.Namespace) -> None:
         for target in range(args.step, args.max_sandboxes + 1, args.step):
             before = guard_host()
             started = time.monotonic()
-            results = await asyncio.gather(
-                *(
-                    create_sandbox(index, scenario="density")
-                    for index in range(len(sandboxes), target)
-                ),
-                return_exceptions=True,
-            )
-            errors = [result for result in results if isinstance(result, BaseException)]
-            sandboxes.extend(
-                result for result in results if isinstance(result, Sandbox)
-            )
-            if errors:
-                raise RuntimeError(
-                    f"{len(errors)} sandbox creates failed; first={errors[0]!r}"
+            pending_indexes = list(range(len(sandboxes), target))
+            for offset in range(0, len(pending_indexes), args.create_concurrency):
+                batch = pending_indexes[offset : offset + args.create_concurrency]
+                results = await asyncio.gather(
+                    *(create_sandbox(index, scenario="density") for index in batch),
+                    return_exceptions=True,
                 )
+                errors = [
+                    result for result in results if isinstance(result, BaseException)
+                ]
+                sandboxes.extend(
+                    result for result in results if isinstance(result, Sandbox)
+                )
+                if errors:
+                    append_jsonl(
+                        path,
+                        {
+                            "countBeforeFailure": len(sandboxes),
+                            "createConcurrency": args.create_concurrency,
+                            "failedCreates": len(errors),
+                            "firstError": str(errors[0]),
+                            "hostAfter": host_snapshot(),
+                            "outcome": "create_failed",
+                            "target": target,
+                        },
+                    )
+                    raise RuntimeError(
+                        f"{len(errors)} sandbox creates failed; first={errors[0]!r}"
+                    )
 
             # OpenSandbox Docker metrics currently expose host-level values. Keep
             # them out of per-sandbox density totals until adapter qualification.
@@ -221,6 +235,7 @@ async def run_density(args: argparse.Namespace) -> None:
                 path,
                 {
                     "count": target,
+                    "createConcurrency": args.create_concurrency,
                     "createSeconds": round(time.monotonic() - started, 3),
                     "clientMaxRssKb": process_rss_kb(),
                     "backendMetricQualification": "host_scoped_not_per_sandbox",
@@ -457,6 +472,8 @@ async def main() -> None:
     )
     parser.add_argument("--max-sandboxes", type=int, default=100)
     parser.add_argument("--step", type=int, default=10)
+    parser.add_argument("--create-concurrency", type=int, default=1)
+    parser.add_argument("--evidence-label", default="sequential")
     args = parser.parse_args()
 
     guard_host()

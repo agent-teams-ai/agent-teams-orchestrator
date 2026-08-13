@@ -21,7 +21,15 @@ done
 
 for scenario in density recovery isolation; do
   guard_host
-  uv run --with opensandbox "$SCRIPT_DIR/opensandbox-spike.py" "$scenario"
+  if [[ "$scenario" == density ]]; then
+    uv run --with opensandbox "$SCRIPT_DIR/opensandbox-spike.py" density \
+      --max-sandboxes "${OPEN_SANDBOX_MAX_SANDBOXES:-100}" \
+      --step "${OPEN_SANDBOX_STEP:-10}" \
+      --create-concurrency "${OPEN_SANDBOX_CREATE_CONCURRENCY:-1}" \
+      --evidence-label "${OPEN_SANDBOX_EVIDENCE_LABEL:-sequential}"
+  else
+    uv run --with opensandbox "$SCRIPT_DIR/opensandbox-spike.py" "$scenario"
+  fi
 done
 
 cleanup_all
