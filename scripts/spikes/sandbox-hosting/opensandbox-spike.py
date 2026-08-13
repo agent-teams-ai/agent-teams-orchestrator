@@ -363,6 +363,29 @@ async def run_isolation(_: argparse.Namespace) -> None:
     )
     tenant_a, tenant_b = sandboxes
     try:
+        await tenant_a.commands.run(
+            "mkdir -p /tmp/www; printf tenant-a-network-secret > /tmp/www/value; "
+            "busybox httpd -p 8080 -h /tmp/www"
+        )
+        ip_execution = await tenant_a.commands.run("hostname -i | awk '{print $1}'")
+        tenant_a_ip = "".join(item.text for item in ip_execution.logs.stdout).strip()
+        network_execution = await tenant_b.commands.run(
+            f"wget -T 2 -q -O- http://{tenant_a_ip}:8080/value >/dev/null 2>&1; printf $?"
+        )
+        network_exit = "".join(
+            item.text for item in network_execution.logs.stdout
+        ).strip()
+        append_jsonl(
+            path,
+            {
+                "scenario": "cross-tenant-network",
+                "outcome": "blocked"
+                if network_exit != "0"
+                else "unexpectedly_reachable",
+                "commandExitText": network_exit,
+            },
+        )
+
         execution = await tenant_b.commands.run(
             "env | grep -E 'AWS_|GITHUB_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY' || true"
         )
