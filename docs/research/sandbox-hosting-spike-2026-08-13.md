@@ -32,16 +32,18 @@ a direct Kubernetes Agent Sandbox adapter?
 The probes did not use an agent provider, user project, production data, or
 foreign container. Guards stopped admission below 3 GiB available memory, 20 GiB
 free disk, or configured PSI limits. Cleanup selected only spike-owned resources.
+The reusable harness now pins kubectl 1.36.1 to match the Kind node; the recorded
+run used kubectl 1.35.3 and exercised only stable lifecycle operations.
 
 ## Results
 
 | Scenario | Result |
 | --- | --- |
-| Raw Docker density | 100 active idle containers; about 51.5 MiB aggregate container RSS |
+| Raw Docker density | 100 active idle containers; about 49.1 MiB aggregate container RSS |
 | Raw Docker startup | Each additional group of 10 took 12.4-16.0 seconds on the shared host |
 | OpenSandbox sequential density | 100 active sandboxes; all creates and cleanup completed |
 | OpenSandbox sequential startup | Last groups of 10 took 26.3-31.2 seconds, about 2.6-3.1 seconds per sandbox |
-| OpenSandbox burst create, concurrency 10 | Intermittent port-allocation collision; two observed failures, including one of five controlled repeats |
+| OpenSandbox burst create, concurrency 10 | Intermittent port-allocation collision; two failed rounds, including one of five controlled repeats |
 | OpenSandbox client reconnect | Reconnected to the same running sandbox after losing the local client |
 | OpenSandbox server crash | Sandbox remained usable after killing and restarting only the spike-owned server process |
 | Lost create acknowledgement | One resource was found by operation metadata |

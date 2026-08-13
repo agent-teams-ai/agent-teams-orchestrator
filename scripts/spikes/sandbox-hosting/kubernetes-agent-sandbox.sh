@@ -5,7 +5,7 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 source "$SCRIPT_DIR/common.sh"
 
 KIND_VERSION=${KIND_VERSION:-v0.32.0}
-KUBECTL_VERSION=${KUBECTL_VERSION:-v1.35.3}
+KUBECTL_VERSION=${KUBECTL_VERSION:-v1.36.1}
 AGENT_SANDBOX_VERSION=${AGENT_SANDBOX_VERSION:-v0.5.4}
 TOOLS_DIR=${TOOLS_DIR:?set TOOLS_DIR}
 KUBECONFIG=${KUBECONFIG:?set KUBECONFIG}
@@ -164,8 +164,10 @@ claimed_sandbox=$(
 ended=$(date +%s%N)
 record warm-pool-claim ready "$(( (ended - started) / 1000000 ))"
 
+started=$(date +%s%N)
 "$KUBECTL" delete namespace "$NAMESPACE" --wait=true --timeout=120s
-record namespace-disposition deleted 0
+ended=$(date +%s%N)
+record namespace-disposition deleted "$(( (ended - started) / 1000000 ))"
 
 capture_host_snapshot kubernetes-agent-sandbox-after
 cleanup_cluster
