@@ -139,6 +139,8 @@ horizon defined by ADR-0037.
 CI architecture gates test:
 
 - production source outside approved feature or package-assembly roots;
+- arbitrary hidden source, while excluding only Foundation-owned terminal
+  cleanup evidence under the exact `.foundation-retired-evidence-` directory;
 - packages without an explicit architectural role;
 - production packages absent from `architecture/package-catalog.yaml`;
 - packages whose owner document remains proposed;
