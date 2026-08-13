@@ -15,7 +15,7 @@ related:
   - ADR-0070
   - ADR-0079
   - ADR-0080
-  - ADR-0084
+  - ADR-0083
   - architecture.local-host-lifecycle
   - OD-004
 ---

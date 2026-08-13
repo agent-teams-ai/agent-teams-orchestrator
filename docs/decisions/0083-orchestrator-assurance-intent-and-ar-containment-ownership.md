@@ -1,13 +1,12 @@
 ---
-id: ADR-0084
+id: ADR-0083
 type: adr
 status: accepted
 owner: architecture/security
 summary: Limit Orchestrator to product assurance intent while Agent Runtime owns all technical containment.
 approved_by: product-owner
 accepted_at: 2026-08-13
-supersedes:
-  - ADR-0083
+supersedes: []
 superseded_by: []
 related:
   - ADR-0003
@@ -19,15 +18,15 @@ related:
   - architecture.security
 ---
 
-# ADR-0084: Orchestrator Assurance Intent and AR Containment Ownership
+# ADR-0083: Orchestrator Assurance Intent and AR Containment Ownership
 
 ## Context
 
-ADR-0083 correctly kept concrete sandbox products out of the Orchestrator
-domain, but it still specified sandbox assignment, reuse, warm-pool, reset,
-resource, cleanup, and backend-qualification behavior. Those are technical
-execution concerns already owned by Agent Runtime under ADR-0003 and the Runtime
-Published Language boundary.
+The Orchestrator needs to express product assurance intent without specifying
+sandbox assignment, reuse, warm-pool, reset, resource, cleanup, or
+backend-qualification behavior. Those are technical execution concerns already
+owned by Agent Runtime under ADR-0003 and the Runtime Published Language
+boundary.
 
 Keeping those rules in both repositories would create two policy compilers and
 two lifecycle authorities. It would also prevent AR from evolving containment
@@ -109,8 +108,6 @@ making Orchestrator the sandbox implementation owner.
   lifecycles joined only by explicit references and evidence.
 - Concrete candidates remain non-normative until AR qualifies and publishes the
   applicable capability.
-- ADR-0083 is superseded because its sandbox lifecycle and qualification rules
-  crossed the runtime boundary.
 
 ## Rejected Alternatives
 

@@ -20,7 +20,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 |---|---|---|
 | System shape and long-term evolution | `ADR-0001`, `ADR-0042`, `ADR-0051`, `ADR-0054`, `ADR-0062`, `ADR-0065`, `ADR-0076` | [Overview](../architecture/overview.md), [context map](../architecture/context-map.md), [architecture model](../architecture/architecture-model.md) |
 | Feature and dependency boundaries | `ADR-0012`, `ADR-0038`, `ADR-0040`, `ADR-0075` | [Feature standard](../architecture/feature-module-standard.md), [dependency rules](../architecture/dependency-rules.md) |
-| Runtime ownership and AR integration | `ADR-0003`, `ADR-0028`, `ADR-0069`, `ADR-0079`, `ADR-0080`, `ADR-0084` | [Runtime boundary](../architecture/runtime-boundary.md) |
+| Runtime ownership and AR integration | `ADR-0003`, `ADR-0028`, `ADR-0069`, `ADR-0079`, `ADR-0080`, `ADR-0083` | [Runtime boundary](../architecture/runtime-boundary.md) |
 | Eventing, delivery, and replay | `ADR-0004`, `ADR-0010`, `ADR-0019`, `ADR-0035` | [Eventing and reliability](../architecture/eventing-and-reliability.md) |
 | Persistence, migrations, and exact values | `ADR-0011`, `ADR-0025`, `ADR-0046`, `ADR-0050`, `ADR-0052`, `ADR-0078` | [Persistence boundary](../architecture/persistence-boundary.md), [testing](../architecture/testing-strategy.md) |
 | Public contracts and SDK | `ADR-0016`, `ADR-0019`, `ADR-0036`, `ADR-0037`, `ADR-0058`, `ADR-0067`, `ADR-0071`, `ADR-0077` | [SDK and transports](../architecture/sdk-and-transports.md), [public contracts](../architecture/public-control-contracts.md) |
@@ -28,7 +28,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 | Workflow and migration | `ADR-0027`, `ADR-0029`, `ADR-0063`, `ADR-0065` | [Extension points](../architecture/extension-points.md), [migration boundary](../architecture/migration-boundary.md) |
 | Repository publication and enforcement | `ADR-0031`, `ADR-0032`, `ADR-0039`, `ADR-0053`, `ADR-0056`, `ADR-0059`, `ADR-0070`, `ADR-0081` | [Repository tooling](../architecture/repository-tooling.md), [documentation standard](../standards/documentation.md), [testing](../architecture/testing-strategy.md) |
 | Domain capability boundaries | `ADR-0044`, `ADR-0045`, `ADR-0046`, `ADR-0068`, `ADR-0072`, `ADR-0073`, `ADR-0074`, `ADR-0080` | [Context map](../architecture/context-map.md), [context dossiers](../domain/contexts/README.md) |
-| Security boundaries and data handling | `ADR-0021`, `ADR-0028`, `ADR-0055`, `ADR-0084` | [Security architecture](../architecture/security-architecture.md), [runtime boundary](../architecture/runtime-boundary.md) |
+| Security boundaries and data handling | `ADR-0021`, `ADR-0028`, `ADR-0055`, `ADR-0083` | [Security architecture](../architecture/security-architecture.md), [runtime boundary](../architecture/runtime-boundary.md) |
 | Reliability objectives | `ADR-0057` | [Reliability objectives](../architecture/reliability-objectives.md), [testing](../architecture/testing-strategy.md) |
 
 ## Proposed decisions
@@ -37,7 +37,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 
 ## Accepted decisions
 
-- [ADR-0084: Orchestrator assurance intent and AR containment ownership](0084-orchestrator-assurance-intent-and-ar-containment-ownership.md)
+- [ADR-0083: Orchestrator assurance intent and AR containment ownership](0083-orchestrator-assurance-intent-and-ar-containment-ownership.md)
 - [ADR-0001: Headless event-driven modular monolith](0001-headless-event-driven-modular-monolith.md)
 - [ADR-0003: Runtime lifecycle belongs to ar](0003-ar-owns-runtime-lifecycle.md)
 - [ADR-0004: Broker-neutral core with NATS JetStream adapter](0004-broker-neutral-events-with-jetstream.md)
@@ -122,7 +122,6 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0026: Opaque runtime execution observations](0026-opaque-runtime-execution-observations.md)
 - [ADR-0033: Shared local supervisor and versioned host](0033-shared-local-supervisor-and-versioned-host.md)
 - [ADR-0061: Command-family-scoped durable operations](0061-command-family-scoped-durable-operations.md)
-- [ADR-0083: Assurance profiles and replaceable runtime containment](0083-assurance-profiles-and-replaceable-runtime-containment.md)
 
 ## ADR process
 
