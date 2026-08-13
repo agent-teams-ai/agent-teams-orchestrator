@@ -214,26 +214,20 @@ async def run_density(args: argparse.Namespace) -> None:
                     f"{len(errors)} sandbox creates failed; first={errors[0]!r}"
                 )
 
-            metrics = await asyncio.gather(
-                *(sandbox.get_metrics() for sandbox in sandboxes),
-                return_exceptions=True,
-            )
-            valid_metrics = [
-                metric for metric in metrics if not isinstance(metric, BaseException)
-            ]
+            # OpenSandbox Docker metrics currently expose host-level values. Keep
+            # them out of per-sandbox density totals until adapter qualification.
+            metric = await sandboxes[0].get_metrics()
             append_jsonl(
                 path,
                 {
                     "count": target,
                     "createSeconds": round(time.monotonic() - started, 3),
                     "clientMaxRssKb": process_rss_kb(),
-                    "sandboxMemoryUsedMiB": round(
-                        sum(metric.memory_used_in_mib for metric in valid_metrics), 3
+                    "backendMetricQualification": "host_scoped_not_per_sandbox",
+                    "backendReportedMemoryUsedMiB": round(metric.memory_used_in_mib, 3),
+                    "backendReportedMemoryTotalMiB": round(
+                        metric.memory_total_in_mib, 3
                     ),
-                    "sandboxCpuUsedPercent": round(
-                        sum(metric.cpu_used_percentage for metric in valid_metrics), 3
-                    ),
-                    "metricFailures": len(metrics) - len(valid_metrics),
                     "hostBefore": before,
                     "hostAfter": host_snapshot(),
                 },
