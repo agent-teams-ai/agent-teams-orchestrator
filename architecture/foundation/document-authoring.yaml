@@ -1,4 +1,4 @@
-schemaVersion: 1
+schemaVersion: 2
 projectId: agent-teams-orchestrator
 
 catalog:
@@ -39,6 +39,9 @@ authoring:
         path: docs/templates/adr.md
       heading:
         kind: id-colon-title
+      reachability:
+        kind: manual-fixed-index
+        indexPath: docs/decisions/README.md
 
     - type: open-decision
       initialStatus: open
@@ -54,6 +57,9 @@ authoring:
         path: docs/templates/open-decision.md
       heading:
         kind: id-colon-title
+      reachability:
+        kind: manual-fixed-index
+        indexPath: docs/open-decisions/README.md
 
     - type: bounded-context
       initialStatus: proposed
@@ -75,6 +81,9 @@ authoring:
         path: docs/templates/bounded-context.md
       heading:
         kind: title
+      reachability:
+        kind: manual-fixed-index
+        indexPath: docs/domain/contexts/README.md
 
     - type: contract
       initialStatus: proposed
@@ -95,6 +104,9 @@ authoring:
         path: docs/templates/contract.md
       heading:
         kind: title
+      reachability:
+        kind: manual-fixed-index
+        indexPath: docs/contracts/README.md
 
     - type: feature
       initialStatus: proposed
@@ -123,6 +135,10 @@ authoring:
         path: docs/templates/feature.md
       heading:
         kind: title
+      reachability:
+        kind: manual-colocated-index
+        pathPrefix: before-required-segments
+        indexBasename: README.md
 
     - type: runbook
       initialStatus: active
@@ -143,3 +159,6 @@ authoring:
         path: docs/templates/runbook.md
       heading:
         kind: title
+      reachability:
+        kind: manual-fixed-index
+        indexPath: docs/operations/README.md

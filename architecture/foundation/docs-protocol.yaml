@@ -1,0 +1,19 @@
+schemaVersion: 1
+protocol:
+  id: agent-teams.docs-protocol
+  version: 1
+foundationProfile:
+  path: architecture/foundation/document-authoring.yaml
+  schemaVersion: 2
+  metadataSidecarPolicy: foundation-profile-v2-strict-merge
+agentWorkflow:
+  skillPath: .agents/skills/docs-authoring/SKILL.md
+semanticValidatorIds:
+  - orchestrator.docs.code-impact
+  - orchestrator.docs.local-links
+  - orchestrator.docs.metadata-schema
+  - orchestrator.docs.mermaid
+  - orchestrator.docs.prose
+  - orchestrator.docs.reachability
+  - orchestrator.docs.relations
+  - orchestrator.architecture.likec4
