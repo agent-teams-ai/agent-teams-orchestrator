@@ -11,14 +11,16 @@ Read these before making any change:
 2. [Architecture overview](docs/architecture/overview.md)
 3. [Open decisions](docs/open-decisions/README.md)
 4. [Documentation standard](docs/standards/documentation.md)
-5. [Documentation authoring Skill](.agents/skills/docs-authoring/SKILL.md)
+5. Follow the documentation route below.
+
+Use [.agents/skills/docs-authoring/SKILL.md](.agents/skills/docs-authoring/SKILL.md) for documentation.
 
 Use the single task router in [the documentation map](docs/README.md#navigate-by-task).
 Do not preload every architecture document when a change touches one boundary.
 Search stable IDs such as `ADR-0051`, `OD-004`, or
 `domain.contexts.run-orchestration`, not only filenames.
-For a new governed document, run `pnpm docs:new -- --help`; do not manually copy
-and edit template frontmatter.
+Do not hand-copy frontmatter or bypass the ordered discovery, authoring,
+reachability, impact, and repository-semantic checks.
 
 The Foundation 0.16 RC writer is available only as an explicit preview route:
 `pnpm docs:foundation:find`, `pnpm docs:foundation:new`,
@@ -147,11 +149,10 @@ For architecture or implementation work:
 13. run additional surface-specific gates when the owning documentation requires
     them. A passing changed-file or fast check never replaces the complete gate.
 
-For governed documentation changes, follow the repository-local
-`docs-authoring` Skill, which routes `agent-teams.docs-protocol/v1` without
-duplicating the machine-readable authoring profile. Run `pnpm docs:impact` before
-the final documentation gate; an impact report is a review route, not permission
-to rewrite an unrelated authority.
+For governed documentation changes, the repository-local `docs-authoring` Skill
+is the exact route for `agent-teams.docs-protocol/v1`; it does not duplicate the
+machine-readable profile. Its ordered checks are mandatory. An impact report is
+a review route, not permission to rewrite an unrelated authority.
 
 Do not create generic `shared`, `core`, workflow-engine, repository, event, DTO, or
 utility packages to avoid choosing an owner. Reuse semantics through explicit

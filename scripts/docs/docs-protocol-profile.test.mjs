@@ -13,6 +13,10 @@ async function readYaml(repositoryPath) {
   return YAML.parse(await readFile(path.join(repositoryRoot, repositoryPath), "utf8"));
 }
 
+async function readJson(repositoryPath) {
+  return JSON.parse(await readFile(path.join(repositoryRoot, repositoryPath), "utf8"));
+}
+
 test("keeps the protocol profile thin and routes one Foundation v2 authority", async () => {
   const profile = await readYaml("architecture/foundation/docs-protocol.yaml");
 
@@ -51,6 +55,9 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
   const artifacts = Object.fromEntries(
     profile.authoring.artifactTypes.map((artifact) => [artifact.type, artifact]),
   );
+  const owners = Object.keys((await readYaml("docs/owners.yaml")).owners).toSorted(
+    (left, right) => Buffer.compare(Buffer.from(left), Buffer.from(right)),
+  );
 
   assert.equal(profile.schemaVersion, 2);
   assert.deepEqual(Object.keys(artifacts).toSorted(), [
@@ -61,6 +68,15 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
     "open-decision",
     "runbook",
   ]);
+  for (const artifact of Object.values(artifacts)) {
+    assert.deepEqual(
+      artifact.allowedOwnerIds.toSorted((left, right) =>
+        Buffer.compare(Buffer.from(left), Buffer.from(right)),
+      ),
+      owners,
+      `${artifact.type} must preserve the registered-owner authoring boundary`,
+    );
+  }
   assert.deepEqual(artifacts.adr.reachability, {
     kind: "manual-fixed-index",
     indexPath: "docs/decisions/README.md",
@@ -86,4 +102,24 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
     kind: "manual-fixed-index",
     indexPath: "docs/operations/README.md",
   });
+});
+
+test("stages cutover without weakening repository-specific documentation gates", async () => {
+  const { scripts } = await readJson("package.json");
+
+  assert.equal(scripts["docs:check"], "pnpm run docs:repository:check");
+  assert.deepEqual(scripts["docs:repository:check"].split(" && "), [
+    "pnpm run docs:validate",
+    "pnpm run docs:query:shadow",
+    "pnpm run docs:test",
+    "pnpm run skills:check",
+    "pnpm run architecture:model:check",
+    "pnpm run docs:lint",
+    "pnpm run docs:prose",
+    "pnpm run docs:impact",
+  ]);
+  assert.match(scripts["docs:prose"], /docs:vale.*docs:spell/u);
+  assert.match(scripts["docs:test"], /docs-protocol-parity\.test\.mjs/u);
+  assert.equal(scripts["docs:new"], "node scripts/docs/create-doc.mjs");
+  assert.equal(scripts["docs:query"], "node scripts/docs/query-docs.mjs");
 });

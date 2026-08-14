@@ -112,6 +112,12 @@ code_anchors:
     enforcement: required
 ```
 
+The unified writer canonicalizes each anchor as `enforcement` followed by
+`pattern`. This key order is intentionally different from the legacy writer's
+`pattern` followed by `enforcement`; YAML mapping order has no semantic meaning,
+but deterministic bytes do. Migration parity therefore compares normalized
+anchor meaning while the new golden fixtures freeze the unified byte order.
+
 Patterns are repository-relative, use forward slashes, cannot escape the
 repository, and must match at least one current file. They cannot target `docs/**`
 or `.agents/**`; documentation relationships use stable IDs and links instead.
@@ -267,6 +273,17 @@ real checkout. Canonical-route parity remains unclaimed until all six artifact
 types and their extra metadata, IDs, paths, templates, indexes, and validators
 have equivalent consumer evidence.
 
+The cutover keeps generic protocol validation and Orchestrator semantics separate.
+`docs:check` becomes the exact shared protocol command only after both registry
+packages are pinned and the six-type workspace-built qualification passes.
+`docs:repository:check` permanently owns the repository-specific chain: metadata
+and relation validation, compatibility projection, fixture tests, Skill checks,
+LikeC4, markdownlint, Vale, CSpell, and `docs:impact`. During staging,
+`docs:check` aliases that repository chain so no existing gate is weakened.
+Switching `docs:find`, `docs:new`, `docs:doctor`, `docs:recover`, dependencies, and
+the two check commands is one atomic change; legacy writer/query removal happens
+only after the registry-backed parity evidence is green.
+
 ## AI-assisted authoring
 
 An agent changing documentation starts with the canonical repository-local
@@ -280,11 +297,11 @@ The agent must:
 3. search stable IDs, related metadata, and supersession links;
 4. update the existing authority instead of creating a parallel explanation;
 5. preserve unresolved choices as open decisions;
-6. use `pnpm docs:new -- --help` for a new governed artifact so the matching
-   template, identity, owner, placement, relationships, and code anchors are
-   validated before the first write;
-7. run `pnpm docs:impact` to inspect code-anchored documents;
-8. run `pnpm docs:check`.
+6. follow the exact preview/apply commands in the Skill so template, identity,
+   owner, placement, relationships, and code anchors are validated before write;
+7. apply the reported index/link instruction manually;
+8. run `pnpm docs:impact`, `pnpm docs:check`, and
+   `pnpm docs:repository:check` in their documented order.
 
 `docs:new` never overwrites a file, accepts an unregistered owner, records an
 accepted decision, or edits semantic index prose. Its output is incomplete until

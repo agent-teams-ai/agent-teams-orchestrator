@@ -99,6 +99,7 @@ Run:
 ```bash
 pnpm docs:check
 pnpm docs:impact
+pnpm docs:repository:check
 ```
 
 CI applies the same metadata, ID, hierarchy, index, navigation, link, anchor,
