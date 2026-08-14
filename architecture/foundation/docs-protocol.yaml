@@ -9,11 +9,11 @@ foundationProfile:
 agentWorkflow:
   skillPath: .agents/skills/docs-authoring/SKILL.md
 semanticValidatorIds:
+  - orchestrator.architecture.likec4
   - orchestrator.docs.code-impact
   - orchestrator.docs.local-links
-  - orchestrator.docs.metadata-schema
   - orchestrator.docs.mermaid
+  - orchestrator.docs.metadata-schema
   - orchestrator.docs.prose
   - orchestrator.docs.reachability
   - orchestrator.docs.relations
-  - orchestrator.architecture.likec4

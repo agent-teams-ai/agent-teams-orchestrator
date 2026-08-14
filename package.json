@@ -32,7 +32,7 @@
     "check:changed": "agent-teams-foundation agent-workflow changed --consumer .",
     "check:fast": "pnpm foundation:check && pnpm docs:check && pnpm run specs:check && pnpm run specs:test && pnpm lint:fast && pnpm typecheck && pnpm architecture:model:check && pnpm architecture:nx:check",
     "docs:validate": "node scripts/docs/validate-docs.mjs",
-    "docs:test": "node --test --test-concurrency=1 scripts/docs/check-doc-impact.test.mjs scripts/docs/create-doc.test.mjs scripts/docs/query-docs-shadow.test.mjs scripts/docs/validate-docs.test.mjs scripts/docs/validate-prose.test.mjs",
+    "docs:test": "node --test --test-concurrency=1 scripts/docs/check-doc-impact.test.mjs scripts/docs/create-doc.test.mjs scripts/docs/docs-protocol-profile.test.mjs scripts/docs/query-docs-shadow.test.mjs scripts/docs/validate-docs.test.mjs scripts/docs/validate-prose.test.mjs",
     "docs:impact": "node scripts/docs/check-doc-impact.mjs",
     "docs:new": "node scripts/docs/create-doc.mjs",
     "docs:query": "node scripts/docs/query-docs.mjs",
