@@ -148,9 +148,10 @@ For architecture or implementation work:
     them. A passing changed-file or fast check never replaces the complete gate.
 
 For governed documentation changes, follow the repository-local
-`docs-authoring` Skill. Run `pnpm docs:impact` before the final documentation
-gate; an impact report is a review route, not permission to rewrite an unrelated
-authority.
+`docs-authoring` Skill, which routes `agent-teams.docs-protocol/v1` without
+duplicating the machine-readable authoring profile. Run `pnpm docs:impact` before
+the final documentation gate; an impact report is a review route, not permission
+to rewrite an unrelated authority.
 
 Do not create generic `shared`, `core`, workflow-engine, repository, event, DTO, or
 utility packages to avoid choosing an owner. Reuse semantics through explicit
