@@ -5,16 +5,20 @@ import {
   mkdtemp,
   readFile,
   rm,
+  symlink,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 import { docsCheck, docsNew } from "@agent-teams/docs-protocol";
 import { runDocsProtocolQualification } from "@agent-teams/docs-protocol/qualification";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
+const docsPackageRoot = path.dirname(fileURLToPath(import.meta.resolve("@agent-teams/docs-protocol/package.json")));
+const foundationPackageRoot = path.dirname(fileURLToPath(import.meta.resolve("@agent-teams/engineering-foundation/package.json")));
 
 test("qualification manifest binds the exact protocol gate and registry packages", async () => {
   const [qualification, manifest] = await Promise.all([
@@ -91,6 +95,7 @@ async function makeSourceFixture() {
     mkdir(path.join(root, "docs/operations"), { recursive: true }),
     mkdir(path.join(root, "packages/example/src/features/create-widget"), { recursive: true }),
     mkdir(path.join(root, "tooling"), { recursive: true }),
+    mkdir(path.join(root, "node_modules/@agent-teams"), { recursive: true }),
   ]);
   await Promise.all([
     cp(path.join(repositoryRoot, "architecture/foundation/document-authoring.yaml"), path.join(root, "architecture/foundation/document-authoring.yaml")),
@@ -111,6 +116,8 @@ async function makeSourceFixture() {
     writeFile(path.join(root, "packages/example/src/features/create-widget/create-widget.ts"), "export {};\n"),
     cp(path.join(repositoryRoot, "docs/decisions/0001-headless-event-driven-modular-monolith.md"), path.join(root, "docs/decisions/0001-frozen.md")),
     writeFile(path.join(root, "docs/open-decisions/OD-001-frozen.md"), "---\nid: OD-001\ntype: open-decision\nstatus: open\nowner: architecture/tooling\nsummary: Existing decision used by protocol blocker parity.\n---\n\n# OD-001: Existing Open Decision\n"),
+    symlink(docsPackageRoot, path.join(root, "node_modules/@agent-teams/docs-protocol"), process.platform === "win32" ? "junction" : "dir"),
+    symlink(foundationPackageRoot, path.join(root, "node_modules/@agent-teams/engineering-foundation"), process.platform === "win32" ? "junction" : "dir"),
   ]);
   return root;
 }
@@ -178,10 +185,9 @@ test("shared writer rejects unknown owners and unresolved relation IDs without m
       { ...cases[0], intent: { ...cases[0].intent, id: "ADR-9002", owner: "not/registered" } },
       { ...cases[4], intent: { ...cases[4].intent, id: "feature.example.missing-relation" }, related: ["ADR-9999"], blockedBy: [] },
     ]) {
-      await assert.rejects(
-        docsNew({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml", apply: true, intent: request.intent, related: request.related, blockedBy: request.blockedBy, codeAnchors: request.codeAnchors }),
-        /not allowed|does not exist/u,
-      );
+      const result = await docsNew({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml", apply: true, intent: request.intent, related: request.related, blockedBy: request.blockedBy, codeAnchors: request.codeAnchors });
+      assert.notEqual(result.exitCode, 0, JSON.stringify(result.envelope));
+      assert.match(JSON.stringify(result.envelope), /not allowed|does not exist/u);
       await assert.rejects(readFile(path.join(source, request.expectedPath)), { code: "ENOENT" });
     }
   } finally {

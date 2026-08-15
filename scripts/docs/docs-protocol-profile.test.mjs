@@ -107,7 +107,8 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
 test("routes the canonical protocol commands without weakening repository documentation gates", async () => {
   const { scripts } = await readJson("package.json");
 
-  assert.deepEqual(scripts["docs:repository:check"].split(" && "), [
+  assert.equal(scripts["docs:repository:check"], "pnpm run docs:protocol:check");
+  assert.deepEqual(scripts["docs:protocol:check"].split(" && "), [
     "pnpm run docs:check",
     "pnpm run docs:validate",
     "pnpm run docs:test",
@@ -130,7 +131,6 @@ test("routes the canonical protocol commands without weakening repository docume
     "docs:foundation:find",
     "docs:foundation:new",
     "docs:foundation:recover",
-    "docs:protocol:check",
     "docs:protocol:parity",
     "docs:query",
     "docs:query:shadow",
