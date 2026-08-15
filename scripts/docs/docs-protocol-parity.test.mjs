@@ -4,6 +4,7 @@ import {
   mkdir,
   mkdtemp,
   readFile,
+  readdir,
   rm,
   symlink,
   writeFile,
@@ -13,7 +14,12 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { docsCheck, docsNew } from "@agent-teams/docs-protocol";
+import {
+  docsCheck,
+  docsDoctor,
+  docsNew,
+  docsRecover,
+} from "@agent-teams/docs-protocol";
 import { runDocsProtocolQualification } from "@agent-teams/docs-protocol/qualification";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
@@ -124,8 +130,11 @@ async function makeSourceFixture({ installPackages = true } = {}) {
   return root;
 }
 
+const requiresStrictDirectoryDurability = process.platform === "win32" ? test.skip : test;
+const requiresUnsupportedStrictDirectoryDurability = process.platform === "win32" ? test : test.skip;
+
 for (const scenario of cases) {
-  test(`shared writer freezes exact ${scenario.name} bytes, path, heading, template, and index instruction`, async () => {
+  requiresStrictDirectoryDurability(`shared writer freezes exact ${scenario.name} bytes, path, heading, template, and index instruction`, async () => {
     const source = await makeSourceFixture();
     try {
       const preflight = await docsCheck({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
@@ -155,7 +164,7 @@ for (const scenario of cases) {
   });
 }
 
-test("shared qualification runner proves all six types on owned disposable copies", async () => {
+requiresStrictDirectoryDurability("shared qualification runner proves all six types on owned disposable copies", async () => {
   const source = await makeSourceFixture({ installPackages: false });
   try {
     for (const scenario of cases) {
@@ -175,6 +184,62 @@ test("shared qualification runner proves all six types on owned disposable copie
       assert.equal(receipt.appliedDocumentPath, scenario.expectedPath);
       assert.deepEqual(receipt.checks, ["info", "find", "preview", "crash", "doctor", "recover", "receipt", "parent", "apply", "index", "check", "source-unchanged"]);
     }
+  } finally {
+    await rm(source, { recursive: true, force: true });
+  }
+});
+
+requiresUnsupportedStrictDirectoryDurability("Windows previews all six types and preserves fail-closed durability evidence", async () => {
+  const source = await makeSourceFixture();
+  try {
+    const preflight = await docsCheck({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
+    assert.equal(preflight.exitCode, 0, JSON.stringify(preflight.envelope));
+    for (const scenario of cases) {
+      const preview = await docsNew({
+        consumerRoot: source,
+        profilePath: "architecture/foundation/docs-protocol.yaml",
+        apply: false,
+        intent: scenario.intent,
+        related: scenario.related,
+        blockedBy: scenario.blockedBy,
+        codeAnchors: scenario.codeAnchors,
+      });
+      assert.equal(preview.exitCode, 0, JSON.stringify(preview.envelope));
+      assert.equal(preview.envelope.result.writeState, "preview");
+      assert.equal(preview.envelope.result.documentPath, scenario.expectedPath);
+      assert.equal(preview.envelope.result.reachability.indexPath, scenario.indexPath);
+      await assert.rejects(readFile(path.join(source, scenario.expectedPath)), { code: "ENOENT" });
+    }
+
+    const applied = await docsNew({
+      consumerRoot: source,
+      profilePath: "architecture/foundation/docs-protocol.yaml",
+      apply: true,
+      intent: cases[0].intent,
+    });
+    assert.equal(applied.exitCode, 1);
+    assert.equal(applied.envelope.outcome, "recovery-required");
+    assert.equal(applied.envelope.result.writeState, "unchanged");
+    assert.equal(applied.envelope.result.receiptOutcome, "manual-recovery-required");
+    assert.ok(applied.envelope.diagnostics.some(({ ruleId }) => ruleId === "document.transaction.journal-reconciliation"));
+    await assert.rejects(readFile(path.join(source, cases[0].expectedPath)), { code: "ENOENT" });
+
+    const stateDirectory = path.join(source, ".agent-teams-local");
+    const transitionName = "scaffolding-transaction.json.document-transition";
+    assert.deepEqual((await readdir(stateDirectory)).toSorted(), [
+      "foundation-operation.lock",
+      transitionName,
+    ]);
+    const transitionBefore = await readFile(path.join(stateDirectory, transitionName));
+    const doctor = await docsDoctor({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
+    const recovered = await docsRecover({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
+    assert.equal(doctor.exitCode, 1);
+    assert.equal(doctor.envelope.result.environment.filesystem.strictDirectoryDurability, "platform-unsupported");
+    assert.equal(doctor.envelope.result.transaction.state, "manual-recovery-required");
+    assert.equal(recovered.exitCode, 1);
+    assert.equal(recovered.envelope.result.transactionState, "manual-required");
+    assert.equal(recovered.envelope.result.transaction.state, "manual-recovery-required");
+    assert.deepEqual(await readFile(path.join(stateDirectory, transitionName)), transitionBefore);
   } finally {
     await rm(source, { recursive: true, force: true });
   }
