@@ -13,7 +13,7 @@ ADRs record significant architecture choices and their consequences.
 ## Landmark decisions by concern
 
 This map is a short reading aid, not another complete catalog. Use
-`pnpm docs:query -- --owner|--status|--related <value>` for metadata-backed
+`pnpm docs:find -- --owner|--status|--related <value>` for metadata-backed
 discovery. The lifecycle lists below remain the complete status ledger.
 
 | Concern | Current decisions | Current architecture |

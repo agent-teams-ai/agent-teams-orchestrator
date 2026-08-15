@@ -1,25 +1,20 @@
 import assert from "node:assert/strict";
-import { pathToFileURL } from "node:url";
 import {
   cp,
   mkdir,
   mkdtemp,
   readFile,
   rm,
-  symlink,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
+import { docsCheck, docsNew } from "@agent-teams/docs-protocol";
+import { runDocsProtocolQualification } from "@agent-teams/docs-protocol/qualification";
+
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
-const packageRoot = process.env.DOCS_PROTOCOL_PACKAGE_ROOT;
-const required = process.env.REQUIRE_DOCS_PROTOCOL_PARITY === "1";
-if (required && !packageRoot) {
-  throw new Error("DOCS_PROTOCOL_PACKAGE_ROOT is required by the parity runner.");
-}
-const sharedTest = packageRoot ? test : test.skip;
 
 const cases = [
   {
@@ -89,7 +84,7 @@ async function makeSourceFixture() {
     cp(path.join(repositoryRoot, "docs/templates"), path.join(root, "docs/templates"), { recursive: true }),
     cp(path.join(repositoryRoot, "docs/metadata.schema.json"), path.join(root, "docs/metadata.schema.json")),
     cp(path.join(repositoryRoot, "docs/owners.yaml"), path.join(root, "docs/owners.yaml")),
-    writeFile(path.join(root, "package.json"), `${JSON.stringify({ name: "docs-parity-fixture", private: true, type: "module", scripts: Object.fromEntries(["check", "doctor", "find", "info", "new", "recover"].map((command) => [`docs:${command}`, `agent-teams-docs ${command} --consumer . --profile architecture/foundation/docs-protocol.yaml`])), devDependencies: { "@agent-teams/docs-protocol": "0.0.0", "@agent-teams/engineering-foundation": "0.16.0" } }, null, 2)}\n`),
+    writeFile(path.join(root, "package.json"), `${JSON.stringify({ name: "docs-parity-fixture", private: true, type: "module", scripts: Object.fromEntries(["check", "doctor", "find", "info", "new", "recover"].map((command) => [`docs:${command}`, `agent-teams-docs ${command} --consumer . --profile architecture/foundation/docs-protocol.yaml`])), devDependencies: { "@agent-teams/docs-protocol": "0.1.0-rc.0", "@agent-teams/engineering-foundation": "0.17.0-rc.0" } }, null, 2)}\n`),
     writeFile(path.join(root, "docs/README.md"), indexSource("docs.index", "Documentation")),
     writeFile(path.join(root, "docs/decisions/README.md"), indexSource("docs.decisions.index", "Decisions")),
     writeFile(path.join(root, "docs/open-decisions/README.md"), indexSource("docs.open-decisions.index", "Open Decisions")),
@@ -104,28 +99,10 @@ async function makeSourceFixture() {
   return root;
 }
 
-async function linkWorkspacePackages(root) {
-  const scope = path.join(root, "node_modules/@agent-teams");
-  await mkdir(scope, { recursive: true });
-  const foundationRoot = path.resolve(packageRoot, "../engineering-foundation");
-  await Promise.all([
-    symlink(packageRoot, path.join(scope, "docs-protocol"), process.platform === "win32" ? "junction" : "dir"),
-    symlink(foundationRoot, path.join(scope, "engineering-foundation"), process.platform === "win32" ? "junction" : "dir"),
-  ]);
-}
-
-async function loadShared() {
-  const api = await import(pathToFileURL(path.join(packageRoot, "dist/index.js")));
-  const qualification = await import(pathToFileURL(path.join(packageRoot, "dist/qualification/index.js")));
-  return { docsCheck: api.docsCheck, docsNew: api.docsNew, runDocsProtocolQualification: qualification.runDocsProtocolQualification };
-}
-
 for (const scenario of cases) {
-  sharedTest(`shared writer freezes exact ${scenario.name} bytes, path, heading, template, and index instruction`, async () => {
+  test(`shared writer freezes exact ${scenario.name} bytes, path, heading, template, and index instruction`, async () => {
     const source = await makeSourceFixture();
     try {
-      await linkWorkspacePackages(source);
-      const { docsCheck, docsNew } = await loadShared();
       const preflight = await docsCheck({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
       assert.equal(preflight.exitCode, 0, JSON.stringify(preflight.envelope));
       const result = await docsNew({
@@ -153,10 +130,9 @@ for (const scenario of cases) {
   });
 }
 
-sharedTest("shared qualification runner proves all six types on owned disposable copies", async () => {
+test("shared qualification runner proves all six types on owned disposable copies", async () => {
   const source = await makeSourceFixture();
   try {
-    const { runDocsProtocolQualification } = await loadShared();
     for (const scenario of cases) {
       const receipt = await runDocsProtocolQualification({
         fixtureRoot: source,
@@ -179,11 +155,9 @@ sharedTest("shared qualification runner proves all six types on owned disposable
   }
 });
 
-sharedTest("shared writer rejects unknown owners and unresolved relation IDs without mutation", async () => {
+test("shared writer rejects unknown owners and unresolved relation IDs without mutation", async () => {
   const source = await makeSourceFixture();
   try {
-    await linkWorkspacePackages(source);
-    const { docsNew } = await loadShared();
     for (const request of [
       { ...cases[0], intent: { ...cases[0].intent, id: "ADR-9002", owner: "not/registered" } },
       { ...cases[4], intent: { ...cases[4].intent, id: "feature.example.missing-relation" }, related: ["ADR-9999"], blockedBy: [] },

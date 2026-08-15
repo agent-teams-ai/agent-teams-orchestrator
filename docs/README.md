@@ -75,7 +75,7 @@ Machine-readable governance:
   owns candidate SLIs, strict reliability invariants, and resource budgets.
 - [The repository-local docs-authoring Skill](../.agents/skills/docs-authoring/SKILL.md)
   provides the canonical agent workflow without becoming architecture authority.
-- `pnpm docs:query`, `pnpm docs:new`, and `pnpm docs:impact` provide the guarded
+- `pnpm docs:find`, `pnpm docs:new`, and `pnpm docs:impact` provide the guarded
   find, create, and review-impact path without storing a generated authority.
 
 ## Authority and lifecycle

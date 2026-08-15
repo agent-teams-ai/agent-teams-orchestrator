@@ -104,13 +104,12 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
   });
 });
 
-test("stages cutover without weakening repository-specific documentation gates", async () => {
+test("routes the canonical protocol commands without weakening repository documentation gates", async () => {
   const { scripts } = await readJson("package.json");
 
-  assert.equal(scripts["docs:check"], "pnpm run docs:repository:check");
   assert.deepEqual(scripts["docs:repository:check"].split(" && "), [
+    "pnpm run docs:check",
     "pnpm run docs:validate",
-    "pnpm run docs:query:shadow",
     "pnpm run docs:test",
     "pnpm run skills:check",
     "pnpm run architecture:model:check",
@@ -120,6 +119,22 @@ test("stages cutover without weakening repository-specific documentation gates",
   ]);
   assert.match(scripts["docs:prose"], /docs:vale.*docs:spell/u);
   assert.match(scripts["docs:test"], /docs-protocol-parity\.test\.mjs/u);
-  assert.equal(scripts["docs:new"], "node scripts/docs/create-doc.mjs");
-  assert.equal(scripts["docs:query"], "node scripts/docs/query-docs.mjs");
+  for (const command of ["check", "doctor", "find", "info", "new", "recover"]) {
+    assert.equal(
+      scripts[`docs:${command}`],
+      `agent-teams-docs ${command} --consumer . --profile architecture/foundation/docs-protocol.yaml`,
+    );
+  }
+  for (const removed of [
+    "docs:foundation:doctor",
+    "docs:foundation:find",
+    "docs:foundation:new",
+    "docs:foundation:recover",
+    "docs:protocol:check",
+    "docs:protocol:parity",
+    "docs:query",
+    "docs:query:shadow",
+  ]) {
+    assert.equal(scripts[removed], undefined);
+  }
 });

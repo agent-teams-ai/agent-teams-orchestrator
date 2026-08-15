@@ -246,43 +246,27 @@ Repository and directory indexes route readers; they do not repeat normative
 rules. Use task-oriented links and short scope descriptions. Stable document IDs
 are preferred in discussion and automation because paths may move.
 
-Use
-`pnpm docs:query -- --id|--owner|--type|--status|--related|--blocked-by <value>`
-for metadata-backed discovery. It derives results from frontmatter and never
-writes a generated source-of-truth file.
+Read the active vocabulary and placement policy with `pnpm docs:info`. Use
+`pnpm docs:find -- --text|--id|--owner|--type|--status|--related|--blocked-by
+<value>` for metadata-backed discovery. Filters have AND semantics, results use
+portable binary ordering, and no matches is a successful empty result.
 
-The Foundation read-only catalog is currently adopted in shadow mode through
-`pnpm docs:query:shadow`. The required documentation gate compares its complete
-common projection with `docs:query` by stable ID and path; any partial catalog or
-content mismatch fails the gate. Common AND-filter and zero-result probes also
-preserve the query migration contract. Ordering stays engine-specific during shadow:
-the legacy query retains its frozen locale ordering while Foundation uses its
-portable binary order. Agents continue to use `docs:query`, and `docs:new`
-remains the only supported automated writer during this migration phase. The
-Foundation shadow does not write documents or generated indexes.
+The exact registry-pinned Docs Protocol is the only query and writer engine.
+`pnpm docs:new -- --dry-run` previews without mutation or reservation. A write
+requires the same reviewed inputs plus explicit `--apply`; the command never
+overwrites existing authority or edits index prose. When reachability requires
+an index, add the exact reported Markdown link at the exact reported path.
 
-Foundation 0.16 RC authoring is additionally exposed through the clearly named
-`docs:foundation:find`, `docs:foundation:new`, `docs:foundation:doctor`, and
-`docs:foundation:recover` aliases. These commands consume the repository-owned
-metadata schema, owner catalog, templates, artifact types, identity rules, and
-placements in `architecture/foundation/document-authoring.yaml`. They are a
-qualification preview, not a replacement for `docs:query` or `docs:new`.
-Publication and recovery must be exercised only in disposable fixtures;
-`docs:foundation:new -- --dry-run` is the only writer form permitted against the
-real checkout. Canonical-route parity remains unclaimed until all six artifact
-types and their extra metadata, IDs, paths, templates, indexes, and validators
-have equivalent consumer evidence.
+Use `pnpm docs:doctor` to inspect recovery requirements and `pnpm docs:recover`
+only for the reported transaction. Publication, crash, cancellation, and
+recovery qualification runs exclusively in disposable fixtures.
 
-The cutover keeps generic protocol validation and Orchestrator semantics separate.
-`docs:check` becomes the exact shared protocol command only after both registry
-packages are pinned and the six-type workspace-built qualification passes.
-`docs:repository:check` permanently owns the repository-specific chain: metadata
-and relation validation, compatibility projection, fixture tests, Skill checks,
-LikeC4, markdownlint, Vale, CSpell, and `docs:impact`. During staging,
-`docs:check` aliases that repository chain so no existing gate is weakened.
-Switching `docs:find`, `docs:new`, `docs:doctor`, `docs:recover`, dependencies, and
-the two check commands is one atomic change; legacy writer/query removal happens
-only after the registry-backed parity evidence is green.
+Generic protocol validation and Orchestrator semantics remain separate.
+`docs:check` is the exact shared protocol command. `docs:repository:check` owns
+the repository-specific chain: metadata and relation validation, six-type
+golden qualification, Skill checks, LikeC4, markdownlint, Vale, CSpell, and
+`docs:impact`. Root quality gates run the repository chain so no project-specific
+coverage is weakened.
 
 ## AI-assisted authoring
 

@@ -22,13 +22,11 @@ Search stable IDs such as `ADR-0051`, `OD-004`, or
 Do not hand-copy frontmatter or bypass the ordered discovery, authoring,
 reachability, impact, and repository-semantic checks.
 
-The Foundation 0.16 RC writer is available only as an explicit preview route:
-`pnpm docs:foundation:find`, `pnpm docs:foundation:new`,
-`pnpm docs:foundation:doctor`, and `pnpm docs:foundation:recover`. Continue to use
-`pnpm docs:query` and `pnpm docs:new` as the canonical local protocol. Use the
-Foundation writer only when intentionally qualifying the RC; start with
-`docs:foundation:new -- --dry-run`, and perform writes only in a disposable
-fixture, never in the real repository.
+The exact registry-pinned Docs Protocol command suite is the only document
+writer and query engine. Start with `pnpm docs:info`, search with
+`pnpm docs:find`, preview before every `pnpm docs:new -- --apply`, and use
+`pnpm docs:doctor` before recovery. Mutation and recovery qualification runs
+only in disposable fixtures, never against the real repository.
 
 ## Current phase
 
