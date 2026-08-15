@@ -406,6 +406,11 @@
       "id": "ADR-0081",
       "path": "docs/decisions/0081-foundation-owned-package-scaffolding-protocol.md",
       "immutableDigest": "sha256:3afccfd98883f9353114414927ff399c9a841ac3082ec9ec8fd1de0f816b9355"
+    },
+    {
+      "id": "ADR-0083",
+      "path": "docs/decisions/0083-orchestrator-assurance-intent-and-ar-containment-ownership.md",
+      "immutableDigest": "sha256:057c5f9edb3983e073b7132bb0bd99c0f13f9ac9daaeedcbf81fd349ed693512"
     }
   ]
 }

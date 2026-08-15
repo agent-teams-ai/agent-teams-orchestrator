@@ -15,6 +15,7 @@ related:
   - ADR-0070
   - ADR-0079
   - ADR-0080
+  - ADR-0083
   - architecture.local-host-lifecycle
   - OD-004
 ---
@@ -82,6 +83,9 @@ flowchart LR
 | Authority to use a workspace | Configured product authority provider through a feature-owned authorization port |
 | Workspace trust and required isolation properties | Policy and Risk |
 | Runtime sandbox, mounts, process isolation, network enforcement, and technical fencing | `ar` |
+| Backend-neutral execution-assurance requirement | Policy and Risk, resolved by Run Orchestration |
+| Technical containment compilation, backend capability negotiation, and attestation | `ar` |
+| Optional runtime resource admission, fairness, reservation, and placement | AR-composed runtime-capacity implementation |
 | Runtime-scope cutoff, technical disposition actions, and runtime evidence | `ar` |
 | Git worktree, clone, snapshot, or remote materialization mechanics | Workspace adapters |
 | Provider API, CLI, SSE, and protocol translation | `ar` provider driver |
@@ -92,6 +96,14 @@ flowchart LR
 
 There must never be two writers for one runtime mutation or two supervisors for
 one agent process.
+
+The Orchestrator supplies backend-neutral product assurance intent through a
+consumer-owned runtime port. It does not define AR's technical policy shape,
+resource model, sandbox lifecycle, backend choice, capacity algorithm, or
+qualification matrix. AR maps the intent to its Published Language, compiles and
+enforces technical containment, and returns typed capability and evidence
+outcomes. Unsupported required assurance fails before provider execution; no
+profile may silently downgrade.
 
 Orchestration Scope owns project-level `RuntimeScopeBinding`, scope admission and
 disposition intent, and the scope-ingestion inboxes, checkpoints, and
