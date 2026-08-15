@@ -16,6 +16,22 @@ import { runDocsProtocolQualification } from "@agent-teams/docs-protocol/qualifi
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 
+test("qualification manifest binds the exact protocol gate and registry packages", async () => {
+  const [qualification, manifest] = await Promise.all([
+    readFile(path.join(repositoryRoot, "architecture/foundation/docs-protocol-qualification.json"), "utf8").then(JSON.parse),
+    readFile(path.join(repositoryRoot, "package.json"), "utf8").then(JSON.parse),
+  ]);
+  assert.equal(qualification.gateCommand, "pnpm docs:protocol:check");
+  assert.deepEqual(qualification.packages, {
+    "@agent-teams/docs-protocol": manifest.devDependencies["@agent-teams/docs-protocol"],
+    "@agent-teams/engineering-foundation": manifest.devDependencies["@agent-teams/engineering-foundation"],
+  });
+  assert.deepEqual(qualification.qualificationTests, [
+    "scripts/docs/docs-protocol-parity.test.mjs",
+    "scripts/docs/docs-protocol-profile.test.mjs",
+  ]);
+});
+
 const cases = [
   {
     name: "adr",
