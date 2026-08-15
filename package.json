@@ -85,7 +85,7 @@
     "typecheck:root": "tsc --project tsconfig.json --noEmit --pretty false"
   },
   "devDependencies": {
-    "@agent-teams/engineering-foundation": "0.16.0-rc.0",
+    "@agent-teams/engineering-foundation": "0.16.1",
     "@xstate/graph": "catalog:",
     "ajv": "catalog:",
     "ajv-formats": "catalog:",
