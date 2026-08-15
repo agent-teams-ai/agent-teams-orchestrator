@@ -155,6 +155,7 @@ policies:
     - "@agent-teams/"
   developmentOnlyPackages: []
   exactRegistryDevelopmentOnlyPackages:
+    - "@agent-teams/docs-protocol"
     - "@agent-teams/engineering-foundation"
 `,
   );
@@ -183,6 +184,7 @@ policies:
       "external-one": "catalog:",
     },
     devDependencies: {
+      "@agent-teams/docs-protocol": "0.1.0",
       "@agent-teams/engineering-foundation": "0.1.0",
       "external-tool": "catalog:compatibility",
     },
@@ -314,6 +316,19 @@ export const documentationExample =
   );
   requireFoundationSuccess(
     "dynamic production import is outside declaration capability",
+    runFoundation(temporaryRoot),
+  );
+  await writeFile(
+    consumerSourcePath,
+    'import "@agent-teams/docs-protocol";\n',
+  );
+  requireFailure(
+    "docs protocol production import",
+    run(temporaryRoot),
+    "production source cannot import @agent-teams/docs-protocol",
+  );
+  requireFoundationSuccess(
+    "docs protocol production import is outside declaration capability",
     runFoundation(temporaryRoot),
   );
   await rm(path.join(temporaryRoot, "packages/consumer/src"), {

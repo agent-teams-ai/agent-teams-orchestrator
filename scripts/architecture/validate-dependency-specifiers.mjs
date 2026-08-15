@@ -13,8 +13,8 @@ const dependencySections = [
   "optionalDependencies",
   "peerDependencies",
 ];
-const engineeringFoundationPackage =
-  "@agent-teams/engineering-foundation";
+const dependencyPolicyPath =
+  "architecture/foundation/dependency-declarations.yaml";
 const productionSourceExtensions = new Set([
   ".cjs",
   ".cts",
@@ -110,6 +110,39 @@ function selectedCatalogName(specifier) {
   return;
 }
 
+async function loadExactRegistryDevelopmentOnlyPackages(
+  repositoryRoot,
+  errors,
+) {
+  let policy;
+  try {
+    policy = YAML.parse(
+      await readFile(path.join(repositoryRoot, dependencyPolicyPath), "utf8"),
+    );
+  } catch (error) {
+    errors.push(`${dependencyPolicyPath}: invalid YAML: ${error.message}`);
+    return new Set();
+  }
+  const packages = policy?.policies?.exactRegistryDevelopmentOnlyPackages;
+  if (
+    !Array.isArray(packages) ||
+    packages.length === 0 ||
+    packages.some((packageName) =>
+      typeof packageName !== "string" || packageName.length === 0)
+  ) {
+    errors.push(
+      `${dependencyPolicyPath}: exactRegistryDevelopmentOnlyPackages must be a non-empty string array`,
+    );
+    return new Set();
+  }
+  if (new Set(packages).size !== packages.length) {
+    errors.push(
+      `${dependencyPolicyPath}: exactRegistryDevelopmentOnlyPackages must be unique`,
+    );
+  }
+  return new Set(packages);
+}
+
 async function loadWorkspaceManifests(repositoryRoot, workspace, errors) {
   const patterns = workspace.packages;
   if (
@@ -181,6 +214,7 @@ function validateDependency({
   dependencySpecifier,
   entry,
   errors,
+  exactRegistryDevelopmentOnlyPackages,
   section,
   workspaceNames,
 }) {
@@ -199,7 +233,7 @@ function validateDependency({
     return;
   }
 
-  if (dependencyName === engineeringFoundationPackage) {
+  if (exactRegistryDevelopmentOnlyPackages.has(dependencyName)) {
     if (section !== "devDependencies") {
       errors.push(
         `${location} is engineering tooling and is allowed only as an exact devDependency`,
@@ -237,7 +271,11 @@ function validateDependency({
   }
 }
 
-async function validateProductionFoundationImports(repositoryRoot, errors) {
+async function validateProductionToolingImports(
+  repositoryRoot,
+  exactRegistryDevelopmentOnlyPackages,
+  errors,
+) {
   const sourceFiles = (
     await Promise.all(
       ["apps", "packages"].map((directory) =>
@@ -253,14 +291,15 @@ async function validateProductionFoundationImports(repositoryRoot, errors) {
 
   for (const filePath of sourceFiles) {
     const source = await readFile(filePath, "utf8");
-    const importsFoundation = extractModuleSpecifiers(source, filePath).some(
-      (specifier) =>
-        specifier === engineeringFoundationPackage ||
-        specifier.startsWith(`${engineeringFoundationPackage}/`),
-    );
-    if (importsFoundation) {
+    const importedToolingPackage = extractModuleSpecifiers(source, filePath)
+      .map((specifier) =>
+        [...exactRegistryDevelopmentOnlyPackages].find((packageName) =>
+          specifier === packageName || specifier.startsWith(`${packageName}/`)
+        ))
+      .find(Boolean);
+    if (importedToolingPackage) {
       errors.push(
-        `${relative(repositoryRoot, filePath)}: production source cannot import ${engineeringFoundationPackage}`,
+        `${relative(repositoryRoot, filePath)}: production source cannot import ${importedToolingPackage}`,
       );
     }
   }
@@ -301,6 +340,8 @@ async function main() {
     errors,
   );
   const workspaceNames = validateManifestNames(manifests, errors);
+  const exactRegistryDevelopmentOnlyPackages =
+    await loadExactRegistryDevelopmentOnlyPackages(repositoryRoot, errors);
 
   for (const entry of manifests) {
     for (const section of dependencySections) {
@@ -313,13 +354,18 @@ async function main() {
           dependencySpecifier,
           entry,
           errors,
+          exactRegistryDevelopmentOnlyPackages,
           section,
           workspaceNames,
         });
       }
     }
   }
-  await validateProductionFoundationImports(repositoryRoot, errors);
+  await validateProductionToolingImports(
+    repositoryRoot,
+    exactRegistryDevelopmentOnlyPackages,
+    errors,
+  );
 
   if (errors.length > 0) {
     for (const error of [...new Set(errors)].toSorted()) {
