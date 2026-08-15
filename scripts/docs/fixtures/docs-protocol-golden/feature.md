@@ -2,16 +2,16 @@
 id: feature.example.create-widget
 type: feature
 status: proposed
-owner: example/create-widget
-summary: Freezes the current feature document creation behavior.
+owner: architecture/tooling
+summary: Freezes the unified feature document creation behavior.
 related:
   - ADR-0001
   - OD-001
 blocked_by:
   - OD-001
 code_anchors:
-  - pattern: packages/example/src/features/create-widget/*.ts
-    enforcement: required
+  - enforcement: required
+    pattern: packages/example/src/features/create-widget/*.ts
 ---
 
 # Create Widget

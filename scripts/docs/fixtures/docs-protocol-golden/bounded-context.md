@@ -3,7 +3,7 @@ id: domain.contexts.frozen
 type: bounded-context
 status: proposed
 owner: architecture/tooling
-summary: Freezes the current bounded context creation contract.
+summary: Freezes the unified bounded context creation contract.
 ---
 
 # Frozen Context

@@ -3,7 +3,7 @@ id: OD-901
 type: open-decision
 status: open
 owner: architecture/tooling
-summary: Freezes the current open decision creation contract.
+summary: Freezes the unified open decision creation contract.
 ---
 
 # OD-901: Frozen Choice

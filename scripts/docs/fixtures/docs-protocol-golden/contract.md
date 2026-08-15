@@ -3,7 +3,7 @@ id: contract.frozen.widgets.v1
 type: contract
 status: proposed
 owner: architecture/tooling
-summary: Freezes the current contract document creation behavior.
+summary: Freezes the unified contract document creation behavior.
 ---
 
 # Frozen Widgets v1

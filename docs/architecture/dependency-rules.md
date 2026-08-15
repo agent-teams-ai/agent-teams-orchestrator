@@ -14,6 +14,8 @@ related:
   - ADR-0075
   - architecture.composition
 code_anchors:
+  - pattern: architecture/foundation/dependency-declarations.yaml
+    enforcement: required
   - pattern: scripts/architecture/validate-dependency-specifiers.mjs
     enforcement: required
   - pattern: scripts/architecture/source-imports.mjs
@@ -199,12 +201,16 @@ on contexts, integrations, or platform implementation packages. Internal workspa
 dependencies must be cataloged and use the `workspace:` protocol. Dev-only testing
 packages are the explicit exception to runtime role direction.
 
-The published `@agent-teams/engineering-foundation` package is the only external
-package allowed in the reserved scope. It must use an exact registry version in
+The `exactRegistryDevelopmentOnlyPackages` list in
+`architecture/foundation/dependency-declarations.yaml` is the single authority
+for external engineering tooling allowed in the reserved scope. It currently
+contains `@agent-teams/engineering-foundation` and
+`@agent-teams/docs-protocol`. Each package must use an exact registry version in
 `devDependencies`; runtime, optional, and peer declarations are prohibited.
-Production source under `apps/**/src` and `packages/**/src` cannot import it.
-Architecture fixtures prove both the valid dev-only declaration and invalid
-declaration and import cases.
+Production source under `apps/**/src` and `packages/**/src` cannot import any
+package from this list. The repository-local validator reads the policy instead
+of maintaining a second allowlist, and architecture fixtures prove valid
+dev-only declarations plus invalid declaration and import cases.
 
 The current exact Foundation release provides reusable declaration and source
 dependency checks through `workspace.dependency-declarations` and

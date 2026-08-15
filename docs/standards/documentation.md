@@ -112,6 +112,12 @@ code_anchors:
     enforcement: required
 ```
 
+The unified writer canonicalizes each anchor as `enforcement` followed by
+`pattern`. This key order is intentionally different from the legacy writer's
+`pattern` followed by `enforcement`; YAML mapping order has no semantic meaning,
+but deterministic bytes do. Migration parity therefore compares normalized
+anchor meaning while the new golden fixtures freeze the unified byte order.
+
 Patterns are repository-relative, use forward slashes, cannot escape the
 repository, and must match at least one current file. They cannot target `docs/**`
 or `.agents/**`; documentation relationships use stable IDs and links instead.
@@ -240,32 +246,27 @@ Repository and directory indexes route readers; they do not repeat normative
 rules. Use task-oriented links and short scope descriptions. Stable document IDs
 are preferred in discussion and automation because paths may move.
 
-Use
-`pnpm docs:query -- --id|--owner|--type|--status|--related|--blocked-by <value>`
-for metadata-backed discovery. It derives results from frontmatter and never
-writes a generated source-of-truth file.
+Read the active vocabulary and placement policy with `pnpm docs:info`. Use
+`pnpm docs:find -- --text|--id|--owner|--type|--status|--related|--blocked-by
+<value>` for metadata-backed discovery. Filters have AND semantics, results use
+portable binary ordering, and no matches is a successful empty result.
 
-The Foundation read-only catalog is currently adopted in shadow mode through
-`pnpm docs:query:shadow`. The required documentation gate compares its complete
-common projection with `docs:query` by stable ID and path; any partial catalog or
-content mismatch fails the gate. Common AND-filter and zero-result probes also
-preserve the query migration contract. Ordering stays engine-specific during shadow:
-the legacy query retains its frozen locale ordering while Foundation uses its
-portable binary order. Agents continue to use `docs:query`, and `docs:new`
-remains the only supported automated writer during this migration phase. The
-Foundation shadow does not write documents or generated indexes.
+The exact registry-pinned Docs Protocol is the only query and writer engine.
+`pnpm docs:new -- --dry-run` previews without mutation or reservation. A write
+requires the same reviewed inputs plus explicit `--apply`; the command never
+overwrites existing authority or edits index prose. When reachability requires
+an index, add the exact reported Markdown link at the exact reported path.
 
-Foundation 0.16 RC authoring is additionally exposed through the clearly named
-`docs:foundation:find`, `docs:foundation:new`, `docs:foundation:doctor`, and
-`docs:foundation:recover` aliases. These commands consume the repository-owned
-metadata schema, owner catalog, templates, artifact types, identity rules, and
-placements in `architecture/foundation/document-authoring.yaml`. They are a
-qualification preview, not a replacement for `docs:query` or `docs:new`.
-Publication and recovery must be exercised only in disposable fixtures;
-`docs:foundation:new -- --dry-run` is the only writer form permitted against the
-real checkout. Canonical-route parity remains unclaimed until all six artifact
-types and their extra metadata, IDs, paths, templates, indexes, and validators
-have equivalent consumer evidence.
+Use `pnpm docs:doctor` to inspect recovery requirements and `pnpm docs:recover`
+only for the reported transaction. Publication, crash, cancellation, and
+recovery qualification runs exclusively in disposable fixtures.
+
+Generic protocol validation and Orchestrator semantics remain separate.
+`docs:check` is the exact shared protocol command. `docs:repository:check` owns
+the repository-specific chain: metadata and relation validation, six-type
+golden qualification, Skill checks, LikeC4, markdownlint, Vale, CSpell, and
+`docs:impact`. Root quality gates run the repository chain so no project-specific
+coverage is weakened.
 
 ## AI-assisted authoring
 
@@ -280,11 +281,11 @@ The agent must:
 3. search stable IDs, related metadata, and supersession links;
 4. update the existing authority instead of creating a parallel explanation;
 5. preserve unresolved choices as open decisions;
-6. use `pnpm docs:new -- --help` for a new governed artifact so the matching
-   template, identity, owner, placement, relationships, and code anchors are
-   validated before the first write;
-7. run `pnpm docs:impact` to inspect code-anchored documents;
-8. run `pnpm docs:check`.
+6. follow the exact preview/apply commands in the Skill so template, identity,
+   owner, placement, relationships, and code anchors are validated before write;
+7. apply the reported index/link instruction manually;
+8. run `pnpm docs:impact`, `pnpm docs:check`, and
+   `pnpm docs:repository:check` in their documented order.
 
 `docs:new` never overwrites a file, accepts an unregistered owner, records an
 accepted decision, or edits semantic index prose. Its output is incomplete until

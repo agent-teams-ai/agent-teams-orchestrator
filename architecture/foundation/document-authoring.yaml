@@ -1,4 +1,4 @@
-schemaVersion: 1
+schemaVersion: 2
 projectId: agent-teams-orchestrator
 
 catalog:
@@ -27,6 +27,46 @@ authoring:
   artifactTypes:
     - type: adr
       initialStatus: proposed
+      allowedOwnerIds:
+        - access-control
+        - agent-attention
+        - agent-communication
+        - agent-context
+        - agent-organization
+        - apps
+        - apps/desktop-sidecar
+        - approval-management
+        - architecture
+        - architecture/composition
+        - architecture/contracts
+        - architecture/domain
+        - architecture/governance
+        - architecture/quality
+        - architecture/reliability
+        - architecture/security
+        - architecture/tooling
+        - clients/sdk
+        - consumption-governance
+        - engineering/tooling
+        - human-notification
+        - identity-registry
+        - integration/runtime
+        - migration/desktop
+        - operations
+        - orchestration-scope
+        - platform/control-api
+        - platform/eventing
+        - platform/local-host
+        - platform/observability
+        - platform/persistence
+        - policy-risk
+        - run-orchestration
+        - team-topology
+        - usage-accounting
+        - usage-capability
+        - usage-metering
+        - work-coordination
+        - workspace-registry
       identity:
         kind: explicit
         format: adr-four-digits
@@ -39,9 +79,52 @@ authoring:
         path: docs/templates/adr.md
       heading:
         kind: id-colon-title
+      reachability:
+        kind: manual-fixed-index
+        indexPath: docs/decisions/README.md
 
     - type: open-decision
       initialStatus: open
+      allowedOwnerIds:
+        - access-control
+        - agent-attention
+        - agent-communication
+        - agent-context
+        - agent-organization
+        - apps
+        - apps/desktop-sidecar
+        - approval-management
+        - architecture
+        - architecture/composition
+        - architecture/contracts
+        - architecture/domain
+        - architecture/governance
+        - architecture/quality
+        - architecture/reliability
+        - architecture/security
+        - architecture/tooling
+        - clients/sdk
+        - consumption-governance
+        - engineering/tooling
+        - human-notification
+        - identity-registry
+        - integration/runtime
+        - migration/desktop
+        - operations
+        - orchestration-scope
+        - platform/control-api
+        - platform/eventing
+        - platform/local-host
+        - platform/observability
+        - platform/persistence
+        - policy-risk
+        - run-orchestration
+        - team-topology
+        - usage-accounting
+        - usage-capability
+        - usage-metering
+        - work-coordination
+        - workspace-registry
       identity:
         kind: explicit
         format: open-decision-three-digits
@@ -54,9 +137,52 @@ authoring:
         path: docs/templates/open-decision.md
       heading:
         kind: id-colon-title
+      reachability:
+        kind: manual-fixed-index
+        indexPath: docs/open-decisions/README.md
 
     - type: bounded-context
       initialStatus: proposed
+      allowedOwnerIds:
+        - access-control
+        - agent-attention
+        - agent-communication
+        - agent-context
+        - agent-organization
+        - apps
+        - apps/desktop-sidecar
+        - approval-management
+        - architecture
+        - architecture/composition
+        - architecture/contracts
+        - architecture/domain
+        - architecture/governance
+        - architecture/quality
+        - architecture/reliability
+        - architecture/security
+        - architecture/tooling
+        - clients/sdk
+        - consumption-governance
+        - engineering/tooling
+        - human-notification
+        - identity-registry
+        - integration/runtime
+        - migration/desktop
+        - operations
+        - orchestration-scope
+        - platform/control-api
+        - platform/eventing
+        - platform/local-host
+        - platform/observability
+        - platform/persistence
+        - policy-risk
+        - run-orchestration
+        - team-topology
+        - usage-accounting
+        - usage-capability
+        - usage-metering
+        - work-coordination
+        - workspace-registry
       identity:
         kind: explicit
         format: qualified
@@ -75,9 +201,52 @@ authoring:
         path: docs/templates/bounded-context.md
       heading:
         kind: title
+      reachability:
+        kind: manual-fixed-index
+        indexPath: docs/domain/contexts/README.md
 
     - type: contract
       initialStatus: proposed
+      allowedOwnerIds:
+        - access-control
+        - agent-attention
+        - agent-communication
+        - agent-context
+        - agent-organization
+        - apps
+        - apps/desktop-sidecar
+        - approval-management
+        - architecture
+        - architecture/composition
+        - architecture/contracts
+        - architecture/domain
+        - architecture/governance
+        - architecture/quality
+        - architecture/reliability
+        - architecture/security
+        - architecture/tooling
+        - clients/sdk
+        - consumption-governance
+        - engineering/tooling
+        - human-notification
+        - identity-registry
+        - integration/runtime
+        - migration/desktop
+        - operations
+        - orchestration-scope
+        - platform/control-api
+        - platform/eventing
+        - platform/local-host
+        - platform/observability
+        - platform/persistence
+        - policy-risk
+        - run-orchestration
+        - team-topology
+        - usage-accounting
+        - usage-capability
+        - usage-metering
+        - work-coordination
+        - workspace-registry
       identity:
         kind: explicit
         format: qualified
@@ -95,9 +264,52 @@ authoring:
         path: docs/templates/contract.md
       heading:
         kind: title
+      reachability:
+        kind: manual-fixed-index
+        indexPath: docs/contracts/README.md
 
     - type: feature
       initialStatus: proposed
+      allowedOwnerIds:
+        - access-control
+        - agent-attention
+        - agent-communication
+        - agent-context
+        - agent-organization
+        - apps
+        - apps/desktop-sidecar
+        - approval-management
+        - architecture
+        - architecture/composition
+        - architecture/contracts
+        - architecture/domain
+        - architecture/governance
+        - architecture/quality
+        - architecture/reliability
+        - architecture/security
+        - architecture/tooling
+        - clients/sdk
+        - consumption-governance
+        - engineering/tooling
+        - human-notification
+        - identity-registry
+        - integration/runtime
+        - migration/desktop
+        - operations
+        - orchestration-scope
+        - platform/control-api
+        - platform/eventing
+        - platform/local-host
+        - platform/observability
+        - platform/persistence
+        - policy-risk
+        - run-orchestration
+        - team-topology
+        - usage-accounting
+        - usage-capability
+        - usage-metering
+        - work-coordination
+        - workspace-registry
       identity:
         kind: explicit
         format: qualified
@@ -123,9 +335,53 @@ authoring:
         path: docs/templates/feature.md
       heading:
         kind: title
+      reachability:
+        kind: manual-colocated-index
+        pathPrefix: before-required-segments
+        indexBasename: README.md
 
     - type: runbook
       initialStatus: active
+      allowedOwnerIds:
+        - access-control
+        - agent-attention
+        - agent-communication
+        - agent-context
+        - agent-organization
+        - apps
+        - apps/desktop-sidecar
+        - approval-management
+        - architecture
+        - architecture/composition
+        - architecture/contracts
+        - architecture/domain
+        - architecture/governance
+        - architecture/quality
+        - architecture/reliability
+        - architecture/security
+        - architecture/tooling
+        - clients/sdk
+        - consumption-governance
+        - engineering/tooling
+        - human-notification
+        - identity-registry
+        - integration/runtime
+        - migration/desktop
+        - operations
+        - orchestration-scope
+        - platform/control-api
+        - platform/eventing
+        - platform/local-host
+        - platform/observability
+        - platform/persistence
+        - policy-risk
+        - run-orchestration
+        - team-topology
+        - usage-accounting
+        - usage-capability
+        - usage-metering
+        - work-coordination
+        - workspace-registry
       identity:
         kind: explicit
         format: qualified
@@ -143,3 +399,6 @@ authoring:
         path: docs/templates/runbook.md
       heading:
         kind: title
+      reachability:
+        kind: manual-fixed-index
+        indexPath: docs/operations/README.md

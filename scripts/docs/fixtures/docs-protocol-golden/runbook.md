@@ -3,7 +3,7 @@ id: runbook.frozen.widget-outage
 type: runbook
 status: active
 owner: architecture/tooling
-summary: Freezes the current runbook document creation behavior.
+summary: Freezes the unified runbook document creation behavior.
 ---
 
 # Frozen Widget Outage

@@ -3,7 +3,7 @@ id: ADR-9001
 type: adr
 status: proposed
 owner: architecture/tooling
-summary: Freezes the current ADR document creation contract.
+summary: Freezes the unified ADR document creation contract.
 ---
 
 # ADR-9001: Frozen ADR
