@@ -21,14 +21,14 @@ const allowedRootEntries = new Set([
 ]);
 const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const docsAuthoringRequiredRoutes = [
-  "docs/standards/documentation.md#authority-by-knowledge-type",
+  "pnpm docs:info",
   "pnpm docs:find",
   "pnpm docs:new -- --type TYPE --id ID --dry-run",
   "pnpm docs:new -- --type TYPE --id ID --apply",
-  "reported index and link",
-  "pnpm docs:impact",
+  "reported index/link",
   "pnpm docs:check",
-  "pnpm docs:repository:check",
+  "pnpm docs:doctor",
+  "pnpm docs:recover",
 ];
 
 function relative(repositoryRoot, filePath) {

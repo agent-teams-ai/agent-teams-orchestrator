@@ -83,7 +83,7 @@ function indexSource(id, title) {
 }
 
 async function makeSourceFixture({ installPackages = true } = {}) {
-  const root = await mkdtemp(path.join(tmpdir(), "orchestrator-docs-protocol-source-"));
+  const root = await mkdtemp(path.join(tmpdir(), "atd-o-"));
   await Promise.all([
     mkdir(path.join(root, "architecture/foundation"), { recursive: true }),
     mkdir(path.join(root, "apps"), { recursive: true }),
