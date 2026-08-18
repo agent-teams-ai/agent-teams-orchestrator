@@ -13,7 +13,9 @@ Read these before making any change:
 4. [Documentation standard](docs/standards/documentation.md)
 5. Follow the documentation route below.
 
+<!-- agent-teams-docs:route/v1 begin -->
 Use [.agents/skills/docs-authoring/SKILL.md](.agents/skills/docs-authoring/SKILL.md) for documentation.
+<!-- agent-teams-docs:route/v1 end -->
 
 Use the single task router in [the documentation map](docs/README.md#navigate-by-task).
 Do not preload every architecture document when a change touches one boundary.

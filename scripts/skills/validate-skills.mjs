@@ -21,14 +21,14 @@ const allowedRootEntries = new Set([
 ]);
 const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const docsAuthoringRequiredRoutes = [
-  "pnpm docs:info",
-  "pnpm docs:find",
-  "pnpm docs:new -- --type TYPE --id ID --dry-run",
-  "pnpm docs:new -- --type TYPE --id ID --apply",
-  "reported index/link",
-  "pnpm docs:check",
-  "pnpm docs:doctor",
-  "pnpm docs:recover",
+  { label: "pnpm docs:info", pattern: /pnpm docs:info/u },
+  { label: "pnpm docs:find", pattern: /pnpm docs:find/u },
+  { label: "pnpm docs:new preview", pattern: /pnpm docs:new -- [^\n]*--dry-run/u },
+  { label: "pnpm docs:new apply", pattern: /pnpm docs:new -- [^\n]*--apply/u },
+  { label: "reported index/link", pattern: /reported index\/link/u },
+  { label: "pnpm docs:check", pattern: /pnpm docs:check/u },
+  { label: "pnpm docs:doctor", pattern: /pnpm docs:doctor/u },
+  { label: "pnpm docs:recover", pattern: /pnpm docs:recover/u },
 ];
 
 function relative(repositoryRoot, filePath) {
@@ -141,9 +141,9 @@ function validateDocsAuthoringRoutes(
   }
   const skillPath = path.join(skillDirectory, "SKILL.md");
   for (const route of docsAuthoringRequiredRoutes) {
-    if (!source.includes(route)) {
+    if (!route.pattern.test(source)) {
       errors.push(
-        `${relative(repositoryRoot, skillPath)}: canonical documentation workflow must route ${route}`,
+        `${relative(repositoryRoot, skillPath)}: canonical documentation workflow must route ${route.label}`,
       );
     }
   }
