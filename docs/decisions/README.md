@@ -28,7 +28,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 | Workflow and migration | `ADR-0027`, `ADR-0029`, `ADR-0063`, `ADR-0065` | [Extension points](../architecture/extension-points.md), [migration boundary](../architecture/migration-boundary.md) |
 | Repository publication and enforcement | `ADR-0031`, `ADR-0032`, `ADR-0039`, `ADR-0053`, `ADR-0056`, `ADR-0059`, `ADR-0070`, `ADR-0081` | [Repository tooling](../architecture/repository-tooling.md), [documentation standard](../standards/documentation.md), [testing](../architecture/testing-strategy.md) |
 | Domain capability boundaries | `ADR-0044`, `ADR-0045`, `ADR-0046`, `ADR-0068`, `ADR-0072`, `ADR-0073`, `ADR-0074`, `ADR-0080`, `ADR-0084` | [Context map](../architecture/context-map.md), [context dossiers](../domain/contexts/README.md) |
-| Security boundaries and data handling | `ADR-0021`, `ADR-0028`, `ADR-0055`, `ADR-0089`, `ADR-0090`, `ADR-0092`, `ADR-0094` | [Security architecture](../architecture/security-architecture.md), [runtime boundary](../architecture/runtime-boundary.md) |
+| Security boundaries and data handling | `ADR-0021`, `ADR-0028`, `ADR-0055`, `ADR-0083`, `ADR-0089`, `ADR-0090`, `ADR-0092`, `ADR-0094` | [Security architecture](../architecture/security-architecture.md), [runtime boundary](../architecture/runtime-boundary.md) |
 | Reliability objectives | `ADR-0057`, `ADR-0091`, `ADR-0093` | [Reliability objectives](../architecture/reliability-objectives.md), [testing](../architecture/testing-strategy.md) |
 
 ## Proposed decisions
