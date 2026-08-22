@@ -12,7 +12,7 @@ related:
   - ADR-0021
   - ADR-0024
   - ADR-0036
-  - ADR-0085
+  - ADR-0086
   - OD-016
 ---
 
@@ -54,7 +54,7 @@ ADR-0015 fixes the architectural shape:
   plus an isolated browser ESM conditional export;
 - the initial SDK Node support floor is version 22;
 - Node-only Supervisor discovery and local lifecycle are isolated in
-  `@agent-teams/orchestrator-local-host` under ADR-0085;
+  `@agent-teams/orchestrator-local-host` under ADR-0086;
 - packed-artifact, Node ESM/CommonJS, TypeScript resolution, bundler, browser
   graph, previous-consumer, Connect-Web proxy, and size-budget fixtures are
   mandatory release gates.

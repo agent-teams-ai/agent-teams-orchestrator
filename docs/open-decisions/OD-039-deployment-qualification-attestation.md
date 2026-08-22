@@ -6,8 +6,8 @@ owner: architecture/reliability
 summary: Define cryptographically verifiable deployment qualification evidence and its CI verification protocol.
 blocked_by: []
 related:
-  - ADR-0090
-  - ADR-0092
+  - ADR-0091
+  - ADR-0093
   - architecture.reliability
   - architecture.testing
 ---

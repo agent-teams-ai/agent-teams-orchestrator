@@ -1,5 +1,5 @@
 ---
-id: ADR-0087
+id: ADR-0088
 type: adr
 status: accepted
 superseded_by: []
@@ -14,15 +14,15 @@ related:
   - ADR-0030
   - ADR-0036
   - ADR-0055
-  - ADR-0085
   - ADR-0086
+  - ADR-0087
   - architecture.deployment-profiles
   - architecture.sdk-transports
   - OD-001
   - OD-008
 ---
 
-# ADR-0087: Explicit Client Target Profiles
+# ADR-0088: Explicit Client Target Profiles
 
 ## Context
 

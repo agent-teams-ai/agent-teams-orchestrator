@@ -10,7 +10,7 @@ function documents(status = "open") {
     ["OD-021", { metadata: { status } }],
     ["OD-035", { metadata: { status } }],
     ["OD-040", { metadata: { resolved_by: "ADR-0099", status } }],
-    ["ADR-0092", { metadata: { status: "accepted" } }],
+    ["ADR-0093", { metadata: { status: "accepted" } }],
     ["ADR-0099", { metadata: { status: "accepted" } }],
   ]);
 }
@@ -41,7 +41,7 @@ test("rejects deleting OD-040 from a reserved local package", () => {
 test("requires the accepted decision that resolves OD-040", () => {
   const entry = localEntry();
   entry.materialization = "allowed";
-  entry.materialization_decision = "ADR-0092";
+  entry.materialization_decision = "ADR-0093";
   const errors = [];
   validateMaterializationGates(entry, documents("resolved"), errors);
   assert.match(errors.join("\n"), /materialization decision must resolve OD-040/u);

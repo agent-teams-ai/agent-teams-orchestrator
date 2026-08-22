@@ -253,6 +253,25 @@ try {
     "scaffolded accepted context",
     run(temporaryRoot),
   );
+  const foundationEvidenceRoot = path.join(
+    temporaryRoot,
+    "packages/contexts/work-coordination/src/.foundation-retired-evidence-/fixture",
+  );
+  await mkdir(foundationEvidenceRoot, { recursive: true });
+  await writeFile(path.join(foundationEvidenceRoot, "owned-temporary"), "evidence\n");
+  requireSuccess("Foundation terminal evidence", run(temporaryRoot));
+  const hiddenSourceRoot = path.join(
+    temporaryRoot,
+    "packages/contexts/work-coordination/src/.unowned-hidden",
+  );
+  await mkdir(hiddenSourceRoot, { recursive: true });
+  await writeFile(path.join(hiddenSourceRoot, "rogue.ts"), "export {};\n");
+  requireFailure(
+    "unowned hidden source",
+    run(temporaryRoot),
+    "production source must belong to src/features/**",
+  );
+  await rm(hiddenSourceRoot, { recursive: true });
   await writeRootReferences(temporaryRoot, [
     "packages/contexts/work-coordination/",
   ]);

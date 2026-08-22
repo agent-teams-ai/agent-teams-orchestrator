@@ -1,4 +1,4 @@
 interface:
   display_name: "Documentation Authoring"
   short_description: "Author governed project documentation"
-  default_prompt: "Apply the repository documentation workflow and validate the result."
+  default_prompt: "Find the existing documentation authority, use docs:new only when a new governed artifact is required, connect it to the indexes, and validate the result."

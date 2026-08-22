@@ -4,12 +4,12 @@ type: open-decision
 status: resolved
 owner: architecture/composition
 summary: Decide whether the first usable release qualifies server profiles only while preserving the future fully local composition.
-resolved_by: ADR-0086
+resolved_by: ADR-0087
 related:
   - ADR-0030
   - ADR-0033
   - ADR-0060
-  - ADR-0086
+  - ADR-0087
   - architecture.implementation-readiness-gates
   - architecture.local-host-lifecycle
   - OD-021
@@ -72,6 +72,6 @@ upgrade lifecycle are not implemented for that release.
 
 ## Resolution
 
-Resolved by ADR-0086. V1 qualifies Managed SaaS and Standalone Self-Hosted
+Resolved by ADR-0087. V1 qualifies Managed SaaS and Standalone Self-Hosted
 Server. Fully Local remains a first-class future profile whose implementation and
 packaging are deferred.

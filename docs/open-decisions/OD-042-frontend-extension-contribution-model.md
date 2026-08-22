@@ -7,7 +7,7 @@ summary: Decide the framework-neutral Frontend extension contribution, isolation
 blocked_by: []
 related:
   - ADR-0074
-  - ADR-0094
+  - ADR-0095
   - architecture.extensions
   - OD-041
 ---

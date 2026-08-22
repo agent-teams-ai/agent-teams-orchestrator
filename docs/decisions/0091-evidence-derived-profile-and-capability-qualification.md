@@ -1,5 +1,5 @@
 ---
-id: ADR-0090
+id: ADR-0091
 type: adr
 status: accepted
 superseded_by: []
@@ -9,7 +9,7 @@ summary: Derive deployment qualification from resolved decisions and conformance
 approved_by: product-owner
 accepted_at: 2026-08-09
 related:
-  - ADR-0089
+  - ADR-0090
   - architecture.deployment-profiles
   - architecture.reliability
   - architecture.security
@@ -18,11 +18,11 @@ related:
   - OD-038
 ---
 
-# ADR-0090: Evidence-Derived Profile and Capability Qualification
+# ADR-0091: Evidence-Derived Profile and Capability Qualification
 
 ## Context
 
-ADR-0089 correctly separates a V1 target from a qualified deployment, but a
+ADR-0090 correctly separates a V1 target from a qualified deployment, but a
 profile could still be marked `qualified` by deleting its blockers. It also
 listed local-device runtime connectivity among server-profile concerns even
 though a server can qualify with independently proven remote capacity.
@@ -64,7 +64,7 @@ independently qualified runtime placements.
 
 Fully Local remains blocked by its workflow, transport, persistence, eventing,
 Supervisor lifecycle, recovery, and distribution decisions. Its package
-materialization remains independently deferred under ADR-0089.
+materialization remains independently deferred under ADR-0090.
 
 ## Consequences
 

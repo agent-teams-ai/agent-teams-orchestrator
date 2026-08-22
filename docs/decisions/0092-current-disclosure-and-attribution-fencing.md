@@ -1,5 +1,5 @@
 ---
-id: ADR-0091
+id: ADR-0092
 type: adr
 status: accepted
 superseded_by: []
@@ -9,18 +9,18 @@ summary: Fence historical disclosure, delay publication until Run attribution is
 approved_by: product-owner
 accepted_at: 2026-08-09
 related:
-  - ADR-0083
   - ADR-0084
-  - ADR-0088
+  - ADR-0085
+  - ADR-0089
   - architecture.security
   - domain.contexts.execution-observation
 ---
 
-# ADR-0091: Current Disclosure and Attribution Fencing
+# ADR-0092: Current Disclosure and Attribution Fencing
 
 ## Context
 
-ADR-0084 and ADR-0088 retain revisioned search documents for snapshot cursors
+ADR-0085 and ADR-0089 retain revisioned search documents for snapshot cursors
 and route Activity through a stable Run or Project-system feed partition. Three
 details need stronger semantics before implementation:
 

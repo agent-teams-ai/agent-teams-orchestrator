@@ -9,10 +9,14 @@ policies:
   reservedScopes:
     - "@agent-teams/"
   developmentOnlyPackages:
+    - "@xstate/graph"
     - dependency-cruiser
+    - fast-check
     - nx
     - oxlint
     - oxlint-tsgolint
     - typescript
+    - xstate
   exactRegistryDevelopmentOnlyPackages:
+    - "@agent-teams/docs-protocol"
     - "@agent-teams/engineering-foundation"

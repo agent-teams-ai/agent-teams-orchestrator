@@ -1,5 +1,5 @@
 ---
-id: ADR-0095
+id: ADR-0096
 type: adr
 status: accepted
 superseded_by: []
@@ -10,7 +10,7 @@ approved_by: product-owner
 accepted_at: 2026-08-13
 related:
   - ADR-0074
-  - ADR-0094
+  - ADR-0095
   - architecture.extensions
   - architecture.security
   - OD-041
@@ -18,7 +18,7 @@ related:
   - OD-043
 ---
 
-# ADR-0095: Shared Extension Foundation and OCI Distribution
+# ADR-0096: Shared Extension Foundation and OCI Distribution
 
 ## Context
 
@@ -66,7 +66,7 @@ signature ecosystems.
   missing optional extension produces an explicit capability outcome rather
   than a hidden fallback or startup failure.
 
-The guardrails in ADR-0094 remain mandatory. Extensions propose decisions,
+The guardrails in ADR-0095 remain mandatory. Extensions propose decisions,
 provide facts, render contributions, or execute effects behind ports. The owning
 application and domain layers validate their outputs and retain all authority
 over aggregate invariants, authorization, fencing, transactions, and canonical

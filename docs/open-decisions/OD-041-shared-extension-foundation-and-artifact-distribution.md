@@ -2,14 +2,14 @@
 id: OD-041
 type: open-decision
 status: resolved
-resolved_by: ADR-0095
+resolved_by: ADR-0096
 owner: architecture
 summary: Decide the shared extension foundation, OCI artifact distribution, catalog boundary, and registry conformance model.
 blocked_by: []
 related:
   - ADR-0074
-  - ADR-0094
   - ADR-0095
+  - ADR-0096
   - architecture.extensions
   - architecture.security
   - OD-037
@@ -103,6 +103,6 @@ foundation. They do not become product domain dependencies.
 
 ## Resolution
 
-Resolved by ADR-0095. Exact catalog governance, isolation tiers, lifecycle, hot
+Resolved by ADR-0096. Exact catalog governance, isolation tiers, lifecycle, hot
 update, and rollback remain open in OD-043. The Frontend contribution model
 remains open in OD-042.

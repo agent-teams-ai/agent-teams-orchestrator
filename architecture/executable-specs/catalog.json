@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "specifications": [
+    {
+      "id": "orchestrator.accepted-authority-submodels",
+      "ownerDocs": [
+        "docs/domain/contexts/orchestration-scope/README.md",
+        "docs/domain/contexts/run-orchestration/README.md"
+      ],
+      "adrRefs": [
+        "docs/decisions/0079-runtime-authority-binding-cutoff-and-disposition.md",
+        "docs/decisions/0080-orchestration-scope-project-authority-and-disposition.md"
+      ],
+      "schemaPaths": [
+        "architecture/executable-specs/orchestrator-state-machine.schema.json"
+      ],
+      "documents": [
+        {
+          "path": "architecture/executable-specs/orchestration-project-lifecycle.json",
+          "schemaId": "https://agent-teams.dev/schemas/orchestrator-state-machine.json"
+        },
+        {
+          "path": "architecture/executable-specs/run-authority-state.json",
+          "schemaId": "https://agent-teams.dev/schemas/orchestrator-state-machine.json"
+        }
+      ],
+      "generatedTypes": [],
+      "gateBindings": {
+        "property": {
+          "packageName": "@agent-teams/orchestrator-repository",
+          "script": "specs:property"
+        },
+        "mutation": {
+          "packageName": "@agent-teams/orchestrator-repository",
+          "script": "specs:mutation"
+        }
+      },
+      "stateModel": {
+        "kind": "xstate",
+        "axes": [
+          "project-identity-lifecycle",
+          "deletion-epoch",
+          "run-authority-state",
+          "run-authority-generation"
+        ],
+        "modelPath": "scripts/orchestration-specs/state-model.mjs",
+        "adapterPath": "scripts/orchestration-specs/derive-machine.mjs",
+        "tracesPath": "architecture/executable-specs/fixtures/proof-artifacts/accepted-authority-submodels.paths.json",
+        "diagramPath": "architecture/executable-specs/fixtures/proof-artifacts/accepted-authority-submodels.mmd",
+        "gateBinding": {
+          "packageName": "@agent-teams/orchestrator-repository",
+          "script": "specs:model"
+        }
+      }
+    }
+  ]
+}

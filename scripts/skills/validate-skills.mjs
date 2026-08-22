@@ -20,6 +20,16 @@ const allowedRootEntries = new Set([
   "scripts",
 ]);
 const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const docsAuthoringRequiredRoutes = [
+  { label: "pnpm docs:info", pattern: /pnpm docs:info/u },
+  { label: "pnpm docs:find", pattern: /pnpm docs:find/u },
+  { label: "pnpm docs:new preview", pattern: /pnpm docs:new -- [^\n]*--dry-run/u },
+  { label: "pnpm docs:new apply", pattern: /pnpm docs:new -- [^\n]*--apply/u },
+  { label: "reported index/link", pattern: /reported index\/link/u },
+  { label: "pnpm docs:check", pattern: /pnpm docs:check/u },
+  { label: "pnpm docs:doctor", pattern: /pnpm docs:doctor/u },
+  { label: "pnpm docs:recover", pattern: /pnpm docs:recover/u },
+];
 
 function relative(repositoryRoot, filePath) {
   return path.relative(repositoryRoot, filePath).split(path.sep).join("/");
@@ -120,6 +130,25 @@ async function validateOpenAiMetadata(
   }
 }
 
+function validateDocsAuthoringRoutes(
+  repositoryRoot,
+  skillDirectory,
+  source,
+  errors,
+) {
+  if (path.basename(skillDirectory) !== "docs-authoring") {
+    return;
+  }
+  const skillPath = path.join(skillDirectory, "SKILL.md");
+  for (const route of docsAuthoringRequiredRoutes) {
+    if (!route.pattern.test(source)) {
+      errors.push(
+        `${relative(repositoryRoot, skillPath)}: canonical documentation workflow must route ${route.label}`,
+      );
+    }
+  }
+}
+
 async function validateSkill(repositoryRoot, skillDirectory, errors) {
   const folderName = path.basename(skillDirectory);
   const skillPath = path.join(skillDirectory, "SKILL.md");
@@ -174,6 +203,7 @@ async function validateSkill(repositoryRoot, skillDirectory, errors) {
   if (source.split("\n").length > 500) {
     errors.push(`${relative(repositoryRoot, skillPath)}: skill exceeds 500 lines`);
   }
+  validateDocsAuthoringRoutes(repositoryRoot, skillDirectory, source, errors);
   if (!tree.children.some((node) => node.type === "heading" && node.depth === 1)) {
     errors.push(`${relative(repositoryRoot, skillPath)}: missing level-one title`);
   }

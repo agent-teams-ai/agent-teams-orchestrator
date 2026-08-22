@@ -23,13 +23,18 @@ related:
   - ADR-0071
   - ADR-0078
   - ADR-0080
-  - ADR-0088
-  - ADR-0091
-  - ADR-0093
+  - ADR-0089
+  - ADR-0092
+  - ADR-0094
   - ADR-0064
   - ADR-0065
   - architecture.local-host-lifecycle
   - architecture.security
+code_anchors:
+  - pattern: architecture/executable-specs/**
+    enforcement: advisory
+  - pattern: scripts/orchestration-specs/**
+    enforcement: advisory
 ---
 
 # Testing Strategy
@@ -51,6 +56,33 @@ command-trace tests, invalid-state construction tests, and explicit assertions
 that domain events remain distinct from public integration-event fixtures.
 
 They use no mocks for infrastructure because infrastructure is absent.
+
+### Pre-production executable state specifications
+
+Accepted Orchestrator-owned semantics may be captured before production package
+admission as strict [canonical JSON specifications](../../architecture/executable-specs/orchestrator-state-machine.schema.json)
+with deterministic traces and fault cases. The current specifications cover only
+ADR-0079 `RunAuthorityState` plus `RunAuthorityGeneration`, and ADR-0080
+`OrchestrationProject` identity lifecycle.
+
+The JSON files are authoritative for this harness. Strict schema validation,
+property tests, and a semantic mutation pack protect their invariants. XState and
+its graph package derive pure test and Mermaid views without actors, services,
+timers, actions, persisted snapshots, or Agent Runtime state. Deterministic
+derived evidence lives under `architecture/executable-specs/fixtures/proof-artifacts`
+and changes only through the explicit generation command; the blocking check
+compares expected content without writing files.
+
+This is partial evidence only. It does not accept the proposed tactical dossiers,
+activate a production package, define Agent Runtime contracts, or pass an
+implementation-readiness gate.
+
+Foundation 0.11.0 validates the consumer-owned executable-specification catalog
+and classifies the harness source boundary as development tooling. XState, graph,
+schema, and property-test dependencies remain exact development dependencies and
+cannot cross into a runtime source boundary. The Foundation capability validates
+static connectivity only; the repository-owned property, mutation, and model
+scripts remain the independent executable evidence gates.
 
 ### Application tests
 

@@ -1,5 +1,5 @@
 ---
-id: ADR-0089
+id: ADR-0090
 type: adr
 status: accepted
 superseded_by: []
@@ -11,8 +11,8 @@ accepted_at: 2026-08-09
 related:
   - ADR-0038
   - ADR-0058
-  - ADR-0086
   - ADR-0087
+  - ADR-0088
   - architecture.deployment-profiles
   - architecture.implementation-readiness-gates
   - architecture.security
@@ -21,11 +21,11 @@ related:
   - OD-038
 ---
 
-# ADR-0089: Deployment Qualification and Client Target Fencing
+# ADR-0090: Deployment Qualification and Client Target Fencing
 
 ## Context
 
-ADR-0086 selects Managed SaaS and Standalone Self-Hosted Server as V1 targets;
+ADR-0087 selects Managed SaaS and Standalone Self-Hosted Server as V1 targets;
 it does not prove either target production-qualified. Identity, revocation, and
 hosted-to-local runtime connectivity remain open. The first profile model also
 needs a hard client fence so late responses from one Target cannot appear after

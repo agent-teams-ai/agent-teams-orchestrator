@@ -409,58 +409,73 @@
     },
     {
       "id": "ADR-0083",
-      "path": "docs/decisions/0083-execution-observation-evidence-and-activity-model.md",
-      "immutableDigest": "sha256:83d1a798b4226bf0e47cf753b4e7373c1f95c1783865b7898a569dc4eb15f538"
+      "path": "docs/decisions/0083-orchestrator-assurance-intent-and-ar-containment-ownership.md",
+      "immutableDigest": "sha256:057c5f9edb3983e073b7132bb0bd99c0f13f9ac9daaeedcbf81fd349ed693512"
     },
     {
       "id": "ADR-0084",
-      "path": "docs/decisions/0084-protected-observation-payload-and-rebuildable-search.md",
-      "immutableDigest": "sha256:10512ded2533acd0285d6eb6a58866d623cb388edf0dfc2f32b9f199ae842a4b"
+      "path": "docs/decisions/0084-execution-observation-evidence-and-activity-model.md",
+      "immutableDigest": "sha256:6e12c9923b1d0e6c91354cea6c63735222380b36679afd9c897d13f807a7932f"
     },
     {
       "id": "ADR-0085",
-      "path": "docs/decisions/0085-local-host-package-name.md",
-      "immutableDigest": "sha256:38d551e83071b536d731412dbe8b182bae7e346be1f39f08d17387e41c46da7a"
+      "path": "docs/decisions/0085-protected-observation-payload-and-rebuildable-search.md",
+      "immutableDigest": "sha256:a0d12e1027412e14f8bdb6b429a326d9ccf5e50087c98e4c77def0697a3a4165"
     },
     {
       "id": "ADR-0086",
-      "path": "docs/decisions/0086-server-first-v1-deployment-scope.md",
-      "immutableDigest": "sha256:ce3f6f00e274ab6a69b0d9fc7132342f28df822133d217ae6b72010d26ef1f5b"
+      "path": "docs/decisions/0086-local-host-package-name.md",
+      "immutableDigest": "sha256:003e4cba37052c74da4dbbca6a43591f5014aa6de48242461702b8bc07dd589f"
     },
     {
       "id": "ADR-0087",
-      "path": "docs/decisions/0087-explicit-client-target-profiles.md",
-      "immutableDigest": "sha256:cf0dd76853b0d07d507e3c2908c34663896b269e125fda2a53b8c2618a6b443f"
+      "path": "docs/decisions/0087-server-first-v1-deployment-scope.md",
+      "immutableDigest": "sha256:025f44b94ed69758eae211931259ae1cad1f64f8d43f32e5932ccf076ab60b41"
     },
     {
       "id": "ADR-0088",
-      "path": "docs/decisions/0088-observation-protocol-safety-constraints.md",
-      "immutableDigest": "sha256:6a3a3587fbf6dca0bf766385e4a97badf123d2c03b7256f246492e31f56fe91b"
+      "path": "docs/decisions/0088-explicit-client-target-profiles.md",
+      "immutableDigest": "sha256:222d4f938a1e92b3a2f2acb8d3118ad7227331aee7a06ed0af483a0afb9501f2"
     },
     {
       "id": "ADR-0089",
-      "path": "docs/decisions/0089-deployment-qualification-and-client-target-fencing.md",
-      "immutableDigest": "sha256:a984fc518e8910b9771165fd1a45233f0e8de194db94a62750660e2d6db582db"
+      "path": "docs/decisions/0089-observation-protocol-safety-constraints.md",
+      "immutableDigest": "sha256:9333eda35607fcf353a1fab353ac32b712c96ea86ac41e92241d1fd9284c486d"
     },
     {
       "id": "ADR-0090",
-      "path": "docs/decisions/0090-evidence-derived-profile-and-capability-qualification.md",
-      "immutableDigest": "sha256:2d62f29a2826d282b12ffbe66285d2d3d4778c8bb6842dae7d565a4b53063b04"
+      "path": "docs/decisions/0090-deployment-qualification-and-client-target-fencing.md",
+      "immutableDigest": "sha256:f70b3a861cd5927a07c75ec03fd803841fbb22483fbaae24297dade12cf62576"
     },
     {
       "id": "ADR-0091",
-      "path": "docs/decisions/0091-current-disclosure-and-attribution-fencing.md",
-      "immutableDigest": "sha256:5c493d28ad53869858d08d48f47060dffe5580771b155075201de2ab1c654fd2"
+      "path": "docs/decisions/0091-evidence-derived-profile-and-capability-qualification.md",
+      "immutableDigest": "sha256:7a46ede4c325e8825df6caee1d53efb60c0cd5ce0c7a37f7f195502160c54693"
     },
     {
       "id": "ADR-0092",
-      "path": "docs/decisions/0092-closed-deployment-qualification-and-materialization-gates.md",
-      "immutableDigest": "sha256:12ea63af7e03208d98dfdd1c7ace27455270ad8aea82823be9eac267adc25066"
+      "path": "docs/decisions/0092-current-disclosure-and-attribution-fencing.md",
+      "immutableDigest": "sha256:32342cbfa32c42238dc4eef303d241ed29cb19491316785bd8d2bc1edd5ade11"
     },
     {
       "id": "ADR-0093",
-      "path": "docs/decisions/0093-observation-snapshot-and-replay-closure.md",
-      "immutableDigest": "sha256:41e87eb01f1e3dc810d9013fad84ceb7ab36c2242ddb78476c6c78453fb4f16a"
+      "path": "docs/decisions/0093-closed-deployment-qualification-and-materialization-gates.md",
+      "immutableDigest": "sha256:54c9cc553f5e1c6c5321e42f9391b6ab958185d104b2d25440879ca2f9886b71"
+    },
+    {
+      "id": "ADR-0094",
+      "path": "docs/decisions/0094-observation-snapshot-and-replay-closure.md",
+      "immutableDigest": "sha256:47e6c8ebed4bb2951b5a858b93f19dbac7591ecce7c5e88023db0f9806def921"
+    },
+    {
+      "id": "ADR-0095",
+      "path": "docs/decisions/0095-extension-safety-and-ownership-invariants.md",
+      "immutableDigest": "sha256:102860f116e3f797cf28c76e715f9d6a39e05f66aae6c6566694bdeb20cdc07a"
+    },
+    {
+      "id": "ADR-0096",
+      "path": "docs/decisions/0096-shared-extension-foundation-and-oci-distribution.md",
+      "immutableDigest": "sha256:d062c3a69d20adea5bd611064f781742bf8f286919e69684d5e3c4973bc495d2"
     }
   ]
 }

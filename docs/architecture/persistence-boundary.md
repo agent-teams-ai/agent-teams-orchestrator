@@ -14,7 +14,7 @@ related:
   - ADR-0049
   - ADR-0050
   - ADR-0078
-  - ADR-0084
+  - ADR-0085
   - OD-003
 ---
 
@@ -424,7 +424,7 @@ updated with idempotency after commit. Orphan collection, payload-unavailable st
 blue/green index generations, authorization-bound cursors, and deletion epochs
 provide recovery. Filesystem, S3, KMS, FTS, and future search-engine primitives
 remain private to their outbound adapters; they are not a global `ArtifactStore`
-or part of the context Unit of Work. ADR-0084 owns the complete protocol.
+or part of the context Unit of Work. ADR-0085 owns the complete protocol.
 
 Driver errors are translated inside each adapter into stable persistence
 outcomes. Raw SQLite error names, SQLite numeric codes, PostgreSQL SQLSTATE values,

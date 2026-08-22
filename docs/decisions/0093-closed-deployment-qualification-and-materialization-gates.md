@@ -1,5 +1,5 @@
 ---
-id: ADR-0092
+id: ADR-0093
 type: adr
 status: accepted
 superseded_by: []
@@ -9,8 +9,8 @@ summary: Close deployment qualification over mandatory capabilities, separate op
 approved_by: product-owner
 accepted_at: 2026-08-09
 related:
-  - ADR-0089
   - ADR-0090
+  - ADR-0091
   - architecture.deployment-profiles
   - architecture.reliability
   - OD-004
@@ -20,17 +20,17 @@ related:
   - OD-040
 ---
 
-# ADR-0092: Closed Deployment Qualification and Materialization Gates
+# ADR-0093: Closed Deployment Qualification and Materialization Gates
 
 ## Context
 
-ADR-0090 requires evidence-derived qualification, but checking only that an
+ADR-0091 requires evidence-derived qualification, but checking only that an
 artifact file and accepted ADR exist is forgeable. The capability list can also
 be weakened by deleting a mandatory entry. Managed SaaS should not require an
 unfinished commercial entitlement contract for its baseline orchestration
 capabilities.
 
-ADR-0089 also defers local packages until a future accepted decision and Fully
+ADR-0090 also defers local packages until a future accepted decision and Fully
 Local evidence. Final production qualification cannot literally precede package
 creation because the packages must exist to produce conformance evidence.
 
@@ -76,7 +76,7 @@ accepted materialization ADR recorded in the package catalog. This authorizes
 implementation only; it does not qualify or ship the Fully Local profile.
 
 Final profile qualification remains evidence-based after implementation. This
-two-stage model is the non-circular interpretation of ADR-0089's requirement for
+two-stage model is the non-circular interpretation of ADR-0090's requirement for
 a future accepted decision and qualification evidence.
 
 ## Consequences

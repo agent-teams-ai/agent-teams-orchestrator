@@ -1,41 +1,28 @@
 ---
 name: docs-authoring
-description: Use when creating, changing, reorganizing, or reviewing architecture, domain, contract, decision, runbook, research, or feature documentation in this repository.
+description: Use when creating, changing, reorganizing, or reviewing governed documentation in this repository.
 ---
 
 # Documentation Authoring
 
-Use this workflow to change governed project knowledge without creating a second
-source of truth.
+Protocol: `agent-teams.docs-protocol/v1`.
 
-## Workflow
+## Required workflow
 
-1. Read `docs/README.md` and the nearest directory index.
-2. Identify the authoritative artifact type with
-   `docs/standards/documentation.md#authority-by-knowledge-type`.
-3. Discover existing sources with `pnpm docs:query`. Search stable document IDs
-   and related metadata before searching only by filename.
-4. Check related open decisions. Do not implement or document an unresolved
-   choice as accepted architecture.
-5. Update the existing authority. For a new artifact, start from the matching
-   file under `docs/templates/`.
-6. Add or update `code_anchors` when a document must be reviewed after matching
-   implementation or machine-readable sources change.
-7. Run `pnpm docs:impact` while iterating. Use `--strict` when validating a
-   required anchor locally.
-8. If bounded-context relationships change, update `architecture/likec4/` and
-   the owning context dossier or ADR together.
-9. Run `pnpm docs:check`. Run `pnpm architecture:check` when the change affects
-   context topology, package topology, dependency rules, or architecture tools.
+- Read the current types, owners, placement, metadata, and index policy with `pnpm docs:info`.
+- Search first with `pnpm docs:find -- --text query`.
+- Reuse or relate existing authority instead of creating a competing source.
+- Preview with `pnpm docs:new -- --type TYPE --id ID --title TITLE --owner OWNER --summary SUMMARY --dry-run`.
+- Review the exact destination, metadata, relations, anchors, and diagnostics.
+- Apply with `pnpm docs:new -- --type TYPE --id ID --title TITLE --owner OWNER --summary SUMMARY --apply` after review.
+- Manually update the reported index/link exactly when reachability requires it.
+- Finish with `pnpm docs:check` after the index is current.
 
-## Invariants
+## Rules
 
-- A repo-local Skill is workflow guidance, never architecture authority.
-- New ADRs start as proposed. Record acceptance only after explicit
-  product-owner approval.
-- LikeC4 owns exact context relationship topology, not domain semantics or
-  bounded-context acceptance.
-- Generated LikeC4 exports, search indexes, and summaries are disposable views.
-- Code anchors express review impact. They do not replace tests, ownership, or
-  compatibility checks.
-- Update indexes and relationships in the same change as the governed document.
+- Never invent owners, types, statuses, paths, or metadata outside `docs:info`.
+- If dependencies are absent, use only `pnpm install --frozen-lockfile`; never use npx, dlx, or latest tags.
+- Keep preview and apply inputs identical.
+- Stop when recovery is required; use `pnpm docs:doctor` before `pnpm docs:recover`.
+- Resolve required anchors and blockers before apply.
+- Do not bypass repository scripts or hand-edit transaction evidence.

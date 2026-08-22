@@ -112,6 +112,12 @@ code_anchors:
     enforcement: required
 ```
 
+The unified writer canonicalizes each anchor as `enforcement` followed by
+`pattern`. This key order is intentionally different from the legacy writer's
+`pattern` followed by `enforcement`; YAML mapping order has no semantic meaning,
+but deterministic bytes do. Migration parity therefore compares normalized
+anchor meaning while the new golden fixtures freeze the unified byte order.
+
 Patterns are repository-relative, use forward slashes, cannot escape the
 repository, and must match at least one current file. They cannot target `docs/**`
 or `.agents/**`; documentation relationships use stable IDs and links instead.
@@ -240,10 +246,27 @@ Repository and directory indexes route readers; they do not repeat normative
 rules. Use task-oriented links and short scope descriptions. Stable document IDs
 are preferred in discussion and automation because paths may move.
 
-Use
-`pnpm docs:query -- --id|--owner|--type|--status|--related|--blocked-by <value>`
-for metadata-backed discovery. It derives results from frontmatter and never
-writes a generated source-of-truth file.
+Read the active vocabulary and placement policy with `pnpm docs:info`. Use
+`pnpm docs:find -- --text|--id|--owner|--type|--status|--related|--blocked-by
+<value>` for metadata-backed discovery. Filters have AND semantics, results use
+portable binary ordering, and no matches is a successful empty result.
+
+The exact registry-pinned Docs Protocol is the only query and writer engine.
+`pnpm docs:new -- --dry-run` previews without mutation or reservation. A write
+requires the same reviewed inputs plus explicit `--apply`; the command never
+overwrites existing authority or edits index prose. When reachability requires
+an index, add the exact reported Markdown link at the exact reported path.
+
+Use `pnpm docs:doctor` to inspect recovery requirements and `pnpm docs:recover`
+only for the reported transaction. Publication, crash, cancellation, and
+recovery qualification runs exclusively in disposable fixtures.
+
+Generic protocol validation and Orchestrator semantics remain separate.
+`docs:check` is the exact shared protocol command. `docs:repository:check` owns
+the repository-specific chain: metadata and relation validation, six-type
+golden qualification, Skill checks, LikeC4, markdownlint, Vale, CSpell, and
+`docs:impact`. Root quality gates run the repository chain so no project-specific
+coverage is weakened.
 
 ## AI-assisted authoring
 
@@ -258,9 +281,15 @@ The agent must:
 3. search stable IDs, related metadata, and supersession links;
 4. update the existing authority instead of creating a parallel explanation;
 5. preserve unresolved choices as open decisions;
-6. use the matching template for a new governed artifact;
-7. run `pnpm docs:impact` to inspect code-anchored documents;
-8. run `pnpm docs:check`.
+6. follow the exact preview/apply commands in the Skill so template, identity,
+   owner, placement, relationships, and code anchors are validated before write;
+7. apply the reported index/link instruction manually;
+8. run `pnpm docs:impact`, `pnpm docs:check`, and
+   `pnpm docs:repository:check` in their documented order.
+
+`docs:new` never overwrites a file, accepts an unregistered owner, records an
+accepted decision, or edits semantic index prose. Its output is incomplete until
+the author fills the evidence sections and links it from the nearest index.
 
 Generated summaries, semantic indexes, search databases, and AI-produced diagrams
 are disposable derived views. They never become a source of truth unless reviewed
@@ -297,6 +326,8 @@ Update related artifacts in one change when their authority requires it:
 - ADR lifecycle placement and metadata-backed collection indexes;
 - status-sensitive required document sections;
 - safe, non-stale code anchors and changed-path impact reporting;
+- guarded creation from the current governed templates, covered by positive and
+  negative fixture tests;
 - Mermaid syntax using the official Mermaid parser;
 - Markdown structure;
 - canonical product and technology terminology through project-owned Vale rules;

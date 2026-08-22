@@ -1,5 +1,5 @@
 ---
-id: ADR-0094
+id: ADR-0095
 type: adr
 status: accepted
 superseded_by: []
@@ -22,7 +22,7 @@ related:
   - OD-043
 ---
 
-# ADR-0094: Extension Safety and Ownership Invariants
+# ADR-0095: Extension Safety and Ownership Invariants
 
 ## Context
 

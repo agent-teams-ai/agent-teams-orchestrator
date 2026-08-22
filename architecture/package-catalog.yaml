@@ -155,7 +155,7 @@ packages:
     role: sdk
     path: packages/sdk/orchestrator-local-host
     package_name: "@agent-teams/orchestrator-local-host"
-    owner_document: ADR-0085
+    owner_document: ADR-0086
     materialization: deferred
     materialization_blocked_by: [OD-021, OD-035, OD-040]
     materialization_decision: null

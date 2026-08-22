@@ -1,5 +1,5 @@
 ---
-id: ADR-0083
+id: ADR-0084
 type: adr
 status: accepted
 superseded_by: []
@@ -22,7 +22,7 @@ related:
   - OD-029
 ---
 
-# ADR-0083: Execution Observation Evidence and Activity Model
+# ADR-0084: Execution Observation Evidence and Activity Model
 
 ## Context
 

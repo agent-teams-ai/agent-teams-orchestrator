@@ -6,11 +6,13 @@ packages:
 catalogMode: strict
 
 catalog:
+  "@xstate/graph": 3.0.4
   ajv: 8.20.0
   ajv-formats: 3.0.1
   cspell: 10.0.1
   eslint-import-resolver-oxc: 0.15.0
   eslint-plugin-boundaries: 7.1.0
+  fast-check: 4.9.0
   github-slugger: 2.0.0
   jsdom: 29.1.1
   likec4: 1.59.2
@@ -28,6 +30,7 @@ catalog:
   typescript: 7.0.2
   unified: 11.0.5
   unist-util-visit: 5.1.0
+  xstate: 5.32.5
   yaml: 2.9.0
 
 catalogs:
@@ -44,7 +47,8 @@ minimumReleaseAge: 1440
 minimumReleaseAgeStrict: true
 
 minimumReleaseAgeExclude:
-  - "@agent-teams/engineering-foundation"
+  - "@agent-teams/engineering-foundation@0.17.0-rc.7 || 0.17.0-rc.8"
+  - "@agent-teams/docs-protocol@0.1.0-rc.10 || 0.1.0-rc.12"
   - js-yaml@5.2.2
 
 overrides:

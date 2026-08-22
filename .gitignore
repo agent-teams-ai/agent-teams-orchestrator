@@ -3,6 +3,7 @@ dist/
 .nx/
 .cache/
 .agent-teams-local/
+**/.foundation-retired-evidence-/
 .DS_Store
 *.log
 *.tsbuildinfo

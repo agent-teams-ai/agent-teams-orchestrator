@@ -17,6 +17,7 @@ related:
   - ADR-0080
   - ADR-0083
   - ADR-0084
+  - ADR-0085
   - architecture.local-host-lifecycle
   - OD-004
 ---
@@ -88,6 +89,9 @@ flowchart LR
 | Authority to use a workspace | Configured product authority provider through a feature-owned authorization port |
 | Workspace trust and required isolation properties | Policy and Risk |
 | Runtime sandbox, mounts, process isolation, network enforcement, and technical fencing | `ar` |
+| Backend-neutral execution-assurance requirement | Policy and Risk, resolved by Run Orchestration |
+| Technical containment compilation, backend capability negotiation, and attestation | `ar` |
+| Optional runtime resource admission, fairness, reservation, and placement | AR-composed runtime-capacity implementation |
 | Runtime-scope cutoff, technical disposition actions, and runtime evidence | `ar` |
 | Git worktree, clone, snapshot, or remote materialization mechanics | Workspace adapters |
 | Provider API, CLI, SSE, and protocol translation | `ar` provider driver |
@@ -98,6 +102,14 @@ flowchart LR
 
 There must never be two writers for one runtime mutation or two supervisors for
 one agent process.
+
+The Orchestrator supplies backend-neutral product assurance intent through a
+consumer-owned runtime port. It does not define AR's technical policy shape,
+resource model, sandbox lifecycle, backend choice, capacity algorithm, or
+qualification matrix. AR maps the intent to its Published Language, compiles and
+enforces technical containment, and returns typed capability and evidence
+outcomes. Unsupported required assurance fails before provider execution; no
+profile may silently downgrade.
 
 Orchestration Scope owns project-level `RuntimeScopeBinding`, scope admission and
 disposition intent, and the scope-ingestion inboxes, checkpoints, and
@@ -419,7 +431,7 @@ access, and publishes a context-owned activity feed. It does not replace the Run
 observation projection, use output as lifecycle authority, or expose arbitrary AR
 payload to clients. Scope and Run facts enter as separate idempotent reference
 projections; rebuild never queries another context's current tables or API.
-ADR-0083, ADR-0084, and ADR-0088 define this boundary.
+ADR-0084, ADR-0085, and ADR-0089 define this boundary.
 
 A Hosted Orchestrator may control AR on a user device only through a qualified
 runtime-connectivity adapter. OD-038 must close enrollment, target-bound device

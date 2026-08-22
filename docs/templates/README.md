@@ -20,3 +20,8 @@ summary: Navigation index for governed documentation templates and their intende
 Templates define required structure, not domain answers. Remove irrelevant
 optional sections only when the governing standard permits it; never fill a
 section with invented detail merely to complete a skeleton.
+
+Create a governed document with `pnpm docs:new -- --help`. The command reads the
+matching template at execution time, validates metadata and placement, refuses
+overwrites, and prints the required connection and verification steps. Templates
+remain the structure authority; the generator is only their guarded entry point.

@@ -48,6 +48,8 @@ const forbiddenPackageRootDirectories = new Set([
   "shared",
   "utils",
 ]);
+const ignoredProductionFileNames = new Set([".DS_Store", ".gitkeep"]);
+const ignoredFoundationEvidenceDirectory = ".foundation-retired-evidence-";
 const allowedPackageAssemblyPaths = [
   /^index\.[cm]?[jt]sx?$/,
   /^module\.[cm]?[jt]sx?$/,
@@ -345,7 +347,9 @@ async function validateMaterializedPackage(context) {
 
   const sourceRoot = path.join(packageRoot, "src");
   const sourceFiles = await walk(sourceRoot, () => true, {
-    skipDirectories: ["node_modules", "dist", "coverage"],
+    skipDirectories: [
+      "node_modules", "dist", "coverage", ignoredFoundationEvidenceDirectory,
+    ],
   });
   await validateFeatureDocumentation({
     entry,
@@ -431,9 +435,11 @@ async function main() {
       ["apps", "packages"].map((directory) =>
         walk(
           path.join(repositoryRoot, directory),
-          (filePath) => path.basename(filePath) !== ".DS_Store",
+          (filePath) => !ignoredProductionFileNames.has(path.basename(filePath)),
           {
-            skipDirectories: ["node_modules", "dist", "coverage"],
+            skipDirectories: [
+              "node_modules", "dist", "coverage", ignoredFoundationEvidenceDirectory,
+            ],
           },
         ),
       ),

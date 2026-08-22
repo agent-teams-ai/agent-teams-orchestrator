@@ -13,23 +13,23 @@ ADRs record significant architecture choices and their consequences.
 ## Landmark decisions by concern
 
 This map is a short reading aid, not another complete catalog. Use
-`pnpm docs:query -- --owner|--status|--related <value>` for metadata-backed
+`pnpm docs:find -- --owner|--status|--related <value>` for metadata-backed
 discovery. The lifecycle lists below remain the complete status ledger.
 
 | Concern | Current decisions | Current architecture |
 |---|---|---|
 | System shape and long-term evolution | `ADR-0001`, `ADR-0042`, `ADR-0051`, `ADR-0054`, `ADR-0062`, `ADR-0065`, `ADR-0076` | [Overview](../architecture/overview.md), [context map](../architecture/context-map.md), [architecture model](../architecture/architecture-model.md) |
-| Feature and dependency boundaries | `ADR-0012`, `ADR-0038`, `ADR-0040`, `ADR-0075`, `ADR-0094`, `ADR-0095` | [Feature standard](../architecture/feature-module-standard.md), [dependency rules](../architecture/dependency-rules.md), [extension points](../architecture/extension-points.md) |
-| Runtime ownership and AR integration | `ADR-0003`, `ADR-0028`, `ADR-0069`, `ADR-0079`, `ADR-0080`, `ADR-0083`, `ADR-0084`, `ADR-0088`, `ADR-0091`, `ADR-0093` | [Runtime boundary](../architecture/runtime-boundary.md), [Execution Observation](../domain/contexts/execution-observation/README.md) |
+| Feature and dependency boundaries | `ADR-0012`, `ADR-0038`, `ADR-0040`, `ADR-0075`, `ADR-0095`, `ADR-0096` | [Feature standard](../architecture/feature-module-standard.md), [dependency rules](../architecture/dependency-rules.md), [extension points](../architecture/extension-points.md) |
+| Runtime ownership and AR integration | `ADR-0003`, `ADR-0028`, `ADR-0069`, `ADR-0079`, `ADR-0080`, `ADR-0083`, `ADR-0084`, `ADR-0085`, `ADR-0089`, `ADR-0092`, `ADR-0094` | [Runtime boundary](../architecture/runtime-boundary.md), [Execution Observation](../domain/contexts/execution-observation/README.md) |
 | Eventing, delivery, and replay | `ADR-0004`, `ADR-0010`, `ADR-0019`, `ADR-0035` | [Eventing and reliability](../architecture/eventing-and-reliability.md) |
 | Persistence, migrations, and exact values | `ADR-0011`, `ADR-0025`, `ADR-0046`, `ADR-0050`, `ADR-0052`, `ADR-0078` | [Persistence boundary](../architecture/persistence-boundary.md), [testing](../architecture/testing-strategy.md) |
-| Public contracts and SDK | `ADR-0016`, `ADR-0019`, `ADR-0036`, `ADR-0037`, `ADR-0058`, `ADR-0067`, `ADR-0071`, `ADR-0077`, `ADR-0085` | [SDK and transports](../architecture/sdk-and-transports.md), [public contracts](../architecture/public-control-contracts.md) |
-| Local and hosted composition | `ADR-0030`, `ADR-0058`, `ADR-0060`, `ADR-0064`, `ADR-0086`, `ADR-0087`, `ADR-0089`, `ADR-0092` | [Deployment profiles](../architecture/deployment-profiles.md), [Local Host lifecycle](../architecture/local-host-lifecycle.md), [composition](../architecture/composition-and-dependency-injection.md) |
+| Public contracts and SDK | `ADR-0016`, `ADR-0019`, `ADR-0036`, `ADR-0037`, `ADR-0058`, `ADR-0067`, `ADR-0071`, `ADR-0077`, `ADR-0086` | [SDK and transports](../architecture/sdk-and-transports.md), [public contracts](../architecture/public-control-contracts.md) |
+| Local and hosted composition | `ADR-0030`, `ADR-0058`, `ADR-0060`, `ADR-0064`, `ADR-0087`, `ADR-0088`, `ADR-0090`, `ADR-0093` | [Deployment profiles](../architecture/deployment-profiles.md), [Local Host lifecycle](../architecture/local-host-lifecycle.md), [composition](../architecture/composition-and-dependency-injection.md) |
 | Workflow and migration | `ADR-0027`, `ADR-0029`, `ADR-0063`, `ADR-0065` | [Extension points](../architecture/extension-points.md), [migration boundary](../architecture/migration-boundary.md) |
 | Repository publication and enforcement | `ADR-0031`, `ADR-0032`, `ADR-0039`, `ADR-0053`, `ADR-0056`, `ADR-0059`, `ADR-0070`, `ADR-0081` | [Repository tooling](../architecture/repository-tooling.md), [documentation standard](../standards/documentation.md), [testing](../architecture/testing-strategy.md) |
-| Domain capability boundaries | `ADR-0044`, `ADR-0045`, `ADR-0046`, `ADR-0068`, `ADR-0072`, `ADR-0073`, `ADR-0074`, `ADR-0080`, `ADR-0083` | [Context map](../architecture/context-map.md), [context dossiers](../domain/contexts/README.md) |
-| Security boundaries and data handling | `ADR-0021`, `ADR-0028`, `ADR-0055`, `ADR-0088`, `ADR-0089`, `ADR-0091`, `ADR-0093` | [Security architecture](../architecture/security-architecture.md), [runtime boundary](../architecture/runtime-boundary.md) |
-| Reliability objectives | `ADR-0057`, `ADR-0090`, `ADR-0092` | [Reliability objectives](../architecture/reliability-objectives.md), [testing](../architecture/testing-strategy.md) |
+| Domain capability boundaries | `ADR-0044`, `ADR-0045`, `ADR-0046`, `ADR-0068`, `ADR-0072`, `ADR-0073`, `ADR-0074`, `ADR-0080`, `ADR-0084` | [Context map](../architecture/context-map.md), [context dossiers](../domain/contexts/README.md) |
+| Security boundaries and data handling | `ADR-0021`, `ADR-0028`, `ADR-0055`, `ADR-0089`, `ADR-0090`, `ADR-0092`, `ADR-0094` | [Security architecture](../architecture/security-architecture.md), [runtime boundary](../architecture/runtime-boundary.md) |
+| Reliability objectives | `ADR-0057`, `ADR-0091`, `ADR-0093` | [Reliability objectives](../architecture/reliability-objectives.md), [testing](../architecture/testing-strategy.md) |
 
 ## Proposed decisions
 
@@ -37,6 +37,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 
 ## Accepted decisions
 
+- [ADR-0083: Orchestrator assurance intent and AR containment ownership](0083-orchestrator-assurance-intent-and-ar-containment-ownership.md)
 - [ADR-0001: Headless event-driven modular monolith](0001-headless-event-driven-modular-monolith.md)
 - [ADR-0003: Runtime lifecycle belongs to ar](0003-ar-owns-runtime-lifecycle.md)
 - [ADR-0004: Broker-neutral core with NATS JetStream adapter](0004-broker-neutral-events-with-jetstream.md)
@@ -107,19 +108,19 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0079: Runtime authority, binding, cutoff, and disposition](0079-runtime-authority-binding-cutoff-and-disposition.md)
 - [ADR-0080: Orchestration Scope Project authority and disposition](0080-orchestration-scope-project-authority-and-disposition.md)
 - [ADR-0081: Foundation-owned package scaffolding protocol](0081-foundation-owned-package-scaffolding-protocol.md)
-- [ADR-0083: Execution Observation evidence and activity model](0083-execution-observation-evidence-and-activity-model.md)
-- [ADR-0084: Protected observation payload and rebuildable search](0084-protected-observation-payload-and-rebuildable-search.md)
-- [ADR-0085: Local Host package name](0085-local-host-package-name.md)
-- [ADR-0086: Server-first V1 deployment scope](0086-server-first-v1-deployment-scope.md)
-- [ADR-0087: Explicit client Target Profiles](0087-explicit-client-target-profiles.md)
-- [ADR-0088: Observation protocol safety constraints](0088-observation-protocol-safety-constraints.md)
-- [ADR-0089: Deployment qualification and client Target fencing](0089-deployment-qualification-and-client-target-fencing.md)
-- [ADR-0090: Evidence-derived profile and capability qualification](0090-evidence-derived-profile-and-capability-qualification.md)
-- [ADR-0091: Current disclosure and attribution fencing](0091-current-disclosure-and-attribution-fencing.md)
-- [ADR-0092: Closed deployment qualification and materialization gates](0092-closed-deployment-qualification-and-materialization-gates.md)
-- [ADR-0093: Observation snapshot and replay closure](0093-observation-snapshot-and-replay-closure.md)
-- [ADR-0094: Extension safety and ownership invariants](0094-extension-safety-and-ownership-invariants.md)
-- [ADR-0095: Shared extension foundation and OCI distribution](0095-shared-extension-foundation-and-oci-distribution.md)
+- [ADR-0084: Execution Observation evidence and activity model](0084-execution-observation-evidence-and-activity-model.md)
+- [ADR-0085: Protected observation payload and rebuildable search](0085-protected-observation-payload-and-rebuildable-search.md)
+- [ADR-0086: Local Host package name](0086-local-host-package-name.md)
+- [ADR-0087: Server-first V1 deployment scope](0087-server-first-v1-deployment-scope.md)
+- [ADR-0088: Explicit client Target Profiles](0088-explicit-client-target-profiles.md)
+- [ADR-0089: Observation protocol safety constraints](0089-observation-protocol-safety-constraints.md)
+- [ADR-0090: Deployment qualification and client Target fencing](0090-deployment-qualification-and-client-target-fencing.md)
+- [ADR-0091: Evidence-derived profile and capability qualification](0091-evidence-derived-profile-and-capability-qualification.md)
+- [ADR-0092: Current disclosure and attribution fencing](0092-current-disclosure-and-attribution-fencing.md)
+- [ADR-0093: Closed deployment qualification and materialization gates](0093-closed-deployment-qualification-and-materialization-gates.md)
+- [ADR-0094: Observation snapshot and replay closure](0094-observation-snapshot-and-replay-closure.md)
+- [ADR-0095: Extension safety and ownership invariants](0095-extension-safety-and-ownership-invariants.md)
+- [ADR-0096: Shared extension foundation and OCI distribution](0096-shared-extension-foundation-and-oci-distribution.md)
 
 ## Superseded decisions
 

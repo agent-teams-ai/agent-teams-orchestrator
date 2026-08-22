@@ -1,5 +1,5 @@
 ---
-id: ADR-0084
+id: ADR-0085
 type: adr
 status: accepted
 superseded_by: []
@@ -15,14 +15,14 @@ related:
   - ADR-0025
   - ADR-0055
   - ADR-0058
-  - ADR-0083
+  - ADR-0084
   - architecture.persistence
   - architecture.security
   - domain.contexts.execution-observation
   - OD-029
 ---
 
-# ADR-0084: Protected Observation Payload and Rebuildable Search
+# ADR-0085: Protected Observation Payload and Rebuildable Search
 
 ## Context
 

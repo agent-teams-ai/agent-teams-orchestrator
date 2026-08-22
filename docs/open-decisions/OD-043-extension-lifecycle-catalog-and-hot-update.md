@@ -6,8 +6,8 @@ owner: architecture
 summary: Decide extension catalog governance, isolation tiers, lifecycle transitions, hot update, rollback, and operator experience.
 blocked_by: []
 related:
-  - ADR-0094
   - ADR-0095
+  - ADR-0096
   - architecture.extensions
   - architecture.security
   - OD-037
@@ -25,7 +25,7 @@ built-in, first-party private, community, and custom extensions?
 ## Accepted constraints
 
 - OCI, ORAS, Cosign, immutable digests, and the shared extension foundation are
-  fixed by ADR-0095.
+  fixed by ADR-0096.
 - Artifact storage is separate from catalog and marketplace governance.
 - A catalog listing, publisher identity, signature, entitlement, and manifest
   permission request do not grant product authority.

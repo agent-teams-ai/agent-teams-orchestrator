@@ -12,8 +12,9 @@ related:
   - ADR-0080
   - ADR-0083
   - ADR-0084
-  - ADR-0091
-  - ADR-0093
+  - ADR-0085
+  - ADR-0092
+  - ADR-0094
   - OD-012
   - OD-014
   - OD-029
@@ -60,6 +61,13 @@ The Runtime ACL separately translates a consumer-owned runtime port into the
 `ar` Published Language without becoming an authorization owner. `ar`
 independently enforces technical runtime permissions, sandbox boundaries, and
 capabilities.
+
+Product-facing execution-assurance profiles are versioned product-policy
+presets. They never name a container, VM, scheduler, cluster, sandbox vendor,
+or technical AR policy field. Policy and Risk may require stronger guarantees
+than AR can prove; the governing use case then fails closed before provider
+execution rather than choosing a weaker backend. Technical policy compilation,
+capability negotiation, lifecycle, and evidence remain exclusively AR-owned.
 
 ## Trust boundaries
 
@@ -246,8 +254,8 @@ cursors, index generations, realtime cache, replay, and delayed work. A current
 disclosure fence likewise hides revisions withdrawn by redaction, quarantine,
 retraction, or security invalidation, even when snapshot history remains stored.
 Admission compares the current freeze revision and deletion epoch in the same
-transaction that would make staged payload reachable. ADR-0083, ADR-0084,
-ADR-0088, ADR-0091, and ADR-0093 define the complete ownership and lifecycle.
+transaction that would make staged payload reachable. ADR-0084, ADR-0085,
+ADR-0089, ADR-0092, and ADR-0094 define the complete ownership and lifecycle.
 
 Protected payload uses an independent current disposition keyed by its opaque
 reference. Authorization alone is insufficient: raw reads, exports, artifact
@@ -330,6 +338,20 @@ is split into schema, discovery, policy, and threat-fixture modules to satisfy
 maintainability budgets. Generated or vendor code may be exempt from the five
 size and complexity budgets, but it is not exempt from security discovery,
 classification, suppression governance, or the allow/deny fixture contract.
+
+The ReviewRouter interaction entry point is a least-privilege caller of the
+centrally maintained reusable workflow. Its `uses` reference and `runtime_ref`
+input must match one immutable reviewed commit SHA. The caller keeps OIDC and
+repository-specific event filtering explicit, maps only the required secrets,
+and limits the fallback GitHub token to read-only issue and pull-request access.
+The security validator rejects mutable or mismatched refs, write-capable
+fallback permissions, and local checkout, authentication, or runtime steps that
+would duplicate or bypass the reusable workflow boundary.
+
+The accepted security baseline is ReviewRouter `v1.0.104` at commit
+`c7b7d5c5da0587c9fecdc2b7ec65be3df8e4acf4`. `pnpm security:check` verifies the
+caller and validator use that exact pin and proves that a deliberately different
+runtime SHA is rejected.
 
 `pnpm architecture:check` includes this gate. The documentation and architecture
 CI workflows execute it independently so changes to prose, schemas, fixtures, or

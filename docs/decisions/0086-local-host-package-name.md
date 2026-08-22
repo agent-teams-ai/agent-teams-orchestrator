@@ -1,5 +1,5 @@
 ---
-id: ADR-0085
+id: ADR-0086
 type: adr
 status: accepted
 superseded_by: []
@@ -19,7 +19,7 @@ related:
   - OD-036
 ---
 
-# ADR-0085: Local Host Package Name
+# ADR-0086: Local Host Package Name
 
 ## Context
 

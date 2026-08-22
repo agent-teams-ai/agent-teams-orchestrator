@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "protocolId": "agent-teams.docs-protocol",
+  "protocolVersion": 1,
+  "consumer": "agent-teams-ai/agent-teams-orchestrator",
+  "packages": {
+    "@agent-teams/docs-protocol": "0.1.0-rc.12",
+    "@agent-teams/engineering-foundation": "0.17.0-rc.8"
+  },
+  "profilePath": "architecture/foundation/docs-protocol.yaml",
+  "callerWorkflowPath": ".github/workflows/docs-protocol.yml",
+  "skillPath": ".agents/skills/docs-authoring/SKILL.md",
+  "gateCommand": "pnpm docs:protocol:check",
+  "qualificationTests": [
+    "scripts/docs/docs-protocol-parity.test.mjs",
+    "scripts/docs/docs-protocol-profile.test.mjs"
+  ]
+}

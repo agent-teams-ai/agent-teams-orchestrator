@@ -9,9 +9,8 @@ related:
   - ADR-0073
   - ADR-0074
   - ADR-0080
-  - ADR-0083
   - ADR-0084
-  - ADR-0086
+  - ADR-0085
   - ADR-0087
   - ADR-0088
   - ADR-0089
@@ -19,6 +18,7 @@ related:
   - ADR-0091
   - ADR-0092
   - ADR-0093
+  - ADR-0094
   - ADR-0062
   - ADR-0063
   - ADR-0064
@@ -119,6 +119,15 @@ Required evidence:
 
 The gate does not require Temporal or a real AR provider.
 
+The repository now has partial executable evidence for the exact
+[ADR-0079 Run authority state-machine slice](../../architecture/executable-specs/run-authority-state.json)
+and [ADR-0080 Project identity lifecycle](../../architecture/executable-specs/orchestration-project-lifecycle.json).
+These fixtures prove suspension-before-successor, monotonic generation, explicit
+cancellation, stale-generation rejection, terminal retirement, and opaque late
+runtime evidence without authority mutation. They do not cover the other required
+Run, Work, topology, fan-out, policy, or recovery evidence above, so Gate 1 remains
+`In review`.
+
 ## Gate 2: Communication, Attention, and Agent Context boundary
 
 Required evidence:
@@ -165,11 +174,11 @@ Required evidence:
   fixtures for every runtime-output surface used by the slice;
 - versioned search-snapshot, query-time authorization, freeze-versus-admission,
   reference-projection replay, resource-limit, and committed-only realtime
-  fixtures required by ADR-0088;
+  fixtures required by ADR-0089;
 - disclosure-interval, protected-payload disposition, index commit-position,
   monotonic Run-attribution, gap reconciliation, cross-partition correction, and
-  disclosure-safe feed/realtime replay fixtures required by ADR-0091 and
-  ADR-0093;
+  disclosure-safe feed/realtime replay fixtures required by ADR-0092 and
+  ADR-0094;
 - one behavioral fixture suite runnable through direct SDK, Connect, and every
   affected compatibility adapter;
 - activation, single-writer, unknown-outcome, rollback-before-admission, and
@@ -200,7 +209,7 @@ Required evidence:
   reconciliation.
 
 The gate does not require deploying Temporal in every profile or implementing a
-Fully Local workflow engine in the first production slice. ADR-0086 defers Fully
+Fully Local workflow engine in the first production slice. ADR-0087 defers Fully
 Local implementation from V1, while OD-035 keeps the local engine decision
 explicit for the future profile.
 
@@ -209,7 +218,7 @@ explicit for the future profile.
 Required evidence:
 
 - machine-readable Managed SaaS, Standalone Self-Hosted, Connected Self-Hosted,
-  and Fully Local profile states agree with ADR-0086 and ADR-0089;
+  and Fully Local profile states agree with ADR-0087 and ADR-0090;
 - the OD-039 qualification framework has a blocking trusted-attestation verifier
   before any profile or capability becomes `qualified`;
 - profile qualification is closed over the exact mandatory capability registry

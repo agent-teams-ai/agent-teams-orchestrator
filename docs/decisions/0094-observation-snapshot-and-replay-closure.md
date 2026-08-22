@@ -1,5 +1,5 @@
 ---
-id: ADR-0093
+id: ADR-0094
 type: adr
 status: accepted
 superseded_by: []
@@ -10,19 +10,19 @@ approved_by: product-owner
 accepted_at: 2026-08-09
 related:
   - ADR-0058
-  - ADR-0084
-  - ADR-0088
-  - ADR-0091
+  - ADR-0085
+  - ADR-0089
+  - ADR-0092
   - architecture.security
   - architecture.testing
   - domain.contexts.execution-observation
 ---
 
-# ADR-0093: Observation Snapshot and Replay Closure
+# ADR-0094: Observation Snapshot and Replay Closure
 
 ## Context
 
-ADR-0091 closes the main stale-disclosure and late-attribution risks, but its
+ADR-0092 closes the main stale-disclosure and late-attribution risks, but its
 single current allowed revision can accidentally hide a still-safe revision from
 an older snapshot. Source watermarks alone also cannot freeze search results when
 late indexing commits old source data after a cursor is issued.

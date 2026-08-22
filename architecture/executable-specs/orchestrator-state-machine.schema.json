@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-teams.dev/schemas/orchestrator-state-machine.json",
+  "title": "Orchestrator-owned executable state-machine specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "kind",
+    "title",
+    "authority",
+    "scopeBoundary",
+    "axes",
+    "initialState",
+    "states",
+    "events",
+    "transitions",
+    "invariants",
+    "traces",
+    "faultCases"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "type": "string", "pattern": "^orchestrator\\.[a-z][a-z0-9-]+$" },
+    "kind": { "const": "orchestrator-owned-executable-spec" },
+    "title": { "$ref": "#/$defs/nonEmptyString" },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner", "adrRefs", "acceptanceScope"],
+      "properties": {
+        "owner": { "$ref": "#/$defs/nonEmptyString" },
+        "adrRefs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^ADR-[0-9]{4}$" }
+        },
+        "acceptanceScope": { "$ref": "#/$defs/nonEmptyString" }
+      }
+    },
+    "scopeBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["models", "excludes", "readinessClaim"],
+      "properties": {
+        "models": { "$ref": "#/$defs/nonEmptyStrings" },
+        "excludes": { "$ref": "#/$defs/nonEmptyStrings" },
+        "readinessClaim": { "const": "PARTIAL_EVIDENCE_ONLY" }
+      }
+    },
+    "axes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "owner", "modeled", "values"],
+        "properties": {
+          "id": { "$ref": "#/$defs/identifier" },
+          "owner": { "$ref": "#/$defs/nonEmptyString" },
+          "modeled": { "type": "boolean" },
+          "values": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "oneOf": [
+                { "type": "string" },
+                { "type": "integer", "minimum": 0 },
+                { "type": "boolean" }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "initialState": { "$ref": "#/$defs/identifier" },
+    "states": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "terminal", "coordinates"],
+        "properties": {
+          "id": { "$ref": "#/$defs/identifier" },
+          "label": { "$ref": "#/$defs/nonEmptyString" },
+          "terminal": { "type": "boolean" },
+          "coordinates": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "oneOf": [
+                { "type": "string" },
+                { "type": "integer", "minimum": 0 },
+                { "type": "boolean" }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "category", "sourceOwner"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+          "label": { "$ref": "#/$defs/nonEmptyString" },
+          "category": {
+            "enum": [
+              "authority-mutation",
+              "business-cancellation",
+              "opaque-evidence",
+              "stale-command",
+              "forbidden"
+            ]
+          },
+          "sourceOwner": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source",
+          "event",
+          "disposition",
+          "target",
+          "authorityMutation",
+          "reason",
+          "adrRef"
+        ],
+        "properties": {
+          "source": { "$ref": "#/$defs/identifier" },
+          "event": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+          "disposition": { "enum": ["accepted", "ignored", "rejected"] },
+          "target": { "oneOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }] },
+          "authorityMutation": { "type": "boolean" },
+          "reason": { "$ref": "#/$defs/nonEmptyString" },
+          "adrRef": { "type": "string", "pattern": "^ADR-[0-9]{4}$" }
+        }
+      }
+    },
+    "invariants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "statement", "adrRefs", "enforcedBy"],
+        "properties": {
+          "id": { "$ref": "#/$defs/identifier" },
+          "statement": { "$ref": "#/$defs/nonEmptyString" },
+          "adrRefs": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "pattern": "^ADR-[0-9]{4}$" }
+          },
+          "enforcedBy": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "enum": ["schema", "semantics", "property", "mutation", "trace"] }
+          }
+        }
+      }
+    },
+    "traces": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "description", "steps"],
+        "properties": {
+          "id": { "$ref": "#/$defs/identifier" },
+          "description": { "$ref": "#/$defs/nonEmptyString" },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["event", "expectedState"],
+              "properties": {
+                "event": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+                "expectedState": { "$ref": "#/$defs/identifier" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "faultCases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "source", "event", "expectedState", "expectedDisposition", "reason"],
+        "properties": {
+          "id": { "$ref": "#/$defs/identifier" },
+          "source": { "$ref": "#/$defs/identifier" },
+          "event": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+          "expectedState": { "$ref": "#/$defs/identifier" },
+          "expectedDisposition": { "enum": ["ignored", "rejected"] },
+          "reason": { "$ref": "#/$defs/nonEmptyString" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "nonEmptyString": { "type": "string", "minLength": 1 },
+    "nonEmptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonEmptyString" }
+    }
+  }
+}

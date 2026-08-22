@@ -8,12 +8,12 @@ related:
   - ADR-0030
   - ADR-0058
   - ADR-0060
-  - ADR-0085
   - ADR-0086
   - ADR-0087
-  - ADR-0089
+  - ADR-0088
   - ADR-0090
-  - ADR-0092
+  - ADR-0091
+  - ADR-0093
   - architecture.local-host-lifecycle
   - architecture.sdk-transports
   - architecture.security
@@ -134,7 +134,7 @@ workflow adapter, local realtime edge, and AR execution components under the
 Local Supervisor. Components are independently signed and lifecycle-managed;
 unused local infrastructure is not started merely because Desktop is installed.
 
-ADR-0086 excludes this implementation from V1. OD-035 names OpenWorkflow as the
+ADR-0087 excludes this implementation from V1. OD-035 names OpenWorkflow as the
 preferred local workflow spike candidate. Deferral cannot change public resource,
 persistence port, workflow-state, feed, recovery, or authority boundaries.
 

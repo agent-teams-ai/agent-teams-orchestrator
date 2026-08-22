@@ -1,1 +1,4 @@
 tooling/architecture-conformance/fixtures/scaffolding/library-boundary-golden/** text eol=lf
+scripts/docs/** text eol=lf
+AGENTS.md text eol=lf
+.agents/skills/docs-authoring/SKILL.md text eol=lf

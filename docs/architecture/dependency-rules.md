@@ -12,9 +12,11 @@ related:
   - ADR-0038
   - ADR-0040
   - ADR-0075
-  - ADR-0089
+  - ADR-0090
   - architecture.composition
 code_anchors:
+  - pattern: architecture/foundation/dependency-declarations.yaml
+    enforcement: required
   - pattern: scripts/architecture/validate-dependency-specifiers.mjs
     enforcement: required
   - pattern: scripts/architecture/source-imports.mjs
@@ -140,6 +142,8 @@ horizon defined by ADR-0037.
 CI architecture gates test:
 
 - production source outside approved feature or package-assembly roots;
+- arbitrary hidden source, while excluding only Foundation-owned terminal
+  cleanup evidence under the exact `.foundation-retired-evidence-` directory;
 - packages without an explicit architectural role;
 - production packages absent from `architecture/package-catalog.yaml`;
 - packages whose owner document remains proposed;
@@ -174,6 +178,9 @@ TypeScript path aliases are conveniences, not boundaries. `package.json` exports
 workspace dependencies, lint rules, and architecture tests enforce boundaries.
 The package catalog reserves approved topology; it does not replace import-graph
 enforcement inside materialized packages.
+A root-level `.gitkeep` may preserve an approved workspace family such as `apps/`;
+the topology validator ignores that sentinel, and it neither materializes a
+package nor authorizes any other production file outside a cataloged package.
 
 Package materialization is fail closed. A deferred catalog entry names at least
 one unresolved decision in `materialization_blocked_by`; the validator and
@@ -206,12 +213,16 @@ on contexts, integrations, or platform implementation packages. Internal workspa
 dependencies must be cataloged and use the `workspace:` protocol. Dev-only testing
 packages are the explicit exception to runtime role direction.
 
-The published `@agent-teams/engineering-foundation` package is the only external
-package allowed in the reserved scope. It must use an exact registry version in
+The `exactRegistryDevelopmentOnlyPackages` list in
+`architecture/foundation/dependency-declarations.yaml` is the single authority
+for external engineering tooling allowed in the reserved scope. It currently
+contains `@agent-teams/engineering-foundation` and
+`@agent-teams/docs-protocol`. Each package must use an exact registry version in
 `devDependencies`; runtime, optional, and peer declarations are prohibited.
-Production source under `apps/**/src` and `packages/**/src` cannot import it.
-Architecture fixtures prove both the valid dev-only declaration and invalid
-declaration and import cases.
+Production source under `apps/**/src` and `packages/**/src` cannot import any
+package from this list. The repository-local validator reads the policy instead
+of maintaining a second allowlist, and architecture fixtures prove valid
+dev-only declarations plus invalid declaration and import cases.
 
 The current exact Foundation release provides reusable declaration and source
 dependency checks through `workspace.dependency-declarations` and

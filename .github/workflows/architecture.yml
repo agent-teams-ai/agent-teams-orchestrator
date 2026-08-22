@@ -56,5 +56,7 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Characterize documentation authoring
+        run: pnpm docs:test
       - run: pnpm --filter @agent-teams/local-host-control run check
       - run: pnpm architecture:scaffolding:check

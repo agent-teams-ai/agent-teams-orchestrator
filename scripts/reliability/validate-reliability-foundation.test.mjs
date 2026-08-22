@@ -226,7 +226,7 @@ test("rejects qualification while the attestation framework is blocked", () => {
   catalog.profiles[0].qualification = "qualified";
   catalog.profiles[0].qualificationEvidence = {
     conformanceRefs: ["architecture/qualification-evidence/managed.json"],
-    decisionRefs: ["ADR-0092"],
+    decisionRefs: ["ADR-0093"],
   };
 
   assert.match(
@@ -241,7 +241,7 @@ test("rejects enabling the qualification framework before its verifier exists", 
   catalog.qualificationFramework.qualification = "qualified";
   catalog.qualificationFramework.qualificationEvidence = {
     conformanceRefs: ["architecture/qualification-evidence/framework.json"],
-    decisionRefs: ["ADR-0092"],
+    decisionRefs: ["ADR-0093"],
   };
 
   assert.match(
@@ -281,7 +281,7 @@ test("rejects a qualified profile whose mandatory capability is not qualified", 
   catalog.profiles[0].qualification = "qualified";
   catalog.profiles[0].qualificationEvidence = {
     conformanceRefs: ["architecture/qualification-evidence/managed.json"],
-    decisionRefs: ["ADR-0092"],
+    decisionRefs: ["ADR-0093"],
   };
 
   assert.match(
@@ -298,7 +298,7 @@ test("rejects unknown blockers and missing conformance artifacts", async () => {
     conformanceRefs: [
       "architecture/qualification-evidence/missing-managed-saas.json",
     ],
-    decisionRefs: ["ADR-0089"],
+    decisionRefs: ["ADR-0090"],
   };
   catalog.capabilities[0].blockedBy = ["OD-999"];
 

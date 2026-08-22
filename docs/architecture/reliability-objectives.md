@@ -9,9 +9,9 @@ related:
   - ADR-0057
   - ADR-0079
   - ADR-0080
-  - ADR-0089
   - ADR-0090
-  - ADR-0092
+  - ADR-0091
+  - ADR-0093
   - OD-014
   - OD-030
   - architecture.eventing

@@ -7,9 +7,9 @@ summary: Define secure enrollment and durable connectivity between a server Orch
 related:
   - ADR-0024
   - ADR-0064
-  - ADR-0086
   - ADR-0087
-  - ADR-0089
+  - ADR-0088
+  - ADR-0090
   - architecture.deployment-profiles
   - architecture.runtime-boundary
   - architecture.security

@@ -1,0 +1,435 @@
+{
+  "schemaVersion": 1,
+  "id": "orchestrator.run-authority-state",
+  "kind": "orchestrator-owned-executable-spec",
+  "title": "RunAuthorityState accepted transition semantics",
+  "authority": {
+    "owner": "run-orchestration",
+    "adrRefs": ["ADR-0079"],
+    "acceptanceScope": "RunAuthorityState and RunAuthorityGeneration only"
+  },
+  "scopeBoundary": {
+    "models": [
+      "verified revocation and expiry suspension",
+      "intervening suspension before successor authorization",
+      "monotonic authority generation",
+      "explicit business cancellation",
+      "opaque late runtime evidence as non-authoritative input"
+    ],
+    "excludes": [
+      "Agent Runtime state or wire contracts",
+      "runtime actors, services, timers, actions, or persisted snapshots",
+      "Run lifecycle, target fan-out, Work mutation, and detailed aggregate shape",
+      "predecessor barrier satisfaction and production readiness"
+    ],
+    "readinessClaim": "PARTIAL_EVIDENCE_ONLY"
+  },
+  "axes": [
+    {
+      "id": "run-authority-state",
+      "owner": "run-orchestration",
+      "modeled": true,
+      "values": ["ACTIVE", "SUSPENDED", "CANCELLED"]
+    },
+    {
+      "id": "run-authority-generation",
+      "owner": "run-orchestration",
+      "modeled": true,
+      "values": [1, 2, 3]
+    },
+    {
+      "id": "run-lifecycle",
+      "owner": "run-orchestration",
+      "modeled": false,
+      "values": ["INDEPENDENT_AXIS"]
+    },
+    {
+      "id": "runtime-barrier-evidence",
+      "owner": "run-orchestration-consumer-model",
+      "modeled": false,
+      "values": ["OPAQUE_INDEPENDENT_AXIS"]
+    },
+    {
+      "id": "run-reconciliation-state",
+      "owner": "run-orchestration",
+      "modeled": false,
+      "values": ["INDEPENDENT_AXIS"]
+    }
+  ],
+  "initialState": "active-generation-1-basis-a",
+  "states": [
+    {
+      "id": "active-generation-1-basis-a",
+      "label": "ACTIVE generation 1 basis A",
+      "terminal": false,
+      "coordinates": {
+        "run-authority-state": "ACTIVE",
+        "run-authority-generation": 1
+      }
+    },
+    {
+      "id": "suspended-generation-2",
+      "label": "SUSPENDED generation 2",
+      "terminal": false,
+      "coordinates": {
+        "run-authority-state": "SUSPENDED",
+        "run-authority-generation": 2
+      }
+    },
+    {
+      "id": "active-generation-3-basis-b",
+      "label": "ACTIVE generation 3 basis B",
+      "terminal": false,
+      "coordinates": {
+        "run-authority-state": "ACTIVE",
+        "run-authority-generation": 3
+      }
+    },
+    {
+      "id": "cancelled-generation-1",
+      "label": "CANCELLED generation 1",
+      "terminal": true,
+      "coordinates": {
+        "run-authority-state": "CANCELLED",
+        "run-authority-generation": 1
+      }
+    },
+    {
+      "id": "cancelled-generation-2",
+      "label": "CANCELLED generation 2",
+      "terminal": true,
+      "coordinates": {
+        "run-authority-state": "CANCELLED",
+        "run-authority-generation": 2
+      }
+    },
+    {
+      "id": "cancelled-generation-3",
+      "label": "CANCELLED generation 3",
+      "terminal": true,
+      "coordinates": {
+        "run-authority-state": "CANCELLED",
+        "run-authority-generation": 3
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "VERIFIED_REVOCATION",
+      "label": "Verified subject-bound revocation",
+      "category": "authority-mutation",
+      "sourceOwner": "run-orchestration"
+    },
+    {
+      "id": "AUTHORITY_EXPIRED",
+      "label": "Verified authority expiry",
+      "category": "authority-mutation",
+      "sourceOwner": "run-orchestration"
+    },
+    {
+      "id": "EXPLICIT_REAUTHORIZATION",
+      "label": "Explicit successor-basis authorization",
+      "category": "authority-mutation",
+      "sourceOwner": "run-orchestration"
+    },
+    {
+      "id": "BUSINESS_CANCEL",
+      "label": "Explicit business cancellation",
+      "category": "business-cancellation",
+      "sourceOwner": "run-orchestration"
+    },
+    {
+      "id": "STALE_GENERATION_COMMAND",
+      "label": "Command carrying a stale authority generation",
+      "category": "stale-command",
+      "sourceOwner": "run-orchestration"
+    },
+    {
+      "id": "LATE_OPAQUE_AR_EVIDENCE",
+      "label": "Late opaque Agent Runtime evidence",
+      "category": "opaque-evidence",
+      "sourceOwner": "agent-runtime"
+    },
+    {
+      "id": "REOPEN_CUT_PREDECESSOR",
+      "label": "Attempt to reopen a cut predecessor operation",
+      "category": "forbidden",
+      "sourceOwner": "run-orchestration"
+    }
+  ],
+  "transitions": [
+    {
+      "source": "active-generation-1-basis-a",
+      "event": "VERIFIED_REVOCATION",
+      "disposition": "accepted",
+      "target": "suspended-generation-2",
+      "authorityMutation": true,
+      "reason": "Verified revocation suspends authority and advances the Run authority generation.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "active-generation-1-basis-a",
+      "event": "AUTHORITY_EXPIRED",
+      "disposition": "accepted",
+      "target": "suspended-generation-2",
+      "authorityMutation": true,
+      "reason": "Verified expiry follows the same suspension boundary as revocation.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "active-generation-1-basis-a",
+      "event": "EXPLICIT_REAUTHORIZATION",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Direct ACTIVE basis A to ACTIVE basis B replacement is forbidden.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "suspended-generation-2",
+      "event": "EXPLICIT_REAUTHORIZATION",
+      "disposition": "accepted",
+      "target": "active-generation-3-basis-b",
+      "authorityMutation": true,
+      "reason": "A successor basis may activate only from the intervening suspended generation.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "active-generation-1-basis-a",
+      "event": "BUSINESS_CANCEL",
+      "disposition": "accepted",
+      "target": "cancelled-generation-1",
+      "authorityMutation": true,
+      "reason": "Explicit business cancellation closes Run authority without claiming runtime enforcement.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "suspended-generation-2",
+      "event": "BUSINESS_CANCEL",
+      "disposition": "accepted",
+      "target": "cancelled-generation-2",
+      "authorityMutation": true,
+      "reason": "Explicit business cancellation remains available while authority is suspended.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "active-generation-3-basis-b",
+      "event": "BUSINESS_CANCEL",
+      "disposition": "accepted",
+      "target": "cancelled-generation-3",
+      "authorityMutation": true,
+      "reason": "Explicit business cancellation closes the successor authority generation.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "active-generation-1-basis-a",
+      "event": "STALE_GENERATION_COMMAND",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "A stale authority generation cannot authorize mutation.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "suspended-generation-2",
+      "event": "STALE_GENERATION_COMMAND",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "A stale authority generation cannot bypass suspension.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "active-generation-3-basis-b",
+      "event": "STALE_GENERATION_COMMAND",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Historical generation commands cannot mutate successor authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "active-generation-1-basis-a",
+      "event": "LATE_OPAQUE_AR_EVIDENCE",
+      "disposition": "ignored",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Opaque runtime evidence is an independent input and never grants Run authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "suspended-generation-2",
+      "event": "LATE_OPAQUE_AR_EVIDENCE",
+      "disposition": "ignored",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Late runtime evidence cannot reopen suspended Run authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "active-generation-3-basis-b",
+      "event": "LATE_OPAQUE_AR_EVIDENCE",
+      "disposition": "ignored",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Late predecessor evidence cannot mutate successor authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "suspended-generation-2",
+      "event": "REOPEN_CUT_PREDECESSOR",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Reauthorization creates a successor operation and never reopens its predecessor.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "cancelled-generation-1",
+      "event": "STALE_GENERATION_COMMAND",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "A stale command cannot mutate cancelled generation 1 authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "cancelled-generation-1",
+      "event": "LATE_OPAQUE_AR_EVIDENCE",
+      "disposition": "ignored",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Late runtime evidence cannot mutate cancelled generation 1 authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "cancelled-generation-2",
+      "event": "STALE_GENERATION_COMMAND",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "A stale command cannot mutate cancelled generation 2 authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "cancelled-generation-2",
+      "event": "LATE_OPAQUE_AR_EVIDENCE",
+      "disposition": "ignored",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Late runtime evidence cannot mutate cancelled generation 2 authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "cancelled-generation-3",
+      "event": "STALE_GENERATION_COMMAND",
+      "disposition": "rejected",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "A stale command cannot mutate cancelled generation 3 authority.",
+      "adrRef": "ADR-0079"
+    },
+    {
+      "source": "cancelled-generation-3",
+      "event": "LATE_OPAQUE_AR_EVIDENCE",
+      "disposition": "ignored",
+      "target": null,
+      "authorityMutation": false,
+      "reason": "Late runtime evidence cannot mutate cancelled Run authority.",
+      "adrRef": "ADR-0079"
+    }
+  ],
+  "invariants": [
+    {
+      "id": "run-direct-active-replacement-forbidden",
+      "statement": "ACTIVE basis A cannot transition directly to ACTIVE basis B.",
+      "adrRefs": ["ADR-0079"],
+      "enforcedBy": ["semantics", "property", "mutation", "trace"]
+    },
+    {
+      "id": "run-authority-generation-monotonic",
+      "statement": "Suspension and successor authorization advance RunAuthorityGeneration monotonically.",
+      "adrRefs": ["ADR-0079"],
+      "enforcedBy": ["semantics", "property", "mutation"]
+    },
+    {
+      "id": "run-predecessor-never-reopens",
+      "statement": "Reauthorization creates successor authority and never reopens a cut predecessor operation.",
+      "adrRefs": ["ADR-0079"],
+      "enforcedBy": ["semantics", "property", "mutation", "trace"]
+    },
+    {
+      "id": "run-runtime-evidence-non-authoritative",
+      "statement": "Late opaque Agent Runtime evidence cannot mutate Run authority.",
+      "adrRefs": ["ADR-0079"],
+      "enforcedBy": ["semantics", "property", "mutation", "trace"]
+    },
+    {
+      "id": "run-stale-generation-fails-closed",
+      "statement": "A stale Run authority generation cannot authorize mutation.",
+      "adrRefs": ["ADR-0079"],
+      "enforcedBy": ["semantics", "property", "mutation"]
+    }
+  ],
+  "traces": [
+    {
+      "id": "revocation-successor-cancel",
+      "description": "Revocation serializes through suspension before a successor generation and later cancellation.",
+      "steps": [
+        { "event": "VERIFIED_REVOCATION", "expectedState": "suspended-generation-2" },
+        { "event": "EXPLICIT_REAUTHORIZATION", "expectedState": "active-generation-3-basis-b" },
+        { "event": "BUSINESS_CANCEL", "expectedState": "cancelled-generation-3" },
+        { "event": "LATE_OPAQUE_AR_EVIDENCE", "expectedState": "cancelled-generation-3" }
+      ]
+    },
+    {
+      "id": "expiry-before-successor",
+      "description": "Expiry suspends authority before explicit successor authorization.",
+      "steps": [
+        { "event": "AUTHORITY_EXPIRED", "expectedState": "suspended-generation-2" },
+        { "event": "EXPLICIT_REAUTHORIZATION", "expectedState": "active-generation-3-basis-b" }
+      ]
+    },
+    {
+      "id": "direct-replacement-fails-closed",
+      "description": "A successor basis cannot replace an active predecessor without suspension.",
+      "steps": [
+        { "event": "EXPLICIT_REAUTHORIZATION", "expectedState": "active-generation-1-basis-a" }
+      ]
+    }
+  ],
+  "faultCases": [
+    {
+      "id": "direct-active-a-to-active-b",
+      "source": "active-generation-1-basis-a",
+      "event": "EXPLICIT_REAUTHORIZATION",
+      "expectedState": "active-generation-1-basis-a",
+      "expectedDisposition": "rejected",
+      "reason": "The intervening suspended generation is mandatory."
+    },
+    {
+      "id": "stale-generation-after-suspension",
+      "source": "suspended-generation-2",
+      "event": "STALE_GENERATION_COMMAND",
+      "expectedState": "suspended-generation-2",
+      "expectedDisposition": "rejected",
+      "reason": "Historical authority cannot bypass the current generation."
+    },
+    {
+      "id": "late-runtime-evidence-after-cancel",
+      "source": "cancelled-generation-3",
+      "event": "LATE_OPAQUE_AR_EVIDENCE",
+      "expectedState": "cancelled-generation-3",
+      "expectedDisposition": "ignored",
+      "reason": "Opaque runtime evidence is not Run authority."
+    },
+    {
+      "id": "reopen-cut-predecessor",
+      "source": "suspended-generation-2",
+      "event": "REOPEN_CUT_PREDECESSOR",
+      "expectedState": "suspended-generation-2",
+      "expectedDisposition": "rejected",
+      "reason": "A successor operation is required; the predecessor remains monotonic."
+    }
+  ]
+}

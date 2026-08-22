@@ -11,8 +11,8 @@ related:
   - ADR-0060
   - ADR-0064
   - ADR-0065
-  - ADR-0086
   - ADR-0087
+  - ADR-0088
   - architecture.deployment-profiles
 ---
 
@@ -151,10 +151,10 @@ own broker interaction. It may supervise AR host availability, but AR remains th
 only owner of provider sessions and processes. See
 [Local Host Lifecycle](local-host-lifecycle.md).
 
-ADR-0086 defers Fully Local implementation from V1 without removing these
+ADR-0087 defers Fully Local implementation from V1 without removing these
 boundaries. The selected V1 targets, their still-blocking qualification gates,
 and independent client and execution axes are defined in
-[Deployment Profiles](deployment-profiles.md) and ADR-0089.
+[Deployment Profiles](deployment-profiles.md) and ADR-0090.
 
 Client configuration distinguishes:
 

@@ -8,8 +8,8 @@ blocked_by:
   - OD-021
   - OD-035
 related:
-  - ADR-0089
-  - ADR-0092
+  - ADR-0090
+  - ADR-0093
   - architecture.deployment-profiles
   - architecture.local-host-lifecycle
   - OD-021

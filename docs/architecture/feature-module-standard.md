@@ -13,7 +13,7 @@ related:
   - ADR-0037
   - ADR-0038
   - ADR-0075
-  - ADR-0092
+  - ADR-0093
 code_anchors:
   - pattern: scripts/architecture/validate-package-topology.mjs
     enforcement: required
@@ -62,6 +62,10 @@ A package-level `src/` may contain only:
 
 The final exception requires an architecture decision. A broad `shared`, `common`,
 `utils`, `services`, or `infrastructure` directory is not an acceptable exception.
+Foundation-owned terminal cleanup evidence under the exact
+`.foundation-retired-evidence-` directory is transaction evidence rather than
+production source and is excluded from topology inventory. No other hidden
+directory receives that exclusion.
 
 Feature ownership is structural, while DDD depth is semantic:
 
@@ -244,6 +248,11 @@ listed gate is resolved and `materialization_decision` names the accepted ADR
 that resolves OD-040. This starts implementation but does not claim that the
 Fully Local deployment profile is qualified. Deleting the marker or substituting
 an unrelated accepted ADR is not a valid bypass.
+
+A root-level `.gitkeep` may preserve a supported empty workspace family without
+materializing a package; every other production file still requires a cataloged
+package boundary.
+
 `architecture/source-dependency-policy.yaml` separately allows each production
 source dependency by exact consumer, provider, and exported subpath. A manifest
 dependency, package-role-compatible direction, or LikeC4 relationship alone does

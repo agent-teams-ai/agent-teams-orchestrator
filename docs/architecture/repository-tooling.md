@@ -29,6 +29,8 @@ code_anchors:
     enforcement: required
   - pattern: scripts/lint/**
     enforcement: required
+  - pattern: scripts/security/validate-reviewrouter-workflow.mjs
+    enforcement: required
   - pattern: pnpm-workspace.yaml
     enforcement: advisory
   - pattern: nx.json
@@ -57,6 +59,7 @@ is complete.
 | Capability | Decision state | Implementation state |
 |---|---|---|
 | Repository-local Stage 0 validators, lint, docs, security, and reliability gates | Accepted | Implemented and blocking |
+| Repository-local documentation authoring workflow | Accepted in ADR-0053 | Implemented with metadata discovery, template-backed guarded creation, code-impact routing, and blocking validation |
 | Versioned engineering foundation distribution | Accepted in ADR-0059 | Implemented with exact public npm dependency, explicit local lifecycle, consumer E2E proof, and fail-closed CI registry checks |
 | Nx package graph and affected foundation | Accepted in ADR-0039 | Implemented with pinned Nx Core and blocking pnpm-workspace discovery validation |
 | Nx task pipelines and local cache | Accepted in ADR-0039 | Planned; no task is cacheable until its complete inputs and outputs are proven |
@@ -154,9 +157,10 @@ The baseline consists of:
 - Oxlint with boundary rules as a blocking source gate;
 - dependency-cruiser in the isolated TypeScript 6 tooling package as an advisory
   complete-graph gate;
-- fixture-based architecture conformance tests.
+- fixture-based architecture conformance tests;
 - LikeC4 semantic validation and package-catalog consistency checks;
-- repository-local documentation Skill and code impact anchors.
+- repository-local documentation Skill, template-backed `docs:new` scaffolding,
+  metadata query, and code impact anchors.
 
 ### Source-quality lanes
 
@@ -440,6 +444,20 @@ Agents working in this repository must:
    bypass it with an undocumented exclusion;
 6. update a conformance fixture with every new permitted dependency shape or fixed
    false negative.
+
+The ReviewRouter interaction workflow is intentionally a thin caller of the
+centrally maintained reusable workflow. Both the reusable `uses` reference and
+its `runtime_ref` input use the same reviewed commit SHA. Repository-specific
+event filters, discussion variables, and secret mappings remain explicit in the
+caller. OIDC is explicit, and the fallback GitHub token stays read-only for issue
+and pull-request content. The security gate rejects mutable or mismatched refs,
+write-capable fallback permissions, and copied checkout, authentication, or
+runtime steps so fixes stay DRY and centrally auditable.
+
+The current reviewed baseline is ReviewRouter `v1.0.104` at commit
+`c7b7d5c5da0587c9fecdc2b7ec65be3df8e4acf4`. An upgrade must repin every real
+`uses` reference, `runtime_ref`, and canonical validator fixture together while
+retaining a deliberately different SHA in the mismatch rejection fixture.
 
 ## Upgrade policy
 

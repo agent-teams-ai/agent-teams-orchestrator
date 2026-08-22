@@ -6,9 +6,9 @@ owner: architecture/contracts
 summary: Define commercial capability entitlement without proxying Orchestrator traffic through Platform or mixing plans with domain authorization.
 related:
   - ADR-0055
-  - ADR-0086
   - ADR-0087
-  - ADR-0089
+  - ADR-0088
+  - ADR-0090
   - architecture.deployment-profiles
   - architecture.security
   - OD-012

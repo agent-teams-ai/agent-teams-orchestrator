@@ -1,5 +1,5 @@
 ---
-id: ADR-0086
+id: ADR-0087
 type: adr
 status: accepted
 superseded_by: []
@@ -22,7 +22,7 @@ related:
   - OD-036
 ---
 
-# ADR-0086: Server-First V1 Deployment Scope
+# ADR-0087: Server-First V1 Deployment Scope
 
 ## Context
 

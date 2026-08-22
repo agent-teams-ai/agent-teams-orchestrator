@@ -13,11 +13,11 @@ related:
   - ADR-0055
   - ADR-0058
   - ADR-0069
-  - ADR-0083
   - ADR-0084
-  - ADR-0088
-  - ADR-0091
-  - ADR-0093
+  - ADR-0085
+  - ADR-0089
+  - ADR-0092
+  - ADR-0094
   - architecture.context-map
   - architecture.runtime-boundary
   - architecture.security
@@ -43,7 +43,7 @@ questions:
 - Which protected provider diagnostics may this subject inspect or export?
 - How can the user browse, subscribe to, and search the resulting history?
 
-The strategic boundary is accepted by ADR-0083. This detailed dossier remains
+The strategic boundary is accepted by ADR-0084. This detailed dossier remains
 proposed until event storming and executable fixtures prove the exact aggregate,
 transaction, retention, and public-contract boundaries. No production package is
 materialized from this dossier alone.

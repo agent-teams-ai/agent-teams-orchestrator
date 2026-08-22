@@ -1,5 +1,5 @@
 ---
-id: ADR-0088
+id: ADR-0089
 type: adr
 status: accepted
 superseded_by: []
@@ -11,19 +11,19 @@ accepted_at: 2026-08-09
 related:
   - ADR-0019
   - ADR-0058
-  - ADR-0083
   - ADR-0084
+  - ADR-0085
   - architecture.persistence
   - architecture.runtime-boundary
   - architecture.security
   - domain.contexts.execution-observation
 ---
 
-# ADR-0088: Observation Protocol Safety Constraints
+# ADR-0089: Observation Protocol Safety Constraints
 
 ## Context
 
-ADR-0083 and ADR-0084 establish the correct ownership and storage boundaries,
+ADR-0084 and ADR-0085 establish the correct ownership and storage boundaries,
 but an independent pre-implementation critique found several protocol details
 that must be closed before code is admitted. A mutable latest-only search
 document cannot honor a snapshot cursor. Uncommitted live fragments can bypass
