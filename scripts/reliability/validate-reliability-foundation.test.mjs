@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { copyFile, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
@@ -144,6 +146,39 @@ test("accepts the canonical reliability foundation", async () => {
   assert.equal(result.catalog.indicators.length, 5);
   assert.equal(result.catalog.invariants.length, 5);
   assert.equal(result.catalog.resourceBudgets.length, 4);
+});
+
+test("returns schema diagnostics without running semantic validation", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "reliability-schema-"));
+  try {
+    await Promise.all([
+      mkdir(path.join(root, "architecture/reliability"), { recursive: true }),
+      mkdir(path.join(root, "docs"), { recursive: true }),
+    ]);
+    await Promise.all([
+      copyFile(
+        path.join(
+          repositoryRoot,
+          "architecture/reliability/reliability-catalog.schema.json",
+        ),
+        path.join(
+          root,
+          "architecture/reliability/reliability-catalog.schema.json",
+        ),
+      ),
+      writeFile(
+        path.join(root, "architecture/reliability/reliability-catalog.yaml"),
+        "schemaVersion: 1\n",
+      ),
+      writeFile(path.join(root, "docs/owners.yaml"), "owners: {}\n"),
+    ]);
+
+    const result = await validateReliabilityFoundation(root);
+    assert.ok(result.errors.length > 0);
+    assert.ok(result.errors.every((error) => error.startsWith("REL-SCHEMA-001")));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
 
 test("rejects a high-cardinality metric attribute", () => {

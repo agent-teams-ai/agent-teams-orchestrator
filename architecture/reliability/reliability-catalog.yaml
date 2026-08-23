@@ -133,6 +133,7 @@ indicators:
     allowedAttributes:
       - deployment.profile
       - command.kind
+      - operation.outcome
 
   - id: orchestrator.dispatch-age
     owner: run-orchestration
@@ -146,6 +147,7 @@ indicators:
     allowedAttributes:
       - deployment.profile
       - command.kind
+      - operation.outcome
 
   - id: orchestrator.observation-freshness
     owner: platform/eventing

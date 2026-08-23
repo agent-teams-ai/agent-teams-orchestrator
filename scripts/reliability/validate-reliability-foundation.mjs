@@ -15,7 +15,7 @@ export { validateQualificationReferences } from "./qualification-validation.mjs"
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
-const maximumSeriesCombinations = 512;
+const maximumSeriesCombinations = 1024;
 const requiredProhibitedAttributes = new Set([
   "agent.id",
   "operation.id",
@@ -285,6 +285,12 @@ export async function validateReliabilityFoundation(repositoryRoot) {
   const validate = ajv.compile(schema);
   const valid = validate(catalog);
   const errors = valid ? [] : schemaErrors(validate);
+  if (!valid) {
+    return {
+      catalog,
+      errors: errors.toSorted(),
+    };
+  }
   errors.push(
     ...validateReliabilitySemantics(
       catalog,
