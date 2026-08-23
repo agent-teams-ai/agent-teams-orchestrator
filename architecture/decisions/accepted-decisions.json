@@ -476,6 +476,11 @@
       "id": "ADR-0096",
       "path": "docs/decisions/0096-shared-extension-foundation-and-oci-distribution.md",
       "immutableDigest": "sha256:d062c3a69d20adea5bd611064f781742bf8f286919e69684d5e3c4973bc495d2"
+    },
+    {
+      "id": "ADR-0097",
+      "path": "docs/decisions/0097-separate-package-topology-and-materialization-policy.md",
+      "immutableDigest": "sha256:eb8e0687b82cf98138396dc6fb80a9fc53e59ba61dff4605f383b9e0859099dc"
     }
   ]
 }

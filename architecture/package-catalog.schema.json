@@ -27,34 +27,6 @@
     "package": {
       "type": "object",
       "additionalProperties": false,
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "id": {
-                "enum": [
-                  "app.local-supervisor",
-                  "app.orchestrator-local",
-                  "sdk.orchestrator-local-host"
-                ]
-              }
-            },
-            "required": ["id"]
-          },
-          "then": {
-            "properties": {
-              "materialization": {},
-              "materialization_blocked_by": {},
-              "materialization_decision": {}
-            },
-            "required": [
-              "materialization",
-              "materialization_blocked_by",
-              "materialization_decision"
-            ]
-          }
-        }
-      ],
       "required": [
         "id",
         "role",
@@ -87,30 +59,6 @@
         },
         "owner_document": {
           "$ref": "#/$defs/documentId"
-        },
-        "materialization": {
-          "enum": [
-            "allowed",
-            "deferred"
-          ]
-        },
-        "materialization_blocked_by": {
-          "type": "array",
-          "minItems": 1,
-          "uniqueItems": true,
-          "items": {
-            "$ref": "#/$defs/documentId"
-          }
-        },
-        "materialization_decision": {
-          "anyOf": [
-            {
-              "type": "null"
-            },
-            {
-              "$ref": "#/$defs/documentId"
-            }
-          ]
         }
       }
     }

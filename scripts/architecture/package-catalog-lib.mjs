@@ -83,6 +83,14 @@ export async function loadPackageCatalog(repositoryRoot) {
   return YAML.parse(await readFile(catalogPath, "utf8"));
 }
 
+export async function loadPackageMaterializationPolicy(repositoryRoot) {
+  const policyPath = path.join(
+    repositoryRoot,
+    "architecture/package-materialization-policy.yaml",
+  );
+  return YAML.parse(await readFile(policyPath, "utf8"));
+}
+
 export async function loadSourceDependencyPolicy(repositoryRoot) {
   const policyPath = path.join(
     repositoryRoot,

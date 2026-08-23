@@ -10,17 +10,11 @@ packages:
     path: apps/local-supervisor
     package_name: "@agent-teams/app-local-supervisor"
     owner_document: ADR-0060
-    materialization: deferred
-    materialization_blocked_by: [OD-021, OD-035, OD-040]
-    materialization_decision: null
   - id: app.orchestrator-local
     role: app
     path: apps/orchestrator-local
     package_name: "@agent-teams/app-orchestrator-local"
     owner_document: ADR-0030
-    materialization: deferred
-    materialization_blocked_by: [OD-021, OD-035, OD-040]
-    materialization_decision: null
   - id: app.orchestrator-server
     role: app
     path: apps/orchestrator-server
@@ -156,9 +150,6 @@ packages:
     path: packages/sdk/orchestrator-local-host
     package_name: "@agent-teams/orchestrator-local-host"
     owner_document: ADR-0086
-    materialization: deferred
-    materialization_blocked_by: [OD-021, OD-035, OD-040]
-    materialization_decision: null
   - id: testing.conformance
     role: testing
     path: packages/testing/conformance

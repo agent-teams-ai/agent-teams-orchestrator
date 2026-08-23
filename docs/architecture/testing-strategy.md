@@ -479,7 +479,8 @@ Automated checks must reject:
 - client resources, caches, cursors, subscriptions, or late responses not fenced
   by Target identity and client generation;
 - local-device execution advertised before OD-038 connectivity conformance;
-- materialization of a package marked `deferred` in the package catalog;
+- materialization of a package marked `deferred` in the package materialization
+  policy;
 - durable write entry points that do not resolve to exactly one mutation and one
   ADR-0078 consistency contract;
 - mutations without a compatible binding for every enabled deployment profile;

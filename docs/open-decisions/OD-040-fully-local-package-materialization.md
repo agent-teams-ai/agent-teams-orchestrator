@@ -53,9 +53,10 @@ would start the wrong architecture prematurely.
 - accepted local durable workflow adapter boundary;
 - exact first package slices and owners;
 - explicit non-goals for the first Fully Local implementation increment;
-- an accepted materialization ADR referenced by the package catalog.
+- an accepted materialization ADR referenced by the package materialization
+  policy.
 
 ## Resolution
 
-Open. Resolution records the accepted materialization ADR in every package entry
+Open. Resolution records the accepted materialization ADR in every policy entry
 that becomes allowed.

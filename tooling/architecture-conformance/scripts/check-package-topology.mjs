@@ -18,6 +18,7 @@ import {
   writeCatalog,
   writeDossier,
   writeFeatureReadme,
+  writeMaterializationGate,
   writePlatformOwner,
   writeRootReferences,
 } from "./topology-fixture-lib.mjs";
@@ -42,6 +43,10 @@ const catalogSchema = path.join(
 const dependencyPolicySchema = path.join(
   repositoryRoot,
   "architecture/source-dependency-policy.schema.json",
+);
+const materializationPolicySchema = path.join(
+  repositoryRoot,
+  "architecture/package-materialization-policy.schema.json",
 );
 
 function run(root) {
@@ -129,29 +134,37 @@ try {
   await writeCatalog(temporaryRoot, {
     catalog: catalogSchema,
     dependencyPolicy: dependencyPolicySchema,
+    materializationPolicy: materializationPolicySchema,
   });
   await writeDossier(temporaryRoot, "proposed");
+  await writeMaterializationGate(temporaryRoot);
   await writePlatformOwner(temporaryRoot);
   requireSuccess(
     "reserved proposed context",
     run(temporaryRoot),
   );
-  const fixtureCatalogPath = path.join(
+  const fixtureMaterializationPath = path.join(
     temporaryRoot,
-    "architecture/package-catalog.yaml",
+    "architecture/package-materialization-policy.yaml",
   );
-  const allowedCatalog = await readFile(fixtureCatalogPath, "utf8");
-  const deferredCatalog = allowedCatalog.replace(
-    "    owner_document: domain.contexts.work-coordination\n",
-    "    owner_document: domain.contexts.work-coordination\n    materialization: deferred\n",
+  const allowedMaterializationPolicy = await readFile(
+    fixtureMaterializationPath,
+    "utf8",
   );
-  await writeFile(fixtureCatalogPath, deferredCatalog);
+  const deferredMaterializationPolicy = `version: 1
+entries:
+  - package_id: context.work-coordination
+    state: deferred
+    blocked_by: [OD-999]
+    decision: null
+`;
+  await writeFile(fixtureMaterializationPath, deferredMaterializationPolicy);
   requireFailure(
     "scaffold deferred context",
     runScaffolder(temporaryRoot, "context.work-coordination"),
     "package materialization is deferred",
   );
-  await writeFile(fixtureCatalogPath, allowedCatalog);
+  await writeFile(fixtureMaterializationPath, allowedMaterializationPolicy);
   requireFailure(
     "scaffold proposed context",
     runScaffolder(temporaryRoot, "context.work-coordination"),
@@ -173,13 +186,13 @@ try {
     "materialized accepted context",
     run(temporaryRoot),
   );
-  await writeFile(fixtureCatalogPath, deferredCatalog);
+  await writeFile(fixtureMaterializationPath, deferredMaterializationPolicy);
   requireFailure(
     "materialized deferred context",
     run(temporaryRoot),
-    "package materialization is deferred by the package catalog",
+    "package materialization is deferred by the materialization policy",
   );
-  await writeFile(fixtureCatalogPath, allowedCatalog);
+  await writeFile(fixtureMaterializationPath, allowedMaterializationPolicy);
 
   await rm(
     path.join(temporaryRoot, "packages/contexts/work-coordination"),

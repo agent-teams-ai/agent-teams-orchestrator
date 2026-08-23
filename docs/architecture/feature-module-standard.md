@@ -240,14 +240,15 @@ Feature ownership is enforced mechanically rather than remembered during review.
 `architecture/package-catalog.yaml` is the default-deny registry of allowed
 production package identities, roles, paths, names, and owner documents. A
 proposed owner reserves a name and path but cannot materialize production files.
-An entry marked `materialization: deferred` remains non-materializable even when
-its owner document is accepted. Both the topology validator and scaffolder reject
-it. Reserved Fully Local entries must also retain their machine-readable
-`materialization_blocked_by` decisions; CI permits `allowed` only after every
-listed gate is resolved and `materialization_decision` names the accepted ADR
-that resolves OD-040. This starts implementation but does not claim that the
-Fully Local deployment profile is qualified. Deleting the marker or substituting
-an unrelated accepted ADR is not a valid bypass.
+An entry marked `state: deferred` in
+`architecture/package-materialization-policy.yaml` remains non-materializable
+even when its catalog owner document is accepted. Both the topology validator
+and scaffolder reject it. Reserved Fully Local entries must retain their
+machine-readable `blocked_by` decisions; CI permits `allowed` only after every
+listed gate is resolved and `decision` names the accepted ADR that resolves
+OD-040. This starts implementation but does not claim that the Fully Local
+deployment profile is qualified. Deleting either the reservation or its policy,
+or substituting an unrelated accepted ADR, is not a valid bypass.
 
 A root-level `.gitkeep` may preserve a supported empty workspace family without
 materializing a package; every other production file still requires a cataloged

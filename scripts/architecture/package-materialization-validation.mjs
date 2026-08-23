@@ -14,63 +14,101 @@ function sameMembers(actual, expected) {
   );
 }
 
+export function validateRequiredMaterializationEntries(
+  entries,
+  documents,
+  errors,
+) {
+  if (!documents.has("ADR-0093")) {
+    return;
+  }
+  const entryIds = new Set(entries.map((entry) => entry.package_id));
+  for (const requiredId of requiredLocalMaterializationGates.keys()) {
+    if (!entryIds.has(requiredId)) {
+      errors.push(
+        `architecture/package-materialization-policy.yaml: required Fully Local reservation ${requiredId} is missing`,
+      );
+    }
+  }
+}
+
 export function validateMaterializationGates(entry, documents, errors) {
-  const requiredGates = requiredLocalMaterializationGates.get(entry.id);
-  if (
-    requiredGates &&
-    !sameMembers(entry.materialization_blocked_by ?? [], requiredGates)
-  ) {
+  const requiredGates = requiredLocalMaterializationGates.get(entry.package_id);
+  if (requiredGates && !sameMembers(entry.blocked_by ?? [], requiredGates)) {
     errors.push(
-      `architecture/package-catalog.yaml: ${entry.id} must retain the accepted Fully Local materialization gate set`,
+      `architecture/package-materialization-policy.yaml: ${entry.package_id} must retain the accepted Fully Local materialization gate set`,
     );
   }
   let unresolvedGateCount = 0;
-  for (const gateId of entry.materialization_blocked_by ?? []) {
+  for (const gateId of entry.blocked_by ?? []) {
     const gate = documents.get(gateId);
     if (!gate) {
       errors.push(
-        `architecture/package-catalog.yaml: ${entry.id} references unknown materialization gate ${gateId}`,
+        `architecture/package-materialization-policy.yaml: ${entry.package_id} references unknown materialization gate ${gateId}`,
       );
     } else if (unresolvedDecisionStatuses.has(gate.metadata.status)) {
       unresolvedGateCount += 1;
     }
   }
 
-  if (entry.materialization === "allowed" && unresolvedGateCount > 0) {
+  if (entry.state === "allowed" && unresolvedGateCount > 0) {
     errors.push(
-      `architecture/package-catalog.yaml: ${entry.id} cannot allow materialization while a gate is unresolved`,
+      `architecture/package-materialization-policy.yaml: ${entry.package_id} cannot allow materialization while a gate is unresolved`,
     );
   }
-  if (entry.materialization === "deferred" && unresolvedGateCount === 0) {
+  if (entry.state === "deferred" && unresolvedGateCount === 0) {
     errors.push(
-      `architecture/package-catalog.yaml: ${entry.id} is deferred without an unresolved materialization gate`,
+      `architecture/package-materialization-policy.yaml: ${entry.package_id} is deferred without an unresolved materialization gate`,
     );
   }
-  if (
-    entry.materialization === "deferred" &&
-    entry.materialization_decision
-  ) {
+  if (entry.state === "deferred" && entry.decision) {
     errors.push(
-      `architecture/package-catalog.yaml: ${entry.id} cannot record a materialization decision while deferred`,
+      `architecture/package-materialization-policy.yaml: ${entry.package_id} cannot record a materialization decision while deferred`,
     );
   }
-  if (entry.materialization !== "allowed") {
+  if (entry.state !== "allowed") {
     return;
   }
 
-  const decision = documents.get(entry.materialization_decision);
+  const decision = documents.get(entry.decision);
   if (!decision || !acceptedOwnerStatuses.has(decision.metadata.status)) {
     errors.push(
-      `architecture/package-catalog.yaml: ${entry.id} requires an accepted materialization decision`,
+      `architecture/package-materialization-policy.yaml: ${entry.package_id} requires an accepted materialization decision`,
     );
   }
   const explicitGate = documents.get("OD-040");
-  if (
-    requiredGates &&
-    explicitGate?.metadata.resolved_by !== entry.materialization_decision
-  ) {
+  if (requiredGates && explicitGate?.metadata.resolved_by !== entry.decision) {
     errors.push(
-      `architecture/package-catalog.yaml: ${entry.id} materialization decision must resolve OD-040`,
+      `architecture/package-materialization-policy.yaml: ${entry.package_id} materialization decision must resolve OD-040`,
     );
   }
+}
+
+export function validatePackageMaterializationPolicy(
+  policy,
+  catalogEntries,
+  documents,
+  errors,
+) {
+  const catalogIds = new Set(catalogEntries.map((entry) => entry.id));
+  const entriesByPackageId = new Map();
+
+  validateRequiredMaterializationEntries(policy.entries, documents, errors);
+  for (const entry of policy.entries) {
+    if (entriesByPackageId.has(entry.package_id)) {
+      errors.push(
+        `architecture/package-materialization-policy.yaml: duplicate package_id ${entry.package_id}`,
+      );
+      continue;
+    }
+    entriesByPackageId.set(entry.package_id, entry);
+    if (!catalogIds.has(entry.package_id)) {
+      errors.push(
+        `architecture/package-materialization-policy.yaml: unknown package_id ${entry.package_id}`,
+      );
+    }
+    validateMaterializationGates(entry, documents, errors);
+  }
+
+  return entriesByPackageId;
 }

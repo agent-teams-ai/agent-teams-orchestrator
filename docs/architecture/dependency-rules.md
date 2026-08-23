@@ -147,8 +147,9 @@ CI architecture gates test:
 - packages without an explicit architectural role;
 - production packages absent from `architecture/package-catalog.yaml`;
 - packages whose owner document remains proposed;
-- packages marked `materialization: deferred`, or packages whose declared
-  materialization gate still has an unresolved status;
+- packages marked `state: deferred` by
+  `architecture/package-materialization-policy.yaml`, or packages whose
+  declared materialization gate still has an unresolved status;
 - package manifests whose name, role, or owner differs from the catalog;
 - empty ceremonial DDD layers;
 - package export boundaries;
@@ -182,14 +183,17 @@ A root-level `.gitkeep` may preserve an approved workspace family such as `apps/
 the topology validator ignores that sentinel, and it neither materializes a
 package nor authorizes any other production file outside a cataloged package.
 
-Package materialization is fail closed. A deferred catalog entry names at least
-one unresolved decision in `materialization_blocked_by`; the validator and
-scaffolder reject filesystem creation while that gate is unresolved. Changing or
-removing the marker cannot bypass the gate: the catalog may allow materialization
-only after the declared blockers no longer have an unresolved status and
-`materialization_decision` names the accepted ADR that resolves the explicit
-implementation-start gate. This authorizes package creation, not deployment
-qualification; final profile qualification requires its independent evidence.
+Package materialization is fail closed. The package catalog remains the topology
+Published Language consumed by Engineering Foundation. Orchestrator-specific
+deferment belongs to `architecture/package-materialization-policy.yaml`, where a
+deferred entry names at least one unresolved decision in `blocked_by`. The
+validator and scaffolder reject filesystem creation while that gate is
+unresolved. Changing or removing one side cannot bypass the gate: every policy
+entry must reference a catalog package, required Fully Local reservations must
+remain present, and `decision` must name the accepted ADR that resolves the
+explicit implementation-start gate before `state` becomes `allowed`. This
+authorizes package creation, not deployment qualification; final profile
+qualification requires its independent evidence.
 
 Every materialized package appears exactly once in the root TypeScript project
 references. Removing or adding a package updates the catalog, filesystem, manifest,
