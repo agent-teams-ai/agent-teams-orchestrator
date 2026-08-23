@@ -85,7 +85,7 @@ function minimalCatalog() {
         qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
       },
       {
-        blockedBy: ["OD-004"],
+        blockedBy: ["OD-004", "OD-021", "OD-035"],
         id: "local-host-runtime-execution",
         profiles: ["fully-local"],
         qualification: "blocked",
@@ -260,6 +260,19 @@ test("rejects deleting or rebinding a required deployment capability", () => {
   const output = validateReliabilitySemantics(catalog, owners).join("\n");
   assert.match(output, /REL-PROFILE-020/u);
   assert.match(output, /REL-PROFILE-021/u);
+});
+
+test("rejects deleting a deployment capability blocker", () => {
+  const catalog = minimalCatalog();
+  const localHostCapability = catalog.capabilities.find(
+    (capability) => capability.id === "local-host-runtime-execution",
+  );
+  localHostCapability.blockedBy = ["OD-004"];
+
+  assert.match(
+    validateReliabilitySemantics(catalog, owners).join("\n"),
+    /REL-PROFILE-020/u,
+  );
 });
 
 test("rejects making optional commercial work a profile blocker", () => {

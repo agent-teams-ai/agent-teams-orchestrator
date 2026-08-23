@@ -54,16 +54,39 @@ const expectedProfileDefinitions = new Map([
 const expectedDeploymentCapabilities = new Map([
   [
     "server-runtime-execution",
-    ["connected-self-hosted", "managed-saas", "standalone-self-hosted"],
+    {
+      blockedBy: ["OD-004"],
+      profiles: [
+        "connected-self-hosted",
+        "managed-saas",
+        "standalone-self-hosted",
+      ],
+    },
   ],
-  ["local-host-runtime-execution", ["fully-local"]],
+  [
+    "local-host-runtime-execution",
+    {
+      blockedBy: ["OD-004", "OD-021", "OD-035"],
+      profiles: ["fully-local"],
+    },
+  ],
   [
     "local-device-execution",
-    ["connected-self-hosted", "managed-saas", "standalone-self-hosted"],
+    {
+      blockedBy: ["OD-038"],
+      profiles: [
+        "connected-self-hosted",
+        "managed-saas",
+        "standalone-self-hosted",
+      ],
+    },
   ],
   [
     "managed-commercial-entitlements",
-    ["connected-self-hosted", "managed-saas"],
+    {
+      blockedBy: ["OD-037"],
+      profiles: ["connected-self-hosted", "managed-saas"],
+    },
   ],
 ]);
 
@@ -183,14 +206,17 @@ function validateProfiles(catalog, errors) {
 }
 
 function validateCapabilityProfiles(capability, profileIds, errors) {
-  const expectedProfiles = expectedDeploymentCapabilities.get(capability.id);
-  if (!expectedProfiles) {
+  const expected = expectedDeploymentCapabilities.get(capability.id);
+  if (!expected) {
     errors.push(
       `REL-PROFILE-019 ${capability.id}: deployment capability is not in the closed registry`,
     );
-  } else if (!sameMembers(capability.profiles ?? [], expectedProfiles)) {
+  } else if (
+    !sameMembers(capability.profiles ?? [], expected.profiles) ||
+    !sameMembers(capability.blockedBy ?? [], expected.blockedBy)
+  ) {
     errors.push(
-      `REL-PROFILE-020 ${capability.id}: deployment capability profile binding does not match the accepted registry`,
+      `REL-PROFILE-020 ${capability.id}: deployment capability profile or blocker binding does not match the accepted registry`,
     );
   }
   for (const profile of capability.profiles ?? []) {
