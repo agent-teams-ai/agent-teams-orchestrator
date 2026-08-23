@@ -26,6 +26,8 @@ import {
   loadPackageMaterializationPolicy,
   relative,
 } from "./package-catalog-lib.mjs";
+import { validatePackageMaterializationPolicy } from "./package-materialization-validation.mjs";
+import { loadPackageMaterializationInputs } from "./package-topology-inputs.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
@@ -125,6 +127,30 @@ function validateRepository(repositoryRoot) {
   if (result.status !== 0) {
     throw new Error(
       `package topology must be valid before planning:\n${result.stdout ?? ""}${result.stderr ?? ""}`,
+    );
+  }
+}
+
+async function validateMaterializationPolicy(repositoryRoot) {
+  const errors = [];
+  const { catalog, documents, materializationPolicy } =
+    await loadPackageMaterializationInputs(repositoryRoot, errors);
+  validatePackageMaterializationPolicy(
+    materializationPolicy && Array.isArray(materializationPolicy.entries)
+      ? materializationPolicy
+      : { entries: [] },
+    catalog && Array.isArray(catalog.packages) ? catalog.packages : [],
+    documents,
+    errors,
+  );
+  if (errors.length > 0) {
+    throw new Error(
+      `package materialization policy must be valid before apply:\n${[
+        ...new Set(errors),
+      ]
+        .toSorted()
+        .map((error) => `ERROR ${error}`)
+        .join("\n")}`,
     );
   }
 }
@@ -393,6 +419,7 @@ async function applyCommand(options) {
   const repositoryRoot = await canonicalRepositoryRoot(
     options.repositoryRoot,
   );
+  await validateMaterializationPolicy(repositoryRoot);
   const plan = await readScaffoldPlanFile(
     repositoryRoot,
     options.planPath,

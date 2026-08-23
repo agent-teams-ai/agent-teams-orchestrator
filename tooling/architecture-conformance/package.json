@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check:conformance": "node scripts/check-conformance.mjs && node scripts/check-package-scaffolding.mjs && node scripts/check-package-topology.mjs && node scripts/check-dependency-specifiers.mjs",
+    "check:conformance": "node scripts/check-conformance.mjs && node scripts/check-package-scaffolding.mjs && node scripts/check-package-scaffolding-policy.mjs && node scripts/check-package-topology.mjs && node scripts/check-dependency-specifiers.mjs",
     "check:graph": "node scripts/run-advisory-graph.mjs"
   },
   "devDependencies": {
