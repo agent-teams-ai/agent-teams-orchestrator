@@ -13,6 +13,7 @@ import {
   writePlatformOwner,
   writeRootReferences,
 } from "./topology-fixture-lib.mjs";
+import { writeJournal } from "./scaffolding-transaction-fixture.mjs";
 
 const toolingRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(toolingRoot, "../..");
@@ -96,6 +97,16 @@ try {
   const applied = run(root, "apply", "--plan", planPath, "--json");
   assert.notEqual(applied.status, 0, "invalid policy unexpectedly applied a Plan");
   assert.match(`${applied.stdout}\n${applied.stderr}`, /duplicate package_id/u);
+  assert.equal(await exists(path.join(root, targetPath)), false);
+
+  await writeJournal(root, JSON.parse(planned.stdout).plan);
+  const recovered = run(root, "recover", "--json");
+  assert.notEqual(
+    recovered.status,
+    0,
+    "invalid policy unexpectedly recovered a pending Plan",
+  );
+  assert.match(`${recovered.stdout}\n${recovered.stderr}`, /duplicate package_id/u);
   assert.equal(await exists(path.join(root, targetPath)), false);
   console.log("Package scaffolding policy qualification passed.");
 } finally {

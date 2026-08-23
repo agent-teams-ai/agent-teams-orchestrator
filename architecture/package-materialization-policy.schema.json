@@ -20,9 +20,13 @@
     }
   },
   "$defs": {
-    "documentId": {
+    "openDecisionId": {
       "type": "string",
-      "pattern": "^(ADR-[0-9]{4}|OD-[0-9]{3}|[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+)$"
+      "pattern": "^OD-[0-9]{3}$"
+    },
+    "architectureDecisionId": {
+      "type": "string",
+      "pattern": "^ADR-[0-9]{4}$"
     },
     "entry": {
       "type": "object",
@@ -49,7 +53,7 @@
           "minItems": 1,
           "uniqueItems": true,
           "items": {
-            "$ref": "#/$defs/documentId"
+            "$ref": "#/$defs/openDecisionId"
           }
         },
         "decision": {
@@ -58,7 +62,7 @@
               "type": "null"
             },
             {
-              "$ref": "#/$defs/documentId"
+              "$ref": "#/$defs/architectureDecisionId"
             }
           ]
         }

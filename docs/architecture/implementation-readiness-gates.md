@@ -233,8 +233,9 @@ Required evidence:
   and Operation handle is fenced by Target identity and client generation;
 - profile switching closes the old generation and proves that late results
   cannot update the new view or retry against a different Host;
-- the separately gated `local-device-execution` capability passes OD-038 enrollment, outbound
-  channel, revocation, reconnect, stale-custody, and Desktop-exit conformance;
+- when the selected profile advertises `local-device-execution`, that separately
+  gated capability passes OD-038 enrollment, outbound channel, revocation,
+  reconnect, stale-custody, and Desktop-exit conformance;
 - the Host issues scoped short-lived realtime subscription authority before the
   client connects to the edge;
 - Standalone Self-Hosted passes an offline fixture with no managed endpoint or

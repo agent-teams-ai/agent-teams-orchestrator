@@ -75,7 +75,11 @@ flowchart LR
 OCI Distribution, ORAS, and Cosign are fixed technical choices behind the shared
 foundation. They do not become product domain dependencies.
 
-## Required proof before acceptance
+## Required proof before production adoption
+
+ADR-0096 resolves the architectural direction. The evidence below qualifies its
+production implementation and any public extension surface; it is not evidence
+that already exists merely because the decision record is accepted.
 
 - the same fixture can be published, resolved, verified, installed, and rolled
   back through GHCR and Harbor without leaking provider types into product code;
@@ -103,6 +107,6 @@ foundation. They do not become product domain dependencies.
 
 ## Resolution
 
-Resolved by ADR-0096. Exact catalog governance, isolation tiers, lifecycle, hot
-update, and rollback remain open in OD-043. The Frontend contribution model
-remains open in OD-042.
+Resolved by ADR-0096. Production adoption remains gated by the evidence above.
+Exact catalog governance, isolation tiers, lifecycle, hot update, and rollback
+remain open in OD-043. The Frontend contribution model remains open in OD-042.

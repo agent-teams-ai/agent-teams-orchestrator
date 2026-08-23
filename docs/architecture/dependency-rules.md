@@ -27,6 +27,14 @@ code_anchors:
     enforcement: required
   - pattern: architecture/source-dependency-policy.schema.json
     enforcement: required
+  - pattern: architecture/package-materialization-policy.yaml
+    enforcement: required
+  - pattern: architecture/package-materialization-policy.schema.json
+    enforcement: required
+  - pattern: scripts/architecture/package-materialization-validation.mjs
+    enforcement: required
+  - pattern: scripts/architecture/scaffold-package.mjs
+    enforcement: required
   - pattern: tooling/architecture-conformance/scripts/check-dependency-specifiers.mjs
     enforcement: required
 ---

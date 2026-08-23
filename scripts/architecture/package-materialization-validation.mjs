@@ -14,6 +14,25 @@ function sameMembers(actual, expected) {
   );
 }
 
+function countUnresolvedMaterializationGates(entry, documents, errors) {
+  let unresolvedGateCount = 0;
+  for (const gateId of entry.blocked_by ?? []) {
+    const gate = documents.get(gateId);
+    if (!gate) {
+      errors.push(
+        `architecture/package-materialization-policy.yaml: ${entry.package_id} references unknown materialization gate ${gateId}`,
+      );
+    } else if (gate.metadata.type !== "open-decision") {
+      errors.push(
+        `architecture/package-materialization-policy.yaml: ${entry.package_id} materialization gate ${gateId} must reference an open decision`,
+      );
+    } else if (unresolvedDecisionStatuses.has(gate.metadata.status)) {
+      unresolvedGateCount += 1;
+    }
+  }
+  return unresolvedGateCount;
+}
+
 export function validateRequiredMaterializationEntries(
   entries,
   documents,
@@ -39,17 +58,11 @@ export function validateMaterializationGates(entry, documents, errors) {
       `architecture/package-materialization-policy.yaml: ${entry.package_id} must retain the accepted Fully Local materialization gate set`,
     );
   }
-  let unresolvedGateCount = 0;
-  for (const gateId of entry.blocked_by ?? []) {
-    const gate = documents.get(gateId);
-    if (!gate) {
-      errors.push(
-        `architecture/package-materialization-policy.yaml: ${entry.package_id} references unknown materialization gate ${gateId}`,
-      );
-    } else if (unresolvedDecisionStatuses.has(gate.metadata.status)) {
-      unresolvedGateCount += 1;
-    }
-  }
+  const unresolvedGateCount = countUnresolvedMaterializationGates(
+    entry,
+    documents,
+    errors,
+  );
 
   if (entry.state === "allowed" && unresolvedGateCount > 0) {
     errors.push(
@@ -71,9 +84,13 @@ export function validateMaterializationGates(entry, documents, errors) {
   }
 
   const decision = documents.get(entry.decision);
-  if (!decision || !acceptedOwnerStatuses.has(decision.metadata.status)) {
+  if (
+    !decision ||
+    decision.metadata.type !== "adr" ||
+    !acceptedOwnerStatuses.has(decision.metadata.status)
+  ) {
     errors.push(
-      `architecture/package-materialization-policy.yaml: ${entry.package_id} requires an accepted materialization decision`,
+      `architecture/package-materialization-policy.yaml: ${entry.package_id} requires an accepted materialization ADR`,
     );
   }
   const explicitGate = documents.get("OD-040");

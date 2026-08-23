@@ -11,11 +11,20 @@ const exactGates = ["OD-021", "OD-035", "OD-040"];
 
 function documents(status = "open") {
   return new Map([
-    ["OD-021", { metadata: { status } }],
-    ["OD-035", { metadata: { status } }],
-    ["OD-040", { metadata: { resolved_by: "ADR-0099", status } }],
-    ["ADR-0093", { metadata: { status: "accepted" } }],
-    ["ADR-0099", { metadata: { status: "accepted" } }],
+    ["OD-021", { metadata: { status, type: "open-decision" } }],
+    ["OD-035", { metadata: { status, type: "open-decision" } }],
+    [
+      "OD-040",
+      {
+        metadata: {
+          resolved_by: "ADR-0099",
+          status,
+          type: "open-decision",
+        },
+      },
+    ],
+    ["ADR-0093", { metadata: { status: "accepted", type: "adr" } }],
+    ["ADR-0099", { metadata: { status: "accepted", type: "adr" } }],
   ]);
 }
 
@@ -89,7 +98,44 @@ test("rejects allowed materialization without an accepted decision", () => {
   entry.state = "allowed";
   const errors = [];
   validateMaterializationGates(entry, documents("resolved"), errors);
-  assert.match(errors.join("\n"), /requires an accepted materialization decision/u);
+  assert.match(errors.join("\n"), /requires an accepted materialization ADR/u);
+});
+
+test("rejects a non-OD materialization gate", () => {
+  const entry = {
+    package_id: "context.work-coordination",
+    state: "deferred",
+    blocked_by: ["architecture.overview"],
+    decision: null,
+  };
+  const invalidDocuments = new Map([
+    [
+      "architecture.overview",
+      { metadata: { status: "proposed", type: "architecture" } },
+    ],
+  ]);
+  const errors = [];
+  validateMaterializationGates(entry, invalidDocuments, errors);
+  assert.match(errors.join("\n"), /must reference an open decision/u);
+});
+
+test("rejects an accepted non-ADR materialization decision", () => {
+  const entry = {
+    package_id: "context.work-coordination",
+    state: "allowed",
+    blocked_by: ["OD-999"],
+    decision: "architecture.overview",
+  };
+  const invalidDocuments = new Map([
+    ["OD-999", { metadata: { status: "resolved", type: "open-decision" } }],
+    [
+      "architecture.overview",
+      { metadata: { status: "accepted", type: "architecture" } },
+    ],
+  ]);
+  const errors = [];
+  validateMaterializationGates(entry, invalidDocuments, errors);
+  assert.match(errors.join("\n"), /requires an accepted materialization ADR/u);
 });
 
 test("admits materialization after every gate and the deciding ADR agree", () => {

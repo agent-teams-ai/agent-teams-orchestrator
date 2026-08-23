@@ -474,6 +474,7 @@ async function recoverCommand(options) {
   const repositoryRoot = await canonicalRepositoryRoot(
     options.repositoryRoot,
   );
+  await validateMaterializationPolicy(repositoryRoot);
   const pendingPlan = await readPendingCanonicalPlan(repositoryRoot);
   const receipt = pendingPlan
     ? await applyFilesystemScaffold(repositoryRoot, pendingPlan)
