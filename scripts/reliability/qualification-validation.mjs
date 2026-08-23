@@ -149,6 +149,11 @@ function sameMembers(actual, expected) {
 function validateQualificationFramework(catalog, errors) {
   const framework = catalog.qualificationFramework;
   validateQualificationState(framework, "framework", errors);
+  if (!sameMembers(framework.blockedBy ?? [], ["OD-039"])) {
+    errors.push(
+      "REL-PROFILE-023 qualification framework blocker binding must remain exactly OD-039 until the attestation verifier is implemented",
+    );
+  }
   if (framework.qualification === "qualified") {
     errors.push(
       "REL-PROFILE-017 qualification framework cannot be qualified before the OD-039 attestation verifier is implemented",

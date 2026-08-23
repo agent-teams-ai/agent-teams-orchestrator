@@ -285,6 +285,16 @@ test("rejects enabling the qualification framework before its verifier exists", 
   );
 });
 
+test("rejects rebinding the qualification framework away from OD-039", () => {
+  const catalog = minimalCatalog();
+  catalog.qualificationFramework.blockedBy = ["OD-003"];
+
+  assert.match(
+    validateReliabilitySemantics(catalog, owners).join("\n"),
+    /REL-PROFILE-023/u,
+  );
+});
+
 test("rejects deleting or rebinding a required deployment capability", () => {
   const catalog = minimalCatalog();
   catalog.capabilities = catalog.capabilities.filter(

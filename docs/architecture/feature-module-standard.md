@@ -280,9 +280,10 @@ Before implementation packages are accepted, repository tooling must:
 8. provide generators for new packages and features so the compliant path is the
    easiest path.
 
-ADR-0038 owns the catalog and materialization policy; ADR-0081 owns delegation to
-the versioned Foundation scaffolding protocol. The adapter cannot invent a package,
-role, path, or owner. After the owner and first slice are accepted, run:
+ADR-0038 owns the package catalog, ADR-0097 owns the separate materialization
+policy, and ADR-0081 owns delegation to the versioned Foundation scaffolding
+protocol. The adapter cannot invent a package, role, path, or owner. After the
+owner and first slice are accepted, run:
 
 ```bash
 pnpm architecture:scaffold-package -- plan --id <catalog-id>
