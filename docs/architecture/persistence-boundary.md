@@ -14,6 +14,7 @@ related:
   - ADR-0049
   - ADR-0050
   - ADR-0078
+  - ADR-0085
   - OD-003
 ---
 
@@ -414,6 +415,16 @@ watermark, projector version, and dimensional scope. Statistics may read them,
 but budget admission, quota reservation, accounting close, and correction
 authority use their owning aggregate state or authoritative facts. A projection
 cannot silently become a write-model invariant because it is faster to query.
+
+Execution Observation uses a stricter three-part boundary. Canonical evidence,
+safe activity projection, durable feed changes, payload manifest, and indexing
+outbox may share one context database transaction. The encrypted diagnostic blob
+is written durably as a staged object before that transaction, and search is
+updated with idempotency after commit. Orphan collection, payload-unavailable state,
+blue/green index generations, authorization-bound cursors, and deletion epochs
+provide recovery. Filesystem, S3, KMS, FTS, and future search-engine primitives
+remain private to their outbound adapters; they are not a global `ArtifactStore`
+or part of the context Unit of Work. ADR-0085 owns the complete protocol.
 
 Driver errors are translated inside each adapter into stable persistence
 outcomes. Raw SQLite error names, SQLite numeric codes, PostgreSQL SQLSTATE values,

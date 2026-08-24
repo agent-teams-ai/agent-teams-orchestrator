@@ -36,7 +36,7 @@ The repository is in architecture definition. Do not introduce production
 behavior, runtime dependencies, transports, databases, or framework scaffolding
 until the owning boundary and required decision are accepted.
 
-The first production vertical slice is additionally blocked by the four
+The first production vertical slice is additionally blocked by the five
 [implementation readiness gates](docs/architecture/implementation-readiness-gates.md).
 Research, deterministic contract fixtures, diagrams, and disposable spikes may
 proceed while a gate is in review.

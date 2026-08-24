@@ -23,8 +23,11 @@ import {
 
 import {
   loadPackageCatalog,
+  loadPackageMaterializationPolicy,
   relative,
 } from "./package-catalog-lib.mjs";
+import { validatePackageMaterializationPolicy } from "./package-materialization-validation.mjs";
+import { loadPackageMaterializationInputs } from "./package-topology-inputs.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
@@ -124,6 +127,30 @@ function validateRepository(repositoryRoot) {
   if (result.status !== 0) {
     throw new Error(
       `package topology must be valid before planning:\n${result.stdout ?? ""}${result.stderr ?? ""}`,
+    );
+  }
+}
+
+async function validateMaterializationPolicy(repositoryRoot) {
+  const errors = [];
+  const { catalog, documents, materializationPolicy } =
+    await loadPackageMaterializationInputs(repositoryRoot, errors);
+  validatePackageMaterializationPolicy(
+    materializationPolicy && Array.isArray(materializationPolicy.entries)
+      ? materializationPolicy
+      : { entries: [] },
+    catalog && Array.isArray(catalog.packages) ? catalog.packages : [],
+    documents,
+    errors,
+  );
+  if (errors.length > 0) {
+    throw new Error(
+      `package materialization policy must be valid before apply:\n${[
+        ...new Set(errors),
+      ]
+        .toSorted()
+        .map((error) => `ERROR ${error}`)
+        .join("\n")}`,
     );
   }
 }
@@ -248,6 +275,10 @@ function matchesCanonicalTarget(composition, target, plan) {
   ].every(Boolean);
 }
 
+function materializationFor(policy, packageId) {
+  return policy.entries?.find((entry) => entry.package_id === packageId);
+}
+
 async function assertCanonicalOrchestratorPlan(repositoryRoot, plan) {
   const config = YAML.parse(
     await readFile(
@@ -258,10 +289,16 @@ async function assertCanonicalOrchestratorPlan(repositoryRoot, plan) {
   const composition = config.compositions?.find(
     (candidate) => candidate.id === defaultCompositionId,
   );
-  const catalog = await loadPackageCatalog(repositoryRoot);
+  const [catalog, materializationPolicy] = await Promise.all([
+    loadPackageCatalog(repositoryRoot),
+    loadPackageMaterializationPolicy(repositoryRoot),
+  ]);
   const target = catalog.packages?.find(
     (candidate) => candidate.id === plan.target?.id,
   );
+  if (materializationFor(materializationPolicy, target?.id)?.state === "deferred") {
+    throw new Error(`${target.id}: package materialization is deferred`);
+  }
   if (
     !composition ||
     !target ||
@@ -279,12 +316,18 @@ async function planCommand(options) {
   const repositoryRoot = await canonicalRepositoryRoot(
     options.repositoryRoot,
   );
-  const catalog = await loadPackageCatalog(repositoryRoot);
+  const [catalog, materializationPolicy] = await Promise.all([
+    loadPackageCatalog(repositoryRoot),
+    loadPackageMaterializationPolicy(repositoryRoot),
+  ]);
   const entry = catalog.packages?.find(
     (candidate) => candidate.id === options.id,
   );
   if (!entry) {
     throw new Error(`${options.id}: package ID is not registered in the catalog`);
+  }
+  if (materializationFor(materializationPolicy, entry.id)?.state === "deferred") {
+    throw new Error(`${options.id}: package materialization is deferred`);
   }
   if (await pathEntryExists(path.join(repositoryRoot, entry.path))) {
     throw new Error(`${entry.path}: target already exists`);
@@ -376,6 +419,7 @@ async function applyCommand(options) {
   const repositoryRoot = await canonicalRepositoryRoot(
     options.repositoryRoot,
   );
+  await validateMaterializationPolicy(repositoryRoot);
   const plan = await readScaffoldPlanFile(
     repositoryRoot,
     options.planPath,
@@ -430,6 +474,7 @@ async function recoverCommand(options) {
   const repositoryRoot = await canonicalRepositoryRoot(
     options.repositoryRoot,
   );
+  await validateMaterializationPolicy(repositoryRoot);
   const pendingPlan = await readPendingCanonicalPlan(repositoryRoot);
   const receipt = pendingPlan
     ? await applyFilesystemScaffold(repositoryRoot, pendingPlan)

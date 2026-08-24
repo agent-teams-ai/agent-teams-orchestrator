@@ -19,6 +19,7 @@ related:
   - ADR-0079
   - ADR-0073
   - ADR-0080
+  - ADR-0084
   - OD-011
   - OD-023
   - OD-024
@@ -61,6 +62,7 @@ These concepts often align, but they are not interchangeable.
 | Agent Organization | Core | Accepted by ADR-0044 | Tenant-scoped organizations, units, structures, and team placements | [Dossier](../domain/contexts/agent-organization/README.md) |
 | Work Coordination | Core | Proposed | Tasks, assignments, dependencies, handoffs, and work lifecycle | [Dossier](../domain/contexts/work-coordination/README.md) |
 | Run Orchestration | Core | Proposed | Durable Run coordination and application of accepted execution policy consequences | [Dossier](../domain/contexts/run-orchestration/README.md) |
+| Execution Observation | Supporting | Accepted by ADR-0084 | Admitted runtime evidence, protected diagnostics, deterministic user-facing activity, durable activity feeds, and authorized search | [Dossier](../domain/contexts/execution-observation/README.md) |
 | Agent Communication | Core | Proposed | Typed team communication, delivery intent, inbox policy, and receipts | [Dossier](../domain/contexts/agent-communication/README.md) |
 | Human Notification Management | Supporting | Accepted by ADR-0068 | Human inbox, presentation preference, acknowledgement, and escalation lifecycle | [Dossier](../domain/contexts/human-notification/README.md) |
 | Agent Attention | Core | Accepted by ADR-0068 | Agent relevance, orientation need, bounded disruption intent, and attention-loop control | [Dossier](../domain/contexts/agent-attention/README.md) |

@@ -2,17 +2,14 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import Ajv2020 from "ajv/dist/2020.js";
-
 import {
   acceptedOwnerStatuses,
   exists,
-  loadDocuments,
-  loadPackageCatalog,
-  loadSourceDependencyPolicy,
   relative,
   walk,
 } from "./package-catalog-lib.mjs";
+import { validatePackageMaterializationPolicy } from "./package-materialization-validation.mjs";
+import { loadPackageTopologyInputs } from "./package-topology-inputs.mjs";
 import {
   isNormalizedBuiltExport,
   stringTargets,
@@ -114,6 +111,7 @@ function validateCatalogSemantics(catalog, documents, errors) {
         `architecture/package-catalog.yaml: ${entry.id} must be owned by a bounded-context dossier`,
       );
     }
+
   }
 
   const catalogPaths = [...byPath.keys()].toSorted();
@@ -270,11 +268,18 @@ async function validateMaterializedPackage(context) {
     entry,
     errors,
     owner,
+    materialization,
     repositoryRoot,
   } = context;
   const packageRoot = path.join(repositoryRoot, entry.path);
   const packageJsonPath = path.join(packageRoot, "package.json");
   const tsconfigPath = path.join(packageRoot, "tsconfig.json");
+
+  if (materialization?.state === "deferred") {
+    errors.push(
+      `${entry.path}: package materialization is deferred by the materialization policy`,
+    );
+  }
 
   if (!acceptedOwnerStatuses.has(owner.metadata.status)) {
     errors.push(
@@ -357,58 +362,26 @@ async function validateMaterializedPackage(context) {
 
 async function main() {
   const repositoryRoot = parseArguments(process.argv.slice(2));
-  const schemaPath = path.join(
-    repositoryRoot,
-    "architecture/package-catalog.schema.json",
-  );
-  const dependencyPolicySchemaPath = path.join(
-    repositoryRoot,
-    "architecture/source-dependency-policy.schema.json",
-  );
   const errors = [];
-
-  const [
+  const {
     catalog,
-    schemaSource,
-    documents,
     dependencyPolicy,
-    dependencyPolicySchemaSource,
-  ] = await Promise.all([
-    loadPackageCatalog(repositoryRoot),
-    readFile(schemaPath, "utf8"),
-    loadDocuments(repositoryRoot),
-    loadSourceDependencyPolicy(repositoryRoot),
-    readFile(dependencyPolicySchemaPath, "utf8"),
-  ]);
-  const schema = JSON.parse(schemaSource);
-  const ajv = new Ajv2020({
-    allErrors: true,
-    strict: true,
-  });
-  const validateCatalog = ajv.compile(schema);
-  const validateDependencyPolicy = ajv.compile(
-    JSON.parse(dependencyPolicySchemaSource),
-  );
-
-  if (!validateCatalog(catalog)) {
-    for (const validationError of validateCatalog.errors ?? []) {
-      errors.push(
-        `architecture/package-catalog.yaml${validationError.instancePath}: ${validationError.message}`,
-      );
-    }
-  }
-  if (!validateDependencyPolicy(dependencyPolicy)) {
-    for (const validationError of validateDependencyPolicy.errors ?? []) {
-      errors.push(
-        `architecture/source-dependency-policy.yaml${validationError.instancePath}: ${validationError.message}`,
-      );
-    }
-  }
+    documents,
+    materializationPolicy,
+  } = await loadPackageTopologyInputs(repositoryRoot, errors);
 
   const { byPackageName, byPath } = validateCatalogSemantics(
     catalog && Array.isArray(catalog.packages)
       ? catalog
       : { packages: [] },
+    documents,
+    errors,
+  );
+  const materializationByPackageId = validatePackageMaterializationPolicy(
+    materializationPolicy && Array.isArray(materializationPolicy.entries)
+      ? materializationPolicy
+      : { entries: [] },
+    catalog && Array.isArray(catalog.packages) ? catalog.packages : [],
     documents,
     errors,
   );
@@ -464,6 +437,7 @@ async function main() {
         dependencyEdges,
         entry,
         errors,
+        materialization: materializationByPackageId.get(entry.id),
         owner,
         repositoryRoot,
       });

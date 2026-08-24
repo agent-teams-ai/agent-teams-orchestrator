@@ -1,0 +1,14 @@
+version: 1
+entries:
+  - package_id: app.local-supervisor
+    state: deferred
+    blocked_by: [OD-021, OD-035, OD-040]
+    decision: null
+  - package_id: app.orchestrator-local
+    state: deferred
+    blocked_by: [OD-021, OD-035, OD-040]
+    decision: null
+  - package_id: sdk.orchestrator-local-host
+    state: deferred
+    blocked_by: [OD-021, OD-035, OD-040]
+    decision: null

@@ -13,6 +13,7 @@ related:
   - ADR-0037
   - ADR-0038
   - ADR-0075
+  - ADR-0093
 code_anchors:
   - pattern: scripts/architecture/validate-package-topology.mjs
     enforcement: required
@@ -239,9 +240,20 @@ Feature ownership is enforced mechanically rather than remembered during review.
 `architecture/package-catalog.yaml` is the default-deny registry of allowed
 production package identities, roles, paths, names, and owner documents. A
 proposed owner reserves a name and path but cannot materialize production files.
+An entry marked `state: deferred` in
+`architecture/package-materialization-policy.yaml` remains non-materializable
+even when its catalog owner document is accepted. Both the topology validator
+and scaffolder reject it. Reserved Fully Local entries must retain their
+machine-readable `blocked_by` decisions; CI permits `allowed` only after every
+listed gate is resolved and `decision` names the accepted ADR that resolves
+OD-040. This starts implementation but does not claim that the Fully Local
+deployment profile is qualified. Deleting either the reservation or its policy,
+or substituting an unrelated accepted ADR, is not a valid bypass.
+
 A root-level `.gitkeep` may preserve a supported empty workspace family without
 materializing a package; every other production file still requires a cataloged
 package boundary.
+
 `architecture/source-dependency-policy.yaml` separately allows each production
 source dependency by exact consumer, provider, and exported subpath. A manifest
 dependency, package-role-compatible direction, or LikeC4 relationship alone does
@@ -268,9 +280,10 @@ Before implementation packages are accepted, repository tooling must:
 8. provide generators for new packages and features so the compliant path is the
    easiest path.
 
-ADR-0038 owns the catalog and materialization policy; ADR-0081 owns delegation to
-the versioned Foundation scaffolding protocol. The adapter cannot invent a package,
-role, path, or owner. After the owner and first slice are accepted, run:
+ADR-0038 owns the package catalog, ADR-0097 owns the separate materialization
+policy, and ADR-0081 owns delegation to the versioned Foundation scaffolding
+protocol. The adapter cannot invent a package, role, path, or owner. After the
+owner and first slice are accepted, run:
 
 ```bash
 pnpm architecture:scaffold-package -- plan --id <catalog-id>

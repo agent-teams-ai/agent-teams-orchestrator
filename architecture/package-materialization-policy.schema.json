@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-teams.dev/schemas/package-materialization-policy.json",
+  "title": "Agent Teams Orchestrator package materialization policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "entries"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    }
+  },
+  "$defs": {
+    "openDecisionId": {
+      "type": "string",
+      "pattern": "^OD-[0-9]{3}$"
+    },
+    "architectureDecisionId": {
+      "type": "string",
+      "pattern": "^ADR-[0-9]{4}$"
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "package_id",
+        "state",
+        "blocked_by",
+        "decision"
+      ],
+      "properties": {
+        "package_id": {
+          "type": "string",
+          "pattern": "^(app|context|integration|platform|sdk|testing)\\.[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)*$"
+        },
+        "state": {
+          "enum": [
+            "allowed",
+            "deferred"
+          ]
+        },
+        "blocked_by": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/openDecisionId"
+          }
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/architectureDecisionId"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -48,6 +48,7 @@ authoring:
         - clients/sdk
         - consumption-governance
         - engineering/tooling
+        - execution-observation
         - human-notification
         - identity-registry
         - integration/runtime
@@ -106,6 +107,7 @@ authoring:
         - clients/sdk
         - consumption-governance
         - engineering/tooling
+        - execution-observation
         - human-notification
         - identity-registry
         - integration/runtime
@@ -164,6 +166,7 @@ authoring:
         - clients/sdk
         - consumption-governance
         - engineering/tooling
+        - execution-observation
         - human-notification
         - identity-registry
         - integration/runtime
@@ -228,6 +231,7 @@ authoring:
         - clients/sdk
         - consumption-governance
         - engineering/tooling
+        - execution-observation
         - human-notification
         - identity-registry
         - integration/runtime
@@ -291,6 +295,7 @@ authoring:
         - clients/sdk
         - consumption-governance
         - engineering/tooling
+        - execution-observation
         - human-notification
         - identity-registry
         - integration/runtime
@@ -363,6 +368,7 @@ authoring:
         - clients/sdk
         - consumption-governance
         - engineering/tooling
+        - execution-observation
         - human-notification
         - identity-registry
         - integration/runtime

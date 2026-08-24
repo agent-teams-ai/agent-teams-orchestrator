@@ -550,7 +550,8 @@ published artifact is correct.
 
 | Failure class | Owning tool |
 |---|---|
-| Package identity and materialization | Package catalog and topology validator |
+| Package identity | Package catalog and topology validator |
+| Package materialization | Package materialization policy, topology validator, and scaffolder |
 | Project and task impact | Nx |
 | Source import boundaries | Oxlint with boundary rules |
 | Complete dependency graph and cycles | dependency-cruiser |

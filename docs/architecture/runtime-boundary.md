@@ -16,6 +16,8 @@ related:
   - ADR-0079
   - ADR-0080
   - ADR-0083
+  - ADR-0084
+  - ADR-0085
   - architecture.local-host-lifecycle
   - OD-004
 ---
@@ -36,12 +38,14 @@ only integration authority.
 flowchart LR
     Scope["Orchestration Scope Application"]
     Run["Run Orchestration Application"]
+    Observation["Execution Observation Application"]
     ScopePorts["Scope Admission and Disposition Ports"]
     RunPorts["Target, Session, and Operation Ports"]
     OutACL["Runtime Command ACL (Outbound Adapter)"]
     InACL["Runtime Event ACL (Inbound Adapter)"]
     ScopeIn["Scope Observation Ingestion"]
     RunIn["Target Observation Ingestion"]
+    EvidenceIn["Observation Evidence Ingestion"]
     AR["ar Runtime"]
     Driver["Provider Driver"]
     Provider["Claude / Codex / OpenCode"]
@@ -54,6 +58,7 @@ flowchart LR
     AR --> InACL
     InACL --> ScopeIn --> Scope
     InACL --> RunIn --> Run
+    InACL --> EvidenceIn --> Observation
     AR --> Driver
     Driver --> Provider
 ```
@@ -65,6 +70,7 @@ flowchart LR
 | Team, task, and message intent | Orchestrator |
 | Team messages, product inboxes, and coordination delivery | Agent Communication |
 | Runtime input and provider output | `ar` |
+| Admitted product evidence, protected diagnostics, normalized user-facing activity, activity feeds, and observation search | Execution Observation |
 | Assignment and completion policy | Orchestrator |
 | Orchestration tenant and Project identity, coarse admission, runtime-scope bindings, and whole-Project disposition coordination | Orchestration Scope |
 | Desired runtime state | Orchestrator |
@@ -109,6 +115,10 @@ Orchestration Scope owns project-level `RuntimeScopeBinding`, scope admission an
 disposition intent, and the scope-ingestion inboxes, checkpoints, and
 projections. Run Orchestration owns participant-level `ManagedRuntimeBinding`,
 `RunRuntimeTarget`, Run cutoff obligations, and target/session-ingestion state.
+Execution Observation owns evidence receipts, protected payload manifests,
+deterministic activity interpretation, its durable activity feed, and rebuildable
+search projections. It cannot infer lifecycle consequences or technical
+authority from provider output.
 `ar` owns runtime scopes, sessions, operations, processes, custody, technical
 fencing, provider cursors, and the pre-materialization negative operation-intent
 guard.
@@ -143,6 +153,7 @@ RuntimeTargetDispatchPort
 RuntimeOperationCutoffPort
 RuntimeSessionCutoffPort
 RuntimeTargetObservationPort
+RuntimeObservationEvidencePort
 RuntimePermissionDecisionPort
 RuntimeRecoveryPort
 ```
@@ -412,6 +423,21 @@ owning capability defines:
 When the source has no replayable cursor, the observation is marked
 non-replayable. Reconciliation uses a fresh snapshot and never fabricates missing
 history.
+
+Execution Observation separately admits user-visible control and output evidence
+through its own consumer port. It stores authenticated source coordinates before
+deterministic normalization, keeps protected provider payload behind stricter
+access, and publishes a context-owned activity feed. It does not replace the Run
+observation projection, use output as lifecycle authority, or expose arbitrary AR
+payload to clients. Scope and Run facts enter as separate idempotent reference
+projections; rebuild never queries another context's current tables or API.
+ADR-0084, ADR-0085, and ADR-0089 define this boundary.
+
+A Hosted Orchestrator may control AR on a user device only through a qualified
+runtime-connectivity adapter. OD-038 must close enrollment, target-bound device
+identity, outbound channel, revocation, reconnect, connection generation, stale
+custody, and Desktop-exit semantics before that placement is advertised. Desktop
+and the connector own neither business Run lifecycle nor AR technical state.
 
 ## Runtime-command idempotency
 

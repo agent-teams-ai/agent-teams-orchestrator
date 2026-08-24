@@ -52,6 +52,15 @@ question. `Resolved` is historical and must relate to at least one deciding ADR.
 | OD-032 | [Last-mile side-effect safety](OD-032-last-mile-side-effect-safety.md) | architecture/security | Open |
 | OD-033 | [OODA convergence and context activation](OD-033-ooda-convergence-and-context-activation.md) | architecture/domain | Open |
 | OD-034 | [External Integration Management](OD-034-external-integration-management.md) | architecture/domain | Deferred |
+| OD-035 | [Local durable workflow engine](OD-035-local-durable-workflow-engine.md) | run-orchestration | Open |
+| OD-036 | [First usable deployment profile](OD-036-first-usable-deployment-profile.md) | architecture/composition | Resolved by ADR-0087 |
+| OD-037 | [Commercial capability entitlements](OD-037-commercial-capability-entitlements.md) | architecture/contracts | Open |
+| OD-038 | [Runtime worker connectivity and enrollment](OD-038-runtime-worker-connectivity-and-enrollment.md) | integration/runtime | Open |
+| OD-039 | [Deployment qualification attestation](OD-039-deployment-qualification-attestation.md) | architecture/reliability | Open |
+| OD-040 | [Fully Local package materialization](OD-040-fully-local-package-materialization.md) | architecture/composition | Open |
+| OD-041 | [Shared extension foundation and artifact distribution](OD-041-shared-extension-foundation-and-artifact-distribution.md) | architecture | Resolved by ADR-0096 |
+| OD-042 | [Frontend extension contribution model](OD-042-frontend-extension-contribution-model.md) | architecture | Open |
+| OD-043 | [Extension lifecycle, catalog, and hot update](OD-043-extension-lifecycle-catalog-and-hot-update.md) | architecture | Open |
 
 Use the [open-decision template](../templates/open-decision.md) for new entries.
 CI verifies that every record is listed and that table owner and status match its

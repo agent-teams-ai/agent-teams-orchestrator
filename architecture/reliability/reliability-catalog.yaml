@@ -1,15 +1,97 @@
 schemaVersion: 1
 
+qualificationFramework:
+  id: deployment-qualification
+  qualification: blocked
+  blockedBy: [OD-039]
+  qualificationEvidence:
+    decisionRefs: []
+    conformanceRefs: []
+
 profiles:
-  - id: local
-    description: User-managed machine with an automatically supervised local Orchestrator Host.
-  - id: hosted
-    description: Server deployment with externally operated persistence, messaging, and observability.
+  - id: managed-saas
+    description: Agent Teams-managed Server Host with managed product authority and infrastructure.
+    releaseScope: v1-target
+    qualification: blocked
+    blockedBy: [OD-003, OD-012]
+    productAuthorityAdapter: managed-platform
+    commercialAuthorityAdapter: optional-managed-platform
+    requiredCapabilities: [server-runtime-execution]
+    qualificationEvidence:
+      decisionRefs: []
+      conformanceRefs: []
+  - id: standalone-self-hosted
+    description: Customer-operated Server Host with standalone authority and customer infrastructure.
+    releaseScope: v1-target
+    qualification: blocked
+    blockedBy: [OD-003, OD-012]
+    productAuthorityAdapter: standalone
+    commercialAuthorityAdapter: none
+    requiredCapabilities: [server-runtime-execution]
+    qualificationEvidence:
+      decisionRefs: []
+      conformanceRefs: []
+  - id: connected-self-hosted
+    description: Future customer-operated Host using explicitly selected managed capabilities.
+    releaseScope: future
+    qualification: deferred
+    blockedBy: [OD-003, OD-012]
+    productAuthorityAdapter: standalone
+    commercialAuthorityAdapter: optional-managed-platform
+    requiredCapabilities: [server-runtime-execution]
+    qualificationEvidence:
+      decisionRefs: []
+      conformanceRefs: []
+  - id: fully-local
+    description: Future user-device Host with local authority, persistence, and supervised components.
+    releaseScope: future
+    qualification: deferred
+    blockedBy: [OD-001, OD-003, OD-009, OD-021, OD-035]
+    productAuthorityAdapter: local-standalone
+    commercialAuthorityAdapter: none
+    requiredCapabilities: [local-host-runtime-execution]
+    qualificationEvidence:
+      decisionRefs: []
+      conformanceRefs: []
+
+capabilities:
+  - id: server-runtime-execution
+    description: Server Orchestrator Host controls qualified server-side AR capacity.
+    qualification: blocked
+    profiles: [managed-saas, standalone-self-hosted, connected-self-hosted]
+    blockedBy: [OD-004]
+    qualificationEvidence:
+      decisionRefs: []
+      conformanceRefs: []
+  - id: local-host-runtime-execution
+    description: Fully Local Orchestrator Host controls qualified AR capacity on the same user device.
+    qualification: blocked
+    profiles: [fully-local]
+    blockedBy: [OD-004, OD-021, OD-035]
+    qualificationEvidence:
+      decisionRefs: []
+      conformanceRefs: []
+  - id: local-device-execution
+    description: Server Orchestrator controls enrolled AR capacity on a user or customer device.
+    qualification: blocked
+    profiles: [managed-saas, standalone-self-hosted, connected-self-hosted]
+    blockedBy: [OD-038]
+    qualificationEvidence:
+      decisionRefs: []
+      conformanceRefs: []
+  - id: managed-commercial-entitlements
+    description: Managed or connected Host consumes independently qualified commercial capability evidence.
+    qualification: blocked
+    profiles: [managed-saas, connected-self-hosted]
+    blockedBy: [OD-037]
+    qualificationEvidence:
+      decisionRefs: []
+      conformanceRefs: []
 
 metricAttributes:
   - id: deployment.profile
     cardinality: low
-    maxDistinct: 2
+    maxDistinct: 4
   - id: command.kind
     cardinality: bounded
     maxDistinct: 32
@@ -47,7 +129,7 @@ indicators:
     measure: histogram
     unit: milliseconds
     source: control-api.command-receipt
-    profiles: [local, hosted]
+    profiles: [managed-saas, standalone-self-hosted, connected-self-hosted, fully-local]
     allowedAttributes:
       - deployment.profile
       - command.kind
@@ -61,7 +143,7 @@ indicators:
     measure: histogram
     unit: milliseconds
     source: dispatch.intent-lifecycle
-    profiles: [local, hosted]
+    profiles: [managed-saas, standalone-self-hosted, connected-self-hosted, fully-local]
     allowedAttributes:
       - deployment.profile
       - command.kind
@@ -75,7 +157,7 @@ indicators:
     measure: gauge
     unit: milliseconds
     source: feed.delivery-watermark
-    profiles: [local, hosted]
+    profiles: [managed-saas, standalone-self-hosted, connected-self-hosted, fully-local]
     allowedAttributes:
       - deployment.profile
       - feed.kind
@@ -88,7 +170,7 @@ indicators:
     measure: histogram
     unit: milliseconds
     source: run-runtime-target.recovery-lifecycle
-    profiles: [local, hosted]
+    profiles: [managed-saas, standalone-self-hosted, connected-self-hosted, fully-local]
     allowedAttributes:
       - deployment.profile
       - recovery.reason
@@ -102,7 +184,7 @@ indicators:
     measure: histogram
     unit: milliseconds
     source: scope.disposition-lifecycle
-    profiles: [local, hosted]
+    profiles: [managed-saas, standalone-self-hosted, connected-self-hosted, fully-local]
     allowedAttributes:
       - deployment.profile
       - recovery.reason
@@ -155,7 +237,7 @@ resourceBudgets:
     measure: histogram
     unit: milliseconds
     source: host.event-loop
-    profiles: [local, hosted]
+    profiles: [managed-saas, standalone-self-hosted, connected-self-hosted, fully-local]
     allowedAttributes:
       - deployment.profile
 
@@ -166,7 +248,7 @@ resourceBudgets:
     measure: gauge
     unit: ratio
     source: command-lane.capacity
-    profiles: [local, hosted]
+    profiles: [managed-saas, standalone-self-hosted, connected-self-hosted, fully-local]
     allowedAttributes:
       - deployment.profile
 
@@ -177,7 +259,7 @@ resourceBudgets:
     measure: gauge
     unit: bytes
     source: local-storage.headroom
-    profiles: [local]
+    profiles: [fully-local]
     allowedAttributes:
       - deployment.profile
 
@@ -188,6 +270,6 @@ resourceBudgets:
     measure: gauge
     unit: count
     source: telemetry.metric-cardinality
-    profiles: [local, hosted]
+    profiles: [managed-saas, standalone-self-hosted, connected-self-hosted, fully-local]
     allowedAttributes:
       - deployment.profile

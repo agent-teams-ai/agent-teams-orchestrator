@@ -71,6 +71,22 @@ summary: Owns the test platform package for topology fixtures.
   );
 }
 
+export async function writeMaterializationGate(root) {
+  const decisionsRoot = path.join(root, "docs/open-decisions");
+  await mkdir(decisionsRoot, { recursive: true });
+  await writeFile(
+    path.join(decisionsRoot, "OD-999-fixture-materialization.md"),
+    `---
+id: OD-999
+type: open-decision
+status: open
+owner: architecture
+summary: Keeps fixture package materialization deferred.
+---
+`,
+  );
+}
+
 export async function writeFeatureReadme(
   featureRoot,
   { id, owner, ownerDocument, status = "accepted" },
@@ -92,6 +108,21 @@ related:
   );
 }
 
+export async function writeEmptyMaterializationPolicy(root, schemaPath) {
+  const architectureRoot = path.join(root, "architecture");
+  await mkdir(architectureRoot, { recursive: true });
+  await Promise.all([
+    cp(
+      schemaPath,
+      path.join(architectureRoot, "package-materialization-policy.schema.json"),
+    ),
+    writeFile(
+      path.join(architectureRoot, "package-materialization-policy.yaml"),
+      "version: 1\nentries: []\n",
+    ),
+  ]);
+}
+
 export async function writeCatalog(root, schemaPaths) {
   const architectureRoot = path.join(root, "architecture");
   await mkdir(architectureRoot, { recursive: true });
@@ -103,6 +134,7 @@ export async function writeCatalog(root, schemaPaths) {
     schemaPaths.dependencyPolicy,
     path.join(architectureRoot, "source-dependency-policy.schema.json"),
   );
+  await writeEmptyMaterializationPolicy(root, schemaPaths.materializationPolicy);
   await writeFile(
     path.join(architectureRoot, "package-catalog.yaml"),
     `version: 1

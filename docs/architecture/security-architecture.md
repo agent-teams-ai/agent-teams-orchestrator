@@ -11,6 +11,10 @@ related:
   - ADR-0058
   - ADR-0080
   - ADR-0083
+  - ADR-0084
+  - ADR-0085
+  - ADR-0092
+  - ADR-0094
   - OD-012
   - OD-014
   - OD-029
@@ -224,6 +228,60 @@ Ambiguous outcomes are reconciled rather than blindly retried.
 Orchestrator never stores or validates an AR-private execution fence. It sends
 only the published preconditions accepted by the `ar` contract; `ar` owns the
 technical enforcement decision.
+
+## Execution Observation data boundary
+
+Execution Observation admits provider output only through an authenticated
+runtime binding. Provider payload cannot select tenant, project, principal, Run,
+Work, visibility, retention, or authorization. Unknown schemas remain restricted
+evidence and cannot be rendered, indexed, exported, or promoted into activity
+effects automatically.
+
+Canonical evidence, safe Activity Views, protected diagnostic payload, search
+documents, realtime changes, exports, and telemetry are separate disclosure
+surfaces. Each materialized surface has its own classification manifest. Full
+diagnostic payload uses envelope encryption and a distinct access capability;
+default feeds and exports contain only bounded redacted Activity Views.
+
+Search cursors are encrypted, integrity-protected, expiring, and bound to query,
+subject, authorization epoch, scope, snapshot watermark, and index generation.
+Every page and raw-payload read repeats current authorization. Authorization,
+current disclosure, and deletion predicates execute before matching, ranking,
+count, pagination, and cursor advancement. Disclosure is evaluated over revision
+intervals, so an ordinary safe update preserves older safe snapshots while an
+explicit safety withdrawal wins immediately. A deletion tombstone overrides old
+cursors, index generations, realtime cache, replay, and delayed work. A current
+disclosure fence likewise hides revisions withdrawn by redaction, quarantine,
+retraction, or security invalidation, even when snapshot history remains stored.
+Admission compares the current freeze revision and deletion epoch in the same
+transaction that would make staged payload reachable. ADR-0084, ADR-0085,
+ADR-0089, ADR-0092, and ADR-0094 define the complete ownership and lifecycle.
+
+Protected payload uses an independent current disposition keyed by its opaque
+reference. Authorization alone is insufficient: raw reads, exports, artifact
+downloads, restore, and cleanup recheck payload disposition so a stale reference
+cannot bypass later quarantine or redaction. Durable feed replay and snapshots
+hydrate Activity Views through current disclosure. The realtime edge retains
+only bounded wake-ups and feed positions, not replayable Activity content.
+
+Source conflict comparison uses a tenant-keyed digest; payload integrity uses a
+separate protected digest. Ingress limits compressed expansion, chunk count,
+nesting, object count, and per-partition rate before unbounded allocation.
+
+## Server-to-local runtime connectivity
+
+A server Host cannot assume direct reachability to AR on a user device. OD-038
+owns explicit enrollment, device and target identity, outbound channel,
+revocation, reconnect, connection generation, and Desktop-exit behavior. The
+Local Runtime Connector is a proposed connectivity process only: it cannot own a
+Run, RuntimeSession, provider process, or product authorization.
+
+Managed Product Authority and Standalone Deployment Authority are alternative
+product-authority adapters. Commercial Access Authority is a separate logical
+port even when the same Platform deployment implements both managed services.
+Managed commercial evidence is Host-custodied and cannot be replayed by a client.
+Standalone baseline operation does not depend on either managed authority
+endpoint.
 
 ## Client realtime boundary
 

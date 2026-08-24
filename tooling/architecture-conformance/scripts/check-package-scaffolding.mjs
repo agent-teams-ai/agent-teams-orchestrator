@@ -17,6 +17,7 @@ import Ajv2020 from "ajv/dist/2020.js";
 import { planScaffoldFromFile } from "@agent-teams/engineering-foundation/scaffolding";
 import YAML from "yaml";
 
+import { writeEmptyMaterializationPolicy } from "./topology-fixture-lib.mjs";
 import {
   journalPath,
   operationBytes,
@@ -35,14 +36,12 @@ const wrapper = path.join(
   repositoryRoot,
   "scripts/architecture/scaffold-package.mjs",
 );
-const catalogSchema = path.join(
-  repositoryRoot,
-  "architecture/package-catalog.schema.json",
-);
+const catalogSchema = path.join(repositoryRoot, "architecture/package-catalog.schema.json");
 const dependencyPolicySchema = path.join(
   repositoryRoot,
   "architecture/source-dependency-policy.schema.json",
 );
+const materializationPolicySchema = path.join(repositoryRoot, "architecture/package-materialization-policy.schema.json");
 const goldenRoot = path.join(
   toolingRoot,
   "fixtures/scaffolding/library-boundary-golden",
@@ -149,6 +148,7 @@ async function createFixture(entries) {
       dependencyPolicySchema,
       path.join(architectureRoot, "source-dependency-policy.schema.json"),
     ),
+    writeEmptyMaterializationPolicy(root, materializationPolicySchema),
     copyFile(
       path.join(repositoryRoot, "architecture/foundation/scaffolding.yaml"),
       path.join(architectureRoot, "foundation/scaffolding.yaml"),

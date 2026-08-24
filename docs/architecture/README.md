@@ -16,6 +16,7 @@ that contributors must implement now.
 
 - [Architecture overview](overview.md)
 - [Local Host lifecycle](local-host-lifecycle.md)
+- [Deployment profiles](deployment-profiles.md)
 - [Strategic context map](context-map.md)
 - [Machine-readable architecture model](architecture-model.md)
 - [Evolution and quality attributes](evolution-quality-attributes.md)
@@ -27,6 +28,7 @@ that contributors must implement now.
 - [Composition and dependency injection](composition-and-dependency-injection.md)
 - [Repository tooling plan](repository-tooling.md)
 - [Machine-readable package catalog](../../architecture/package-catalog.yaml)
+- [Machine-readable deployment and reliability profiles](../../architecture/reliability/reliability-catalog.yaml)
 - [Machine-readable LikeC4 sources](../../architecture/likec4/model.c4)
 
 ## Integration and data boundaries

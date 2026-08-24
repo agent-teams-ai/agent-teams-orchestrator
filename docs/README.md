@@ -37,6 +37,7 @@ Agents should also follow the short repository-level
 | Classify data or cross a trust boundary | [Security architecture](architecture/security-architecture.md) | [Machine-readable security schemas](../architecture/security/data-classification.schema.json), `OD-012`, `OD-029` |
 | Add an SDK or API capability | [SDK and transports](architecture/sdk-and-transports.md) | [Public control contracts](architecture/public-control-contracts.md) |
 | Change local lifecycle | [Local Host lifecycle](architecture/local-host-lifecycle.md) | `OD-001`, `OD-021` |
+| Change deployment profiles or client targets | [Deployment profiles](architecture/deployment-profiles.md) | `ADR-0087`, `ADR-0088`, `ADR-0090`, `ADR-0091`, `OD-035`, `OD-037`, `OD-038` |
 | Migrate legacy behavior | [Migration boundary](architecture/migration-boundary.md) | owning context dossier and migration open decision |
 | Change repository tooling | [Repository tooling](architecture/repository-tooling.md) | [Testing strategy](architecture/testing-strategy.md) |
 | Change strategic relationships | [Machine-readable architecture model](architecture/architecture-model.md) | [Context map](architecture/context-map.md), owning context dossiers |
