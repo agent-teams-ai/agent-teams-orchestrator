@@ -47,12 +47,12 @@ minimumReleaseAge: 1440
 minimumReleaseAgeStrict: true
 
 minimumReleaseAgeExclude:
-  - "@agent-teams/engineering-foundation@0.17.0"
-  - "@agent-teams/docs-protocol@0.1.1"
+  - "@agent-teams/engineering-foundation@0.18.0"
+  - "@agent-teams/docs-protocol@0.1.2"
   - js-yaml@5.2.2
 
 overrides:
-  "ajv@8>fast-uri": "3.1.5"
+  "ajv@8>fast-uri": "3.1.6"
   "js-yaml": "5.2.2"
   "jsdom@29>undici": "7.29.0"
   "minimatch@10>brace-expansion": "5.0.9"
