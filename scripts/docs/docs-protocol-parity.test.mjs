@@ -25,6 +25,8 @@ import { runDocsProtocolQualification } from "@agent-teams/docs-protocol/qualifi
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const docsPackageRoot = path.dirname(fileURLToPath(import.meta.resolve("@agent-teams/docs-protocol/package.json")));
 const foundationPackageRoot = path.dirname(fileURLToPath(import.meta.resolve("@agent-teams/engineering-foundation/package.json")));
+const { version: docsPackageVersion } = JSON.parse(await readFile(path.join(docsPackageRoot, "package.json"), "utf8"));
+const { version: foundationPackageVersion } = JSON.parse(await readFile(path.join(foundationPackageRoot, "package.json"), "utf8"));
 
 test("qualification manifest binds the exact protocol gate and registry packages", async () => {
   const [qualification, manifest] = await Promise.all([
@@ -111,7 +113,7 @@ async function makeSourceFixture({ installPackages = true } = {}) {
     cp(path.join(repositoryRoot, "docs/templates"), path.join(root, "docs/templates"), { recursive: true }),
     cp(path.join(repositoryRoot, "docs/metadata.schema.json"), path.join(root, "docs/metadata.schema.json")),
     cp(path.join(repositoryRoot, "docs/owners.yaml"), path.join(root, "docs/owners.yaml")),
-    writeFile(path.join(root, "package.json"), `${JSON.stringify({ name: "docs-parity-fixture", private: true, type: "module", scripts: Object.fromEntries(["check", "doctor", "find", "info", "new", "recover"].map((command) => [`docs:${command}`, `agent-teams-docs ${command} --consumer . --profile architecture/foundation/docs-protocol.yaml`])), devDependencies: { "@agent-teams/docs-protocol": "0.1.2", "@agent-teams/engineering-foundation": "0.18.0" } }, null, 2)}\n`),
+    writeFile(path.join(root, "package.json"), `${JSON.stringify({ name: "docs-parity-fixture", private: true, type: "module", scripts: Object.fromEntries(["check", "doctor", "find", "info", "new", "recover"].map((command) => [`docs:${command}`, `agent-teams-docs ${command} --consumer . --profile architecture/foundation/docs-protocol.yaml`])), devDependencies: { "@agent-teams/docs-protocol": docsPackageVersion, "@agent-teams/engineering-foundation": foundationPackageVersion } }, null, 2)}\n`),
     writeFile(path.join(root, "docs/README.md"), indexSource("docs.index", "Documentation")),
     writeFile(path.join(root, "docs/decisions/README.md"), indexSource("docs.decisions.index", "Decisions")),
     writeFile(path.join(root, "docs/open-decisions/README.md"), indexSource("docs.open-decisions.index", "Open Decisions")),
