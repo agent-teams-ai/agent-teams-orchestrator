@@ -11,6 +11,7 @@ CloudEvents
 Codex
 compensatable
 cooldown
+Cordis
 custodied
 Dapr
 Dinero

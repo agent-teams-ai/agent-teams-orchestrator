@@ -50,8 +50,10 @@ features/quota-reservation/
     README.md
   application/
   adapters/
-  module.ts
-  tests/
+  composition/
+    feature-module-factory.ts
+
+tests/features/quota-reservation/
 ```
 
 An entity, value object, factory, or event used by only one aggregate is colocated
@@ -189,7 +191,7 @@ context dossier or feature domain documentation:
 | Protected invariants | Rules requiring one consistency boundary |
 | Commands | Every legal mutation entry point |
 | Domain events | Facts produced after valid transitions |
-| Transaction | State, receipts, outbox, and projections committed together |
+| Transaction | State, command receipt, and outbox intent committed atomically; only explicitly transactional read-model updates join that Unit of Work, while asynchronous projections use their own inbox/checkpoint transaction |
 | Concurrency | Revision, conflict set, lock or isolation strategy |
 | Collection growth | Explicit bound or extraction trigger |
 | External facts | Values supplied before the domain decision |

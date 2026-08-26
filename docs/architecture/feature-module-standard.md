@@ -101,15 +101,21 @@ packages/
           subscriptions/
           handoffs/
         published-language/
-        module.ts
+        composition/
+          context-composition.ts
         index.ts
+      tests/
+        features/
+          task-model/
+        package/
   integrations/
     runtime-gateway/
       src/
         features/
           session-control/
           runtime-observation/
-        module.ts
+        composition/
+          package-composition.ts
         index.ts
   platform/
     local-host-control/
@@ -118,13 +124,15 @@ packages/
           supervisor-bootstrap/
           host-discovery/
           component-lifecycle/
-        module.ts
+        composition/
+          package-composition.ts
         index.ts
     eventing/
       src/
         features/
           outbox-relay/
-        module.ts
+        composition/
+          package-composition.ts
         index.ts
   sdk/
     orchestrator/
@@ -132,7 +140,8 @@ packages/
         features/
           teams/
           tasks/
-        module.ts
+        composition/
+          package-composition.ts
         index.ts
 ```
 
@@ -180,11 +189,16 @@ features/task-model/
       persistence/
         schema/
         migrations/
-  module.ts
-  tests/
-    domain/
-    application/
-    contract/
+  composition/
+    feature-module-factory.ts
+
+tests/features/task-model/
+  contract/
+  integration/
+  adapters/
+
+tests/package/
+  packed-consumer/
 ```
 
 `task-model` owns every mutation of the `Task` aggregate, including assignment when
@@ -193,6 +207,21 @@ separate feature.
 
 Directories are created only when they contain a real artifact. Empty ceremonial
 folders are prohibited.
+
+Test placement follows a deliberate hybrid:
+
+- focused white-box unit tests are colocated with the source they exercise as
+  `*.test.ts` or `*.spec.ts`;
+- feature contract, integration, adapter, persistence, and conformance tests live
+  under package-level `tests/features/<feature>/`;
+- package export, declaration, packed-artifact, and black-box consumer tests live
+  under `tests/package/`;
+- a generic detached `tests/unit/` tree is prohibited because it loses feature
+  ownership.
+
+Colocated tests are compiled by a separate no-emit test configuration and are
+explicitly excluded from the production build and published artifact. Create that
+test configuration with the first TypeScript test, not as empty scaffolding.
 
 Aggregate-specific entities, value objects, factories, and domain events are
 colocated under `domain/aggregates/<aggregate-name>/`. Feature-level policy,
@@ -215,20 +244,24 @@ packages/contexts/work-coordination/src/features/task-sync/
   adapters/
     outbound/
       jira/
-  module.ts
-  tests/
+  composition/
+    feature-module-factory.ts
+
+packages/contexts/work-coordination/tests/features/task-sync/
 
 packages/platform/eventing/src/features/outbox-relay/
   contracts/
   ports/
   implementation/
-  tests/
+
+packages/platform/eventing/tests/features/outbox-relay/
 
 packages/sdk/orchestrator/src/features/teams/
   contracts/
   client/
   mappers/
-  tests/
+
+packages/sdk/orchestrator/tests/features/teams/
 ```
 
 These examples are not mandatory folder templates. A directory exists only for
@@ -487,12 +520,20 @@ business invariant that belongs in the domain.
 Composition is an assembly responsibility, not a mandatory DDD layer or directory.
 It has three possible levels:
 
-1. An optional feature `module.ts` wires feature-local handlers and receives
-   required ports.
-2. Context `module.ts` wires features and context-owned adapters and assembles
-   feature migration contributions into one deterministic context bundle.
+1. An optional `composition/feature-module-factory.ts` exports a framework-neutral
+   `FeatureModuleFactory` that wires feature-local handlers from exact typed
+   dependencies.
+2. Context or package composition wires feature factories and context-owned
+   adapters and assembles feature migration contributions into one deterministic
+   bundle.
 3. The application composition root creates process-wide resources such as
    database pools, NATS connections, runtime clients, clocks, and telemetry.
+
+`FeatureModuleFactory` is static product composition. It is not an
+`ExtensionModuleDefinition`, which is a future declarative participant in a
+validated runtime graph, and it is not a `PluginArtifact`, which is an installed,
+versioned, signed distribution envelope. Generic feature-level `module.ts` files
+are prohibited because they collapse these three meanings.
 
 A feature must not instantiate process-wide resources. This prevents duplicate
 runtime ACL clients, broker clients, transaction managers, and process owners.
@@ -527,7 +568,8 @@ for real artifacts.
 Every aggregate implementation has one owning domain-capability feature. Another
 feature inside the same bounded context:
 
-- may depend on an explicit context-internal API;
+- may depend only on an explicit `domain/internal-api.ts` or
+  `application/internal-api.ts` surface;
 - may use stable identities and Ubiquitous Language types exposed for that context;
 - must ask the owning application capability to mutate the aggregate;
 - must not import the aggregate repository or mutate aggregate internals.
@@ -539,6 +581,38 @@ bounded contexts, not as ceremony between every pair of features in one context.
 The context maintains an explicit directed dependency graph between internal
 features. Cycles are resolved by moving the shared concept to its semantic owner,
 introducing an application coordinator, or revisiting the feature boundary.
+
+Every edge is declared once in `architecture/source-dependency-policy.yaml` by
+package, consumer feature, provider feature, and allowed internal surface. The
+policy is default-deny, rejects cycles and unused or ambiguous edges, and is the
+machine-readable authority used by CI. Oxlint permits only the two named internal
+API files; the topology validator narrows that structural permission to exact
+declared edges.
+
+Domain code may consume only another feature's domain internal API. Application
+code may consume domain or application internal APIs. Adapters reach another
+feature through their own application core, and composition injects concrete
+implementations; adapters do not deep-import sibling feature internals. Internal
+API files are curated surfaces, not barrels over a whole layer, and never expose a
+repository, aggregate implementation, adapter, container, or framework type.
+
+## Dependency mechanisms
+
+Use exactly one mechanism for each dependency:
+
+1. An ordinary fixed dependency uses a static import and a typed factory.
+2. A replaceable internal implementation uses a consumer-owned port selected by
+   context or package composition. Awilix may implement composition only under
+   `composition/**`; its types never cross that boundary.
+3. A dynamically selected plugin or extension module uses a closed graph compiler
+   with exact provider bindings, an immutable activation plan, and explicit
+   `required`, `optional`, or `ordered-many` cardinality.
+
+The third mechanism is introduced only when a real slice requires runtime provider
+selection, variable dependencies, or an independently managed lifecycle. Static
+product code does not pre-emptively depend on a runtime graph. `resolve()`, ambient
+containers, service locators, parent-container fallback, registration order as
+semantics, and global mutable registries are prohibited for all three mechanisms.
 
 ## Package surfaces
 
@@ -594,12 +668,23 @@ Before adding shared code, ask:
 
 ## Promoting a feature to a package
 
-Promotion is justified only when a feature needs independent:
+The default is one package per accepted bounded context, with feature-owned slices
+inside it. A feature is extracted only when it is ready and at least one of these
+conditions is proven:
 
-- deployment or scaling;
-- ownership or release cadence;
-- security boundary;
-- persistence lifecycle;
-- external API.
+| Evidence | Extraction condition |
+|---|---|
+| Hard boundary | Independent deployment, scaling, ownership, release, security, persistence, or external API lifecycle |
+| Reuse | At least two real independent consumers require the same semantics |
+| Public SPI | At least two independent implementations pass the same conformance suite |
+| Dependency lifecycle | Native, platform, postinstall, incompatible, or independently updated dependencies require isolation |
 
-Promotion requires an ADR and contract compatibility plan.
+Conceptually: `EXTRACT = READY AND (BOUNDARY OR REUSE OR PUBLIC_SPI OR
+DEPENDENCY_LIFECYCLE)`. `READY` requires accepted semantic ownership, a curated
+public surface, compatibility policy, executable tests, and a migration plan.
+
+A package is not created merely for folder isolation, cache performance, a large
+file count, one adapter, or a hypothetical future consumer. Promotion requires an
+ADR and contract compatibility plan. Moving a ready feature preserves its internal
+feature layout; callers change only from the context-internal API to the extracted
+package's explicit public surface.
