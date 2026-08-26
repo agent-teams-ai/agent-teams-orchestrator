@@ -23,6 +23,7 @@ import {
   validateInternalPackageImports,
   validateSourceDependencyPolicy,
 } from "./package-topology-source.mjs";
+import { validateFeatureDependencyPolicy } from "./package-topology-features.mjs";
 import { validateRootTsconfig } from "./package-topology-tsconfig.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -258,6 +259,16 @@ function validateSourceLayout(repositoryRoot, sourceRoot, sourceFiles, errors) {
         `${relative(repositoryRoot, filePath)}: feature-level projections is not a universal layer; place projection policy in application and persistence in adapters`,
       );
     }
+    if (/^features\/[^/]+\/tests\//.test(sourceRelative)) {
+      errors.push(
+        `${relative(repositoryRoot, filePath)}: feature integration and contract tests belong under package-level tests/features/<feature>; colocated unit tests use *.test.ts or *.spec.ts beside source`,
+      );
+    }
+    if (/^features\/[^/]+\/module\.[cm]?[jt]sx?$/.test(sourceRelative)) {
+      errors.push(
+        `${relative(repositoryRoot, filePath)}: generic feature module.ts is prohibited; use composition/feature-module-factory.ts for static composition`,
+      );
+    }
   }
 }
 
@@ -394,6 +405,11 @@ async function main() {
       : { packages: [] },
     errors,
   );
+  const featureDependencyEdges = validateFeatureDependencyPolicy(
+    dependencyPolicy,
+    catalog,
+    errors,
+  );
   const productionFiles = (
     await Promise.all(
       ["apps", "packages"].map((directory) =>
@@ -457,6 +473,7 @@ async function main() {
     byPackageName,
     dependencyEdges,
     errors,
+    featureDependencyEdges,
     materializedPackages,
     repositoryRoot,
   });

@@ -10,6 +10,10 @@ import {
   isExportedSubpath,
   packageNameFromSpecifier,
 } from "./package-topology-exports.mjs";
+import {
+  validateCrossFeatureSpecifier,
+  validateFeatureDependencyUsage,
+} from "./package-topology-features.mjs";
 import { analyzeModuleSpecifiers } from "./source-imports.mjs";
 
 const productionSourceExtensions = new Set([
@@ -22,6 +26,7 @@ const productionSourceExtensions = new Set([
   ".ts",
   ".tsx",
 ]);
+const testSourcePattern = /\.(?:test|spec)\.[cm]?[jt]sx?$/u;
 const documentIdPattern =
   /^(ADR-[0-9]{4}|OD-[0-9]{3}|[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+)$/;
 const documentOwnerPattern = /^[a-z][a-z0-9-]*(\/[a-z][a-z0-9-]*)*$/;
@@ -48,7 +53,10 @@ export const allowedInternalDependencyRoles = {
 };
 
 function isProductionSourceFile(filePath) {
-  return productionSourceExtensions.has(path.extname(filePath));
+  return (
+    productionSourceExtensions.has(path.extname(filePath)) &&
+    !testSourcePattern.test(filePath)
+  );
 }
 
 export function dependencyEdgeKey(fromId, toId) {
@@ -187,6 +195,12 @@ function validateInternalSpecifier(context, specifier) {
   if (!dependencyName || dependencyName === engineeringFoundationPackage) {
     return;
   }
+  if (dependencyName === current.manifest.name) {
+    errors.push(
+      `${relative(repositoryRoot, filePath)}: production source cannot self-import package ${dependencyName}; use a local feature API and an exact feature edge`,
+    );
+    return;
+  }
   const dependency = byPackageName.get(dependencyName);
   if (!dependency) {
     errors.push(
@@ -232,7 +246,12 @@ function validateInternalSpecifier(context, specifier) {
 }
 
 export async function validateInternalPackageImports(context) {
-  const { errors, materializedPackages, repositoryRoot } = context;
+  const {
+    errors,
+    materializedPackages,
+    repositoryRoot,
+  } = context;
+  const usedFeatureSurfaces = new Set();
   for (const current of materializedPackages.values()) {
     const currentRoot = path.join(repositoryRoot, current.entry.path);
     const declaredDependencies = new Set(
@@ -254,6 +273,16 @@ export async function validateInternalPackageImports(context) {
         );
       }
       for (const specifier of moduleSpecifiers.specifiers) {
+        validateCrossFeatureSpecifier(
+          {
+            ...context,
+            current,
+            filePath,
+            sourceRoot: path.join(currentRoot, "src"),
+            usedFeatureSurfaces,
+          },
+          specifier,
+        );
         validateInternalSpecifier(
           { ...context, current, currentRoot, declaredDependencies, filePath },
           specifier,
@@ -261,6 +290,12 @@ export async function validateInternalPackageImports(context) {
       }
     }
   }
+
+  validateFeatureDependencyUsage({
+    ...context,
+    isProductionSourceFile,
+    usedFeatureSurfaces,
+  });
 }
 
 export function validateSourceDependencyPolicy(policy, catalog, errors) {

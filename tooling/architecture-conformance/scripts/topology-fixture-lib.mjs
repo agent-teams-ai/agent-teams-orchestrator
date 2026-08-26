@@ -202,6 +202,7 @@ edges:
     to: context.work-coordination
     imports:
       - ./module
+feature_edges: []
 `,
   );
 }

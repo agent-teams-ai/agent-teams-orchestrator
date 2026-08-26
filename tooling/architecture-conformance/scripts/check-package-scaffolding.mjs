@@ -163,7 +163,7 @@ async function createFixture(entries) {
   );
   await writeFile(
     path.join(architectureRoot, "source-dependency-policy.yaml"),
-    YAML.stringify({ version: 1, default: "deny", edges: [] }),
+    YAML.stringify({ version: 1, default: "deny", edges: [], feature_edges: [] }),
   );
   await writeFile(
     path.join(root, "tsconfig.json"),

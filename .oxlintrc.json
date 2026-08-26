@@ -92,25 +92,25 @@
         "baseCapture": ["packagePath"]
       },
       {
-        "type": "projection",
-        "pattern": "features/*/projections",
-        "capture": ["feature"],
-        "basePattern": "**/src",
-        "baseCapture": ["packagePath"]
-      },
-      {
-        "type": "tests",
-        "pattern": "features/*/tests",
-        "capture": ["feature"],
-        "basePattern": "**/src",
-        "baseCapture": ["packagePath"]
-      },
-      {
         "type": "feature-other",
         "pattern": "features/*",
         "capture": ["feature"],
         "basePattern": "**/src",
         "baseCapture": ["packagePath"]
+      }
+    ],
+    "boundaries/files": [
+      {
+        "category": "domain-internal-api",
+        "pattern": "**/src/features/*/domain/internal-api.ts"
+      },
+      {
+        "category": "application-internal-api",
+        "pattern": "**/src/features/*/application/internal-api.ts"
+      },
+      {
+        "category": "test",
+        "pattern": "**/*.{test,spec}.{ts,tsx,mts,cts}"
       }
     ],
     "import/resolver": {
@@ -160,6 +160,23 @@
         "policies": [
           {
             "from": {
+              "file": {
+                "categories": "test"
+              }
+            },
+            "allow": {
+              "to": {
+                "module": {
+                  "origin": [
+                    "core",
+                    "external"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "from": {
               "element": {
                 "type": "domain"
               }
@@ -179,11 +196,30 @@
           {
             "from": {
               "element": {
+                "type": "domain"
+              }
+            },
+            "allow": {
+              "to": {
+                "element": {
+                  "type": "domain",
+                  "captured": {
+                    "packagePath": "{{ from.element.captured.packagePath }}"
+                  }
+                },
+                "file": {
+                  "categories": "domain-internal-api"
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
                 "type": [
                   "adapter-inbound",
                   "adapter-outbound",
                   "composition",
-                  "tests",
                   "feature-other"
                 ]
               }
@@ -208,6 +244,58 @@
                   "type": [
                     "application",
                     "domain"
+                  ],
+                  "captured": {
+                    "feature": "{{ from.element.captured.feature }}",
+                    "packagePath": "{{ from.element.captured.packagePath }}"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
+                "type": "application"
+              }
+            },
+            "allow": {
+              "to": {
+                "element": {
+                  "type": [
+                    "domain",
+                    "application"
+                  ],
+                  "captured": {
+                    "packagePath": "{{ from.element.captured.packagePath }}"
+                  }
+                },
+                "file": {
+                  "categories": [
+                    "domain-internal-api",
+                    "application-internal-api"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "from": {
+              "element": {
+                "type": "feature-other"
+              }
+            },
+            "allow": {
+              "to": {
+                "element": {
+                  "type": [
+                    "domain",
+                    "application",
+                    "contracts",
+                    "adapter-inbound",
+                    "adapter-outbound",
+                    "composition",
+                    "feature-other"
                   ],
                   "captured": {
                     "feature": "{{ from.element.captured.feature }}",
@@ -294,61 +382,6 @@
                     "adapter-inbound",
                     "adapter-outbound",
                     "composition",
-                    "projection",
-                    "feature-other"
-                  ],
-                  "captured": {
-                    "feature": "{{ from.element.captured.feature }}",
-                    "packagePath": "{{ from.element.captured.packagePath }}"
-                  }
-                }
-              }
-            }
-          },
-          {
-            "from": {
-              "element": {
-                "type": "projection"
-              }
-            },
-            "allow": {
-              "to": {
-                "element": {
-                  "type": [
-                    "domain",
-                    "application",
-                    "contracts",
-                    "projection"
-                  ],
-                  "captured": {
-                    "feature": "{{ from.element.captured.feature }}",
-                    "packagePath": "{{ from.element.captured.packagePath }}"
-                  }
-                }
-              }
-            }
-          },
-          {
-            "from": {
-              "element": {
-                "type": [
-                  "tests",
-                  "feature-other"
-                ]
-              }
-            },
-            "allow": {
-              "to": {
-                "element": {
-                  "type": [
-                    "domain",
-                    "application",
-                    "contracts",
-                    "adapter-inbound",
-                    "adapter-outbound",
-                    "composition",
-                    "projection",
-                    "tests",
                     "feature-other"
                   ],
                   "captured": {
@@ -366,7 +399,6 @@
                   "adapter-inbound",
                   "adapter-outbound",
                   "composition",
-                  "tests",
                   "feature-other"
                 ]
               }
@@ -385,8 +417,7 @@
                 "type": [
                   "domain",
                   "application",
-                  "contracts",
-                  "projection"
+                  "contracts"
                 ]
               }
             },
