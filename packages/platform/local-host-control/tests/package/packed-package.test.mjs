@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-const packageRoot = path.resolve(import.meta.dirname, "..");
+const packageRoot = path.resolve(import.meta.dirname, "../..");
 const pnpmCli = process.env.npm_execpath;
 const typescriptCli = path.resolve(
   packageRoot,
