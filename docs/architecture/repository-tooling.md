@@ -104,6 +104,14 @@ Generic local-reference and suppression policy belongs to Foundation; the local
 documentation and lint gates retain project-specific metadata, diagram, owner,
 and protected-rule checks.
 
+Package-local feature dependencies remain an Orchestrator-specific closed-world
+policy. Oxlint permits only the structural `domain/internal-api.ts` and
+`application/internal-api.ts` shapes. The topology validator then requires an
+exact, acyclic, used `feature_edges` entry for every production cross-feature
+import and rejects deep imports, forbidden layer directions, and production
+self-imports through the package export. The architecture-conformance corpus
+contains both accepted and rejected fixtures for every supported edge shape.
+
 `governance.architecture-decisions` is also blocking. Every ADR declares both
 directions of supersession explicitly, the lifecycle sections in
 `docs/decisions/README.md` list each ADR exactly once, and the generated accepted
@@ -553,7 +561,8 @@ published artifact is correct.
 | Package identity | Package catalog and topology validator |
 | Package materialization | Package materialization policy, topology validator, and scaffolder |
 | Project and task impact | Nx |
-| Source import boundaries | Oxlint with boundary rules |
+| Structural source import boundaries | Oxlint with boundary rules |
+| Exact package and feature dependency edges | Topology validator and conformance fixtures |
 | Complete dependency graph and cycles | dependency-cruiser |
 | Repository-specific structural patterns | ast-grep |
 | Unused code and dependencies | Knip |

@@ -122,9 +122,12 @@ A direct in-process adapter is permitted as a deployment optimization, but it mu
 implement the same consumer-owned port and published contract used by a future
 remote adapter.
 
-Inside one bounded context, features may use explicit context-internal APIs and a
-directed module dependency graph. They do not need Published Language or ACL
-ceremony for every collaboration. They still cannot mutate another feature's
+Inside one bounded context, features may use only the provider feature's curated
+`domain/internal-api.ts` or `application/internal-api.ts` and an exact directed
+feature dependency edge. Domain may consume only a domain internal API;
+application may consume either surface. Adapters collaborate through their owning
+application core and composition. Features do not need Published Language or ACL
+ceremony for every collaboration, but still cannot mutate another feature's
 aggregate through its repository or internals.
 
 ## Contract surfaces
@@ -240,9 +243,11 @@ The current exact Foundation release provides reusable declaration and source
 dependency checks through `workspace.dependency-declarations` and
 `architecture.source-dependencies`. Both are blocking. The source policy governs
 the materialized Local Host Control production source with explicit public API,
-application, model, and port boundaries. Package-local consumer tests live outside
-that governed production root so a self-package black-box import is not mistaken
-for a production dependency.
+application, model, and port boundaries. Colocated `*.test.ts` unit tests retain
+their source layer's dependency rules but are excluded from production builds.
+Feature integration and contract tests live under `tests/features/<feature>/`, and
+package black-box and packed-consumer tests live under `tests/package/`, so a
+self-package public import is not mistaken for a production dependency.
 
 The repository-local dependency validator remains a blocking donor oracle for
 Orchestrator-specific package roles, catalog completeness, and production import
@@ -263,6 +268,15 @@ provider, and exact provider export subpaths. Cross-package relative imports,
 package-root and wildcard imports, `file:` or absolute imports, and package-local
 aliases that target another package are prohibited. Type-only, dynamic,
 re-exported, test, generated, and composition imports follow the same policy.
+Production source also cannot self-import its own package public export because
+that would hide sibling-feature dependencies; black-box public API tests live
+outside `src`.
+
+The same file owns exact package-local `feature_edges`. Each feature edge names the
+package, consumer feature, provider feature, and allowed `domain` or `application`
+internal surface. CI rejects deep sibling imports, layer violations, undeclared or
+unused surfaces, duplicate edges, and cycles. Oxlint provides the fast structural
+check; the topology validator applies the exact allowlist.
 
 ## Dependency inversion examples
 

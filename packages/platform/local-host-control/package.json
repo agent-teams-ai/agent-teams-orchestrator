@@ -12,7 +12,7 @@
     "clean": "node -e \"const fs=require('node:fs'); for (const path of ['dist','.cache']) fs.rmSync(path, { recursive: true, force: true })\"",
     "prepack": "pnpm run clean && pnpm run build",
     "test": "node --test --test-concurrency=1",
-    "test:types": "tsc --project tests/consumer/tsconfig.json --noEmit --pretty false",
+    "test:types": "tsc --project tests/package/consumer/tsconfig.json --noEmit --pretty false",
     "typecheck": "tsc --project tsconfig.json --noEmit --pretty false"
   },
   "agentTeamsArchitecture": {

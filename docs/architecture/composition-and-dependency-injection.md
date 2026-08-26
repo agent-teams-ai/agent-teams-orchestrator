@@ -69,18 +69,21 @@ packages/contexts/<context>/src/
     create-context-handle.ts
   features/
     <feature>/
-      module.ts
       domain/
       application/
       adapters/
+      composition/
+        feature-module-factory.ts
 ```
 
 Directories are created only when their artifacts exist. This layout does not
 authorize materializing a proposed context or empty DDD folders.
 
-Feature `module.ts` files and factories are framework-neutral. They declare narrow
-dependency objects and return narrow module APIs. The context composition layer
+`FeatureModuleFactory` implementations are framework-neutral. They declare narrow
+dependency objects and return narrow feature APIs. The context composition layer
 maps those factories to Awilix registrations. Feature code never imports Awilix.
+This static factory is distinct from a dynamic `ExtensionModuleDefinition` and
+from a distributable `PluginArtifact`.
 
 SDK, contracts, integration, platform, testing, and tooling packages use typed
 factories by default. A package receives a container only when it owns an accepted
@@ -175,6 +178,12 @@ lazy container resolution.
 Local and hosted Hosts construct the same context feature modules with different
 adapter sets. Tests construct modules directly with fakes or use a test-only context
 composition. Business tests do not start an Awilix container.
+
+Tenant, project, workspace, run, and session identifiers may be authority inputs to
+an operation, but never imply a container or module lifetime. Static context
+composition initially has process and operation lifetimes. A future extension
+runtime initially activates one immutable module generation at a time; broader
+lifetime variants require independent qualification.
 
 Awilix is replaceable because only composition imports it. Replacing the container
 may change registration, scope, and lifecycle assembly, but cannot require changes

@@ -1,15 +1,10 @@
 import { spawnSync } from "node:child_process";
-import {
-  mkdtemp,
-  mkdir,
-  readFile,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { checkFeatureDependencyTopology } from "./check-feature-dependency-topology.mjs";
 import {
   materializeApp,
   materializeContext,
@@ -527,6 +522,17 @@ entries:
     "library exports may precede generated build output",
     run(temporaryRoot),
   );
+  const dependencyPolicyPath = path.join(
+    temporaryRoot,
+    "architecture/source-dependency-policy.yaml",
+  );
+  await checkFeatureDependencyTopology({
+    dependencyPolicyPath,
+    requireFailure,
+    requireSuccess,
+    run,
+    temporaryRoot,
+  });
   manifest.exports = qualifiedLibraryExports({
     "./module": {
       types: "./dist/module.d.ts",
@@ -567,13 +573,9 @@ entries:
     "@agent-teams/work-coordination": "workspace:*",
   };
   await writeFile(appManifestPath, JSON.stringify(appManifest, null, 2));
-  const dependencyPolicyPath = path.join(
-    temporaryRoot,
-    "architecture/source-dependency-policy.yaml",
-  );
   await writeFile(
     dependencyPolicyPath,
-    "version: 1\ndefault: deny\nedges: []\n",
+    "version: 1\ndefault: deny\nedges: []\nfeature_edges: []\n",
   );
   requireFailure(
     "undeclared source dependency edge",
@@ -582,7 +584,7 @@ entries:
   );
   await writeFile(
     dependencyPolicyPath,
-    "version: 1\ndefault: deny\nedges:\n  - from: app.test\n    to: context.work-coordination\n    imports:\n      - ./module\n",
+    "version: 1\ndefault: deny\nedges:\n  - from: app.test\n    to: context.work-coordination\n    imports:\n      - ./module\nfeature_edges: []\n",
   );
   await writeFile(
     appFeaturePath,
@@ -732,7 +734,7 @@ entries:
   );
   await writeFile(
     dependencyPolicyPath,
-    "version: 1\ndefault: deny\nedges:\n  - from: app.test\n    to: context.work-coordination\n    imports:\n      - ./module\n  - from: context.work-coordination\n    to: app.test\n    imports:\n      - ./module\n",
+    "version: 1\ndefault: deny\nedges:\n  - from: app.test\n    to: context.work-coordination\n    imports:\n      - ./module\n  - from: context.work-coordination\n    to: app.test\n    imports:\n      - ./module\nfeature_edges: []\n",
   );
   requireFailure(
     "source dependency cycle",
@@ -741,7 +743,7 @@ entries:
   );
   await writeFile(
     dependencyPolicyPath,
-    "version: 1\ndefault: deny\nedges:\n  - from: app.test\n    to: context.work-coordination\n    imports:\n      - ./module\n",
+    "version: 1\ndefault: deny\nedges:\n  - from: app.test\n    to: context.work-coordination\n    imports:\n      - ./module\nfeature_edges: []\n",
   );
   requireSuccess("restored source dependency policy", run(temporaryRoot));
 

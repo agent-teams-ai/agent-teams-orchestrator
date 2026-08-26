@@ -263,6 +263,13 @@ Plugins cannot replace domain policies that protect aggregate invariants. Facts
 returned by a plugin remain untrusted input until the owning application and domain
 validate them.
 
+Every plugin contribution maps through a feature-owned inbound or outbound adapter
+to a private application port and application model. Plugin manifests, host SDK
+objects, Cordis contexts, generic contribution records, and extension framework
+types never become domain or application contracts. The owning use case validates
+authorization, authority scope, revision, policy, and invariants before a canonical
+mutation.
+
 ### Non-negotiable extension guardrails
 
 These constraints apply to built-in, private first-party, community, and custom

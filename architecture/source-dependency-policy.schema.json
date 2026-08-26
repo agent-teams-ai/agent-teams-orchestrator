@@ -7,7 +7,8 @@
   "required": [
     "version",
     "default",
-    "edges"
+    "edges",
+    "feature_edges"
   ],
   "properties": {
     "version": {
@@ -21,6 +22,12 @@
       "items": {
         "$ref": "#/$defs/edge"
       }
+    },
+    "feature_edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/featureEdge"
+      }
     }
   },
   "$defs": {
@@ -31,6 +38,16 @@
     "exportSubpath": {
       "type": "string",
       "pattern": "^\\./[a-z][a-z0-9-]*(/[a-z][a-z0-9-]*)*$"
+    },
+    "featureName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "internalSurface": {
+      "enum": [
+        "domain",
+        "application"
+      ]
     },
     "edge": {
       "type": "object",
@@ -53,6 +70,35 @@
           "uniqueItems": true,
           "items": {
             "$ref": "#/$defs/exportSubpath"
+          }
+        }
+      }
+    },
+    "featureEdge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "package",
+        "from",
+        "to",
+        "imports"
+      ],
+      "properties": {
+        "package": {
+          "$ref": "#/$defs/packageId"
+        },
+        "from": {
+          "$ref": "#/$defs/featureName"
+        },
+        "to": {
+          "$ref": "#/$defs/featureName"
+        },
+        "imports": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/internalSurface"
           }
         }
       }
