@@ -4,7 +4,6 @@ type: open-decision
 status: open
 owner: architecture
 summary: Decide the framework-neutral Frontend extension contribution, isolation, lifecycle, and capability model.
-blocked_by: []
 related:
   - ADR-0074
   - ADR-0095

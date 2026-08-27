@@ -2,11 +2,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import Ajv2020 from "ajv/dist/2020.js";
-import addFormats from "ajv-formats";
 import { toString } from "mdast-util-to-string";
 import { visit } from "unist-util-visit";
-import YAML from "yaml";
 
 import {
   listRepositoryFiles,
@@ -27,8 +24,6 @@ const repositoryRoot = process.env.DOCS_REPOSITORY_ROOT
   ? path.resolve(process.env.DOCS_REPOSITORY_ROOT)
   : path.resolve(scriptDirectory, "../..");
 const docsRoot = path.join(repositoryRoot, "docs");
-const metadataSchemaPath = path.join(docsRoot, "metadata.schema.json");
-const ownerCatalogPath = path.join(docsRoot, "owners.yaml");
 const entrypoint = path.join(docsRoot, "README.md");
 const mermaidValidatorPath = path.join(scriptDirectory, "validate-mermaid.mjs");
 const adrApprovalPolicyStart = 34;
@@ -368,28 +363,6 @@ async function main() {
     ...governedMarkdownFiles,
   ];
 
-  const schema = JSON.parse(await readFile(metadataSchemaPath, "utf8"));
-  const ownerCatalog = YAML.parse(await readFile(ownerCatalogPath, "utf8"));
-  if (
-    ownerCatalog?.version !== 1 ||
-    !ownerCatalog.owners ||
-    typeof ownerCatalog.owners !== "object" ||
-    Array.isArray(ownerCatalog.owners)
-  ) {
-    errors.push(
-      `${relative(ownerCatalogPath)}: expected version 1 with an owners mapping`,
-    );
-  }
-  const registeredOwners = new Set(
-    Object.keys(ownerCatalog?.owners ?? {}),
-  );
-  const ajv = new Ajv2020({
-    allErrors: true,
-    strict: true,
-  });
-  addFormats(ajv);
-  const validateMetadata = ajv.compile(schema);
-
   const documents = [];
   const documentsByPath = new Map();
   const documentsById = new Map();
@@ -416,27 +389,8 @@ async function main() {
       continue;
     }
 
-    if (!validateMetadata(parsed.metadata)) {
-      for (const validationError of validateMetadata.errors ?? []) {
-        errors.push(
-          `${relative(filePath)}${validationError.instancePath || ""}: ${validationError.message}`,
-        );
-      }
-    }
-
-    const existing = documentsById.get(parsed.metadata.id);
-    if (existing) {
-      errors.push(
-        `${relative(filePath)}: duplicate id ${parsed.metadata.id}; already used by ${relative(existing.filePath)}`,
-      );
-    } else {
+    if (!documentsById.has(parsed.metadata.id)) {
       documentsById.set(parsed.metadata.id, document);
-    }
-
-    if (!registeredOwners.has(parsed.metadata.owner)) {
-      errors.push(
-        `${relative(filePath)}: owner ${parsed.metadata.owner} is not registered in ${relative(ownerCatalogPath)}`,
-      );
     }
 
     validateFilename(document);

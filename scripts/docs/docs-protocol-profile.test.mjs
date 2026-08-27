@@ -17,8 +17,23 @@ async function readJson(repositoryPath) {
   return JSON.parse(await readFile(path.join(repositoryRoot, repositoryPath), "utf8"));
 }
 
-test("keeps the protocol profile thin and routes one Foundation v2 authority", async () => {
-  const profile = await readYaml("architecture/foundation/docs-protocol.yaml");
+test("routes the v2 qualification contract through the consumer integration", async () => {
+  const [integration, qualification, rollout] = await Promise.all([
+    readJson("architecture/foundation/docs-consumer-integration.json"),
+    readJson("architecture/foundation/docs-protocol-qualification.json"),
+    readFile(path.join(repositoryRoot, "architecture/foundation/docs-protocol-rollout.yaml"), "utf8"),
+  ]);
+
+  assert.equal(integration.schemaVersion, 1);
+  assert.match(rollout, /^status: stable3-current-v2-staged$/mu);
+  assert.match(rollout, /^  integrationSchemaVersion: 2$/mu);
+  assert.match(rollout, /^  qualificationContractSchemaVersion: 2$/mu);
+  assert.equal(qualification.schemaVersion, 2);
+  assert.equal(qualification.scenarios.length, 6);
+});
+
+test("keeps the protocol profile thin and routes one Foundation v3 authority", async () => {
+  const profile = await readYaml("architecture/foundation/rollouts/docs-protocol-v2/docs-protocol.yaml");
 
   assert.deepEqual(Object.keys(profile).toSorted(), [
     "agentWorkflow",
@@ -27,14 +42,15 @@ test("keeps the protocol profile thin and routes one Foundation v2 authority", a
     "schemaVersion",
     "semanticValidatorIds",
   ]);
+  assert.equal(profile.schemaVersion, 2);
   assert.deepEqual(profile.protocol, {
     id: "agent-teams.docs-protocol",
     version: 1,
   });
   assert.deepEqual(profile.foundationProfile, {
-    path: "architecture/foundation/document-authoring.yaml",
-    schemaVersion: 2,
-    metadataSidecarPolicy: "foundation-profile-v2-strict-merge",
+    path: "architecture/foundation/rollouts/docs-protocol-v2/document-authoring.yaml",
+    schemaVersion: 3,
+    metadataSidecarPolicy: "foundation-profile-v3-strict-merge",
   });
   assert.equal(
     profile.agentWorkflow.skillPath,
@@ -50,7 +66,7 @@ test("keeps the protocol profile thin and routes one Foundation v2 authority", a
 
 test("declares explicit reachability for every Orchestrator authoring type", async () => {
   const profile = await readYaml(
-    "architecture/foundation/document-authoring.yaml",
+    "architecture/foundation/rollouts/docs-protocol-v2/document-authoring.yaml",
   );
   const artifacts = Object.fromEntries(
     profile.authoring.artifactTypes.map((artifact) => [artifact.type, artifact]),
@@ -59,7 +75,14 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
     (left, right) => Buffer.compare(Buffer.from(left), Buffer.from(right)),
   );
 
-  assert.equal(profile.schemaVersion, 2);
+  assert.equal(profile.schemaVersion, 3);
+  assert.equal(profile.authoring.ownerSets.schemaVersion, 1);
+  assert.deepEqual(
+    profile.authoring.ownerSets.sets["registered-owners"].toSorted(
+      (left, right) => Buffer.compare(Buffer.from(left), Buffer.from(right)),
+    ),
+    owners,
+  );
   assert.deepEqual(Object.keys(artifacts).toSorted(), [
     "adr",
     "bounded-context",
@@ -69,14 +92,16 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
     "runbook",
   ]);
   for (const artifact of Object.values(artifacts)) {
-    assert.deepEqual(
-      artifact.allowedOwnerIds.toSorted((left, right) =>
-        Buffer.compare(Buffer.from(left), Buffer.from(right)),
-      ),
-      owners,
-      `${artifact.type} must preserve the registered-owner authoring boundary`,
-    );
+    assert.equal(artifact.ownerSetId, "registered-owners");
+    assert.equal(artifact.allowedOwnerIds, undefined);
   }
+  assert.equal(
+    profile.authoring.artifactTypes.filter((artifact) =>
+      artifact.ownerSetId === "registered-owners",
+    ).length,
+    6,
+    "all six types must preserve the registered-owner authoring boundary",
+  );
   assert.deepEqual(artifacts.adr.reachability, {
     kind: "manual-fixed-index",
     indexPath: "docs/decisions/README.md",
@@ -91,7 +116,7 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
   });
   assert.deepEqual(artifacts.contract.reachability, {
     kind: "manual-fixed-index",
-    indexPath: "docs/contracts/README.md",
+    indexPath: "docs/README.md",
   });
   assert.deepEqual(artifacts.feature.reachability, {
     kind: "manual-colocated-index",
@@ -100,7 +125,7 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
   });
   assert.deepEqual(artifacts.runbook.reachability, {
     kind: "manual-fixed-index",
-    indexPath: "docs/operations/README.md",
+    indexPath: "docs/README.md",
   });
 });
 

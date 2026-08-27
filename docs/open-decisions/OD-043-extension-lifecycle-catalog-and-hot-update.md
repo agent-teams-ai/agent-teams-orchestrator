@@ -4,7 +4,6 @@ type: open-decision
 status: open
 owner: architecture
 summary: Decide extension catalog governance, isolation tiers, lifecycle transitions, hot update, rollback, and operator experience.
-blocked_by: []
 related:
   - ADR-0095
   - ADR-0096

@@ -4,7 +4,6 @@ type: open-decision
 status: open
 owner: architecture/reliability
 summary: Define cryptographically verifiable deployment qualification evidence and its CI verification protocol.
-blocked_by: []
 related:
   - ADR-0091
   - ADR-0093

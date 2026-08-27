@@ -230,14 +230,21 @@ domain detail.
 ## Navigation
 
 Every document must be reachable from [the documentation index](../README.md)
-through Markdown links. Every documentation directory has a `README.md`: a
+through Markdown links. A documentation directory normally has a `README.md`: a
 collection index for multiple entries or the governed dossier for one leaf
-artifact. Agents should not need directory scans to discover canonical guidance.
+artifact. `docs/contracts/` and `docs/operations/` are created only with their
+first real document; that single document is linked directly from `docs/README.md`.
+Their collection `README.md` is created with the second real document, never as
+an empty readiness placeholder. Agents should not need directory scans to
+discover canonical guidance.
 
-Each directory index directly links:
+Each materialized directory index directly links:
 
 - every Markdown document immediately inside that directory;
 - the `README.md` of every immediate child directory containing documentation.
+
+For the single-document deferred collections above, `docs/README.md` links the
+document itself until the collection index is materialized.
 
 Transitive reachability alone is insufficient. Direct links make ownership and
 placement visible at the boundary where a contributor adds a file.
