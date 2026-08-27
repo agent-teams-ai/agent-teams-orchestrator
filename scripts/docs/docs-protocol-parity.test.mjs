@@ -20,7 +20,11 @@ import {
   docsNew,
   docsRecover,
 } from "@agent-teams/docs-protocol";
-import { runDocsProtocolQualification } from "@agent-teams/docs-protocol/qualification";
+
+const qualificationModule = await import(
+  process.env.DOCS_PROTOCOL_QUALIFICATION_MODULE ??
+    "@agent-teams/docs-protocol/qualification"
+);
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const docsPackageRoot = path.dirname(fileURLToPath(import.meta.resolve("@agent-teams/docs-protocol/package.json")));
@@ -28,20 +32,24 @@ const foundationPackageRoot = path.dirname(fileURLToPath(import.meta.resolve("@a
 const { version: docsPackageVersion } = JSON.parse(await readFile(path.join(docsPackageRoot, "package.json"), "utf8"));
 const { version: foundationPackageVersion } = JSON.parse(await readFile(path.join(foundationPackageRoot, "package.json"), "utf8"));
 
-test("qualification manifest binds the exact protocol gate and registry packages", async () => {
-  const [qualification, manifest] = await Promise.all([
+test("v2 qualification contract binds the managed integration gate and covers each live type once", async () => {
+  const [qualification, integration, rollout] = await Promise.all([
     readFile(path.join(repositoryRoot, "architecture/foundation/docs-protocol-qualification.json"), "utf8").then(JSON.parse),
-    readFile(path.join(repositoryRoot, "package.json"), "utf8").then(JSON.parse),
+    readFile(path.join(repositoryRoot, "architecture/foundation/docs-consumer-integration.json"), "utf8").then(JSON.parse),
+    readFile(path.join(repositoryRoot, "architecture/foundation/docs-protocol-rollout.yaml"), "utf8"),
   ]);
-  assert.equal(qualification.gateCommand, "pnpm docs:protocol:check");
-  assert.deepEqual(qualification.packages, {
-    "@agent-teams/docs-protocol": manifest.devDependencies["@agent-teams/docs-protocol"],
-    "@agent-teams/engineering-foundation": manifest.devDependencies["@agent-teams/engineering-foundation"],
-  });
-  assert.deepEqual(qualification.qualificationTests, [
-    "scripts/docs/docs-protocol-parity.test.mjs",
-    "scripts/docs/docs-protocol-profile.test.mjs",
-  ]);
+  assert.deepEqual(Object.keys(qualification).toSorted(), ["scenarios", "schemaVersion"]);
+  assert.equal(qualification.schemaVersion, 2);
+  assert.equal(integration.schemaVersion, 1);
+  assert.match(rollout, /^status: stable3-current-v2-staged$/mu);
+  assert.match(rollout, /^  integrationSchemaVersion: 2$/mu);
+  assert.match(rollout, /^  qualificationContractSchemaVersion: 2$/mu);
+  assert.deepEqual(
+    qualification.scenarios.map(({ type }) => type).toSorted(),
+    ["adr", "bounded-context", "contract", "feature", "open-decision", "runbook"],
+  );
+  assert.equal(new Set(qualification.scenarios.map(({ id }) => id)).size, 6);
+  assert.ok(qualification.scenarios.every(({ expected }) => expected.metadataStorage === "frontmatter"));
 });
 
 const cases = [
@@ -66,7 +74,7 @@ const cases = [
   {
     name: "contract",
     expectedPath: "docs/contracts/frozen-widgets-v1.md",
-    indexPath: "docs/contracts/README.md",
+    indexPath: "docs/README.md",
     intent: { type: "contract", id: "contract.frozen.widgets.v1", title: "Frozen Widgets v1", owner: "architecture/tooling", summary: "Freezes the unified contract document creation behavior." },
   },
   {
@@ -81,7 +89,7 @@ const cases = [
   {
     name: "runbook",
     expectedPath: "docs/operations/frozen-widget-outage.md",
-    indexPath: "docs/operations/README.md",
+    indexPath: "docs/README.md",
     intent: { type: "runbook", id: "runbook.frozen.widget-outage", title: "Frozen Widget Outage", owner: "architecture/tooling", summary: "Freezes the unified runbook document creation behavior." },
   },
 ];
@@ -166,29 +174,82 @@ for (const scenario of cases) {
   });
 }
 
-requiresStrictDirectoryDurability("shared qualification runner proves all six types on owned disposable copies", async () => {
-  const source = await makeSourceFixture({ installPackages: false });
-  try {
-    for (const scenario of cases) {
-      const receipt = await runDocsProtocolQualification({
-        fixtureRoot: source,
-        scenario: {
-          find: { query: { id: "ADR-0001" }, expectedIds: ["ADR-0001"] },
-          newDocument: {
-            intent: scenario.intent,
-            related: scenario.related,
-            blockedBy: scenario.blockedBy,
-            codeAnchors: scenario.codeAnchors,
-          },
-        },
-      });
-      assert.equal(receipt.projectId, "agent-teams-orchestrator");
-      assert.equal(receipt.appliedDocumentPath, scenario.expectedPath);
-      assert.deepEqual(receipt.checks, ["info", "find", "preview", "crash", "doctor", "recover", "receipt", "parent", "apply", "index", "check", "source-unchanged"]);
-    }
-  } finally {
-    await rm(source, { recursive: true, force: true });
-  }
+const qualificationV2Test =
+  process.platform === "win32" ||
+  typeof qualificationModule.runDocsProtocolQualificationV2 !== "function"
+    ? test.skip
+    : test;
+
+qualificationV2Test("managed v2 runner qualifies every live type on one disposable consumer copy", async () => {
+  const localDevelopment =
+    process.env.DOCS_PROTOCOL_QUALIFICATION_LOCAL_DEVELOPMENT === "1";
+  const sourceFiles = [
+    "architecture/foundation/docs-consumer-integration.json",
+    "architecture/foundation/docs-protocol-qualification.json",
+    ".agents/skills/docs-authoring/SKILL.md",
+  ];
+  const before = await Promise.all(
+    sourceFiles.map((file) => readFile(path.join(repositoryRoot, file))),
+  );
+  const receipt = await qualificationModule.runDocsProtocolQualificationV2({
+    consumerRoot: repositoryRoot,
+    ...(localDevelopment ? { localDevelopment: true } : {}),
+  });
+
+  assert.equal(receipt.schemaVersion, 2);
+  assert.equal(receipt.projectId, "agent-teams-orchestrator");
+  assert.equal(receipt.cohortAdmissible, !localDevelopment);
+  assert.equal(
+    receipt.evidenceClass,
+    localDevelopment ? "local-development" : "released-cohort",
+  );
+  assert.deepEqual(receipt.scenarios.map(({ type }) => type).toSorted(), [
+    "adr",
+    "bounded-context",
+    "contract",
+    "feature",
+    "open-decision",
+    "runbook",
+  ]);
+  assert.deepEqual(receipt.checks, [
+    "info",
+    "find",
+    "check",
+    "doctor",
+    "recover",
+    "preview",
+    "apply",
+    "path",
+    "reachability",
+    "golden",
+    "source-unchanged",
+  ]);
+  assert.deepEqual(
+    await Promise.all(sourceFiles.map((file) => readFile(path.join(repositoryRoot, file)))),
+    before,
+  );
+});
+
+const strictReleaseQualificationTest =
+  qualificationV2Test === test &&
+  process.env.DOCS_PROTOCOL_QUALIFICATION_LOCAL_DEVELOPMENT === "1"
+    ? test
+    : test.skip;
+
+strictReleaseQualificationTest("unreleased local packages remain blocked from cohort-admissible qualification by default", async () => {
+  const source = await readFile(
+    path.join(repositoryRoot, ".agents/skills/docs-authoring/SKILL.md"),
+  );
+  await assert.rejects(
+    qualificationModule.runDocsProtocolQualificationV2({
+      consumerRoot: repositoryRoot,
+    }),
+    /qualification check failed/u,
+  );
+  assert.deepEqual(
+    await readFile(path.join(repositoryRoot, ".agents/skills/docs-authoring/SKILL.md")),
+    source,
+  );
 });
 
 requiresUnsupportedStrictDirectoryDurability("Windows previews all six types and preserves fail-closed durability evidence", async () => {

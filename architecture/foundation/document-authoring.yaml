@@ -270,7 +270,7 @@ authoring:
         kind: title
       reachability:
         kind: manual-fixed-index
-        indexPath: docs/contracts/README.md
+        indexPath: docs/README.md
 
     - type: feature
       initialStatus: proposed
@@ -407,4 +407,4 @@ authoring:
         kind: title
       reachability:
         kind: manual-fixed-index
-        indexPath: docs/operations/README.md
+        indexPath: docs/README.md

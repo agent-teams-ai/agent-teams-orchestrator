@@ -1,18 +1,139 @@
 {
-  "schemaVersion": 1,
-  "protocolId": "agent-teams.docs-protocol",
-  "protocolVersion": 1,
-  "consumer": "agent-teams-ai/agent-teams-orchestrator",
-  "packages": {
-    "@agent-teams/docs-protocol": "0.1.4",
-    "@agent-teams/engineering-foundation": "0.19.0"
-  },
-  "profilePath": "architecture/foundation/docs-protocol.yaml",
-  "callerWorkflowPath": ".github/workflows/docs-protocol.yml",
-  "skillPath": ".agents/skills/docs-authoring/SKILL.md",
-  "gateCommand": "pnpm docs:protocol:check",
-  "qualificationTests": [
-    "scripts/docs/docs-protocol-parity.test.mjs",
-    "scripts/docs/docs-protocol-profile.test.mjs"
+  "schemaVersion": 2,
+  "scenarios": [
+    {
+      "id": "adr",
+      "type": "adr",
+      "intent": {
+        "id": "ADR-9001",
+        "title": "Frozen ADR",
+        "owner": "architecture/tooling",
+        "summary": "Freezes the unified ADR document creation contract."
+      },
+      "expected": {
+        "documentPath": "docs/decisions/9001-frozen-adr.md",
+        "metadataStorage": "frontmatter",
+        "reachability": {
+          "state": "manual-required",
+          "indexPath": "docs/decisions/README.md",
+          "markdownLink": "[ADR-9001: Frozen ADR](9001-frozen-adr.md)"
+        },
+        "goldenFile": "scripts/docs/fixtures/docs-protocol-golden/adr.md"
+      }
+    },
+    {
+      "id": "open-decision",
+      "type": "open-decision",
+      "intent": {
+        "id": "OD-901",
+        "title": "Frozen Choice",
+        "owner": "architecture/tooling",
+        "summary": "Freezes the unified open decision creation contract."
+      },
+      "expected": {
+        "documentPath": "docs/open-decisions/OD-901-frozen-choice.md",
+        "metadataStorage": "frontmatter",
+        "reachability": {
+          "state": "manual-required",
+          "indexPath": "docs/open-decisions/README.md",
+          "markdownLink": "[OD-901: Frozen Choice](OD-901-frozen-choice.md)"
+        },
+        "goldenFile": "scripts/docs/fixtures/docs-protocol-golden/open-decision.md"
+      }
+    },
+    {
+      "id": "bounded-context",
+      "type": "bounded-context",
+      "intent": {
+        "id": "domain.contexts.frozen",
+        "title": "Frozen Context",
+        "owner": "architecture/tooling",
+        "summary": "Freezes the unified bounded context creation contract."
+      },
+      "expected": {
+        "documentPath": "docs/domain/contexts/frozen/README.md",
+        "metadataStorage": "frontmatter",
+        "reachability": {
+          "state": "manual-required",
+          "indexPath": "docs/domain/contexts/README.md",
+          "markdownLink": "[Frozen Context](frozen/README.md)"
+        },
+        "goldenFile": "scripts/docs/fixtures/docs-protocol-golden/bounded-context.md"
+      }
+    },
+    {
+      "id": "contract",
+      "type": "contract",
+      "intent": {
+        "id": "contract.frozen.widgets.v1",
+        "title": "Frozen Widgets v1",
+        "owner": "architecture/tooling",
+        "summary": "Freezes the unified contract document creation behavior."
+      },
+      "expected": {
+        "documentPath": "docs/contracts/frozen-widgets-v1.md",
+        "metadataStorage": "frontmatter",
+        "reachability": {
+          "state": "manual-required",
+          "indexPath": "docs/README.md",
+          "markdownLink": "[Frozen Widgets v1](contracts/frozen-widgets-v1.md)"
+        },
+        "goldenFile": "scripts/docs/fixtures/docs-protocol-golden/contract.md"
+      }
+    },
+    {
+      "id": "feature",
+      "type": "feature",
+      "intent": {
+        "id": "feature.local-host-control.qualification-fixture",
+        "title": "Qualification Fixture",
+        "owner": "architecture/tooling",
+        "summary": "Freezes related, blocked, and anchored feature authoring behavior.",
+        "destination": "packages/platform/local-host-control/src/features/qualification-fixture/README.md",
+        "related": [
+          "ADR-0001",
+          "OD-001"
+        ],
+        "blockedBy": [
+          "OD-001"
+        ],
+        "codeAnchors": [
+          {
+            "enforcement": "required",
+            "pattern": "packages/platform/local-host-control/src/index.ts"
+          }
+        ]
+      },
+      "expected": {
+        "documentPath": "packages/platform/local-host-control/src/features/qualification-fixture/README.md",
+        "metadataStorage": "frontmatter",
+        "reachability": {
+          "state": "manual-required",
+          "indexPath": "packages/platform/local-host-control/README.md",
+          "markdownLink": "[Qualification Fixture](src/features/qualification-fixture/README.md)"
+        },
+        "goldenFile": "scripts/docs/fixtures/docs-protocol-golden/feature-v2.md"
+      }
+    },
+    {
+      "id": "runbook",
+      "type": "runbook",
+      "intent": {
+        "id": "runbook.frozen.widget-outage",
+        "title": "Frozen Widget Outage",
+        "owner": "architecture/tooling",
+        "summary": "Freezes the unified runbook document creation behavior."
+      },
+      "expected": {
+        "documentPath": "docs/operations/frozen-widget-outage.md",
+        "metadataStorage": "frontmatter",
+        "reachability": {
+          "state": "manual-required",
+          "indexPath": "docs/README.md",
+          "markdownLink": "[Frozen Widget Outage](operations/frozen-widget-outage.md)"
+        },
+        "goldenFile": "scripts/docs/fixtures/docs-protocol-golden/runbook.md"
+      }
+    }
   ]
 }

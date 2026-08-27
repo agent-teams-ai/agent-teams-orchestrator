@@ -91,7 +91,7 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
   });
   assert.deepEqual(artifacts.contract.reachability, {
     kind: "manual-fixed-index",
-    indexPath: "docs/contracts/README.md",
+    indexPath: "docs/README.md",
   });
   assert.deepEqual(artifacts.feature.reachability, {
     kind: "manual-colocated-index",
@@ -100,7 +100,7 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
   });
   assert.deepEqual(artifacts.runbook.reachability, {
     kind: "manual-fixed-index",
-    indexPath: "docs/operations/README.md",
+    indexPath: "docs/README.md",
   });
 });
 
