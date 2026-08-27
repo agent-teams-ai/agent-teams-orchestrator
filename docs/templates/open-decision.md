@@ -15,8 +15,6 @@ type: open-decision
 status: open
 owner: owning/area
 summary: One sentence naming the unresolved choice.
-related:
-  - ADR-NNNN
 ---
 
 # OD-NNN: Decision Title

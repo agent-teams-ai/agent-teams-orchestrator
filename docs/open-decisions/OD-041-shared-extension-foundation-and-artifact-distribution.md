@@ -5,7 +5,6 @@ status: resolved
 resolved_by: ADR-0096
 owner: architecture
 summary: Decide the shared extension foundation, OCI artifact distribution, catalog boundary, and registry conformance model.
-blocked_by: []
 related:
   - ADR-0074
   - ADR-0095

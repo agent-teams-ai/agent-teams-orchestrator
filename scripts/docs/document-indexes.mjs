@@ -6,6 +6,37 @@ import { visit } from "unist-util-visit";
 
 import { markdownLinks, resolveMarkdownTarget } from "./document-links.mjs";
 
+const deferredCollectionIndexes = new Set([
+  "docs/contracts",
+  "docs/operations",
+]);
+
+function isDeferredSingleDocumentCollection(context, directory) {
+  const repositoryPath = context.relative(directory);
+  if (!deferredCollectionIndexes.has(repositoryPath)) {
+    return false;
+  }
+  const descendants = context.markdownFiles.filter((filePath) =>
+    filePath.startsWith(`${directory}${path.sep}`),
+  );
+  return (
+    descendants.length === 1 && path.dirname(descendants[0]) === directory
+  );
+}
+
+function childNavigationTarget(context, childDirectory) {
+  const indexPath = path.join(childDirectory, "README.md");
+  if (context.documentsByPath.has(indexPath)) {
+    return indexPath;
+  }
+  if (isDeferredSingleDocumentCollection(context, childDirectory)) {
+    return context.markdownFiles.find((filePath) =>
+      filePath.startsWith(`${childDirectory}${path.sep}`),
+    );
+  }
+  return indexPath;
+}
+
 function linkedLocalMarkdownPaths(context, indexDocument) {
   return new Set(
     markdownLinks(indexDocument.tree)
@@ -56,10 +87,16 @@ async function validateDirectoryIndexes(context) {
           filePath.startsWith(`${childDirectory}${path.sep}`),
         ),
       )
-      .map((childDirectory) => path.join(childDirectory, "README.md"));
+      .map((childDirectory) => childNavigationTarget(context, childDirectory));
     const requiredTargets = [...directDocuments, ...childIndexes];
     const indexPath = path.join(directory, "README.md");
     const indexDocument = documentsByPath.get(indexPath);
+    if (
+      !indexDocument &&
+      isDeferredSingleDocumentCollection(context, directory)
+    ) {
+      continue;
+    }
     if (requiredTargets.length > 0 && !indexDocument) {
       errors.push(
         `${relative(directory)}: documentation directory requires README.md`,

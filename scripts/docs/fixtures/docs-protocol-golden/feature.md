@@ -1,5 +1,5 @@
 ---
-id: feature.example.create-widget
+id: feature.local-host-control.qualification-probe
 type: feature
 status: proposed
 owner: architecture/tooling
@@ -11,10 +11,10 @@ blocked_by:
   - OD-001
 code_anchors:
   - enforcement: required
-    pattern: packages/example/src/features/create-widget/*.ts
+    pattern: packages/platform/local-host-control/src/features/host-discovery/index.ts
 ---
 
-# Create Widget
+# Qualification Probe
 
 ## Scope
 

@@ -130,24 +130,6 @@ test("rejects metadata drift in an index table", async () => {
   );
 });
 
-test("rejects an unregistered documentation owner", async () => {
-  await withFixture(
-    (fixtureRoot) =>
-      replaceInFile(
-        path.join(fixtureRoot, "docs/glossary.md"),
-        "owner: architecture",
-        "owner: architecture/typo",
-      ),
-    ({ code, output }) => {
-      assert.equal(code, 1);
-      assert.match(
-        output,
-        /owner architecture\/typo is not registered in docs\/owners\.yaml/,
-      );
-    },
-  );
-});
-
 test("rejects ADR lifecycle placement drift", async () => {
   await withFixture(
     (fixtureRoot) =>
@@ -208,6 +190,71 @@ summary: Example colocated feature documentation used by the validator fixture.
       assert.match(
         output,
         /packages\/contexts\/example\/src\/features\/example\/README\.md: unreachable from docs\/README\.md/,
+      );
+    },
+  );
+});
+
+test("allows the first real contract to route through the existing docs index", async () => {
+  await withFixture(
+    async (fixtureRoot) => {
+      const contractDirectory = path.join(fixtureRoot, "docs/contracts");
+      await mkdir(contractDirectory, { recursive: true });
+      await writeFile(
+        path.join(contractDirectory, "fixture-contract.md"),
+        `---
+id: contract.fixture.v1
+type: contract
+status: proposed
+owner: architecture
+summary: First real contract used to prove deferred collection index readiness.
+---
+
+# Fixture Contract
+`,
+      );
+      const indexPath = path.join(fixtureRoot, "docs/README.md");
+      const index = await readFile(indexPath, "utf8");
+      await writeFile(
+        indexPath,
+        `${index}\n[Fixture Contract](contracts/fixture-contract.md)\n`,
+      );
+    },
+    ({ code, output }) => {
+      assert.equal(code, 0, output);
+    },
+  );
+});
+
+test("requires a collection index when a second contract is added", async () => {
+  await withFixture(
+    async (fixtureRoot) => {
+      const contractDirectory = path.join(fixtureRoot, "docs/contracts");
+      await mkdir(contractDirectory, { recursive: true });
+      for (const [name, id] of [
+        ["first.md", "contract.fixture.first.v1"],
+        ["second.md", "contract.fixture.second.v1"],
+      ]) {
+        await writeFile(
+          path.join(contractDirectory, name),
+          `---
+id: ${id}
+type: contract
+status: proposed
+owner: architecture
+summary: Contract fixture used to prove collection index materialization timing.
+---
+
+# ${id}
+`,
+        );
+      }
+    },
+    ({ code, output }) => {
+      assert.equal(code, 1);
+      assert.match(
+        output,
+        /docs\/contracts: documentation directory requires README\.md/,
       );
     },
   );

@@ -18,8 +18,6 @@ type: feature
 status: proposed
 owner: context-name/feature-name
 summary: One sentence describing the owned capability and implementation boundary.
-related:
-  - domain.contexts.context-name
 ---
 
 # Feature Name

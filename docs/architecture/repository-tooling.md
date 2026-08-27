@@ -19,6 +19,8 @@ related:
   - architecture.feature-module-standard
   - architecture.machine-readable-model
 code_anchors:
+  - pattern: architecture/foundation/document-authoring.yaml
+    enforcement: advisory
   - pattern: architecture/package-catalog.yaml
     enforcement: advisory
   - pattern: scripts/architecture/**
@@ -112,8 +114,8 @@ import and rejects deep imports, forbidden layer directions, and production
 self-imports through the package export. The architecture-conformance corpus
 contains both accepted and rejected fixtures for every supported edge shape.
 
-`governance.architecture-decisions` is also blocking. Every ADR declares both
-directions of supersession explicitly, the lifecycle sections in
+`governance.architecture-decisions` is also blocking. Every real supersession is
+declared in both directions, the lifecycle sections in
 `docs/decisions/README.md` list each ADR exactly once, and the generated accepted
 baseline makes accepted history immutable. The concern map uses stable IDs as
 navigation labels rather than duplicating lifecycle links.
@@ -126,6 +128,25 @@ release-owned baselines. The accepted combined repository-security profile does
 not apply while Orchestrator publishes no package and must not be enabled with
 fabricated package evidence. Each adoption is a separate parity-proven tooling
 change.
+
+### Documentation authoring readiness
+
+The live authoring profile materializes only a requested document and its real
+parent path. It does not create empty `docs/contracts/` or `docs/operations/`
+catalogs as readiness evidence. The first contract or runbook is linked directly
+from `docs/README.md`; its collection index is introduced with the second real
+document.
+
+The Foundation v3 authoring profile declares the consumer-local
+`registered-owners` set once, with the exact current membership from
+`docs/owners.yaml`. All six qualified authoring types reference that set by ID.
+YAML anchors are not an authority boundary, and a catalog-wide wildcard remains
+forbidden because it would silently authorize future owners.
+
+The shared Docs Protocol owns metadata-schema validation, registered-owner
+membership, and repository-wide ID uniqueness. The Orchestrator validator keeps
+only consumer semantics such as required headings, local links and anchors,
+Mermaid, index policy, relation lifecycle, and content-impact routing.
 
 The first-party foundation package alone is exempt from the pnpm release-age
 delay. Its exact manifest version, registry integrity, reviewed upgrade, and npm

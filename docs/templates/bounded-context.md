@@ -17,8 +17,6 @@ type: bounded-context
 status: proposed
 owner: context-name
 summary: One sentence defining the model boundary.
-related:
-  - OD-011
 ---
 
 # Context Name

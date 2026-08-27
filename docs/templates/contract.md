@@ -17,8 +17,6 @@ type: contract
 status: proposed
 owner: owning/context
 summary: One sentence describing the contract purpose and consumers.
-related:
-  - ADR-NNNN
 ---
 
 # Contract Name v1

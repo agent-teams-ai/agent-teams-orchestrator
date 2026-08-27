@@ -27,64 +27,63 @@ const docsPackageRoot = path.dirname(fileURLToPath(import.meta.resolve("@agent-t
 const foundationPackageRoot = path.dirname(fileURLToPath(import.meta.resolve("@agent-teams/engineering-foundation/package.json")));
 const { version: docsPackageVersion } = JSON.parse(await readFile(path.join(docsPackageRoot, "package.json"), "utf8"));
 const { version: foundationPackageVersion } = JSON.parse(await readFile(path.join(foundationPackageRoot, "package.json"), "utf8"));
+const qualification = JSON.parse(
+  await readFile(
+    path.join(
+      repositoryRoot,
+      "architecture/foundation/docs-protocol-qualification.json",
+    ),
+    "utf8",
+  ),
+);
 
-test("qualification manifest binds the exact protocol gate and registry packages", async () => {
-  const [qualification, manifest] = await Promise.all([
-    readFile(path.join(repositoryRoot, "architecture/foundation/docs-protocol-qualification.json"), "utf8").then(JSON.parse),
-    readFile(path.join(repositoryRoot, "package.json"), "utf8").then(JSON.parse),
+test("qualification contract freezes exactly six v2 authoring scenarios", () => {
+  assert.deepEqual(Object.keys(qualification).toSorted(), [
+    "scenarios",
+    "schemaVersion",
   ]);
-  assert.equal(qualification.gateCommand, "pnpm docs:protocol:check");
-  assert.deepEqual(qualification.packages, {
-    "@agent-teams/docs-protocol": manifest.devDependencies["@agent-teams/docs-protocol"],
-    "@agent-teams/engineering-foundation": manifest.devDependencies["@agent-teams/engineering-foundation"],
-  });
-  assert.deepEqual(qualification.qualificationTests, [
-    "scripts/docs/docs-protocol-parity.test.mjs",
-    "scripts/docs/docs-protocol-profile.test.mjs",
-  ]);
+  assert.equal(qualification.schemaVersion, 2);
+  assert.equal(qualification.scenarios.length, 6);
+  assert.deepEqual(
+    qualification.scenarios.map(({ type }) => type).toSorted(),
+    ["adr", "bounded-context", "contract", "feature", "open-decision", "runbook"],
+  );
 });
 
-const cases = [
-  {
-    name: "adr",
-    expectedPath: "docs/decisions/9001-frozen-adr.md",
-    indexPath: "docs/decisions/README.md",
-    intent: { type: "adr", id: "ADR-9001", title: "Frozen ADR", owner: "architecture/tooling", summary: "Freezes the unified ADR document creation contract." },
-  },
-  {
-    name: "open-decision",
-    expectedPath: "docs/open-decisions/OD-901-frozen-choice.md",
-    indexPath: "docs/open-decisions/README.md",
-    intent: { type: "open-decision", id: "OD-901", title: "Frozen Choice", owner: "architecture/tooling", summary: "Freezes the unified open decision creation contract." },
-  },
-  {
-    name: "bounded-context",
-    expectedPath: "docs/domain/contexts/frozen/README.md",
-    indexPath: "docs/domain/contexts/README.md",
-    intent: { type: "bounded-context", id: "domain.contexts.frozen", title: "Frozen Context", owner: "architecture/tooling", summary: "Freezes the unified bounded context creation contract." },
-  },
-  {
-    name: "contract",
-    expectedPath: "docs/contracts/frozen-widgets-v1.md",
+const stableReachability = {
+  contract: {
+    state: "manual-required",
     indexPath: "docs/contracts/README.md",
-    intent: { type: "contract", id: "contract.frozen.widgets.v1", title: "Frozen Widgets v1", owner: "architecture/tooling", summary: "Freezes the unified contract document creation behavior." },
+    markdownLink: "[Frozen Widgets v1](frozen-widgets-v1.md)",
   },
-  {
-    name: "feature",
-    expectedPath: "packages/example/src/features/create-widget/README.md",
-    indexPath: "packages/example/README.md",
-    intent: { type: "feature", id: "feature.example.create-widget", title: "Create Widget", owner: "architecture/tooling", summary: "Freezes the unified feature document creation behavior.", destination: "packages/example/src/features/create-widget/README.md" },
-    related: ["ADR-0001"],
-    blockedBy: ["OD-001"],
-    codeAnchors: [{ pattern: "packages/example/src/features/create-widget/*.ts", enforcement: "required" }],
-  },
-  {
-    name: "runbook",
-    expectedPath: "docs/operations/frozen-widget-outage.md",
+  runbook: {
+    state: "manual-required",
     indexPath: "docs/operations/README.md",
-    intent: { type: "runbook", id: "runbook.frozen.widget-outage", title: "Frozen Widget Outage", owner: "architecture/tooling", summary: "Freezes the unified runbook document creation behavior." },
+    markdownLink: "[Frozen Widget Outage](frozen-widget-outage.md)",
   },
-];
+};
+
+const cases = qualification.scenarios.map(({ id: name, type, intent, expected }) => ({
+  name,
+  intent: {
+    type,
+    id: intent.id,
+    title: intent.title,
+    owner: intent.owner,
+    summary: intent.summary,
+    ...(intent.slug === undefined ? {} : { slug: intent.slug }),
+    ...(intent.destination === undefined
+      ? {}
+      : { destination: intent.destination }),
+  },
+  related: intent.related,
+  blockedBy: intent.blockedBy,
+  codeAnchors: intent.codeAnchors,
+  additionalMetadata: intent.metadata,
+  expectedPath: expected.documentPath,
+  expectedReachability: stableReachability[name] ?? expected.reachability,
+  goldenFile: expected.goldenFile,
+}));
 
 function indexSource(id, title) {
   return `---\nid: ${id}\ntype: index\nstatus: active\nowner: architecture/tooling\nsummary: Fixture index for unified documentation protocol parity tests.\n---\n\n# ${title}\n`;
@@ -101,7 +100,7 @@ async function makeSourceFixture({ installPackages = true } = {}) {
     mkdir(path.join(root, "docs/domain/contexts"), { recursive: true }),
     mkdir(path.join(root, "docs/contracts"), { recursive: true }),
     mkdir(path.join(root, "docs/operations"), { recursive: true }),
-    mkdir(path.join(root, "packages/example/src/features/create-widget"), { recursive: true }),
+    mkdir(path.join(root, "packages/platform/local-host-control/src/features/host-discovery"), { recursive: true }),
     mkdir(path.join(root, "tooling"), { recursive: true }),
     ...(installPackages ? [mkdir(path.join(root, "node_modules/@agent-teams"), { recursive: true })] : []),
   ]);
@@ -120,8 +119,8 @@ async function makeSourceFixture({ installPackages = true } = {}) {
     writeFile(path.join(root, "docs/domain/contexts/README.md"), indexSource("docs.domain.contexts.index", "Contexts")),
     writeFile(path.join(root, "docs/contracts/README.md"), indexSource("docs.contracts.index", "Contracts")),
     writeFile(path.join(root, "docs/operations/README.md"), indexSource("docs.operations.index", "Operations")),
-    writeFile(path.join(root, "packages/example/README.md"), indexSource("package.example.index", "Example Package")),
-    writeFile(path.join(root, "packages/example/src/features/create-widget/create-widget.ts"), "export {};\n"),
+    writeFile(path.join(root, "packages/platform/local-host-control/README.md"), indexSource("package.local-host-control.index", "Local Host Control")),
+    writeFile(path.join(root, "packages/platform/local-host-control/src/features/host-discovery/index.ts"), "export {};\n"),
     cp(path.join(repositoryRoot, "docs/decisions/0001-headless-event-driven-modular-monolith.md"), path.join(root, "docs/decisions/0001-frozen.md")),
     writeFile(path.join(root, "docs/open-decisions/OD-001-frozen.md"), "---\nid: OD-001\ntype: open-decision\nstatus: open\nowner: architecture/tooling\nsummary: Existing decision used by protocol blocker parity.\n---\n\n# OD-001: Existing Open Decision\n"),
     ...(installPackages ? [
@@ -131,6 +130,66 @@ async function makeSourceFixture({ installPackages = true } = {}) {
   ]);
   return root;
 }
+
+async function replaceFixtureText(root, repositoryPath, before, after) {
+  const filePath = path.join(root, repositoryPath);
+  const source = await readFile(filePath, "utf8");
+  assert.ok(source.includes(before), `${repositoryPath} lacks fixture text`);
+  await writeFile(filePath, source.replace(before, after));
+}
+
+test("shared check owns metadata, owner membership, and duplicate IDs", async () => {
+  const evidence = [
+    {
+      ruleId: "document.catalog.metadata-invalid",
+      mutate: (source) =>
+        replaceFixtureText(
+          source,
+          "docs/README.md",
+          "summary: Fixture index for unified documentation protocol parity tests.",
+          "summary: short",
+        ),
+    },
+    {
+      ruleId: "document.catalog.owner-unknown",
+      mutate: (source) =>
+        replaceFixtureText(
+          source,
+          "docs/README.md",
+          "owner: architecture/tooling",
+          "owner: not/registered",
+        ),
+    },
+    {
+      ruleId: "document.catalog.duplicate-id",
+      mutate: (source) =>
+        cp(
+          path.join(source, "docs/decisions/0001-frozen.md"),
+          path.join(source, "docs/decisions/0002-duplicate.md"),
+        ),
+    },
+  ];
+
+  for (const scenario of evidence) {
+    const source = await makeSourceFixture();
+    try {
+      await scenario.mutate(source);
+      const result = await docsCheck({
+        consumerRoot: source,
+        profilePath: "architecture/foundation/docs-protocol.yaml",
+      });
+      assert.equal(result.exitCode, 1, JSON.stringify(result.envelope));
+      assert.ok(
+        result.envelope.diagnostics.some(
+          ({ ruleId }) => ruleId === scenario.ruleId,
+        ),
+        JSON.stringify(result.envelope),
+      );
+    } finally {
+      await rm(source, { recursive: true, force: true });
+    }
+  }
+});
 
 const requiresStrictDirectoryDurability = process.platform === "win32" ? test.skip : test;
 const requiresUnsupportedStrictDirectoryDurability = process.platform === "win32" ? test : test.skip;
@@ -149,16 +208,19 @@ for (const scenario of cases) {
         related: scenario.related,
         blockedBy: scenario.blockedBy,
         codeAnchors: scenario.codeAnchors,
+        additionalMetadata: scenario.additionalMetadata,
       });
       assert.equal(result.exitCode, 0, JSON.stringify(result.envelope));
       assert.equal(result.envelope.result.documentPath, scenario.expectedPath);
-      assert.deepEqual(result.envelope.result.reachability, {
-        state: "manual-required",
-        indexPath: scenario.indexPath,
-        markdownLink: `[${scenario.name === "adr" ? "ADR-9001: Frozen ADR" : scenario.name === "open-decision" ? "OD-901: Frozen Choice" : scenario.intent.title}](${path.posix.relative(path.posix.dirname(scenario.indexPath), scenario.expectedPath)})`,
-      });
+      assert.deepEqual(
+        result.envelope.result.reachability,
+        scenario.expectedReachability,
+      );
       const actual = await readFile(path.join(source, scenario.expectedPath), "utf8");
-      const expected = await readFile(path.join(repositoryRoot, "scripts/docs/fixtures/docs-protocol-golden", `${scenario.name}.md`), "utf8");
+      const expected = await readFile(
+        path.join(repositoryRoot, scenario.goldenFile),
+        "utf8",
+      );
       assert.equal(actual, expected);
     } finally {
       await rm(source, { recursive: true, force: true });
@@ -179,6 +241,7 @@ requiresStrictDirectoryDurability("shared qualification runner proves all six ty
             related: scenario.related,
             blockedBy: scenario.blockedBy,
             codeAnchors: scenario.codeAnchors,
+            additionalMetadata: scenario.additionalMetadata,
           },
         },
       });
@@ -205,11 +268,15 @@ requiresUnsupportedStrictDirectoryDurability("Windows previews all six types and
         related: scenario.related,
         blockedBy: scenario.blockedBy,
         codeAnchors: scenario.codeAnchors,
+        additionalMetadata: scenario.additionalMetadata,
       });
       assert.equal(preview.exitCode, 0, JSON.stringify(preview.envelope));
       assert.equal(preview.envelope.result.writeState, "preview");
       assert.equal(preview.envelope.result.documentPath, scenario.expectedPath);
-      assert.equal(preview.envelope.result.reachability.indexPath, scenario.indexPath);
+      assert.deepEqual(
+        preview.envelope.result.reachability,
+        scenario.expectedReachability,
+      );
       await assert.rejects(readFile(path.join(source, scenario.expectedPath)), { code: "ENOENT" });
     }
 
