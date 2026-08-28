@@ -14,7 +14,6 @@ import {
   packageCatalogSchemaSpecifier,
   packageManifestSpecifier,
   trustedRegistrySchemaDigestFor,
-  trustedRegistrySchemaDigests,
 } from "./package-catalog-authority-contract.mjs";
 import {
   assertRegistryStatus,

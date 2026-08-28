@@ -295,6 +295,31 @@ async function validateMaterializedPackage(context) {
   return { entry, manifest, sourceFiles };
 }
 
+function collectMaterializedPaths(
+  productionFiles,
+  repositoryRoot,
+  byPath,
+  errors,
+) {
+  const materializedPaths = new Set();
+  for (const filePath of productionFiles) {
+    const fileRelative = relative(repositoryRoot, filePath);
+    const owner = [...byPath.entries()].find(
+      ([catalogPath]) =>
+        fileRelative === catalogPath ||
+        fileRelative.startsWith(`${catalogPath}/`),
+    );
+    if (!owner) {
+      errors.push(
+        `${fileRelative}: production file is outside the package catalog`,
+      );
+      continue;
+    }
+    materializedPaths.add(owner[0]);
+  }
+  return materializedPaths;
+}
+
 async function main() {
   const repositoryRoot = parseArguments(process.argv.slice(2));
   const errors = [];
@@ -358,24 +383,13 @@ async function main() {
       ),
     )
   ).flat();
-  const materializedPaths = new Set();
+  const materializedPaths = collectMaterializedPaths(
+    productionFiles,
+    repositoryRoot,
+    byPath,
+    errors,
+  );
   const materializedPackages = new Map();
-
-  for (const filePath of productionFiles) {
-    const fileRelative = relative(repositoryRoot, filePath);
-    const owner = [...byPath.entries()].find(
-      ([catalogPath]) =>
-        fileRelative === catalogPath ||
-        fileRelative.startsWith(`${catalogPath}/`),
-    );
-    if (!owner) {
-      errors.push(
-        `${fileRelative}: production file is outside the package catalog`,
-      );
-      continue;
-    }
-    materializedPaths.add(owner[0]);
-  }
 
   for (const materializedPath of [...materializedPaths].toSorted()) {
     const entry = byPath.get(materializedPath);

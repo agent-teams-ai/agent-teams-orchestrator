@@ -48,7 +48,7 @@ function provenanceFailure(status, ruleId, fields, cause) {
 
 function directoryOpenFlags() {
   if (!Number.isInteger(constants.O_DIRECTORY) || constants.O_DIRECTORY === 0) {
-    return undefined;
+    return;
   }
   return (
     constants.O_RDONLY |

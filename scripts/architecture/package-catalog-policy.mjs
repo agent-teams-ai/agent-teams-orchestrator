@@ -141,37 +141,43 @@ function matchesRolePath(role, value) {
   return role === "integration" ? segments.length >= 3 : segments.length === 3;
 }
 
-function validateEntry(entry, index, emit) {
+function validateEntryId(entry, index, emit) {
   if (typeof entry?.id === "string" && !packageIdPattern.test(entry.id)) {
-    if (!append(emit, "orchestrator.catalog.entry.id", {
+    return append(emit, "orchestrator.catalog.entry.id", {
       index,
       value: entry.id,
-    })) {
-      return false;
-    }
+    });
   }
+  return true;
+}
+
+function validateEntryPackageName(entry, index, emit) {
   if (
     typeof entry?.package_name === "string" &&
     !packageNamePattern.test(entry.package_name)
   ) {
-    if (!append(emit, "orchestrator.catalog.entry.package-name", {
+    return append(emit, "orchestrator.catalog.entry.package-name", {
       index,
       value: entry.package_name,
-    })) {
-      return false;
-    }
+    });
   }
+  return true;
+}
+
+function validateEntryOwnerDocument(entry, index, emit) {
   if (
     typeof entry?.owner_document === "string" &&
     !ownerDocumentIdPattern.test(entry.owner_document)
   ) {
-    if (!append(emit, "orchestrator.catalog.entry.owner-document", {
+    return append(emit, "orchestrator.catalog.entry.owner-document", {
       index,
       value: entry.owner_document,
-    })) {
-      return false;
-    }
+    });
   }
+  return true;
+}
+
+function validateEntryPath(entry, index, emit) {
   if (typeof entry?.path === "string" && !hasSecurePathShape(entry.path)) {
     return append(emit, "orchestrator.catalog.entry.secure-path", {
       index,
@@ -192,6 +198,15 @@ function validateEntry(entry, index, emit) {
     }
   }
   return true;
+}
+
+function validateEntry(entry, index, emit) {
+  return (
+    validateEntryId(entry, index, emit) &&
+    validateEntryPackageName(entry, index, emit) &&
+    validateEntryOwnerDocument(entry, index, emit) &&
+    validateEntryPath(entry, index, emit)
+  );
 }
 
 export function validateOrchestratorCatalogPolicy(entries, emit) {

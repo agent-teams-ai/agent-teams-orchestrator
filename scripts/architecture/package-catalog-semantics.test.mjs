@@ -52,7 +52,7 @@ test("caps adversarial overlap diagnostics with deterministic early termination"
     forwardErrors,
   );
   validateCatalogSemantics(
-    { packages: [...descendants].reverse().concat(root) },
+    { packages: descendants.toReversed().concat(root) },
     documents,
     reverseErrors,
   );
