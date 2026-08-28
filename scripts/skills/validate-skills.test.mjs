@@ -97,7 +97,7 @@ test("rejects a docs-authoring skill that drops a required workflow route", asyn
     await rename(fixture.skillDirectory, docsSkillDirectory);
     await writeFile(
       path.join(docsSkillDirectory, "SKILL.md"),
-      `---\nname: docs-authoring\ndescription: Use when authoring governed documentation through the canonical repository workflow.\n---\n\n# Documentation Authoring\n\nUse pnpm docs:info, pnpm docs:find, pnpm docs:new -- --type TYPE --id ID --dry-run, pnpm docs:new -- --type TYPE --id ID --apply, the reported index/link, pnpm docs:check, and pnpm docs:doctor.\n`,
+      `---\nname: docs-authoring\ndescription: Use when authoring governed documentation through the canonical repository workflow.\n---\n\n# Documentation Authoring\n\nUse pnpm docs:info, pnpm docs:find, pnpm docs:new -- --type TYPE --id ID --dry-run, pnpm docs:new -- --type TYPE --id ID --apply, the reported index/link, pnpm docs:protocol:check, and pnpm docs:doctor.\n`,
     );
     const result = await runValidator(fixture.root);
     assert.equal(result.code, 1, result.output);

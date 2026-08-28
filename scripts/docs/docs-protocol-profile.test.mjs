@@ -18,22 +18,22 @@ async function readJson(repositoryPath) {
 }
 
 test("routes the v2 qualification contract through the consumer integration", async () => {
-  const [integration, qualification, rollout] = await Promise.all([
+  const [integration, qualification] = await Promise.all([
     readJson("architecture/foundation/docs-consumer-integration.json"),
     readJson("architecture/foundation/docs-protocol-qualification.json"),
-    readFile(path.join(repositoryRoot, "architecture/foundation/docs-protocol-rollout.yaml"), "utf8"),
   ]);
 
-  assert.equal(integration.schemaVersion, 1);
-  assert.match(rollout, /^status: stable3-current-v2-staged$/mu);
-  assert.match(rollout, /^  integrationSchemaVersion: 2$/mu);
-  assert.match(rollout, /^  qualificationContractSchemaVersion: 2$/mu);
+  assert.equal(integration.schemaVersion, 2);
+  assert.deepEqual(integration.qualification, {
+    contractPath: "architecture/foundation/docs-protocol-qualification.json",
+    gateCommand: "pnpm docs:protocol:check",
+  });
   assert.equal(qualification.schemaVersion, 2);
   assert.equal(qualification.scenarios.length, 6);
 });
 
 test("keeps the protocol profile thin and routes one Foundation v3 authority", async () => {
-  const profile = await readYaml("architecture/foundation/rollouts/docs-protocol-v2/docs-protocol.yaml");
+  const profile = await readYaml("architecture/foundation/docs-protocol.yaml");
 
   assert.deepEqual(Object.keys(profile).toSorted(), [
     "agentWorkflow",
@@ -48,7 +48,7 @@ test("keeps the protocol profile thin and routes one Foundation v3 authority", a
     version: 1,
   });
   assert.deepEqual(profile.foundationProfile, {
-    path: "architecture/foundation/rollouts/docs-protocol-v2/document-authoring.yaml",
+    path: "architecture/foundation/document-authoring.yaml",
     schemaVersion: 3,
     metadataSidecarPolicy: "foundation-profile-v3-strict-merge",
   });
@@ -66,7 +66,7 @@ test("keeps the protocol profile thin and routes one Foundation v3 authority", a
 
 test("declares explicit reachability for every Orchestrator authoring type", async () => {
   const profile = await readYaml(
-    "architecture/foundation/rollouts/docs-protocol-v2/document-authoring.yaml",
+    "architecture/foundation/document-authoring.yaml",
   );
   const artifacts = Object.fromEntries(
     profile.authoring.artifactTypes.map((artifact) => [artifact.type, artifact]),

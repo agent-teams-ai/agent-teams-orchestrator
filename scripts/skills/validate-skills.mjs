@@ -26,7 +26,10 @@ const docsAuthoringRequiredRoutes = [
   { label: "pnpm docs:new preview", pattern: /pnpm docs:new -- [^\n]*--dry-run/u },
   { label: "pnpm docs:new apply", pattern: /pnpm docs:new -- [^\n]*--apply/u },
   { label: "reported index/link", pattern: /reported index\/link/u },
-  { label: "pnpm docs:check", pattern: /pnpm docs:check/u },
+  {
+    label: "pnpm docs:protocol:check",
+    pattern: /pnpm docs:protocol:check/u,
+  },
   { label: "pnpm docs:doctor", pattern: /pnpm docs:doctor/u },
   { label: "pnpm docs:recover", pattern: /pnpm docs:recover/u },
 ];
