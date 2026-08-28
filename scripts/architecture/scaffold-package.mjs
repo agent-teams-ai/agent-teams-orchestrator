@@ -316,10 +316,12 @@ async function planCommand(options) {
   const repositoryRoot = await canonicalRepositoryRoot(
     options.repositoryRoot,
   );
-  const [catalog, materializationPolicy] = await Promise.all([
-    loadPackageCatalog(repositoryRoot),
-    loadPackageMaterializationPolicy(repositoryRoot),
-  ]);
+  const authorityErrors = [];
+  const { catalog, materializationPolicy } =
+    await loadPackageMaterializationInputs(repositoryRoot, authorityErrors);
+  if (authorityErrors.length > 0) {
+    throw new Error([...new Set(authorityErrors)].toSorted().join("\n"));
+  }
   const entry = catalog.packages?.find(
     (candidate) => candidate.id === options.id,
   );
@@ -333,7 +335,6 @@ async function planCommand(options) {
     throw new Error(`${entry.path}: target already exists`);
   }
   validateRepository(repositoryRoot);
-
   const intentDirectory = await ensureLocalStateDirectory(
     repositoryRoot,
     "scaffolding-intents",
@@ -419,7 +420,10 @@ async function applyCommand(options) {
   const repositoryRoot = await canonicalRepositoryRoot(
     options.repositoryRoot,
   );
-  await validateMaterializationPolicy(repositoryRoot);
+  const pendingPlan = await readPendingCanonicalPlan(repositoryRoot);
+  if (!pendingPlan) {
+    await validateMaterializationPolicy(repositoryRoot);
+  }
   const plan = await readScaffoldPlanFile(
     repositoryRoot,
     options.planPath,
@@ -474,8 +478,10 @@ async function recoverCommand(options) {
   const repositoryRoot = await canonicalRepositoryRoot(
     options.repositoryRoot,
   );
-  await validateMaterializationPolicy(repositoryRoot);
   const pendingPlan = await readPendingCanonicalPlan(repositoryRoot);
+  if (!pendingPlan) {
+    await validateMaterializationPolicy(repositoryRoot);
+  }
   const receipt = pendingPlan
     ? await applyFilesystemScaffold(repositoryRoot, pendingPlan)
     : await recoverFilesystemScaffold(repositoryRoot);

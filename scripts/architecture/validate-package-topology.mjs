@@ -8,7 +8,6 @@ import {
   relative,
   walk,
 } from "./package-catalog-lib.mjs";
-import { validateOrchestratorCatalogEntry } from "./package-catalog-policy.mjs";
 import { validatePackageMaterializationPolicy } from "./package-materialization-validation.mjs";
 import { loadPackageTopologyInputs } from "./package-topology-inputs.mjs";
 import {
@@ -71,7 +70,6 @@ function validateCatalogSemantics(catalog, documents, errors) {
     if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
       continue;
     }
-    validateOrchestratorCatalogEntry(entry, errors);
     for (const [field, value, index] of [
       ["id", entry.id, byId],
       ["path", entry.path, byPath],
@@ -370,6 +368,10 @@ async function main() {
     documents,
     materializationPolicy,
   } = await loadPackageTopologyInputs(repositoryRoot, errors);
+  if (errors.length > 0) {
+    reportErrors(errors);
+    return;
+  }
 
   const { byPackageName, byPath } = validateCatalogSemantics(
     catalog && Array.isArray(catalog.packages)
@@ -469,19 +471,23 @@ async function main() {
   });
 
   if (errors.length > 0) {
-    for (const error of [...new Set(errors)].toSorted()) {
-      console.error(`ERROR ${error}`);
-    }
-    console.error(
-      `\nPackage topology validation failed with ${new Set(errors).size} error(s).`,
-    );
-    process.exitCode = 1;
+    reportErrors(errors);
     return;
   }
 
   console.log(
     `Package topology validation passed: ${catalog.packages.length} reserved paths, ${materializedPaths.size} materialized packages.`,
   );
+}
+
+function reportErrors(errors) {
+  for (const error of [...new Set(errors)].toSorted()) {
+    console.error(`ERROR ${error}`);
+  }
+  console.error(
+    `\nPackage topology validation failed with ${new Set(errors).size} error(s).`,
+  );
+  process.exitCode = 1;
 }
 
 await main();

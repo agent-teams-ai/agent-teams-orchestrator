@@ -28,7 +28,7 @@
     "architecture:scaffolding:check": "node tooling/architecture-conformance/scripts/check-package-scaffolding.mjs",
     "architecture:scaffold-package": "node scripts/architecture/scaffold-package.mjs",
     "architecture:topology": "node scripts/architecture/validate-package-topology.mjs",
-    "architecture:topology:test": "node --test --test-concurrency=1 scripts/architecture/package-catalog-schema.test.mjs scripts/architecture/package-materialization-validation.test.mjs",
+    "architecture:topology:test": "node --test --test-concurrency=1 scripts/architecture/package-catalog-bounded-input.test.mjs scripts/architecture/package-catalog-schema.test.mjs scripts/architecture/package-materialization-validation.test.mjs",
     "check": "pnpm foundation:check && pnpm docs:repository:check && pnpm packages:check && pnpm typecheck:root && pnpm architecture:check",
     "check:changed": "agent-teams-foundation agent-workflow changed --consumer .",
     "check:fast": "pnpm foundation:check && pnpm docs:repository:check && pnpm run specs:check && pnpm run specs:test && pnpm lint:fast && pnpm typecheck && pnpm architecture:model:check && pnpm architecture:nx:check",

@@ -1,5 +1,40 @@
-import { cp, mkdir, writeFile } from "node:fs/promises";
+import {
+  copyFile,
+  cp,
+  mkdir,
+  realpath,
+  writeFile,
+} from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
+const repositoryRoot = path.resolve(scriptDirectory, "../..", "..");
+const foundationPackageName = "@agent-teams/engineering-foundation";
+const foundationFixtureManifestSource = `${JSON.stringify(
+  {
+    name: "package-topology-fixture",
+    private: true,
+    packageManager: "pnpm@11.18.0",
+    devDependencies: { [foundationPackageName]: "0.19.0" },
+  },
+  null,
+  2,
+)}\n`;
+const foundationFixtureLockfileSource = `lockfileVersion: '9.0'
+importers:
+  .:
+    devDependencies:
+      '@agent-teams/engineering-foundation':
+        specifier: 0.19.0
+        version: 0.19.0(supports-color@7.2.0)
+packages:
+  '@agent-teams/engineering-foundation@0.19.0':
+    resolution:
+      integrity: sha512-CeIWttZYT74jgwryA+326d21xNapep8NFQkxN9I+zAoyebEZk+apVvIndx3WC8NtJZYvzuKouEh1OB+vJPadxA==
+snapshots:
+  '@agent-teams/engineering-foundation@0.19.0(supports-color@7.2.0)': {}
+`;
 
 export function qualifiedLibraryScripts() {
   return {
@@ -123,6 +158,55 @@ export async function writeEmptyMaterializationPolicy(root, schemaPath) {
   ]);
 }
 
+export async function writeFoundationRegistryFixture(root) {
+  const foundationRoot = await realpath(
+    path.join(
+      repositoryRoot,
+      "node_modules",
+      ...foundationPackageName.split("/"),
+    ),
+  );
+  const fixtureFoundationRoot = path.join(
+    root,
+    "node_modules",
+    ...foundationPackageName.split("/"),
+  );
+  const fixtureSchemaRoot = path.join(
+    fixtureFoundationRoot,
+    "schemas/scaffold-target-catalog",
+  );
+  const virtualStoreRoot = path.join(root, "node_modules/.pnpm");
+  await Promise.all([
+    mkdir(fixtureSchemaRoot, { recursive: true }),
+    mkdir(virtualStoreRoot, { recursive: true }),
+  ]);
+  await Promise.all([
+    copyFile(
+      path.join(foundationRoot, "package.json"),
+      path.join(fixtureFoundationRoot, "package.json"),
+    ),
+    copyFile(
+      path.join(
+        foundationRoot,
+        "schemas/scaffold-target-catalog/v1.schema.json",
+      ),
+      path.join(fixtureSchemaRoot, "v1.schema.json"),
+    ),
+    writeFile(
+      path.join(root, "package.json"),
+      foundationFixtureManifestSource,
+    ),
+    writeFile(
+      path.join(root, "pnpm-lock.yaml"),
+      foundationFixtureLockfileSource,
+    ),
+    writeFile(
+      path.join(virtualStoreRoot, "lock.yaml"),
+      foundationFixtureLockfileSource,
+    ),
+  ]);
+}
+
 export async function writeCatalog(root, schemaPaths) {
   const architectureRoot = path.join(root, "architecture");
   await mkdir(architectureRoot, { recursive: true });
@@ -201,6 +285,7 @@ edges:
 feature_edges: []
 `,
   );
+  await writeFoundationRegistryFixture(root);
 }
 
 export async function materializeContext(root) {

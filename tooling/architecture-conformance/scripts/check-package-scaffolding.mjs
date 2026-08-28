@@ -17,7 +17,11 @@ import Ajv2020 from "ajv/dist/2020.js";
 import { planScaffoldFromFile } from "@agent-teams/engineering-foundation/scaffolding";
 import YAML from "yaml";
 
-import { writeEmptyMaterializationPolicy } from "./topology-fixture-lib.mjs";
+import { ownerPath, ownerType, planPath, verifyCatalogAuthorityAtPlanApplyBoundary } from "./package-catalog-scaffolding-fixture.mjs";
+import {
+  writeEmptyMaterializationPolicy,
+  writeFoundationRegistryFixture,
+} from "./topology-fixture-lib.mjs";
 import {
   journalPath,
   operationBytes,
@@ -120,14 +124,6 @@ function requireFailureReceipt(label, result, expectedOutcome, expectedRuleId) {
   return receipt;
 }
 
-function ownerType(entry) {
-  return entry.role === "bounded-context" ? "bounded-context" : "architecture";
-}
-
-function ownerPath(ownerDocument) {
-  return `docs/owners/${ownerDocument.replaceAll(".", "-")}.md`;
-}
-
 async function createFixture(entries) {
   const root = await mkdtemp(
     path.join(os.tmpdir(), "orchestrator-scaffolding-qualification-"),
@@ -148,6 +144,7 @@ async function createFixture(entries) {
       path.join(repositoryRoot, "architecture/foundation/scaffolding.yaml"),
       path.join(architectureRoot, "foundation/scaffolding.yaml"),
     ),
+    writeFoundationRegistryFixture(root),
   ]);
   await writeFile(
     path.join(architectureRoot, "package-catalog.yaml"),
@@ -175,10 +172,6 @@ async function createFixture(entries) {
     );
   }
   return root;
-}
-
-function planPath(id) {
-  return `.agent-teams-local/scaffolding-plans/${id}.json`;
 }
 
 function planTarget(root, id) {
@@ -657,7 +650,7 @@ async function verifyRecoveryWithoutTopologyGate() {
       planPath(pendingEntries[1].id),
       "--json",
     ]),
-    /requires recovery/u,
+    /^(?![\s\S]*orchestrator\.catalog\.provenance)[\s\S]*requires recovery/u,
   );
   assert.equal(
     await pathExists(path.join(pendingRoot, pendingEntries[1].path)),
@@ -821,6 +814,12 @@ async function verifyTamperingAndFilesystemBoundaries() {
 try {
   await verifyQualificationRecord();
   await verifyDonorAndVariants();
+  await verifyCatalogAuthorityAtPlanApplyBoundary({
+    createFixture,
+    planTarget,
+    requireFailure,
+    runWrapper,
+  });
   await verifyStaleAuthority();
   await verifyRecoveryWithoutTopologyGate();
   await verifyTamperingAndFilesystemBoundaries();
