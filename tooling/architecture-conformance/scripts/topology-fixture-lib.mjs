@@ -127,10 +127,6 @@ export async function writeCatalog(root, schemaPaths) {
   const architectureRoot = path.join(root, "architecture");
   await mkdir(architectureRoot, { recursive: true });
   await cp(
-    schemaPaths.catalog,
-    path.join(architectureRoot, "package-catalog.schema.json"),
-  );
-  await cp(
     schemaPaths.dependencyPolicy,
     path.join(architectureRoot, "source-dependency-policy.schema.json"),
   );

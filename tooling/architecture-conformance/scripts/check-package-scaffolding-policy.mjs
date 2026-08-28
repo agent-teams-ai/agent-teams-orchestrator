@@ -22,7 +22,6 @@ const scaffolder = path.join(
   "scripts/architecture/scaffold-package.mjs",
 );
 const schemaPaths = {
-  catalog: path.join(repositoryRoot, "architecture/package-catalog.schema.json"),
   dependencyPolicy: path.join(
     repositoryRoot,
     "architecture/source-dependency-policy.schema.json",

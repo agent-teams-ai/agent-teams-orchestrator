@@ -36,7 +36,6 @@ const wrapper = path.join(
   repositoryRoot,
   "scripts/architecture/scaffold-package.mjs",
 );
-const catalogSchema = path.join(repositoryRoot, "architecture/package-catalog.schema.json");
 const dependencyPolicySchema = path.join(
   repositoryRoot,
   "architecture/source-dependency-policy.schema.json",
@@ -140,10 +139,6 @@ async function createFixture(entries) {
     mkdir(path.join(root, "docs/owners"), { recursive: true }),
   ]);
   await Promise.all([
-    copyFile(
-      catalogSchema,
-      path.join(architectureRoot, "package-catalog.schema.json"),
-    ),
     copyFile(
       dependencyPolicySchema,
       path.join(architectureRoot, "source-dependency-policy.schema.json"),

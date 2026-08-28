@@ -8,6 +8,7 @@ import {
   relative,
   walk,
 } from "./package-catalog-lib.mjs";
+import { validateOrchestratorCatalogEntry } from "./package-catalog-policy.mjs";
 import { validatePackageMaterializationPolicy } from "./package-materialization-validation.mjs";
 import { loadPackageTopologyInputs } from "./package-topology-inputs.mjs";
 import {
@@ -28,14 +29,6 @@ import { validateRootTsconfig } from "./package-topology-tsconfig.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
-const rolePathPatterns = {
-  app: /^apps\/[^/]+$/,
-  "bounded-context": /^packages\/contexts\/[^/]+$/,
-  integration: /^packages\/integrations\/.+$/,
-  platform: /^packages\/platform\/[^/]+$/,
-  sdk: /^packages\/sdk\/[^/]+$/,
-  testing: /^packages\/testing\/[^/]+$/,
-};
 const forbiddenPackageRootDirectories = new Set([
   "common",
   "core",
@@ -75,6 +68,10 @@ function validateCatalogSemantics(catalog, documents, errors) {
   const byPackageName = new Map();
 
   for (const entry of catalog.packages ?? []) {
+    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
+      continue;
+    }
+    validateOrchestratorCatalogEntry(entry, errors);
     for (const [field, value, index] of [
       ["id", entry.id, byId],
       ["path", entry.path, byPath],
@@ -87,13 +84,6 @@ function validateCatalogSemantics(catalog, documents, errors) {
       } else {
         index.set(value, entry);
       }
-    }
-
-    const expectedPath = rolePathPatterns[entry.role];
-    if (!expectedPath?.test(entry.path)) {
-      errors.push(
-        `architecture/package-catalog.yaml: ${entry.id} path ${entry.path} does not match role ${entry.role}`,
-      );
     }
 
     const owner = documents.get(entry.owner_document);

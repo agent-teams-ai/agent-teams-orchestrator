@@ -31,10 +31,6 @@ const scaffolder = path.join(
   repositoryRoot,
   "scripts/architecture/scaffold-package.mjs",
 );
-const catalogSchema = path.join(
-  repositoryRoot,
-  "architecture/package-catalog.schema.json",
-);
 const dependencyPolicySchema = path.join(
   repositoryRoot,
   "architecture/source-dependency-policy.schema.json",
@@ -127,7 +123,6 @@ const temporaryRoot = await mkdtemp(
 
 try {
   await writeCatalog(temporaryRoot, {
-    catalog: catalogSchema,
     dependencyPolicy: dependencyPolicySchema,
     materializationPolicy: materializationPolicySchema,
   });

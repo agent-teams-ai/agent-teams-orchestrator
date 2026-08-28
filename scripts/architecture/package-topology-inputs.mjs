@@ -9,6 +9,7 @@ import {
   loadPackageMaterializationPolicy,
   loadSourceDependencyPolicy,
 } from "./package-catalog-lib.mjs";
+import { loadCanonicalPackageCatalogSchema } from "./package-catalog-schema.mjs";
 
 function appendSchemaErrors(errors, location, validationErrors) {
   for (const validationError of validationErrors ?? []) {
@@ -18,8 +19,10 @@ function appendSchemaErrors(errors, location, validationErrors) {
   }
 }
 
-function validateSchema(ajv, location, value, schemaSource, errors) {
-  const validate = ajv.compile(JSON.parse(schemaSource));
+function validateSchema(ajv, location, value, schema, errors) {
+  const validate = ajv.compile(
+    typeof schema === "string" ? JSON.parse(schema) : schema,
+  );
   if (!validate(value)) {
     appendSchemaErrors(errors, location, validate.errors);
   }
@@ -38,7 +41,7 @@ export async function loadPackageMaterializationInputs(
     materializationPolicySchema,
   ] = await Promise.all([
     loadPackageCatalog(repositoryRoot),
-    readFile(path.join(architectureRoot, "package-catalog.schema.json"), "utf8"),
+    loadCanonicalPackageCatalogSchema(),
     loadDocuments(repositoryRoot),
     loadPackageMaterializationPolicy(repositoryRoot),
     readFile(
@@ -51,7 +54,7 @@ export async function loadPackageMaterializationInputs(
     ajv,
     "architecture/package-catalog.yaml",
     catalog,
-    catalogSchema,
+    catalogSchema.schema,
     errors,
   );
   validateSchema(
