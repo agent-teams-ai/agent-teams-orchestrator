@@ -28,6 +28,10 @@ import {
 } from "./package-catalog-lib.mjs";
 import { validatePackageMaterializationPolicy } from "./package-materialization-validation.mjs";
 import { loadPackageMaterializationInputs } from "./package-topology-inputs.mjs";
+import {
+  inspectPendingScaffoldingRecovery,
+  pendingScaffoldingJournalExists,
+} from "./scaffold-package-recovery.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
@@ -39,14 +43,16 @@ const localStateDirectory = ".agent-teams-local";
 const defaultCompositionId = "orchestrator-library-boundary";
 const canonicalScaffoldingConfigPath =
   "architecture/foundation/scaffolding.yaml";
-const scaffoldingJournalPath =
-  `${localStateDirectory}/scaffolding-transaction.json`;
-const maximumScaffoldingJournalBytes = 32 * 1024 * 1024;
 const successfulOutcomes = new Set([
   "applied",
   "already-applied",
   "failed-recovered",
 ]);
+const pendingRecoveryDiagnostic = Object.freeze({
+  message:
+    "A pending scaffolding transaction requires recovery. Run pnpm architecture:scaffold-package -- recover before retrying Apply.",
+  ruleId: "orchestrator.scaffold.recovery-required",
+});
 
 function requiredValue(argv, index, option) {
   const value = argv[index + 1];
@@ -133,7 +139,7 @@ function validateRepository(repositoryRoot) {
 
 async function validateMaterializationPolicy(repositoryRoot) {
   const errors = [];
-  const { catalog, documents, materializationPolicy } =
+  const { catalog, catalogAuthority, documents, materializationPolicy } =
     await loadPackageMaterializationInputs(repositoryRoot, errors);
   validatePackageMaterializationPolicy(
     materializationPolicy && Array.isArray(materializationPolicy.entries)
@@ -151,6 +157,15 @@ async function validateMaterializationPolicy(repositoryRoot) {
         .toSorted()
         .map((error) => `ERROR ${error}`)
         .join("\n")}`,
+    );
+  }
+  return catalogAuthority;
+}
+
+function reportLocalCatalogAuthority(catalogAuthority) {
+  if (catalogAuthority?.trustMode === "LOCAL") {
+    process.stderr.write(
+      `[orchestrator.catalog.authority.local] Foundation ${catalogAuthority.foundationVersion} LOCAL schema authority is active; these contract bytes are unpublished.\n`,
     );
   }
 }
@@ -317,7 +332,7 @@ async function planCommand(options) {
     options.repositoryRoot,
   );
   const authorityErrors = [];
-  const { catalog, materializationPolicy } =
+  const { catalog, catalogAuthority, materializationPolicy } =
     await loadPackageMaterializationInputs(repositoryRoot, authorityErrors);
   if (authorityErrors.length > 0) {
     throw new Error([...new Set(authorityErrors)].toSorted().join("\n"));
@@ -395,11 +410,12 @@ async function planCommand(options) {
   const source = `${JSON.stringify(plan, null, 2)}\n`;
   const writeOutcome = await writeExclusive(planAbsolute, source);
   const normalizedPlanPath = relative(repositoryRoot, planAbsolute);
+  reportLocalCatalogAuthority(catalogAuthority);
 
   if (options.json) {
     process.stdout.write(
       `${JSON.stringify(
-        { plan, planPath: normalizedPlanPath, writeOutcome },
+        { catalogAuthority, plan, planPath: normalizedPlanPath, writeOutcome },
         null,
         2,
       )}\n`,
@@ -408,7 +424,7 @@ async function planCommand(options) {
   }
 
   process.stdout.write(
-    `Scaffold Plan: ${plan.planDigest}\nTarget: ${plan.target.id} -> ${plan.target.path}\nOperations: ${plan.operations.length}\nSaved: ${normalizedPlanPath} (${writeOutcome})\nReview the saved Plan, then run architecture:scaffold-package apply --plan ${normalizedPlanPath}.\n`,
+    `Scaffold Plan: ${plan.planDigest}\nCatalog authority: ${catalogAuthority.trustMode} Foundation ${catalogAuthority.foundationVersion}\nTarget: ${plan.target.id} -> ${plan.target.path}\nOperations: ${plan.operations.length}\nSaved: ${normalizedPlanPath} (${writeOutcome})\nReview the saved Plan, then run architecture:scaffold-package apply --plan ${normalizedPlanPath}.\n`,
   );
 }
 
@@ -420,16 +436,26 @@ async function applyCommand(options) {
   const repositoryRoot = await canonicalRepositoryRoot(
     options.repositoryRoot,
   );
-  const pendingPlan = await readPendingCanonicalPlan(repositoryRoot);
-  if (!pendingPlan) {
-    await validateMaterializationPolicy(repositoryRoot);
+  if (await pendingScaffoldingJournalExists(repositoryRoot)) {
+    const result = {
+      diagnostics: [pendingRecoveryDiagnostic],
+      outcome: "recovery-required",
+    };
+    const message = `[${pendingRecoveryDiagnostic.ruleId}] ${pendingRecoveryDiagnostic.message}`;
+    (options.json ? process.stdout : process.stderr).write(
+      options.json ? `${JSON.stringify(result, null, 2)}\n` : `${message}\n`,
+    );
+    process.exitCode = 1;
+    return;
   }
+  const catalogAuthority = await validateMaterializationPolicy(repositoryRoot);
   const plan = await readScaffoldPlanFile(
     repositoryRoot,
     options.planPath,
   );
   await assertCanonicalOrchestratorPlan(repositoryRoot, plan);
   const receipt = await applyFilesystemScaffold(repositoryRoot, plan);
+  reportLocalCatalogAuthority(catalogAuthority);
   process.stdout.write(
     options.json
       ? `${JSON.stringify(receipt, null, 2)}\n`
@@ -440,51 +466,15 @@ async function applyCommand(options) {
   }
 }
 
-async function readPendingCanonicalPlan(repositoryRoot) {
-  const pathname = path.join(repositoryRoot, scaffoldingJournalPath);
-  let metadata;
-  try {
-    metadata = await lstat(pathname);
-  } catch (error) {
-    if (error instanceof Error && error.code === "ENOENT") {
-      return;
-    }
-    throw error;
-  }
-  if (
-    !metadata.isFile() ||
-    metadata.isSymbolicLink() ||
-    metadata.size > maximumScaffoldingJournalBytes
-  ) {
-    throw new Error("Pending scaffolding journal is not a bounded regular file");
-  }
-
-  let journal;
-  try {
-    journal = JSON.parse(await readFile(pathname, "utf8"));
-  } catch (error) {
-    throw new Error("Pending scaffolding journal is not valid JSON", {
-      cause: error,
-    });
-  }
-  if (!journal?.plan) {
-    throw new Error("Pending scaffolding journal does not contain a Plan");
-  }
-  await assertCanonicalOrchestratorPlan(repositoryRoot, journal.plan);
-  return journal.plan;
-}
-
 async function recoverCommand(options) {
   const repositoryRoot = await canonicalRepositoryRoot(
     options.repositoryRoot,
   );
-  const pendingPlan = await readPendingCanonicalPlan(repositoryRoot);
-  if (!pendingPlan) {
-    await validateMaterializationPolicy(repositoryRoot);
-  }
-  const receipt = pendingPlan
-    ? await applyFilesystemScaffold(repositoryRoot, pendingPlan)
-    : await recoverFilesystemScaffold(repositoryRoot);
+  await inspectPendingScaffoldingRecovery(repositoryRoot, {
+    compositionId: defaultCompositionId,
+    configPath: canonicalScaffoldingConfigPath,
+  });
+  const receipt = await recoverFilesystemScaffold(repositoryRoot);
   if (!receipt) {
     process.stdout.write(
       options.json

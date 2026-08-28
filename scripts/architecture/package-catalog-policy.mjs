@@ -6,16 +6,8 @@ const packageNamePattern = /^@agent-teams\/[a-z][a-z0-9-]*$/u;
 const ownerDocumentIdPattern =
   /^(ADR-[0-9]{4}|OD-[0-9]{3}|[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+)$/u;
 const pathSegmentPattern = /^[a-z][a-z0-9-]*$/u;
-const fieldLimits = {
-  id: 160,
-  package_name: 214,
-  owner_document: 160,
-  path: 512,
-  role: 160,
-};
 const maximumDiagnosticValueLength = 240;
 const maximumDiagnosticFields = 12;
-const maximumPackages = 4096;
 const stableRuleIdPattern =
   /^orchestrator\.catalog(?:\.[a-z][a-z0-9-]*)+$/u;
 const diagnosticFieldPattern = /^[a-z][a-z0-9-]*$/u;
@@ -32,10 +24,6 @@ function isUnsafeControl(character) {
     codePoint === 0x2028 ||
     codePoint === 0x2029
   );
-}
-
-function hasUnsafeControl(value) {
-  return [...value].some(isUnsafeControl);
 }
 
 function escapedControl(character) {
@@ -107,27 +95,8 @@ export function catalogDiagnostic(ruleId, fields = {}) {
   return [`[${stableRuleId}]`, ...details].join(" ");
 }
 
-function append(errors, ruleId, fields) {
-  errors.push(catalogDiagnostic(ruleId, fields));
-}
-
-function validateBoundedString(entry, field, index, errors) {
-  const value = entry[field];
-  if (
-    typeof value !== "string" ||
-    value.length === 0 ||
-    value.length > fieldLimits[field] ||
-    hasUnsafeControl(value)
-  ) {
-    append(errors, "orchestrator.catalog.entry.bounded-string", {
-      field,
-      index,
-      maximum: fieldLimits[field],
-      value,
-    });
-    return false;
-  }
-  return true;
+function append(emit, ruleId, fields) {
+  emit(catalogDiagnostic(ruleId, fields));
 }
 
 function hasSecurePathShape(value) {
@@ -172,52 +141,44 @@ function matchesRolePath(role, value) {
   return role === "integration" ? segments.length >= 3 : segments.length === 3;
 }
 
-function validateEntry(entry, index, errors) {
-  if (!plainObject(entry)) {
-    append(errors, "orchestrator.catalog.entry.object", { index, value: entry });
-    return;
-  }
-
-  const validFields = Object.fromEntries(
-    Object.keys(fieldLimits).map((field) => [
-      field,
-      validateBoundedString(entry, field, index, errors),
-    ]),
-  );
-  if (validFields.id && !packageIdPattern.test(entry.id)) {
-    append(errors, "orchestrator.catalog.entry.id", {
+function validateEntry(entry, index, emit) {
+  if (typeof entry?.id === "string" && !packageIdPattern.test(entry.id)) {
+    append(emit, "orchestrator.catalog.entry.id", {
       index,
       value: entry.id,
     });
   }
-  if (validFields.package_name && !packageNamePattern.test(entry.package_name)) {
-    append(errors, "orchestrator.catalog.entry.package-name", {
+  if (
+    typeof entry?.package_name === "string" &&
+    !packageNamePattern.test(entry.package_name)
+  ) {
+    append(emit, "orchestrator.catalog.entry.package-name", {
       index,
       value: entry.package_name,
     });
   }
   if (
-    validFields.owner_document &&
+    typeof entry?.owner_document === "string" &&
     !ownerDocumentIdPattern.test(entry.owner_document)
   ) {
-    append(errors, "orchestrator.catalog.entry.owner-document", {
+    append(emit, "orchestrator.catalog.entry.owner-document", {
       index,
       value: entry.owner_document,
     });
   }
-  if (validFields.path && !hasSecurePathShape(entry.path)) {
-    append(errors, "orchestrator.catalog.entry.secure-path", {
+  if (typeof entry?.path === "string" && !hasSecurePathShape(entry.path)) {
+    append(emit, "orchestrator.catalog.entry.secure-path", {
       index,
       value: entry.path,
     });
     return;
   }
   if (
-    validFields.path &&
-    validFields.role &&
+    typeof entry?.path === "string" &&
+    typeof entry?.role === "string" &&
     !matchesRolePath(entry.role, entry.path)
   ) {
-    append(errors, "orchestrator.catalog.entry.role-path", {
+    append(emit, "orchestrator.catalog.entry.role-path", {
       index,
       path: entry.path,
       role: entry.role,
@@ -225,32 +186,8 @@ function validateEntry(entry, index, errors) {
   }
 }
 
-export function validateOrchestratorPackageCatalog(catalog, errors) {
-  if (!plainObject(catalog)) {
-    append(errors, "orchestrator.catalog.envelope.object", { value: catalog });
-    return false;
+export function validateOrchestratorCatalogPolicy(entries, emit) {
+  for (const [index, entry] of entries.entries()) {
+    validateEntry(entry, index, emit);
   }
-  if (catalog.version !== 1) {
-    append(errors, "orchestrator.catalog.envelope.version", {
-      value: catalog.version,
-    });
-  }
-  if (!Array.isArray(catalog.packages)) {
-    append(errors, "orchestrator.catalog.envelope.packages", {
-      value: catalog.packages,
-    });
-    return false;
-  }
-  if (catalog.packages.length > maximumPackages) {
-    append(errors, "orchestrator.catalog.envelope.package-count", {
-      count: catalog.packages.length,
-      maximum: maximumPackages,
-    });
-  }
-  for (const [index, entry] of catalog.packages
-    .slice(0, maximumPackages)
-    .entries()) {
-    validateEntry(entry, index, errors);
-  }
-  return errors.length === 0;
 }

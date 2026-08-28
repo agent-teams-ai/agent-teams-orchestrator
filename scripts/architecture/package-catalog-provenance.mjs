@@ -23,9 +23,34 @@ function isWithin(parent, candidate) {
   );
 }
 
+function remediationContext(status) {
+  const mode =
+    status?.mode === "LOCAL" || status?.mode === "REGISTRY"
+      ? status.mode
+      : plainObject(status?.linkState)
+        ? "LOCAL"
+        : undefined;
+  const recoveryRequired =
+    plainObject(status?.transaction) && status.transaction.state !== "idle";
+  return {
+    ...(mode === undefined ? {} : { mode }),
+    ...(recoveryRequired ? { recoveryRequired: true } : {}),
+  };
+}
+
+function provenanceFailure(status, ruleId, fields, cause) {
+  return authorityFailure(
+    ruleId,
+    fields,
+    cause,
+    remediationContext(status),
+  );
+}
+
 export function validateInspectionShape(status) {
   if (!plainObject(status)) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.status",
       { detail: "inspection status must be a plain object" },
     );
@@ -39,25 +64,29 @@ export function validateInspectionShape(status) {
         issue.length <= catalogAuthorityInputLimits.issue,
     )
   ) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.issues",
       { detail: "inspection issues must be a bounded string array" },
     );
   }
   if (status.issues.length > 0) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.issues",
       { count: status.issues.length, issue: status.issues[0] },
     );
   }
   if (!boundedAuthorityString(status.mode, catalogAuthorityInputLimits.mode)) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.mode",
       { detail: "inspection mode must be REGISTRY or LOCAL" },
     );
   }
   if (status.mode !== "REGISTRY" && status.mode !== "LOCAL") {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.mode",
       { value: status.mode },
     );
@@ -70,7 +99,8 @@ export function validateInspectionShape(status) {
   ]) {
     const value = status[field];
     if (typeof value !== "string" || value.length === 0) {
-      throw authorityFailure(
+      throw provenanceFailure(
+        status,
         "orchestrator.catalog.provenance.field",
         { field, value },
       );
@@ -79,7 +109,8 @@ export function validateInspectionShape(status) {
       ? boundedAuthorityPath(value)
       : boundedAuthorityString(value, maximumLength);
     if (!valid) {
-      throw authorityFailure(
+      throw provenanceFailure(
+        status,
         "orchestrator.catalog.provenance.field",
         { field, maximum: maximumLength },
       );
@@ -102,7 +133,8 @@ export async function assertStatusRoots(status, roots, declaredVersion) {
       throw new Error("inspection roots resolve beyond the supported path bound");
     }
   } catch (error) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.root",
       { detail: "inspection roots cannot be resolved" },
       error,
@@ -114,7 +146,8 @@ export async function assertStatusRoots(status, roots, declaredVersion) {
     status.dependencySpec !== declaredVersion ||
     status.installedVersion !== declaredVersion
   ) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.binding",
       {
         detail:
@@ -126,13 +159,15 @@ export async function assertStatusRoots(status, roots, declaredVersion) {
 
 export async function assertRegistryStatus(status, roots, declaredVersion) {
   if (status.linkState !== undefined) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.registry-state",
       { detail: "REGISTRY status must not contain local link state" },
     );
   }
   if (!boundedAuthorityPath(status.lockfilePath)) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.registry-root",
       { detail: "registry paths cannot be resolved" },
     );
@@ -147,13 +182,15 @@ export async function assertRegistryStatus(status, roots, declaredVersion) {
       catalogAuthorityInputLimits.integrity,
     )
   ) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.registry-binding",
       { detail: "registry provenance fields are missing or unbounded" },
     );
   }
   if (!/^sha512-[A-Za-z0-9+/]+={0,2}$/u.test(status.registryIntegrity)) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.registry-binding",
       { detail: "registry provenance does not bind the active package" },
     );
@@ -180,7 +217,8 @@ export async function assertRegistryStatus(status, roots, declaredVersion) {
       throw new Error("registry paths resolve beyond the supported path bound");
     }
   } catch (error) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.registry-root",
       { detail: "registry paths cannot be resolved" },
       error,
@@ -193,7 +231,8 @@ export async function assertRegistryStatus(status, roots, declaredVersion) {
     status.lockfilePackageKey !==
       `${engineeringFoundationPackage}@${declaredVersion}`
   ) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.registry-binding",
       { detail: "registry provenance does not bind the active package" },
     );
@@ -220,8 +259,8 @@ function invalidLocalLinkState(linkState, declaredVersion) {
     ) ||
     !["directory", "symbolic-link"].includes(linkState.registryEntryKind) ||
     !boundedAuthorityPath(linkState.registryPackageRoot) ||
-    !boundedAuthorityString(linkState.gitCommit, 40) ||
-    !/^[0-9a-f]{40}$/u.test(linkState.gitCommit) ||
+    !boundedAuthorityString(linkState.gitCommit, 64) ||
+    !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(linkState.gitCommit) ||
     typeof linkState.gitDirty !== "boolean" ||
     !boundedAuthorityString(
       linkState.attachedAt,
@@ -234,7 +273,8 @@ function invalidLocalLinkState(linkState, declaredVersion) {
 export async function assertLocalStatus(status, roots, declaredVersion) {
   const linkState = status.linkState;
   if (invalidLocalLinkState(linkState, declaredVersion)) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.local-state",
       { detail: "LOCAL status must contain explicit valid link state" },
     );
@@ -262,7 +302,8 @@ export async function assertLocalStatus(status, roots, declaredVersion) {
       throw new Error("LOCAL roots resolve beyond the supported path bound");
     }
   } catch (error) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.local-root",
       { detail: "LOCAL roots cannot be resolved" },
       error,
@@ -273,7 +314,8 @@ export async function assertLocalStatus(status, roots, declaredVersion) {
     stateConsumerRoot !== roots.consumerRoot ||
     stateTargetRoot !== roots.packageRoot
   ) {
-    throw authorityFailure(
+    throw provenanceFailure(
+      status,
       "orchestrator.catalog.provenance.local-binding",
       { detail: "LOCAL link state does not bind the active package" },
     );

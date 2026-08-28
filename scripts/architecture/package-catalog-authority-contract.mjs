@@ -41,25 +41,34 @@ export function boundedAuthorityPath(value) {
   );
 }
 
-function installationGuidance() {
-  return "Run pnpm install --frozen-lockfile and pnpm foundation:assert-registry.";
+function remediationGuidance(ruleId, context) {
+  if (context.recoveryRequired === true) {
+    return "Run pnpm foundation:status and complete the reported Foundation recovery before retrying.";
+  }
+  if (context.mode === "LOCAL" || ruleId.includes(".local-")) {
+    return "Run pnpm foundation:status; repair the attached Foundation checkout, or run pnpm foundation:detach to restore REGISTRY mode.";
+  }
+  if (context.mode === "REGISTRY" || ruleId.includes(".registry-")) {
+    return "Run pnpm install --frozen-lockfile and pnpm foundation:assert-registry.";
+  }
+  return "Run pnpm foundation:status and repair the reported Foundation authority state.";
 }
 
 export class CatalogAuthorityError extends Error {
-  constructor(ruleId, fields, options) {
+  constructor(ruleId, fields, options = {}) {
     super(
-      `${catalogDiagnostic(ruleId, fields)} ${installationGuidance()}`,
-      options,
+      `${catalogDiagnostic(ruleId, fields)} ${remediationGuidance(ruleId, options)}`,
+      options.cause === undefined ? undefined : { cause: options.cause },
     );
     this.name = "CatalogAuthorityError";
     this.ruleId = ruleId;
   }
 }
 
-export function authorityFailure(ruleId, fields, cause) {
+export function authorityFailure(ruleId, fields, cause, context = {}) {
   return new CatalogAuthorityError(
     ruleId,
     fields,
-    cause === undefined ? undefined : { cause },
+    { ...context, ...(cause === undefined ? {} : { cause }) },
   );
 }

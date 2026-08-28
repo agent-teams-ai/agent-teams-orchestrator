@@ -3,6 +3,8 @@ import path from "node:path";
 
 import YAML from "yaml";
 
+import { loadResourceBoundedPackageCatalog } from "./package-catalog-resource-guards.mjs";
+
 export const acceptedOwnerStatuses = new Set(["accepted", "active"]);
 
 export function relative(repositoryRoot, filePath) {
@@ -76,11 +78,7 @@ export async function loadDocuments(repositoryRoot) {
 }
 
 export async function loadPackageCatalog(repositoryRoot) {
-  const catalogPath = path.join(
-    repositoryRoot,
-    "architecture/package-catalog.yaml",
-  );
-  return YAML.parse(await readFile(catalogPath, "utf8"));
+  return loadResourceBoundedPackageCatalog(repositoryRoot);
 }
 
 export async function loadPackageMaterializationPolicy(repositoryRoot) {

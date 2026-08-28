@@ -17,8 +17,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import YAML from "yaml";
 
 import {
-  validateOrchestratorPackageCatalog,
+  validateOrchestratorCatalogPolicy,
 } from "./package-catalog-policy.mjs";
+import { catalogResourceBudgets } from "./package-catalog-resource-guards.mjs";
 import {
   engineeringFoundationPackage,
   loadCanonicalPackageCatalogSchema,
@@ -273,32 +274,40 @@ async function createInputFixture(t) {
     ),
   ]);
   const status = await localStatus(root, packageRoot);
+  async function loadSource(catalogSource, schema = canonicalSchema) {
+    await Promise.all([
+      writeFile(
+        path.join(architectureRoot, "package-catalog.yaml"),
+        catalogSource,
+      ),
+      writeFile(schemaPath, `${JSON.stringify(schema, null, 2)}\n`),
+    ]);
+    const errors = [];
+    const inputs = await loadPackageTopologyInputs(root, errors, {
+      loadPackageCatalogSchema: async ({ consumerRoot }) => {
+        assert.equal(consumerRoot, root);
+        return loadCanonicalPackageCatalogSchema({
+          consumerRoot,
+          loadFoundationLocalMode: async () => ({
+            inspectFoundationMode: async (inspectedRoot) => {
+              assert.equal(inspectedRoot, await realpath(root));
+              return status;
+            },
+          }),
+        });
+      },
+    });
+    return { errors, inputs };
+  }
   return {
     root,
+    load: (catalog, schema = canonicalSchema) =>
+      loadSource(YAML.stringify(catalog), schema),
     async validate(catalog, schema = canonicalSchema) {
-      await Promise.all([
-        writeFile(
-          path.join(architectureRoot, "package-catalog.yaml"),
-          YAML.stringify(catalog),
-        ),
-        writeFile(schemaPath, `${JSON.stringify(schema, null, 2)}\n`),
-      ]);
-      const errors = [];
-      await loadPackageTopologyInputs(root, errors, {
-        loadPackageCatalogSchema: async ({ consumerRoot }) => {
-          assert.equal(consumerRoot, root);
-          return loadCanonicalPackageCatalogSchema({
-            consumerRoot,
-            loadFoundationLocalMode: async () => ({
-              inspectFoundationMode: async (inspectedRoot) => {
-                assert.equal(inspectedRoot, await realpath(root));
-                return status;
-              },
-            }),
-          });
-        },
-      });
-      return errors;
+      return (await loadSource(YAML.stringify(catalog), schema)).errors;
+    },
+    async validateSource(catalogSource, schema = canonicalSchema) {
+      return (await loadSource(catalogSource, schema)).errors;
     },
   };
 }
@@ -329,7 +338,7 @@ test("binds the exact registry schema through independent consumer-root resoluti
   assert.ok(authority.schemaPath.startsWith(`${packageRoot}${path.sep}`));
 });
 
-test("admits explicit guarded LOCAL schema development without relabeling trust", async (t) => {
+test("unit-validates post-inspection LOCAL status without relabeling trust", async (t) => {
   const fixture = await createAuthorityFixture(t, { mode: "LOCAL" });
   await writeFile(
     fixture.schemaPath,
@@ -398,6 +407,35 @@ test("fails closed for table-driven provenance inspection cases", async (t) => {
       );
     });
   }
+});
+
+test("uses mode- and recovery-aware authority remediation", async (t) => {
+  const localFixture = await createAuthorityFixture(t, { mode: "LOCAL" });
+  await writeFile(
+    localFixture.schemaPath,
+    `${JSON.stringify({ $id: "wrong" })}\n`,
+  );
+  await assert.rejects(localFixture.load(), (error) => {
+    assert.equal(
+      error.message,
+      "[orchestrator.catalog.authority.schema-identity] id=\"wrong\" type=\"object\" Run pnpm foundation:status; repair the attached Foundation checkout, or run pnpm foundation:detach to restore REGISTRY mode.",
+    );
+    return true;
+  });
+
+  const recoveryFixture = await createAuthorityFixture(t);
+  recoveryFixture.status = {
+    ...recoveryFixture.status,
+    issues: ["A Foundation transaction requires recovery."],
+    transaction: { state: "pending" },
+  };
+  await assert.rejects(recoveryFixture.load(), (error) => {
+    assert.equal(
+      error.message,
+      "[orchestrator.catalog.provenance.issues] count=\"1\" issue=\"A Foundation transaction requires recovery.\" Run pnpm foundation:status and complete the reported Foundation recovery before retrying.",
+    );
+    return true;
+  });
 });
 
 test("rejects independent identity and provenance mismatches", async (t) => {
@@ -469,8 +507,10 @@ test("rejects unreadable, escaping, malformed, and tampered schema exports", asy
   const cases = [
     ["outside package root", "outside", /schema-containment/u],
     ["escaping symlink", "symlink", /schema-containment/u],
+    ["in-root schema symlink", "in-root-symlink", /authority\.read/u],
     ["unreadable schema", "missing", /authority\.read/u],
     ["invalid JSON", "json", /authority\.schema-json/u],
+    ["oversized schema", "oversized", /authority\.read/u],
     ["boolean schema", "boolean", /authority\.schema-identity/u],
     ["wrong schema id", "id", /authority\.schema-identity/u],
     ["tampered in-root registry bytes", "tamper", /registry-digest/u],
@@ -516,8 +556,15 @@ test("rejects unreadable, escaping, malformed, and tampered schema exports", asy
       } else if (mutation === "missing") {
         await rm(fixture.schemaPath);
         await mkdir(fixture.schemaPath);
+      } else if (mutation === "in-root-symlink") {
+        const schemaTarget = path.join(fixture.packageRoot, "schema-target.json");
+        await writeFile(schemaTarget, canonicalSchemaSource);
+        await rm(fixture.schemaPath);
+        await symlink(schemaTarget, fixture.schemaPath, "file");
       } else if (mutation === "json") {
         await writeFile(fixture.schemaPath, "{not json");
+      } else if (mutation === "oversized") {
+        await writeFile(fixture.schemaPath, "x".repeat(1024 * 1024 + 1));
       } else if (mutation === "boolean") {
         await writeFile(fixture.schemaPath, "true\n");
       } else if (mutation === "id") {
@@ -533,7 +580,12 @@ test("rejects unreadable, escaping, malformed, and tampered schema exports", asy
 test("uses the production topology-input path for shared schema and policy", async (t) => {
   const fixture = await createInputFixture(t);
 
-  assert.deepEqual(await fixture.validate(catalogWith(validEntry())), []);
+  const admitted = await fixture.load(catalogWith(validEntry()));
+  assert.deepEqual(admitted.errors, []);
+  assert.deepEqual(admitted.inputs.catalogAuthority, {
+    foundationVersion,
+    trustMode: "LOCAL",
+  });
 
   const schemaOnlyErrors = await fixture.validate(
     catalogWith({ ...validEntry(), unexpected: true }),
@@ -606,7 +658,62 @@ test("uses the production topology-input path for shared schema and policy", asy
   );
 });
 
-test("enforces the immutable security envelope and every role path grammar", () => {
+test("enforces operational catalog work and diagnostic budgets", async (t) => {
+  const fixture = await createInputFixture(t);
+  const byteErrors = await fixture.validateSource(
+    "x".repeat(catalogResourceBudgets.bytes + 1),
+  );
+  assert.ok(
+    byteErrors.some((error) =>
+      error.includes("orchestrator.catalog.resource.bytes"),
+    ),
+    byteErrors.join("\n"),
+  );
+  assert.equal(
+    byteErrors.some((error) =>
+      error.includes("orchestrator.catalog.schema.violation"),
+    ),
+    false,
+  );
+
+  const entryBudgetErrors = await fixture.validate({
+    version: 1,
+    packages: Array.from(
+      { length: catalogResourceBudgets.validationEntries + 1 },
+      () => null,
+    ),
+  });
+  assert.ok(
+    entryBudgetErrors.some((error) =>
+      error.includes("orchestrator.catalog.resource.validation-entries"),
+    ),
+    entryBudgetErrors.join("\n"),
+  );
+  assert.equal(
+    entryBudgetErrors.some((error) =>
+      error.includes("orchestrator.catalog.schema.violation"),
+    ),
+    false,
+  );
+
+  const diagnosticErrors = await fixture.validate({
+    version: 1,
+    packages: Array.from({ length: 100 }, (_, index) =>
+      validEntry({
+        id: `platform/bad-${index}`,
+        package_name: `@agent-teams/bad-${index}`,
+        path: `packages/platform/bad_${index}`,
+      }),
+    ),
+  });
+  assert.equal(diagnosticErrors.length, catalogResourceBudgets.diagnostics);
+  assert.match(
+    diagnosticErrors.at(-1),
+    /orchestrator\.catalog\.resource\.diagnostics-omitted/u,
+  );
+});
+
+test("enforces only Orchestrator taxonomy and role/path policy", () => {
   const accepted = [
     validEntry({
       id: "app.cli",
@@ -641,50 +748,38 @@ test("enforces the immutable security envelope and every role path grammar", () 
     }),
   ];
   const acceptedErrors = [];
-  validateOrchestratorPackageCatalog(
-    { version: 1, packages: accepted },
-    acceptedErrors,
+  validateOrchestratorCatalogPolicy(accepted, (error) =>
+    acceptedErrors.push(error),
   );
   assert.deepEqual(acceptedErrors, []);
 
   const cases = [
-    ["non-object envelope", []],
-    ["non-array packages", { version: 1, packages: {} }],
-    ["version zero", { version: 0, packages: [] }],
-    ["primitive entry", { version: 1, packages: [0, "entry", null, []] }],
-    ["parent segment", catalogWith(validEntry({ role: "app", path: "apps/.." }))],
-    ["uppercase", catalogWith(validEntry({ path: "packages/platform/Upper" }))],
-    ["underscore", catalogWith(validEntry({ path: "packages/platform/under_score" }))],
-    ["dot", catalogWith(validEntry({ path: "packages/platform/dot.name" }))],
-    ["at sign", catalogWith(validEntry({ path: "packages/platform/@scope" }))],
-    ["backslash", catalogWith(validEntry({ path: "packages\\platform\\bad" }))],
-    ["absolute", catalogWith(validEntry({ path: "/packages/platform/bad" }))],
+    ["consumer ID taxonomy", validEntry({ id: "platform/schema-regression" })],
+    ["npm namespace", validEntry({ package_name: "schema-regression" })],
+    ["owner document", validEntry({ owner_document: "Owner" })],
+    ["uppercase path", validEntry({ path: "packages/platform/Upper" })],
+    ["underscore path", validEntry({ path: "packages/platform/under_score" })],
+    ["dot path", validEntry({ path: "packages/platform/dot.name" })],
+    ["at-sign path", validEntry({ path: "packages/platform/@scope" })],
+    ["role/path mapping", validEntry({ path: "packages/platform/nested/path" })],
   ];
-  for (const [label, catalog] of cases) {
+  for (const [label, entry] of cases) {
     const errors = [];
-    validateOrchestratorPackageCatalog(catalog, errors);
+    validateOrchestratorCatalogPolicy([entry], (error) => errors.push(error));
     assert.ok(errors.length > 0, `${label} unexpectedly passed`);
-    if (label === "primitive entry") {
-      assert.equal(
-        errors.filter((error) =>
-          error.includes("orchestrator.catalog.entry.object"),
-        ).length,
-        4,
-      );
-    }
   }
 });
 
 test("bounds and sanitizes every untrusted catalog diagnostic", () => {
   const errors = [];
-  validateOrchestratorPackageCatalog(
-    catalogWith(
+  validateOrchestratorCatalogPolicy(
+    [
       validEntry({
         id: `platform.bad\n\u001b[31m${"x".repeat(5000)}`,
         path: `packages/platform/bad\r\n${"y".repeat(5000)}`,
       }),
-    ),
-    errors,
+    ],
+    (error) => errors.push(error),
   );
   assert.ok(errors.length > 0);
   for (const error of errors) {

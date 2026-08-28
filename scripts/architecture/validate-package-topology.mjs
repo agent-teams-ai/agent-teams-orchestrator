@@ -364,6 +364,7 @@ async function main() {
   const errors = [];
   const {
     catalog,
+    catalogAuthority,
     dependencyPolicy,
     documents,
     materializationPolicy,
@@ -473,6 +474,12 @@ async function main() {
   if (errors.length > 0) {
     reportErrors(errors);
     return;
+  }
+
+  if (catalogAuthority?.trustMode === "LOCAL") {
+    console.warn(
+      `[orchestrator.catalog.authority.local] Foundation ${catalogAuthority.foundationVersion} LOCAL schema authority is active; these contract bytes are unpublished.`,
+    );
   }
 
   console.log(

@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import YAML from "yaml";
 
-import { pathExists } from "./scaffolding-transaction-fixture.mjs";
+import {
+  journalPath,
+  pathExists,
+} from "./scaffolding-transaction-fixture.mjs";
 
 export function ownerType(entry) {
   return entry.role === "bounded-context" ? "bounded-context" : "architecture";
@@ -65,23 +68,53 @@ export async function verifyCatalogAuthorityAtPlanApplyBoundary({
     "architecture/package-catalog.yaml",
   );
   const applyCatalog = YAML.parse(await readFile(applyCatalogPath, "utf8"));
-  applyCatalog.packages.push({
-    id: "opaque",
-    role: "opaque",
-    path: "somewhere",
-    package_name: "package",
-    owner_document: "Owner",
-  });
+  applyCatalog.packages[0].unexpected = true;
   await writeFile(applyCatalogPath, YAML.stringify(applyCatalog));
-  requireFailure(
-    "Orchestrator policy violation before Apply",
+  const schemaOnlyApply = requireFailure(
+    "schema-only catalog violation before Apply",
     runWrapper(applyRoot, [
       "apply",
       "--plan",
       planPath(applyEntry.id),
       "--json",
     ]),
-    /orchestrator\.catalog\.entry\.(?:id|role-path)/u,
+    /orchestrator\.catalog\.schema\.violation.*additionalProperties/u,
+  );
+  assert.doesNotMatch(
+    `${schemaOnlyApply.stdout}\n${schemaOnlyApply.stderr}`,
+    /authority-stale/u,
   );
   assert.equal(await pathExists(path.join(applyRoot, applyEntry.path)), false);
+  assert.equal(await pathExists(journalPath(applyRoot)), false);
+
+  const missingSchemaEntry = {
+    id: "platform.schema-missing",
+    role: "platform",
+    path: "packages/platform/schema-missing",
+    package_name: "@agent-teams/schema-missing",
+    owner_document: "architecture.schema-missing",
+  };
+  const missingSchemaRoot = await createFixture([missingSchemaEntry]);
+  planTarget(missingSchemaRoot, missingSchemaEntry.id);
+  await rm(
+    path.join(
+      missingSchemaRoot,
+      "node_modules/@agent-teams/engineering-foundation/schemas/scaffold-target-catalog/v1.schema.json",
+    ),
+  );
+  requireFailure(
+    "missing Foundation schema export before Apply",
+    runWrapper(missingSchemaRoot, [
+      "apply",
+      "--plan",
+      planPath(missingSchemaEntry.id),
+      "--json",
+    ]),
+    /orchestrator\.catalog\.authority\.(?:exports|realpath)/u,
+  );
+  assert.equal(
+    await pathExists(path.join(missingSchemaRoot, missingSchemaEntry.path)),
+    false,
+  );
+  assert.equal(await pathExists(journalPath(missingSchemaRoot)), false);
 }

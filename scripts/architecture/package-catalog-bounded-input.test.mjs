@@ -95,7 +95,7 @@ async function createFixture(t, mode = "REGISTRY") {
       registryEntryKind: "directory",
       registryPackageRoot: installedEntry,
       packageVersion: foundationVersion,
-      gitCommit: "a".repeat(40),
+      gitCommit: "a".repeat(64),
       gitDirty: false,
       attachedAt: "2026-08-28T00:00:00.000Z",
     },
@@ -147,7 +147,7 @@ async function assertBoundedRejection(promise, expected) {
   });
 }
 
-test("rejects oversized registry provenance before path and pattern operations", async (t) => {
+test("unit-bounds registry status after Foundation inspection", async (t) => {
   const fixture = await createFixture(t);
   const baseline = fixture.status;
   const cases = [
@@ -169,7 +169,7 @@ test("rejects oversized registry provenance before path and pattern operations",
   }
 });
 
-test("rejects oversized LOCAL path and version fields before filesystem use", async (t) => {
+test("unit-bounds LOCAL status before adapter filesystem use", async (t) => {
   const fixture = await createFixture(t, "LOCAL");
   const baseline = fixture.status;
   const fields = [
