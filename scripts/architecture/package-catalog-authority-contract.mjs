@@ -8,10 +8,29 @@ export const packageCatalogSchemaSpecifier =
   `${engineeringFoundationPackage}/schemas/scaffold-target-catalog/v1.schema.json`;
 export const packageManifestSpecifier =
   `${engineeringFoundationPackage}/package.json`;
-export const trustedRegistrySchemaDigests = Object.freeze({
-  "0.19.0":
-    "sha256:92ad50dc438f438d8ae8ec328d28d8b03c9fb3d9235e0144fb740386dd3e3b60",
-});
+const trustedRegistrySchemaDigestRecords = Object.freeze([
+  Object.freeze({
+    digest:
+      "sha256:92ad50dc438f438d8ae8ec328d28d8b03c9fb3d9235e0144fb740386dd3e3b60",
+    status: "active",
+    version: "0.20.0",
+  }),
+  Object.freeze({
+    digest:
+      "sha256:92ad50dc438f438d8ae8ec328d28d8b03c9fb3d9235e0144fb740386dd3e3b60",
+    status: "compatibility",
+    version: "0.19.0",
+  }),
+]);
+
+export const trustedRegistrySchemaDigests = Object.freeze(
+  Object.fromEntries(
+    trustedRegistrySchemaDigestRecords.map(({ digest, version }) => [
+      version,
+      digest,
+    ]),
+  ),
+);
 
 export const catalogAuthorityInputLimits = Object.freeze({
   instant: 100,
@@ -39,6 +58,26 @@ export function boundedAuthorityPath(value) {
     boundedAuthorityString(value, catalogAuthorityInputLimits.path) &&
     !value.includes("\0")
   );
+}
+
+export function trustedRegistrySchemaDigestFor(declaredVersion) {
+  const matches = trustedRegistrySchemaDigestRecords.filter(
+    ({ version }) => version === declaredVersion,
+  );
+  if (matches.length !== 1) {
+    throw authorityFailure(
+      "orchestrator.catalog.authority.trusted-digest-set",
+      {
+        count: matches.length,
+        detail:
+          "declared exact Foundation version must have exactly one trusted schema digest",
+        version: declaredVersion,
+      },
+      undefined,
+      { mode: "REGISTRY" },
+    );
+  }
+  return matches[0].digest;
 }
 
 function remediationGuidance(ruleId, context) {

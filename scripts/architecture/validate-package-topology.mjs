@@ -8,6 +8,7 @@ import {
   relative,
   walk,
 } from "./package-catalog-lib.mjs";
+import { validateCatalogSemantics } from "./package-catalog-semantics.mjs";
 import { validatePackageMaterializationPolicy } from "./package-materialization-validation.mjs";
 import { loadPackageTopologyInputs } from "./package-topology-inputs.mjs";
 import {
@@ -59,71 +60,6 @@ function parseArguments(argv) {
     throw new Error("--root requires a path");
   }
   return path.resolve(root);
-}
-
-function validateCatalogSemantics(catalog, documents, errors) {
-  const byId = new Map();
-  const byPath = new Map();
-  const byPackageName = new Map();
-
-  for (const entry of catalog.packages ?? []) {
-    if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
-      continue;
-    }
-    for (const [field, value, index] of [
-      ["id", entry.id, byId],
-      ["path", entry.path, byPath],
-      ["package_name", entry.package_name, byPackageName],
-    ]) {
-      if (index.has(value)) {
-        errors.push(
-          `architecture/package-catalog.yaml: duplicate ${field} ${value}`,
-        );
-      } else {
-        index.set(value, entry);
-      }
-    }
-
-    const owner = documents.get(entry.owner_document);
-    if (!owner) {
-      errors.push(
-        `architecture/package-catalog.yaml: ${entry.id} references unknown owner document ${entry.owner_document}`,
-      );
-      continue;
-    }
-
-    if (
-      entry.role === "bounded-context" &&
-      owner.metadata.type !== "bounded-context"
-    ) {
-      errors.push(
-        `architecture/package-catalog.yaml: ${entry.id} must be owned by a bounded-context dossier`,
-      );
-    }
-
-  }
-
-  const catalogPaths = [...byPath.keys()].toSorted();
-  for (let leftIndex = 0; leftIndex < catalogPaths.length; leftIndex += 1) {
-    for (
-      let rightIndex = leftIndex + 1;
-      rightIndex < catalogPaths.length;
-      rightIndex += 1
-    ) {
-      const left = catalogPaths[leftIndex];
-      const right = catalogPaths[rightIndex];
-      if (right.startsWith(`${left}/`)) {
-        errors.push(
-          `architecture/package-catalog.yaml: package paths overlap: ${left} and ${right}`,
-        );
-      }
-    }
-  }
-
-  return {
-    byPackageName,
-    byPath,
-  };
 }
 
 function validateLibraryManifest(entry, manifest, errors) {
@@ -381,6 +317,10 @@ async function main() {
     documents,
     errors,
   );
+  if (errors.length > 0) {
+    reportErrors(errors);
+    return;
+  }
   const materializationByPackageId = validatePackageMaterializationPolicy(
     materializationPolicy && Array.isArray(materializationPolicy.entries)
       ? materializationPolicy

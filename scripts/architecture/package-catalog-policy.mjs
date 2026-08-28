@@ -96,7 +96,7 @@ export function catalogDiagnostic(ruleId, fields = {}) {
 }
 
 function append(emit, ruleId, fields) {
-  emit(catalogDiagnostic(ruleId, fields));
+  return emit(catalogDiagnostic(ruleId, fields)) !== false;
 }
 
 function hasSecurePathShape(value) {
@@ -143,51 +143,61 @@ function matchesRolePath(role, value) {
 
 function validateEntry(entry, index, emit) {
   if (typeof entry?.id === "string" && !packageIdPattern.test(entry.id)) {
-    append(emit, "orchestrator.catalog.entry.id", {
+    if (!append(emit, "orchestrator.catalog.entry.id", {
       index,
       value: entry.id,
-    });
+    })) {
+      return false;
+    }
   }
   if (
     typeof entry?.package_name === "string" &&
     !packageNamePattern.test(entry.package_name)
   ) {
-    append(emit, "orchestrator.catalog.entry.package-name", {
+    if (!append(emit, "orchestrator.catalog.entry.package-name", {
       index,
       value: entry.package_name,
-    });
+    })) {
+      return false;
+    }
   }
   if (
     typeof entry?.owner_document === "string" &&
     !ownerDocumentIdPattern.test(entry.owner_document)
   ) {
-    append(emit, "orchestrator.catalog.entry.owner-document", {
+    if (!append(emit, "orchestrator.catalog.entry.owner-document", {
       index,
       value: entry.owner_document,
-    });
+    })) {
+      return false;
+    }
   }
   if (typeof entry?.path === "string" && !hasSecurePathShape(entry.path)) {
-    append(emit, "orchestrator.catalog.entry.secure-path", {
+    return append(emit, "orchestrator.catalog.entry.secure-path", {
       index,
       value: entry.path,
     });
-    return;
   }
   if (
     typeof entry?.path === "string" &&
     typeof entry?.role === "string" &&
     !matchesRolePath(entry.role, entry.path)
   ) {
-    append(emit, "orchestrator.catalog.entry.role-path", {
+    if (!append(emit, "orchestrator.catalog.entry.role-path", {
       index,
       path: entry.path,
       role: entry.role,
-    });
+    })) {
+      return false;
+    }
   }
+  return true;
 }
 
 export function validateOrchestratorCatalogPolicy(entries, emit) {
   for (const [index, entry] of entries.entries()) {
-    validateEntry(entry, index, emit);
+    if (!validateEntry(entry, index, emit)) {
+      return;
+    }
   }
 }

@@ -89,18 +89,28 @@ export function catalogWithinValidationBudget(catalog, append) {
 export function createCatalogDiagnosticCollector(errors) {
   const diagnostics = [];
   let omitted = 0;
+  let flushed = false;
   return {
     append(diagnostic) {
       if (omitted > 0) {
-        omitted += 1;
+        return false;
       } else if (diagnostics.length < catalogResourceBudgets.diagnostics) {
         diagnostics.push(diagnostic);
+        return true;
       } else {
         diagnostics.pop();
         omitted = 2;
+        return false;
       }
     },
+    get exhausted() {
+      return omitted > 0;
+    },
     flush() {
+      if (flushed) {
+        return;
+      }
+      flushed = true;
       if (omitted > 0) {
         diagnostics.push(
           catalogDiagnostic("orchestrator.catalog.resource.diagnostics-omitted", {

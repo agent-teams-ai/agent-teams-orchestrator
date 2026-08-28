@@ -16,7 +16,7 @@ const foundationFixtureManifestSource = `${JSON.stringify(
     name: "package-topology-fixture",
     private: true,
     packageManager: "pnpm@11.18.0",
-    devDependencies: { [foundationPackageName]: "0.19.0" },
+    devDependencies: { [foundationPackageName]: "0.20.0" },
   },
   null,
   2,
@@ -26,14 +26,14 @@ importers:
   .:
     devDependencies:
       '@agent-teams/engineering-foundation':
-        specifier: 0.19.0
-        version: 0.19.0(supports-color@7.2.0)
+        specifier: 0.20.0
+        version: 0.20.0(supports-color@7.2.0)
 packages:
-  '@agent-teams/engineering-foundation@0.19.0':
+  '@agent-teams/engineering-foundation@0.20.0':
     resolution:
-      integrity: sha512-CeIWttZYT74jgwryA+326d21xNapep8NFQkxN9I+zAoyebEZk+apVvIndx3WC8NtJZYvzuKouEh1OB+vJPadxA==
+      integrity: sha512-YGyNyfpxyElMUALIho+pi+xM9XHXWWEV5hBBEzcysaCO1Dgz5/3GuUjQ6fQM2sCjfPo7Pd6OoFJOSKiHaqe5ZA==
 snapshots:
-  '@agent-teams/engineering-foundation@0.19.0(supports-color@7.2.0)': {}
+  '@agent-teams/engineering-foundation@0.20.0(supports-color@7.2.0)': {}
 `;
 
 export function qualifiedLibraryScripts() {
@@ -181,9 +181,16 @@ export async function writeFoundationRegistryFixture(root) {
     mkdir(virtualStoreRoot, { recursive: true }),
   ]);
   await Promise.all([
-    copyFile(
-      path.join(foundationRoot, "package.json"),
+    writeFile(
       path.join(fixtureFoundationRoot, "package.json"),
+      `${JSON.stringify({
+        name: foundationPackageName,
+        version: "0.20.0",
+        exports: {
+          "./package.json": "./package.json",
+          "./schemas/*": "./schemas/*",
+        },
+      })}\n`,
     ),
     copyFile(
       path.join(

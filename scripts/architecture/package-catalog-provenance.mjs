@@ -1,4 +1,5 @@
-import { realpath } from "node:fs/promises";
+import { constants } from "node:fs";
+import { lstat, open, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 
 import {
@@ -23,13 +24,16 @@ function isWithin(parent, candidate) {
   );
 }
 
+function sameIdentity(left, right) {
+  return left.dev === right.dev && left.ino === right.ino;
+}
+
 function remediationContext(status) {
-  const mode =
-    status?.mode === "LOCAL" || status?.mode === "REGISTRY"
-      ? status.mode
-      : plainObject(status?.linkState)
-        ? "LOCAL"
-        : undefined;
+  const mode = plainObject(status?.linkState)
+    ? "LOCAL"
+    : status?.mode === "REGISTRY"
+      ? "REGISTRY"
+      : undefined;
   const recoveryRequired =
     plainObject(status?.transaction) && status.transaction.state !== "idle";
   return {
@@ -39,12 +43,72 @@ function remediationContext(status) {
 }
 
 function provenanceFailure(status, ruleId, fields, cause) {
-  return authorityFailure(
-    ruleId,
-    fields,
-    cause,
-    remediationContext(status),
+  return authorityFailure(ruleId, fields, cause, remediationContext(status));
+}
+
+function directoryOpenFlags() {
+  if (!Number.isInteger(constants.O_DIRECTORY) || constants.O_DIRECTORY === 0) {
+    return undefined;
+  }
+  return (
+    constants.O_RDONLY |
+    constants.O_DIRECTORY |
+    (constants.O_NOFOLLOW ?? 0) |
+    (constants.O_NONBLOCK ?? 0)
   );
+}
+
+async function inspectPhysicalDirectory(requestedPath, allowSymbolicLink) {
+  const entryBefore = await lstat(requestedPath, { bigint: true });
+  const entryKind = entryBefore.isSymbolicLink()
+    ? "symbolic-link"
+    : entryBefore.isDirectory()
+      ? "directory"
+      : "other";
+  if (
+    entryKind === "other" ||
+    (entryKind === "symbolic-link" && !allowSymbolicLink)
+  ) {
+    throw new Error("physical authority path is not an allowed directory entry");
+  }
+  const canonicalPath = await realpath(requestedPath);
+  const targetBefore = await stat(canonicalPath, { bigint: true });
+  if (!targetBefore.isDirectory()) {
+    throw new Error("physical authority target is not a directory");
+  }
+
+  const flags = directoryOpenFlags();
+  if (flags !== undefined) {
+    const handle = await open(canonicalPath, flags);
+    try {
+      const descriptor = await handle.stat({ bigint: true });
+      if (!descriptor.isDirectory() || !sameIdentity(descriptor, targetBefore)) {
+        throw new Error("physical authority descriptor changed identity");
+      }
+    } finally {
+      await handle.close();
+    }
+  }
+
+  const [entryAfter, currentPath] = await Promise.all([
+    lstat(requestedPath, { bigint: true }),
+    realpath(requestedPath),
+  ]);
+  const targetAfter = await stat(currentPath, { bigint: true });
+  const currentKind = entryAfter.isSymbolicLink()
+    ? "symbolic-link"
+    : entryAfter.isDirectory()
+      ? "directory"
+      : "other";
+  if (
+    currentKind !== entryKind ||
+    currentPath !== canonicalPath ||
+    !sameIdentity(entryBefore, entryAfter) ||
+    !sameIdentity(targetBefore, targetAfter)
+  ) {
+    throw new Error("physical authority path changed during inspection");
+  }
+  return { canonicalPath, entryKind, targetIdentity: targetBefore };
 }
 
 export function validateInspectionShape(status) {
@@ -118,127 +182,6 @@ export function validateInspectionShape(status) {
   }
 }
 
-export async function assertStatusRoots(status, roots, declaredVersion) {
-  let reportedConsumerRoot;
-  let reportedPackageRoot;
-  try {
-    [reportedConsumerRoot, reportedPackageRoot] = await Promise.all([
-      realpath(status.consumerRoot),
-      realpath(status.installedPackageRoot),
-    ]);
-    if (
-      !boundedAuthorityPath(reportedConsumerRoot) ||
-      !boundedAuthorityPath(reportedPackageRoot)
-    ) {
-      throw new Error("inspection roots resolve beyond the supported path bound");
-    }
-  } catch (error) {
-    throw provenanceFailure(
-      status,
-      "orchestrator.catalog.provenance.root",
-      { detail: "inspection roots cannot be resolved" },
-      error,
-    );
-  }
-  if (
-    reportedConsumerRoot !== roots.consumerRoot ||
-    reportedPackageRoot !== roots.packageRoot ||
-    status.dependencySpec !== declaredVersion ||
-    status.installedVersion !== declaredVersion
-  ) {
-    throw provenanceFailure(
-      status,
-      "orchestrator.catalog.provenance.binding",
-      {
-        detail:
-          "inspection status does not match independently resolved roots and version",
-      },
-    );
-  }
-}
-
-export async function assertRegistryStatus(status, roots, declaredVersion) {
-  if (status.linkState !== undefined) {
-    throw provenanceFailure(
-      status,
-      "orchestrator.catalog.provenance.registry-state",
-      { detail: "REGISTRY status must not contain local link state" },
-    );
-  }
-  if (!boundedAuthorityPath(status.lockfilePath)) {
-    throw provenanceFailure(
-      status,
-      "orchestrator.catalog.provenance.registry-root",
-      { detail: "registry paths cannot be resolved" },
-    );
-  }
-  if (
-    !boundedAuthorityString(
-      status.lockfilePackageKey,
-      catalogAuthorityInputLimits.packageKey,
-    ) ||
-    !boundedAuthorityString(
-      status.registryIntegrity,
-      catalogAuthorityInputLimits.integrity,
-    )
-  ) {
-    throw provenanceFailure(
-      status,
-      "orchestrator.catalog.provenance.registry-binding",
-      { detail: "registry provenance fields are missing or unbounded" },
-    );
-  }
-  if (!/^sha512-[A-Za-z0-9+/]+={0,2}$/u.test(status.registryIntegrity)) {
-    throw provenanceFailure(
-      status,
-      "orchestrator.catalog.provenance.registry-binding",
-      { detail: "registry provenance does not bind the active package" },
-    );
-  }
-  const expectedPackageEntry = path.join(
-    roots.consumerRoot,
-    "node_modules",
-    ...engineeringFoundationPackage.split("/"),
-  );
-  let installedEntry;
-  let nodeModulesRoot;
-  let lockfilePath;
-  try {
-    [installedEntry, nodeModulesRoot, lockfilePath] = await Promise.all([
-      realpath(expectedPackageEntry),
-      realpath(path.join(roots.consumerRoot, "node_modules")),
-      realpath(status.lockfilePath),
-    ]);
-    if (
-      !boundedAuthorityPath(installedEntry) ||
-      !boundedAuthorityPath(nodeModulesRoot) ||
-      !boundedAuthorityPath(lockfilePath)
-    ) {
-      throw new Error("registry paths resolve beyond the supported path bound");
-    }
-  } catch (error) {
-    throw provenanceFailure(
-      status,
-      "orchestrator.catalog.provenance.registry-root",
-      { detail: "registry paths cannot be resolved" },
-      error,
-    );
-  }
-  if (
-    installedEntry !== roots.packageRoot ||
-    !isWithin(nodeModulesRoot, roots.packageRoot) ||
-    lockfilePath !== path.join(roots.consumerRoot, "pnpm-lock.yaml") ||
-    status.lockfilePackageKey !==
-      `${engineeringFoundationPackage}@${declaredVersion}`
-  ) {
-    throw provenanceFailure(
-      status,
-      "orchestrator.catalog.provenance.registry-binding",
-      { detail: "registry provenance does not bind the active package" },
-    );
-  }
-}
-
 function invalidLocalLinkState(linkState, declaredVersion) {
   return (
     !plainObject(linkState) ||
@@ -270,54 +213,224 @@ function invalidLocalLinkState(linkState, declaredVersion) {
   );
 }
 
-export async function assertLocalStatus(status, roots, declaredVersion) {
+async function inspectCommonPhysicalBinding(
+  status,
+  consumerRoot,
+  declaredVersion,
+) {
+  const activePath = path.join(
+    consumerRoot,
+    "node_modules",
+    ...engineeringFoundationPackage.split("/"),
+  );
+  try {
+    const [consumer, active, reportedConsumer, reportedPackage] =
+      await Promise.all([
+        inspectPhysicalDirectory(consumerRoot, false),
+        inspectPhysicalDirectory(activePath, true),
+        inspectPhysicalDirectory(status.consumerRoot, false),
+        inspectPhysicalDirectory(status.installedPackageRoot, true),
+      ]);
+    if (
+      consumer.canonicalPath !== consumerRoot ||
+      reportedConsumer.canonicalPath !== consumerRoot ||
+      reportedPackage.canonicalPath !== active.canonicalPath ||
+      status.dependencySpec !== declaredVersion ||
+      status.installedVersion !== declaredVersion
+    ) {
+      throw new Error("inspection status does not match physical binding");
+    }
+    return { activePath, active, consumer };
+  } catch (error) {
+    throw provenanceFailure(
+      status,
+      "orchestrator.catalog.provenance.binding",
+      {
+        detail:
+          "inspection status does not match descriptor-checked roots and version",
+      },
+      error,
+    );
+  }
+}
+
+async function inspectLocalPhysicalBinding(status, common, consumerRoot) {
   const linkState = status.linkState;
-  if (invalidLocalLinkState(linkState, declaredVersion)) {
+  if (invalidLocalLinkState(linkState, status.dependencySpec)) {
     throw provenanceFailure(
       status,
       "orchestrator.catalog.provenance.local-state",
       { detail: "LOCAL status must contain explicit valid link state" },
     );
   }
-  let linkedEntry;
-  let stateConsumerRoot;
-  let stateTargetRoot;
+  const stateRoot = path.join(consumerRoot, ".agent-teams-local");
+  const expectedBackupPath = path.join(
+    stateRoot,
+    "foundation-registry-backup",
+  );
+  const nodeModulesRoot = path.join(consumerRoot, "node_modules");
   try {
-    [linkedEntry, stateConsumerRoot, stateTargetRoot] = await Promise.all([
-      realpath(
-        path.join(
-          roots.consumerRoot,
-          "node_modules",
-          ...engineeringFoundationPackage.split("/"),
-        ),
-      ),
-      realpath(linkState.consumerRoot),
-      realpath(linkState.targetPackageRoot),
-    ]);
+    const [stateConsumer, stateTarget, backup, nodeModules, stateDirectory] =
+      await Promise.all([
+        inspectPhysicalDirectory(linkState.consumerRoot, false),
+        inspectPhysicalDirectory(linkState.targetPackageRoot, false),
+        inspectPhysicalDirectory(linkState.registryBackupPath, true),
+        inspectPhysicalDirectory(nodeModulesRoot, false),
+        inspectPhysicalDirectory(stateRoot, false),
+      ]);
     if (
-      !boundedAuthorityPath(linkedEntry) ||
-      !boundedAuthorityPath(stateConsumerRoot) ||
-      !boundedAuthorityPath(stateTargetRoot)
+      common.active.entryKind !== "symbolic-link" ||
+      stateConsumer.canonicalPath !== consumerRoot ||
+      stateTarget.canonicalPath !== common.active.canonicalPath ||
+      path.resolve(linkState.consumerRoot) !== consumerRoot ||
+      path.resolve(linkState.targetPackageRoot) !== stateTarget.canonicalPath ||
+      path.resolve(linkState.registryBackupPath) !== expectedBackupPath ||
+      stateDirectory.canonicalPath !== stateRoot ||
+      !isWithin(consumerRoot, expectedBackupPath) ||
+      !isWithin(nodeModules.canonicalPath, path.resolve(linkState.registryPackageRoot)) ||
+      backup.entryKind !== linkState.registryEntryKind
     ) {
-      throw new Error("LOCAL roots resolve beyond the supported path bound");
+      throw new Error("LOCAL state paths do not match the active physical binding");
+    }
+    if (linkState.registryEntryKind === "directory") {
+      if (
+        path.resolve(linkState.registryPackageRoot) !== common.activePath ||
+        backup.canonicalPath !== expectedBackupPath
+      ) {
+        throw new Error("LOCAL directory backup does not bind the registry entry");
+      }
+    } else {
+      const registryRoot = await inspectPhysicalDirectory(
+        linkState.registryPackageRoot,
+        false,
+      );
+      if (backup.canonicalPath !== registryRoot.canonicalPath) {
+        throw new Error("LOCAL symbolic-link backup does not bind the registry root");
+      }
     }
   } catch (error) {
     throw provenanceFailure(
       status,
-      "orchestrator.catalog.provenance.local-root",
-      { detail: "LOCAL roots cannot be resolved" },
+      "orchestrator.catalog.provenance.local-binding",
+      {
+        detail:
+          "LOCAL state does not bind the descriptor-checked active path, target, consumer, backup, and registry entry",
+      },
+      error,
+    );
+  }
+}
+
+async function inspectRegistryPhysicalBinding(status, common, consumerRoot) {
+  if (status.linkState !== undefined) {
+    throw provenanceFailure(
+      status,
+      "orchestrator.catalog.provenance.registry-state",
+      { detail: "REGISTRY physical state must not contain local link state" },
+    );
+  }
+  try {
+    const nodeModules = await inspectPhysicalDirectory(
+      path.join(consumerRoot, "node_modules"),
+      false,
+    );
+    if (!isWithin(nodeModules.canonicalPath, common.active.canonicalPath)) {
+      throw new Error("registry package root is outside consumer node_modules");
+    }
+  } catch (error) {
+    throw provenanceFailure(
+      status,
+      "orchestrator.catalog.provenance.registry-root",
+      { detail: "registry package root is not consumer-owned physical state" },
+      error,
+    );
+  }
+}
+
+export async function derivePhysicalFoundationState(
+  status,
+  consumerRoot,
+  declaredVersion,
+) {
+  const common = await inspectCommonPhysicalBinding(
+    status,
+    consumerRoot,
+    declaredVersion,
+  );
+  const mode = status.linkState === undefined ? "REGISTRY" : "LOCAL";
+  if (mode === "LOCAL") {
+    await inspectLocalPhysicalBinding(status, common, consumerRoot);
+  } else {
+    await inspectRegistryPhysicalBinding(status, common, consumerRoot);
+  }
+  if (status.mode !== mode) {
+    throw provenanceFailure(
+      status,
+      "orchestrator.catalog.provenance.mode-binding",
+      { derived: mode, reported: status.mode },
+    );
+  }
+  return {
+    mode,
+    packageRoot: common.active.canonicalPath,
+    packageRootIdentity: common.active.targetIdentity,
+  };
+}
+
+export async function assertRegistryStatus(status, roots, declaredVersion) {
+  if (!boundedAuthorityPath(status.lockfilePath)) {
+    throw provenanceFailure(
+      status,
+      "orchestrator.catalog.provenance.registry-root",
+      { detail: "registry paths cannot be resolved" },
+    );
+  }
+  if (
+    !boundedAuthorityString(
+      status.lockfilePackageKey,
+      catalogAuthorityInputLimits.packageKey,
+    ) ||
+    !boundedAuthorityString(
+      status.registryIntegrity,
+      catalogAuthorityInputLimits.integrity,
+    )
+  ) {
+    throw provenanceFailure(
+      status,
+      "orchestrator.catalog.provenance.registry-binding",
+      { detail: "registry provenance fields are missing or unbounded" },
+    );
+  }
+  if (!/^sha512-[A-Za-z0-9+/]+={0,2}$/u.test(status.registryIntegrity)) {
+    throw provenanceFailure(
+      status,
+      "orchestrator.catalog.provenance.registry-binding",
+      { detail: "registry provenance does not bind the active package" },
+    );
+  }
+  let lockfilePath;
+  try {
+    lockfilePath = await realpath(status.lockfilePath);
+    if (!boundedAuthorityPath(lockfilePath)) {
+      throw new Error("registry lockfile resolves beyond the supported path bound");
+    }
+  } catch (error) {
+    throw provenanceFailure(
+      status,
+      "orchestrator.catalog.provenance.registry-root",
+      { detail: "registry paths cannot be resolved" },
       error,
     );
   }
   if (
-    linkedEntry !== roots.packageRoot ||
-    stateConsumerRoot !== roots.consumerRoot ||
-    stateTargetRoot !== roots.packageRoot
+    lockfilePath !== path.join(roots.consumerRoot, "pnpm-lock.yaml") ||
+    status.lockfilePackageKey !==
+      `${engineeringFoundationPackage}@${declaredVersion}`
   ) {
     throw provenanceFailure(
       status,
-      "orchestrator.catalog.provenance.local-binding",
-      { detail: "LOCAL link state does not bind the active package" },
+      "orchestrator.catalog.provenance.registry-binding",
+      { detail: "registry provenance does not bind the active package" },
     );
   }
 }

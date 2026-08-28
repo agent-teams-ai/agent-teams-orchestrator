@@ -13,12 +13,12 @@ import {
   packageCatalogSchemaId,
   packageCatalogSchemaSpecifier,
   packageManifestSpecifier,
+  trustedRegistrySchemaDigestFor,
   trustedRegistrySchemaDigests,
 } from "./package-catalog-authority-contract.mjs";
 import {
-  assertLocalStatus,
   assertRegistryStatus,
-  assertStatusRoots,
+  derivePhysicalFoundationState,
   validateInspectionShape,
 } from "./package-catalog-provenance.mjs";
 import { readOpenedBoundedFile } from "./opened-bounded-file.mjs";
@@ -87,8 +87,18 @@ function toFilePath(location) {
   return filePath;
 }
 
-async function readBoundedFile(filePath, maximumBytes, rootPath) {
-  return readOpenedBoundedFile({ filePath, maximumBytes, rootPath });
+async function readBoundedFile(
+  filePath,
+  maximumBytes,
+  rootPath,
+  expectedRootIdentity,
+) {
+  return readOpenedBoundedFile({
+    expectedRootIdentity,
+    filePath,
+    maximumBytes,
+    rootPath,
+  });
 }
 
 async function readConsumerVersion(consumerRoot) {
@@ -149,7 +159,9 @@ async function resolveAuthorityFiles(consumerRoot, resolver, mode) {
       toFilePath(manifestLocation),
       toFilePath(schemaLocation),
     ];
-    const resolvedPaths = await Promise.all(requestedPaths.map(realpath));
+    const resolvedPaths = await Promise.all(
+      requestedPaths.map((requestedPath) => realpath(requestedPath)),
+    );
     if (!resolvedPaths.every(boundedPath)) {
       throw new Error("Foundation exports resolve beyond the supported path bound");
     }
@@ -225,11 +237,27 @@ async function resolveConsumerRoot(requestedConsumerRoot) {
   }
 }
 
-async function readAuthoritySources(manifestPath, schemaPath, packageRoot, mode) {
+async function readAuthoritySources(
+  manifestPath,
+  schemaPath,
+  packageRoot,
+  packageRootIdentity,
+  mode,
+) {
   try {
     return await Promise.all([
-      readBoundedFile(manifestPath, maximumManifestBytes, packageRoot),
-      readBoundedFile(schemaPath, maximumSchemaBytes, packageRoot),
+      readBoundedFile(
+        manifestPath,
+        maximumManifestBytes,
+        packageRoot,
+        packageRootIdentity,
+      ),
+      readBoundedFile(
+        schemaPath,
+        maximumSchemaBytes,
+        packageRoot,
+        packageRootIdentity,
+      ),
     ]);
   } catch (error) {
     throw authorityFailure(
@@ -282,17 +310,21 @@ function assertAuthorityIdentity(manifest, schema, declaredVersion, mode) {
   }
 }
 
-async function assertTrustStatus(status, roots, declaredVersion, schemaSource) {
-  await assertStatusRoots(status, roots, declaredVersion);
-  if (status.mode !== "REGISTRY") {
-    await assertLocalStatus(status, roots, declaredVersion);
+async function assertTrustStatus(
+  status,
+  roots,
+  declaredVersion,
+  schemaSource,
+  mode,
+) {
+  if (mode !== "REGISTRY") {
     return;
   }
   await assertRegistryStatus(status, roots, declaredVersion);
   const digest = `sha256:${createHash("sha256")
     .update(schemaSource)
     .digest("hex")}`;
-  if (trustedRegistrySchemaDigests[declaredVersion] !== digest) {
+  if (trustedRegistrySchemaDigestFor(declaredVersion) !== digest) {
     throw authorityFailure(
       "orchestrator.catalog.authority.registry-digest",
       { actual: digest, version: declaredVersion },
@@ -311,46 +343,71 @@ export async function loadCanonicalPackageCatalogSchema(options = {}) {
     consumerRoot,
     options.loadFoundationLocalMode ?? loadFoundationLocalMode,
   );
+  const physicalState = await derivePhysicalFoundationState(
+    status,
+    consumerRoot,
+    declaredVersion,
+  );
   const [manifestFile, schemaFile] = await resolveAuthorityFiles(
     consumerRoot,
     options.resolvePackageExport ?? resolvePackageExport,
-    status.mode,
+    physicalState.mode,
   );
   const packageRoot = path.dirname(manifestFile.canonicalPath);
+  if (packageRoot !== physicalState.packageRoot) {
+    throw authorityFailure(
+      "orchestrator.catalog.authority.export-binding",
+      { detail: "Foundation exports do not belong to the active physical package" },
+      undefined,
+      { mode: physicalState.mode },
+    );
+  }
   if (!isWithin(packageRoot, schemaFile.canonicalPath)) {
     throw authorityFailure(
       "orchestrator.catalog.authority.schema-containment",
       { detail: "schema resolves outside the active Foundation package root" },
       undefined,
-      { mode: status.mode },
+      { mode: physicalState.mode },
     );
   }
   const [manifestSource, schemaSource] = await readAuthoritySources(
     manifestFile.requestedPath,
     schemaFile.requestedPath,
     packageRoot,
-    status.mode,
+    physicalState.packageRootIdentity,
+    physicalState.mode,
   );
   const manifest = parseJson(
     manifestSource,
     "orchestrator.catalog.authority.manifest-json",
     "Foundation manifest is not valid JSON",
-    status.mode,
+    physicalState.mode,
   );
   const schema = parseJson(
     schemaSource,
     "orchestrator.catalog.authority.schema-json",
     "Foundation schema is not valid JSON",
-    status.mode,
+    physicalState.mode,
   );
-  assertAuthorityIdentity(manifest, schema, declaredVersion, status.mode);
+  assertAuthorityIdentity(
+    manifest,
+    schema,
+    declaredVersion,
+    physicalState.mode,
+  );
   const roots = { consumerRoot, packageRoot };
-  await assertTrustStatus(status, roots, declaredVersion, schemaSource);
+  await assertTrustStatus(
+    status,
+    roots,
+    declaredVersion,
+    schemaSource,
+    physicalState.mode,
+  );
 
   return {
     foundationVersion: declaredVersion,
     schema,
     schemaPath: schemaFile.canonicalPath,
-    trustMode: status.mode,
+    trustMode: physicalState.mode,
   };
 }

@@ -20,7 +20,7 @@ import {
   packageManifestSpecifier,
 } from "./package-catalog-schema.mjs";
 
-const foundationVersion = "0.19.0";
+const foundationVersion = "0.20.0";
 const oversized = "x".repeat(20_000);
 
 async function createFixture(t, mode = "REGISTRY") {
@@ -41,6 +41,17 @@ async function createFixture(t, mode = "REGISTRY") {
   await Promise.all([
     mkdir(packageRoot, { recursive: true }),
     mkdir(path.dirname(installedEntry), { recursive: true }),
+    ...(mode === "LOCAL"
+      ? [
+          mkdir(
+            path.join(
+              consumerRoot,
+              ".agent-teams-local/foundation-registry-backup",
+            ),
+            { recursive: true },
+          ),
+        ]
+      : []),
   ]);
   if (mode === "LOCAL") {
     await symlink(
@@ -91,7 +102,10 @@ async function createFixture(t, mode = "REGISTRY") {
       phase: "LOCAL",
       consumerRoot: canonicalConsumerRoot,
       targetPackageRoot: canonicalPackageRoot,
-      registryBackupPath: path.join(canonicalConsumerRoot, "registry-backup"),
+      registryBackupPath: path.join(
+        canonicalConsumerRoot,
+        ".agent-teams-local/foundation-registry-backup",
+      ),
       registryEntryKind: "directory",
       registryPackageRoot: installedEntry,
       packageVersion: foundationVersion,

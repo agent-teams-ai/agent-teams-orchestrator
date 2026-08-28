@@ -3,7 +3,6 @@ import {
   copyFile,
   mkdir,
   mkdtemp,
-  readFile,
   realpath,
   rm,
   symlink,
@@ -12,7 +11,7 @@ import {
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
 
 import YAML from "yaml";
 
@@ -21,25 +20,21 @@ import {
 } from "./package-catalog-policy.mjs";
 import { catalogResourceBudgets } from "./package-catalog-resource-guards.mjs";
 import {
+  canonicalSchema,
+  canonicalSchemaSource,
+  createAuthorityFixture,
+  foundationVersion,
+  localStatus,
+  registryStatus,
+  repositoryRoot,
+} from "./package-catalog-authority-fixture.mjs";
+import {
   engineeringFoundationPackage,
   loadCanonicalPackageCatalogSchema,
   packageCatalogSchemaId,
-  packageCatalogSchemaSpecifier,
   packageManifestSpecifier,
 } from "./package-catalog-schema.mjs";
 import { loadPackageTopologyInputs } from "./package-topology-inputs.mjs";
-
-const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
-const repositoryRoot = path.resolve(scriptDirectory, "../..");
-const foundationVersion = "0.19.0";
-const canonicalSchemaPath = path.join(
-  repositoryRoot,
-  "node_modules",
-  ...engineeringFoundationPackage.split("/"),
-  "schemas/scaffold-target-catalog/v1.schema.json",
-);
-const canonicalSchemaSource = await readFile(canonicalSchemaPath, "utf8");
-const canonicalSchema = JSON.parse(canonicalSchemaSource);
 
 function validEntry(overrides = {}) {
   return {
@@ -54,153 +49,6 @@ function validEntry(overrides = {}) {
 
 function catalogWith(entry, overrides = {}) {
   return { version: 1, packages: [entry], ...overrides };
-}
-
-async function registryStatus(consumerRoot, packageRoot, overrides = {}) {
-  const canonicalConsumerRoot = await realpath(consumerRoot);
-  const canonicalPackageRoot = await realpath(packageRoot);
-  return {
-    mode: "REGISTRY",
-    consumerRoot: canonicalConsumerRoot,
-    dependencySpec: foundationVersion,
-    installedPackageRoot: canonicalPackageRoot,
-    installedVersion: foundationVersion,
-    lockfilePath: path.join(canonicalConsumerRoot, "pnpm-lock.yaml"),
-    lockfilePackageKey: `${engineeringFoundationPackage}@${foundationVersion}`,
-    registryIntegrity: "sha512-Zml4dHVyZQ==",
-    issues: [],
-    ...overrides,
-  };
-}
-
-async function localStatus(consumerRoot, packageRoot, overrides = {}) {
-  const canonicalConsumerRoot = await realpath(consumerRoot);
-  const canonicalPackageRoot = await realpath(packageRoot);
-  return {
-    mode: "LOCAL",
-    consumerRoot: canonicalConsumerRoot,
-    dependencySpec: foundationVersion,
-    installedPackageRoot: canonicalPackageRoot,
-    installedVersion: foundationVersion,
-    issues: [],
-    linkState: {
-      schemaVersion: 1,
-      phase: "LOCAL",
-      consumerRoot: canonicalConsumerRoot,
-      targetPackageRoot: canonicalPackageRoot,
-      registryBackupPath: path.join(
-        canonicalConsumerRoot,
-        ".agent-teams-local/registry-backup",
-      ),
-      registryEntryKind: "directory",
-      registryPackageRoot: path.join(
-        canonicalConsumerRoot,
-        "node_modules",
-        ...engineeringFoundationPackage.split("/"),
-      ),
-      packageVersion: foundationVersion,
-      gitCommit: "a".repeat(40),
-      gitDirty: false,
-      attachedAt: "2026-08-28T00:00:00.000Z",
-    },
-    ...overrides,
-  };
-}
-
-async function createAuthorityFixture(t, { mode = "REGISTRY" } = {}) {
-  const temporaryRoot = await mkdtemp(
-    path.join(os.tmpdir(), "orchestrator-catalog-authority-"),
-  );
-  t.after(() => rm(temporaryRoot, { recursive: true, force: true }));
-  const consumerRoot = path.join(temporaryRoot, "consumer");
-  const packageRoot =
-    mode === "LOCAL"
-      ? path.join(temporaryRoot, "foundation-source")
-      : path.join(
-          consumerRoot,
-          "node_modules",
-          ...engineeringFoundationPackage.split("/"),
-        );
-  const installedEntry = path.join(
-    consumerRoot,
-    "node_modules",
-    ...engineeringFoundationPackage.split("/"),
-  );
-  await Promise.all([
-    mkdir(packageRoot, { recursive: true }),
-    mkdir(path.dirname(installedEntry), { recursive: true }),
-  ]);
-  if (mode === "LOCAL") {
-    await symlink(
-      packageRoot,
-      installedEntry,
-      process.platform === "win32" ? "junction" : "dir",
-    );
-  }
-  await Promise.all([
-    writeFile(
-      path.join(consumerRoot, "package.json"),
-      JSON.stringify({
-        devDependencies: { [engineeringFoundationPackage]: foundationVersion },
-      }),
-    ),
-    writeFile(path.join(consumerRoot, "pnpm-lock.yaml"), "lockfileVersion: '9.0'\n"),
-    writeFile(
-      path.join(packageRoot, "package.json"),
-      JSON.stringify({
-        name: engineeringFoundationPackage,
-        version: foundationVersion,
-      }),
-    ),
-    writeFile(
-      path.join(packageRoot, "v1.schema.json"),
-      canonicalSchemaSource,
-    ),
-  ]);
-  const schemaPath = path.join(packageRoot, "v1.schema.json");
-  const manifestPath = path.join(packageRoot, "package.json");
-  let status =
-    mode === "LOCAL"
-      ? await localStatus(consumerRoot, packageRoot)
-      : await registryStatus(consumerRoot, packageRoot);
-  let resolver = (specifier) => {
-    assert.ok(
-      [packageManifestSpecifier, packageCatalogSchemaSpecifier].includes(
-        specifier,
-      ),
-    );
-    return pathToFileURL(
-      specifier === packageManifestSpecifier ? manifestPath : schemaPath,
-    ).href;
-  };
-  return {
-    consumerRoot,
-    manifestPath,
-    packageRoot,
-    schemaPath,
-    get resolver() {
-      return resolver;
-    },
-    set resolver(value) {
-      resolver = value;
-    },
-    get status() {
-      return status;
-    },
-    set status(value) {
-      status = value;
-    },
-    async load(overrides = {}) {
-      return loadCanonicalPackageCatalogSchema({
-        consumerRoot,
-        loadFoundationLocalMode: async () => ({
-          inspectFoundationMode: async () => status,
-        }),
-        resolvePackageExport: resolver,
-        ...overrides,
-      });
-    },
-  };
 }
 
 async function createInputFixture(t) {
@@ -225,6 +73,10 @@ async function createInputFixture(t) {
     mkdir(path.join(root, "docs"), { recursive: true }),
     mkdir(path.dirname(installedEntry), { recursive: true }),
     mkdir(path.dirname(schemaPath), { recursive: true }),
+    mkdir(
+      path.join(root, ".agent-teams-local/foundation-registry-backup"),
+      { recursive: true },
+    ),
   ]);
   await symlink(
     packageRoot,
@@ -311,43 +163,6 @@ async function createInputFixture(t) {
     },
   };
 }
-
-test("binds the exact registry schema through independent consumer-root resolution", async () => {
-  const packageRoot = await realpath(
-    path.join(
-      repositoryRoot,
-      "node_modules",
-      ...engineeringFoundationPackage.split("/"),
-    ),
-  );
-  const status = await registryStatus(repositoryRoot, packageRoot);
-  let inspectedRoot;
-  const authority = await loadCanonicalPackageCatalogSchema({
-    consumerRoot: repositoryRoot,
-    loadFoundationLocalMode: async () => ({
-      inspectFoundationMode: async (consumerRoot) => {
-        inspectedRoot = consumerRoot;
-        return status;
-      },
-    }),
-  });
-  assert.equal(inspectedRoot, await realpath(repositoryRoot));
-  assert.equal(authority.foundationVersion, foundationVersion);
-  assert.equal(authority.schema.$id, packageCatalogSchemaId);
-  assert.equal(authority.trustMode, "REGISTRY");
-  assert.ok(authority.schemaPath.startsWith(`${packageRoot}${path.sep}`));
-});
-
-test("unit-validates post-inspection LOCAL status without relabeling trust", async (t) => {
-  const fixture = await createAuthorityFixture(t, { mode: "LOCAL" });
-  await writeFile(
-    fixture.schemaPath,
-    `${JSON.stringify({ $id: packageCatalogSchemaId })}\n`,
-  );
-  const authority = await fixture.load();
-  assert.equal(authority.trustMode, "LOCAL");
-  assert.deepEqual(authority.schema, { $id: packageCatalogSchemaId });
-});
 
 test("fails closed for table-driven provenance inspection cases", async (t) => {
   const fixture = await createAuthorityFixture(t);
@@ -455,7 +270,7 @@ test("rejects independent identity and provenance mismatches", async (t) => {
         await writeFile(
           path.join(fixture.consumerRoot, "package.json"),
           JSON.stringify({
-            devDependencies: { [engineeringFoundationPackage]: "^0.19.0" },
+            devDependencies: { [engineeringFoundationPackage]: "^0.20.0" },
           }),
         );
       } else if (mutation === "package" || mutation === "version") {
@@ -466,7 +281,7 @@ test("rejects independent identity and provenance mismatches", async (t) => {
               mutation === "package"
                 ? "@agent-teams/not-foundation"
                 : engineeringFoundationPackage,
-            version: mutation === "version" ? "0.19.1" : foundationVersion,
+            version: mutation === "version" ? "0.20.1" : foundationVersion,
           }),
         );
       } else if (mutation === "root") {
@@ -710,6 +525,37 @@ test("enforces operational catalog work and diagnostic budgets", async (t) => {
   assert.match(
     diagnosticErrors.at(-1),
     /orchestrator\.catalog\.resource\.diagnostics-omitted/u,
+  );
+
+  await Promise.all([
+    writeFile(
+      path.join(
+        fixture.root,
+        "architecture/package-materialization-policy.yaml",
+      ),
+      YAML.stringify({
+        version: 1,
+        entries: Array.from({ length: 100 }, () => ({})),
+      }),
+    ),
+    writeFile(
+      path.join(fixture.root, "architecture/source-dependency-policy.yaml"),
+      YAML.stringify({ version: "invalid" }),
+    ),
+  ]);
+  const crossParseErrors = await fixture.validate(
+    catalogWith(validEntry()),
+  );
+  assert.equal(crossParseErrors.length, catalogResourceBudgets.diagnostics);
+  assert.match(
+    crossParseErrors.at(-1),
+    /orchestrator\.catalog\.resource\.diagnostics-omitted/u,
+  );
+  assert.equal(
+    crossParseErrors.some((error) =>
+      error.includes("architecture/source-dependency-policy.yaml"),
+    ),
+    false,
   );
 });
 

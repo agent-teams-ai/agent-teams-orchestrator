@@ -25,13 +25,15 @@ import {
 
 function appendSchemaErrors(append, location, validationErrors) {
   for (const validationError of validationErrors ?? []) {
-    append(
+    if (append(
       catalogDiagnostic("orchestrator.catalog.schema.violation", {
         detail: validationError.message,
         keyword: validationError.keyword,
         location: `${location}${validationError.instancePath}`,
       }),
-    );
+    ) === false) {
+      return;
+    }
   }
 }
 
@@ -91,9 +93,11 @@ export async function loadPackageMaterializationInputs(
   repositoryRoot,
   errors,
   options = {},
+  sharedDiagnostics,
 ) {
   const architectureRoot = path.join(repositoryRoot, "architecture");
-  const catalogDiagnostics = createCatalogDiagnosticCollector(errors);
+  const catalogDiagnostics =
+    sharedDiagnostics ?? createCatalogDiagnosticCollector(errors);
   const catalog = await loadCatalog(
     repositoryRoot,
     catalogDiagnostics.append,
@@ -121,6 +125,7 @@ export async function loadPackageMaterializationInputs(
   );
   let schemaAdmitted = false;
   if (
+    !catalogDiagnostics.exhausted &&
     catalog !== undefined &&
     catalogAuthority !== undefined &&
     withinValidationBudget
@@ -133,21 +138,25 @@ export async function loadPackageMaterializationInputs(
       catalogDiagnostics.append,
     );
   }
-  if (schemaAdmitted) {
+  if (schemaAdmitted && !catalogDiagnostics.exhausted) {
     validateOrchestratorCatalogPolicy(
       catalog.packages,
       catalogDiagnostics.append,
     );
   }
-  catalogDiagnostics.flush();
-  const ajv = new Ajv2020({ allErrors: true, strict: true });
-  validateSchema(
-    ajv,
-    "architecture/package-materialization-policy.yaml",
-    materializationPolicy,
-    materializationPolicySchema,
-    (diagnostic) => errors.push(diagnostic),
-  );
+  if (!catalogDiagnostics.exhausted) {
+    const ajv = new Ajv2020({ allErrors: true, strict: true });
+    validateSchema(
+      ajv,
+      "architecture/package-materialization-policy.yaml",
+      materializationPolicy,
+      materializationPolicySchema,
+      catalogDiagnostics.append,
+    );
+  }
+  if (sharedDiagnostics === undefined) {
+    catalogDiagnostics.flush();
+  }
   return {
     catalog,
     catalogAuthority:
@@ -168,26 +177,35 @@ export async function loadPackageTopologyInputs(
   options = {},
 ) {
   const architectureRoot = path.join(repositoryRoot, "architecture");
+  const diagnostics = createCatalogDiagnosticCollector(errors);
   const [
     materializationInputs,
     dependencyPolicy,
     dependencyPolicySchema,
   ] = await Promise.all([
-    loadPackageMaterializationInputs(repositoryRoot, errors, options),
+    loadPackageMaterializationInputs(
+      repositoryRoot,
+      errors,
+      options,
+      diagnostics,
+    ),
     loadSourceDependencyPolicy(repositoryRoot),
     readFile(
       path.join(architectureRoot, "source-dependency-policy.schema.json"),
       "utf8",
     ),
   ]);
-  const ajv = new Ajv2020({ allErrors: true, strict: true });
-  validateSchema(
-    ajv,
-    "architecture/source-dependency-policy.yaml",
-    dependencyPolicy,
-    dependencyPolicySchema,
-    (diagnostic) => errors.push(diagnostic),
-  );
+  if (!diagnostics.exhausted) {
+    const ajv = new Ajv2020({ allErrors: true, strict: true });
+    validateSchema(
+      ajv,
+      "architecture/source-dependency-policy.yaml",
+      dependencyPolicy,
+      dependencyPolicySchema,
+      diagnostics.append,
+    );
+  }
+  diagnostics.flush();
 
   return { ...materializationInputs, dependencyPolicy };
 }

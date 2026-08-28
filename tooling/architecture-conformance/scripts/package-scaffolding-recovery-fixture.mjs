@@ -31,6 +31,10 @@ function foundationCatalogSchemaPath(root) {
   );
 }
 
+function materializationPolicyPath(root) {
+  return path.join(root, "architecture/package-materialization-policy.yaml");
+}
+
 export async function verifyRecoveryAuthorityPrecedence({
   createFixture,
   planTarget,
@@ -38,6 +42,39 @@ export async function verifyRecoveryAuthorityPrecedence({
   requireSuccess,
   runWrapper,
 }) {
+  const applyEntry = {
+    id: "platform.invalid-policy-apply",
+    role: "platform",
+    path: "packages/platform/invalid-policy-apply",
+    package_name: "@agent-teams/invalid-policy-apply",
+    owner_document: "architecture.invalid-policy-apply",
+  };
+  const applyRoot = await createFixture([applyEntry]);
+  planTarget(applyRoot, applyEntry.id);
+  await writeFile(
+    materializationPolicyPath(applyRoot),
+    `version: 1
+entries:
+  - package_id: ${applyEntry.id}
+    state: invalid
+`,
+  );
+  requireFailure(
+    "Apply with invalid materialization policy",
+    runWrapper(applyRoot, [
+      "apply",
+      "--plan",
+      planPath(applyEntry.id),
+      "--json",
+    ]),
+    /package materialization policy must be valid before apply/u,
+  );
+  assert.equal(
+    await pathExists(path.join(applyRoot, applyEntry.path)),
+    false,
+  );
+  assert.equal(await pathExists(journalPath(applyRoot)), false);
+
   const recoveryEntry = {
     id: "platform.recovery-probe",
     role: "platform",
@@ -48,13 +85,22 @@ export async function verifyRecoveryAuthorityPrecedence({
   const root = await createFixture([recoveryEntry]);
   const plan = planTarget(root, recoveryEntry.id);
   await writeJournal(root, plan);
+  await writeFile(
+    materializationPolicyPath(root),
+    `version: 1
+entries:
+  - package_id: ${recoveryEntry.id}
+    state: invalid
+`,
+  );
   await rm(foundationCatalogSchemaPath(root));
 
   const recovered = requireSuccess(
-    "journal recovery with missing Foundation schema authority",
+    "journal recovery with invalid materialization policy and missing Foundation schema authority",
     runWrapper(root, ["recover", "--json"]),
   );
   assert.doesNotMatch(output(recovered), /orchestrator\.catalog\.authority/u);
+  assert.doesNotMatch(output(recovered), /materialization policy/u);
   const receipt = parseJsonOutput("journal recovery", recovered);
   assert.equal(receipt.outcome, "failed-recovered");
   for (const operation of plan.operations) {

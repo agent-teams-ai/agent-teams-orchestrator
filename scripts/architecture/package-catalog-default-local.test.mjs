@@ -21,7 +21,7 @@ import {
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "../..");
-const foundationVersion = "0.19.0";
+const foundationVersion = "0.20.0";
 
 async function createDefaultLocalAuthorityFixture(t) {
   const temporaryRoot = await mkdtemp(
@@ -76,12 +76,19 @@ async function createDefaultLocalAuthorityFixture(t) {
       path.join(consumerRoot, "pnpm-lock.yaml"),
     ),
     copyFile(
-      path.join(repositoryRoot, "node_modules/.pnpm/lock.yaml"),
+      path.join(repositoryRoot, "pnpm-lock.yaml"),
       path.join(consumerRoot, "node_modules/.pnpm/lock.yaml"),
     ),
-    copyFile(
-      path.join(installedFoundationRoot, "package.json"),
+    writeFile(
       path.join(packageRoot, "package.json"),
+      `${JSON.stringify({
+        name: engineeringFoundationPackage,
+        version: foundationVersion,
+        exports: {
+          "./package.json": "./package.json",
+          "./schemas/*": "./schemas/*",
+        },
+      })}\n`,
     ),
     copyFile(
       path.join(

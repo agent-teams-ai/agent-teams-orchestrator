@@ -1,3 +1,4 @@
+import { constants } from "node:fs";
 import { lstat, open, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 
@@ -100,36 +101,53 @@ async function readAtMost(handle, maximumBytes) {
   return buffer.subarray(0, total);
 }
 
-export async function readOpenedBoundedFile({
-  filePath,
-  maximumBytes,
-  rootPath,
-}) {
+function safeReadFlags() {
+  return (
+    constants.O_RDONLY |
+    (constants.O_NOFOLLOW ?? 0) |
+    (constants.O_NONBLOCK ?? 0)
+  );
+}
+
+export const openedBoundedFileDescriptorCheckpoint = Symbol(
+  "openedBoundedFileDescriptorCheckpoint",
+);
+
+export async function readOpenedBoundedFile(options) {
+  const { expectedRootIdentity, filePath, maximumBytes, rootPath } = options;
+  if (!Number.isSafeInteger(maximumBytes) || maximumBytes < 0) {
+    throw new TypeError("maximumBytes must be a non-negative safe integer");
+  }
   const canonicalRoot = await realpath(rootPath);
   const rootIdentity = await stat(canonicalRoot, { bigint: true });
-  if (!rootIdentity.isDirectory()) {
+  if (
+    !rootIdentity.isDirectory() ||
+    (expectedRootIdentity !== undefined &&
+      !sameIdentity(rootIdentity, expectedRootIdentity))
+  ) {
     throw new Error("bounded file authority root is not a directory");
   }
   await assertSafeRequestedAncestry(filePath, canonicalRoot);
-  const requestedEntry = await lstat(filePath, { bigint: true });
-  if (requestedEntry.isSymbolicLink() || !requestedEntry.isFile()) {
-    throw new Error("bounded file path must name a regular file directly");
-  }
-  const canonicalPath = await realpath(filePath);
-  if (!isWithin(canonicalRoot, canonicalPath)) {
-    throw new Error("bounded file resolves outside its authority root");
-  }
 
-  const handle = await open(canonicalPath, "r");
+  const handle = await open(filePath, safeReadFlags());
   try {
     const before = await handle.stat({ bigint: true });
-    if (
-      !before.isFile() ||
-      !sameIdentity(requestedEntry, before) ||
-      before.size > BigInt(maximumBytes)
-    ) {
+    if (!before.isFile() || before.size > BigInt(maximumBytes)) {
       throw new Error("bounded file must be a bounded regular file");
     }
+    const descriptorCheckpoint =
+      options[openedBoundedFileDescriptorCheckpoint];
+    if (descriptorCheckpoint !== undefined) {
+      if (typeof descriptorCheckpoint !== "function") {
+        throw new TypeError("descriptor checkpoint must be a function");
+      }
+      await descriptorCheckpoint();
+    }
+    const canonicalPath = await realpath(filePath);
+    if (!isWithin(canonicalRoot, canonicalPath)) {
+      throw new Error("bounded file resolves outside its authority root");
+    }
+    await assertSafeRequestedAncestry(filePath, canonicalRoot);
     await assertPathIdentity(
       filePath,
       canonicalRoot,
@@ -137,6 +155,7 @@ export async function readOpenedBoundedFile({
       before,
     );
     await assertRootIdentity(rootPath, canonicalRoot, rootIdentity);
+
     const source = await readAtMost(handle, maximumBytes);
     const after = await handle.stat({ bigint: true });
     if (!sameSnapshot(before, after)) {
