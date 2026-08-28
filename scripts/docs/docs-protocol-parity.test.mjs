@@ -15,10 +15,10 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
-  docsCheck,
-  docsDoctor,
-  docsNew,
-  docsRecover,
+  docsCheckV2,
+  docsDoctorV2,
+  docsNewV2,
+  docsRecoverV2,
 } from "@agent-teams/docs-protocol";
 import { runDocsProtocolQualification } from "@agent-teams/docs-protocol/qualification";
 
@@ -50,19 +50,6 @@ test("qualification contract freezes exactly six v2 authoring scenarios", () => 
   );
 });
 
-const stableReachability = {
-  contract: {
-    state: "manual-required",
-    indexPath: "docs/contracts/README.md",
-    markdownLink: "[Frozen Widgets v1](frozen-widgets-v1.md)",
-  },
-  runbook: {
-    state: "manual-required",
-    indexPath: "docs/operations/README.md",
-    markdownLink: "[Frozen Widget Outage](frozen-widget-outage.md)",
-  },
-};
-
 const cases = qualification.scenarios.map(({ id: name, type, intent, expected }) => ({
   name,
   intent: {
@@ -81,7 +68,7 @@ const cases = qualification.scenarios.map(({ id: name, type, intent, expected })
   codeAnchors: intent.codeAnchors,
   additionalMetadata: intent.metadata,
   expectedPath: expected.documentPath,
-  expectedReachability: stableReachability[name] ?? expected.reachability,
+  expectedReachability: expected.reachability,
   goldenFile: expected.goldenFile,
 }));
 
@@ -174,7 +161,7 @@ test("shared check owns metadata, owner membership, and duplicate IDs", async ()
     const source = await makeSourceFixture();
     try {
       await scenario.mutate(source);
-      const result = await docsCheck({
+      const result = await docsCheckV2({
         consumerRoot: source,
         profilePath: "architecture/foundation/docs-protocol.yaml",
       });
@@ -198,9 +185,9 @@ for (const scenario of cases) {
   requiresStrictDirectoryDurability(`shared writer freezes exact ${scenario.name} bytes, path, heading, template, and index instruction`, async () => {
     const source = await makeSourceFixture();
     try {
-      const preflight = await docsCheck({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
+      const preflight = await docsCheckV2({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
       assert.equal(preflight.exitCode, 0, JSON.stringify(preflight.envelope));
-      const result = await docsNew({
+      const result = await docsNewV2({
         consumerRoot: source,
         profilePath: "architecture/foundation/docs-protocol.yaml",
         apply: true,
@@ -257,10 +244,10 @@ requiresStrictDirectoryDurability("shared qualification runner proves all six ty
 requiresUnsupportedStrictDirectoryDurability("Windows previews all six types and preserves fail-closed durability evidence", async () => {
   const source = await makeSourceFixture();
   try {
-    const preflight = await docsCheck({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
+    const preflight = await docsCheckV2({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
     assert.equal(preflight.exitCode, 0, JSON.stringify(preflight.envelope));
     for (const scenario of cases) {
-      const preview = await docsNew({
+      const preview = await docsNewV2({
         consumerRoot: source,
         profilePath: "architecture/foundation/docs-protocol.yaml",
         apply: false,
@@ -280,7 +267,7 @@ requiresUnsupportedStrictDirectoryDurability("Windows previews all six types and
       await assert.rejects(readFile(path.join(source, scenario.expectedPath)), { code: "ENOENT" });
     }
 
-    const applied = await docsNew({
+    const applied = await docsNewV2({
       consumerRoot: source,
       profilePath: "architecture/foundation/docs-protocol.yaml",
       apply: true,
@@ -300,8 +287,8 @@ requiresUnsupportedStrictDirectoryDurability("Windows previews all six types and
       transitionName,
     ]);
     const transitionBefore = await readFile(path.join(stateDirectory, transitionName));
-    const doctor = await docsDoctor({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
-    const recovered = await docsRecover({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
+    const doctor = await docsDoctorV2({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
+    const recovered = await docsRecoverV2({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
     assert.equal(doctor.exitCode, 1);
     assert.equal(doctor.envelope.result.environment.filesystem.strictDirectoryDurability, "platform-unsupported");
     assert.equal(doctor.envelope.result.transaction.state, "manual-recovery-required");
@@ -322,7 +309,7 @@ test("shared writer rejects unknown owners and unresolved relation IDs without m
       { ...cases[4], intent: { ...cases[4].intent, id: "feature.example.missing-relation" }, related: ["ADR-9999"], blockedBy: [] },
     ]) {
       await assert.rejects(
-        docsNew({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml", apply: true, intent: request.intent, related: request.related, blockedBy: request.blockedBy, codeAnchors: request.codeAnchors }),
+        docsNewV2({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml", apply: true, intent: request.intent, related: request.related, blockedBy: request.blockedBy, codeAnchors: request.codeAnchors }),
         /not allowed|does not exist/u,
       );
       await assert.rejects(readFile(path.join(source, request.expectedPath)), { code: "ENOENT" });
