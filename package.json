@@ -15,10 +15,12 @@
     "pnpm": "11.18.0"
   },
   "scripts": {
-    "architecture:check": "pnpm run specs:check && pnpm run specs:test && pnpm run architecture:topology && pnpm run architecture:topology:test && pnpm run architecture:nx:check && pnpm run architecture:model:check && pnpm run architecture:model:test && pnpm run security:check && pnpm run reliability:check && pnpm run architecture:dependencies && pnpm run lint && pnpm run architecture:conformance && pnpm run architecture:graph:advisory",
+    "architecture:check": "pnpm run architecture:feature-module-profile && pnpm run architecture:feature-module-profile:test && pnpm run specs:check && pnpm run specs:test && pnpm run architecture:topology && pnpm run architecture:topology:test && pnpm run architecture:nx:check && pnpm run architecture:model:check && pnpm run architecture:model:test && pnpm run security:check && pnpm run reliability:check && pnpm run architecture:dependencies && pnpm run lint && pnpm run architecture:conformance && pnpm run architecture:graph:advisory",
     "architecture:conformance": "pnpm --filter @agent-teams/architecture-conformance run check:conformance",
     "architecture:graph:advisory": "pnpm --filter @agent-teams/architecture-conformance run check:graph",
     "architecture:dependencies": "node scripts/architecture/validate-dependency-specifiers.mjs",
+    "architecture:feature-module-profile": "node scripts/architecture/validate-feature-module-standard-profile.mjs",
+    "architecture:feature-module-profile:test": "node --test scripts/architecture/validate-feature-module-standard-profile.test.mjs",
     "architecture:model:check": "node scripts/architecture/validate-architecture-model.mjs",
     "architecture:model:format": "likec4 format architecture/likec4",
     "architecture:model:preview": "likec4 start architecture/likec4",
@@ -31,7 +33,7 @@
     "architecture:topology:test": "node --test --test-concurrency=1 scripts/architecture/package-materialization-validation.test.mjs",
     "check": "pnpm foundation:check && pnpm docs:repository:check && pnpm packages:check && pnpm typecheck:root && pnpm architecture:check",
     "check:changed": "agent-teams-foundation agent-workflow changed --consumer .",
-    "check:fast": "pnpm foundation:check && pnpm docs:repository:check && pnpm run specs:check && pnpm run specs:test && pnpm lint:fast && pnpm typecheck && pnpm architecture:model:check && pnpm architecture:nx:check",
+    "check:fast": "pnpm foundation:check && pnpm docs:repository:check && pnpm architecture:feature-module-profile && pnpm run specs:check && pnpm run specs:test && pnpm lint:fast && pnpm typecheck && pnpm architecture:model:check && pnpm architecture:nx:check",
     "docs:validate": "node scripts/docs/validate-docs.mjs",
     "docs:test": "node --test --test-concurrency=1 scripts/docs/check-doc-impact.test.mjs scripts/docs/docs-protocol-parity.test.mjs scripts/docs/docs-protocol-profile.test.mjs scripts/docs/validate-docs.test.mjs scripts/docs/validate-prose.test.mjs",
     "docs:impact": "node scripts/docs/check-doc-impact.mjs",
