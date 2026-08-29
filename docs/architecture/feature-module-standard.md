@@ -352,6 +352,11 @@ limits, and compatibility. The
 [public contract standard](public-control-contracts.md) owns the exact wire and
 compatibility rules.
 
+An outbound integration-event adapter maps transport-independent publication
+intent into the versioned public event schema and outbox record. The
+[eventing and reliability standard](eventing-and-reliability.md) owns the exact
+publication and delivery rules.
+
 ### Composition and dependency selection
 
 Feature modules expose typed factories and narrow APIs. They do not own
@@ -374,8 +379,9 @@ concepts.
 
 The application composition root constructs context bridges, concrete adapters,
 process resources, and lifecycle ordering. Context composition owns only
-migration assembly. Feature schemas and dialect migrations stay with the owning
-persistence adapter.
+migration assembly. Context migration assembly owns ordering, dependency
+validation, compatibility checks, and one context migration entry point. Feature
+schemas and dialect migrations stay with the owning persistence adapter.
 
 ### Durable workflows and transport direction
 

@@ -111,10 +111,12 @@ test("retains stricter Orchestrator rules from the pre-adoption standard", () =>
     "`tests/unit/` tree is prohibited",
     "Neither schema is generated from the other.",
     "integration-event JSON Schema MUST have an event manifest",
+    "An outbound integration-event adapter maps transport-independent publication",
     "Every dynamic dependency declares exactly one",
     "`application/process-managers/`",
     "`packages/integrations/**`",
     "Context-owned repository adapters",
+    "Context migration assembly owns ordering, dependency",
   ]) {
     assert.throws(
       () => validate({ document: document.replace(marker, "") }),

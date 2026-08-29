@@ -1,5 +1,7 @@
 import { spawnSync } from "node:child_process";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  mkdtemp, mkdir, readFile, rm, symlink, writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -395,6 +397,17 @@ entries:
     "detached tests/unit is prohibited",
   );
   await rm(detachedUnitRoot, { recursive: true });
+
+  const detachedUnitTarget = path.join(temporaryRoot, "detached-unit-target");
+  await mkdir(detachedUnitTarget);
+  await symlink(detachedUnitTarget, detachedUnitRoot, "dir");
+  requireFailure(
+    "detached unit-test tree through a directory symlink",
+    run(temporaryRoot),
+    "detached tests/unit is prohibited",
+  );
+  await rm(detachedUnitRoot);
+  await rm(detachedUnitTarget, { recursive: true });
 
   const unknownRoot = path.join(temporaryRoot, "packages/shared");
   await mkdir(unknownRoot, { recursive: true });
