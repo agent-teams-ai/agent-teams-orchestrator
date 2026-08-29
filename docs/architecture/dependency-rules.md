@@ -247,7 +247,8 @@ application, model, and port boundaries. Colocated `*.test.ts` unit tests retain
 their source layer's dependency rules but are excluded from production builds.
 Feature integration and contract tests live under `tests/features/<feature>/`, and
 package black-box and packed-consumer tests live under `tests/package/`, so a
-self-package public import is not mistaken for a production dependency.
+self-package public import is not mistaken for a production dependency. A
+generic `tests/unit/` tree is rejected because it erases feature ownership.
 
 The repository-local dependency validator remains a blocking donor oracle for
 Orchestrator-specific package roles, catalog completeness, and production import

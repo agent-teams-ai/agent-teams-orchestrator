@@ -96,6 +96,7 @@ directory receives that exclusion.
 packages/
   contexts/
     work-coordination/
+      package.json
       src/
         features/
           task-model/
@@ -133,12 +134,18 @@ packages/
       src/
         features/
           outbox-relay/
+        composition/
+          package-composition.ts
+        index.ts
   sdk/
     orchestrator/
       src/
         features/
           teams/
           tasks/
+        composition/
+          package-composition.ts
+        index.ts
 ```
 
 Application executables remain thin composition roots under `apps/**`.
@@ -158,6 +165,7 @@ The standard's role-oriented feature layout maps to TypeScript directories:
 
 ```text
 features/task-model/
+  README.md
   contracts/
     control-api/
     published-language/
@@ -206,6 +214,8 @@ Focused white-box unit tests are colocated as `*.test.ts` or `*.spec.ts`.
 Feature contract, integration, adapter, persistence, and conformance tests live
 under `tests/features/<feature>/`. Package export, declaration,
 packed-artifact, and black-box consumer tests live under `tests/package/`.
+A generic detached `tests/unit/` tree is prohibited because it loses feature
+ownership.
 
 Colocated tests are compiled by a separate no-emit test configuration and are
 excluded from production builds and published artifacts. That configuration is
@@ -220,19 +230,30 @@ packages/contexts/work-coordination/src/features/task-sync/
   adapters/outbound/jira/
   composition/feature-module-factory.ts
 
+packages/contexts/work-coordination/tests/features/task-sync/
+
 packages/platform/eventing/src/features/outbox-relay/
   contracts/
   ports/
   implementation/
 
+packages/platform/eventing/tests/features/outbox-relay/
+
 packages/sdk/orchestrator/src/features/teams/
   contracts/
   client/
   mappers/
+
+packages/sdk/orchestrator/tests/features/teams/
 ```
 
 These are examples, not ceremonial templates. A directory exists only for real
 owned artifacts.
+
+Business features follow the aggregate placement and behavior rules in the
+[Full DDD modeling standard](../domain/modeling-standard.md). Platform,
+integration, SDK, host, and tooling features do not invent ceremonial domain
+layers.
 
 ## Local extensions
 
@@ -309,7 +330,27 @@ Each package manifest provides blocking `check`, `typecheck`, `build`, and `test
 scripts. Root gates run them without `--if-present`. The build is tested through
 the real root export, a declaration consumer, and an isolated packed-artifact
 consumer. Root TypeScript project references contain every materialized package
-exactly once after path normalization.
+exactly once after path normalization. Directory, trailing-slash, and explicit
+`/tsconfig.json` spellings resolve to the same package reference.
+
+### Contract surfaces
+
+Feature contract directories own their schema definitions. The context-level
+`published-language` module is only a curated export and compatibility manifest;
+it MUST NOT redefine or copy feature-owned schemas.
+
+Every Orchestrator external contract surface starts with one explicit `v1`
+schema family. Speculative `v2` directories, writers, adapters, and SDK models
+are prohibited. ADR-0037 governs the compatibility and migration decision
+required before a later major exists.
+
+Public control `.proto` files and integration-event JSON Schemas are separate
+feature-owned artifacts. Neither schema is generated from the other. Every
+integration-event JSON Schema MUST have an event manifest covering ownership,
+scope, authorization, privacy, ordering, delivery, retention, replay, payload
+limits, and compatibility. The
+[public contract standard](public-control-contracts.md) owns the exact wire and
+compatibility rules.
 
 ### Composition and dependency selection
 
@@ -322,6 +363,8 @@ Static dependencies use imports and typed factories. Replaceable internal
 implementations use consumer-owned ports selected by composition. Dynamic
 plugins use the separately accepted closed graph compiler and immutable
 activation plan only when a real runtime-selection capability requires it.
+Every dynamic dependency declares exactly one `required`, `optional`, or
+`ordered-many` cardinality.
 
 Generic `module.ts` feature files, ambient `resolve()`, service locators,
 parent-container fallback, registration-order semantics, and global mutable
@@ -340,6 +383,10 @@ Durable process managers are owned by the feature or bounded context whose
 business process they coordinate. Shared platform code may provide timers,
 dispatch, persistence primitives, and test harnesses, but cannot become a
 generic product workflow engine.
+
+Create `application/process-managers/` only for durable, stateful business
+processes owned by that feature. A generic `coordinators/` directory is
+prohibited; ordinary coordination remains in named use cases.
 
 When Temporal is used, direction remains relative to the application core:
 
@@ -368,6 +415,33 @@ not.
 A JetStream consumer and publisher are separate adapter roles even when they
 share a connection. Direction follows who initiates the application capability,
 not the eventual direction of bytes or response data.
+
+Examples of the concrete adapter direction mapping are:
+
+```text
+adapters/inbound/http/
+adapters/inbound/cli/
+adapters/inbound/jetstream-consumer/
+
+adapters/outbound/sqlite/
+adapters/outbound/postgres/
+adapters/outbound/jetstream-publisher/
+adapters/outbound/agent-runtime/
+```
+
+### Integration and persistence ownership
+
+A feature-specific external adapter is promoted to `packages/integrations/**`
+only after proven cross-context reuse, an independent lifecycle or publication
+surface, or a dedicated provider conformance surface. The integration package
+may own protocol clients and mappings, but it MUST NOT own the consuming
+feature's business policy.
+
+Platform persistence packages may expose technical drivers and transaction
+primitives. Context-owned repository adapters, tables, migrations, inboxes,
+outboxes, and projections remain inside the owning context. Within that context,
+feature-specific artifacts stay with their owning feature as required by `v1`.
+The [persistence boundary](persistence-boundary.md) owns the detailed rules.
 
 ### Runtime gateway ownership
 

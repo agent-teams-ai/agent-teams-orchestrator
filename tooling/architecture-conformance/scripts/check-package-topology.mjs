@@ -383,6 +383,19 @@ entries:
     ),
   );
 
+  const detachedUnitRoot = path.join(
+    temporaryRoot,
+    "packages/contexts/work-coordination/tests/unit",
+  );
+  await mkdir(detachedUnitRoot, { recursive: true });
+  await writeFile(path.join(detachedUnitRoot, "task.test.ts"), "export {};\n");
+  requireFailure(
+    "detached unit-test tree",
+    run(temporaryRoot),
+    "detached tests/unit is prohibited",
+  );
+  await rm(detachedUnitRoot, { recursive: true });
+
   const unknownRoot = path.join(temporaryRoot, "packages/shared");
   await mkdir(unknownRoot, { recursive: true });
   await writeFile(
