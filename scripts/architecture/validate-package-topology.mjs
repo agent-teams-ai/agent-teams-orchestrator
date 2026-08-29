@@ -272,6 +272,20 @@ function validateSourceLayout(repositoryRoot, sourceRoot, sourceFiles, errors) {
   }
 }
 
+function validateTestLayout(repositoryRoot, packageRoot, testFiles, errors) {
+  for (const filePath of testFiles) {
+    const packageRelative = relative(packageRoot, filePath);
+    if (
+      packageRelative === "tests/unit" ||
+      packageRelative.startsWith("tests/unit/")
+    ) {
+      errors.push(
+        `${relative(repositoryRoot, filePath)}: detached tests/unit is prohibited; colocate focused unit tests with source and place feature-owned integration tests under tests/features/<feature>`,
+      );
+    }
+  }
+}
+
 async function validateMaterializedPackage(context) {
   const {
     byPackageName,
@@ -367,6 +381,11 @@ async function validateMaterializedPackage(context) {
   });
 
   validateSourceLayout(repositoryRoot, sourceRoot, sourceFiles, errors);
+
+  const testFiles = await walk(path.join(packageRoot, "tests"), () => true, {
+    skipDirectories: ["node_modules", "dist", "coverage"],
+  });
+  validateTestLayout(repositoryRoot, packageRoot, testFiles, errors);
 
   return { entry, manifest, sourceFiles };
 }

@@ -105,3 +105,22 @@ test("binds the human profile to the machine-readable adoption", () => {
     /Agent instructions are missing/u,
   );
 });
+
+test("retains stricter Orchestrator rules from the pre-adoption standard", () => {
+  for (const marker of [
+    "`tests/unit/` tree is prohibited",
+    "Neither schema is generated from the other.",
+    "integration-event JSON Schema MUST have an event manifest",
+    "An outbound integration-event adapter maps transport-independent publication",
+    "Every dynamic dependency declares exactly one",
+    "`application/process-managers/`",
+    "`packages/integrations/**`",
+    "Context-owned repository adapters",
+    "Context migration assembly owns ordering, dependency",
+  ]) {
+    assert.throws(
+      () => validate({ document: document.replace(marker, "") }),
+      /missing required marker/u,
+    );
+  }
+});

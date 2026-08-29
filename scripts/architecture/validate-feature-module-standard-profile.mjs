@@ -29,6 +29,18 @@ const EXPECTED_ENFORCEMENT = Object.freeze([
   { command: "architecture:conformance", evidence: "boundary-conformance" },
 ]);
 
+const REQUIRED_LOCAL_EQUIVALENCE_MARKERS = Object.freeze([
+  "`tests/unit/` tree is prohibited",
+  "Neither schema is generated from the other.",
+  "integration-event JSON Schema MUST have an event manifest",
+  "An outbound integration-event adapter maps transport-independent publication",
+  "Every dynamic dependency declares exactly one",
+  "`application/process-managers/`",
+  "`packages/integrations/**`",
+  "Context-owned repository adapters",
+  "Context migration assembly owns ordering, dependency",
+]);
+
 function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
@@ -146,6 +158,7 @@ export function validateFeatureModuleStandardProfile({
     EXPECTED_STANDARD.sha256,
     canonicalUrl,
     "ADR-0098",
+    ...REQUIRED_LOCAL_EQUIVALENCE_MARKERS,
   ]) {
     assert(document.includes(marker), `Profile document is missing required marker: ${marker}`);
   }
