@@ -3,97 +3,99 @@ id: architecture.feature-module-standard
 type: architecture
 status: accepted
 owner: architecture
-summary: Canonical feature-owned vertical-slice layout and responsibility rules.
+summary: Orchestrator adoption profile and local extensions for the organization Feature Module Standard v1.
 related:
-  - ADR-0051
-  - ADR-0042
   - ADR-0012
-  - ADR-0047
-  - ADR-0060
   - ADR-0037
   - ADR-0038
+  - ADR-0042
+  - ADR-0047
+  - ADR-0051
+  - ADR-0060
   - ADR-0075
   - ADR-0093
+  - ADR-0098
 code_anchors:
-  - pattern: scripts/architecture/validate-package-topology.mjs
-    enforcement: required
-  - pattern: tooling/architecture-conformance/scripts/check-package-topology.mjs
-    enforcement: required
-  - pattern: architecture/source-dependency-policy.yaml
-    enforcement: required
-  - pattern: architecture/source-dependency-policy.schema.json
-    enforcement: required
+  - enforcement: required
+    pattern: architecture/feature-module-standard-profile.json
+  - enforcement: required
+    pattern: architecture/source-dependency-policy.schema.json
+  - enforcement: required
+    pattern: architecture/source-dependency-policy.yaml
+  - enforcement: required
+    pattern: scripts/architecture/validate-feature-module-standard-profile.mjs
+  - enforcement: required
+    pattern: scripts/architecture/validate-package-topology.mjs
+  - enforcement: required
+    pattern: tooling/architecture-conformance/scripts/check-package-topology.mjs
 ---
 
-# Feature Module Standard
+# Orchestrator Feature Module Profile
 
-## Hierarchy
+## Adoption
+
+Agent Teams Orchestrator adopts the immutable organization
+[Feature Module Standard v1](https://github.com/agent-teams-ai/.github/blob/main/docs/architecture/feature-module-standard/v1.md).
+The standard identity is `agent-teams.feature-module-standard`, version `v1`,
+with SHA-256
+`851653f96643cf0466b67ab22963661976b00de44840fa3144a48a8c054f95fa`.
+
+The machine-readable adoption is
+[`architecture/feature-module-standard-profile.json`](../../architecture/feature-module-standard-profile.json).
+ADR-0098 accepts the organization standard and this local profile.
+
+The organization standard owns universal feature ownership, layer
+responsibilities, dependency mechanisms, test ownership, shared-code policy,
+and extraction criteria. This document owns only the Orchestrator mapping,
+technology extensions, stricter constraints, and enforcement coordinates.
+
+There are no deviations from `v1`. A future deviation requires a repository
+architecture decision and a complete machine-readable deviation record. A
+successor organization standard does not apply until Orchestrator explicitly
+adopts it.
+
+## Scope mapping
+
+The standard's abstract hierarchy maps to Orchestrator as follows:
 
 ```text
 repository
-  -> workspace package with one architectural role
-      -> feature-owned capability slice
+  -> workspace package with one cataloged architectural role
+      -> src/features/<feature>/ capability slice
           -> role-appropriate internal layers
               -> operations and behavior
 ```
 
-A workspace package is a hard bounded-context boundary after that context is
-accepted. A feature module is a cohesive domain capability inside one Ubiquitous
-Language. It is not an independent bounded context by default. A use case is one
-operation.
+Production roots are `packages/**` and thin executable applications under
+`apps/**`. Repository tooling under `scripts/**` and `tooling/**` is outside the
+production feature-ownership scope and follows the repository-tooling
+architecture instead.
 
-Do not create one package per endpoint or one feature per class.
-
-## Universal feature ownership
-
-All production behavior under `packages/**` belongs to an explicit
-`src/features/<feature>/` capability slice. This rule applies to bounded contexts,
-integrations, platform capabilities, SDKs, and testing packages. Package role
-determines the valid internal layers; it does not remove feature ownership.
+Every materialized production package MUST contain at least one real source file
+under `src/features/<feature>/` and one colocated feature `README.md` with
+`type: feature`, `status: accepted`, and a reference to the package owner
+document. Package assembly files do not satisfy this gate.
 
 A package-level `src/` may contain only:
 
-- the curated public package entrypoint;
-- package composition that wires feature public entrypoints;
-- context-level Published Language and migration assembly that indexes
+- the curated public package entry point;
+- package composition that wires feature public entry points;
+- context-level Published Language and migration assembly that index
   feature-owned artifacts without redefining them;
-- generated artifacts in an explicitly isolated generated directory;
-- narrowly scoped package primitives whose ownership cannot belong to one feature.
+- generated artifacts under an explicitly isolated generated directory;
+- narrowly scoped package primitives accepted by an architecture decision.
 
-The final exception requires an architecture decision. A broad `shared`, `common`,
-`utils`, `services`, or `infrastructure` directory is not an acceptable exception.
 Foundation-owned terminal cleanup evidence under the exact
 `.foundation-retired-evidence-` directory is transaction evidence rather than
 production source and is excluded from topology inventory. No other hidden
 directory receives that exclusion.
 
-Feature ownership is structural, while DDD depth is semantic:
-
-- bounded-context domain capabilities use tactical DDD and the Clean Architecture
-  layers required by their invariants;
-- integration features own provider-specific contracts, mappings, ports, and
-  adapters without inventing a domain model;
-- platform features own technical capabilities and stable technical ports without
-  pretending that infrastructure is a business domain;
-- SDK features are sliced by public capability and own contracts, client
-  operations, mappings, and tests;
-- testing features own reusable fixtures, conformance suites, and harnesses by the
-  capability they validate.
-
-No package may postpone feature ownership until it becomes large. A package may
-start with one feature, but production behavior still begins inside that feature.
-Every materialized package, including an application, contains at least one real
-source file under `src/features/<feature>/` and a colocated feature `README.md`
-whose metadata is `type: feature`, `status: accepted`, and references the package
-owner document. Package assembly files do not satisfy this gate.
-
-## Target workspace layout
+### Workspace layout
 
 ```text
 packages/
   contexts/
     work-coordination/
-      package.json
       src/
         features/
           task-model/
@@ -131,32 +133,28 @@ packages/
       src/
         features/
           outbox-relay/
-        composition/
-          package-composition.ts
-        index.ts
   sdk/
     orchestrator/
       src/
         features/
           teams/
           tasks/
-        composition/
-          package-composition.ts
-        index.ts
 ```
 
 Application executables remain thin composition roots under `apps/**`.
-`apps/local-supervisor` composes technical `local-host-control` features and
+`apps/local-supervisor` composes technical local-host-control features and
 OS-specific adapters but contains no bounded-context domain or application
-behavior. `apps/cli` composes the public SDK and, for explicit host administration
-commands, a separate narrow local-host control client.
+behavior. `apps/cli` composes the public SDK and, for explicit host
+administration commands, a separate narrow local-host-control client.
 
 `packages/sdk/**` is reserved for supported distributable client libraries.
-Executable clients belong in `apps/**`; protocol clients used only by one
-integration remain inside that owning adapter. A generic top-level `clients/`
+Executable clients belong in `apps/**`. Protocol clients used only by one
+integration remain inside that owning adapter. A generic top-level client
 package family is not created preemptively.
 
-## Feature layout
+### Feature layout
+
+The standard's role-oriented feature layout maps to TypeScript directories:
 
 ```text
 features/task-model/
@@ -175,7 +173,6 @@ features/task-model/
     policies/
     specifications/
     errors/
-    README.md
   application/
     models/
     use-cases/
@@ -201,437 +198,205 @@ tests/package/
   packed-consumer/
 ```
 
-`task-model` owns every mutation of the `Task` aggregate, including assignment when
-assignment is part of the Task invariant. A UI action or verb is not automatically a
-separate feature.
+`task-model` owns every mutation of the `Task` aggregate, including assignment
+when assignment is part of the Task invariant. A UI action or verb is not
+automatically a separate feature.
 
-Directories are created only when they contain a real artifact. Empty ceremonial
-folders are prohibited.
-
-Test placement follows a deliberate hybrid:
-
-- focused white-box unit tests are colocated with the source they exercise as
-  `*.test.ts` or `*.spec.ts`;
-- feature contract, integration, adapter, persistence, and conformance tests live
-  under package-level `tests/features/<feature>/`;
-- package export, declaration, packed-artifact, and black-box consumer tests live
-  under `tests/package/`;
-- a generic detached `tests/unit/` tree is prohibited because it loses feature
-  ownership.
+Focused white-box unit tests are colocated as `*.test.ts` or `*.spec.ts`.
+Feature contract, integration, adapter, persistence, and conformance tests live
+under `tests/features/<feature>/`. Package export, declaration,
+packed-artifact, and black-box consumer tests live under `tests/package/`.
 
 Colocated tests are compiled by a separate no-emit test configuration and are
-explicitly excluded from the production build and published artifact. Create that
-test configuration with the first TypeScript test, not as empty scaffolding.
+excluded from production builds and published artifacts. That configuration is
+created with the first TypeScript test, not as empty scaffolding.
 
-Aggregate-specific entities, value objects, factories, and domain events are
-colocated under `domain/aggregates/<aggregate-name>/`. Feature-level policy,
-service, specification, error, or value-object directories exist only when the
-concept is genuinely shared by several aggregates inside that feature. Detailed
-behavior follows the
-[tactical modeling standard](../domain/tactical-modeling-patterns.md).
-
-Business features use the layers required by their behavior. A pure integration
-feature may have contracts, application ports, and adapters without a domain
-aggregate. Do not invent entities, repositories, ports, or domain services to
-satisfy a directory template.
-
-Role-specific feature examples:
+Role-specific feature layouts may be smaller:
 
 ```text
 packages/contexts/work-coordination/src/features/task-sync/
   contracts/
   application/
-  adapters/
-    outbound/
-      jira/
-  composition/
-    feature-module-factory.ts
-
-packages/contexts/work-coordination/tests/features/task-sync/
+  adapters/outbound/jira/
+  composition/feature-module-factory.ts
 
 packages/platform/eventing/src/features/outbox-relay/
   contracts/
   ports/
   implementation/
 
-packages/platform/eventing/tests/features/outbox-relay/
-
 packages/sdk/orchestrator/src/features/teams/
   contracts/
   client/
   mappers/
-
-packages/sdk/orchestrator/tests/features/teams/
 ```
 
-These examples are not mandatory folder templates. A directory exists only for
-real owned artifacts.
+These are examples, not ceremonial templates. A directory exists only for real
+owned artifacts.
 
-## Growth guardrails
+## Local extensions
 
-Feature ownership is enforced mechanically rather than remembered during review.
-`architecture/package-catalog.yaml` is the default-deny registry of allowed
-production package identities, roles, paths, names, and owner documents. A
-proposed owner reserves a name and path but cannot materialize production files.
+### Package identity and materialization
+
+[`architecture/package-catalog.yaml`](../../architecture/package-catalog.yaml)
+is the default-deny authority for production package identities, roles, paths,
+names, and owner documents. A proposed owner reserves a name and path but cannot
+materialize production files.
+
 An entry marked `state: deferred` in
-`architecture/package-materialization-policy.yaml` remains non-materializable
-even when its catalog owner document is accepted. Both the topology validator
-and scaffolder reject it. Reserved Fully Local entries must retain their
-machine-readable `blocked_by` decisions; CI permits `allowed` only after every
-listed gate is resolved and `decision` names the accepted ADR that resolves
-OD-040. This starts implementation but does not claim that the Fully Local
-deployment profile is qualified. Deleting either the reservation or its policy,
-or substituting an unrelated accepted ADR, is not a valid bypass.
+[`architecture/package-materialization-policy.yaml`](../../architecture/package-materialization-policy.yaml)
+remains non-materializable even when its owner document is accepted. The
+topology validator and scaffolder both reject it. Reserved Fully Local entries
+retain machine-readable `blocked_by` decisions. CI permits `allowed` only after
+every listed gate is resolved and `decision` names the accepted ADR that
+resolves OD-040. This starts implementation but does not qualify the Fully Local
+deployment profile.
 
-A root-level `.gitkeep` may preserve a supported empty workspace family without
-materializing a package; every other production file still requires a cataloged
-package boundary.
-
-`architecture/source-dependency-policy.yaml` separately allows each production
-source dependency by exact consumer, provider, and exported subpath. A manifest
-dependency, package-role-compatible direction, or LikeC4 relationship alone does
-not grant a source import. Cross-package relative, absolute, `file:`, wildcard,
-package-root, deep, and package-alias bypasses remain prohibited.
-
-The Orchestrator policy owns package identity, role, and allowed exported
-subpaths. Foundation's `architecture.source-dependencies` capability provides an
-independent physical-boundary check for ambiguous classification, runtime and
-type-only cycles, declared entrypoints, and relative-import bypasses. Both gates
-must pass; a broad Foundation boundary never widens an Orchestrator-owned edge,
-and a local edge never bypasses Foundation's cycle or entrypoint checks.
-
-Before implementation packages are accepted, repository tooling must:
-
-1. classify every workspace package by architectural role;
-2. reject production source outside an allowed feature or package-assembly root;
-3. enforce role-specific dependency direction and public feature entrypoints;
-4. reject cross-feature deep imports and dependency cycles;
-5. reject empty ceremonial DDD layers;
-6. require an explicit architecture decision for package-level ownership
-   exceptions;
-7. validate every materialized package against the package catalog;
-8. provide generators for new packages and features so the compliant path is the
-   easiest path.
+Deleting a reservation or policy, or substituting an unrelated ADR, is not a
+valid bypass. A root-level `.gitkeep` may preserve an empty supported workspace
+family without materializing a package; every other production file requires a
+cataloged package boundary.
 
 ADR-0038 owns the package catalog, ADR-0097 owns the separate materialization
 policy, and ADR-0081 owns delegation to the versioned Foundation scaffolding
-protocol. The adapter cannot invent a package, role, path, or owner. After the
-owner and first slice are accepted, run:
+protocol. Foundation cannot invent a package identity, role, path, or owner.
+
+After the package owner and first feature are accepted, use the reviewed
+Plan/Apply flow:
 
 ```bash
 pnpm architecture:scaffold-package -- plan --id <catalog-id>
 pnpm architecture:scaffold-package -- apply --plan <saved-plan-path>
 ```
 
-Review the saved immutable Plan between the commands. If Apply is interrupted,
-run `pnpm architecture:scaffold-package -- recover`; recovery intentionally does
-not depend on unrelated topology validity. The generated boundary does not pass CI
-until a real feature slice and root project reference are added in the same change.
+Review the immutable Plan between commands. After interruption, run
+`pnpm architecture:scaffold-package -- recover`. Recovery intentionally does not
+depend on unrelated topology validity. A generated boundary does not pass CI
+until the same change adds one real feature and the root project reference.
+
+### Source dependencies and internal APIs
+
+[`architecture/source-dependency-policy.yaml`](../../architecture/source-dependency-policy.yaml)
+allows each production dependency by exact consumer, provider, and exported
+subpath. A manifest dependency, role-compatible direction, or architecture-model
+relationship does not grant a source import.
+
+Cross-package relative, absolute, `file:`, wildcard, package-root, deep, and
+package-alias bypasses are prohibited. Orchestrator policy owns package identity,
+role, and allowed subpaths. Foundation independently checks physical boundaries,
+ambiguous classification, runtime and type-only cycles, declared entry points,
+and relative-import bypasses. Both gates must pass. Neither gate can widen the
+other.
+
+Each internal feature edge is declared once by package, consumer feature,
+provider feature, and allowed internal surface. The policy is default-deny and
+rejects cycles, unused edges, and ambiguous edges.
+
+Only `domain/internal-api.ts` and `application/internal-api.ts` may expose sibling
+feature internals. Domain code may consume only a sibling domain internal API.
+Application code may consume domain or application internal APIs. Adapters reach
+sibling features through their own application core; composition injects the
+implementation. Internal APIs never expose repositories, aggregate
+implementations, adapters, containers, or framework types.
+
+### TypeScript package publication
 
 Every materialized TypeScript library exposes built ESM and declaration targets
 under `dist/**`, declares `"type": "module"`, and gives every non-null exported
-subpath both `types` and ESM `import` targets; source-only package exports are
-prohibited. Topology checks validate normalized targets and their declaration or
-ESM suffixes without requiring generated `dist/**` files before the build. Its
-manifest provides blocking `check`, `typecheck`, `build`, and `test` scripts. Root
-package gates run these scripts without `--if-present`, so a newly materialized
-package cannot silently disappear from CI. The package build is tested through
-its actual root export, a declaration consumer, and an isolated packed-artifact
-consumer, not only by importing source files. Root TypeScript project references
-contain every materialized package exactly once; directory, trailing-slash, and
-explicit `/tsconfig.json` spellings resolve to the same package reference.
+subpath both `types` and ESM `import` targets. Source-only exports are prohibited.
+
+Each package manifest provides blocking `check`, `typecheck`, `build`, and `test`
+scripts. Root gates run them without `--if-present`. The build is tested through
+the real root export, a declaration consumer, and an isolated packed-artifact
+consumer. Root TypeScript project references contain every materialized package
+exactly once after path normalization.
+
+### Composition and dependency selection
+
+Feature modules expose typed factories and narrow APIs. They do not own
+dependency-injection containers or import Awilix. Private Awilix containers may
+exist only under context or package `composition/**`; Awilix types never cross
+that boundary.
+
+Static dependencies use imports and typed factories. Replaceable internal
+implementations use consumer-owned ports selected by composition. Dynamic
+plugins use the separately accepted closed graph compiler and immutable
+activation plan only when a real runtime-selection capability requires it.
+
+Generic `module.ts` feature files, ambient `resolve()`, service locators,
+parent-container fallback, registration-order semantics, and global mutable
+registries are prohibited. Static `FeatureModuleFactory`, dynamic
+`ExtensionModuleDefinition`, and installed `PluginArtifact` remain separate
+concepts.
+
+The application composition root constructs context bridges, concrete adapters,
+process resources, and lifecycle ordering. Context composition owns only
+migration assembly. Feature schemas and dialect migrations stay with the owning
+persistence adapter.
+
+### Durable workflows and transport direction
 
 Durable process managers are owned by the feature or bounded context whose
 business process they coordinate. Shared platform code may provide timers,
-dispatch, persistence primitives, and test harnesses, but it must not become a
-generic product workflow engine. A future Temporal adapter executes declared
-workflow boundaries; it does not absorb domain policy.
+dispatch, persistence primitives, and test harnesses, but cannot become a
+generic product workflow engine.
 
-Ordinary application coordination remains in named use cases. Create
-`application/process-managers/` only for durable, stateful business processes
-owned by that feature; do not create a generic `coordinators/` directory.
-
-When a feature uses Temporal, direction is relative to the application core:
+When Temporal is used, direction remains relative to the application core:
 
 ```text
 features/<feature>/
   application/
     use-cases/
     process-managers/
-    ports/
-      inbound/
-      outbound/
+    ports/inbound/
+    ports/outbound/
   adapters/
-    inbound/
-      temporal/
-        workflows/
-        activities/
-        signals/
-        queries/
-    outbound/
-      temporal/
-        client/
+    inbound/temporal/
+      workflows/
+      activities/
+      signals/
+      queries/
+    outbound/temporal/client/
 ```
 
-A Temporal client is outbound because the application asks it to schedule or
-signal durable work. Temporal workers, activities, signals, and queries are inbound
-because Temporal invokes the application. Shared connection factories and worker
-bootstrap may live in platform or an application composition root, but
-feature-specific mappings and workflow contracts remain inside the owning feature.
+The Temporal client is outbound because the application schedules or signals
+work. Workers, activities, signals, and queries are inbound because Temporal
+invokes the application. Shared connections and worker bootstrap may live in
+platform or application composition; feature mappings and workflow contracts do
+not.
 
-Feature modules expose typed factories and narrow module APIs. They do not own DI
-containers or import Awilix. A bounded context's private composition layer registers
-feature factories and concrete adapters as defined by
-[the composition standard](composition-and-dependency-injection.md).
+A JetStream consumer and publisher are separate adapter roles even when they
+share a connection. Direction follows who initiates the application capability,
+not the eventual direction of bytes or response data.
 
-## Layer responsibilities
+### Runtime gateway ownership
 
-### Contracts
+`@agent-teams/runtime-gateway` is the accepted narrow AR integration boundary.
+It owns the AR Published Language client, transport behavior, protocol mapping
+primitives, and Runtime Published Language client and ACL conformance.
+Provider-driver and provider-behavior conformance remain owned by AR.
 
-Owns stable outer-boundary data:
+The gateway is not a consumer-owned feature adapter. Every consuming feature
+still owns the adapter from its application port to the gateway. The gateway
+cannot import business contexts or define Team, Task, Run, Approval, or teammate
+message semantics.
 
-- client API commands, queries, results, and errors;
-- bounded-context Published Language;
-- integration events;
-- Protobuf control schemas, JSON integration-event schemas, and version metadata
-  for their respective external boundaries.
+### Package surfaces
 
-Contracts do not expose aggregate instances or infrastructure types.
-Application and domain code do not import public contracts. Physical ownership by
-the feature does not make contracts an inner layer.
-
-Client API contracts and context Published Language are distinct surfaces even when
-the same feature owns both. They may have different compatibility, authorization,
-and disclosure rules and must not be reused merely to avoid mapping code.
-
-Feature contract directories own schema definitions. The context-level
-`published-language` module is only a curated export and compatibility manifest; it
-does not redefine or copy those schemas.
-
-Each external contract surface starts with one explicit `v1` schema family.
-Speculative `v2` directories, writers, adapters, and SDK models are prohibited.
-ADR-0037 governs the migration required before a later major exists.
-
-Public control `.proto` files and integration-event JSON Schemas are separate
-feature-owned artifacts. A feature may map the same business fact to both, but
-neither schema is generated from the other.
-
-Every integration-event JSON Schema is accompanied by its event manifest covering
-ownership, scope, authorization, privacy, ordering, delivery, retention, replay,
-payload limits, and compatibility. Transport adapters consume that manifest;
-broker configuration never becomes the only place where those semantics exist.
-
-### Domain
-
-Owns business meaning and invariants:
-
-- aggregates;
-- entities;
-- value objects;
-- domain events;
-- domain services;
-- invariant violations.
-
-Domain behavior must be deterministic for the same explicit inputs. Time, IDs,
-randomness, and external facts enter through application orchestration.
-
-### Application
-
-Owns use-case coordination:
-
-- command handlers;
-- query handlers;
-- transport-independent application input and output models;
-- transaction boundaries;
-- application coordination policies;
-- ports;
-- authorization of business operations;
-- mapping domain events to publication intent;
-- staging durable command-dispatch intent with state transitions.
-
-Application code must not know which adapter implements a port.
-
-### Adapters
-
-Inbound adapters validate public contracts and map them into application input
-models. Outbound adapters implement application ports for storage, runtime,
-messaging, workflow, clocks, IDs, and external systems. Outbound integration-event
-adapters map domain or application publication intent into public event schemas.
-
-Inbound and outbound are named relative to the application core, not network
-traffic, request/response payloads, or whether bytes enter or leave the process:
-
-- an inbound adapter initiates an application use case through an inbound port;
-- an outbound adapter is invoked by application code through an outbound port.
-
-Examples:
+Bounded-context packages expose deliberately separate surfaces when applicable:
 
 ```text
-adapters/inbound/http/
-adapters/inbound/cli/
-adapters/inbound/jetstream-consumer/
-
-adapters/outbound/sqlite/
-adapters/outbound/postgres/
-adapters/outbound/jetstream-publisher/
-adapters/outbound/agent-runtime/
-```
-
-A technology may appear on both sides. A JetStream consumer and publisher are
-separate adapter roles even when composition supplies the same connection. A
-bidirectional integration must expose distinct inbound and outbound modules rather
-than hide both directions behind a broad gateway. Direction follows who initiates
-the application capability, not the eventual direction of returned data or events.
-
-All behavior specific to one feature's external boundary remains inside that
-feature's adapter directory. Context or process composition may share low-level
-connections and lifecycle resources, but it must not own feature mappings,
-repositories, handlers, schemas, or recovery policy.
-
-An external-system adapter belongs to the feature that owns the use case, port,
-mapping policy, and recovery decision. For example, Jira task synchronization
-normally belongs to a Work Coordination feature, and an AR adapter implementing a
-run capability belongs to the consuming orchestration feature. Promote an adapter
-to `packages/integrations/**` only when it has proven cross-context reuse,
-independent lifecycle or publication, or a dedicated provider conformance surface.
-The integration package may own protocol clients and mappings but never the
-consumer's business policy.
-
-`@agent-teams/runtime-gateway` is the accepted narrow AR integration boundary. It
-owns the AR Published Language client, transport behavior, protocol mapping
-primitives, and consumer-side Runtime Published Language client and ACL
-conformance. Provider-driver and provider-behavior conformance remain owned and
-published by AR. The gateway is not the consumer-owned feature adapter: each
-consuming feature still owns the adapter from its application port to that
-gateway. The gateway cannot import business contexts or define Team, Task, Run,
-Approval, or teammate-message semantics.
-
-Feature-specific tables, indexes, schema fragments, and dialect migration
-implementations remain with the feature's outbound persistence adapter. They are
-not moved into a context-wide infrastructure folder.
-
-Application code never accepts an SDK DTO directly.
-
-Adapters may contain technology-specific recovery and mapping behavior but no
-business invariant that belongs in the domain.
-
-### Composition
-
-Composition is an assembly responsibility, not a mandatory DDD layer or directory.
-It has three possible levels:
-
-1. An optional `composition/feature-module-factory.ts` exports a framework-neutral
-   `FeatureModuleFactory` that wires feature-local handlers from exact typed
-   dependencies.
-2. Context or package composition wires feature factories and context-owned
-   adapters and assembles feature migration contributions into one deterministic
-   bundle.
-3. The application composition root creates process-wide resources such as
-   database pools, NATS connections, runtime clients, clocks, and telemetry.
-
-`FeatureModuleFactory` is static product composition. It is not an
-`ExtensionModuleDefinition`, which is a future declarative participant in a
-validated runtime graph, and it is not a `PluginArtifact`, which is an installed,
-versioned, signed distribution envelope. Generic feature-level `module.ts` files
-are prohibited because they collapse these three meanings.
-
-A feature must not instantiate process-wide resources. This prevents duplicate
-runtime ACL clients, broker clients, transaction managers, and process owners.
-
-The application composition root is the only place that may:
-
-- construct context bridges and choose concrete adapters;
-- order `start`, `ready`, `stop`, and `dispose` lifecycles;
-- roll back partially started compositions;
-- share a technical connection pool without sharing context repositories or
-  transactions.
-
-Context composition owns only migration assembly: ordering, dependency validation,
-compatibility checks, and the single context migration entry point. It does not
-own feature schemas or rewrite migration SQL. Features never acquire migration
-locks or run migrations independently.
-
-### Projection responsibilities
-
-Each context owns projections derived from its state and events. A feature may own
-projection handlers and read models for its capability. Cross-context client views
-are assembled by an edge Query Composition adapter, not a global projection
-bounded context.
-
-`projections/` is not a universal feature layer. Projection policy and projectors
-belong in application code, inbound event handlers belong in inbound adapters, and
-read-model persistence belongs in outbound adapters. Create named directories only
-for real artifacts.
-
-## Aggregate and internal-module ownership
-
-Every aggregate implementation has one owning domain-capability feature. Another
-feature inside the same bounded context:
-
-- may depend only on an explicit `domain/internal-api.ts` or
-  `application/internal-api.ts` surface;
-- may use stable identities and Ubiquitous Language types exposed for that context;
-- must ask the owning application capability to mutate the aggregate;
-- must not import the aggregate repository or mutate aggregate internals.
-
-Cross-aggregate workflows belong in application coordination or explicit process
-managers. Published Language, ACLs, and integration events are required across
-bounded contexts, not as ceremony between every pair of features in one context.
-
-The context maintains an explicit directed dependency graph between internal
-features. Cycles are resolved by moving the shared concept to its semantic owner,
-introducing an application coordinator, or revisiting the feature boundary.
-
-Every edge is declared once in `architecture/source-dependency-policy.yaml` by
-package, consumer feature, provider feature, and allowed internal surface. The
-policy is default-deny, rejects cycles and unused or ambiguous edges, and is the
-machine-readable authority used by CI. Oxlint permits only the two named internal
-API files; the topology validator narrows that structural permission to exact
-declared edges.
-
-Domain code may consume only another feature's domain internal API. Application
-code may consume domain or application internal APIs. Adapters reach another
-feature through their own application core, and composition injects concrete
-implementations; adapters do not deep-import sibling feature internals. Internal
-API files are curated surfaces, not barrels over a whole layer, and never expose a
-repository, aggregate implementation, adapter, container, or framework type.
-
-## Dependency mechanisms
-
-Use exactly one mechanism for each dependency:
-
-1. An ordinary fixed dependency uses a static import and a typed factory.
-2. A replaceable internal implementation uses a consumer-owned port selected by
-   context or package composition. Awilix may implement composition only under
-   `composition/**`; its types never cross that boundary.
-3. A dynamically selected plugin or extension module uses a closed graph compiler
-   with exact provider bindings, an immutable activation plan, and explicit
-   `required`, `optional`, or `ordered-many` cardinality.
-
-The third mechanism is introduced only when a real slice requires runtime provider
-selection, variable dependencies, or an independently managed lifecycle. Static
-product code does not pre-emptively depend on a runtime graph. `resolve()`, ambient
-containers, service locators, parent-container fallback, registration order as
-semantics, and global mutable registries are prohibited for all three mechanisms.
-
-## Package surfaces
-
-Each bounded-context package exposes deliberately separate surfaces. Exact export
-names are conventional and may be adapted per context:
-
-```text
-./module       module factory and lifecycle for the application composition root
+./module       module factory and lifecycle
 ./api          provider-owned inbound application API
 ./published    Published Language and public read contracts
 ./contracts/*  external API and integration-event schemas
 ./testing      fixtures and context contract kits
 ```
 
-Consumer-owned outbound ports remain private to the consuming application package
-unless a separately packaged adapter must implement them. In that case a narrow
-`./spi/<capability>` export is allowed; a broad `./spi` barrel is not.
-
-Package `exports` must prevent consumers from importing feature internals.
+Consumer-owned outbound ports remain private unless a separately packaged
+adapter must implement one. That case may expose a narrow
+`./spi/<capability>`; a broad `./spi` barrel is prohibited. Package exports
+prevent imports of feature internals.
 
 Allowed:
 
@@ -642,49 +407,26 @@ import { createWorkCoordination } from "@agent-teams/work-coordination/module";
 Forbidden:
 
 ```ts
-import { Task } from "@agent-teams/work-coordination/src/features/task-model/domain/Task";
+import { Task } from "@agent-teams/work-coordination/src/features/task-model/domain/task";
 ```
 
-## Shared code policy
+## Enforcement
 
-A root shared kernel is not created by default. It requires an ADR that names its
-owners, versioning policy, and exact allowlist. It must never contain
-`BaseAggregate`, generic repositories, global business errors, tenant/project
-domain identities, policies, provider branches, or convenience services.
+The machine-readable adoption declares the gates that implement this profile:
 
-Stable technical contract primitives may live in a narrowly named contract package
-when duplication would break interoperability. Context-local business identities
-and concepts remain context-owned even when their serialized values look alike.
+- `pnpm architecture:feature-module-profile` validates the central identity,
+  immutable digest, scope, local authorities, profile markers, and declared
+  commands;
+- `pnpm architecture:topology` validates package identity, materialization,
+  feature ownership, package surfaces, and source topology;
+- `pnpm architecture:dependencies` rejects dependency-specifier bypasses;
+- `pnpm architecture:conformance` runs the Foundation-backed boundary corpus.
 
-Platform persistence packages may expose technical drivers and transaction
-primitives. Context-owned repository adapters, tables, migrations, inboxes,
-outboxes, and projections remain inside their owning context.
+`pnpm architecture:feature-module-profile:test` proves positive adoption and
+negative identity, digest, scope, authority, deviation, and command cases. The
+profile check runs in `check:fast`; the check and its tests run in the complete
+`architecture:check` and root `pnpm check` gates.
 
-Before adding shared code, ask:
-
-1. Does it represent the same concept with the same lifecycle in every context?
-2. Would duplication be cheaper than semantic coupling?
-3. Can the behavior be expressed through a contract instead?
-
-## Promoting a feature to a package
-
-The default is one package per accepted bounded context, with feature-owned slices
-inside it. A feature is extracted only when it is ready and at least one of these
-conditions is proven:
-
-| Evidence | Extraction condition |
-|---|---|
-| Hard boundary | Independent deployment, scaling, ownership, release, security, persistence, or external API lifecycle |
-| Reuse | At least two real independent consumers require the same semantics |
-| Public SPI | At least two independent implementations pass the same conformance suite |
-| Dependency lifecycle | Native, platform, postinstall, incompatible, or independently updated dependencies require isolation |
-
-Conceptually: `EXTRACT = READY AND (BOUNDARY OR REUSE OR PUBLIC_SPI OR
-DEPENDENCY_LIFECYCLE)`. `READY` requires accepted semantic ownership, a curated
-public surface, compatibility policy, executable tests, and a migration plan.
-
-A package is not created merely for folder isolation, cache performance, a large
-file count, one adapter, or a hypothetical future consumer. Promotion requires an
-ADR and contract compatibility plan. Moving a ready feature preserves its internal
-feature layout; callers change only from the context-internal API to the extracted
-package's explicit public surface.
+Orchestrator claims adoption of Feature Module Standard `v1`, not universal
+product correctness. Domain acceptance, security, reliability, deployment, and
+release qualification remain separate repository-owned claims.

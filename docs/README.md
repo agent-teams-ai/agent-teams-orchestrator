@@ -29,7 +29,7 @@ Agents should also follow the short repository-level
 |---|---|---|
 | Understand the system | [Architecture index](architecture/README.md) | [Overview](architecture/overview.md), [quality attributes](architecture/evolution-quality-attributes.md) |
 | Model or change a business capability | [Domain index](domain/README.md) | [Context dossiers](domain/contexts/README.md), [Full DDD standard](domain/modeling-standard.md) |
-| Add a package or feature | [Feature module standard](architecture/feature-module-standard.md) | [Dependency rules](architecture/dependency-rules.md), [package catalog](../architecture/package-catalog.yaml) |
+| Add a package or feature | [Orchestrator feature module profile](architecture/feature-module-standard.md) | [Organization Feature Module Standard v1](https://github.com/agent-teams-ai/.github/blob/main/docs/architecture/feature-module-standard/v1.md), [dependency rules](architecture/dependency-rules.md), [package catalog](../architecture/package-catalog.yaml) |
 | Integrate AR or a provider runtime | [Runtime boundary](architecture/runtime-boundary.md) | `OD-004`, [eventing](architecture/eventing-and-reliability.md) |
 | Design persistence or concurrency | [Persistence boundary](architecture/persistence-boundary.md) | `OD-003`, [testing](architecture/testing-strategy.md) |
 | Add events, feeds, inbox, or outbox | [Eventing and reliability](architecture/eventing-and-reliability.md) | [Public contracts](architecture/public-control-contracts.md) |

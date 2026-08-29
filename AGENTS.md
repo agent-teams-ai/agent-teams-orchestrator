@@ -70,7 +70,8 @@ before a high-cost boundary violation.
 
 - Business behavior belongs to the owning bounded context and feature. Follow the
   [context map](docs/architecture/context-map.md) and
-  [feature standard](docs/architecture/feature-module-standard.md).
+  [Orchestrator feature profile](docs/architecture/feature-module-standard.md),
+  which adopts the organization Feature Module Standard v1.
 - Domain code is pure. Application code depends only on domain and declared
   ports. Adapters implement ports. See
   [dependency rules](docs/architecture/dependency-rules.md).
