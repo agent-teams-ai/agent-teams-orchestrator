@@ -339,19 +339,17 @@ maintainability budgets. Generated or vendor code may be exempt from the five
 size and complexity budgets, but it is not exempt from security discovery,
 classification, suppression governance, or the allow/deny fixture contract.
 
-The ReviewRouter interaction entry point is a least-privilege caller of the
-centrally maintained reusable workflow. Its `uses` reference and `runtime_ref`
-input must match one immutable reviewed commit SHA. The caller keeps OIDC and
-repository-specific event filtering explicit, maps only the required secrets,
-and limits the fallback GitHub token to read-only issue and pull-request access.
-The security validator rejects mutable or mismatched refs, write-capable
-fallback permissions, and local checkout, authentication, or runtime steps that
-would duplicate or bypass the reusable workflow boundary.
+The accepted security baseline is ReviewRouter `v1.0.138` at commit
+`75cbecab131d74021677fcd1fb21962994d306b8`. Its canonical V4/T0 review workflow
+is default-branch trusted, same-repository and non-bot filtered, least-privilege,
+and bound to the exact versioned secret namespace. Its explicit interaction V2
+workflow keeps the fallback GitHub token read-only, uses OIDC for App authority,
+and pins every checkout and runtime source immutably.
 
-The accepted security baseline is ReviewRouter `v1.0.104` at commit
-`c7b7d5c5da0587c9fecdc2b7ec65be3df8e4acf4`. `pnpm security:check` verifies the
-caller and validator use that exact pin and proves that a deliberately different
-runtime SHA is rejected.
+`pnpm security:check` parses both workflow files and then verifies their complete
+reviewed SHA-256 digests. Mutation fixtures prove that trust-boundary triggers,
+permissions, schema, namespace, runtime refs, configuration mode, and immutable
+action pins cannot drift independently.
 
 `pnpm architecture:check` includes this gate. The documentation and architecture
 CI workflows execute it independently so changes to prose, schemas, fixtures, or
