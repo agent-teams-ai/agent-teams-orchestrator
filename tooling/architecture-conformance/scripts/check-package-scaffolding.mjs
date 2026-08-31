@@ -18,6 +18,7 @@ import { planScaffoldFromFile } from "@agent-teams/engineering-foundation/scaffo
 import YAML from "yaml";
 
 import { writeEmptyMaterializationPolicy } from "./topology-fixture-lib.mjs";
+import { verifyPendingApplyRecoveryPrecedence } from "./scaffolding-recovery-precedence-fixture.mjs";
 import {
   journalPath,
   operationBytes,
@@ -654,20 +655,13 @@ async function verifyRecoveryWithoutTopologyGate() {
   const pendingPlanA = planTarget(pendingRoot, pendingEntries[0].id);
   planTarget(pendingRoot, pendingEntries[1].id);
   await writeJournal(pendingRoot, pendingPlanA);
-  requireFailure(
-    "different Plan while recovery is pending",
-    runWrapper(pendingRoot, [
-      "apply",
-      "--plan",
-      planPath(pendingEntries[1].id),
-      "--json",
-    ]),
-    /requires recovery/u,
-  );
-  assert.equal(
-    await pathExists(path.join(pendingRoot, pendingEntries[1].path)),
-    false,
-  );
+  await verifyPendingApplyRecoveryPrecedence({
+    pendingRoot,
+    pendingEntries,
+    planPath,
+    runWrapper,
+    pathExists,
+  });
 
   const temporaryEntry = {
     id: "platform.journal-temporary",
@@ -761,7 +755,7 @@ async function verifyTamperingAndFilesystemBoundaries() {
   requireFailure(
     "recovery journal from alternate authority",
     runWrapper(tamperRoot, ["recover", "--json"]),
-    /canonical Orchestrator Composition/u,
+    /recovery scope|canonical Orchestrator Composition/iu,
   );
   assert.equal(await pathExists(path.join(tamperRoot, tamperEntry.path)), false);
 

@@ -12,6 +12,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
+import { inspectFoundationTransactionAwareMode } from "@agent-teams/engineering-foundation";
 import YAML from "yaml";
 
 import {
@@ -39,9 +40,12 @@ const localStateDirectory = ".agent-teams-local";
 const defaultCompositionId = "orchestrator-library-boundary";
 const canonicalScaffoldingConfigPath =
   "architecture/foundation/scaffolding.yaml";
-const scaffoldingJournalPath =
-  `${localStateDirectory}/scaffolding-transaction.json`;
-const maximumScaffoldingJournalBytes = 32 * 1024 * 1024;
+const scaffoldingRecoveryScope = Object.freeze({
+  projectId: "agent-teams-orchestrator",
+  configPath: canonicalScaffoldingConfigPath,
+  targetCatalogPath: "architecture/package-catalog.yaml",
+  compositionId: defaultCompositionId,
+});
 const successfulOutcomes = new Set([
   "applied",
   "already-applied",
@@ -415,59 +419,62 @@ function renderReceipt(receipt, phase) {
   return `${phase} result for Scaffold Plan: ${receipt.planDigest}\nOutcome: ${receipt.outcome}\nOperations: ${receipt.operations.length}\n`;
 }
 
-async function applyCommand(options) {
-  const repositoryRoot = await canonicalRepositoryRoot(
-    options.repositoryRoot,
-  );
-  await validateMaterializationPolicy(repositoryRoot);
-  const plan = await readScaffoldPlanFile(
-    repositoryRoot,
-    options.planPath,
-  );
-  await assertCanonicalOrchestratorPlan(repositoryRoot, plan);
-  const receipt = await applyFilesystemScaffold(repositoryRoot, plan);
+function writeReceipt(options, receipt, phase) {
   process.stdout.write(
     options.json
       ? `${JSON.stringify(receipt, null, 2)}\n`
-      : renderReceipt(receipt, "Apply"),
+      : renderReceipt(receipt, phase),
   );
   if (!successfulOutcomes.has(receipt.outcome)) {
     process.exitCode = 1;
   }
 }
 
-async function readPendingCanonicalPlan(repositoryRoot) {
-  const pathname = path.join(repositoryRoot, scaffoldingJournalPath);
-  let metadata;
-  try {
-    metadata = await lstat(pathname);
-  } catch (error) {
-    if (error instanceof Error && error.code === "ENOENT") {
-      return;
-    }
-    throw error;
+async function recoverPendingScaffoldingTransaction(
+  repositoryRoot,
+  options,
+) {
+  const status = await inspectFoundationTransactionAwareMode(repositoryRoot);
+  const transaction = status.transaction;
+  if (!transaction || transaction.state === "idle") {
+    return false;
   }
   if (
-    !metadata.isFile() ||
-    metadata.isSymbolicLink() ||
-    metadata.size > maximumScaffoldingJournalBytes
+    transaction.state !== "pending" ||
+    transaction.operationKind !== "scaffolding" ||
+    transaction.recovery?.commandId !== "scaffold-recover"
   ) {
-    throw new Error("Pending scaffolding journal is not a bounded regular file");
+    throw new Error(
+      transaction.diagnostics[0]?.message ??
+        "A different Foundation transaction requires recovery before scaffolding Apply.",
+    );
   }
+  const receipt = await recoverFilesystemScaffold(
+    repositoryRoot,
+    scaffoldingRecoveryScope,
+  );
+  if (!receipt) {
+    return false;
+  }
+  writeReceipt(options, receipt, "Apply recovery");
+  return true;
+}
 
-  let journal;
-  try {
-    journal = JSON.parse(await readFile(pathname, "utf8"));
-  } catch (error) {
-    throw new Error("Pending scaffolding journal is not valid JSON", {
-      cause: error,
-    });
+async function applyCommand(options) {
+  const repositoryRoot = await canonicalRepositoryRoot(
+    options.repositoryRoot,
+  );
+  await validateMaterializationPolicy(repositoryRoot);
+  if (await recoverPendingScaffoldingTransaction(repositoryRoot, options)) {
+    return;
   }
-  if (!journal?.plan) {
-    throw new Error("Pending scaffolding journal does not contain a Plan");
-  }
-  await assertCanonicalOrchestratorPlan(repositoryRoot, journal.plan);
-  return journal.plan;
+  const plan = await readScaffoldPlanFile(
+    repositoryRoot,
+    options.planPath,
+  );
+  await assertCanonicalOrchestratorPlan(repositoryRoot, plan);
+  const receipt = await applyFilesystemScaffold(repositoryRoot, plan);
+  writeReceipt(options, receipt, "Apply");
 }
 
 async function recoverCommand(options) {
@@ -475,10 +482,10 @@ async function recoverCommand(options) {
     options.repositoryRoot,
   );
   await validateMaterializationPolicy(repositoryRoot);
-  const pendingPlan = await readPendingCanonicalPlan(repositoryRoot);
-  const receipt = pendingPlan
-    ? await applyFilesystemScaffold(repositoryRoot, pendingPlan)
-    : await recoverFilesystemScaffold(repositoryRoot);
+  const receipt = await recoverFilesystemScaffold(
+    repositoryRoot,
+    scaffoldingRecoveryScope,
+  );
   if (!receipt) {
     process.stdout.write(
       options.json
@@ -487,14 +494,7 @@ async function recoverCommand(options) {
     );
     return;
   }
-  process.stdout.write(
-    options.json
-      ? `${JSON.stringify(receipt, null, 2)}\n`
-      : renderReceipt(receipt, "Recovery"),
-  );
-  if (!successfulOutcomes.has(receipt.outcome)) {
-    process.exitCode = 1;
-  }
+  writeReceipt(options, receipt, "Recovery");
 }
 
 async function main() {

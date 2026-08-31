@@ -20,6 +20,8 @@ evidence:
   - journal-recovery
   - partial-journal-recovery
   - recovery-conflict-preservation
+  - scoped-journal-recovery
+  - apply-recovery-precedence
   - tampered-plan-rejection
   - canonical-composition-binding
   - filesystem-boundary-rejection

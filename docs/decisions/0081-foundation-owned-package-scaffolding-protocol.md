@@ -33,7 +33,7 @@ product architecture authority.
 
 ## Decision
 
-Use exact registry dependency `@agent-teams/engineering-foundation@0.8.0` and its
+Use exact registry dependency `@agent-teams/engineering-foundation@0.21.0` and its
 closed definitions:
 
 ```text
@@ -60,6 +60,15 @@ bytes and re-verifies source-bound authority. Recover never runs unrelated
 topology validation because a pending journal must remain recoverable even while
 other repository state is invalid.
 
+The adapter never parses Foundation journal bytes. It supplies one immutable
+consumer-owned recovery scope (`projectId`, canonical config path, target catalog
+path, and Composition ID) to Foundation, which validates that scope against the
+stored transaction while holding its scaffolding lease. Apply first inspects the
+public transaction-aware Foundation status. A pending scaffolding transaction has
+precedence over a new reviewed Plan and is recovered through the same scoped API;
+the inspection is advisory, while Foundation remains the mutation authority.
+Other transaction kinds fail closed and route to their owning recovery command.
+
 The adapter keeps one consumer-specific precondition: planning rejects an existing
 target root. After Apply, the same reviewed change must add the accepted first
 feature slice and root project reference before repository topology can pass.
@@ -78,6 +87,8 @@ a second donor.
 - Foundation owns one reusable compiler, recipe renderer, filesystem transaction,
   and recovery protocol.
 - Orchestrator keeps all product topology and acceptance facts as data.
+- Orchestrator depends only on Foundation's public transaction status and scoped
+  recovery contract; it owns no duplicate journal schema or parser.
 - The old local renderer and atomic writer are removed after parity evidence
   passes; no permanent fallback generator remains.
 - A Foundation upgrade that changes recipe bytes requires an explicit exact-

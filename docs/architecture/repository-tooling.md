@@ -414,6 +414,11 @@ and all post-Apply topology checks. The Composition is declared in
 `architecture/foundation/scaffolding-qualification.yaml` and rerun by architecture
 conformance.
 
+The repository adapter passes an immutable consumer-owned recovery scope into the
+Foundation API and consults Foundation's public transaction-aware status only to
+give an existing scaffolding transaction Apply precedence. Journal parsing,
+lease-protected scope validation, and recovery mutation remain Foundation-owned.
+
 `platform.local-host-control` is the only real donor. Synthetic fixtures vary
 consumer roles, paths, and npm names without claiming a second product donor.
 Applications are deliberately excluded from the current Composition. The legacy
