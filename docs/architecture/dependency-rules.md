@@ -206,6 +206,12 @@ explicit implementation-start gate before `state` becomes `allowed`. This
 authorizes package creation, not deployment qualification; final profile
 qualification requires its independent evidence.
 
+The scaffolding adapter may depend on Foundation's public transaction inspection
+and scoped recovery APIs. It must not depend on Foundation's journal location,
+schema, or bytes. Consumer topology remains inward data; Foundation owns the
+lease-protected mutation and validates the supplied immutable scope against the
+stored transaction before recovery.
+
 Every materialized package appears exactly once in the root TypeScript project
 references. Removing or adding a package updates the catalog, filesystem, manifest,
 and root reference in the same change. Directory references with a trailing slash

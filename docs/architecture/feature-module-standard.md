@@ -291,8 +291,11 @@ pnpm architecture:scaffold-package -- apply --plan <saved-plan-path>
 ```
 
 Review the immutable Plan between commands. After interruption, run
-`pnpm architecture:scaffold-package -- recover`. Recovery intentionally does not
-depend on unrelated topology validity. A generated boundary does not pass CI
+`pnpm architecture:scaffold-package -- recover`. The command sends the canonical
+Orchestrator project, config, catalog, and Composition scope to Foundation; it
+does not read Foundation journal bytes. Apply gives an already-pending scoped
+recovery precedence over a new Plan. Recovery intentionally does not depend on
+unrelated topology validity. A generated boundary does not pass CI
 until the same change adds one real feature and the root project reference.
 
 ### Source dependencies and internal APIs
