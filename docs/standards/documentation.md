@@ -322,25 +322,31 @@ Update related artifacts in one change when their authority requires it:
 
 ## Validation
 
-`pnpm docs:check` is the local and CI quality gate. It validates:
+`pnpm docs:protocol:check` is the full local and CI documentation gate.
+`pnpm docs:check` is only its first step: the registry-pinned Docs Protocol
+command builds the governed catalog and validates YAML frontmatter against
+`docs/metadata.schema.json`, unique document IDs, safe non-stale code anchors,
+and adoption state. The remaining steps of `pnpm docs:protocol:check` validate:
 
-- YAML frontmatter against `docs/metadata.schema.json`;
-- unique document IDs and filename conventions;
-- exactly one top-level title per Markdown document;
+- filename conventions and exactly one top-level title per Markdown document;
 - local links and anchors;
 - navigation reachability;
 - direct directory-index completeness;
 - ADR lifecycle placement and metadata-backed collection indexes;
 - status-sensitive required document sections;
-- safe, non-stale code anchors and changed-path impact reporting;
+- changed-path impact reporting;
 - guarded creation from the current governed templates, covered by positive and
   negative fixture tests;
 - Mermaid syntax using the official Mermaid parser;
 - Markdown structure;
 - canonical product and technology terminology through project-owned Vale rules;
-- spelling through a reviewed CSpell project dictionary.
+- spelling through a reviewed CSpell project dictionary;
 - repository-local Skill structure and fixture tests;
 - LikeC4 relationship-model consistency with the package catalog.
+
+`pnpm check:changed` routes Markdown changes only to `pnpm docs:check`. Run
+`pnpm docs:protocol:check` before handoff whenever links, anchors, diagrams, or
+terminology changed.
 
 The validator itself has positive and negative fixture tests. External HTTP
 availability is checked by a scheduled Lychee workflow, not by the deterministic

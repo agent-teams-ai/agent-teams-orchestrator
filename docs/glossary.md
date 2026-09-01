@@ -473,7 +473,8 @@ implicitly. Every crossing requires an explicit protocol and authority model.
 
 One concrete local or remote orchestrator deployment and its trust configuration.
 A Target is selected by a Client Profile and is independent of the current
-project directory or Workspace.
+project directory or Workspace. It is unrelated to the AR execution target that
+ADR-0079 references as `RunRuntimeTarget`.
 
 ## Temporal.io
 

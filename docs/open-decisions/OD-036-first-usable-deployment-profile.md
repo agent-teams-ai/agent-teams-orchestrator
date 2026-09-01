@@ -7,7 +7,6 @@ summary: Decide whether the first usable release qualifies server profiles only 
 resolved_by: ADR-0087
 related:
   - ADR-0030
-  - ADR-0033
   - ADR-0060
   - ADR-0087
   - architecture.implementation-readiness-gates

@@ -152,7 +152,7 @@ model {
   identityRegistry -[publishedFacts]-> accessControl 'Principal facts' {
     metadata {
       integration_style 'Published principal facts'
-      authority 'Identity owns identity; Access owns grants'
+      authority 'Identity owns identity; the configured product authority provider owns grants; Access holds context-local grant projections'
       status 'proposed'
     }
   }
@@ -166,7 +166,7 @@ model {
   accessControl -[decisionContract]-> applicationUseCases 'Authorization facts' {
     metadata {
       integration_style 'Consumer-owned decision port or context-local grant projection'
-      authority 'Access owns authorization facts; consumer owns operation policy'
+      authority 'The configured product authority provider owns grant facts; Access supplies context-local projections; consumer owns operation policy'
       status 'proposed'
     }
   }
@@ -254,10 +254,24 @@ model {
       status 'proposed'
     }
   }
+  runOrchestration -[consumerPort]-> teamTopology 'Team creation or selection request' {
+    metadata {
+      integration_style 'Narrow application boundary requested by the team-activation feature'
+      authority 'Run owns the team-activation process; Team owns CreateTeam, versions, roster, and Team invariants'
+      status 'accepted'
+    }
+  }
+  runOrchestration -[consumerPort]-> agentOrganization 'Optional placement command' {
+    metadata {
+      integration_style 'Narrow application boundary requested by the team-activation feature'
+      authority 'Run owns the team-activation process; Organization owns semantic placement'
+      status 'accepted'
+    }
+  }
   agentOrganization -[publishedFacts]-> accessControl 'Structure facts' {
     metadata {
       integration_style 'Versioned structure facts'
-      authority 'Organization owns hierarchy; Access owns grants'
+      authority 'Organization owns hierarchy; the configured product authority provider owns grants; Access holds context-local grant projections'
       status 'proposed'
     }
   }
@@ -405,6 +419,34 @@ model {
     metadata {
       integration_style 'Versioned orientation intent without source content'
       authority 'Attention owns orientation need; Agent Context owns semantic composition'
+      status 'proposed'
+    }
+  }
+  teamTopology -[publishedFacts]-> agentContext 'Team context facts' {
+    metadata {
+      integration_style 'Producer-owned versioned Team facts through a consumer ACL'
+      authority 'Team owns roster and lifecycle; Agent Context owns disclosed semantic composition'
+      status 'proposed'
+    }
+  }
+  accessControl -[decisionContract]-> agentContext 'Authorization decisions as evidence' {
+    metadata {
+      integration_style 'Decision facts consumed as evidence, not copied authority'
+      authority 'The configured product authority provider owns grant facts; Agent Context owns semantic composition'
+      status 'proposed'
+    }
+  }
+  policyRisk -[decisionContract]-> agentContext 'Policy decisions as evidence' {
+    metadata {
+      integration_style 'Decision facts consumed as evidence, not copied authority'
+      authority 'Policy owns risk decisions; Agent Context owns semantic composition'
+      status 'proposed'
+    }
+  }
+  consumptionGovernance -[decisionContract]-> agentContext 'Consumption decisions as evidence' {
+    metadata {
+      integration_style 'Decision facts consumed as evidence, not copied authority'
+      authority 'Governance owns budget and quota decisions; Agent Context owns semantic composition'
       status 'proposed'
     }
   }

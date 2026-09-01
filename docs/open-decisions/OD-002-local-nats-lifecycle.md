@@ -7,8 +7,8 @@ summary: Select the durable local eventing profile and lifecycle owner for bundl
 resolved_by: ADR-0035
 related:
   - ADR-0004
-  - ADR-0033
   - ADR-0035
+  - ADR-0060
   - architecture.eventing
 ---
 

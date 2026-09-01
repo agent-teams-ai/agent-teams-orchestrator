@@ -32,6 +32,7 @@ related:
   - architecture.testing
   - research.human-notification-agent-attention-boundary-critique-2026-07-30
   - research.pre-implementation-gate-critique-2026-07-30
+  - OD-003
   - OD-004
   - OD-005
   - OD-006
@@ -229,6 +230,9 @@ Required evidence:
   commercial-authority mode declared by the selected profile;
 - OD-012 is resolved far enough to prove the selected profile's authentication,
   tenant isolation, service identity, revocation, browser, and feed authority;
+- OD-003 is resolved far enough to name the selected profile's persistence
+  composition, because the reliability catalog blocks both V1 profiles on
+  OD-003 and OD-012;
 - every client resource, request, subscription, cursor, cache, optimistic update,
   and Operation handle is fenced by Target identity and client generation;
 - profile switching closes the old generation and proves that late results

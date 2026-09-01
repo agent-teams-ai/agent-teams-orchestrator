@@ -6,7 +6,6 @@ owner: platform/local-host
 summary: Specify the exact local supervisor state machine, distribution, compatibility, activation, and recovery policy.
 related:
   - ADR-0030
-  - ADR-0033
   - ADR-0035
   - ADR-0058
   - ADR-0060

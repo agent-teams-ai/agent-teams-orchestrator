@@ -15,10 +15,17 @@ related:
   - ADR-0050
   - ADR-0078
   - ADR-0085
+  - ADR-0087
   - OD-003
 ---
 
 # Persistence Boundary
+
+ADR-0087 qualifies only the Managed SaaS and Standalone Self-Hosted Server
+profiles in V1, and both use PostgreSQL. The SQLite topology, `node:sqlite`
+driver, and local command-lane rules below describe the future Fully Local
+profile and must not be read as a V1 availability or implementation claim.
+ADR-0087 forbids placeholder SQLite repositories before that profile starts.
 
 ## Principle
 
@@ -138,12 +145,14 @@ ownership.
 
 ## Local and hosted profiles
 
-The initial production topology is:
+The V1 production topology is one PostgreSQL database with one schema per
+bounded context for the Managed SaaS and Standalone Self-Hosted Server
+profiles. The complete profile set is:
 
-- one embedded SQLite database file per bounded context for desktop/local
-  operation;
-- one PostgreSQL database with one schema per bounded context for the initial
-  hosted deployment;
+- one PostgreSQL database with one schema per bounded context for the V1
+  server profiles;
+- one embedded SQLite database file per bounded context for the future Fully
+  Local profile, deferred from V1 by ADR-0087;
 - separate context-owned adapters and dialect migrations;
 - shared technical test harnesses plus context-owned semantic conformance suites.
 
@@ -159,7 +168,8 @@ transfer protocol defined by ADR-0048.
 
 ### Desktop SQLite
 
-Each bounded context receives its own database file and connection lifecycle:
+This profile is deferred from V1 by ADR-0087. When implemented, each bounded
+context receives its own database file and connection lifecycle:
 
 ```text
 data/
@@ -216,11 +226,11 @@ desktop targets and may be tightened by product SLOs.
 
 ### Hosted PostgreSQL
 
-The initial hosted deployment uses one PostgreSQL database with schema-qualified
+The V1 server profiles use one PostgreSQL database with schema-qualified
 context namespaces:
 
 ```text
-tenant_project_registry.*
+orchestration_scope.*
 team_topology.*
 work_coordination.*
 run_orchestration.*

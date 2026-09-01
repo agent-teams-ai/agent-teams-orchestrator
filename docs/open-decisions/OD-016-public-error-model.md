@@ -7,10 +7,10 @@ summary: Define stable public error codes, retryability, diagnostics, and SDK ma
 related:
   - architecture.sdk-transports
   - architecture.public-control-contracts
-  - ADR-0018
   - ADR-0019
   - ADR-0020
   - ADR-0023
+  - ADR-0071
   - OD-008
   - research.pre-implementation-gate-critique-2026-07-30
 ---

@@ -7,7 +7,7 @@ summary: Select the protected local protocols for Supervisor bootstrap and direc
 related:
   - architecture.sdk-transports
   - ADR-0016
-  - ADR-0033
+  - ADR-0060
   - architecture.local-host-lifecycle
 ---
 
@@ -30,7 +30,7 @@ The decision must cover authentication, discovery, startup readiness, reconnect,
 streaming, backpressure, version negotiation, credential rotation, and crash
 recovery. Normal Desktop and CLI use must not require manual infrastructure setup.
 
-ADR-0033 fixes process ownership: the shared Local Supervisor owns technical
+ADR-0060 fixes process ownership: the shared Local Supervisor owns technical
 process availability, and the ordinary SDK connects directly to the Host after
 protected discovery. The Supervisor must not proxy normal control API traffic.
 
