@@ -32,6 +32,7 @@ related:
   - architecture.testing
   - research.human-notification-agent-attention-boundary-critique-2026-07-30
   - research.pre-implementation-gate-critique-2026-07-30
+  - OD-003
   - OD-004
   - OD-005
   - OD-006
@@ -246,6 +247,10 @@ Required evidence:
 - deferred Fully Local packages retain the exact OD-021, OD-035, and OD-040 gate
   set and are rejected by scaffolding and topology checks until OD-040 names the
   accepted materialization decision.
+
+The reliability catalog separately blocks profile qualification on OD-003 and
+OD-012. The OD-003 blocker is a qualification gate, not a slice-admission
+criterion of this gate.
 
 This gate does not require implementing Fully Local or a commercial capability,
 and optional commercial capability does not block a baseline profile.

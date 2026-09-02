@@ -95,7 +95,7 @@ The preview server is a development view only.
 
 `pnpm architecture:model:test` proves valid and invalid behavior with isolated
 fixtures. Both run inside `pnpm architecture:check`; the model consistency check
-also runs inside `pnpm docs:check`.
+also runs inside `pnpm docs:protocol:check`.
 
 ## Generated artifacts
 

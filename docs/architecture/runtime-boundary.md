@@ -6,7 +6,6 @@ owner: integration/runtime
 summary: Ownership and contract boundary between product orchestration and the ar runtime.
 related:
   - ADR-0003
-  - ADR-0026
   - ADR-0028
   - ADR-0060
   - ADR-0062

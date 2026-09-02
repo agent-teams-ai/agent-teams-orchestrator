@@ -91,7 +91,10 @@ same-user execution, NATS possession, and process parentage are not substitutes
 for a scoped authenticated control channel.
 
 The exact external identity provider remains unresolved in `OD-012`. The LikeC4
-element is deliberately provider-neutral and proposed.
+element is deliberately provider-neutral and proposed. Its identity-authority
+flow records the configured product authority provider, not an internal Access
+Control context, as the owner of product authorization, matching ADR-0080 and
+the authority table above; provider topology stays open under OD-012.
 
 ## Authority and untrusted content
 

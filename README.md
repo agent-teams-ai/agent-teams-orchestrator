@@ -53,9 +53,12 @@ pnpm foundation:e2e -- /absolute/path/to/engineering-foundation
 
 CI requires registry mode. Product code cannot import the development-only
 foundation package.
-Dependabot checks npm every weekday and opens a dedicated reviewed exact-version
-update pull request for new Foundation releases; floating ranges and automerge
-are forbidden, and adding a capability is separate from updating package bytes.
+Dependabot is limited to security updates by `open-pull-requests-limit: 0` in
+`.github/dependabot.yml`. New Foundation releases are adopted through dedicated,
+manually opened, reviewed exact-version pull requests; floating ranges and
+automerge are forbidden, and adding a capability is separate from updating
+package bytes. This deviates from the Dependabot statement in ADR-0059 until a
+superseding ADR is accepted.
 
 The package catalog remains Orchestrator-owned. A qualified library boundary uses
 the Foundation Plan, Apply, and Recover protocol:

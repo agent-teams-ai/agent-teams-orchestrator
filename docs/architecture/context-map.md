@@ -55,7 +55,7 @@ These concepts often align, but they are not interchangeable.
 | Bounded context | Classification | Boundary status | Primary responsibility | Domain authority |
 |---|---|---|---|---|
 | Identity Registry | Generic | Proposed | Human and machine principal identity | [Dossier](../domain/contexts/identity-registry/README.md) |
-| Access Control | Supporting | Proposed | Membership, grants, and authorization facts | [Dossier](../domain/contexts/access-control/README.md) |
+| Access Control | Supporting | Proposed | Consumer-facing authorization boundary over membership and grant facts owned by the configured product authority provider; internal mechanism open under OD-012 | [Dossier](../domain/contexts/access-control/README.md) |
 | Orchestration Scope | Supporting | Accepted by ADR-0080 | Stable Orchestrator tenant/project identity, admission, project-level runtime binding, and disposition coordination | [Dossier](../domain/contexts/orchestration-scope/README.md) |
 | Workspace Registry | Supporting | Proposed | Workspace registration, execution allocation, materialization lifecycle, and cleanup | [Dossier](../domain/contexts/workspace-registry/README.md) |
 | Team Topology | Core | Proposed | Agent-team composition, roles, capabilities, and roster rules | [Dossier](../domain/contexts/team-topology/README.md) |

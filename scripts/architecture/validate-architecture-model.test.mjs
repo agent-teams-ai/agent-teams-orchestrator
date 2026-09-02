@@ -88,8 +88,8 @@ test("rejects missing relationship ownership metadata", async () => {
   try {
     await replaceModel(
       root,
-      "authority 'Identity owns identity; Access owns grants'",
-      "authority_note 'Identity owns identity; Access owns grants'",
+      "authority 'Identity owns identity; the configured product authority provider owns grants; projection versus synchronous decision remains open under OD-012'",
+      "authority_note 'Identity owns identity; the configured product authority provider owns grants; projection versus synchronous decision remains open under OD-012'",
     );
     const result = await runValidator(root);
     assert.equal(result.code, 1);
@@ -105,7 +105,7 @@ test("rejects duplicate semantic relationships", async () => {
     const relationship = `  identityRegistry -[publishedFacts]-> accessControl 'Principal facts' {
     metadata {
       integration_style 'Published principal facts'
-      authority 'Identity owns identity; Access owns grants'
+      authority 'Identity owns identity; the configured product authority provider owns grants; projection versus synchronous decision remains open under OD-012'
       status 'proposed'
     }
   }`;

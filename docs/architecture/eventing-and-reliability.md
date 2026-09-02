@@ -12,11 +12,20 @@ related:
   - ADR-0037
   - ADR-0058
   - ADR-0060
+  - ADR-0087
   - architecture.local-host-lifecycle
   - OD-009
 ---
 
 # Eventing and Reliability
+
+ADR-0087 qualifies only the Managed SaaS and Standalone Self-Hosted Server
+profiles in V1; they connect to NATS JetStream operated outside the Host
+process, as the JetStream section below describes. Statements below about the
+local composition, the Local Supervisor, and the bundled `nats-server` describe
+the future Fully Local profile owned by
+[Local Host Lifecycle](local-host-lifecycle.md) and must not be read as a V1
+availability claim.
 
 ## Event categories
 
@@ -423,10 +432,10 @@ Core contracts remain broker-neutral. Responsibility is split deliberately:
   physical store path, health, restart, upgrade, and resource-limit lifecycle.
 
 Local and hosted deployments use the same JetStream adapter family and applicable
-conformance suites. The local composition is zero-touch and connects to
-Supervisor-managed NATS. The hosted composition connects to externally operated
-NATS. The user never installs, configures, or starts a broker for normal local
-use.
+conformance suites. The future local composition is zero-touch and connects to
+Supervisor-managed NATS. The V1 server composition connects to NATS operated
+outside the Host process. In the future local profile, the user never installs,
+configures, or starts a broker for normal local use.
 
 Hosted clustered readiness verifies JetStream metadata quorum, peer placement,
 and required stream/consumer replicas rather than only a TCP connection or Core
@@ -464,8 +473,8 @@ JetStream is not the authoritative source of aggregate state. Exact local store
 backup, corruption handling, journal completeness, and historical replay remain
 governed by OD-009 and OD-021.
 
-The managed local profile additionally enforces the evidence-backed constraints
-from ADR-0035:
+The future managed local profile additionally enforces the evidence-backed
+constraints from ADR-0035:
 
 - the Supervisor holds an OS-level exclusive lock for the complete lifetime of
   each physical store because NATS does not reject a second standalone owner;
@@ -490,8 +499,8 @@ manifest before leaving degraded mode. Bit-flipped or truncated stores, unexplai
 sequence gaps, and content-hash mismatches fail closed even when the broker starts.
 
 Physical disk exhaustion is not equivalent to a configured stream limit. The
-local profile maintains warning and critical headroom thresholds plus an emergency
-reserve. A critical filestore write signal stops new dispatch admission; recovery
+future local profile maintains warning and critical headroom thresholds plus an
+emergency reserve. A critical filestore write signal stops new dispatch admission; recovery
 requires released capacity, controlled restart, integrity reconciliation, and
 outbox/inbox recovery before readiness.
 

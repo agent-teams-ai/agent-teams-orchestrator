@@ -150,7 +150,7 @@ horizon defined by ADR-0037.
 
 ## Enforcement
 
-CI architecture gates test:
+CI architecture gates test today:
 
 - production source outside approved feature or package-assembly roots;
 - arbitrary hidden source, while excluding only Foundation-owned terminal
@@ -162,29 +162,36 @@ CI architecture gates test:
   `architecture/package-materialization-policy.yaml`, or packages whose
   declared materialization gate still has an unresolved status;
 - package manifests whose name, role, or owner differs from the catalog;
-- empty ceremonial DDD layers;
-- package export boundaries;
-- forbidden imports by layer;
-- cross-context deep imports;
-- dependency cycles;
-- provider-specific symbols in domain/application;
-- public contract imports in domain/application;
-- transport-specific symbols in contracts;
-- unversioned integration events.
-- one public control contract represented by both hand-authored Protobuf and JSON
-  Schema sources;
-- public Protobuf outside the accepted cross-language profile;
-- context packages importing consumer-owned ports from an integration adapter;
-- feature dependency cycles inside a bounded context;
-- broad `spi` and package-root barrel exports.
-- adapters classified from network direction instead of application-core
-  direction;
-- one broad adapter module combining inbound and outbound responsibilities.
+- package export boundaries and cross-context deep imports that bypass package
+  exports;
+- forbidden imports by layer, including public contract imports in domain and
+  application code, external imports, and ambient side effects in domain,
+  application, and contract code;
+- dependency cycles and feature dependency cycles inside a bounded context;
+- inbound adapters importing outbound adapters, and outbound adapters importing
+  inbound adapters;
 - materialized libraries without built ESM and declaration exports under
   `dist/**`, without `dist` in their packed files, or without blocking `build`,
   `check`, `test`, and `typecheck` scripts;
 - root TypeScript project references that omit, duplicate, or retain a stale
   materialized package entry.
+
+The following rules are normative but not yet automated. Reviewers check them
+manually until a validator with negative fixtures exists, and this list is
+expected to shrink as validators are added:
+
+- empty ceremonial DDD layers;
+- adapters classified from network direction instead of application-core
+  direction, and one broad adapter module combining inbound and outbound
+  responsibilities;
+- provider-specific symbols in domain/application;
+- transport-specific symbols in contracts;
+- unversioned integration events;
+- one public control contract represented by both hand-authored Protobuf and JSON
+  Schema sources;
+- public Protobuf outside the accepted cross-language profile;
+- context packages importing consumer-owned ports from an integration adapter;
+- broad `spi` and package-root barrel exports.
 
 TypeScript path aliases are conveniences, not boundaries. `package.json` exports,
 workspace dependencies, lint rules, and architecture tests enforce boundaries.

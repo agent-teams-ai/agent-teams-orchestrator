@@ -46,7 +46,7 @@ flowchart LR
     Activation["Team Activation"] -->|"Create or select"| Team["Team Topology"]
     Activation -->|"Optional placement"| Organization["Agent Organization"]
     Activation -->|"Admit"| Run["OrchestrationRun"]
-    Run -->|"Runtime capability"| Gateway["Runtime Gateway"]
+    Run -->|"Runtime capability"| Gateway["Runtime ACL"]
     Gateway --> AR["Agent Runtime"]
 ```
 
