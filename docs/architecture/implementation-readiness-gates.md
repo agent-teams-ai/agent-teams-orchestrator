@@ -230,9 +230,6 @@ Required evidence:
   commercial-authority mode declared by the selected profile;
 - OD-012 is resolved far enough to prove the selected profile's authentication,
   tenant isolation, service identity, revocation, browser, and feed authority;
-- OD-003 is resolved far enough to name the selected profile's persistence
-  composition, because the reliability catalog blocks both V1 profiles on
-  OD-003 and OD-012;
 - every client resource, request, subscription, cursor, cache, optimistic update,
   and Operation handle is fenced by Target identity and client generation;
 - profile switching closes the old generation and proves that late results
@@ -250,6 +247,10 @@ Required evidence:
 - deferred Fully Local packages retain the exact OD-021, OD-035, and OD-040 gate
   set and are rejected by scaffolding and topology checks until OD-040 names the
   accepted materialization decision.
+
+The reliability catalog separately blocks profile qualification on OD-003 and
+OD-012. The OD-003 blocker is a qualification gate, not a slice-admission
+criterion of this gate.
 
 This gate does not require implementing Fully Local or a commercial capability,
 and optional commercial capability does not block a baseline profile.

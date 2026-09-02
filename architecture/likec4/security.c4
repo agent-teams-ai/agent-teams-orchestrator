@@ -420,7 +420,7 @@ model {
   securityLandscape.hostedControlPlane.host -[authenticatedControl]-> securityLandscape.externalZone.identityAuthority 'Authenticate and obtain identity evidence' {
     metadata {
       integration_style 'Provider-neutral identity adapter'
-      authority 'Identity provider selection is unresolved; Access Control owns product authorization'
+      authority 'Identity provider selection is unresolved; the configured product authority provider owns product authorization; provider topology is open under OD-012'
       status 'proposed'
     }
   }

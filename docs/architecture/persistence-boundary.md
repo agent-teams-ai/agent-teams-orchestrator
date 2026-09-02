@@ -22,10 +22,12 @@ related:
 # Persistence Boundary
 
 ADR-0087 qualifies only the Managed SaaS and Standalone Self-Hosted Server
-profiles in V1, and both use PostgreSQL. The SQLite topology, `node:sqlite`
-driver, and local command-lane rules below describe the future Fully Local
-profile and must not be read as a V1 availability or implementation claim.
-ADR-0087 forbids placeholder SQLite repositories before that profile starts.
+profiles in V1; per ADR-0011 and the deployment profile matrix, both use
+PostgreSQL. The SQLite topology, `node:sqlite` driver, and local command-lane
+rules below describe the future Fully Local profile and must not be read as a
+V1 availability or implementation claim. ADR-0087 forbids placeholder SQLite
+repositories created merely to claim local support, while interface-level
+fixtures for future local adapters remain allowed.
 
 ## Principle
 
@@ -194,9 +196,10 @@ asynchronous even though the adapter executes a synchronous `DatabaseSync`
 transaction.
 
 Mutating use cases enter one single-writer command lane per bounded context before
-opening their Unit of Work. No network, broker, runtime, filesystem, Temporal, or
-other externally observable effect occurs inside that transaction. Complete
-outbox or durable command-dispatch intent is committed first.
+opening their Unit of Work. In every profile, no network, broker, runtime,
+filesystem, Temporal, or other externally observable effect occurs inside that
+transaction. Complete outbox or durable command-dispatch intent is committed
+first.
 
 A command lane is bounded in both admission and scheduling. It must not drain an
 unbounded burst of synchronous SQLite transactions in one event-loop turn.

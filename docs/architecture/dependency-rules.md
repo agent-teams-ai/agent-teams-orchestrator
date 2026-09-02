@@ -164,12 +164,12 @@ CI architecture gates test today:
 - package manifests whose name, role, or owner differs from the catalog;
 - package export boundaries and cross-context deep imports that bypass package
   exports;
-- forbidden imports by layer, including external imports and ambient side
-  effects in domain, application, and contract code;
+- forbidden imports by layer, including public contract imports in domain and
+  application code, external imports, and ambient side effects in domain,
+  application, and contract code;
 - dependency cycles and feature dependency cycles inside a bounded context;
-- adapters classified from network direction instead of application-core
-  direction, and one broad adapter module combining inbound and outbound
-  responsibilities;
+- inbound adapters importing outbound adapters, and outbound adapters importing
+  inbound adapters;
 - materialized libraries without built ESM and declaration exports under
   `dist/**`, without `dist` in their packed files, or without blocking `build`,
   `check`, `test`, and `typecheck` scripts;
@@ -177,10 +177,13 @@ CI architecture gates test today:
   materialized package entry.
 
 The following rules are normative but not yet automated. Reviewers check them
-manually until a validator with negative fixtures exists; this list must shrink,
-never grow:
+manually until a validator with negative fixtures exists, and this list is
+expected to shrink as validators are added:
 
 - empty ceremonial DDD layers;
+- adapters classified from network direction instead of application-core
+  direction, and one broad adapter module combining inbound and outbound
+  responsibilities;
 - provider-specific symbols in domain/application;
 - transport-specific symbols in contracts;
 - unversioned integration events;

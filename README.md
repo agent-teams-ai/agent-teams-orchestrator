@@ -57,7 +57,8 @@ Dependabot is limited to security updates by `open-pull-requests-limit: 0` in
 `.github/dependabot.yml`. New Foundation releases are adopted through dedicated,
 manually opened, reviewed exact-version pull requests; floating ranges and
 automerge are forbidden, and adding a capability is separate from updating
-package bytes.
+package bytes. This deviates from the Dependabot statement in ADR-0059 until a
+superseding ADR is accepted.
 
 The package catalog remains Orchestrator-owned. A qualified library boundary uses
 the Foundation Plan, Apply, and Recover protocol:

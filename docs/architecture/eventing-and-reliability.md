@@ -20,9 +20,10 @@ related:
 # Eventing and Reliability
 
 ADR-0087 qualifies only the Managed SaaS and Standalone Self-Hosted Server
-profiles in V1; they connect to externally operated NATS JetStream. Statements
-below about the local composition, the Local Supervisor, and the bundled
-`nats-server` describe the future Fully Local profile owned by
+profiles in V1; they connect to NATS JetStream operated outside the Host
+process, as the JetStream section below describes. Statements below about the
+local composition, the Local Supervisor, and the bundled `nats-server` describe
+the future Fully Local profile owned by
 [Local Host Lifecycle](local-host-lifecycle.md) and must not be read as a V1
 availability claim.
 
@@ -432,9 +433,9 @@ Core contracts remain broker-neutral. Responsibility is split deliberately:
 
 Local and hosted deployments use the same JetStream adapter family and applicable
 conformance suites. The future local composition is zero-touch and connects to
-Supervisor-managed NATS. The V1 server composition connects to externally
-operated NATS. In the future local profile, the user never installs, configures,
-or starts a broker for normal local use.
+Supervisor-managed NATS. The V1 server composition connects to NATS operated
+outside the Host process. In the future local profile, the user never installs,
+configures, or starts a broker for normal local use.
 
 Hosted clustered readiness verifies JetStream metadata quorum, peer placement,
 and required stream/consumer replicas rather than only a TCP connection or Core

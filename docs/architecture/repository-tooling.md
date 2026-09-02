@@ -277,8 +277,9 @@ Named catalogs exist only for accepted compatibility islands. The initial
 TypeScript 7 toolchain. A second version is not added directly to a package
 manifest.
 
-Dependabot may automate TypeScript patch and minor updates, but not a major
-transition. A major compiler transition must update the primary compiler and each
+Dependabot is limited to security updates, so TypeScript patch and minor updates
+arrive through manually opened reviewed pull requests, and a major transition
+never comes from the updater. A major compiler transition must update the primary compiler and each
 accepted compatibility island through one reviewed toolchain decision. This also
 prevents the updater from mistaking the `tooling-ts6` catalog for an obsolete
 copy of the primary TypeScript 7 dependency.

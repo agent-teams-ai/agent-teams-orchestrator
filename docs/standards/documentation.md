@@ -334,7 +334,7 @@ and adoption state. The remaining steps of `pnpm docs:protocol:check` validate:
 - direct directory-index completeness;
 - ADR lifecycle placement and metadata-backed collection indexes;
 - status-sensitive required document sections;
-- changed-path impact reporting;
+- safe, non-stale code anchors and changed-path impact reporting;
 - guarded creation from the current governed templates, covered by positive and
   negative fixture tests;
 - Mermaid syntax using the official Mermaid parser;

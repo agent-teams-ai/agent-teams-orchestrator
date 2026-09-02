@@ -152,7 +152,7 @@ model {
   identityRegistry -[publishedFacts]-> accessControl 'Principal facts' {
     metadata {
       integration_style 'Published principal facts'
-      authority 'Identity owns identity; the configured product authority provider owns grants; Access holds context-local grant projections'
+      authority 'Identity owns identity; the configured product authority provider owns grants; projection versus synchronous decision remains open under OD-012'
       status 'proposed'
     }
   }
@@ -166,7 +166,7 @@ model {
   accessControl -[decisionContract]-> applicationUseCases 'Authorization facts' {
     metadata {
       integration_style 'Consumer-owned decision port or context-local grant projection'
-      authority 'The configured product authority provider owns grant facts; Access supplies context-local projections; consumer owns operation policy'
+      authority 'The configured product authority provider owns grant facts; consuming features own their authorization ports; projection versus synchronous decision remains open under OD-012'
       status 'proposed'
     }
   }
@@ -271,7 +271,7 @@ model {
   agentOrganization -[publishedFacts]-> accessControl 'Structure facts' {
     metadata {
       integration_style 'Versioned structure facts'
-      authority 'Organization owns hierarchy; the configured product authority provider owns grants; Access holds context-local grant projections'
+      authority 'Organization owns hierarchy; the configured product authority provider owns grants; projection versus synchronous decision remains open under OD-012'
       status 'proposed'
     }
   }
