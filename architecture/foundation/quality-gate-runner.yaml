@@ -1,0 +1,12 @@
+schemaVersion: 1
+packageManager: pnpm
+profiles:
+  - id: ci-diagnostics
+    concurrency: 3
+    tasks:
+      - id: lint:fast
+        timeoutMs: 120000
+      - id: architecture:feature-module-profile
+        timeoutMs: 120000
+      - id: specs:check
+        timeoutMs: 120000

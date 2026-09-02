@@ -2,6 +2,8 @@ schemaVersion: 1
 project:
   id: agent-teams-orchestrator
 capabilities:
+  quality.gate-runner:
+    configPath: architecture/foundation/quality-gate-runner.yaml
   architecture.source-dependencies:
     configPath: architecture/foundation/source-dependencies.yaml
   documentation.local-references:
