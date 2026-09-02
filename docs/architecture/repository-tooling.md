@@ -21,6 +21,8 @@ related:
 code_anchors:
   - pattern: architecture/foundation/document-authoring.yaml
     enforcement: advisory
+  - pattern: architecture/foundation/quality-gate-runner.yaml
+    enforcement: advisory
   - pattern: architecture/package-catalog.yaml
     enforcement: advisory
   - pattern: scripts/architecture/**
@@ -96,6 +98,26 @@ consumer conformance test. During a measured parity window the donor remains a
 blocking oracle; after parity, only Orchestrator-specific residue remains. The
 foundation checkout is accepted only through the guarded local lifecycle and is
 rejected by CI.
+
+### Advisory quality diagnostics
+
+The Orchestrator owns `architecture/foundation/quality-gate-runner.yaml`. Its one
+`ci-diagnostics` profile allows only the existing root `lint:fast`,
+`architecture:feature-module-profile`, and `specs:check` scripts. These
+read-only leaves run with concurrency three and a 120000 ms deadline each. The
+deadlines cap the concurrent diagnostic at two minutes within the Ubuntu
+Architecture job's 15-minute budget, which has remained unchanged since it was
+introduced. This ceiling is not timing evidence or a speed claim.
+
+The Ubuntu CI invocation emits canonical JSON only after the independent
+`pnpm check` succeeds and is advisory through `continue-on-error`; it neither
+removes nor replaces any required gate. The profile does not authorize `check`,
+`check:fast`, `check:changed`, architecture aggregates, `foundation:*`, `docs:*`,
+`packages:*`, `typecheck*`, `security:*`, `reliability:*`, `specs:test`,
+`specs:generate`, Nx, scaffolding, preview, QGR wrapper, writing, runtime, or
+agent-flow scripts. It writes no report file or committed timing artifact and
+provides no Windows evidence. Rollback removes the advisory CI step, package
+script, capability declaration, and consumer-owned profile together.
 
 The current exact Foundation release keeps `workspace.dependency-declarations`,
 `architecture.source-dependencies`, `documentation.local-references`, and

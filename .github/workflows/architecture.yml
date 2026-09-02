@@ -31,6 +31,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      - name: Run advisory quality diagnostics
+        continue-on-error: true
+        run: pnpm quality:diagnostic
       - if: github.event_name == 'pull_request'
         run: pnpm docs:impact -- --base "${{ github.event.pull_request.base.sha }}" --strict
 

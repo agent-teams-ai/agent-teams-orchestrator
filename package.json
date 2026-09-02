@@ -69,6 +69,7 @@
     "nx:projects": "NX_NO_CLOUD=true NX_DAEMON=false nx show projects",
     "packages:check": "pnpm --filter \"./packages/**\" run check",
     "packages:typecheck": "pnpm --filter \"./packages/**\" run typecheck",
+    "quality:diagnostic": "agent-teams-foundation gate run ci-diagnostics --format json",
     "reliability:check": "pnpm run reliability:validate && pnpm run reliability:test",
     "reliability:test": "node --test --test-concurrency=1 scripts/reliability/validate-reliability-foundation.test.mjs",
     "reliability:validate": "node scripts/reliability/validate-reliability-foundation.mjs",
