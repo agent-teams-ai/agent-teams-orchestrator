@@ -61,6 +61,10 @@ question. `Resolved` is historical and must relate to at least one deciding ADR.
 | OD-041 | [Shared extension foundation and artifact distribution](OD-041-shared-extension-foundation-and-artifact-distribution.md) | architecture | Resolved by ADR-0096 |
 | OD-042 | [Frontend extension contribution model](OD-042-frontend-extension-contribution-model.md) | architecture | Open |
 | OD-043 | [Extension lifecycle, catalog, and hot update](OD-043-extension-lifecycle-catalog-and-hot-update.md) | architecture | Open |
+| OD-044 | [Reusable Agent Profile membership](OD-044-reusable-agent-profile-membership.md) | team-topology | Resolved by ADR-0100 |
+| OD-045 | [Concurrent Agent Profile use](OD-045-concurrent-agent-profile-use.md) | run-orchestration | Resolved by ADR-0101 |
+| OD-046 | [Run roster overrides](OD-046-run-roster-overrides.md) | run-orchestration | Resolved by ADR-0101 |
+| OD-047 | [Team coordination model](OD-047-team-coordination-model.md) | architecture/domain | Resolved by ADR-0101 |
 
 Use the [open-decision template](../templates/open-decision.md) for new entries.
 CI verifies that every record is listed and that table owner and status match its

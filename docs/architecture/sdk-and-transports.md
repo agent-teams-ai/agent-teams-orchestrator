@@ -187,6 +187,25 @@ normal public SDK. The orchestrator may expose explicitly durable NATS
 integration surfaces without making broker configuration the client programming
 model.
 
+## Additional client API styles
+
+Connect remains the canonical public control transport. A real client need may
+later justify GraphQL as an additional inbound adapter, most likely for composed
+read models used by Web or Desktop clients. Adding it does not change application
+use cases, domain models, or the handwritten SDK semantics.
+
+A GraphQL adapter owns its schema, resolvers, authentication mapping, pagination,
+error and nullability mapping, query cost limits, and transport-specific tests.
+It maps into the same transport-independent application models as Connect and
+must pass the same capability behavior fixtures. It is not a second source of
+business contracts, does not expose domain entities directly, and does not turn
+the internal transport interface into a public extension point.
+
+GraphQL is added capability by capability after an explicit consumer and query
+shape exist. The architecture keeps that addition local to the inbound edge, but
+does not pretend that schema design, authorization, limits, subscriptions, and
+compatibility are free implementation work.
+
 ## Client realtime edge
 
 Centrifugo is the default replaceable realtime edge selected by ADR-0058. It

@@ -10,6 +10,7 @@ related:
   - ADR-0076
   - OD-010
   - OD-015
+  - research.team-creation-legacy-capability-inventory-2026-08-27
 ---
 
 # Migration Boundary
@@ -79,6 +80,11 @@ ownership, ports, and transaction boundaries.
 The read-only legacy Electron and OpenCode audit is recorded in the
 [research report](../research/legacy-electron-opencode-behavior-audit-2026-07-30.md).
 Its provider-specific code remains evidence, not a target package layout.
+
+The complete create-Team capability ledger and delivery dispositions are recorded
+in the [Team creation inventory](../research/team-creation-legacy-capability-inventory-2026-08-27.md).
+It separates the module pilot, first product MVP candidates, later capabilities,
+and migration-only legacy fields without turning research into contract authority.
 
 In particular:
 

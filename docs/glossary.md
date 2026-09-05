@@ -20,6 +20,23 @@ The stable product identity of an agent definition owned by Team Topology and
 represented by `AgentProfileId`. It is distinct from an authenticated principal,
 team membership, and every AR runtime session.
 
+The user-facing resource is called an **Agent**. A Team version pins an exact
+Agent definition version. Copying an Agent creates a new identity; it does not
+merge membership, active occupancy, or statistics with the source.
+
+## Agent occupancy
+
+Run Orchestration's durable claim that one Agent is reserved for one active Run.
+It is not a worker lease. Timeout, controller loss, or an ambiguous provider start
+does not release it without evidence that the runtime effect cannot continue.
+
+## Run coordinator
+
+An ordinary Run participant selected from a Team default or explicit Run
+override to receive product coordination context and routing. The selection does
+not grant authorization, approval, cancellation, secret, or runtime authority and
+does not make other participants its provider children.
+
 ## Agent Attention
 
 The bounded context that decides whether an admitted source fact is relevant and
