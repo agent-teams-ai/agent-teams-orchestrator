@@ -486,6 +486,16 @@
       "id": "ADR-0098",
       "path": "docs/decisions/0098-adopt-organization-feature-module-standard-v1.md",
       "immutableDigest": "sha256:024e6eaa03b68acc2a90ac23c69ef47157af8ad9236f8b78590b96ec3b36b156"
+    },
+    {
+      "id": "ADR-0100",
+      "path": "docs/decisions/0100-persistent-agents-and-exclusive-team-membership.md",
+      "immutableDigest": "sha256:277efe730a37d1aa3b22270964cf58586ae8008d655e73ebbc2e16132038d652"
+    },
+    {
+      "id": "ADR-0101",
+      "path": "docs/decisions/0101-run-specific-rosters-coordination-and-exclusive-agent-occupancy.md",
+      "immutableDigest": "sha256:d5370bc33e8e3bb12a0440bc9d1d98ca8160814d5dec441f5db3568494460e33"
     }
   ]
 }
