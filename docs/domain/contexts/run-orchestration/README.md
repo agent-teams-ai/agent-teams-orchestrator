@@ -16,6 +16,7 @@ related:
   - ADR-0065
   - ADR-0067
   - ADR-0076
+  - ADR-0101
   - architecture.context-map
   - architecture.runtime-boundary
   - OD-005
@@ -81,6 +82,24 @@ ADR-0079 further fixes the runtime integration boundaries:
   predecessor;
 - consumer-owned ports express Run intent, while the Runtime ACL only translates
   representations and owns no binding, cursor, checkpoint, or recovery state.
+
+ADR-0101 adds the participant-admission product rules:
+
+- every immutable `RunPlanVersion` records its exact source Team version, typed
+  Run-only roster overlay, and fully materialized effective participants;
+- a Team edit and a Run-only exclusion, replacement, or coordinator change are
+  different commands with different owners;
+- the effective coordinator is one ordinary `RunParticipant`, selected from the
+  Team default or an explicit Run override, and gains no implicit authority;
+- one Agent may hold at most one unreleased active Run occupancy;
+- occupancy is durable database state, not a heartbeat lease, and unknown AR
+  outcomes remain blocking until safely reconciled or contained.
+
+The occupancy record stores only product identities, authority generations,
+stable command identities, lifecycle, and opaque runtime references. Worker
+leases may transfer process-manager work but never release or duplicate product
+occupancy. Plan promotion, participant and occupancy writes, receipt, and outbox
+facts share one Run Orchestration transaction; AR effects occur after commit.
 
 `WorkPlacement` stores opaque Work references, expected revisions, participant
 and binding references, checkpoints, and process state. It never copies the Work
