@@ -113,10 +113,8 @@ async function makeSourceFixture() {
     writeFile(path.join(root, "packages/platform/local-host-control/src/features/host-discovery/index.ts"), "export {};\n"),
     cp(path.join(repositoryRoot, "docs/decisions/0001-headless-event-driven-modular-monolith.md"), path.join(root, "docs/decisions/0001-frozen.md")),
     writeFile(path.join(root, "docs/open-decisions/OD-001-frozen.md"), "---\nid: OD-001\ntype: open-decision\nstatus: open\nowner: architecture/tooling\nsummary: Existing decision used by protocol blocker parity.\n---\n\n# OD-001: Existing Open Decision\n"),
-    ...[
-      symlink(docsPackageRoot, path.join(root, "node_modules/@agent-teams/docs-protocol"), process.platform === "win32" ? "junction" : "dir"),
-      symlink(foundationPackageRoot, path.join(root, "node_modules/@agent-teams/engineering-foundation"), process.platform === "win32" ? "junction" : "dir"),
-    ],
+    symlink(docsPackageRoot, path.join(root, "node_modules/@agent-teams/docs-protocol"), process.platform === "win32" ? "junction" : "dir"),
+    symlink(foundationPackageRoot, path.join(root, "node_modules/@agent-teams/engineering-foundation"), process.platform === "win32" ? "junction" : "dir"),
   ]);
   return root;
 }
