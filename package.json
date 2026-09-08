@@ -39,6 +39,7 @@
     "docs:impact": "node scripts/docs/check-doc-impact.mjs",
     "docs:info": "agent-teams-docs info --consumer . --profile architecture/foundation/docs-protocol.yaml",
     "docs:find": "agent-teams-docs find --consumer . --profile architecture/foundation/docs-protocol.yaml",
+    "docs:context": "agent-teams-docs context --consumer . --profile architecture/foundation/docs-protocol.yaml",
     "docs:new": "agent-teams-docs new --consumer . --profile architecture/foundation/docs-protocol.yaml",
     "docs:doctor": "agent-teams-docs doctor --consumer . --profile architecture/foundation/docs-protocol.yaml",
     "docs:recover": "agent-teams-docs recover --consumer . --profile architecture/foundation/docs-protocol.yaml",
@@ -89,8 +90,9 @@
     "typecheck:root": "tsc --project tsconfig.json --noEmit --pretty false"
   },
   "devDependencies": {
-    "@agent-teams/docs-protocol": "0.4.1",
-    "@agent-teams/engineering-foundation": "0.21.0",
+    "@agent-teams/docs-protocol": "0.6.0",
+    "@agent-teams/docs-protocol-agent-teams": "0.2.0",
+    "@agent-teams/engineering-foundation": "1.1.0",
     "@xstate/graph": "catalog:",
     "ajv": "catalog:",
     "ajv-formats": "catalog:",

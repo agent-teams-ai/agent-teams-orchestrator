@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  appendFile,
   cp,
   mkdir,
   mkdtemp,
@@ -16,6 +17,8 @@ import { fileURLToPath } from "node:url";
 
 import {
   docsCheckV2,
+  docsContextV1,
+  docsFindV3,
   docsDoctorV2,
   docsNewV2,
   docsRecoverV2,
@@ -76,7 +79,7 @@ function indexSource(id, title) {
   return `---\nid: ${id}\ntype: index\nstatus: active\nowner: architecture/tooling\nsummary: Fixture index for unified documentation protocol parity tests.\n---\n\n# ${title}\n`;
 }
 
-async function makeSourceFixture({ installPackages = true } = {}) {
+async function makeSourceFixture() {
   const root = await mkdtemp(path.join(tmpdir(), "atd-o-"));
   await Promise.all([
     mkdir(path.join(root, "architecture/foundation"), { recursive: true }),
@@ -89,7 +92,7 @@ async function makeSourceFixture({ installPackages = true } = {}) {
     mkdir(path.join(root, "docs/operations"), { recursive: true }),
     mkdir(path.join(root, "packages/platform/local-host-control/src/features/host-discovery"), { recursive: true }),
     mkdir(path.join(root, "tooling"), { recursive: true }),
-    ...(installPackages ? [mkdir(path.join(root, "node_modules/@agent-teams"), { recursive: true })] : []),
+    mkdir(path.join(root, "node_modules/@agent-teams"), { recursive: true }),
   ]);
   await Promise.all([
     cp(path.join(repositoryRoot, "architecture/foundation/document-authoring.yaml"), path.join(root, "architecture/foundation/document-authoring.yaml")),
@@ -99,7 +102,7 @@ async function makeSourceFixture({ installPackages = true } = {}) {
     cp(path.join(repositoryRoot, "docs/templates"), path.join(root, "docs/templates"), { recursive: true }),
     cp(path.join(repositoryRoot, "docs/metadata.schema.json"), path.join(root, "docs/metadata.schema.json")),
     cp(path.join(repositoryRoot, "docs/owners.yaml"), path.join(root, "docs/owners.yaml")),
-    writeFile(path.join(root, "package.json"), `${JSON.stringify({ name: "docs-parity-fixture", private: true, type: "module", scripts: Object.fromEntries(["check", "doctor", "find", "info", "new", "recover"].map((command) => [`docs:${command}`, `agent-teams-docs ${command} --consumer . --profile architecture/foundation/docs-protocol.yaml`])), devDependencies: { "@agent-teams/docs-protocol": docsPackageVersion, "@agent-teams/engineering-foundation": foundationPackageVersion } }, null, 2)}\n`),
+    writeFile(path.join(root, "package.json"), `${JSON.stringify({ name: "docs-parity-fixture", private: true, type: "module", scripts: Object.fromEntries(["check", "context", "doctor", "find", "info", "new", "recover"].map((command) => [`docs:${command}`, `agent-teams-docs ${command} --consumer . --profile architecture/foundation/docs-protocol.yaml`])), devDependencies: { "@agent-teams/docs-protocol": docsPackageVersion, "@agent-teams/engineering-foundation": foundationPackageVersion } }, null, 2)}\n`),
     writeFile(path.join(root, "docs/README.md"), indexSource("docs.index", "Documentation")),
     writeFile(path.join(root, "docs/decisions/README.md"), indexSource("docs.decisions.index", "Decisions")),
     writeFile(path.join(root, "docs/open-decisions/README.md"), indexSource("docs.open-decisions.index", "Open Decisions")),
@@ -110,10 +113,10 @@ async function makeSourceFixture({ installPackages = true } = {}) {
     writeFile(path.join(root, "packages/platform/local-host-control/src/features/host-discovery/index.ts"), "export {};\n"),
     cp(path.join(repositoryRoot, "docs/decisions/0001-headless-event-driven-modular-monolith.md"), path.join(root, "docs/decisions/0001-frozen.md")),
     writeFile(path.join(root, "docs/open-decisions/OD-001-frozen.md"), "---\nid: OD-001\ntype: open-decision\nstatus: open\nowner: architecture/tooling\nsummary: Existing decision used by protocol blocker parity.\n---\n\n# OD-001: Existing Open Decision\n"),
-    ...(installPackages ? [
+    ...[
       symlink(docsPackageRoot, path.join(root, "node_modules/@agent-teams/docs-protocol"), process.platform === "win32" ? "junction" : "dir"),
       symlink(foundationPackageRoot, path.join(root, "node_modules/@agent-teams/engineering-foundation"), process.platform === "win32" ? "junction" : "dir"),
-    ] : []),
+    ],
   ]);
   return root;
 }
@@ -187,15 +190,24 @@ for (const scenario of cases) {
     try {
       const preflight = await docsCheckV2({ consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" });
       assert.equal(preflight.exitCode, 0, JSON.stringify(preflight.envelope));
-      const result = await docsNewV2({
+      const request = {
         consumerRoot: source,
         profilePath: "architecture/foundation/docs-protocol.yaml",
-        apply: true,
+        apply: false,
         intent: scenario.intent,
         related: scenario.related,
         blockedBy: scenario.blockedBy,
         codeAnchors: scenario.codeAnchors,
         additionalMetadata: scenario.additionalMetadata,
+      };
+      const preview = await docsNewV2(request);
+      assert.equal(preview.exitCode, 0, JSON.stringify(preview.envelope));
+      assert.equal(preview.envelope.result.writeState, "preview");
+      await assert.rejects(readFile(path.join(source, scenario.expectedPath)), { code: "ENOENT" });
+      const result = await docsNewV2({
+        ...request,
+        apply: true,
+        expectedPlanDigest: preview.envelope.result.planDigest,
       });
       assert.equal(result.exitCode, 0, JSON.stringify(result.envelope));
       assert.equal(result.envelope.result.documentPath, scenario.expectedPath);
@@ -209,6 +221,19 @@ for (const scenario of cases) {
         "utf8",
       );
       assert.equal(actual, expected);
+      assert.equal(preview.envelope.result.compiled.document.content, expected);
+      const { indexPath, markdownLink } = result.envelope.result.reachability;
+      await appendFile(path.join(source, indexPath), `\n${markdownLink}\n`);
+      const context = await docsContextV1({
+        consumerRoot: source,
+        profilePath: "architecture/foundation/docs-protocol.yaml",
+        query: { id: scenario.intent.id },
+      });
+      assert.equal(context.exitCode, 0, JSON.stringify(context.envelope));
+      assert.equal(context.envelope.result.includedDocuments, 1);
+      assert.ok(context.envelope.result.content.includes(scenario.intent.id));
+      const checked = await docsCheckV2(request);
+      assert.equal(checked.exitCode, 0, JSON.stringify(checked.envelope));
     } finally {
       await rm(source, { recursive: true, force: true });
     }
@@ -216,11 +241,12 @@ for (const scenario of cases) {
 }
 
 requiresStrictDirectoryDurability("shared qualification runner proves all six types on owned disposable copies", async () => {
-  const source = await makeSourceFixture({ installPackages: false });
+  const source = await makeSourceFixture();
   try {
     for (const scenario of cases) {
       const receipt = await runDocsProtocolQualification({
         fixtureRoot: source,
+        profilePath: "architecture/foundation/docs-protocol.yaml",
         scenario: {
           find: { query: { id: "ADR-0001" }, expectedIds: ["ADR-0001"] },
           newDocument: {
@@ -267,10 +293,17 @@ requiresUnsupportedStrictDirectoryDurability("Windows previews all six types and
       await assert.rejects(readFile(path.join(source, scenario.expectedPath)), { code: "ENOENT" });
     }
 
+    const approvedPreview = await docsNewV2({
+      consumerRoot: source,
+      profilePath: "architecture/foundation/docs-protocol.yaml",
+      apply: false,
+      intent: cases[0].intent,
+    });
     const applied = await docsNewV2({
       consumerRoot: source,
       profilePath: "architecture/foundation/docs-protocol.yaml",
       apply: true,
+      expectedPlanDigest: approvedPreview.envelope.result.planDigest,
       intent: cases[0].intent,
     });
     assert.equal(applied.exitCode, 1);
@@ -314,6 +347,59 @@ test("shared writer rejects unknown owners and unresolved relation IDs without m
       );
       await assert.rejects(readFile(path.join(source, request.expectedPath)), { code: "ENOENT" });
     }
+  } finally {
+    await rm(source, { recursive: true, force: true });
+  }
+});
+
+test("public find and context preserve exact metadata filtering and successful empty results", async () => {
+  const source = await makeSourceFixture();
+  const request = { consumerRoot: source, profilePath: "architecture/foundation/docs-protocol.yaml" };
+  try {
+    const found = await docsFindV3({ ...request, query: { id: "ADR-0001", type: "adr" } });
+    assert.equal(found.exitCode, 0, JSON.stringify(found.envelope));
+    assert.deepEqual(found.envelope.result.documents.map(({ id }) => id), ["ADR-0001"]);
+    const missing = await docsFindV3({ ...request, query: { id: "ADR-0001", type: "runbook" } });
+    assert.equal(missing.exitCode, 0, JSON.stringify(missing.envelope));
+    assert.equal(missing.envelope.result.matches, 0);
+    assert.deepEqual(missing.envelope.result.documents, []);
+    const context = await docsContextV1({ ...request, query: { id: "ADR-0001" } });
+    assert.equal(context.exitCode, 0, JSON.stringify(context.envelope));
+    assert.equal(context.envelope.result.includedDocuments, 1);
+    assert.equal(context.envelope.result.truncated, false);
+    assert.ok(context.envelope.result.content.includes("ADR-0001"));
+  } finally {
+    await rm(source, { recursive: true, force: true });
+  }
+});
+
+test("public writer rejects malformed, mismatched, and stale reviewed plan digests", async () => {
+  const source = await makeSourceFixture();
+  const request = {
+    consumerRoot: source,
+    profilePath: "architecture/foundation/docs-protocol.yaml",
+    intent: cases[0].intent,
+  };
+  try {
+    const preview = await docsNewV2({ ...request, apply: false });
+    assert.equal(preview.exitCode, 0, JSON.stringify(preview.envelope));
+    assert.match(preview.envelope.result.planDigest, /^sha256:[a-f0-9]{64}$/u);
+    for (const { expectedPlanDigest, outcome, ruleId, exitCode } of [
+      { expectedPlanDigest: "invalid", exitCode: 2, outcome: "invalid-input", ruleId: "docs.new.expected-plan-digest-invalid" },
+      { expectedPlanDigest: `sha256:${"0".repeat(64)}`, exitCode: 1, outcome: "authority-stale", ruleId: "docs.new.plan-digest-stale" },
+    ]) {
+      const denied = await docsNewV2({ ...request, apply: true, expectedPlanDigest });
+      assert.equal(denied.exitCode, exitCode, JSON.stringify(denied.envelope));
+      assert.equal(denied.envelope.outcome, outcome);
+      assert.ok(denied.envelope.diagnostics.some((diagnostic) => diagnostic.ruleId === ruleId));
+      await assert.rejects(readFile(path.join(source, cases[0].expectedPath)), { code: "ENOENT" });
+    }
+    await appendFile(path.join(source, "docs/templates/adr.md"), "\nReviewed template changed.\n");
+    const stale = await docsNewV2({ ...request, apply: true, expectedPlanDigest: preview.envelope.result.planDigest });
+    assert.equal(stale.exitCode, 1, JSON.stringify(stale.envelope));
+    assert.equal(stale.envelope.outcome, "authority-stale");
+    assert.ok(stale.envelope.diagnostics.some(({ ruleId }) => ruleId === "docs.new.plan-digest-stale"));
+    await assert.rejects(readFile(path.join(source, cases[0].expectedPath)), { code: "ENOENT" });
   } finally {
     await rm(source, { recursive: true, force: true });
   }

@@ -13,18 +13,20 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import Ajv2020 from "ajv/dist/2020.js";
+import foundationManifest from "@agent-teams/engineering-foundation/package.json" with { type: "json" };
 import { planScaffoldFromFile } from "@agent-teams/engineering-foundation/scaffolding";
 import YAML from "yaml";
 
 import { writeEmptyMaterializationPolicy } from "./topology-fixture-lib.mjs";
+import { verifyQualificationRecord } from "./scaffolding-qualification-record-fixture.mjs";
 import { verifyPendingApplyRecoveryPrecedence } from "./scaffolding-recovery-precedence-fixture.mjs";
 import {
-  journalPath,
+  assertPendingScaffold,
+  assertPublishedPrefix,
   operationBytes,
   operationSources,
   pathExists,
-  writeJournal,
+  interruptScaffold,
   writeOperationPostimage,
 } from "./scaffolding-transaction-fixture.mjs";
 
@@ -73,8 +75,8 @@ function runPackageScript(root, arguments_) {
       ? "pnpm.cmd"
       : "pnpm";
   const commandArguments = packageManagerEntrypoint
-    ? [packageManagerEntrypoint, "architecture:scaffold-package"]
-    : ["architecture:scaffold-package"];
+    ? [packageManagerEntrypoint, "--silent", "architecture:scaffold-package"]
+    : ["--silent", "architecture:scaffold-package"];
   return spawnSync(
     command,
     [...commandArguments, "--", ...arguments_, "--root", root],
@@ -237,81 +239,6 @@ async function addAcceptedFeature(root, entry) {
   );
 }
 
-async function verifyQualificationRecord() {
-  const schema = JSON.parse(
-    await readFile(
-      path.join(
-        repositoryRoot,
-        "architecture/foundation/scaffolding-qualification.schema.json",
-      ),
-      "utf8",
-    ),
-  );
-  const record = YAML.parse(
-    await readFile(
-      path.join(
-        repositoryRoot,
-        "architecture/foundation/scaffolding-qualification.yaml",
-      ),
-      "utf8",
-    ),
-  );
-  const config = YAML.parse(
-    await readFile(
-      path.join(repositoryRoot, "architecture/foundation/scaffolding.yaml"),
-      "utf8",
-    ),
-  );
-  const validate = new Ajv2020({ allErrors: true, strict: true }).compile(schema);
-  assert.equal(validate(record), true, JSON.stringify(validate.errors, null, 2));
-  const versionCases = [
-    ["0.16.0-rc.0+consumer.1", true], ["0.16.0+consumer.1", true],
-    ["0.16", false], ["01.16.0", false], ["0.16.0-01", false],
-    ["0.16.0-", false], ["0.16.0+", false], ["0.16.0_rc.0", false],
-  ];
-  for (const [foundationVersion, expected] of versionCases) {
-    assert.equal(validate({ ...record, foundationVersion }), expected,
-      `${foundationVersion} has an unexpected SemVer result`);
-  }
-  const manifest = JSON.parse(
-    await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
-  );
-  assert.equal(
-    record.foundationVersion,
-    manifest.devDependencies["@agent-teams/engineering-foundation"],
-  );
-  const composition = config.compositions.find(
-    (candidate) => candidate.id === record.composition.id,
-  );
-  assert.ok(composition, "qualified Composition is missing from canonical config");
-  assert.equal(record.consumer, config.projectId);
-  assert.equal(record.composition.targetCatalogPath, config.targetCatalogPath);
-  assert.equal(record.recipe.id, composition.recipe.ref.id);
-  assert.equal(
-    record.recipe.contractVersion,
-    composition.recipe.ref.contractVersion,
-  );
-  requireSuccess(
-    "ignored local scaffolding state",
-    spawnSync(
-      "git",
-      ["check-ignore", "-q", ".agent-teams-local/scaffolding-transaction.json"],
-      { cwd: repositoryRoot, encoding: "utf8" },
-    ),
-  );
-  const trackedLocalState = requireSuccess(
-    "tracked local scaffolding state query",
-    spawnSync("git", ["ls-files", "--", ".agent-teams-local"], {
-      cwd: repositoryRoot,
-      encoding: "utf8",
-    }),
-  );
-  assert.equal(
-    trackedLocalState.stdout.trim(),
-    "",
-    ".agent-teams-local must never contain tracked files",
-  );
-}
 
 async function verifyDonorAndVariants() {
   const qualification = YAML.parse(
@@ -528,7 +455,9 @@ async function verifyRecoveryWithoutTopologyGate() {
   };
   const root = await createFixture([entry]);
   const plan = planTarget(root, entry.id);
-  await writeJournal(root, plan);
+  interruptScaffold(root, plan);
+  await assertPendingScaffold(root);
+  await assertPublishedPrefix(root, plan, 0);
   await mkdir(path.join(root, "packages/shared"), { recursive: true });
   await writeFile(
     path.join(root, "packages/shared/rogue.ts"),
@@ -562,10 +491,9 @@ async function verifyRecoveryWithoutTopologyGate() {
   };
   const partialRoot = await createFixture([partialEntry]);
   const partialPlan = planTarget(partialRoot, partialEntry.id);
-  await writeOperationPostimage(partialRoot, partialPlan.operations[0]);
-  await writeJournal(partialRoot, partialPlan, (_operation, index) =>
-    index === 0 ? "published" : index === 1 ? "publishing" : "pending",
-  );
+  interruptScaffold(partialRoot, partialPlan, "after-journal-operation-publishing", 2);
+  await assertPendingScaffold(partialRoot);
+  await assertPublishedPrefix(partialRoot, partialPlan, 1);
   const partialRecovery = requireSuccess(
     "partial publication recovery",
     runWrapper(partialRoot, ["recover", "--json"]),
@@ -587,7 +515,9 @@ async function verifyRecoveryWithoutTopologyGate() {
   };
   const conflictRoot = await createFixture([conflictEntry]);
   const conflictPlan = planTarget(conflictRoot, conflictEntry.id);
-  await writeJournal(conflictRoot, conflictPlan);
+  interruptScaffold(conflictRoot, conflictPlan);
+  await assertPendingScaffold(conflictRoot);
+  await assertPublishedPrefix(conflictRoot, conflictPlan, 0);
   await writeOperationPostimage(
     conflictRoot,
     conflictPlan.operations[0],
@@ -601,7 +531,9 @@ async function verifyRecoveryWithoutTopologyGate() {
     parseJsonOutput("conflicting recovery", conflictRecovery).outcome,
     "recovery-required",
   );
-  assert.equal(await pathExists(journalPath(conflictRoot)), true);
+  await assertPendingScaffold(conflictRoot);
+  assert.equal(await readFile(path.join(conflictRoot, conflictPlan.operations[0].path), "utf8"),
+    "conflicting third-party bytes\n");
 
   const staleEntry = {
     id: "platform.stale-recovery",
@@ -612,10 +544,9 @@ async function verifyRecoveryWithoutTopologyGate() {
   };
   const staleRoot = await createFixture([staleEntry]);
   const stalePlan = planTarget(staleRoot, staleEntry.id);
-  await writeOperationPostimage(staleRoot, stalePlan.operations[0]);
-  await writeJournal(staleRoot, stalePlan, (_operation, index) =>
-    index === 0 ? "published" : "pending",
-  );
+  interruptScaffold(staleRoot, stalePlan, "after-journal-operation-published");
+  await assertPendingScaffold(staleRoot);
+  await assertPublishedPrefix(staleRoot, stalePlan, 1);
   const staleOwner = path.join(staleRoot, ownerPath(staleEntry.owner_document));
   await writeFile(
     staleOwner,
@@ -629,7 +560,7 @@ async function verifyRecoveryWithoutTopologyGate() {
     parseJsonOutput("stale recovery", staleRecovery).outcome,
     "recovery-required",
   );
-  assert.equal(await pathExists(journalPath(staleRoot)), true);
+  await assertPendingScaffold(staleRoot);
   assert.equal(
     await pathExists(path.join(staleRoot, stalePlan.operations[1].path)),
     false,
@@ -654,7 +585,9 @@ async function verifyRecoveryWithoutTopologyGate() {
   const pendingRoot = await createFixture(pendingEntries);
   const pendingPlanA = planTarget(pendingRoot, pendingEntries[0].id);
   planTarget(pendingRoot, pendingEntries[1].id);
-  await writeJournal(pendingRoot, pendingPlanA);
+  interruptScaffold(pendingRoot, pendingPlanA);
+  await assertPendingScaffold(pendingRoot);
+  await assertPublishedPrefix(pendingRoot, pendingPlanA, 0);
   await verifyPendingApplyRecoveryPrecedence({
     pendingRoot,
     pendingEntries,
@@ -671,15 +604,14 @@ async function verifyRecoveryWithoutTopologyGate() {
     owner_document: "architecture.journal-temporary",
   };
   const temporaryRoot = await createFixture([temporaryEntry]);
-  planTarget(temporaryRoot, temporaryEntry.id);
-  const journalTemporary = `${journalPath(temporaryRoot)}.tmp`;
-  await writeFile(journalTemporary, "unresolved journal temporary\n");
+  const temporaryPlan = planTarget(temporaryRoot, temporaryEntry.id);
+  interruptScaffold(temporaryRoot, temporaryPlan, "after-journal-temporary-synced");
   requireFailure(
     "unresolved journal temporary",
     runWrapper(temporaryRoot, ["recover", "--json"]),
     /temporary/u,
   );
-  await rm(journalTemporary);
+  assert.equal(await pathExists(path.join(temporaryRoot, temporaryEntry.path)), false);
 }
 
 async function verifyTamperingAndFilesystemBoundaries() {
@@ -751,7 +683,9 @@ async function verifyTamperingAndFilesystemBoundaries() {
     /canonical Orchestrator Composition/u,
   );
   assert.equal(await pathExists(path.join(tamperRoot, tamperEntry.path)), false);
-  await writeJournal(tamperRoot, alternatePlan);
+  interruptScaffold(tamperRoot, alternatePlan);
+  await assertPendingScaffold(tamperRoot);
+  await assertPublishedPrefix(tamperRoot, alternatePlan, 0);
   requireFailure(
     "recovery journal from alternate authority",
     runWrapper(tamperRoot, ["recover", "--json"]),
@@ -818,12 +752,17 @@ async function verifyTamperingAndFilesystemBoundaries() {
 }
 
 try {
-  await verifyQualificationRecord();
+  await verifyQualificationRecord(repositoryRoot);
+  console.log("Historical record integrity and installed pin verified; fresh candidate proofs follow.");
   await verifyDonorAndVariants();
+  console.log("verifyDonorAndVariants passed.");
   await verifyStaleAuthority();
+  console.log("verifyStaleAuthority passed.");
   await verifyRecoveryWithoutTopologyGate();
+  console.log("verifyRecoveryWithoutTopologyGate passed.");
   await verifyTamperingAndFilesystemBoundaries();
-  console.log("Package scaffolding qualification passed.");
+  console.log("verifyTamperingAndFilesystemBoundaries passed.");
+  console.log(`Package scaffolding candidate qualification passed for Foundation ${foundationManifest.version}; historical release admission unchanged.`);
 } finally {
   await Promise.all(
     temporaryRoots.map((root) => rm(root, { recursive: true, force: true })),
