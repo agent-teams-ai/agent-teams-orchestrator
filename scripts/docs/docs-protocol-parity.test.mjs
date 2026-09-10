@@ -221,6 +221,7 @@ requiresStrictDirectoryDurability("shared qualification runner proves all six ty
     for (const scenario of cases) {
       const receipt = await runDocsProtocolQualification({
         fixtureRoot: source,
+        profilePath: "architecture/foundation/docs-protocol.yaml",
         scenario: {
           find: { query: { id: "ADR-0001" }, expectedIds: ["ADR-0001"] },
           newDocument: {
