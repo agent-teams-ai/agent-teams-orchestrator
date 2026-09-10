@@ -49,7 +49,7 @@ minimumReleaseAgeStrict: true
 minimumReleaseAgeExclude:
   - "@agent-teams/engineering-foundation@1.2.0"
   - "@agent-teams/docs-protocol@0.6.0"
-  - "@agent-teams/docs-protocol-agent-teams@0.2.4"
+  - "@agent-teams/docs-protocol-agent-teams@0.2.5"
   - "@agent-teams/document-authoring@0.3.0"
   - "@agent-teams/repository-mutation@0.2.0"
   - js-yaml@5.2.2
