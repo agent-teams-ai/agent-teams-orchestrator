@@ -244,9 +244,10 @@ packages are the explicit exception to runtime role direction.
 The `exactRegistryDevelopmentOnlyPackages` list in
 `architecture/foundation/dependency-declarations.yaml` is the single authority
 for external engineering tooling allowed in the reserved scope. It currently
-contains `@agent-teams/engineering-foundation` and
-`@agent-teams/docs-protocol`. Each package must use an exact registry version in
-`devDependencies`; runtime, optional, and peer declarations are prohibited.
+contains `@agent-teams/engineering-foundation`, `@agent-teams/docs-protocol`,
+and `@agent-teams/docs-protocol-agent-teams`. Each package must use an exact
+registry version in `devDependencies`; runtime, optional, and peer declarations
+are prohibited.
 Production source under `apps/**/src` and `packages/**/src` cannot import any
 package from this list. The repository-local validator reads the policy instead
 of maintaining a second allowlist, and architecture fixtures prove valid
