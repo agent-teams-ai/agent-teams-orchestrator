@@ -17,14 +17,13 @@ async function readJson(repositoryPath) {
   return JSON.parse(await readFile(path.join(repositoryRoot, repositoryPath), "utf8"));
 }
 
-test("preserves the historical integration until a qualified v2 cohort is supplied", async () => {
+test("retains the adopted v2 qualification contract while release pins advance", async () => {
   const [integration, qualification] = await Promise.all([
     readJson("architecture/foundation/docs-consumer-integration.json"),
     readJson("architecture/foundation/docs-protocol-qualification.json"),
   ]);
 
-  assert.equal(integration.schemaVersion, 2);
-  assert.equal(integration.cohort.schemaVersion, 1);
+  assert.equal(integration.schemaVersion, 3);
   assert.deepEqual(integration.qualification, {
     contractPath: "architecture/foundation/docs-protocol-qualification.json",
     gateCommand: "pnpm docs:protocol:check",
