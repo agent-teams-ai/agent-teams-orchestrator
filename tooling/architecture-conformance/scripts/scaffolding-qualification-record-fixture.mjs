@@ -56,12 +56,12 @@ export async function verifyQualificationRecord(repositoryRoot) {
     foundationManifest.version,
     manifest.devDependencies["@agent-teams/engineering-foundation"],
   );
-  // This record is historical 0.21.0 evidence, not admission for today's pin.
+  // This record is historical 1.1.1 evidence, not admission for today's pin.
   // Freeze its content across Git checkout line endings; the remaining checks
   // execute fresh candidate proof without changing this historical record.
   assert.equal(createHash("sha256").update((await readFile(path.join(
     repositoryRoot, "architecture/foundation/scaffolding-qualification.yaml",
-  ), "utf8")).replaceAll("\r\n", "\n")).digest("hex"), "f50530bf80f1612783c11ff09683dd5621d8fb6257414855ca7462f9c14cab8d");
+  ), "utf8")).replaceAll("\r\n", "\n")).digest("hex"), "a7fc88e26fb59afbef7e92897e94a2957525700d05c2fc6e76fa0e9785ea4f1c");
   const composition = config.compositions.find(
     (candidate) => candidate.id === record.composition.id,
   );
