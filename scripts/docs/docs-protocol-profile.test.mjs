@@ -23,7 +23,7 @@ test("routes the v2 qualification contract through the consumer integration", as
     readJson("architecture/foundation/docs-protocol-qualification.json"),
   ]);
 
-  assert.equal(integration.schemaVersion, 2);
+  assert.equal(integration.schemaVersion, 3);
   assert.deepEqual(integration.qualification, {
     contractPath: "architecture/foundation/docs-protocol-qualification.json",
     gateCommand: "pnpm docs:protocol:check",
@@ -42,7 +42,7 @@ test("keeps the protocol profile thin and routes one Foundation v3 authority", a
     "schemaVersion",
     "semanticValidatorIds",
   ]);
-  assert.equal(profile.schemaVersion, 2);
+  assert.equal(profile.schemaVersion, 3);
   assert.deepEqual(profile.protocol, {
     id: "agent-teams.docs-protocol",
     version: 1,
@@ -52,10 +52,10 @@ test("keeps the protocol profile thin and routes one Foundation v3 authority", a
     schemaVersion: 3,
     metadataSidecarPolicy: "foundation-profile-v3-strict-merge",
   });
-  assert.equal(
-    profile.agentWorkflow.skillPath,
-    ".agents/skills/docs-authoring/SKILL.md",
-  );
+  assert.deepEqual(profile.agentWorkflow, {
+    adoption: "portable-v1",
+    skillPath: ".agents/skills/docs-authoring/SKILL.md",
+  });
   assert.deepEqual(
     profile.semanticValidatorIds,
     profile.semanticValidatorIds.toSorted((left, right) =>
