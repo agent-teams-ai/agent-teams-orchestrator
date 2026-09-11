@@ -8,7 +8,7 @@ import {
   hostProtocolVersion,
   microseconds,
   targetId,
-} from "@agent-teams/local-host-control";
+} from "../../../dist/index.js";
 
 const int64Magnitude = 1n << 63n;
 const uint64Modulus = 1n << 64n;

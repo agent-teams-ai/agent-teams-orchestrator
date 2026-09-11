@@ -14,7 +14,7 @@ const packageCatalogPath = path.join(
 );
 const conformanceTarget = path.join(
   repositoryRoot,
-  "tooling/architecture-conformance/fixtures/valid",
+  "tooling/architecture-conformance-fixtures/valid",
 );
 const typeScriptExtensions = new Set([".cts", ".mts", ".ts", ".tsx"]);
 const excludedDirectories = new Set([

@@ -1,14 +1,16 @@
 import { spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
-
-import { createConformanceOxlintConfig } from "../../../scripts/lint/create-conformance-config.mjs";
 
 const toolingRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
 const repositoryRoot = path.resolve(toolingRoot, "../..");
+const { createConformanceOxlintConfig } = await import(pathToFileURL(path.join(
+  repositoryRoot,
+  "scripts/lint/create-conformance-config.mjs",
+)).href);
 const generatedOxlintConfig = createConformanceOxlintConfig(repositoryRoot);
 const conformanceOxlintConfig = generatedOxlintConfig.filePath;
 process.once("exit", generatedOxlintConfig.dispose);
@@ -62,7 +64,11 @@ for (const expected of ["typescript@6.0.3"]) {
   }
 }
 
-const validRoot = path.join(toolingRoot, "fixtures/valid");
+const fixtureRoot = path.join(
+  repositoryRoot,
+  "tooling/architecture-conformance-fixtures",
+);
+const validRoot = path.join(fixtureRoot, "valid");
 const validLint = run(
   "pnpm",
   [
@@ -77,7 +83,7 @@ const validLint = run(
 );
 requireSuccess("valid Oxlint boundary fixture", validLint);
 
-const validCoreRoot = path.join(toolingRoot, "fixtures/core-valid");
+const validCoreRoot = path.join(fixtureRoot, "core-valid");
 const validCoreLint = run(
   "pnpm",
   [
@@ -107,7 +113,7 @@ const invalidBoundaryFiles = [
   "adapters/outbound/import-inbound.ts",
 ];
 
-const invalidRoot = path.join(toolingRoot, "fixtures/invalid");
+const invalidRoot = path.join(fixtureRoot, "invalid");
 const invalidLint = run(
   "pnpm",
   [
@@ -160,7 +166,7 @@ const invalidGraph = run(
     ),
     path.relative(
       repositoryRoot,
-      path.join(toolingRoot, "fixtures/cycles"),
+      path.join(fixtureRoot, "cycles"),
     ),
   ],
   repositoryRoot,

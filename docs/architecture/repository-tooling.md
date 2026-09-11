@@ -29,6 +29,8 @@ code_anchors:
     enforcement: advisory
   - pattern: tooling/architecture-conformance/**
     enforcement: advisory
+  - pattern: tooling/architecture-conformance-fixtures/**
+    enforcement: advisory
   - pattern: .oxlintrc*.json
     enforcement: required
   - pattern: scripts/lint/**

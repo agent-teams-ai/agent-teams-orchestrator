@@ -129,6 +129,24 @@ before a high-cost boundary violation.
   require calibration and explicit approval under
   [reliability objectives](docs/architecture/reliability-objectives.md).
 
+Foundation `architecture.source-dependencies` is schema v3: `rootPackage: true`
+and `packageRoots` for every workspace package. Required CI runs
+`agent-teams-foundation check` on the installed registry package. When that
+gate reports a boundary violation, fix the source rather than shrinking scope
+or adding a baseline:
+
+- forbidden domain/tooling dependency -> introduce a consumer-owned port and
+  adapter; do not import filesystem, environment, network SDK, or a concrete
+  adapter into a constrained production boundary;
+- deep import -> use the public entrypoint listed for that boundary;
+- cross-package relative import -> package export or a dynamic repo-root load
+  from a development boundary, never a new production package;
+- new root or package -> owner, `packageRoots`/`rootPackage`, and a
+  non-overlapping boundary, never an exclusion;
+- `includeRootPackage` in YAML is invalid; public v3 uses `rootPackage: true`;
+- CI greening by dropping a governed root, pending a root silently, or adding
+  an unbounded suppression is forbidden.
+
 ## Change workflow
 
 For architecture or implementation work:

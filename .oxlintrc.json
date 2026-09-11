@@ -15,9 +15,9 @@
   },
   "ignorePatterns": [
     "scripts/lint/fixtures/**",
-    "tooling/architecture-conformance/fixtures/scaffolding/**",
-    "tooling/architecture-conformance/fixtures/cycles/**",
-    "tooling/architecture-conformance/fixtures/invalid/**"
+    "tooling/architecture-conformance-fixtures/scaffolding/**",
+    "tooling/architecture-conformance-fixtures/cycles/**",
+    "tooling/architecture-conformance-fixtures/invalid/**"
   ],
   "jsPlugins": [
     {
@@ -46,7 +46,7 @@
     "boundaries/include": [
       "apps/**/src/features/**/*.{ts,tsx,mts,cts}",
       "packages/**/src/features/**/*.{ts,tsx,mts,cts}",
-      "tooling/architecture-conformance/fixtures/**/src/features/**/*.{ts,tsx,mts,cts}"
+      "tooling/architecture-conformance-fixtures/**/src/features/**/*.{ts,tsx,mts,cts}"
     ],
     "boundaries/elements": [
       {

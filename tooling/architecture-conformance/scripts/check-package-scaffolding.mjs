@@ -46,8 +46,8 @@ const dependencyPolicySchema = path.join(
 );
 const materializationPolicySchema = path.join(repositoryRoot, "architecture/package-materialization-policy.schema.json");
 const goldenRoot = path.join(
-  toolingRoot,
-  "fixtures/scaffolding/library-boundary-golden",
+  repositoryRoot,
+  "tooling/architecture-conformance-fixtures/scaffolding/library-boundary-golden",
 );
 const temporaryRoots = [];
 
@@ -309,7 +309,8 @@ async function verifyDonorAndVariants() {
   ).plan;
   const donorBytes = operationBytes(donorPlan);
   for (const relativePath of ["package.json", "src/index.ts", "tsconfig.json"]) {
-    const expected = await readFile(path.join(goldenRoot, relativePath));
+    const goldenName = relativePath === "package.json" ? "expected-package.json" : relativePath;
+    const expected = await readFile(path.join(goldenRoot, goldenName));
     assert.deepEqual(
       donorBytes.get(`${donor.path}/${relativePath}`),
       expected,

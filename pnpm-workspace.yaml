@@ -7,6 +7,7 @@ catalogMode: strict
 
 catalog:
   "@xstate/graph": 3.0.4
+  "@fixture-adapter/runtime-client.js": npm:yaml@2.9.0
   ajv: 8.20.0
   ajv-formats: 3.0.1
   cspell: 10.0.1
@@ -30,6 +31,7 @@ catalog:
   typescript: 7.0.2
   unified: 11.0.5
   unist-util-visit: 5.1.0
+  vitest: 3.2.4
   xstate: 5.32.5
   yaml: 2.9.0
 
