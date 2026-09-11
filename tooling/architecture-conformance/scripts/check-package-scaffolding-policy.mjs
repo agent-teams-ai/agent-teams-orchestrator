@@ -13,7 +13,7 @@ import {
   writePlatformOwner,
   writeRootReferences,
 } from "./topology-fixture-lib.mjs";
-import { writeJournal } from "./scaffolding-transaction-fixture.mjs";
+import { interruptScaffold } from "./scaffolding-transaction-fixture.mjs";
 
 const toolingRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(toolingRoot, "../..");
@@ -99,7 +99,7 @@ try {
   assert.match(`${applied.stdout}\n${applied.stderr}`, /duplicate package_id/u);
   assert.equal(await exists(path.join(root, targetPath)), false);
 
-  await writeJournal(root, JSON.parse(planned.stdout).plan);
+  interruptScaffold(root, JSON.parse(planned.stdout).plan);
   const recovered = run(root, "recover", "--json");
   assert.notEqual(
     recovered.status,
