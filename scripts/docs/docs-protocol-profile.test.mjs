@@ -188,7 +188,7 @@ test("pins managed direct roots and exact transitive age exceptions without acti
   const workspace = await readYaml("pnpm-workspace.yaml");
   const roots = {
     "@agent-teams/docs-protocol": "0.6.0",
-    "@agent-teams/docs-protocol-agent-teams": "0.2.5",
+    "@agent-teams/docs-protocol-agent-teams": "0.2.7",
     "@agent-teams/engineering-foundation": "1.2.0",
   };
   assert.deepEqual(
