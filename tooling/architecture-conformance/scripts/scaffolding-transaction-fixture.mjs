@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { inspectFoundationTransactionAwareMode } from "@agent-teams/engineering-foundation";
+import { foundationPackageRoot, importFoundation } from "./root-foundation.mjs";
 
 export function operationSources(plan) {
   return new Map(
@@ -39,8 +39,12 @@ export async function pathExists(pathname) {
 // Kill a real disposable publication at a supported public phase. Never forge
 // Foundation-owned journals or reach into its private transaction representation.
 export function interruptScaffold(root, plan, phase = "after-journal-prepared", occurrence = 1) {
+  const repositoryRoot = fileURLToPath(new URL("../../..", import.meta.url));
+  const qualificationUrl = pathToFileURL(
+    path.join(foundationPackageRoot(repositoryRoot), "dist/scaffolding/qualification.js"),
+  ).href;
   const result = spawnSync(process.execPath, ["--input-type=module", "--eval", `
-    import { runScaffoldCrashQualification } from "@agent-teams/engineering-foundation/scaffolding/qualification";
+    import { runScaffoldCrashQualification } from ${JSON.stringify(qualificationUrl)};
     let source = "";
     for await (const chunk of process.stdin) source += chunk;
     const { root, plan, phase, occurrence } = JSON.parse(source);
@@ -50,7 +54,7 @@ export function interruptScaffold(root, plan, phase = "after-journal-prepared", 
     });
     throw new Error("Requested scaffold crash cut was not reached");
   `], {
-    cwd: fileURLToPath(new URL("../../..", import.meta.url)),
+    cwd: repositoryRoot,
     input: JSON.stringify({ root, plan, phase, occurrence }),
     encoding: "utf8",
     timeout: 60000,
@@ -61,6 +65,11 @@ export function interruptScaffold(root, plan, phase = "after-journal-prepared", 
 }
 
 export async function assertPendingScaffold(root) {
+  const repositoryRoot = fileURLToPath(new URL("../../..", import.meta.url));
+  const { inspectFoundationTransactionAwareMode } = await importFoundation(
+    repositoryRoot,
+    ".",
+  );
   const { transaction } = await inspectFoundationTransactionAwareMode(root);
   assert.equal(transaction?.state, "pending");
   assert.equal(transaction.operationKind, "scaffolding");

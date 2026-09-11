@@ -190,7 +190,6 @@ boundaries:
     allow:
       boundaries: []
       packages:
-        - vitest
         - yaml
       builtins:
         - node:assert/strict
@@ -286,7 +285,6 @@ boundaries:
       boundaries:
         - tooling.lint
       packages:
-        - "@agent-teams/engineering-foundation"
         - "@agent-teams/work-coordination"
         - ajv
         - yaml
@@ -316,7 +314,6 @@ boundaries:
     allow:
       boundaries: []
       packages:
-        - "@fixture-adapter/runtime-client.js"
         - yaml
       builtins:
         - node:fs/promises

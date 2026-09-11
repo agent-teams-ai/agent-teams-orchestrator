@@ -94,7 +94,6 @@
     "@agent-teams/docs-protocol": "0.6.0",
     "@agent-teams/docs-protocol-agent-teams": "0.2.7",
     "@agent-teams/engineering-foundation": "1.2.0",
-    "@fixture-adapter/runtime-client.js": "catalog:",
     "@xstate/graph": "catalog:",
     "ajv": "catalog:",
     "ajv-formats": "catalog:",
@@ -119,7 +118,6 @@
     "typescript": "catalog:",
     "unified": "catalog:",
     "unist-util-visit": "catalog:",
-    "vitest": "catalog:",
     "xstate": "catalog:",
     "yaml": "catalog:"
   }

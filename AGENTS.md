@@ -144,6 +144,11 @@ or adding a baseline:
 - new root or package -> owner, `packageRoots`/`rootPackage`, and a
   non-overlapping boundary, never an exclusion;
 - `includeRootPackage` in YAML is invalid; public v3 uses `rootPackage: true`;
+- `@agent-teams/engineering-foundation` stays a root-only exact registry
+  development dependency. Nested workspace packages must load it from the
+  repository root install, not declare it in their own manifests;
+- oxlint counterexample fixtures live in `tooling/lint-fixtures` so they can
+  fail lint on purpose without entering Foundation source scope;
 - CI greening by dropping a governed root, pending a root silently, or adding
   an unbounded suppression is forbidden.
 

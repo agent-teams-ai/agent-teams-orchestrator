@@ -8,7 +8,6 @@
     "check:graph": "node scripts/run-advisory-graph.mjs"
   },
   "devDependencies": {
-    "@agent-teams/engineering-foundation": "1.2.0",
     "ajv": "catalog:",
     "dependency-cruiser": "catalog:tooling-ts6",
     "typescript": "catalog:tooling-ts6",

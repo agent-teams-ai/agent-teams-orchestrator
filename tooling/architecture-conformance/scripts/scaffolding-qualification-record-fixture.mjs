@@ -4,9 +4,10 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-import foundationManifest from "@agent-teams/engineering-foundation/package.json" with { type: "json" };
 import Ajv2020 from "ajv/dist/2020.js";
 import YAML from "yaml";
+
+import { loadFoundationManifest } from "./root-foundation.mjs";
 
 function requireSuccess(label, result) {
   assert.equal(result.status, 0, `${label} failed:\n${result.stdout ?? ""}\n${result.stderr ?? ""}`);
@@ -52,6 +53,7 @@ export async function verifyQualificationRecord(repositoryRoot) {
   const manifest = JSON.parse(
     await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
   );
+  const foundationManifest = loadFoundationManifest(repositoryRoot);
   assert.equal(
     foundationManifest.version,
     manifest.devDependencies["@agent-teams/engineering-foundation"],

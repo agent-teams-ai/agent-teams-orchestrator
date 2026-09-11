@@ -1,5 +1,4 @@
 import { spawnSync } from "node:child_process";
-import { createRequire } from "node:module";
 import {
   mkdtemp,
   mkdir,
@@ -11,18 +10,17 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { foundationPackageRoot as resolveFoundationPackageRoot } from "./root-foundation.mjs";
+
 const toolingRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
 const repositoryRoot = path.resolve(toolingRoot, "../..");
-const requireFromTooling = createRequire(import.meta.url);
-const foundationPackageRoot = path.dirname(
-  requireFromTooling.resolve(
-    "@agent-teams/engineering-foundation/package.json",
-  ),
+const foundationCli = path.join(
+  resolveFoundationPackageRoot(repositoryRoot),
+  "dist/cli.js",
 );
-const foundationCli = path.join(foundationPackageRoot, "dist/cli.js");
 const validator = path.join(
   repositoryRoot,
   "scripts/architecture/validate-dependency-specifiers.mjs",
