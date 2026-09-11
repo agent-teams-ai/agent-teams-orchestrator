@@ -8,7 +8,9 @@
     "check:graph": "node scripts/run-advisory-graph.mjs"
   },
   "devDependencies": {
+    "ajv": "catalog:",
     "dependency-cruiser": "catalog:tooling-ts6",
-    "typescript": "catalog:tooling-ts6"
+    "typescript": "catalog:tooling-ts6",
+    "yaml": "catalog:"
   }
 }

@@ -13,8 +13,6 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import foundationManifest from "@agent-teams/engineering-foundation/package.json" with { type: "json" };
-import { planScaffoldFromFile } from "@agent-teams/engineering-foundation/scaffolding";
 import YAML from "yaml";
 
 import { writeEmptyMaterializationPolicy } from "./topology-fixture-lib.mjs";
@@ -29,6 +27,7 @@ import {
   interruptScaffold,
   writeOperationPostimage,
 } from "./scaffolding-transaction-fixture.mjs";
+import { importFoundation, loadFoundationManifest } from "./root-foundation.mjs";
 
 const toolingRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -46,9 +45,11 @@ const dependencyPolicySchema = path.join(
 );
 const materializationPolicySchema = path.join(repositoryRoot, "architecture/package-materialization-policy.schema.json");
 const goldenRoot = path.join(
-  toolingRoot,
-  "fixtures/scaffolding/library-boundary-golden",
+  repositoryRoot,
+  "tooling/architecture-conformance-fixtures/scaffolding/library-boundary-golden",
 );
+const foundationManifest = loadFoundationManifest(repositoryRoot);
+const { planScaffoldFromFile } = await importFoundation(repositoryRoot, "./scaffolding");
 const temporaryRoots = [];
 
 function output(result) {
@@ -309,9 +310,13 @@ async function verifyDonorAndVariants() {
   ).plan;
   const donorBytes = operationBytes(donorPlan);
   for (const relativePath of ["package.json", "src/index.ts", "tsconfig.json"]) {
-    const expected = await readFile(path.join(goldenRoot, relativePath));
-    assert.deepEqual(
-      donorBytes.get(`${donor.path}/${relativePath}`),
+    const goldenName = relativePath === "package.json" ? "expected-package.json" : relativePath;
+    const expected = (await readFile(path.join(goldenRoot, goldenName)))
+      .toString("utf8")
+      .replaceAll("\r\n", "\n");
+    const actual = donorBytes.get(`${donor.path}/${relativePath}`)?.toString("utf8") ?? "";
+    assert.equal(
+      actual,
       expected,
       `${relativePath} drifted from the qualified donor bytes`,
     );

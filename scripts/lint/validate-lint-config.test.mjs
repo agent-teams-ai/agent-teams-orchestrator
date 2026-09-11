@@ -32,7 +32,7 @@ function runOxlint(config, fixture) {
       "--disable-nested-config",
       "--no-ignore",
       ...(typeAware ? ["--type-aware"] : []),
-      path.join(repositoryRoot, "scripts/lint/fixtures", fixture),
+      path.join(repositoryRoot, "tooling/lint-fixtures", fixture),
     ],
     {
       cwd: repositoryRoot,
@@ -63,7 +63,7 @@ function validateSuppressions(fixture) {
     process.execPath,
     [
       suppressionValidator,
-      path.join(repositoryRoot, "scripts/lint/fixtures", fixture),
+      path.join(repositoryRoot, "tooling/lint-fixtures", fixture),
     ],
     {
       cwd: repositoryRoot,

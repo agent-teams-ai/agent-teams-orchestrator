@@ -1,10 +1,20 @@
-schemaVersion: 1
+schemaVersion: 3
 workspace:
   kind: pnpm
   manifest: pnpm-workspace.yaml
+packageRoots:
+  - packages/platform/local-host-control
+  - tooling/architecture-conformance
+rootPackage: true
 governedRoots:
-  - packages/platform/local-host-control/src
-  - scripts/orchestration-specs
+  - packages/platform/local-host-control
+  - scripts
+  - tooling/architecture-conformance
+  - tooling/architecture-conformance-fixtures/core-valid
+  - tooling/architecture-conformance-fixtures/cycles
+  - tooling/architecture-conformance-fixtures/invalid
+  - tooling/architecture-conformance-fixtures/scaffolding/library-boundary-golden/src
+  - tooling/architecture-conformance-fixtures/valid
 boundaries:
   - id: tooling.orchestration-specs
     dependencyMode: development
@@ -30,9 +40,13 @@ boundaries:
         - node:url
       runtimeReferences: []
   - id: platform.local-host-control.public-api
+    dependencyMode: runtime
     roots:
       - packages/platform/local-host-control/src/index.ts
-    entrypoints: []
+    entrypoints:
+      - packages/platform/local-host-control/src/index.ts
+    packageExports:
+      - "."
     allow:
       boundaries:
         - platform.local-host-control.host-discovery.api
@@ -86,3 +100,222 @@ boundaries:
       packages: []
       builtins: []
       runtimeReferences: []
+  - id: test.local-host-control
+    dependencyMode: development
+    roots:
+      - packages/platform/local-host-control/tests
+    entrypoints: []
+    allow:
+      boundaries:
+        - platform.local-host-control.public-api
+        - platform.local-host-control.host-discovery.api
+        - platform.local-host-control.host-discovery.application
+        - platform.local-host-control.host-discovery.model
+        - platform.local-host-control.host-discovery.ports
+      packages:
+        - "@agent-teams/local-host-control"
+      builtins:
+        - node:assert/strict
+        - node:child_process
+        - node:fs/promises
+        - node:os
+        - node:path
+        - node:test
+      runtimeReferences: []
+  - id: tooling.architecture
+    dependencyMode: development
+    roots:
+      - scripts/architecture
+    entrypoints: []
+    allow:
+      boundaries: []
+      packages:
+        - "@agent-teams/engineering-foundation"
+        - ajv
+        - oxc-parser
+        - yaml
+      builtins:
+        - node:assert
+        - node:assert/strict
+        - node:child_process
+        - node:crypto
+        - node:fs
+        - node:fs/promises
+        - node:module
+        - node:os
+        - node:path
+        - node:test
+        - node:url
+        - node:util
+      runtimeReferences:
+        - dynamic
+  - id: tooling.docs
+    dependencyMode: development
+    roots:
+      - scripts/docs
+    entrypoints:
+      - scripts/docs/document-parser.mjs
+    allow:
+      boundaries: []
+      packages:
+        - "@agent-teams/docs-protocol"
+        - github-slugger
+        - jsdom
+        - mdast-util-to-string
+        - mermaid
+        - remark-frontmatter
+        - remark-gfm
+        - remark-parse
+        - unified
+        - unist-util-visit
+        - yaml
+      builtins:
+        - node:assert
+        - node:assert/strict
+        - node:child_process
+        - node:crypto
+        - node:fs
+        - node:fs/promises
+        - node:os
+        - node:path
+        - node:test
+        - node:url
+        - node:util
+      runtimeReferences: []
+  - id: tooling.lint
+    dependencyMode: development
+    roots:
+      - scripts/lint
+    entrypoints: []
+    allow:
+      boundaries: []
+      packages:
+        - yaml
+      builtins:
+        - node:assert/strict
+        - node:child_process
+        - node:crypto
+        - node:fs
+        - node:fs/promises
+        - node:os
+        - node:path
+        - node:test
+        - node:url
+      runtimeReferences: []
+  - id: tooling.foundation
+    dependencyMode: development
+    roots:
+      - scripts/foundation
+    entrypoints: []
+    allow:
+      boundaries: []
+      packages: []
+      builtins:
+        - node:child_process
+        - node:fs/promises
+        - node:path
+        - node:url
+      runtimeReferences: []
+  - id: tooling.reliability
+    dependencyMode: development
+    roots:
+      - scripts/reliability
+    entrypoints: []
+    allow:
+      boundaries: []
+      packages:
+        - ajv
+        - ajv-formats
+        - yaml
+      builtins:
+        - node:assert/strict
+        - node:fs/promises
+        - node:os
+        - node:path
+        - node:test
+        - node:url
+      runtimeReferences: []
+  - id: tooling.security
+    dependencyMode: development
+    roots:
+      - scripts/security
+    entrypoints: []
+    allow:
+      boundaries: []
+      packages:
+        - ajv
+        - ajv-formats
+        - yaml
+      builtins:
+        - node:assert/strict
+        - node:crypto
+        - node:fs/promises
+        - node:os
+        - node:path
+        - node:test
+        - node:url
+      runtimeReferences: []
+  - id: tooling.skills
+    dependencyMode: development
+    roots:
+      - scripts/skills
+    entrypoints: []
+    allow:
+      boundaries:
+        - tooling.docs
+      packages:
+        - unist-util-visit
+        - yaml
+      builtins:
+        - node:assert/strict
+        - node:child_process
+        - node:fs/promises
+        - node:os
+        - node:path
+        - node:test
+        - node:url
+      runtimeReferences: []
+  - id: tooling.architecture-conformance
+    dependencyMode: development
+    roots:
+      - tooling/architecture-conformance/scripts
+      - tooling/architecture-conformance/dependency-cruiser.config.cjs
+    entrypoints: []
+    allow:
+      boundaries:
+        - tooling.lint
+      packages:
+        - "@agent-teams/work-coordination"
+        - ajv
+        - yaml
+      builtins:
+        - node:assert
+        - node:assert/strict
+        - node:child_process
+        - node:crypto
+        - node:fs
+        - node:fs/promises
+        - node:module
+        - node:os
+        - node:path
+        - node:url
+        - node:util
+      runtimeReferences:
+        - dynamic
+  - id: fixture.architecture-conformance
+    dependencyMode: development
+    roots:
+      - tooling/architecture-conformance-fixtures/core-valid
+      - tooling/architecture-conformance-fixtures/cycles
+      - tooling/architecture-conformance-fixtures/invalid
+      - tooling/architecture-conformance-fixtures/scaffolding/library-boundary-golden/src
+      - tooling/architecture-conformance-fixtures/valid
+    entrypoints: []
+    allow:
+      boundaries: []
+      packages:
+        - yaml
+      builtins:
+        - node:fs/promises
+      runtimeReferences:
+        - dynamic

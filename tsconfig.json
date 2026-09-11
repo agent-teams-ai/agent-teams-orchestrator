@@ -5,10 +5,10 @@
     "noEmit": true
   },
   "include": [
-    "tooling/architecture-conformance/fixtures/valid/**/*.ts",
-    "tooling/architecture-conformance/fixtures/valid/**/*.tsx",
-    "tooling/architecture-conformance/fixtures/valid/**/*.mts",
-    "tooling/architecture-conformance/fixtures/valid/**/*.cts"
+    "tooling/architecture-conformance-fixtures/valid/**/*.ts",
+    "tooling/architecture-conformance-fixtures/valid/**/*.tsx",
+    "tooling/architecture-conformance-fixtures/valid/**/*.mts",
+    "tooling/architecture-conformance-fixtures/valid/**/*.cts"
   ],
   "references": [
     {

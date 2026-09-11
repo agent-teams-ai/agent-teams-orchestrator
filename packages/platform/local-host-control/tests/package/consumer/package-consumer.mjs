@@ -6,10 +6,10 @@ import {
   hostProtocolVersion,
   microseconds,
   targetId,
-} from "@agent-teams/local-host-control";
+} from "../../../dist/index.js";
 
 /**
- * @param {import("@agent-teams/local-host-control").HostDiscoverySource} source
+ * @param {import("../../../dist/index.js").HostDiscoverySource} source
  */
 export async function consumeLocalHostDiscovery(source) {
   const discovery = createHostDiscovery({

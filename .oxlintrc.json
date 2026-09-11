@@ -14,10 +14,10 @@
     "suspicious": "error"
   },
   "ignorePatterns": [
-    "scripts/lint/fixtures/**",
-    "tooling/architecture-conformance/fixtures/scaffolding/**",
-    "tooling/architecture-conformance/fixtures/cycles/**",
-    "tooling/architecture-conformance/fixtures/invalid/**"
+    "tooling/lint-fixtures/**",
+    "tooling/architecture-conformance-fixtures/scaffolding/**",
+    "tooling/architecture-conformance-fixtures/cycles/**",
+    "tooling/architecture-conformance-fixtures/invalid/**"
   ],
   "jsPlugins": [
     {
@@ -46,7 +46,7 @@
     "boundaries/include": [
       "apps/**/src/features/**/*.{ts,tsx,mts,cts}",
       "packages/**/src/features/**/*.{ts,tsx,mts,cts}",
-      "tooling/architecture-conformance/fixtures/**/src/features/**/*.{ts,tsx,mts,cts}"
+      "tooling/architecture-conformance-fixtures/**/src/features/**/*.{ts,tsx,mts,cts}"
     ],
     "boundaries/elements": [
       {
@@ -538,10 +538,10 @@
         "packages/**/src/features/*/domain/**/*.{ts,tsx,mts,cts}",
         "packages/**/src/features/*/contracts/**/*.{ts,tsx,mts,cts}",
         "packages/**/src/features/*/projections/**/*.{ts,tsx,mts,cts}",
-        "scripts/lint/fixtures/core-purity/application/**/*.{ts,tsx,mts,cts}",
-        "scripts/lint/fixtures/core-purity/contracts/**/*.{ts,tsx,mts,cts}",
-        "scripts/lint/fixtures/core-purity/domain/**/*.{ts,tsx,mts,cts}",
-        "scripts/lint/fixtures/core-purity/projections/**/*.{ts,tsx,mts,cts}"
+        "tooling/lint-fixtures/core-purity/application/**/*.{ts,tsx,mts,cts}",
+        "tooling/lint-fixtures/core-purity/contracts/**/*.{ts,tsx,mts,cts}",
+        "tooling/lint-fixtures/core-purity/domain/**/*.{ts,tsx,mts,cts}",
+        "tooling/lint-fixtures/core-purity/projections/**/*.{ts,tsx,mts,cts}"
       ],
       "rules": {
         "no-restricted-globals": [

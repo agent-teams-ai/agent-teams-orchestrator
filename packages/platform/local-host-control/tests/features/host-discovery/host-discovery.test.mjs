@@ -14,7 +14,7 @@ import {
   microseconds,
   supervisorInstanceId,
   targetId,
-} from "@agent-teams/local-host-control";
+} from "../../../dist/index.js";
 
 const requestedTarget = targetId("local-default");
 const requiredCapability = hostCapabilityId("host.control.v1");
@@ -678,7 +678,7 @@ test("rejects forged exact values outside signed and unsigned 64-bit bounds", as
 });
 
 test("exports the feature through the package root", async () => {
-  const packageRoot = await import("@agent-teams/local-host-control");
+  const packageRoot = await import("../../../dist/index.js");
   assert.equal(typeof packageRoot.createHostDiscovery, "function");
   assert.equal(typeof packageRoot.targetId, "function");
 });

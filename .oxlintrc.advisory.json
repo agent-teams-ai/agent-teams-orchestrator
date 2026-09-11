@@ -14,10 +14,10 @@
     "suspicious": "error"
   },
   "ignorePatterns": [
-    "scripts/lint/fixtures/**",
-    "tooling/architecture-conformance/fixtures/scaffolding/**",
-    "tooling/architecture-conformance/fixtures/cycles/**",
-    "tooling/architecture-conformance/fixtures/invalid/**"
+    "tooling/lint-fixtures/**",
+    "tooling/architecture-conformance-fixtures/scaffolding/**",
+    "tooling/architecture-conformance-fixtures/cycles/**",
+    "tooling/architecture-conformance-fixtures/invalid/**"
   ],
   "rules": {
     "boundaries/dependencies": "off",
