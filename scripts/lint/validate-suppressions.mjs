@@ -20,6 +20,7 @@ const excludedDirectories = new Set([
   "coverage",
   "dist",
   "fixtures",
+  "lint-fixtures",
   "node_modules",
 ]);
 const protectedRules = new Set([
