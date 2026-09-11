@@ -247,11 +247,15 @@ for external engineering tooling allowed in the reserved scope. It currently
 contains `@agent-teams/engineering-foundation` for repository engineering gates,
 `@agent-teams/docs-protocol` for portable documentation tooling, and
 `@agent-teams/docs-protocol-agent-teams` for managed documentation integration.
-These are root development dependencies; `@agent-teams/document-authoring` and
-`@agent-teams/repository-mutation` remain transitive tooling dependencies.
+These packages are root-only exact registry development dependencies;
+`@agent-teams/document-authoring` and `@agent-teams/repository-mutation` remain
+transitive tooling dependencies. Nested workspace packages must not redeclare
+them: they load the root install. Catalog entries for reusable externals must
+be exact registry versions, not `npm:` aliases.
 Installing the managed integration alone does not establish managed admission.
 Each listed package must use an exact registry version in
-`devDependencies`; runtime, optional, and peer declarations are prohibited.
+`devDependencies` of the repository root; runtime, optional, and peer
+declarations are prohibited.
 Production source under `apps/**/src` and `packages/**/src` cannot import any
 package from this list. The repository-local validator reads the policy instead
 of maintaining a second allowlist, and architecture fixtures prove valid
