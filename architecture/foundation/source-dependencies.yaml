@@ -15,6 +15,7 @@ governedRoots:
   - tooling/architecture-conformance-fixtures/invalid
   - tooling/architecture-conformance-fixtures/scaffolding/library-boundary-golden/src
   - tooling/architecture-conformance-fixtures/valid
+  - tooling/lint-fixtures
 boundaries:
   - id: tooling.orchestration-specs
     dependencyMode: development
@@ -317,5 +318,16 @@ boundaries:
         - yaml
       builtins:
         - node:fs/promises
+      runtimeReferences:
+        - dynamic
+  - id: fixture.lint
+    dependencyMode: development
+    roots:
+      - tooling/lint-fixtures
+    entrypoints: []
+    allow:
+      boundaries: []
+      packages: []
+      builtins: []
       runtimeReferences:
         - dynamic

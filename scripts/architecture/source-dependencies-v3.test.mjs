@@ -26,6 +26,15 @@ test("live source policy is schema v3 with root package and workspace package ro
   ]);
 });
 
+test("oxlint counterexample fixtures are classified as fixture.lint", () => {
+  assert.ok(policy.governedRoots.includes("tooling/lint-fixtures"));
+  const fixture = policy.boundaries.find((boundary) => boundary.id === "fixture.lint");
+  assert.ok(fixture, "fixture.lint must exist");
+  assert.equal(fixture.dependencyMode, "development");
+  assert.deepEqual(fixture.roots, ["tooling/lint-fixtures"]);
+  assert.deepEqual(fixture.allow.runtimeReferences, ["dynamic"]);
+});
+
 test("source v3 rejects includeRootPackage as an unknown public field", async () => {
   const root = await mkdtemp(join(tmpdir(), "orch-foundation-include-root-"));
   try {
