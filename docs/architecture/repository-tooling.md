@@ -31,6 +31,8 @@ code_anchors:
     enforcement: advisory
   - pattern: tooling/architecture-conformance-fixtures/**
     enforcement: advisory
+  - pattern: tooling/lint-fixtures/**
+    enforcement: required
   - pattern: .oxlintrc*.json
     enforcement: required
   - pattern: scripts/lint/**
@@ -230,7 +232,13 @@ cannot weaken repository policy. Package-specific differences use reviewed root
 overrides or a separate explicit capability gate. The conformance config inherits
 that policy by deriving a temporary root-level config that clears only ignore
 patterns, so intentional invalid fixtures can prove that blocking diagnostics
-fire without maintaining a second rule copy.
+fire without maintaining a second rule copy. Oxlint counterexamples live in
+`tooling/lint-fixtures`. Production lanes keep that directory ignored.
+Foundation source-dependencies classifies it as `fixture.lint`
+(`development` plus `dynamic`, not a `packageRoot`) so the files cannot sit
+outside the graph. The Vitest counterexample is `*.test.ts` without a
+`vitest` package import, so focused, disabled, and assertion-free tests
+remain provable.
 
 The quality lanes are deliberately different:
 
@@ -283,8 +291,8 @@ Source classes remain distinct:
   relaxation is a narrow path override owned by the generator;
 - vendored source is excluded and cannot be imported by domain or application
   layers;
-- intentional invalid fixtures are ignored by normal lint and exercised directly
-  by conformance tests.
+- intentional invalid fixtures are ignored by normal lint, classified in
+  source v3 as `fixture.lint`, and exercised directly by conformance tests.
 
 Stage 0 remains active through every later stage. Nx does not replace it.
 

@@ -149,7 +149,7 @@ test("nested configuration cannot weaken the root policy", () => {
 });
 
 test("fast lane rejects focused, disabled, and assertion-free tests", () => {
-  const result = runOxlint(".oxlintrc.json", "vitest-invalid.ts");
+  const result = runOxlint(".oxlintrc.json", "vitest-invalid.test.ts");
   assert.notEqual(result.status, 0);
   assert.match(result.diagnostics, /no-focused-tests/u);
   assert.match(result.diagnostics, /no-disabled-tests/u);

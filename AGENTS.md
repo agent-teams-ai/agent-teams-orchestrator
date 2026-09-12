@@ -148,7 +148,9 @@ or adding a baseline:
   development dependency. Nested workspace packages must load it from the
   repository root install, not declare it in their own manifests;
 - oxlint counterexample fixtures live in `tooling/lint-fixtures` so they can
-  fail lint on purpose without entering Foundation source scope;
+  fail lint on purpose. Production oxlint lanes keep them ignored.
+  Foundation source-dependencies classifies them as `fixture.lint` so they
+  cannot sit outside the graph;
 - CI greening by dropping a governed root, pending a root silently, or adding
   an unbounded suppression is forbidden.
 
