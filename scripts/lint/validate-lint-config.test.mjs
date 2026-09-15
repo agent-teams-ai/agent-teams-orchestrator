@@ -28,10 +28,11 @@ function runOxlint(config, fixture) {
     oxlintBinary,
     [
       "--config",
-      conformanceConfig.filePath,
+      typeAware
+        ? path.join(repositoryRoot, ".oxlintrc.type-aware.json")
+        : conformanceConfig.filePath,
       "--disable-nested-config",
       "--no-ignore",
-      ...(typeAware ? ["--type-aware"] : []),
       path.join(repositoryRoot, "tooling/lint-fixtures", fixture),
     ],
     {
@@ -93,7 +94,7 @@ test("blocking and advisory lanes exclude the same non-production fixtures", () 
 
 test("maintainability profiles stay aligned with Foundation", () => {
   const blockingConfig = JSON.parse(
-    readFileSync(path.join(repositoryRoot, ".oxlintrc.json"), "utf8"),
+    readFileSync(path.join(repositoryRoot, ".oxlintrc.common.json"), "utf8"),
   );
   const foundationTestProfile = JSON.parse(
     readFileSync(
@@ -213,14 +214,20 @@ test("core purity rules accept deterministic domain logic", () => {
   assert.equal(result.status, 0, result.diagnostics);
 });
 
-test("type-aware runner proves that production roots are not empty", () => {
-  const result = runTypeAware();
+test("local type-aware runner checks explicit conformance inputs", () => {
+  const result = runTypeAware("tooling/architecture-conformance-fixtures/valid");
   assert.equal(result.status, 0, result.diagnostics);
   assert.match(
     result.diagnostics,
     /Type-aware lint inputs: [1-9][0-9]* TypeScript file\(s\)\./u,
   );
   assert.doesNotMatch(result.diagnostics, /on 0 files/u);
+});
+
+test("local type-aware runner requires explicit paths", () => {
+  const result = runTypeAware();
+  assert.notEqual(result.status, 0);
+  assert.match(result.diagnostics, /requires explicit paths/u);
 });
 
 test("type-aware runner fails closed on an empty target", () => {
@@ -251,4 +258,104 @@ test("suppression policy rejects blanket, unexplained, and protected bypasses", 
   assert.match(result.diagnostics, /eslint suppression directives/u);
   assert.match(result.diagnostics, /requires a preceding explanatory comment/u);
   assert.match(result.diagnostics, /cannot be suppressed locally/u);
+});
+
+for (const extension of ["tsx", "mts", "cts"]) {
+  test(`type-aware lane rejects abandoned promises in ${extension}`, () => {
+    const result = runOxlint("type-aware", `type-aware-${extension}-invalid.${extension}`);
+    assert.equal(result.status, 1, result.diagnostics);
+    assert.match(result.diagnostics, /typescript\(no-floating-promises\)/u);
+  });
+
+  test(`type-aware lane accepts observed promises in ${extension}`, () => {
+    const result = runOxlint("type-aware", `type-aware-${extension}-valid.${extension}`);
+    assert.equal(result.status, 0, result.diagnostics);
+  });
+}
+
+test("common, fast and typed configs keep separate responsibilities", () => {
+  const readConfig = (name) => JSON.parse(readFileSync(path.join(repositoryRoot, name), "utf8"));
+  const common = readConfig(".oxlintrc.common.json");
+  const fast = readConfig(".oxlintrc.json");
+  const typed = readConfig(".oxlintrc.type-aware.json");
+  assert.deepEqual(fast.extends, ["./.oxlintrc.common.json"]);
+  assert.deepEqual(typed.extends, [...fast.extends,
+    "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/type-aware.json"]);
+  assert.deepEqual(Object.keys(typed).toSorted(), ["$schema", "extends", "options"]);
+  assert.deepEqual(Object.keys(fast).toSorted(), ["$schema", "extends", "ignorePatterns", "jsPlugins", "options", "overrides", "rules", "settings"]);
+  assert.deepEqual(fast.jsPlugins, [{ name: "boundaries", specifier: "eslint-plugin-boundaries" }]);
+  assert.deepEqual(Object.keys(fast.rules).toSorted(), ["boundaries/dependencies", "boundaries/no-unknown-dependencies"]);
+  assert.equal(fast.rules["boundaries/no-unknown-dependencies"], "error");
+  assert.equal(fast.rules["boundaries/dependencies"][0], "error");
+  assert.ok(fast.settings["boundaries/elements"].length > 0);
+  assert.ok(fast.settings["import/resolver"]);
+  for (const key of ["jsPlugins", "settings", "options"]) {
+    assert.equal(Object.hasOwn(common, key), false);
+  }
+  for (const rules of [common.rules, ...common.overrides.map((entry) => entry.rules)]) {
+    assert.equal(Object.keys(rules).some((name) => name.startsWith("boundaries/")), false);
+  }
+  assert.deepEqual(fast.options, {
+    reportUnusedDisableDirectives: "error",
+    respectEslintDisableDirectives: false,
+    typeAware: false,
+    typeCheck: false,
+  });
+  assert.deepEqual(typed.options, { ...fast.options, typeAware: true });
+  assert.deepEqual(fast.overrides[0].files, ["**/generated/**", "**/vendor/**"]);
+  const typescript = common.overrides.find((entry) => entry.files.includes("**/*.{ts,tsx,mts,cts}"));
+  assert.ok(typescript, "all four TypeScript extensions must retain strict rules");
+  const retainedRules = {
+    "typescript/await-thenable": "error",
+    "typescript/ban-ts-comment": [
+      "error",
+      {
+        "minimumDescriptionLength": 12,
+        "ts-check": false,
+        "ts-expect-error": "allow-with-description",
+        "ts-ignore": true,
+        "ts-nocheck": true
+      }
+    ],
+    "typescript/consistent-type-imports": "error",
+    "typescript/no-confusing-void-expression": "error",
+    "typescript/no-deprecated": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-floating-promises": "error",
+    "typescript/no-import-type-side-effects": "error",
+    "typescript/no-invalid-void-type": "error",
+    "typescript/no-meaningless-void-operator": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/no-non-null-assertion": "error",
+    "typescript/no-unnecessary-boolean-literal-compare": "error",
+    "typescript/no-unnecessary-template-expression": "error",
+    "typescript/no-unnecessary-type-arguments": "error",
+    "typescript/no-unnecessary-type-assertion": "error",
+    "typescript/no-unsafe-argument": "error",
+    "typescript/no-unsafe-assignment": "error",
+    "typescript/no-unsafe-call": "error",
+    "typescript/no-unsafe-member-access": "error",
+    "typescript/no-unsafe-return": "error",
+    "typescript/no-unsafe-type-assertion": "error",
+    "typescript/only-throw-error": "error",
+    "typescript/prefer-as-const": "error",
+    "typescript/prefer-nullish-coalescing": "error",
+    "typescript/prefer-promise-reject-errors": "error",
+    "typescript/related-getter-setter-pairs": "error",
+    "typescript/require-array-sort-compare": "error",
+    "typescript/restrict-plus-operands": "error",
+    "typescript/restrict-template-expressions": "error",
+    "typescript/return-await": "error",
+    "typescript/strict-boolean-expressions": "error",
+    "typescript/strict-void-return": "error",
+    "typescript/switch-exhaustiveness-check": "error",
+    "typescript/unbound-method": "error",
+    "typescript/use-unknown-in-catch-callback-variable": "error"
+  };
+  for (const [name, setting] of Object.entries(retainedRules)) {
+    assert.deepEqual(typescript.rules[name], setting, name);
+  }
+  for (const rule of Object.values(typescript.rules)) {
+    assert.equal(Array.isArray(rule) ? rule[0] : rule, "error");
+  }
 });

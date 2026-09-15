@@ -63,6 +63,7 @@ SQLite
 SQLSTATE
 Starlight
 subclients
+tsgolint
 TypeScript
 Ubiquitous
 undispatched

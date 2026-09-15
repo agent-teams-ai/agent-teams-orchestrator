@@ -103,6 +103,52 @@ blocking oracle; after parity, only Orchestrator-specific residue remains. The
 foundation checkout is accepted only through the guarded local lifecycle and is
 rejected by CI.
 
+### Source coverage adoption
+
+Engineering Foundation `1.3.3` provides the active `quality.source-coverage`
+capability through `architecture/foundation/quality-source-coverage.yaml` and
+Foundation configuration schema v2. `quality:coverage:scope` runs the shared
+scope check in `check:fast`; `lint:typed` runs shared selection, compiler context,
+and typed lint once in the full `lint` and `check` chain. The qualified toolchain
+uses Oxlint `1.77.0`, oxlint-tsgolint `7.0.2001`, and TypeScript `7.0.2`.
+
+`architecture/foundation/quality-feature-topology.json` is a checked adapter for
+Foundation's flat FMS v1 reader. The accepted organization authority remains
+`architecture/feature-module-standard-profile.json`; it is unchanged. The adapter
+maps its production and excluded roots and the materialized package catalog to
+`packages/platform/local-host-control`, its `src` tree, and its `tests` tree.
+There are no materialized applications. `validate-quality-topology.mjs` rejects
+projection drift, missing source or test directories, and unreviewed application
+materialization. Foundation independently rejects unclassified workspace packages,
+including packages omitted from the projection or source policy. Catalog
+reservations alone do not create production modules.
+
+Common blocking rules live in `.oxlintrc.common.json`; the fast config adds
+executable boundary rules and the existing generated/vendor budget exemption.
+The typed config adds Foundation's protected typed preset without executable
+plugins. Generated/vendor exemptions do not enter the production typed route.
+All 36 stricter TypeScript rules, explicit root suppression options, and the local
+suppression validator remain required. The architecture, FMS, and immutable
+history gates remain blocking.
+
+Foundation `1.3.3` classifies `.ts` and `.mjs`, but rejects production `.tsx`,
+`.mts`, and `.cts`. The local typed runner remains available through
+`lint:type-aware:files` for explicit file routing and positive/rejecting extension
+qualification. It does not repeat the full production typed pass. Supporting
+those extensions in production requires a qualified Foundation successor.
+Two shared CLI checks exercise the live profile and reject a new unclassified
+workspace package. Pure validator fixtures reject topology omission, source drift,
+and missing production sources. Structural assertions preserve exact routes,
+protected rules, and root suppression options.
+
+Managed Docs adoption is a separate qualification boundary. The active
+`docs-2026-09-15-stable24` cohort binds Foundation `1.3.3` and Docs Protocol Agent
+Teams `0.2.8`. The official managed upgrade from `docs-2026-09-11-stable20`
+was generated in a clean clone and applied to this workspace. The consumer
+integration and managed state record stable24, and the managed check reports
+the adoption as current. Package pins and the lockfile match that cohort.
+Historical cohort qualification evidence remains unchanged.
+
 ### Advisory quality diagnostics
 
 The Orchestrator owns `architecture/foundation/quality-gate-runner.yaml`. Its one
