@@ -1,7 +1,9 @@
-schemaVersion: 1
+schemaVersion: 2
 project:
   id: agent-teams-orchestrator
 capabilities:
+  quality.source-coverage:
+    configPath: architecture/foundation/quality-source-coverage.yaml
   quality.gate-runner:
     configPath: architecture/foundation/quality-gate-runner.yaml
   architecture.source-dependencies:

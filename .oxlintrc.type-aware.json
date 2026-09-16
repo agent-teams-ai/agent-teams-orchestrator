@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": [
+    "./.oxlintrc.common.json",
+    "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/type-aware.json"
+  ],
+  "options": {
+    "reportUnusedDisableDirectives": "error",
+    "respectEslintDisableDirectives": false,
+    "typeAware": true,
+    "typeCheck": false
+  }
+}

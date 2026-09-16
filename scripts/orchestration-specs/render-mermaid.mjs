@@ -9,7 +9,7 @@ const classifiedEvents = (spec, stateId, disposition) =>
         transition.source === stateId && transition.disposition === disposition,
     )
     .map((transition) => transition.event)
-    .sort();
+    .toSorted();
 
 const renderModel = (spec, modelIndex) => {
   const lines = [

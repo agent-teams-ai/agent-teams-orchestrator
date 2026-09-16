@@ -30,7 +30,9 @@ changedChecks:
 fullScanPaths:
   - .github/workflows
   - .oxlintrc.advisory.json
+  - .oxlintrc.common.json
   - .oxlintrc.json
+  - .oxlintrc.type-aware.json
   - architecture/foundation
   - architecture/executable-specs
   - scripts/orchestration-specs

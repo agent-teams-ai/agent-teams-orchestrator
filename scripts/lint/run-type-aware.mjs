@@ -1,21 +1,11 @@
 import { spawnSync } from "node:child_process";
-import { readFile, readdir, stat } from "node:fs/promises";
+import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
-import { parse as parseYaml } from "yaml";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "../..");
 const oxlintBinary = path.join(repositoryRoot, "node_modules/.bin/oxlint");
-const packageCatalogPath = path.join(
-  repositoryRoot,
-  "architecture/package-catalog.yaml",
-);
-const conformanceTarget = path.join(
-  repositoryRoot,
-  "tooling/architecture-conformance-fixtures/valid",
-);
 const typeScriptExtensions = new Set([".cts", ".mts", ".ts", ".tsx"]);
 const excludedDirectories = new Set([
   ".git",
@@ -66,18 +56,10 @@ async function countTypeScriptFiles(target) {
 }
 
 async function resolveTargets(cliArguments) {
-  let requested;
-  if (cliArguments.length > 0) {
-    requested = cliArguments.map((target) => path.resolve(repositoryRoot, target));
-  } else {
-    const catalog = parseYaml(await readFile(packageCatalogPath, "utf8"));
-    requested = [
-      ...(catalog.packages ?? []).map((entry) =>
-        path.join(repositoryRoot, entry.path),
-      ),
-      conformanceTarget,
-    ];
+  if (cliArguments.length === 0) {
+    throw new Error("type-aware lint requires explicit paths; use lint:typed for production coverage");
   }
+  const requested = cliArguments.map((target) => path.resolve(repositoryRoot, target));
   const targets = [];
   for (const target of requested) {
     if (await exists(target)) {
@@ -113,7 +95,7 @@ async function main() {
     "--config",
     path.join(
       repositoryRoot,
-      advisory ? ".oxlintrc.advisory.json" : ".oxlintrc.json",
+      advisory ? ".oxlintrc.advisory.json" : ".oxlintrc.type-aware.json",
     ),
     "--disable-nested-config",
     "--type-aware",
