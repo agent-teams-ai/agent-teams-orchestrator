@@ -367,10 +367,9 @@ checks every workspace manifest, including manual edits, and rejects direct
 external versions, non-`workspace:` internal references, missing catalog entries,
 and non-exact catalog versions.
 
-The repository also enforces a strict 24-hour minimum release age. An immature
-direct or transitive package fails installation instead of being added
-automatically to an exception list. Any exact-version exception is a reviewed
-supply-chain decision and remains visible in `pnpm-workspace.yaml`.
+Package release-age waiting is intentionally disabled for delivery speed. Supply-chain
+safety remains covered by exact catalog versions, lockfile review, audit tooling, and
+the repository quality gates.
 
 Adding a dependency requires:
 

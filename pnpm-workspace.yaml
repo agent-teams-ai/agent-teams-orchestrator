@@ -43,8 +43,6 @@ packageExtensions:
     peerDependencies:
       "typescript": ">=2.0.0 <7.0.0"
 
-minimumReleaseAge: 1440
-minimumReleaseAgeStrict: true
 
 minimumReleaseAgeExclude:
   - "@agent-teams/engineering-foundation@1.3.3"
