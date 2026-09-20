@@ -195,7 +195,7 @@ test("pins managed direct roots while package release-age waiting stays disabled
     Object.fromEntries(Object.entries(devDependencies).filter(([name]) => name.startsWith("@agent-teams/"))),
     roots,
   );
-  assert.equal(workspace.minimumReleaseAge, undefined);
+  assert.equal(workspace.minimumReleaseAge, 0);
   assert.equal(workspace.minimumReleaseAgeStrict, undefined);
   assert.deepEqual(
     workspace.minimumReleaseAgeExclude.filter((name) => name.startsWith("@agent-teams/")).toSorted(),
