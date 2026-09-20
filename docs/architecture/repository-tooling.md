@@ -220,10 +220,9 @@ membership, and repository-wide ID uniqueness. The Orchestrator validator keeps
 only consumer semantics such as required headings, local links and anchors,
 Mermaid, index policy, relation lifecycle, and content-impact routing.
 
-The first-party foundation package alone is exempt from the pnpm release-age
-delay. Its exact manifest version, registry integrity, reviewed upgrade, and npm
-Trusted Publisher remain mandatory. The exemption does not apply to the rest of
-the `@agent-teams` scope or to third-party dependencies.
+The pnpm release-age delay is disabled for all dependencies. Exact manifest
+versions, registry integrity, reviewed upgrades, and npm Trusted Publisher remain
+mandatory for first-party packages.
 
 ## Sources of truth
 
@@ -367,10 +366,9 @@ checks every workspace manifest, including manual edits, and rejects direct
 external versions, non-`workspace:` internal references, missing catalog entries,
 and non-exact catalog versions.
 
-The repository also enforces a strict 24-hour minimum release age. An immature
-direct or transitive package fails installation instead of being added
-automatically to an exception list. Any exact-version exception is a reviewed
-supply-chain decision and remains visible in `pnpm-workspace.yaml`.
+Package release-age waiting is intentionally disabled for delivery speed. Supply-chain
+safety remains covered by exact catalog versions, lockfile review, audit tooling, and
+the repository quality gates.
 
 Adding a dependency requires:
 
