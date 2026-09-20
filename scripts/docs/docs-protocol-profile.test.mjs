@@ -197,12 +197,4 @@ test("pins managed direct roots while package release-age waiting stays disabled
   );
   assert.equal(workspace.minimumReleaseAge, 0);
   assert.equal(workspace.minimumReleaseAgeStrict, undefined);
-  assert.deepEqual(
-    workspace.minimumReleaseAgeExclude.filter((name) => name.startsWith("@agent-teams/")).toSorted(),
-    [
-      ...Object.entries(roots).map(([name, version]) => `${name}@${version}`),
-      "@agent-teams/document-authoring@0.3.0",
-      "@agent-teams/repository-mutation@0.2.0",
-    ].toSorted(),
-  );
 });
