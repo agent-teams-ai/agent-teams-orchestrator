@@ -183,7 +183,7 @@ test("routes the canonical protocol commands without weakening repository docume
   }
 });
 
-test("pins managed direct roots and exact transitive age exceptions without activating history", async () => {
+test("pins managed direct roots while package release-age waiting stays disabled", async () => {
   const { devDependencies } = await readJson("package.json");
   const workspace = await readYaml("pnpm-workspace.yaml");
   const roots = {
@@ -195,8 +195,8 @@ test("pins managed direct roots and exact transitive age exceptions without acti
     Object.fromEntries(Object.entries(devDependencies).filter(([name]) => name.startsWith("@agent-teams/"))),
     roots,
   );
-  assert.equal(workspace.minimumReleaseAge, 1440);
-  assert.equal(workspace.minimumReleaseAgeStrict, true);
+  assert.equal(workspace.minimumReleaseAge, undefined);
+  assert.equal(workspace.minimumReleaseAgeStrict, undefined);
   assert.deepEqual(
     workspace.minimumReleaseAgeExclude.filter((name) => name.startsWith("@agent-teams/")).toSorted(),
     [
