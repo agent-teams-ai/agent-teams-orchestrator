@@ -220,10 +220,9 @@ membership, and repository-wide ID uniqueness. The Orchestrator validator keeps
 only consumer semantics such as required headings, local links and anchors,
 Mermaid, index policy, relation lifecycle, and content-impact routing.
 
-The first-party foundation package alone is exempt from the pnpm release-age
-delay. Its exact manifest version, registry integrity, reviewed upgrade, and npm
-Trusted Publisher remain mandatory. The exemption does not apply to the rest of
-the `@agent-teams` scope or to third-party dependencies.
+The pnpm release-age delay is disabled for all dependencies. Exact manifest
+versions, registry integrity, reviewed upgrades, and npm Trusted Publisher remain
+mandatory for first-party packages.
 
 ## Sources of truth
 
