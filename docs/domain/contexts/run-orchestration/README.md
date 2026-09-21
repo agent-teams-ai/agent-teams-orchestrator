@@ -120,6 +120,11 @@ CreateRun
 Runtime liveness, context application, pending interaction, participant
 readiness, Run health, and completion assessment are independent facts.
 
+The [OD-033 workload classification candidate](../../../open-decisions/OD-033-ooda-convergence-and-context-activation.md#workload-classification-acceptance)
+defines the proposed mapping owner and acceptance for interactive, scheduled,
+and maintenance work. Exact policy remains open; transport priority cannot
+replace product authorization or AR capacity enforcement.
+
 The [Run authority executable specification](../../../../architecture/executable-specs/run-authority-state.json)
 captures only the accepted ADR-0079 `RunAuthorityState` and generation pattern.
 Its derived XState graph is test and visualization evidence, not a production

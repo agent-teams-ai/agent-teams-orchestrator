@@ -159,6 +159,69 @@ The execution profile needs:
 Exact scheduling, quotas, and cell placement remain open. Local and hosted
 profiles must preserve the same application outcomes even when capacity differs.
 
+### Workload classification acceptance
+
+Close this part of OD-033 together with OD-006, OD-013, and OD-026. The following
+is a policy candidate, not an accepted wire enum or permission to implement a
+new scheduler. Keep business importance, execution class, resource cost,
+deadline, and delivery durability separate.
+
+Work Coordination owns Work and Handoff priority facts. Agent Attention owns
+urgency and orientation intent; those facts cannot grant execution or runtime
+interruption. Run Orchestration owns the authorized, versioned mapping of those
+inputs to activation, continuation, and retry requests. AR validates technical
+class, caller scope, capacity, fairness, and cutoff. NATS JetStream transports
+committed integration facts; neither a subject nor an acknowledgement grants
+business priority or proves that execution started.
+
+The initial classification candidate is:
+
+| Class | Meaning | Required treatment |
+| --- | --- | --- |
+| Interactive | Work needed to complete a current user interaction | Bounded preference within quota, with a fairness escape for other eligible work |
+| Scheduled | Planned autonomous execution | Explicit eligibility and deadline; a schedule does not imply low importance |
+| Maintenance | Deferrable work outside an active response | Eventual service under declared load and resource assumptions |
+
+Classify by authorized purpose, not trigger name. A manual request is not an
+unlimited priority grant. A dependency-ready child or continuation may be on an
+interactive critical path; an agent-to-agent message alone proves no such
+relationship. Summarization needed for the current response differs from
+periodic optional summarization. Recovery and retries are not automatically
+the highest priority. An attention notification is not execution authority.
+
+Cancellation, revocation, lease renewal, and reclaim use the relevant owner's
+separate bounded control capacity. This is not a fourth user-selectable class.
+Protect each control stage and downstream resource under overload; a separate
+transport subject alone does not reserve execution, database, or I/O capacity.
+
+Before acceptance, specify exact types, defaults, mapping revision, deadlines,
+budget attribution, expiry, and authorized reclassification. Exact replay or
+transport redelivery of the same accepted command preserves command/reservation
+identity, waiting age, class, policy snapshot, and existing debit. A product retry
+or reauthorization creates the owner-required successor activation/attempt,
+receives a new admission identity, and passes classification and budget checks
+again. Preserve only explicitly stable business/effect correlation; a new attempt
+does not erase the enclosing Run's consumed retry budget. Reclassification of
+existing queued work requires an explicit owner command and concurrency guard,
+not identity reuse. Delegation preserves accountable correlation without
+multiplying tenant quota or blindly inheriting permissions.
+
+Qualify at least these cases with the AR capacity owner:
+
+- an interactive parent awaiting an authorized child without resource deadlock;
+- a scheduled deadline with explicit expiry behavior during interactive load;
+- maintenance progress under continuous interactive arrivals, with a finite
+  bound in eligible grant opportunities under stated fairness assumptions;
+- rejection of forged class, unauthorized mapping revision, and retry-based
+  priority escalation, without invalidating replay of an accepted snapshot;
+- cancellation and renewal under saturated admission and broker redelivery;
+- restart preserving waiting age, policy revision, and capacity accounting.
+
+Expose business importance separately from technical wait reason and observation
+freshness. Neither elapsed time nor a broker acknowledgement can establish a
+stuck, started, completed, or safely stopped outcome. Keep this product mapping
+here; AR's capacity plan owns enforcement acceptance, not a duplicate taxonomy.
+
 ## Feedback-loop controls
 
 Every automated feedback item carries bounded causation metadata:
