@@ -166,6 +166,9 @@ is a policy candidate, not an accepted wire enum or permission to implement a
 new scheduler. Keep business importance, execution class, resource cost,
 deadline, and delivery durability separate.
 
+The organization-wide [early product advantage authority](https://github.com/agent-teams-ai/.github/blob/dcf32221aa6759f5011183e7210c0efd5b2f0d5b/docs/engineering-quality-standard.md#early-product-advantage)
+governs this acceptance bar and is pinned here to its reviewed bytes.
+
 Work Coordination owns Work and Handoff priority facts. Agent Attention owns
 urgency and orientation intent; those facts cannot grant execution or runtime
 interruption. Run Orchestration owns the authorized, versioned mapping of those
