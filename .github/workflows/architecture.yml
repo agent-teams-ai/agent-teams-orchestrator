@@ -53,8 +53,9 @@ jobs:
         with:
           node-version: "26.10.0"
           cache: pnpm
+      - run: bash scripts/ci/check-frozen-peer-enforcement.sh
       # Keep this lane red until the repository and locked packages support Node 26.
-      - run: pnpm install --frozen-lockfile --config.engine-strict=true
+      - run: pnpm install --frozen-lockfile --config.engine-strict=true --strict-peer-dependencies && pnpm peers check
       - run: pnpm check
 
   local-host-control-cross-platform:

@@ -86,7 +86,9 @@ gate as active.
 
 Node.js 24 is the production default selected by ADR-0025. The Node.js 26 CI
 job is a staging qualification lane under proposed ADR-0102: it runs a frozen
-install with engine strictness before the full repository gate. Five reachable
+install with engine and peer strictness, then checks peers against the installed
+lockfile before the full repository gate. A disposable incompatible-peer fixture
+verifies that the lane rejects frozen peer conflicts. Five reachable
 published packages in the current lockfile still declare Node.js `<25`, so a
 red strict install is the expected unresolved compatibility signal. Widening
 package engine claims or moving production to Node.js 26 requires exact
