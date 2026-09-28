@@ -35,6 +35,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 
 - [ADR-0082: Break-glass reduces Orchestrator authority](0082-break-glass-reduces-orchestrator-authority.md)
 - [ADR-0099: Foundation-scoped scaffolding recovery](0099-foundation-scoped-scaffolding-recovery.md)
+- [ADR-0102: Node.js 24 production baseline and Node.js 26 compatibility staging](0102-node-js-24-production-baseline-and-node-js-26-compatibility-staging.md)
 
 ## Accepted decisions
 

@@ -8,6 +8,7 @@ related:
   - ADR-0011
   - ADR-0047
   - ADR-0025
+  - ADR-0102
   - ADR-0052
   - ADR-0046
   - ADR-0048
@@ -190,10 +191,13 @@ integrity checks, version compatibility, and online backup primitives. A
 multi-context product backup uses a mutation barrier and manifest; it does not
 pretend that separate files share one transaction.
 
-The runtime baseline is Node.js 24 LTS with `>=24.18.0 <25` enforced by repository
-tooling. The first local driver is `node:sqlite`. Application ports remain
-asynchronous even though the adapter executes a synchronous `DatabaseSync`
-transaction.
+The production runtime baseline remains Node.js 24 LTS with `>=24.18.0 <25`
+enforced by repository tooling. Node.js 26 is a compatibility staging target
+under proposed ADR-0102; it is not an advertised production runtime until the
+locked published dependencies support it and a clean strict frozen install and
+full repository gate pass. The first local driver is `node:sqlite`. Application
+ports remain asynchronous even though the adapter executes a synchronous
+`DatabaseSync` transaction.
 
 Mutating use cases enter one single-writer command lane per bounded context before
 opening their Unit of Work. In every profile, no network, broker, runtime,

@@ -15,6 +15,7 @@ related:
   - ADR-0056
   - ADR-0059
   - ADR-0078
+  - ADR-0102
   - architecture.dependency-rules
   - architecture.feature-module-standard
   - architecture.machine-readable-model
@@ -80,6 +81,16 @@ is complete.
 The implementation state changes only with executable evidence in this
 repository. Documentation must not describe a planned dependency, wrapper, or
 gate as active.
+
+## Node.js compatibility qualification
+
+Node.js 24 is the production default selected by ADR-0025. The Node.js 26 CI
+job is a staging qualification lane under proposed ADR-0102: it runs a frozen
+install with engine strictness before the full repository gate. Five reachable
+published packages in the current lockfile still declare Node.js `<25`, so a
+red strict install is the expected unresolved compatibility signal. Widening
+package engine claims or moving production to Node.js 26 requires exact
+published compatible artifacts and clean qualification evidence.
 
 ## Cross-repository engineering foundation
 
