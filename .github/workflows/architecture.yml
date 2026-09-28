@@ -38,7 +38,7 @@ jobs:
         run: pnpm docs:impact -- --base "${{ github.event.pull_request.base.sha }}" --strict
 
   node-26-compatibility:
-    name: Node.js 26 compatibility
+    name: Node.js 26 compatibility staging
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -53,7 +53,8 @@ jobs:
         with:
           node-version: "26.10.0"
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      # Keep this lane red until the repository and locked packages support Node 26.
+      - run: pnpm install --frozen-lockfile --config.engine-strict=true
       - run: pnpm check
 
   local-host-control-cross-platform:
