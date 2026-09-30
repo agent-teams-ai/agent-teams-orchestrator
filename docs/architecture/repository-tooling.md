@@ -88,11 +88,16 @@ Node.js 24 is the production default selected by ADR-0025. The Node.js 26 CI
 job is a staging qualification lane under proposed ADR-0102: it runs a frozen
 install with engine and peer strictness, then checks peers against the installed
 lockfile before the full repository gate. A disposable incompatible-peer fixture
-verifies that the lane rejects frozen peer conflicts. Five reachable
-published packages in the current lockfile still declare Node.js `<25`, so a
-red strict install is the expected unresolved compatibility signal. Widening
-package engine claims or moving production to Node.js 26 requires exact
-published compatible artifacts and clean qualification evidence.
+verifies that the lane rejects frozen peer conflicts. The current lockfile pins
+Node.js 26-compatible published versions of `repository-mutation@0.2.2`,
+`document-authoring@0.3.2`, `docs-protocol@0.6.2`,
+`docs-protocol-agent-teams@0.2.13`, and `engineering-foundation@1.7.0`.
+At candidate `dc76b6f09bed96c95ff8d9c004072c089125116f`, hosted Node.js
+24.21 and 26.10 strict frozen installs and `pnpm check:fast` passed; GitHub's
+Node.js 26 and architecture jobs passed.
+The trusted Docs gate remains blocked by the active Cohort's old package
+coordinates. These results do not establish full release readiness or change
+the Node.js 24 production default.
 
 ## Cross-repository engineering foundation
 
@@ -118,7 +123,7 @@ rejected by CI.
 
 ### Source coverage adoption
 
-Engineering Foundation `1.3.3` provides the active `quality.source-coverage`
+Engineering Foundation `1.7.0` provides the active `quality.source-coverage`
 capability through `architecture/foundation/quality-source-coverage.yaml` and
 Foundation configuration schema v2. `quality:coverage:scope` runs the shared
 scope check in `check:fast`; `lint:typed` runs shared selection, compiler context,
@@ -158,9 +163,12 @@ Managed Docs adoption is a separate qualification boundary. The active
 `docs-2026-09-15-stable24` cohort binds Foundation `1.3.3` and Docs Protocol Agent
 Teams `0.2.8`. The official managed upgrade from `docs-2026-09-11-stable20`
 was generated in a clean clone and applied to this workspace. The consumer
-integration and managed state record stable24, and the managed check reports
-the adoption as current. Package pins and the lockfile match that cohort.
-Historical cohort qualification evidence remains unchanged.
+integration and managed state still record stable24, but current package pins
+and the lockfile use Foundation `1.7.0` and Docs Protocol Agent Teams `0.2.13`
+with their Node.js 26-compatible dependency closure. The trusted Docs gate fails
+because the central active Cohort still records the old package coordinates;
+qualifying its successor is separate central work. Historical cohort
+qualification evidence remains unchanged.
 
 ### Advisory quality diagnostics
 

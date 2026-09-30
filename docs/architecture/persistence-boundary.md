@@ -191,11 +191,15 @@ integrity checks, version compatibility, and online backup primitives. A
 multi-context product backup uses a mutation barrier and manifest; it does not
 pretend that separate files share one transaction.
 
-The production runtime baseline remains Node.js 24 LTS with `>=24.18.0 <25`
-enforced by repository tooling. Node.js 26 is a compatibility staging target
-under proposed ADR-0102; it is not an advertised production runtime until the
-locked published dependencies support it and a clean strict frozen install and
-full repository gate pass. The first local driver is `node:sqlite`. Application
+The production runtime baseline remains Node.js 24 LTS, selected by
+`.node-version` and the normal CI lane. Root and Local Host Control package
+engines also admit Node.js 26 for compatibility staging under proposed ADR-0102.
+The current lockfile pins published Node.js 26-compatible dependencies, and
+strict frozen installs and `pnpm check:fast` passed on Node.js 24.21 and 26.10
+at candidate `dc76b6f09bed96c95ff8d9c004072c089125116f`. The trusted Docs
+gate still fails because the central active Cohort records old package
+coordinates; Node.js 26 is not an advertised production runtime or a completed
+release qualification. The first local driver is `node:sqlite`. Application
 ports remain asynchronous even though the adapter executes a synchronous
 `DatabaseSync` transaction.
 
