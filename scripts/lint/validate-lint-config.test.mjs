@@ -78,6 +78,10 @@ function validateSuppressions(fixture) {
   };
 }
 
+function readConfig(name) {
+  return JSON.parse(readFileSync(path.join(repositoryRoot, name), "utf8"));
+}
+
 test("blocking and advisory lanes exclude the same non-production fixtures", () => {
   const blockingConfig = JSON.parse(
     readFileSync(path.join(repositoryRoot, ".oxlintrc.json"), "utf8"),
@@ -282,7 +286,6 @@ for (const extension of ["tsx", "mts", "cts"]) {
 }
 
 test("common, fast and typed configs keep separate responsibilities", () => {
-  const readConfig = (name) => JSON.parse(readFileSync(path.join(repositoryRoot, name), "utf8"));
   const common = readConfig(".oxlintrc.common.json");
   const fast = readConfig(".oxlintrc.json");
   const typed = readConfig(".oxlintrc.type-aware.json");
