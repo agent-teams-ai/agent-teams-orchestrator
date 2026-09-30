@@ -98,6 +98,18 @@ test("published coverage accepts the real consumer profile", async () => {
   });
 });
 
+test("published coverage rejects a test override that also selects unclassified tooling", async () => {
+  await fixture(async (root) => {
+    const common = await readJson(root, ".oxlintrc.common.json");
+    common.overrides[0].files = ["**/*"];
+    await writeJson(root, ".oxlintrc.common.json", common);
+    const result = inspect(root);
+    assert.equal(result.status, 2, JSON.stringify(result.report));
+    assert.match(JSON.stringify(result.report), /QUALITY_PROFILE_INVALID/u);
+    assert.match(JSON.stringify(result.report), /without production or test classification/u);
+  });
+});
+
 test("projection rejects omission and source or standard drift", async () => {
   for (const mutate of [
     (value) => { value.modules = []; },

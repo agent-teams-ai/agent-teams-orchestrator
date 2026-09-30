@@ -29,7 +29,7 @@ function runOxlint(config, fixture) {
     [
       "--config",
       typeAware
-        ? path.join(repositoryRoot, ".oxlintrc.type-aware.json")
+        ? conformanceConfig.typedFilePath
         : conformanceConfig.filePath,
       "--disable-nested-config",
       "--no-ignore",
@@ -116,6 +116,14 @@ test("maintainability profiles stay aligned with Foundation", () => {
   );
   assert.ok(testOverride, "test maintainability override must exist");
   assert.deepEqual(testOverride.rules, foundationTestProfile.rules);
+  assert.deepEqual(testOverride.files, ["packages/**/tests/**"]);
+  const fastConfig = JSON.parse(readFileSync(path.join(repositoryRoot, ".oxlintrc.json"), "utf8"));
+  const toolingTests = fastConfig.overrides.find((override) =>
+    override.files?.includes("scripts/**/*.test.mjs"));
+  assert.deepEqual(toolingTests?.files, [
+    "scripts/**/*.test.mjs", "scripts/**/fixtures/**", "tooling/architecture-conformance/**",
+  ]);
+  assert.deepEqual(toolingTests.rules, foundationTestProfile.rules);
 });
 
 test("generated fixtures keep maintainability budgets disabled", () => {
@@ -303,8 +311,18 @@ test("common, fast and typed configs keep separate responsibilities", () => {
   });
   assert.deepEqual(typed.options, { ...fast.options, typeAware: true });
   assert.deepEqual(fast.overrides[0].files, ["**/generated/**", "**/vendor/**"]);
-  const typescript = common.overrides.find((entry) => entry.files.includes("**/*.{ts,tsx,mts,cts}"));
+  const typescript = common.overrides.find((entry) => entry.files.includes("packages/**/src/**/*.{ts,tsx,mts,cts}"));
   assert.ok(typescript, "all four TypeScript extensions must retain strict rules");
+  assert.deepEqual(typescript.files, [
+    "apps/**/src/**/*.{ts,tsx,mts,cts}",
+    "packages/**/src/**/*.{ts,tsx,mts,cts}",
+    "packages/**/tests/**/*.{ts,tsx,mts,cts}",
+  ]);
+  assert.deepEqual(fast.overrides.find((entry) => entry.files.includes("tooling/lint-fixtures/**/*.{ts,tsx,mts,cts}"))?.rules, typescript.rules);
+  const productionPurity = common.overrides.find((entry) => entry.rules["no-restricted-globals"]);
+  const fixturePurity = fast.overrides.find((entry) => entry.files.includes("tooling/lint-fixtures/core-purity/domain/**/*.{ts,tsx,mts,cts}"));
+  assert.ok(productionPurity.files.every((pattern) => pattern.startsWith("apps/") || pattern.startsWith("packages/")));
+  assert.deepEqual(fixturePurity.rules, productionPurity.rules);
   const retainedRules = {
     "typescript/await-thenable": "error",
     "typescript/ban-ts-comment": [

@@ -57,10 +57,7 @@
   "overrides": [
     {
       "files": [
-        "packages/**/tests/**",
-        "scripts/**/*.test.mjs",
-        "scripts/**/fixtures/**",
-        "tooling/architecture-conformance/**"
+        "packages/**/tests/**"
       ],
       "rules": {
         "complexity": [
@@ -95,7 +92,9 @@
     },
     {
       "files": [
-        "**/*.{ts,tsx,mts,cts}"
+        "apps/**/src/**/*.{ts,tsx,mts,cts}",
+        "packages/**/src/**/*.{ts,tsx,mts,cts}",
+        "packages/**/tests/**/*.{ts,tsx,mts,cts}"
       ],
       "rules": {
         "typescript/await-thenable": "error",
@@ -154,11 +153,7 @@
         "packages/**/src/features/*/application/**/*.{ts,tsx,mts,cts}",
         "packages/**/src/features/*/domain/**/*.{ts,tsx,mts,cts}",
         "packages/**/src/features/*/contracts/**/*.{ts,tsx,mts,cts}",
-        "packages/**/src/features/*/projections/**/*.{ts,tsx,mts,cts}",
-        "tooling/lint-fixtures/core-purity/application/**/*.{ts,tsx,mts,cts}",
-        "tooling/lint-fixtures/core-purity/contracts/**/*.{ts,tsx,mts,cts}",
-        "tooling/lint-fixtures/core-purity/domain/**/*.{ts,tsx,mts,cts}",
-        "tooling/lint-fixtures/core-purity/projections/**/*.{ts,tsx,mts,cts}"
+        "packages/**/src/features/*/projections/**/*.{ts,tsx,mts,cts}"
       ],
       "rules": {
         "no-restricted-globals": [
