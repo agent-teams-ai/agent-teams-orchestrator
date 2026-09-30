@@ -23,7 +23,7 @@ catalog:
   oxc-parser: 0.142.0
   oxc-resolver: 11.24.2
   oxlint: 1.86.0
-  oxlint-tsgolint: 7.0.2001
+  oxlint-tsgolint: 7.0.2003
   remark-frontmatter: 5.0.0
   remark-gfm: 4.0.1
   remark-parse: 11.0.0
