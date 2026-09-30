@@ -187,9 +187,9 @@ test("pins managed direct roots while package release-age waiting stays disabled
   const { devDependencies } = await readJson("package.json");
   const workspace = await readYaml("pnpm-workspace.yaml");
   const roots = {
-    "@agent-teams/docs-protocol": "0.6.0",
-    "@agent-teams/docs-protocol-agent-teams": "0.2.8",
-    "@agent-teams/engineering-foundation": "1.3.3",
+    "@agent-teams/docs-protocol": "0.6.2",
+    "@agent-teams/docs-protocol-agent-teams": "0.2.13",
+    "@agent-teams/engineering-foundation": "1.7.0",
   };
   assert.deepEqual(
     Object.fromEntries(Object.entries(devDependencies).filter(([name]) => name.startsWith("@agent-teams/"))),

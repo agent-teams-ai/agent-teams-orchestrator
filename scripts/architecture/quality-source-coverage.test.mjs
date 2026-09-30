@@ -86,8 +86,8 @@ test("active coverage binds exact tools, authority, scope and a single full type
 
 test("adoption pins the qualified Foundation and Docs adapter", async () => {
   const pkg = await readJson(repositoryRoot, "package.json");
-  assert.equal(pkg.devDependencies["@agent-teams/engineering-foundation"], "1.3.3");
-  assert.equal(pkg.devDependencies["@agent-teams/docs-protocol-agent-teams"], "0.2.8");
+  assert.equal(pkg.devDependencies["@agent-teams/engineering-foundation"], "1.7.0");
+  assert.equal(pkg.devDependencies["@agent-teams/docs-protocol-agent-teams"], "0.2.13");
 });
 
 test("published coverage accepts the real consumer profile", async () => {
