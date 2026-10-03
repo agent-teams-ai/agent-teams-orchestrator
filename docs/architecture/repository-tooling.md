@@ -84,20 +84,18 @@ gate as active.
 
 ## Node.js compatibility qualification
 
-Node.js 24 is the production default selected by ADR-0025. The Node.js 26 CI
-job is a staging qualification lane under proposed ADR-0102: it runs a frozen
-install with engine and peer strictness, then checks peers against the installed
-lockfile before the full repository gate. A disposable incompatible-peer fixture
-verifies that the lane rejects frozen peer conflicts. The current lockfile pins
-Node.js 26-compatible published versions of `repository-mutation@0.2.2`,
-`document-authoring@0.3.2`, `docs-protocol@0.6.2`,
-`docs-protocol-agent-teams@0.2.13`, and `engineering-foundation@1.7.0`.
-At candidate `dc76b6f09bed96c95ff8d9c004072c089125116f`, hosted Node.js
-24.21 and 26.10 strict frozen installs and `pnpm check:fast` passed; GitHub's
-Node.js 26 and architecture jobs passed.
-The trusted Docs gate remains blocked by the active Cohort's old package
-coordinates. These results do not establish full release readiness or change
-the Node.js 24 production default.
+Node.js 24 remains the production default selected by ADR-0025; the current
+root tooling floor is 24.21.0. The Node.js 26 CI job remains a separate
+staging qualification lane under proposed ADR-0102. It retains the exact
+26.10.0 toolchain, strict frozen engine and peer checks, the installed-lock
+peer check, the disposable incompatible-peer rejection fixture, and the full
+repository gate. Its package engine range remains `>=26.0.0 <27`.
+
+The earlier PR candidate `dc76b6f09bed96c95ff8d9c004072c089125116f`
+recorded qualification against earlier inputs. Those results remain historical;
+they do not qualify this integration. Current-main managed profiles, state and
+caller remain unchanged. Node.js 26 package compatibility does not establish
+managed Docs execution support or authorize a production cutover.
 
 ## Cross-repository engineering foundation
 
@@ -123,12 +121,14 @@ rejected by CI.
 
 ### Source coverage adoption
 
-Engineering Foundation `1.7.0` provides the active `quality.source-coverage`
+Engineering Foundation `1.7.2` is the source target for `quality.source-coverage`
 capability through `architecture/foundation/quality-source-coverage.yaml` and
 Foundation configuration schema v2. `quality:coverage:scope` runs the shared
 scope check in `check:fast`; `lint:typed` runs shared selection, compiler context,
-and typed lint once in the full `lint` and `check` chain. The qualified toolchain
-uses Oxlint `1.77.0`, oxlint-tsgolint `7.0.2001`, and TypeScript `7.0.2`.
+and typed lint once in the full `lint` and `check` chain. The public adapter
+requires Oxlint `1.83.0`, oxlint-tsgolint `7.0.2001`, and TypeScript `7.0.2`.
+The consumer catalog and lockfile now pin Oxlint `1.83.0`, matching that adapter.
+These source pins do not replace a fresh frozen install and native qualification.
 
 `architecture/foundation/quality-feature-topology.json` is a checked adapter for
 Foundation's flat FMS v1 reader. The accepted organization authority remains
@@ -141,34 +141,67 @@ materialization. Foundation independently rejects unclassified workspace package
 including packages omitted from the projection or source policy. Catalog
 reservations alone do not create production modules.
 
-Common blocking rules live in `.oxlintrc.common.json`; the fast config adds
-executable boundary rules and the existing generated/vendor budget exemption.
-The typed config adds Foundation's protected typed preset without executable
-plugins. Generated/vendor exemptions do not enter the production typed route.
+Shared global categories, plugins, rules, and preset references live in
+`.oxlintrc.base.json`. `.oxlintrc.common.json` extends that base and retains normal
+tooling, test, and fixture overrides; the fast config adds executable boundary
+rules and the existing generated/vendor budget exemption. The typed config
+extends the base and Foundation's protected typed preset without executable
+plugins. Its existing override rule payloads map to the accepted module's source
+and test roots, including `ts`, `tsx`, `mts`, and `cts` and the pure core layers.
+Generated/vendor exemptions do not enter the production typed route.
 All 36 stricter TypeScript rules, explicit root suppression options, and the local
 suppression validator remain required. The architecture, FMS, and immutable
 history gates remain blocking.
 
-Foundation `1.3.3` classifies `.ts` and `.mjs`, but rejects production `.tsx`,
-`.mts`, and `.cts`. The local typed runner remains available through
-`lint:type-aware:files` for explicit file routing and positive/rejecting extension
-qualification. It does not repeat the full production typed pass. Supporting
-those extensions in production requires a qualified Foundation successor.
-Two shared CLI checks exercise the live profile and reject a new unclassified
-workspace package. Pure validator fixtures reject topology omission, source drift,
-and missing production sources. Structural assertions preserve exact routes,
-protected rules, and root suppression options.
+Foundation `1.7.2` supports production TypeScript extensions through the shared
+selection and compiler route. The existing local typed runner remains available
+through `lint:type-aware:files` for explicit file feedback. Full typed execution
+also rejects assertion chains through `unknown` by default. There are no bridge
+admissions in this consumer; an unsafe production assertion must be fixed at its
+owner rather than hidden by a wildcard exception.
 
-Managed Docs adoption is a separate qualification boundary. The active
-`docs-2026-09-15-stable24` cohort binds Foundation `1.3.3` and Docs Protocol Agent
-Teams `0.2.8`. The official managed upgrade from `docs-2026-09-11-stable20`
-was generated in a clean clone and applied to this workspace. The consumer
-integration and managed state still record stable24, but current package pins
-and the lockfile use Foundation `1.7.0` and Docs Protocol Agent Teams `0.2.13`
-with their Node.js 26-compatible dependency closure. The trusted Docs gate fails
-because the central active Cohort still records the old package coordinates;
-qualifying its successor is separate central work. Historical cohort
-qualification evidence remains unchanged.
+The default root tooling lane requires Node `24.21.0` for Foundation's public
+`agent-teams-node-test` execution contract; pnpm remains `11.18.0`. Node 26 remains
+in compatibility staging. Product runtime qualification remains separate.
+`quality:coverage:test` invokes the installed runner with
+`architecture/foundation/required-quality-tests.json`. Its narrow consumer
+adapter authenticates the reviewed 16-identity contract with an exact SHA-256
+and binds the complete selected file list before execution. Removing a critical
+identity fails admission even when all three protected files remain selected.
+Required source
+boundary, coverage, and runner regression identities must complete; the live
+contract has no OS exceptions. Other test runners retain their existing routes.
+`foundation:boundaries:negative` aliases this combined critical gate, and
+`foundation:check` runs it once in both fast and full checks.
+
+`quality.source-coverage` intentionally rejects protected override selectors
+that include tooling or fixtures excluded by the unchanged FMS profile. The
+consumer's base/common/typed mapping resolves that configuration mismatch;
+excluded-selector rejection remains fail closed. The mandatory typed-closure
+regression covers unclassified selectors, weaker protection, canonical path
+aliases, and stronger inherited ceilings. Existing budgets, roots, rule payloads,
+and blocking routes remain in force. The assertion-bridge fixture queries the
+root install's effective pnpm store and retains frozen, offline installation and
+the real typed baseline, rejection, and repaired-source pass.
+
+Foundation issue
+[#363](https://github.com/agent-teams-ai/engineering-foundation/issues/363), the
+public Node CLI failure when launched from a Node test parent, was fixed and
+released in `1.7.2` through
+[#365](https://github.com/agent-teams-ai/engineering-foundation/pull/365).
+Release status follows supplied operator evidence. This consumer's final installed
+qualification still requires fresh native and full gates; earlier `1.7.1` source
+checks do not qualify `1.7.2`. Historical rejecting evidence remains retained.
+
+Managed Docs adoption retains its historical qualification boundary. The old
+`docs-2026-09-15-stable24` receipt authenticates Foundation `1.3.3` and adapter
+`0.2.8`; it does not qualify the current upgrade. The public adapter has now
+migrated the authentic stable24 origin to `docs-2026-10-03-stable31` against
+protected Central revision `9625c6e6a73555d747cc4b0ba99a29549a75f107`, and its
+after-check returned current. The current manifest and regenerated frozen lock
+select Foundation `1.7.2`, Docs `0.6.2` and adapter `0.3.2`; frozen install passes.
+The old receipts remain historical. Final installed/full consumer qualification,
+independent review, delivery and observed admission still require their own proof.
 
 ### Advisory quality diagnostics
 

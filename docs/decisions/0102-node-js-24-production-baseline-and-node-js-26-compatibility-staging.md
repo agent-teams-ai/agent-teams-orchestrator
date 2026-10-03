@@ -22,15 +22,23 @@ engine was still `>=24.18.0 <25`: `docs-protocol-agent-teams@0.2.8`,
 `engineering-foundation@1.3.3`, and `repository-mutation@0.2.0`.
 An install that ignores those engine declarations cannot establish support.
 
-The current lockfile instead pins published Node.js 26-compatible versions:
-`docs-protocol-agent-teams@0.2.13`, `docs-protocol@0.6.2`,
-`document-authoring@0.3.2`, `engineering-foundation@1.7.0`, and
-`repository-mutation@0.2.2`. At candidate
-`dc76b6f09bed96c95ff8d9c004072c089125116f`, hosted Node.js 24.21 and
-26.10 strict frozen installs and `pnpm check:fast` passed, as did GitHub's
-Node.js 26 and architecture jobs. The trusted Docs gate remains blocked because
-the central active Cohort still records the old package coordinates. This
-qualification is incomplete and does not authorize a production cutover.
+The integration with current main pins published packages whose engines admit Node.js
+26: `docs-protocol-agent-teams@0.3.2`, `docs-protocol@0.6.2`,
+`document-authoring@0.3.2`, `engineering-foundation@1.7.2`, and
+`repository-mutation@0.2.2`. The root tooling lower bound is now Node.js
+24.21.0; the Local Host Control package retains its staged engine range.
+
+The earlier candidate `dc76b6f09bed96c95ff8d9c004072c089125116f`
+recorded hosted Node.js 24.21 and 26.10 strict frozen installs,
+`pnpm check:fast`, and GitHub Node.js 26 and architecture job passes with
+adapter 0.2.13 and Foundation 1.7.0. Those results remain historical evidence
+for those inputs and do not qualify the current integration.
+
+Current main already carries the controller-generated stable31 generation-2
+profile, state and caller. The former stable24 coordinate mismatch is historical.
+Installed qualification, required CI on the integrated source, and observed
+admission remain pending. Node.js 26 engine admission does not qualify managed
+Docs execution there; managed operations retain the Node.js 24 default.
 
 The Node.js 26 CI lane remains a compatibility qualification attempt, not a
 production runtime cutover. The existing Node.js 24 pin remains the production
@@ -54,9 +62,9 @@ Candidate engine widening requires exact published upstream package versions
 that declare Node.js 26 support, reviewed provenance and compatibility, and
 lockfile integrity records. A clean, strict frozen install and the complete
 repository gate must pass under Node.js 26, with Node.js 24 gate evidence and
-relevant Local Host Control platform checks retained. The current candidate has
-the published dependencies and passing checks noted above, but the trusted Docs
-Cohort gate remains unresolved. A production cutover requires its own explicit
+relevant Local Host Control platform checks retained. The current integration has
+the published dependency selection noted above, but still requires fresh
+qualification and the separate managed Docs admission evidence. A production cutover requires its own explicit
 product-owner decision and updated current architecture documentation.
 
 ## Consequences

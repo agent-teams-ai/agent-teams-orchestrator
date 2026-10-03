@@ -21,7 +21,7 @@ export function createConformanceOxlintConfig(repositoryRoot) {
     overrides: [{
       files: ["tooling/lint-fixtures/**/*.{ts,tsx,mts,cts}"],
       rules: commonConfig.overrides.find((entry) =>
-        entry.files.includes("packages/**/src/**/*.{ts,tsx,mts,cts}"))?.rules,
+        entry.files.includes("**/*.{ts,tsx,mts,cts}"))?.rules,
     }],
   }, null, 2)}\n`);
 

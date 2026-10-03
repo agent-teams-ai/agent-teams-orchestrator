@@ -129,6 +129,11 @@ before a high-cost boundary violation.
   require calibration and explicit approval under
   [reliability objectives](docs/architecture/reliability-objectives.md).
 
+The root quality tooling lane uses Node `24.21.0` and pnpm `11.18.0`.
+`pnpm quality:coverage:test` binds all mandatory quality test files and identities
+to the installed Foundation execution runner. `pnpm lint:typed` includes the
+default unknown-assertion bridge gate; never bypass a reported shared defect.
+
 Foundation `architecture.source-dependencies` is schema v3: `rootPackage: true`
 and `packageRoots` for every workspace package. Required CI runs
 `agent-teams-foundation check` on the installed registry package. When that
