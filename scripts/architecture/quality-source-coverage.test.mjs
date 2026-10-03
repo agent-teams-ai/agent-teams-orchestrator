@@ -183,6 +183,20 @@ test("published typed closure rejects unclassified selectors and weaker protecti
   });
 });
 
+test("published coverage rejects a test override that also selects unclassified tooling", async () => {
+  await fixture(async (root) => {
+    await mkdir(join(root, "scripts/architecture"), { recursive: true });
+    await writeFile(join(root, "scripts/architecture/benign.test.mjs"), "export const benign = true;\n");
+    assert.equal(inspect(root).status, 0, "excluded tooling must not invalidate the protected baseline");
+    const typed = await readJson(root, ".oxlintrc.type-aware.json");
+    typed.overrides[0].files = ["**/*"];
+    await writeJson(root, ".oxlintrc.type-aware.json", typed);
+    const result = inspect(root);
+    assert.equal(result.status, 2, JSON.stringify(result.report));
+    assert.equal(result.report.capabilities[0].problem.code, "QUALITY_PROFILE_INVALID");
+  });
+});
+
 test("projection rejects omission and source or standard drift", async () => {
   for (const mutate of [
     (value) => { value.modules = []; },

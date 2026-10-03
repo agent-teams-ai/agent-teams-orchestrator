@@ -37,6 +37,26 @@ jobs:
       - if: github.event_name == 'pull_request'
         run: pnpm docs:impact -- --base "${{ github.event.pull_request.base.sha }}" --strict
 
+  node-26-compatibility:
+    name: Node.js 26 compatibility staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+        with:
+          version: 11.18.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "26.10.0"
+          cache: pnpm
+      - run: bash scripts/ci/check-frozen-peer-enforcement.sh
+      - run: pnpm install --frozen-lockfile --config.engine-strict=true --strict-peer-dependencies && pnpm peers check
+      - run: pnpm check
+
   local-host-control-cross-platform:
     name: Local Host Control (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
