@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,20 +17,23 @@ const suppressionValidator = path.join(
   "validate-suppressions.mjs",
 );
 const conformanceConfig = createConformanceOxlintConfig(repositoryRoot);
+const readConfig = (name) => JSON.parse(readFileSync(path.join(repositoryRoot, name), "utf8"));
+const topology = readConfig("architecture/foundation/quality-feature-topology.json");
 
 after(() => {
   conformanceConfig.dispose();
 });
 
 function runOxlint(config, fixture) {
-  const typeAware = config === "type-aware";
+  if (config === "type-aware") {
+    return lintMappedSource(topology.modules[0].sourceRoot, fixture,
+      readFileSync(path.join(repositoryRoot, "tooling/lint-fixtures", fixture), "utf8"));
+  }
   const result = spawnSync(
     oxlintBinary,
     [
       "--config",
-      typeAware
-        ? path.join(repositoryRoot, ".oxlintrc.type-aware.json")
-        : conformanceConfig.filePath,
+      conformanceConfig.filePath,
       "--disable-nested-config",
       "--no-ignore",
       path.join(repositoryRoot, "tooling/lint-fixtures", fixture),
@@ -45,6 +48,68 @@ function runOxlint(config, fixture) {
     diagnostics: `${result.stdout}${result.stderr}`,
     status: result.status,
   };
+}
+
+test("effective mapped budgets and normal tooling budgets retain all five ceilings", () => {
+  const body = ["export function budget(a: boolean, b: boolean, c: boolean, d: boolean, e: boolean, f: boolean) {",
+    "let result = 0;", ...["a", "b", "c", "d", "e"].map((flag) => `if (${flag}) {`),
+    "result += f ? 1 : 0;", "}}}}}", ...Array.from({ length: 16 }, () => "if (a) { result += 1; }"),
+    ...Array.from({ length: 170 }, () => "result += 1;"), "return result;", "}",
+    ...Array.from({ length: 320 }, (_, index) => `export const value${index} = ${index};`)].join("\n");
+  for (const module of topology.modules) {
+    const production = lintMappedSource(module.sourceRoot, "budget.test.ts", body);
+    assert.equal(production.status, 1, production.diagnostics);
+    for (const rule of ["complexity", "max-depth", "max-lines", "max-lines-per-function", "max-params"]) {
+      assert.ok(production.diagnostics.includes(`(${rule})`), production.diagnostics);
+    }
+    for (const root of module.testRoots) {
+      const tests = lintMappedSource(root, "budget.test.ts", body);
+      assert.equal(tests.status, 0, tests.diagnostics);
+    }
+  }
+  for (const [root, name, status] of [["scripts/lint", "budget.test.mjs", 0],
+    ["scripts/lint/fixtures", "budget.mjs", 0], ["tooling/architecture-conformance", "budget.mjs", 0],
+    ["scripts/lint", "budget.mjs", 1]]) {
+    const result = lintMappedSource(root, name, body.replaceAll(": boolean", ""), ".oxlintrc.common.json");
+    assert.equal(result.status, status, result.diagnostics);
+  }
+});
+
+test("typed mapped core layers retain ambient effect protection", () => {
+  for (const module of topology.modules) {
+    for (const layer of ["application", "domain", "contracts", "projections"]) {
+      const result = lintMappedSource(`${module.sourceRoot}/features/probe/${layer}`, "impure.ts",
+        "export const now = Date.now();\nexport const random = Math.random();\n");
+      assert.equal(result.status, 1, result.diagnostics);
+      assert.match(result.diagnostics, /no-restricted-globals/u);
+      assert.match(result.diagnostics, /no-restricted-properties/u);
+    }
+  }
+});
+
+// Exercise the real typed selectors in a disposable consumer, with the installed
+// dependency tree read through a link. Never plant test inputs in product source.
+function lintMappedSource(target, name, source, config = ".oxlintrc.type-aware.json") {
+  const root = mkdtempSync(path.join(os.tmpdir(), "orchestrator-TEST-lint-"));
+  try {
+    for (const file of [".oxlintrc.base.json", ".oxlintrc.common.json", ".oxlintrc.type-aware.json"]) {
+      cpSync(path.join(repositoryRoot, file), path.join(root, file));
+    }
+    symlinkSync(path.join(repositoryRoot, "node_modules"), path.join(root, "node_modules"), "dir");
+    const input = path.join(root, target, name);
+    mkdirSync(path.dirname(input), { recursive: true });
+    writeFileSync(input, source);
+    writeFileSync(path.join(root, "tsconfig.json"), JSON.stringify({
+      compilerOptions: { module: "NodeNext", moduleResolution: "NodeNext", strict: true, noEmit: true, target: "ES2024" },
+      include: ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+    }));
+    const result = spawnSync(oxlintBinary, ["--config", config, "--disable-nested-config", "--no-ignore", input],
+      { cwd: root, encoding: "utf8", timeout: 60_000 });
+    assert.equal(result.error, undefined, result.stderr);
+    return { status: result.status, diagnostics: `${result.stdout}${result.stderr}` };
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 }
 
 function runTypeAware(...targets) {
@@ -94,7 +159,7 @@ test("blocking and advisory lanes exclude the same non-production fixtures", () 
 
 test("maintainability profiles stay aligned with Foundation", () => {
   const blockingConfig = JSON.parse(
-    readFileSync(path.join(repositoryRoot, ".oxlintrc.common.json"), "utf8"),
+    readFileSync(path.join(repositoryRoot, ".oxlintrc.base.json"), "utf8"),
   );
   const foundationTestProfile = JSON.parse(
     readFileSync(
@@ -111,7 +176,13 @@ test("maintainability profiles stay aligned with Foundation", () => {
     ),
     "production maintainability preset must stay explicit",
   );
-  const testOverride = blockingConfig.overrides.find((override) =>
+  assert.deepEqual(readConfig("node_modules/@agent-teams/engineering-foundation/presets/oxlint/maintainability.json").rules, {
+    complexity: ["error", 20], "max-depth": ["error", 4],
+    "max-lines": ["error", { max: 500, skipBlankLines: true, skipComments: true }],
+    "max-lines-per-function": ["error", { max: 150, skipBlankLines: true, skipComments: true }],
+    "max-params": ["error", 5],
+  });
+  const testOverride = readConfig(".oxlintrc.common.json").overrides.find((override) =>
     override.files?.includes("packages/**/tests/**"),
   );
   assert.ok(testOverride, "test maintainability override must exist");
@@ -274,14 +345,26 @@ for (const extension of ["tsx", "mts", "cts"]) {
 }
 
 test("common, fast and typed configs keep separate responsibilities", () => {
-  const readConfig = (name) => JSON.parse(readFileSync(path.join(repositoryRoot, name), "utf8"));
   const common = readConfig(".oxlintrc.common.json");
   const fast = readConfig(".oxlintrc.json");
   const typed = readConfig(".oxlintrc.type-aware.json");
+  const base = readConfig(".oxlintrc.base.json");
   assert.deepEqual(fast.extends, ["./.oxlintrc.common.json"]);
-  assert.deepEqual(typed.extends, [...fast.extends,
-    "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/type-aware.json"]);
-  assert.deepEqual(Object.keys(typed).toSorted(), ["$schema", "extends", "options"]);
+  assert.deepEqual(common.extends, ["./.oxlintrc.base.json"]);
+  assert.deepEqual(typed.extends, common.extends.concat(
+    "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/type-aware.json"));
+  assert.deepEqual(Object.keys(typed).toSorted(), ["$schema", "extends", "options", "overrides"]);
+  assert.deepEqual(Object.keys(common).toSorted(), ["$schema", "extends", "overrides"]);
+  assert.equal(Object.hasOwn(base, "overrides"), false);
+  assert.deepEqual(typed.overrides.map(({ rules }) => rules), common.overrides.map(({ rules }) => rules));
+  const sourceRoots = topology.modules.map(({ sourceRoot }) => sourceRoot);
+  const testRoots = topology.modules.flatMap(({ testRoots: moduleTestRoots }) => moduleTestRoots);
+  assert.deepEqual(typed.overrides.map(({ files }) => files), [
+    testRoots.map((root) => `${root}/**`),
+    [...sourceRoots, ...testRoots].map((root) => `${root}/**/*.{ts,tsx,mts,cts}`),
+    sourceRoots.flatMap((root) => ["application", "domain", "contracts", "projections"]
+      .map((layer) => `${root}/features/*/${layer}/**/*.{ts,tsx,mts,cts}`)),
+  ]);
   assert.deepEqual(Object.keys(fast).toSorted(), ["$schema", "extends", "ignorePatterns", "jsPlugins", "options", "overrides", "rules", "settings"]);
   assert.deepEqual(fast.jsPlugins, [{ name: "boundaries", specifier: "eslint-plugin-boundaries" }]);
   assert.deepEqual(Object.keys(fast.rules).toSorted(), ["boundaries/dependencies", "boundaries/no-unknown-dependencies"]);
@@ -292,7 +375,7 @@ test("common, fast and typed configs keep separate responsibilities", () => {
   for (const key of ["jsPlugins", "settings", "options"]) {
     assert.equal(Object.hasOwn(common, key), false);
   }
-  for (const rules of [common.rules, ...common.overrides.map((entry) => entry.rules)]) {
+  for (const rules of [base.rules, ...common.overrides.map((entry) => entry.rules)]) {
     assert.equal(Object.keys(rules).some((name) => name.startsWith("boundaries/")), false);
   }
   assert.deepEqual(fast.options, {

@@ -22,7 +22,7 @@ catalog:
   nx: 23.1.1
   oxc-parser: 0.142.0
   oxc-resolver: 11.24.2
-  oxlint: 1.77.0
+  oxlint: 1.83.0
   oxlint-tsgolint: 7.0.2001
   remark-frontmatter: 5.0.0
   remark-gfm: 4.0.1
@@ -43,7 +43,6 @@ packageExtensions:
     peerDependencies:
       "typescript": ">=2.0.0 <7.0.0"
 
-
 minimumReleaseAge: 0
 
 overrides:
@@ -56,3 +55,9 @@ overrides:
 allowBuilds:
   esbuild: true
   nx: true
+minimumReleaseAgeExclude:
+  - "@agent-teams/repository-mutation@0.2.2"
+  - "@agent-teams/document-authoring@0.3.2"
+  - "@agent-teams/docs-protocol@0.6.2"
+  - "@agent-teams/docs-protocol-agent-teams@0.3.2"
+  - "@agent-teams/engineering-foundation@1.7.2"
