@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "required": [
+    {
+      "file": "scripts/architecture/source-dependencies-v3.test.mjs",
+      "names": [
+        "live source policy is schema v3 with root package and workspace package roots"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/source-dependencies-v3.test.mjs",
+      "names": [
+        "oxlint counterexample fixtures are classified as fixture.lint"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/source-dependencies-v3.test.mjs",
+      "names": [
+        "source v3 rejects includeRootPackage as an unknown public field"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/quality-source-coverage.test.mjs",
+      "names": [
+        "active coverage binds exact tools, authority, scope and a single full typed route"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/quality-source-coverage.test.mjs",
+      "names": [
+        "adoption pins the installed Foundation and Docs adapter"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/quality-source-coverage.test.mjs",
+      "names": [
+        "published coverage accepts the real consumer profile"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/quality-source-coverage.test.mjs",
+      "names": [
+        "published typed closure rejects unclassified selectors and weaker protection"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/quality-source-coverage.test.mjs",
+      "names": [
+        "projection rejects omission and source or standard drift"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/quality-source-coverage.test.mjs",
+      "names": [
+        "published coverage rejects an unclassified new workspace package"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/quality-source-coverage.test.mjs",
+      "names": [
+        "projection rejects missing production source"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/quality-source-coverage.test.mjs",
+      "names": [
+        "published coverage rejects missing and non-regular declared inputs"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/quality-source-coverage.test.mjs",
+      "names": [
+        "installed typed gate rejects an unknown assertion bridge by default"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/required-quality-tests.test.mjs",
+      "names": [
+        "published mandatory runner rejects omission and skip, and accepts completed execution"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/required-quality-tests.test.mjs",
+      "names": [
+        "mandatory selection rejects dropping a whole protected file"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/required-quality-tests.test.mjs",
+      "names": [
+        "published mandatory runner admits only the exact OS exception"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/source-dependencies-v3.test.mjs",
+      "names": [
+        "source v3 rejects missing declared roots and unowned governed dist source"
+      ],
+      "kind": "test"
+    }
+  ],
+  "exceptions": []
+}

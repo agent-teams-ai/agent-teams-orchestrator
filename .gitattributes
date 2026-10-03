@@ -2,3 +2,4 @@ tooling/architecture-conformance-fixtures/scaffolding/library-boundary-golden/**
 scripts/docs/** text eol=lf
 AGENTS.md text eol=lf
 .agents/skills/docs-authoring/SKILL.md text eol=lf
+architecture/foundation/required-quality-tests.json text eol=lf

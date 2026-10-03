@@ -1,59 +1,8 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "extends": [
-    "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/node.json",
-    "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/maintainability.json"
+    "./.oxlintrc.base.json"
   ],
-  "categories": {
-    "correctness": "error",
-    "nursery": "off",
-    "pedantic": "off",
-    "perf": "off",
-    "restriction": "off",
-    "style": "off",
-    "suspicious": "error"
-  },
-  "plugins": [
-    "eslint",
-    "typescript",
-    "oxc",
-    "unicorn",
-    "import",
-    "jsdoc",
-    "vitest",
-    "promise",
-    "node"
-  ],
-  "rules": {
-    "array-callback-return": "error",
-    "curly": "error",
-    "eqeqeq": "error",
-    "import/no-duplicates": "error",
-    "import/no-mutable-exports": "error",
-    "import/no-self-import": "error",
-    "no-eval": "error",
-    "no-implied-eval": "error",
-    "no-new-func": "error",
-    "no-promise-executor-return": "error",
-    "no-prototype-builtins": "error",
-    "no-script-url": "error",
-    "node/no-path-concat": "error",
-    "promise/no-return-wrap": "error",
-    "promise/param-names": "error",
-    "oxc/no-accumulating-spread": "error",
-    "unicorn/error-message": "error",
-    "unicorn/no-abusive-eslint-disable": "error",
-    "unicorn/prefer-node-protocol": "error",
-    "unicorn/no-useless-undefined": "error",
-    "vitest/no-focused-tests": "error",
-    "vitest/expect-expect": "error",
-    "vitest/no-conditional-tests": "error",
-    "vitest/no-disabled-tests": "error",
-    "vitest/no-identical-title": "error",
-    "vitest/no-test-return-statement": "error",
-    "vitest/valid-expect": "error",
-    "vitest/valid-expect-in-promise": "error"
-  },
   "overrides": [
     {
       "files": [
