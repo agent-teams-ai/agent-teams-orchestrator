@@ -129,7 +129,14 @@ before a high-cost boundary violation.
   require calibration and explicit approval under
   [reliability objectives](docs/architecture/reliability-objectives.md).
 
-The root quality tooling lane uses Node `24.21.0` and pnpm `11.18.0`.
+The root quality tooling lane defaults to Node `26.11.1` and pnpm `11.18.0`
+under the product owner's explicit Node default migration. Node `24.21.0`
+remains an explicit compatibility lane. Historical Node staging evidence and
+accepted ADRs retain their original values; earlier guidance to keep Node 26
+inactive does not govern this migration. Node 26 does not bundle Corepack;
+invoke the existing Corepack JavaScript entrypoint with the selected Node
+executable and use a job-owned pnpm shim for nested commands. Keep frozen
+installation and engine strictness enabled.
 `pnpm quality:coverage:test` binds all mandatory quality test files and identities
 to the installed Foundation execution runner. `pnpm lint:typed` includes the
 default unknown-assertion bridge gate; never bypass a reported shared defect.
