@@ -84,18 +84,18 @@ gate as active.
 
 ## Node.js compatibility qualification
 
-Node.js 24 remains the production default selected by ADR-0025; the current
-root tooling floor is 24.21.0. The Node.js 26 CI job remains a separate
-staging qualification lane under proposed ADR-0102. It retains the exact
-26.10.0 toolchain, strict frozen engine and peer checks, the installed-lock
+The product owner's current migration selects Node.js `26.11.1` as the
+root tooling default. Node.js `24.21.0` remains an explicit compatibility lane.
+Both lanes retain strict frozen engine and peer checks, the installed-lock
 peer check, the disposable incompatible-peer rejection fixture, and the full
-repository gate. Its package engine range remains `>=26.0.0 <27`.
+repository gate. The package engine ranges remain unchanged. ADR-0025 and
+proposed ADR-0102 retain their historical wording and evidence.
 
 The earlier PR candidate `dc76b6f09bed96c95ff8d9c004072c089125116f`
 recorded qualification against earlier inputs. Those results remain historical;
 they do not qualify this integration. Current-main managed profiles, state and
-caller remain unchanged. Node.js 26 package compatibility does not establish
-managed Docs execution support or authorize a production cutover.
+caller remain unchanged. Node.js package compatibility does not establish managed Docs execution
+support or product runtime qualification.
 
 ## Cross-repository engineering foundation
 
@@ -160,9 +160,10 @@ also rejects assertion chains through `unknown` by default. There are no bridge
 admissions in this consumer; an unsafe production assertion must be fixed at its
 owner rather than hidden by a wildcard exception.
 
-The default root tooling lane requires Node `24.21.0` for Foundation's public
-`agent-teams-node-test` execution contract; pnpm remains `11.18.0`. Node 26 remains
-in compatibility staging. Product runtime qualification remains separate.
+The default root tooling lane uses Node `26.11.1`; pnpm remains `11.18.0`.
+Node `24.21.0` retains an explicit compatibility lane. Foundation's public
+`agent-teams-node-test` contract remains required. Product runtime qualification
+remains separate.
 `quality:coverage:test` invokes the installed runner with
 `architecture/foundation/required-quality-tests.json`. Its narrow consumer
 adapter authenticates the reviewed 16-identity contract with an exact SHA-256
