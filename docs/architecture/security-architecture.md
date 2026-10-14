@@ -348,6 +348,10 @@ is default-branch trusted, same-repository and non-bot filtered, least-privilege
 and bound to the exact versioned secret namespace. Its explicit interaction V2
 workflow keeps the fallback GitHub token read-only, uses OIDC for App authority,
 and pins every checkout and runtime source immutably.
+The migration changes only the interaction-runner default from Node.js 24 to
+Node.js 26.11.1 and updates the interaction V2 workflow's exact-source SHA-256 to
+`336a904791d2e84164b44b2342aa5acc6d63cff36aac71cbce80a8c6fc8b8843`; the security
+boundary and immutable pins remain unchanged.
 
 `pnpm security:check` parses both workflow files and then verifies their complete
 reviewed SHA-256 digests. Mutation fixtures prove that trust-boundary triggers,

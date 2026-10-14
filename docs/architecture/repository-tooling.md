@@ -617,6 +617,10 @@ workflow and explicit interaction V2 workflow. The review workflow is bound to
 the versioned repository secret namespace and immutable reusable runtime. The
 interaction workflow keeps its event filters, read-only fallback permissions,
 OIDC exchange, immutable checkout actions, and explicit runtime steps local.
+The generated interaction workflow source changes only the interaction-runner
+default from Node.js 24 to Node.js 26.11.1 and updates its exact-source SHA-256 to
+`336a904791d2e84164b44b2342aa5acc6d63cff36aac71cbce80a8c6fc8b8843`; the listed
+controls remain unchanged and inside the same reviewed security boundary.
 
 The security gate binds both complete generated workflow sources to their
 reviewed SHA-256 digests. Any trigger, permission, namespace, runtime ref, action
