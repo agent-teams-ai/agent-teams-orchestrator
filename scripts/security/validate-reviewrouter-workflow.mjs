@@ -13,7 +13,7 @@ export const reviewRouterRuntimeSha =
 export const reviewRouterCodexWorkflowSha256 =
   "8049f928f481c0169d3038af4d1e61b2368ceb0a4bf1369db595dcda8da253f7";
 export const reviewRouterInteractionWorkflowSha256 =
-  "0997a60c648fcb66e341d011a94ea2721585af9b1611c7e07445c372f0ac5008";
+  "336a904791d2e84164b44b2342aa5acc6d63cff36aac71cbce80a8c6fc8b8843";
 
 function workflowSha256(source) {
   return createHash("sha256").update(source).digest("hex");
