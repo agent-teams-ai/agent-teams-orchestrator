@@ -199,6 +199,16 @@ Qualification follows the scope being materialized or claimed. A narrow Node.js
 slice does not require a language rewrite or a hundreds-of-agents benchmark
 before it can proceed through its existing implementation gates.
 
+Use the existing S2
+[`CheckTeamDraft` slice](../domain/contexts/team-topology/README.md#first-development-slice)
+as the first portability checkpoint: exercise the same consumer contract and
+behavior fixtures through a qualified in-process adapter and real HTTP between
+two processes. This checks serialization, trusted context, and typed diagnostics
+on an actual capability without adding a separate production service or RPC
+framework. Its side-effect-free behavior does not prove mutation recovery. The
+first selected state-changing portable capability separately demonstrates
+idempotency, unknown outcomes, and recovery under its owning contract.
+
 | Stage | Required evidence |
 |---|---|
 | Before materializing a dependency or adapter | Accepted owning decision, exact versions, capability boundaries, ports, state and lifecycle owners, and the selected deployment profile |

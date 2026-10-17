@@ -58,25 +58,63 @@ this decision and OD-021 supply their remaining implementation evidence.
 
 ## Proposed launcher qualification, 2026-10-17
 
-The next proposed qualification direction is a small PostgreSQL component
-adapter under the existing Node Local Supervisor, using standard PostgreSQL
-process tools and reusable pinned binary artifacts. ADR-0106's first candidate,
-`embedded-postgres`, has received static source review; that is not an executable
-rejection. ADR-0106 already permits upstream process tools behind the same
-adapter when a wrapper limitation is established. This comparison selects no
-production dependency, Desktop framework, or new lifecycle substrate.
+`embedded-postgres` remains the first qualification candidate under ADR-0106
+for the existing Node Local Supervisor. The supplied executable evidence
+supports that order; later source review identifies requirements still to close,
+not a demonstrated superiority of an unimplemented replacement. Standard
+PostgreSQL process tools behind the same component adapter remain a contingency
+when a wrapper limitation is established. This comparison selects no production
+dependency, Desktop framework, or new lifecycle substrate.
+
+### Supplied executable evidence
+
+The product-owner-supplied report *Bundled PostgreSQL options: research and
+executable comparison*, dated 2026-10-03, reports these isolated Linux results
+with Node 24.21.0 and one SQL client. Build and dependency assets were staged
+before the runs; runtime network namespaces contained only loopback.
+
+| Observed behavior | Node `embedded-postgres` | Rust `postgresql_embedded` |
+|---|---|---|
+| Wrapper and actual engine | 18.4.0-beta.17; PostgreSQL 18.4 | 0.21.0; PostgreSQL 18.6 |
+| Offline first start | Passed with staged npm platform payload | Passed with fresh bundled archive extraction |
+| Drizzle transaction rollback | Passed | Passed |
+| Receipt and outbox in one transaction | Passed | Passed |
+| Deliberately discarded completed reply | Reconciled | Reconciled |
+| Persistent reopen | Passed | Passed |
+| Effective `fsync`, `full_page_writes`, `synchronous_commit` | All on | All on |
+| Graceful shutdown and owned postmaster cleanup | Passed | Passed |
+| Control-loop timer during slow SQL | 22 ticks | 24 ticks |
+
+The timer used `pg_sleep(0.25)` and a 10 ms interval. It measures that blocking
+boundary, not agent capacity, general fairness, or comparative throughput.
+Windows lifecycle, signed installers, interrupted updates, power-loss durability,
+backup restore, and major upgrades remain outside this comparison's evidence.
+The supplied report text does not include its linked raw artifacts, and this
+documentation change did not rerun its experiments. The second supplied report,
+*Hosted full-Internet default: implementation and qualification*, dated
+2026-10-03, qualifies hosted worker networking, not bundled PostgreSQL.
+
+### Qualification options
 
 Scores are subjective engineering judgments out of ten for this repository.
-Confidence measures recommendation fit; reliability estimates the qualified
-lifecycle integration, not a measured failure rate or a different SQL engine.
+Confidence measures recommendation fit for the existing lifecycle substrate;
+reliability estimates the qualified lifecycle integration, not a measured failure
+rate or a different SQL engine.
 Complexity includes packaging, operations, and maintenance; higher is worse.
-Every option still requires the accepted lifecycle and recovery evidence.
+The Node scores retain the supplied report's planning assessment. The Rust fit
+score reflects the additional substrate choice, not a lower package quality.
+An unimplemented direct adapter has no fair comparative confidence or reliability
+score yet; "Not established" means missing evidence, not zero quality.
+Table order is qualification priority, not production adoption. Every option
+still requires the accepted lifecycle and recovery evidence.
 
-| Rank | Qualification option | Confidence | Reliability | Complexity |
+| Qualification role | Option | Confidence | Reliability | Complexity |
 |---|---|---|---|---|
-| 1 | Node Supervisor adapter using `initdb`, `postgres`/`pg_ctl`, and existing binary artifacts | 8/10 | 8/10 | 6/10 |
-| 2 | `embedded-postgres` with a small hardened adapter and maintained upstream fixes | 7/10 | 7/10 | 6/10 |
-| 3 | `postgresql_embedded` after an independent Rust substrate decision | 5/10 | 8/10 | 8/10 |
+| First Node candidate | `embedded-postgres` with a small hardened adapter and maintained upstream fixes | 8/10 | 7/10 | 6/10 |
+| Contingency for established wrapper limitations | Node Supervisor adapter using `initdb`, `postgres`/`pg_ctl`, and existing binary artifacts | Not established | Not established | 6/10, provisional |
+| Conditional alternative | `postgresql_embedded` after an independent Rust substrate decision | 5/10 | 8/10 | 8/10 |
+
+### Source review and remaining qualification
 
 The [npm registry](https://registry.npmjs.org/embedded-postgres/latest) reported
 `embedded-postgres` 18.4.0-beta.17, while the
@@ -90,8 +128,10 @@ installation remain unqualified. Consuming a Theseus binary does not require
 introducing its Rust wrapper.
 
 The [reviewed Node source](https://github.com/leinelissen/embedded-postgres/blob/8c8c16d1b81bec8ae3315d59a050654086a85e23/packages/embedded-postgres/src/index.ts)
-remains the upstream revision for 18.4.0-beta.17. Defaults are configurable, but
-initialization creates its own temporary password file without an explicit
+is a separate source-audit pin, not proof of byte identity with the tested npm
+artifact. Defaults are configurable and the reported fixture replaced the
+development credentials and fixed port. Initialization creates its own temporary
+password file without an explicit
 owner-only mode; effective exposure depends on directory protections and the
 process file-creation mask. Public `initdbFlags` can add tool arguments, but they
 cannot suppress the wrapper's creation of its own password file. There is also
@@ -125,8 +165,10 @@ must itself create a protected bootstrap password file before invoking
 [`initdb`](https://www.postgresql.org/docs/18/app-initdb.html), preserve existing
 data, and verify the effective durability settings required by persistence.
 
-The bounded next experiment compares the first two options in disposable data
-roots with the same engine payload on Windows and a supported POSIX platform.
+The bounded next experiment qualifies the Node wrapper against the remaining
+lifecycle requirements in disposable data roots on Windows and a supported
+POSIX platform. Where a limitation requires direct tools, compare that path
+using the same engine payload.
 It covers offline restart with committed data, bootstrap-file access and cleanup,
 foreign occupied ports, spawn failures, early exits, bounded stop, and Supervisor
 death with a surviving server. Record actual binary hashes and SQL settings.

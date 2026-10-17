@@ -256,20 +256,29 @@ portable capability.
 
 Connect remains the canonical public control transport. A real client need may
 later justify GraphQL as an additional inbound adapter, most likely for composed
-read models used by Web or Desktop clients. Adding it does not change application
-use cases, domain models, or the handwritten SDK semantics.
+read models used by Web or Desktop clients. It reuses the owning application
+commands and query ports. A new composed view may require an owned batch query
+port or read projection with declared consistency. Domain invariants, trusted
+tenant scope, authorization, mutation idempotency, operation receipts, and feed
+recovery retain their existing owners. GraphQL does not authorize cross-context
+database access.
 
 A GraphQL adapter owns its schema, resolvers, authentication mapping, pagination,
 error and nullability mapping, query cost limits, and transport-specific tests.
-It maps into the same transport-independent application models as Connect and
-must pass the same capability behavior fixtures. It is not a second source of
-business contracts, does not expose domain entities directly, and does not turn
-the internal transport interface into a public extension point.
+Resolver execution uses bounded request-scoped batching and caching, explicit
+cost limits, and cancellation propagation. The official
+[GraphQL performance guidance](https://graphql.org/learn/performance/)
+describes batching and demand control for composed queries.
+The adapter maps into the same transport-independent application models as
+Connect and must pass the same capability behavior fixtures. It is not a second
+source of business contracts, does not expose domain entities directly, and does
+not turn the internal transport interface into a public extension point.
 
 GraphQL is added capability by capability after an explicit consumer and query
-shape exist. The architecture keeps that addition local to the inbound edge, but
-does not pretend that schema design, authorization, limits, subscriptions, and
-compatibility are free implementation work.
+shape exist. Changes may extend the inbound and owned query paths while
+preserving existing domain and handwritten SDK behavior. Schema design,
+authorization, limits, subscriptions, and compatibility still require
+implementation work.
 
 ## Client realtime edge
 
