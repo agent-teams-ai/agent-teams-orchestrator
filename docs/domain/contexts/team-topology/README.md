@@ -8,6 +8,7 @@ blocked_by:
   - OD-006
   - OD-011
 related:
+  - ADR-0105
   - ADR-0100
   - ADR-0101
   - ADR-0076
@@ -50,6 +51,13 @@ delivered in two increments:
 This direction proves one real feature-module vertical slice. It does not admit
 Team persistence, organization placement, Run creation, AR calls, provider
 readiness, agent execution, or GraphQL.
+
+[ADR-0105](../../../decisions/0105-portable-service-boundaries-and-moleculer.md#adoption-and-qualification)
+also proposes S2 as the first local Moleculer adapter pilot over the same
+Host-assembled application capability. Public Connect and private RPC adapters
+have separate mapping fixtures and shared owned behavior. This requires the
+private profile's acceptance and readiness; it creates no additional business
+feature, worker package, or requirement to deploy draft checking separately.
 
 The initial checker accepts only the smallest role seam: each member may carry
 one optional opaque `roleKey`. A role key is classification input, not a product

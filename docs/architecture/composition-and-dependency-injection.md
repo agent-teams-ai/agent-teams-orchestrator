@@ -179,6 +179,14 @@ operation scope is disposed in `finally` after commit, rollback, and post-commit
 intent handling reach their defined boundary. Do not keep a SQL transaction open
 for an RPC call, model response, user approval, or durable workflow wait.
 
+Inbound adapters receive already-constructed capability handles from the Host.
+A GraphQL request may own bounded loaders and authenticated request resources;
+it does not construct another feature graph or hold one SQL transaction across
+resolvers. Each command or query retains its owning operation scope. Request
+caches cannot outlive their authenticated scope or be retained by singleton
+capabilities. Framework contexts are mapped to the narrow application invocation
+profile before calling the input port.
+
 ## Lifecycle
 
 The Host owns bootstrap order, readiness, health aggregation, process signals,

@@ -107,9 +107,11 @@ service inventory:
 Neither example defines a new feature ID or reserves a worker package. The
 owning dossier defines the first real capability before its feature and callable
 contract are materialized. Existing package identities remain in the
-[package catalog](../../architecture/package-catalog.yaml). No initial capability
-has yet established a requirement for Moleculer; its optional Node.js RPC role
-remains proposed in ADR-0105.
+[package catalog](../../architecture/package-catalog.yaml). ADR-0105 proposes
+Moleculer from the first implementation of a declared private Node.js RPC group,
+initially in one process. Workspace materialization may select that profile
+after its capability is defined; neither these examples nor a `.proto` file
+automatically creates a group or selects its deployment.
 
 ## Integration modules
 

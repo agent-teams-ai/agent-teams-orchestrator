@@ -267,6 +267,20 @@ single-flight refresh; the SDK transport applies short-lived access credentials.
 Authenticated actor, subject, client, tenant, and delegation facts come from
 verified transport context. They are not trusted from business payloads.
 
+Each application capability declares a narrow invocation profile alongside its
+input port. Connect, a future GraphQL adapter, and private RPC adapters map into
+the same application representation of the trusted facts and canonical resource
+scope that the capability consumes, plus applicable deadline, cancellation, and
+correlation semantics. Transport metadata becomes trusted only through the
+owning authentication and scope validation boundary. Authorization remains an
+owned application port; returned metadata cannot grant authority.
+
+The profile uses framework-independent types, not a global extensible context
+bag. It carries no broker, container, database client, framework request, or raw
+credential. A consumer ACL maps to the provider's declared invocation contract.
+Cancelling an observer or disconnecting a request does not cancel previously
+accepted durable work.
+
 ## Compatibility and tooling
 
 Before public v1:

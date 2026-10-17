@@ -120,7 +120,15 @@ before a high-cost boundary violation.
   callable capability, and execution placement separately; justify RPC or a
   durable handler without deriving services from nested features. Use owned
   ports, not a generic service locator; the [Moleculer placement proposal](docs/decisions/0105-portable-service-boundaries-and-moleculer.md)
+  plans its first adapter with a declared private Node.js RPC group, initially
+  in one process. A `.proto` file alone does not select Moleculer; public and
+  independently language-neutral boundaries retain Connect/gRPC. The proposal
   is not production qualification.
+- Define each application's input port and narrow trusted invocation profile
+  without transport types. Connect, future GraphQL, and selected private RPC
+  adapters map to that port. Keep composed queries behind owned query ports and
+  ACLs, and follow the [additional API profile](docs/architecture/sdk-and-transports.md#additional-client-api-styles)
+  for request caches, operation scopes, and first-materialization evidence.
 - Native PostgreSQL is the selected authoritative SQL engine for local and
   hosted profiles. Reuse the PostgreSQL adapter family and context-owned
   migrations; keep local process and distribution management behind the Local

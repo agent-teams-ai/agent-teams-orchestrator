@@ -531,7 +531,8 @@ required quarantine evidence or publish a required dead-letter record cannot
 authorize acknowledgement of the original message.
 
 [ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
-retains Moleculer as an optional, separately justified Node.js RPC profile. Its
+proposes Moleculer as the initial adapter for declared private Node.js RPC groups,
+with one local broker before distributed placement is needed. Its
 framework response, timeout, retry, or in-memory pending request never replaces
 durable command acceptance, receipts, outbox, inbox, or reconciliation. Core
 events may carry disposable wake-ups or diagnostics only when their loss is

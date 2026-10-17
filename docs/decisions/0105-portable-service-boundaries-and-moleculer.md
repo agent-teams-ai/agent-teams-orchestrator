@@ -3,7 +3,7 @@ id: ADR-0105
 type: adr
 status: proposed
 owner: architecture/contracts
-summary: Define portable service contracts and a bounded Moleculer role without turning every module into a network service.
+summary: Define portable contracts and an initial Moleculer default for declared private Node.js RPC groups.
 related:
   - ADR-0004
   - ADR-0005
@@ -32,6 +32,9 @@ The product must support a modular monolith, selective service extraction, and
 replacement of an implementation by one written in another language with minimal
 changes to its consumers. The product owner asked to evaluate Moleculer so that
 service discovery, routing, and resilience do not become a custom framework.
+The owner prefers integrating that adapter with the first selected private
+Node.js RPC capability, accepting bounded early integration work instead of
+deferring the framework decision until distributed deployment.
 
 Moleculer directly supports local and distributed Node.js services. That is a
 useful implementation option, but its packet protocol and service context are not
@@ -55,8 +58,8 @@ or bypass the [implementation readiness gates](../architecture/implementation-re
 | Area | Proposed Moleculer role | Ownership and extraction rule |
 |---|---|---|
 | Domain and application | None | Pure domain and typed consumer-owned ports; no framework types or service locator |
-| Host composition | Construct and start one broker when that profile needs it | Get Modular assembles the Host; one owner constructs and stops each resource |
-| An explicitly selected Node.js RPC group | Optional service registry, discovery, balancing, and resilience when the group has that requirement | Thin adapters preserve published capability semantics; the same calls do not also acquire another mandatory RPC layer |
+| Host composition | Construct and start one broker for the selected local Node.js RPC profile | Get Modular assembles the Host; one owner constructs and stops each resource |
+| An explicitly declared private Node.js RPC group | Planned default adapter from its first implementation, initially in one process | Select the capability boundary before wiring; thin adapters preserve published semantics and prepare discovery, balancing, and resilience for qualified remote placement |
 | A capability with an independent language requirement | No mandatory Moleculer layer | Feature-owned Protobuf and an explicit Connect or gRPC profile define the portable boundary |
 | Team, agent, Run participant, or runtime session | No automatic broker or service per entity | Scale capability workers and AR capacity, not one framework node per business object |
 | JetStream, AR, Temporal, and Centrifugo | Preserve their existing roles | Durable delivery, execution, workflow scheduling, and client fan-out retain their own contracts |
@@ -89,11 +92,43 @@ binding generation. Generic balancing cannot send work to a machine that lacks
 the owned resources, and a transport timeout cannot authorize duplicate
 materialization or cleanup by a different owner.
 
-No initial Node.js capability has yet established a Moleculer requirement. Its
-optional RPC role remains available for a group with an explicit discovery,
-scaling, or failure-isolation need. The proposal does not install it speculatively
-or interpose it on the selected Connect/gRPC and JetStream paths. Hundreds of
+The proposed default applies once the owner declares a real capability as a
+private Node.js RPC group. Its first implementation then includes the Moleculer
+adapter; separate processes do not need to be justified at that point. A reason
+for the boundary, its consumer, and its state owner are still required. Neither
+an ordinary feature nor the existence of a `.proto` file selects this profile.
+Workspace materialization is a candidate for that boundary after OD-011 resolves
+its first capability; this proposal does not reserve a worker package or claim
+that a current slice already requires independently scaled workers. Hundreds of
 agents do not imply hundreds of brokers or independently deployed services.
+
+### Initial Node.js RPC deployment profile
+
+The initial deployment uses one local Moleculer broker in the selected Host role,
+with no transporter. This can be the production topology after its lifecycle and
+capability behavior are qualified; it is not restricted to development. Get
+Modular constructs application capabilities once. Moleculer adapters register
+and invoke those handles rather than constructing a second feature graph.
+
+Use the declared Protobuf models and official generated codecs at this selected
+boundary, including the local adapter. Application ports retain their own types.
+Local invocation must not gain shared mutable request or response objects that
+would disappear across a process boundary. The adapter owns bounded payloads,
+stable action mapping, typed errors, and the capability's trusted invocation
+profile. Do not create a general-purpose RPC wrapper or a service per schema.
+
+Copy and allowlist invocation facts at the boundary. Returned broker metadata
+cannot change authenticated authority or mutate another call's context. A caller
+deadline bounds observation; it does not prove that the handler stopped or that
+an effect did not happen. Propagate the operation's applicable deadline and
+cancellation policy explicitly, preserving durable acceptance and reconciliation.
+
+Moving that group to separate processes changes composition, routing, and
+deployment configuration. It also introduces network transport, authenticated
+service identity, network failures, resource placement, and recovery obligations
+that a local deployment cannot qualify. The same application port and consumer
+contract survive; zero deployment work or zero implementation changes are not
+promised. No distributed transporter is selected by the local default.
 
 ### Preserve portable contracts
 
@@ -105,7 +140,7 @@ extraction does not create speculative services or placeholder packages.
 Ordinary internal features keep typed in-process APIs and declared dependency
 edges without a Protobuf service for each feature or helper.
 
-For a selected TypeScript RPC capability, evaluate Connect's
+For a selected portable standard-RPC capability, evaluate Connect's
 `createRouterTransport` for the initial in-process adapter and standard Connect
 for remote placement. It reuses the declared service and binary serialization
 without a listening HTTP server. This is a production candidate requiring
@@ -136,7 +171,9 @@ still require the actual transport, resource, and failure qualification.
 
 Get Modular APIs stay in `composition/**` and tests. Host composition selects
 local or network adapters without a second global service locator or mandatory
-Moleculer wrapper. A separately justified Moleculer facade over a foreign
+Moleculer wrapper on every RPC. The private Node.js group follows the initial
+profile above; public and language-neutral Connect/gRPC boundaries retain their
+own adapters. A separately justified Moleculer facade over a foreign
 implementation retains an explicit Node.js deployment dependency. Its mapping
 of errors, deadlines, metadata, and retries is part of the qualified adapter,
 not an invisible compatibility promise.
@@ -180,7 +217,7 @@ decision and context state changes share the owning transaction; acknowledgement
 follows its durable commit. The handler is not forwarded through Moleculer
 merely to execute its application operation.
 
-For any separately selected Moleculer RPC, automatic mutation retries remain off
+For the selected Moleculer RPC profile, automatic mutation retries remain off
 unless the operation's idempotency contract and one retry budget across its hops
 justify them. This is a budget per logical operation, not a new global retry
 coordinator. JetStream redelivery still requires its independent inbox and
@@ -201,12 +238,19 @@ before it can proceed through its existing implementation gates.
 
 Use the existing S2
 [`CheckTeamDraft` slice](../domain/contexts/team-topology/README.md#first-development-slice)
-as the first portability checkpoint: exercise the same consumer contract and
-behavior fixtures through a qualified in-process adapter and real HTTP between
-two processes. This checks serialization, trusted context, and typed diagnostics
-on an actual capability without adding a separate production service or RPC
-framework. Its side-effect-free behavior does not prove mutation recovery. The
-first selected state-changing portable capability separately demonstrates
+as the first real adapter pilot. Team Topology owns the application input port;
+the first slice names its concrete interface. One Host-assembled implementation
+supplies the behavior fixtures. Qualify the public Connect adapter separately
+from an initial local Moleculer facade over that capability. The public path also
+exercises real HTTP between two processes under its existing contract profile.
+Both adapters preserve the same owned application behavior and typed diagnostics.
+
+A public Connect edge may call the selected private Moleculer capability through
+an owned port. Those are distinct boundaries; this does not make both frameworks
+mandatory transports for the same private RPC. The pilot adds neither a business
+feature nor a separate deployed service, and does not claim that draft checking
+needs its own worker fleet. Its side-effect-free behavior does not prove mutation
+recovery. The first state-changing portable capability separately demonstrates
 idempotency, unknown outcomes, and recovery under its owning contract.
 
 | Stage | Required evidence |
@@ -229,6 +273,36 @@ require implementing a private service registry, RPC protocol, workflow engine,
 or a framework abstraction for every library. Production claims remain limited
 to the topology and behavior actually qualified.
 
+### Disposable adapter experiment, 2026-10-17
+
+A synthetic diagnostic capability passed the same generated-Protobuf fixtures
+through one local broker and two real processes using the official TCP
+transporter. The isolated Linux network namespace contained only loopback.
+The experiment used Node 26.11.1, Moleculer 0.15.2, Protobuf-ES 2.16.0, and
+Buf 1.74.0, with exact dependency locks and source digests in its evidence.
+
+All eleven reported result groups passed. They include exact `uint64` values
+above `Number.MAX_SAFE_INTEGER`, optional-field presence, detached values,
+owned typed errors, fixture scope propagation, payload bounds, deadlines, and
+bounded shutdown. Raw calls separately demonstrated shared local parameters and
+results, returned metadata merging into caller metadata in both topologies, and
+a handler completing after caller timeout. These findings motivate the explicit
+boundary rules above; a successful RPC does not qualify durable command behavior.
+
+The fixture encoded Protobuf bytes inside Moleculer JSON packets; that encoding
+is experimental, not a selected production wire profile or a Connect/gRPC
+endpoint. The scope facts were synthetic, without an authenticator. No product
+`CheckTeamDraft` implementation, Get Modular assembly, production service
+authentication, NATS transporter, durability, failover, language replacement,
+or workload capacity was exercised.
+
+The reproducible source, generated schema output, lockfile, sanitized results,
+and evidence are in `ato-moleculer-boundary-spike-20261017.tar.gz`, supplied with
+the architecture review. SHA-256:
+`1d1e4209c37ccb81c1812c4dfa4a0dc836b0b16d0bc549989431076d35adc83c`.
+This evidence supports the proposed placement; it does not install the adapter
+or satisfy the owning product implementation gates.
+
 ### Inspected upstream evidence
 
 Inspection date: 2026-10-17. These are research pins, not installed dependencies
@@ -248,8 +322,11 @@ or product qualification results.
 
 ## Consequences
 
-- Moleculer may supply repeated RPC infrastructure for a justified Node.js group;
-  no initial consumer is claimed by these illustrative deployment boundaries.
+- A declared private Node.js RPC group integrates Moleculer with its first
+  implementation and may remain in one production process. This trades bounded
+  early adapter work for avoiding a later framework retrofit at that boundary.
+- A schema does not select deployment: ordinary features retain local APIs, and
+  public or independently language-neutral services retain Connect/gRPC.
 - Local composition remains simple; service extraction changes adapters and
   deployment wiring instead of forcing framework types through business code.
 - Public and private contracts remain separate surfaces, requiring deliberate

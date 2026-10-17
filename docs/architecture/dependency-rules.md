@@ -90,6 +90,13 @@ application ports. They may be imported only below `composition/**`. Contexts,
 features, adapters, and SDKs cannot receive a raw container, cradle, resolver, or
 service locator.
 
+Wire models and generated service types remain in their owning contract surfaces
+and permitted transport adapters or SDKs. GraphQL resolver contexts and
+selection-set structures remain in inbound adapters; neither enters domain or
+application models.
+Adapters map to the owner's application input port and narrow invocation profile;
+application models do not grow framework fields to accommodate another API style.
+
 Get Modular imports, declarations, plans, assembly, and factory bindings belong
 only in `composition/**` and tests under the accepted composition profile. A file
 named `declaration.ts` or `module.ts` outside that boundary is not an exception.
@@ -129,6 +136,12 @@ engines belong behind application-owned calculation ports.
 For synchronous collaboration, the consuming context declares a narrow outbound
 port. An adapter implements that port against the provider context's published
 contract. Asynchronous collaboration uses integration-event contracts.
+
+The same rule applies to GraphQL composition: the consuming query owns its narrow
+outbound query port and ACL. The provider owns its published batch-query API and
+projections; a composed projection has an explicitly declared query owner and
+consistency contract. Resolver nesting does not permit cross-context repositories
+or a shared transaction over several owners.
 
 Cycles between bounded-context packages are prohibited. When two contexts need
 bidirectional collaboration, prefer events, a process manager, or move the

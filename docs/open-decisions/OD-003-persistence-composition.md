@@ -61,9 +61,11 @@ this decision and OD-021 supply their remaining implementation evidence.
 `embedded-postgres` remains the first qualification candidate under ADR-0106
 for the existing Node Local Supervisor. The supplied executable evidence
 supports that order; later source review identifies requirements still to close,
-not a demonstrated superiority of an unimplemented replacement. Standard
-PostgreSQL process tools behind the same component adapter remain a contingency
-when a wrapper limitation is established. This comparison selects no production
+not a demonstrated production advantage for a replacement. The separate
+comparison below establishes a tested Linux direct-tools contingency and one
+wrapper shutdown limitation. Standard PostgreSQL tools behind the same component
+adapter remain available if maintained wrapper fixes cannot satisfy its lifecycle.
+This comparison selects no production
 dependency, Desktop framework, or new lifecycle substrate.
 
 ### Supplied executable evidence
@@ -89,10 +91,60 @@ The timer used `pg_sleep(0.25)` and a 10 ms interval. It measures that blocking
 boundary, not agent capacity, general fairness, or comparative throughput.
 Windows lifecycle, signed installers, interrupted updates, power-loss durability,
 backup restore, and major upgrades remain outside this comparison's evidence.
-The supplied report text does not include its linked raw artifacts, and this
-documentation change did not rerun its experiments. The second supplied report,
+The supplied report text does not include its linked raw artifacts. Its original
+experiments were not rerun; the following comparison has a separate harness and
+scope. The second supplied report,
 *Hosted full-Internet default: implementation and qualification*, dated
 2026-10-03, qualifies hosted worker networking, not bundled PostgreSQL.
+
+### Same-payload lifecycle comparison, 2026-10-17
+
+A new disposable Linux comparison used Node 26.11.1, `pg` 8.22.0, and the same
+`embedded-postgres` 18.4.0-beta.17 Linux payload for both launch paths. Actual
+PostgreSQL was 18.4. Exact tarball integrity, binary and launcher digests,
+the dependency lock, source, and sanitized results are retained with the review artifact.
+Both paths used an existing unprivileged UID, separate private data roots,
+loopback TCP only, SCRAM, and authenticated cluster identity. Effective `fsync`,
+`full_page_writes`, and `synchronous_commit` were all on.
+
+| Observed lifecycle behavior | Configured wrapper behind a guard | Direct tools |
+|---|---|---|
+| Initialization and bootstrap-file removal | Passed | Passed |
+| Authenticated startup and committed sentinel | Passed | Passed |
+| Graceful stop and persistent reopen of the same cluster | Passed | Passed |
+| Owned postmaster process crash and committed-data recovery | Passed | Passed |
+| Occupied test port rejects startup and preserves its listener | Passed | Passed |
+| Final owned process cleanup | Passed | Passed |
+| Separate raw-wrapper diagnostic after the startup child exited | `stop()` did not resolve within 1,000 ms | Not applicable |
+
+The guarded common paths passed six checks each. The failed raw-wrapper
+diagnostic remains a reported limitation. The guard avoids calling `stop()` when
+the owned postmaster has already exited, but the package's global exit hook
+still calls raw `stop()` outside that guard. A maintained fix or qualified
+lifecycle integration is required before production adoption. Occupied-port
+startup also rejected with an undefined value; PostgreSQL diagnostics remained
+available through the configured log callback.
+
+With controlled umask `022`, the wrapper created a mode-`0644` bootstrap file and
+the direct adapter created mode `0600`. Both files belonged to the unprivileged
+UID inside a mode-`0700` parent and were removed. This reproduced the mode
+difference, not secret disclosure. File access and cleanup on failed
+initialization remain qualification work.
+
+The direct path used foreground `postgres` startup and `pg_ctl` fast shutdown;
+it did not test a background server outliving its Supervisor. Network namespace
+isolation was unavailable, so this is not another offline qualification. The
+process-crash check was not a power-loss or interrupted-transaction test. Windows,
+macOS, packaging, missing executables, startup hangs, Supervisor death, backups,
+upgrades, and capacity were not tested. Independent cleanup found no remaining
+fixture processes or database directories. The comparison demonstrates no
+database-performance or overall production-reliability advantage for either
+launcher.
+
+The reproducible harness, frozen dependency lock, sanitized JSON and logs,
+provenance, and independent cleanup evidence are supplied in
+`postgres-launcher-comparison-20261017.zip`. SHA-256:
+`a9f79bd315665b4e7c9b1279719ad579974e95a44b046e209dfb44b2d7bbf8da`.
 
 ### Qualification options
 
@@ -103,15 +155,15 @@ rate or a different SQL engine.
 Complexity includes packaging, operations, and maintenance; higher is worse.
 The Node scores retain the supplied report's planning assessment. The Rust fit
 score reflects the additional substrate choice, not a lower package quality.
-An unimplemented direct adapter has no fair comparative confidence or reliability
-score yet; "Not established" means missing evidence, not zero quality.
+The direct adapter now has a bounded Linux implementation and evidence; its
+scores remain provisional estimates for the missing product integration.
 Table order is qualification priority, not production adoption. Every option
 still requires the accepted lifecycle and recovery evidence.
 
 | Qualification role | Option | Confidence | Reliability | Complexity |
 |---|---|---|---|---|
 | First Node candidate | `embedded-postgres` with a small hardened adapter and maintained upstream fixes | 8/10 | 7/10 | 6/10 |
-| Contingency for established wrapper limitations | Node Supervisor adapter using `initdb`, `postgres`/`pg_ctl`, and existing binary artifacts | Not established | Not established | 6/10, provisional |
+| Tested Linux contingency for wrapper limitations | Node Supervisor adapter using `initdb`, foreground `postgres`, and `pg_ctl` with existing binary artifacts | 7/10 | 7/10 | 6–7/10, provisional |
 | Conditional alternative | `postgresql_embedded` after an independent Rust substrate decision | 5/10 | 8/10 | 8/10 |
 
 ### Source review and remaining qualification
@@ -138,7 +190,9 @@ cannot suppress the wrapper's creation of its own password file. There is also
 no public option to disable the global exit hook. Readiness from stderr,
 missing bounded process handling, and Windows forced termination also need
 qualification. These are source-review risks, not reproduced secret disclosure
-or data-loss bugs.
+or data-loss bugs. The separate npm-payload comparison above reproduces the
+bootstrap mode and raw stop-after-exit behavior; it does not prove that this
+GitHub source pin is byte-identical to that npm payload.
 If hardening replaces most initialization, startup, shutdown, and exit handling,
 direct tools avoid maintaining a parallel launcher fork.
 
@@ -165,13 +219,14 @@ must itself create a protected bootstrap password file before invoking
 [`initdb`](https://www.postgresql.org/docs/18/app-initdb.html), preserve existing
 data, and verify the effective durability settings required by persistence.
 
-The bounded next experiment qualifies the Node wrapper against the remaining
+The bounded next qualification checks the Node wrapper against the remaining
 lifecycle requirements in disposable data roots on Windows and a supported
-POSIX platform. Where a limitation requires direct tools, compare that path
-using the same engine payload.
-It covers offline restart with committed data, bootstrap-file access and cleanup,
-foreign occupied ports, spawn failures, early exits, bounded stop, and Supervisor
-death with a surviving server. Record actual binary hashes and SQL settings.
+POSIX platform. Reuse the same-payload evidence above for its exact Linux inputs;
+do not rerun it as a substitute for closing the untested lifecycle cases.
+Qualify offline restart, bootstrap-file access and failed-initialization cleanup,
+foreign database identity, spawn failures, startup hangs, idempotent stop after
+exit, global exit-hook integration, and Supervisor death with a surviving server.
+Record actual binary hashes and SQL settings for each qualified platform.
 Keep the wrapper only if supported APIs and small maintained fixes satisfy the
 contract; otherwise qualify direct tools. This experiment neither proves power-loss
 durability nor replaces packaging, backup, upgrade, or workload qualification.

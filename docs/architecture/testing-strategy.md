@@ -106,6 +106,18 @@ Validate:
 - runtime-adapter conformance;
 - transport error mapping.
 
+For the first application capability, behavior fixtures call its input port
+without Connect, GraphQL, Moleculer, generated messages, or a DI container. The
+first wire adapter adds mapping fixtures for trusted scope, typed failures, and
+applicable deadline/cancellation behavior, plus negative architecture fixtures
+for framework leakage. The [additional API profile](sdk-and-transports.md#additional-client-api-styles)
+reuses those capability fixtures when GraphQL is introduced, adding nullability,
+error mapping, query-cost rejection, and authenticated cache isolation. An owned
+composed or batched query also proves bounded backend calls, per-key outcomes,
+and its declared consistency. Durable-work disconnect semantics are checked only
+for capabilities that accept durable work. These are first-materialization
+obligations, not a claim that unimplemented adapters are already qualified.
+
 ### Security architecture conformance
 
 The deterministic security gate validates feature-owned data-classification
