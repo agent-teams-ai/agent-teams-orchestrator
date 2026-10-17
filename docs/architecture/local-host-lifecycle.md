@@ -309,6 +309,22 @@ Product custody cannot depend on the Desktop lifetime or unqualified wrapper
 defaults. Qualification must close the reproduced stop-after-exit failure,
 including the package's global exit hook, not only the guarded common test path.
 
+The [deeper launcher evidence](../open-decisions/OD-003-persistence-composition.md#deeper-launcher-and-helper-evidence-2026-10-17)
+also identifies natural-exit status replacement, an incomplete maintenance-tool
+payload, and missing process custody after abrupt launcher death. A dedicated
+launcher child is a candidate for containing wrapper-global hooks and temporary
+environment changes; it is not a second Supervisor or an OS custody mechanism.
+The selected platform adapter must prove the actual survival, termination, or
+adoption policy. Do not remove arbitrary process listeners to conceal the hook.
+
+Control authority binds the Target, cluster identity, current Supervisor
+generation, launch attempt, and live process identity or custody handle. A
+reusable data-root nonce and numeric PID do not grant a failed contender the
+right to stop the winning instance. Under the lifecycle authority, revalidate
+before control and reconcile its outcome; a timeout does not prove that startup
+or shutdown stopped progressing. Losing-attempt cleanup controls only the
+processes that attempt owns. Recovery adoption is a separate transition.
+
 Host activation, context schema migration, and PostgreSQL engine upgrade are
 separate transitions. Candidate health checks cannot migrate a shared live
 cluster before the previous Host is quiesced. Every old writer and dispatcher,
@@ -340,9 +356,9 @@ Local Host Control CI do not qualify PostgreSQL on those platforms.
 
 | Released capability | Required evidence | Qualification owner |
 |---|---|---|
-| Installation and offline use | Actual installable package, exact payload digests, executable/helper/native-library layout, safe extraction, signing and macOS notarization, and typed rejection when OS quarantine or security software blocks launch. First start and persistent reopen require no engine download | OD-021 |
+| Installation and offline use | Actual installable package, enforced executable/helper/native-library digests, relocatable layout, safe extraction, signing and macOS notarization, and typed rejection when OS quarantine or security software blocks launch. First start and persistent reopen require no engine download; recording hashes alone is not verification | OD-021 |
 | Bootstrap and authenticated readiness | New private root only; credential-file permissions and Windows ACLs, removal after success/failure/crash, protected endpoint, collision and foreign-cluster rejection, authenticated SQL identity, actual version, and effective durability settings before Host readiness | OD-021 and OD-003 |
-| Lifecycle and process custody | Concurrent ensure, spawn failure, startup hang, already-exited children, wrapper/global exit hooks, bounded graceful shutdown on each platform, classified unclean termination, and Supervisor death with a surviving database process without a second owner | OD-021 |
+| Lifecycle and process custody | Concurrent ensure, losing-contender cleanup, stale control generations, spawn failure, startup hang, already-exited children, wrapper/global exit hooks and truthful exit outcomes, bounded graceful shutdown on each platform, classified unclean termination, and Supervisor death with a surviving database process without a second owner | OD-021 |
 | Application/Host and schema updates | Separate transition records, declared compatibility, no live-schema migration during candidate health checks, drain and fencing of old clients/dispatchers, interruption at each supported stage, and rollback only against compatible current data without losing later accepted writes | OD-021 and OD-003 |
 | Engine minor and major upgrades | Exact source/target payload and extension/collation/configuration compatibility; engine changes separate from app or wrapper version changes; recovery after interrupted supported transitions; verified backup and explicit irreversible boundary for incompatible changes; rejection of unsupported paths | OD-021 and OD-003 |
 | Backup and restore | Create the selected backup artifact and restore it into a clean isolated root. Validate manifests, integrity, required context schemas and migration checksums, receipts/outbox, blobs, and key access. Reject corrupt, incomplete, or incompatible sets; validate before activation and fence dispatch until fresh authority and reconciliation | OD-003 and owning persistence/context adapters |

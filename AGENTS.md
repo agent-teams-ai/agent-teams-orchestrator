@@ -119,16 +119,18 @@ before a high-cost boundary violation.
   or module count does not supply these decisions. Name the semantic owner,
   callable capability, and execution placement separately; justify RPC or a
   durable handler without deriving services from nested features. Use owned
-  ports, not a generic service locator; the [Moleculer placement proposal](docs/decisions/0105-portable-service-boundaries-and-moleculer.md)
-  plans its first adapter with a declared private Node.js RPC group, initially
-  in one process. Follow the [planned groups](docs/architecture/context-map.md#planned-service-groups):
+  ports, not a generic service locator; the [service-boundary proposal](docs/decisions/0105-portable-service-boundaries-and-moleculer.md)
+  records the reviewed portable contract, local RPC, and distributed runtime
+  alternatives. Follow the [planned groups](docs/architecture/context-map.md#planned-service-groups):
   Team Topology's S3 product group is distinct from the S1/S2 checker fixture.
-  Every action names its group, real consumer, and request/reply or durable
-  semantics. Use the framework's registry, routing, lifecycle, resilience, and
-  telemetry mechanisms through typed adapters; do not rebuild them in a generic
-  abstraction. A `.proto` file alone does not select Moleculer; public and
-  independently language-neutral boundaries retain Connect/gRPC. The proposal
-  is not production qualification.
+  Every operation names its group, real consumer, and request/reply or durable
+  semantics. Distinguish a capability group, deployment role, and interchangeable
+  replica set; never split one transaction across RPC roles. Use selected
+  framework or platform mechanisms through typed adapters, with explicit
+  discovery, routing, identity, admission, drain, and retry owners. Do not rebuild
+  them as a generic framework. A `.proto` file does not select Moleculer or Dapr;
+  standard RPC and framework packet protocols remain distinct. Proposed runtime
+  choices and disposable spikes are not production qualification.
 - Define each application's input port and narrow trusted invocation profile
   without transport types. Connect, future GraphQL, and selected private RPC
   adapters map to that port. Keep composed queries behind owned query ports and

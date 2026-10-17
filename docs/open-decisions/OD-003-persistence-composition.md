@@ -235,6 +235,99 @@ makes those checks mandatory for the corresponding release. Backup evidence
 includes an actual restore into a clean isolated root and validation before
 activation; creation of a dump file alone is insufficient.
 
+### Deeper launcher and helper evidence, 2026-10-17
+
+A subsequent independent research round retained the same Node 26.11.1,
+`embedded-postgres` 18.4.0-beta.17, `pg` 8.22.0, and actual PostgreSQL 18.4.
+Three disposable Linux profiles separate raw package behavior, additional
+official helper tools, and parent-death/duplicate-start behavior. Historical
+sources and results remain unchanged; the observations below do not qualify an
+installed Windows/macOS package or change ADR-0108.
+
+| Profile or finding | Observed result | Required interpretation |
+|---|---|---|
+| Raw npm Linux payload | Eight required research cases passed; `postgres`, `initdb`, and `pg_ctl` are present, while `pg_dump`, `pg_restore`, and `pg_controldata` are absent | The launcher dependency does not supply a complete backup/maintenance distribution |
+| Raw stop after child exit | The promise did not finish within 1.5 seconds | The public guard and package-global shutdown paths both need a bounded solution |
+| Natural worker exit | The installed `async-exit-hook` waited about ten seconds and converted intended exit 2 into actual exit 0 | An independent controller must inspect fresh structured results; a zero worker exit is not a valid success oracle for this experiment |
+| Official additional helpers | Nine required cases passed, including a real custom-format dump, restore to a different clean cluster, exact four-table comparison, and persistent reopen | This qualifies the measured synthetic SQL combination, not complete product recovery |
+| Duplicate start | A second sequential start was rejected; the original authenticated server and committed data remained | Useful positive evidence; simultaneous ensure and generation-safe losing-attempt cleanup remain separate checks |
+| Abrupt launcher death | PostgreSQL survived SIGKILL of its Node launcher with the same authenticated identity and committed sentinel | The wrapper hook does not provide forced-parent custody. Survival is not data loss and can be valid under a qualified external custodian |
+| Windows stop source | The exact wrapper uses `taskkill /f /t` | Source evidence identifies forced termination; no Windows execution result is inferred |
+
+The helper profile built `pg_dump`, `pg_restore`, `pg_controldata`, and libpq
+from the official PostgreSQL 18.4 source archive, keeping the original npm
+server, `initdb`, and `pg_ctl`. The source archive SHA-256 is
+`81a81ec695fb0c7901407defaa1d2f7973617154cf27ba74e3a7ab8e64436094`.
+The successful restore includes exact bigint, numeric, binary values, synthetic
+receipt/outbox state, and a synthetic migration-checksum row. It excludes real
+context migration graphs, cluster-global roles/configuration, external blobs,
+keys, and dispatch reconciliation. A truncated-header rejection is not proof of
+complete backup integrity; actual restore and full validation precede activation.
+
+Independent Astra review verified the retained evidence manifest and reproduced
+an additional negative control: the initial helper provenance routine recorded
+hashes but accepted three version-reporting stubs whose hashes did not match its
+supplied manifest. This does not invalidate the genuine restore, which used the
+retained real binaries. It requires enforced artifact verification before
+execution. The original helper also had an absolute temporary build RUNPATH;
+relocation and native dependency closure need their own qualified package.
+A successful fresh build is not necessarily a byte-identical reproducible build.
+
+The observed bootstrap file mode was 0644 beneath a protected 0700 ancestor.
+This does not establish cross-user disclosure or owner-only file-mode conformance.
+Effective file access, restrictive creation, and residue after abrupt death
+remain platform-specific checks. Temporary environment and umask changes should
+not race with unrelated Supervisor operations.
+
+The leading integration experiment retains the wrapper in a dedicated launcher
+child behind the existing Supervisor adapter. A narrow acknowledged command
+protocol can contain global hooks and preserve truthful outcomes; it does not
+replace platform custody, authenticated identity, generation checks, or Host
+drain. Supported upstream corrections may permit a simpler in-process profile.
+Direct native utilities remain the stated contingency, with no automatic
+fallback, competing owner, or silent replacement of the accepted approach.
+
+The source, exact locks, sanitized logs/results, and provenance are retained in
+`ato-postgres-deep-spikes-20261017.zip`, SHA-256
+`6cdb461581e69ba756c69320c477315281791681f17cfcdbcf547766aa085796`,
+with separate independent critique and follow-up evidence supplied with the
+review. None of the raw diagnostic failures is reclassified as release success.
+
+Two separate follow-ups then addressed specific review findings without changing
+the historical profiles. A dedicated launcher-child experiment passed six
+checks with the unchanged wrapper. Its acknowledged outcome 7 became the
+independently observed Supervisor exit 7 even though the raw launcher exited 0.
+Repeated stop avoided another control call; stale generation/attempt commands
+were rejected before `pg_ctl`. These are in-memory fixture guards, not durable
+custody, concurrent ensure, or adoption by a restarted Supervisor.
+
+A separate second launcher profile also observed an unexpected active-child
+exit in the Supervisor's lifecycle handler, entered reconciliation, and rejected
+another start. Its six cases passed, including negative controls that kept two
+acknowledged shutdown paths out of reconciliation. This resolves the first
+fixture's manual state transition for that path; it does not qualify persistent
+generations, Supervisor replacement, or the complete recovery state machine.
+The separately retained evidence is
+`ato-pg-isolated-launcher-v2-20261017.zip`, SHA-256
+`6facef031f5fac207dc3bfe7aecdad3239dd5a69e126ceb0027894b0a6e7c8fb`.
+
+The helper integrity/relocation profile rejected five altered helper, library,
+manifest, file-set, and symlink cases before helper execution. It staged new
+copies with relative `$ORIGIN` RUNPATHs, removed inherited loader/PostgreSQL
+environment settings, and made the original build prefix unavailable while
+verifying library resolution and performing the real isolated restore. All nine
+required PostgreSQL cases passed; the original files and prefix were restored
+unchanged. The raw wrapper diagnostics still failed independently. The tested
+Ubuntu 24.04 native-library baseline, trusted manifest pin, and preflight
+verification are not Windows/macOS packaging, release signing, or protection
+against replacing an artifact after verification.
+
+The helper follow-up is retained in
+`ato-pg-helper-integrity-relocation-20261017.zip`, SHA-256
+`dfc797d21b486e2ef279ab25461947b139df99e4367eaf96582c739ac40c5466`.
+Repeating its packaging recipe reproduced the staged bytes from the same retained
+inputs; independent source-build reproducibility is not claimed.
+
 ## Decision evidence
 
 The following experiments retain their original dates, versions, and results.

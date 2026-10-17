@@ -80,15 +80,15 @@ or persistence framework in advance.
 ### Planned product service group
 
 ADR-0105 proposes the Agent/Team definitions and versioned roster as the first
-private Node.js RPC group, with a local Moleculer adapter from S3's first
-implementation. The initial actions cover only that slice's accepted Team
+private capability group, with its reviewed portable contract and local adapter
+from S3's first implementation. The initial operations cover only that slice's accepted Team
 create/get/list behavior. Agent definitions, roster edits, cloning, and templates
 join through their own later slices; selecting a group does not freeze their
 contracts or add them to S3.
 
 The public Connect edge and S4 Run `team-activation` consume the group through
 their typed ports and mappings. Get Modular constructs the application once;
-Moleculer registers the selected capabilities without a second business graph.
+the selected transport adapter invokes those capabilities without a second business graph.
 The current assignment authority, immutable versions, revisions, receipts, and
 outbox retain this context's transaction boundary. Remote placement does not
 move Run admission, active Agent occupancy, organizational placement, or provider

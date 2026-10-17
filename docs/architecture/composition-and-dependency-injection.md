@@ -240,7 +240,7 @@ semantics, lifecycle owner, and the workload that justifies separation. Record
 these in the owning feature/context and accepted deployment decision. A file
 size, feature count, or number of agents is not an extraction criterion.
 
-The candidate Moleculer placement and cross-language private RPC profile are in
+The reviewed local and distributed runtime alternatives and portable RPC profile are in
 [ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md). That
 proposal does not replace the accepted public Connect API, JetStream durability,
 AR execution ownership, or Host composition. Routing adapters use constructed

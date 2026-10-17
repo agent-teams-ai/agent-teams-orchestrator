@@ -409,6 +409,15 @@ isolated root and validate the complete required set before activation, rather
 than accepting backup-file creation as successful recovery.
 Process-kill evidence does not qualify power-loss or filesystem durability.
 
+Retain independent lifecycle oracles when a launcher can alter its worker's
+exit status. Require fresh structured completion, the expected case inventory,
+actual owned-process state, and a separately computed verdict. Exercise stale
+control generations and losing-contender cleanup without stopping the winner.
+Helper verification rejects altered binaries, native libraries, or an untrusted
+manifest before execution; test relocation without access to the build prefix.
+Recorded hashes, version strings, a backup table of contents, and a green
+launcher exit do not individually qualify the complete released capability.
+
 Update fixtures separate Host replacement, context schema migration, and engine
 upgrade. A candidate cannot migrate the old Host's live schema during preflight;
 stale checked-out clients and dispatchers cannot commit after fencing. Interrupt

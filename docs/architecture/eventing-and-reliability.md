@@ -531,12 +531,13 @@ required quarantine evidence or publish a required dead-letter record cannot
 authorize acknowledgement of the original message.
 
 [ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
-proposes Moleculer as the initial adapter for declared private Node.js RPC groups,
-with one local broker before distributed placement is needed. Its
-framework response, timeout, retry, or in-memory pending request never replaces
+records the reviewed local Connect profile, leading Dapr candidate for
+distributed polyglot invocation, and conditional Moleculer profile for a
+Node.js group. Any RPC response, timeout, retry, or in-memory pending request never replaces
 durable command acceptance, receipts, outbox, inbox, or reconciliation. Core
 events may carry disposable wake-ups or diagnostics only when their loss is
 permitted. A local Moleculer broker does not remove required JetStream delivery.
+Selecting Dapr invocation does not select Dapr pub/sub, state, or workflows.
 
 Application policy classifies retryable work. JetStream performs redelivery.
 Any selected RPC mechanism observes one retry budget per logical operation

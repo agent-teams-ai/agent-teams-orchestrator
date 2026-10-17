@@ -53,9 +53,14 @@ materialize an empty package or freeze a schema.
   its direct parent under the feature module standard.
 - A Get Modular entry is an independently wired implementation seam; a group
   assembles declared entries and child groups without changing domain ownership.
-- A service group is a declared set of callable capabilities selected for common
-  RPC wiring and placement. It may cover several features, but does not create a
-  new semantic owner or combine the transactions of different contexts.
+- A service group declares the callable capabilities of a selected private
+  boundary. It may cover several features, but does not create a new semantic
+  owner or combine the transactions of different contexts.
+- A deployment role selects the handlers, consumers, and adapters that run
+  together with one lifecycle and resource profile. A group may have several
+  roles; a role may initially host several groups.
+- A replica set contains interchangeable instances of one routing contract.
+  Replica membership does not grant ownership of a session, partition, or data.
 - A Moleculer action is one callable operation within the selected group, not an
   independently deployed service by itself.
 - A deployed service is an execution placement with a lifecycle and scaling
@@ -110,13 +115,13 @@ capability and contract decisions before their adapters are materialized.
 
 | Group | Existing semantic owner and contents | Planned placement and boundary |
 |---|---|---|
-| Agent/Team definitions and versioned roster | [Team Topology](../domain/contexts/team-topology/README.md); S3 persistent Team create/get/list, followed by separately delivered Agent definitions, immutable versions, roster changes, cloning, and templates | First planned private Node.js Moleculer group, initially local. Public Connect and later Run `team-activation` use owned ports. Assignment uniqueness, Team versions, receipts, and outbox remain in one Team Topology transaction; organization placement, Run admission, and AR execution stay outside |
-| Execution activity, history, and diagnostics | [Execution Observation](../domain/contexts/execution-observation/README.md); timeline, snapshots, feed resume, authorized search, protected diagnostic access/export, and selected rebuild controls | Later query/control group with a plausible independent read and indexing load. A declared Node.js RPC subset uses the Moleculer profile; durable ingestion and indexing use direct JetStream handlers. Preserve the receipt/evidence/projection/feed transaction and current disclosure checks; Centrifugo retains client fan-out |
+| Agent/Team definitions and versioned roster | [Team Topology](../domain/contexts/team-topology/README.md); S3 persistent Team create/get/list, followed by separately delivered Agent definitions, immutable versions, roster changes, cloning, and templates | First planned private capability group, initially local, with its transport recommendation under ADR-0105 review. Public Connect and later Run `team-activation` use owned ports. Assignment uniqueness, Team versions, receipts, and outbox remain in one Team Topology transaction; organization placement, Run admission, and AR execution stay outside |
+| Execution activity, history, and diagnostics | [Execution Observation](../domain/contexts/execution-observation/README.md); timeline, snapshots, feed resume, authorized search, protected diagnostic access/export, and selected rebuild controls | Later query/control group with separate ingestion, indexing, and query roles where justified. Durable ingestion and indexing use direct JetStream handlers. Ingestion commits receipt/checkpoint, evidence, safe projection, feed, and indexing outbox together; indexing follows that commit. Preserve disclosure checks; Centrifugo retains client fan-out |
 | Semantic context composition and validity | [Agent Context](../domain/contexts/agent-context/README.md); contribution admission, provenance, manifests, validity, invalidation, and continuity evidence | Later bounded query/control group after its consumer contracts are accepted. Durable assembly and invalidation keep their context-owned state and delivery; avoid a synchronous call chain across source owners. AR owns technical materialization and Run owns activation |
 | Workspace materialization mechanics | [Workspace Registry](../domain/contexts/workspace-registry/README.md); outbound worktree, clone, snapshot, or remote-workspace mechanics | Later technical worker group behind the registry's owned port. Resource/machine affinity, allocation and binding generations, and cleanup reconciliation constrain routing. It is not a new context; AR retains runtime isolation |
 
 The first group is larger than a checker but is implemented incrementally.
-S1/S2 `CheckTeamDraft` remains the module and public API proof. The Moleculer
+S1/S2 `CheckTeamDraft` remains the module and public API proof. The private
 product integration begins with the existing S3 subset; choosing the group does
 not add all later capabilities to that slice. OD-006 and OD-011 still govern
 Team Topology's exact model, and the other dossiers retain their own gates.
@@ -128,11 +133,23 @@ JetStream pull consumers already distribute its accepted delivery work; an extra
 Moleculer hop is not required for that purpose. Human Notification Management
 keeps policy, attempts, and reconciliation under ADR-0068 and OD-026.
 
-One Host broker may register several selected groups. Each group can contain
-several feature-owned actions; ordinary collaboration inside it stays typed and
-local. A group is selected before its first adapter is written, while remote
-placement is separately justified by measured load, isolation, or resource needs.
-A `.proto` file, feature directory, or agent instance does not select placement.
+One initial Host may contain several groups. Each group can contain several
+feature-owned operations; ordinary collaboration inside it stays typed and
+local. The selected profile maps operations to deployment roles and their
+interchangeable replicas. Query and command roles with different method sets
+must use distinct route identities or an ingress that routes those methods;
+they cannot be registered as equivalent replicas behind one undifferentiated
+endpoint. A durable worker does not require an RPC service registration.
+
+A context can have several write replicas without a global singleton writer.
+Its constraints, revisions, receipts, and fencing protect each invariant. Do
+not split one atomic operation across RPC roles or hold its SQL transaction
+open while waiting for another service. Roles sharing the owner's schema need
+explicit migration and mixed-version compatibility during rollout.
+
+A group is selected before its first adapter is written, while remote placement
+is separately justified by measured load, isolation, or resource needs. A
+`.proto` file, feature directory, or agent instance does not select placement.
 Existing package identities and materialization policies remain in the
 [package catalog](../../architecture/package-catalog.yaml).
 

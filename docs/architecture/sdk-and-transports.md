@@ -191,9 +191,10 @@ model.
 ## Service extraction and language portability
 
 [ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
-proposes portable capability boundaries and Moleculer as the initial default
-adapter for an explicitly declared private Node.js RPC group. Such a group can
-remain in one process, including qualified production deployment. These remain
+proposes portable capability boundaries, an initial local Connect profile, and
+Dapr as the leading distributed polyglot runtime candidate. Moleculer remains
+a conditional option for an intentionally Node.js group. A group can remain
+in one process, including qualified production deployment. These remain
 candidate private implementation profiles, not
 selected production dependencies or another public SDK backend:
 
@@ -202,7 +203,8 @@ selected production dependencies or another public SDK backend:
 | Ordinary collaboration inside a context | Curated internal API and local calls | Owning application models and explicit feature dependency |
 | Selected portable standard-RPC capability in one process | Protobuf and a qualified Connect router transport behind a consumer-owned port | Versioned schema and capability semantics, without framework contexts |
 | Independently deployable capability that may change language | The same Protobuf contract with Connect, gRPC over HTTP/2, or a qualified dual-protocol endpoint | Versioned schema, errors, authorization, operation and retry semantics |
-| Declared private Node.js RPC group | Moleculer adapter from the first implementation; one local broker without a transporter initially | Protobuf models and published capability semantics; foreign implementations still need a qualified standard RPC boundary |
+| Distributed polyglot RPC group | Leading candidate: standard gRPC through a narrowly configured Dapr invocation profile; an existing qualified platform or supported resolver is a lighter alternative | Standard service contract plus explicit routing, identity, admission, drain, and recovery providers |
+| Intentionally Node.js group needing integrated action infrastructure | Conditional Moleculer adapter; one local broker without a transporter initially | Published capability semantics; its packet protocol does not confer Connect/gRPC compatibility |
 | Public client control | Existing Connect edge and handwritten SDK | Accepted public control and SDK contracts |
 
 Define the private schema with the first implementation of a selected portable
@@ -231,11 +233,28 @@ facade in addition to Connect.
 The [planned service groups](context-map.md#planned-service-groups) distinguish
 Team Topology's first product integration from the smaller checker fixture and
 later Observation, Agent Context, and Workspace opportunities. The registry,
-routing, service lifecycle, resilience, and telemetry come from Moleculer's
-built-in mechanisms under the [framework profile](../decisions/0105-portable-service-boundaries-and-moleculer.md#use-the-frameworks-service-infrastructure).
+routing, service lifecycle, resilience, and telemetry have explicit providers in
+the [reviewed deployment recommendation](../decisions/0105-portable-service-boundaries-and-moleculer.md#reviewed-polyglot-recommendation-2026-10-17).
+For a selected Node.js alternative, use Moleculer's built-in mechanisms under
+its [framework profile](../decisions/0105-portable-service-boundaries-and-moleculer.md#use-the-frameworks-service-infrastructure).
 Typed adapters preserve the owned contract without implementing another RPC bus.
 JetStream still delivers durable work directly to its owner; AR retains execution
 ownership.
+
+Connect's fixed HTTP endpoint and persistent HTTP/2 session are not an automatic
+per-RPC replica balancer. A network profile selects qualified platform routing,
+a supported gRPC client resolver/balancer, or Dapr. Changing to another client
+library can require adapter and generated-client changes while preserving the
+consumer's application port. Static endpoint balancing does not qualify dynamic
+discovery, identity, or autoscaling.
+
+Host lifecycle closes admission before bounded drain. Connect's shutdown signal
+propagates cancellation, but does not itself reject every new invocation; the
+local profile qualifies its admission gate and active work tracking. Similarly,
+Dapr policies are verified on the selected path: remote standard unary gRPC,
+self-app invocation, and streaming must not inherit untested equivalent limits.
+The profile owns authentication, message bounds, deadlines, and its retry budget
+even when a framework supplies the implementation mechanism.
 
 A common Protobuf schema alone does not make a plain gRPC server serve the
 Connect protocol. A private caller using gRPC can keep that transport when a

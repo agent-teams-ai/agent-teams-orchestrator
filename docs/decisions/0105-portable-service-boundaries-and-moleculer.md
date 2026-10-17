@@ -3,7 +3,7 @@ id: ADR-0105
 type: adr
 status: proposed
 owner: architecture/contracts
-summary: Define portable contracts and an initial Moleculer default for declared private Node.js RPC groups.
+summary: Define portable capability contracts and compare local RPC, Dapr, and conditional Moleculer deployment profiles.
 related:
   - ADR-0004
   - ADR-0005
@@ -35,15 +35,16 @@ The product must support a modular monolith, selective service extraction, and
 replacement of an implementation by one written in another language with minimal
 changes to its consumers. The product owner asked to evaluate Moleculer so that
 service discovery, routing, and resilience do not become a custom framework.
-The owner prefers integrating that adapter with the first selected private
-Node.js RPC capability, accepting bounded early integration work instead of
-deferring the framework decision until distributed deployment.
+The owner initially preferred integrating that adapter with the first selected
+private Node.js RPC capability, accepting bounded early integration work. The
+subsequent request explicitly asks for a broader language-neutral alternative
+review and executable evidence before making that framework the default.
 
 Moleculer is a Node.js and TypeScript microservices framework, not only an RPC
 client. Its registry, discovery, load balancing, lifecycle, resilience,
-middleware, metrics, and tracing are the reusable infrastructure selected for
-these groups. The same service implementation can run locally or remotely;
-avoiding a later rewrite of this infrastructure is a principal reason to adopt it.
+middleware, metrics, and tracing are reusable infrastructure for a group that
+selects it. The same service implementation can run locally or remotely;
+avoiding a later rewrite of this infrastructure is a real reason to evaluate it.
 Its packet protocol and service context are not the language-neutral API of this
 platform. A language rewrite necessarily changes
 the rewritten implementation; the intended portability guarantee protects its
@@ -56,18 +57,70 @@ Get Modular static composition is a separate concern governed by ADR-0104.
 
 ## Decision
 
-This ADR is proposed. The following placement and private wire profile require
-review; they do not install Moleculer, select a production dependency version,
+This ADR is proposed. The revised recommendation and private wire profiles require
+product-owner review; they do not install a framework, select a production dependency version,
 or bypass the [implementation readiness gates](../architecture/implementation-readiness-gates.md).
+
+### Reviewed polyglot recommendation, 2026-10-17
+
+Prefer feature-owned Protobuf and an explicit standard RPC profile for a real
+portable capability boundary. Initially, a qualified Connect router transport
+can run the TypeScript capability in the same Get Modular Host. Ordinary feature
+collaboration remains typed local calls. A replacement in another language must
+implement the chosen Connect or gRPC protocol and preserve the owned operation
+semantics; a shared schema alone is insufficient.
+
+For independently deployed polyglot groups, Dapr's standard-gRPC service
+invocation is the leading shared-runtime candidate. Its sidecar owns configured
+discovery, service routing, telemetry, and applicable resilience mechanisms.
+Select and qualify its exact discovery, identity, policy, and lifecycle profile
+before materialization. This recommendation does not install a sidecar for the
+initial one-Host topology or accept Dapr as a production dependency.
+
+Dapr is not an in-process Node library. A selected local distributed profile
+needs Supervisor-owned sidecar availability, while a hosted profile needs its
+deployment platform. Service invocation can run without Docker, Redis, actor
+placement, or Dapr state and pub/sub components. Existing PostgreSQL, direct
+JetStream delivery, AR execution, Temporal, and Centrifugo retain their owners.
+Do not adopt Dapr's adjacent features as an incidental consequence of RPC.
+
+A lighter standard-RPC deployment is a valid alternative when fixed endpoint
+configuration or an existing qualified routing and identity platform supplies
+its operational needs. Connect does not contain Moleculer's registry, action
+balancer, bulkhead, or complete service lifecycle. NATS eventing does not
+automatically discover HTTP endpoints. Name the concrete providers rather than
+writing a generic registry, RPC bus, or service manager.
+
+Moleculer remains a conditional profile for an intentionally Node.js group that
+benefits from its integrated action infrastructure. The earlier unconditional
+private Node.js default is under review, not an accepted commitment. Official
+NATS Services is a separate broker-based RPC alternative, with versioned
+subjects and its own invocation/error profile; it is not gRPC or a replacement
+for accepted JetStream durability. Do not stack these RPC profiles for the same
+private hop without a specific boundary need.
+
+| Concern | Initial single Host | Independently deployed group |
+|---|---|---|
+| Construction and lifecycle | Get Modular assembles one graph; Host owns resource start, admission closure, bounded drain, and stop | Each declared role has one Host owner; Local Supervisor or the hosted platform manages process availability and rollout |
+| Location and replica routing | Static typed composition and the selected local transport; no network registry | Qualified Dapr discovery/routing, or an explicitly selected platform or supported gRPC resolver/balancer; only interchangeable role replicas share a route |
+| Identity and authorization | Trusted inbound adapter maps a narrow invocation profile; owning use case authorizes the operation | Qualified peer identity, credentials, trust roots, audience, and rotation; process identity never substitutes for the use case's product grant |
+| Admission and resource limits | Owning application/Host adapter bounds handlers, queues, message sizes, and database clients | The same application budgets remain; sidecar or proxy limits are additional and must be verified on the actual protocol path |
+| Deadline, retry, and recovery | Finite operation policy and durable owner receipts; cancellation does not undo effects | One finite retry budget per logical operation across its hops; unknown outcomes reconcile with the durable owner |
+
+Before remote production use, the placement record names the selected provider
+for every applicable row. A base URL, a live process, or a successful synthetic
+RPC is not that qualification. Host shutdown must reject new work before
+draining accepted work; propagating an aborted signal alone does not establish
+an admission barrier. Existing active work remains recoverable when drain ends.
 
 ### Select boundaries by capability
 
-| Area | Proposed Moleculer role | Ownership and extraction rule |
+| Area | Proposed profile | Ownership and extraction rule |
 |---|---|---|
 | Domain and application | None | Pure domain and typed consumer-owned ports; no framework types or service locator |
-| Host composition | Construct and start one broker for the selected local Node.js RPC profile | Get Modular assembles the Host; one owner constructs and stops each resource |
-| An explicitly declared private Node.js RPC group | Planned default adapter from its first implementation, initially in one process | Select the capability boundary before wiring; thin adapters preserve published semantics and prepare discovery, balancing, and resilience for qualified remote placement |
-| A capability with an independent language requirement | No mandatory Moleculer layer | Feature-owned Protobuf and an explicit Connect or gRPC profile define the portable boundary |
+| Host composition | Construct selected adapters and, only for a selected Node.js profile, one broker | Get Modular assembles the Host; one owner constructs and stops each resource |
+| An explicitly declared portable RPC group | Standard contract from its first implementation, initially using a qualified local adapter | Select the capability boundary before wiring; thin adapters preserve published semantics and explicit deployment providers supply remote operation |
+| An intentionally Node.js group needing integrated action infrastructure | Conditional Moleculer profile | Its packet protocol is explicit; another-language replacement needs a qualified standard boundary or proven protocol implementation |
 | Team, agent, Run participant, or runtime session | No automatic broker or service per entity | Scale capability workers and AR capacity, not one framework node per business object |
 | JetStream, AR, Temporal, and Centrifugo | Preserve their existing roles | Durable delivery, execution, workflow scheduling, and client fan-out retain their own contracts |
 
@@ -81,13 +134,13 @@ placement before selecting its RPC or durable delivery mechanism.
 The [planned service groups](../architecture/context-map.md#planned-service-groups)
 name the first product group and later opportunities using existing context
 owners. Team Topology's Agent and Team definitions and versioned roster are the
-first planned private Node.js group; the implemented subset begins with S3
+first planned private capability group; the implemented subset begins with S3
 persistent Team creation and retrieval. `CheckTeamDraft` is one capability and
 an adapter fixture, not the product service boundary. Group selection neither
 creates a new bounded context nor expands the existing delivery slices.
 
-The proposed default applies from the first implementation of a declared private
-Node.js group. Separate processes do not need to be justified at that point.
+The selected contract profile applies from the first implementation of a
+declared portable group. Separate processes are not required at that point.
 Each call still names its real consumer, owner, state, and failure contract.
 Ordinary features, `.proto` files, and entity instances do not create services.
 Human notification delivery uses the existing durable pull-consumer profile
@@ -98,8 +151,8 @@ brokers or independently deployed services.
 
 ### Use the framework's service infrastructure
 
-Thin adapters isolate framework types; they do not replace its mechanisms with
-product-maintained alternatives. The initial profile deliberately configures
+When a group selects Moleculer, thin adapters isolate framework types; they do
+not replace its mechanisms with product-maintained alternatives. That profile configures
 the applicable built-in facilities rather than relying on their defaults:
 
 | Facility | Planned use and ownership |
@@ -121,7 +174,7 @@ times out.
 
 ### Initial Node.js RPC deployment profile
 
-The initial deployment uses one local Moleculer broker in the selected Host role,
+This conditional Node.js alternative uses one local Moleculer broker in the selected Host role,
 with no transporter. This can be the production topology after its lifecycle and
 capability behavior are qualified; it is not restricted to development. Get
 Modular constructs application capabilities once. Moleculer adapters register
@@ -191,7 +244,7 @@ still require the actual transport, resource, and failure qualification.
 
 Get Modular APIs stay in `composition/**` and tests. Host composition selects
 local or network adapters without a second global service locator or mandatory
-Moleculer wrapper on every RPC. The private Node.js group follows the initial
+Moleculer wrapper on every RPC. A group selecting Moleculer follows its initial
 profile above; public and language-neutral Connect/gRPC boundaries retain their
 own adapters. A separately justified Moleculer facade over a foreign
 implementation retains an explicit Node.js deployment dependency. Its mapping
@@ -264,13 +317,13 @@ supply a small private adapter fixture; S2 does not require a product Moleculer
 service or a new deployment. The disposable experiment below is also an adapter
 proof, not the first delivered product group.
 
-The first product integration is Team Topology's declared private group with
+The first product integration remains Team Topology's declared private group with
 S3 persistent Team create/get/list. Later owned Agent, version, roster, clone,
 and template capabilities may join that group as their slices are delivered.
 This does not add them to S3 or freeze unimplemented methods in a `.proto` file.
 Team Topology owns its application ports; Get Modular constructs the actual
 implementations once. The public Connect edge reaches the selected private
-group through typed ports and its local Moleculer client adapter. S4 Run
+group through typed ports and the reviewed local transport adapter. S4 Run
 `team-activation` is a separate consumer through its own outbound port and ACL,
 never a direct import of Team implementation or tables.
 
@@ -290,8 +343,8 @@ readiness still govern the exact subset; the group plan does not close them.
 | Stage | Required evidence |
 |---|---|
 | Before materializing a dependency or adapter | Accepted owning decision, exact versions, capability boundaries, ports, state and lifecycle owners, and the selected deployment profile |
-| Before production use of the initial Node.js profile | Construction, cleanup, trusted scope, command and operation behavior, bounded retries, and the recovery requirements of that actual local or remote topology |
-| Before production use of distributed Node.js capabilities | Real remote serialization and typed failures, restart/failover from durable owner state, unknown outcome after mutation, scoped ownership and fencing, and one bounded retry policy across the deployed hops |
+| Before production use of the initial local profile | Construction, cleanup, trusted scope, command and operation behavior, bounded retries, and the recovery requirements of that actual local or remote topology |
+| Before production use of distributed capabilities | Real remote serialization and typed failures, restart/failover from durable owner state, unknown outcome after mutation, scoped ownership and fencing, and one bounded retry policy across the deployed hops |
 | Before claiming replacement by another language | One representative capability replaced while consumer business code and contract fixtures remain unchanged, covering exact values, authorization, deadlines, duplicates, typed errors, unknown outcomes, and operation lookup |
 | Before claiming a workload or capacity target | Load evidence for that profile's declared active-agent, client, queue, and resource budgets, including saturation and recovery |
 
@@ -318,7 +371,7 @@ Buf 1.74.0, with exact dependency locks and source digests in its evidence.
 All eleven reported result groups passed. They include exact `uint64` values
 above `Number.MAX_SAFE_INTEGER`, optional-field presence, detached values,
 owned typed errors, fixture scope propagation, payload bounds, deadlines, and
-bounded shutdown. Raw calls separately demonstrated shared local parameters and
+owned process cleanup. Raw calls separately demonstrated shared local parameters and
 results, returned metadata merging into caller metadata in both topologies, and
 a handler completing after caller timeout. These findings motivate the explicit
 boundary rules above; a successful RPC does not qualify durable command behavior.
@@ -337,6 +390,34 @@ the architecture review. SHA-256:
 This evidence supports the proposed placement; it does not install the adapter
 or satisfy the owning product implementation gates.
 
+### Polyglot experiments and independent review, 2026-10-17
+
+Separate disposable Linux experiments used the same diagnostic Protobuf schema.
+They qualify representations and specific transport behavior, not Team Topology
+S3, real authorization, durable mutations, or hundreds of active agents.
+
+| Experiment | Observed evidence and material limits |
+|---|---|
+| Connect ES 2.2.0 and Go 2.0.1 | Thirty result groups passed across a local TypeScript router, a Go Connect endpoint, and standard gRPC over HTTP/2. Fresh extraction reproduced the source and generated artifacts. This proves a portable diagnostic boundary, not dynamic discovery or workload capacity |
+| Node gRPC client 1.14.6 and two Go replicas | Eight follow-up groups passed using the official static IP resolver and round-robin balancer. The same consumer port worked through a separate client adapter. After one replica failed, new calls used the survivor; the same client rebalanced after its same-address restart. Accepted calls on the failed replica returned Unavailable. This is not a Connect-Node balancing feature, dynamic membership, zero-error failover, or durable mutation recovery |
+| NATS JS 3.4.0 and Python 2.16.0, server 2.15.1 | Seven groups passed, including deliberate limitation checks. Ninety-six sequential calls reached both implementations of the shared endpoint; this is not fairness or load evidence. Timeout did not cancel the Python handler; JS stop returned before an untracked async callback completed |
+| Dapr 1.18.7 and a standard Go gRPC endpoint | Fourteen groups passed. Remote unary retry/timeout policies worked, but same-app calls bypassed them. Four transparent gRPC handlers ran despite `app-max-concurrency=1`. Alpha SQLite discovery was a scoped fixture; the separate loopback mDNS attempt did not demonstrate two-replica distribution |
+| Independent Astra counterexamples | Connect shutdown signal alone admitted a new handler after abort; the public `requestGate` hook rejected it in the control. Python NATS micro stop cancelled an active callback; core subscription drain waited. SDK and protocol paths need separate lifecycle qualification |
+
+The Connect and Dapr shutdown checks covered idle cleanup, not active-request
+drain. The retry checks observed one handler execution for a selected application
+Unavailable response; they do not prove mutation replay safety after a lost
+reply, connection failure, or restart. The NATS service implementations share
+one endpoint, not their complete method sets. Result-group counts are not
+comparable quality scores.
+
+The review also examined Dapr, NATS Services, Dubbo, Kratos, Kitex, go-micro,
+Encore, wasmCloud, and Service Weaver. Go-specific frameworks can be selected
+inside a future Go service behind standard gRPC; their own protocols and runtime
+models are not universal platform APIs. Encore and wasmCloud introduce broader
+build, execution, lifecycle, and persistence integration decisions. The retained
+research reports document exact release pins and the reasons for this shortlist.
+
 ### Inspected upstream evidence
 
 Inspection date: 2026-10-17. These are research pins, not installed dependencies
@@ -353,14 +434,18 @@ or product qualification results.
 | [Moleculer sidecar](https://github.com/moleculerjs/sidecar/blob/a2cc0ba6e3152e1bfc9f147bcce804fcd7fd3a8c/README.md) | Labels itself WIP; this proposal does not treat it as a qualified production bridge |
 | [Connect ES 2.2.0](https://github.com/connectrpc/connect-es/blob/378bb8fde1209afc3ab6a9b0aa97c00d0db58c24/README.md) and [Connect Go 2.0.1](https://github.com/connectrpc/connect-go/blob/f86de812094e37f7e975f969c8cc85818cbbc9d7/README.md) | Stable implementations of Connect, gRPC, and gRPC-Web; actual server, HTTP/2, toolchain, and proxy profiles remain explicit |
 | [Connect in-process transport](https://github.com/connectrpc/connect-es/blob/378bb8fde1209afc3ab6a9b0aa97c00d0db58c24/packages/connect/src/router-transport.ts) | Routes binary Connect through local handlers; message-size defaults are unbounded for product purposes and real network behavior is not exercised |
+| [Dapr standard gRPC invocation](https://docs.dapr.io/developing-applications/building-blocks/service-invocation/howto-invoke-services-grpc/) and [1.18.7 proxy policy selection](https://github.com/dapr/dapr/blob/b32a815fa2260983e181b95272ea555fe17d3895/pkg/messaging/grpc_proxy.go) | Ordinary gRPC endpoints can use the sidecar without a language-specific Dapr SDK. The actual local/remote path and policy configuration require qualification; the executed unary evidence is narrower than blanket documentation claims |
+| [Dapr self-hosted operation](https://docs.dapr.io/operations/hosting/self-hosted/self-hosted-overview/) | A sidecar is a separately managed process. Plain invocation does not require the adjacent actor, state, or pub/sub building blocks |
+| [Official NATS Services](https://docs.nats.io/learn/services/) and [JS 3.4.0 service implementation](https://github.com/nats-io/nats.js/blob/v3.4.0/services/src/service.ts) | Multiple official language SDKs, inspection, and queue routing are available. The explicit NATS wire profile and async lifecycle remain separate from gRPC and durable JetStream delivery |
 | [Moleculer Core NATS transporter](https://github.com/moleculerjs/moleculer/blob/c5a0d82b4fc4919fd8bb952a954f61d21ef5f247/src/transporters/nats.js) | Loads the monolithic `nats` package; dependency qualification remains necessary even without Channels |
 | [Channels 0.3.1 NATS adapter](https://github.com/moleculerjs/moleculer-channels/blob/16d6aec31c04b127b0c818d24f324e0235a82517/src/adapters/nats.js) | Uses push subscriptions and the monolithic NATS client; it is not the accepted shared durable pull-consumer profile without adaptation and qualification |
 
 ## Consequences
 
-- A declared private Node.js RPC group integrates Moleculer with its first
-  implementation and may remain in one production process. This trades bounded
-  early adapter work for avoiding a later framework retrofit at that boundary.
+- A declared portable group establishes its real contract with the first
+  implementation and may remain in one qualified production Host. The revised
+  recommendation separates that commitment from a conditional Node framework
+  and the leading Dapr candidate for distributed polyglot placement.
 - A schema does not select deployment: ordinary features retain local APIs, and
   public or independently language-neutral services retain Connect/gRPC.
 - Local composition remains simple; service extraction changes adapters and
@@ -374,6 +459,9 @@ or product qualification results.
   tenancy, workflow, or execution responsibilities. Library adoption, deployment
   readiness, language replacement, and capacity claims have separate evidence
   gates.
+- Standard protocols reduce consumer coupling but do not supply a complete
+  operating runtime. Every remote profile names its discovery, routing, identity,
+  admission, drain, and retry providers before claiming production readiness.
 
 ## Rejected alternatives
 

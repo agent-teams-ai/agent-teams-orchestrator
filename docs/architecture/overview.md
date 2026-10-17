@@ -232,8 +232,8 @@ owner of business state and cannot write context storage.
 A Get Modular entry or nested feature is a composition or semantic boundary,
 not automatically a network service. ADR-0104 and the
 [composition profile](composition-and-dependency-injection.md) define one
-construction authority and typed context handles. The candidate Moleculer role
-and portable private service contracts are recorded in
+construction authority and typed context handles. Portable private contracts,
+the initial local RPC recommendation, and Dapr/Moleculer alternatives are recorded in
 [ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md); that
 proposal does not authorize a second RPC or durable-delivery framework.
 

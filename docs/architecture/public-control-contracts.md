@@ -89,7 +89,7 @@ proposes a corresponding profile for capabilities that actually need an
 independent network or language boundary. It does not promote every feature,
 module, or application port into a Protobuf service, and it does not make public
 control messages the Published Language of an internal context. Its private RPC
-and Moleculer placement choices remain proposed; the public Protobuf, Buf, and
+and runtime placement choices remain proposed; the public Protobuf, Buf, and
 Connect decisions in ADR-0016 and ADR-0017 remain authoritative.
 
 For a selected portable capability, the proposal introduces its private schema

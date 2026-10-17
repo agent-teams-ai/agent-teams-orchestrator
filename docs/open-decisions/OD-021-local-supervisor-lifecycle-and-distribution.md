@@ -193,6 +193,11 @@ operation remain release gates. The complete evidence is in the
 - native PostgreSQL fixtures cover the selected wrapper's source-audit risks
   and the packaged OS/architecture, including recovery from an interrupted
   update without reinitializing existing data;
+- the [deeper launcher findings](OD-003-persistence-composition.md#deeper-launcher-and-helper-evidence-2026-10-17)
+  are closed for the selected integration: truthful structured outcomes despite
+  global hooks, generation-safe control and losing-contender cleanup, actual
+  platform custody, effective credential protection, and enforced helper/library
+  integrity after relocation; an extra launcher process alone is not custody;
 - every released PostgreSQL platform and capability satisfies the
   [packaged qualification matrix](../architecture/local-host-lifecycle.md#packaged-postgresql-qualification),
   with actual installed-package evidence on Windows and macOS and a verified
