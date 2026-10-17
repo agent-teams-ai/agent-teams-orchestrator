@@ -18,6 +18,9 @@ related:
   - architecture.eventing
   - architecture.public-control-contracts
   - architecture.sdk-transports
+  - domain.contexts.team-topology
+  - domain.contexts.execution-observation
+  - domain.contexts.agent-context
   - domain.contexts.human-notification
   - domain.contexts.workspace-registry
   - OD-011
@@ -36,9 +39,13 @@ The owner prefers integrating that adapter with the first selected private
 Node.js RPC capability, accepting bounded early integration work instead of
 deferring the framework decision until distributed deployment.
 
-Moleculer directly supports local and distributed Node.js services. That is a
-useful implementation option, but its packet protocol and service context are not
-the language-neutral API of this platform. A language rewrite necessarily changes
+Moleculer is a Node.js and TypeScript microservices framework, not only an RPC
+client. Its registry, discovery, load balancing, lifecycle, resilience,
+middleware, metrics, and tracing are the reusable infrastructure selected for
+these groups. The same service implementation can run locally or remotely;
+avoiding a later rewrite of this infrastructure is a principal reason to adopt it.
+Its packet protocol and service context are not the language-neutral API of this
+platform. A language rewrite necessarily changes
 the rewritten implementation; the intended portability guarantee protects its
 consumers, contracts, state ownership, and observable behavior.
 
@@ -71,36 +78,46 @@ features; an entry or nested feature does not itself justify a service. Record
 the owner, callable capability, state and transaction boundary, and execution
 placement before selecting its RPC or durable delivery mechanism.
 
-The earlier notification and workspace examples mean the following:
+The [planned service groups](../architecture/context-map.md#planned-service-groups)
+name the first product group and later opportunities using existing context
+owners. Team Topology's Agent and Team definitions and versioned roster are the
+first planned private Node.js group; the implemented subset begins with S3
+persistent Team creation and retrieval. `CheckTeamDraft` is one capability and
+an adapter fixture, not the product service boundary. Group selection neither
+creates a new bounded context nor expands the existing delivery slices.
 
-| Capability example | Existing semantic owner | What a separate worker could execute |
-|---|---|---|
-| Human notification delivery | Human Notification Management; strategic split accepted by ADR-0068, tactical model still under OD-026 | Presentation-channel work under the context's policy, intent, attempt evidence, and reconciliation |
-| Workspace materialization | Workspace Registry; discovery under OD-011, responsibility split fixed by ADR-0062 | Replaceable worktree, clone, snapshot, or remote-workspace mechanics behind an outbound port |
+The proposed default applies from the first implementation of a declared private
+Node.js group. Separate processes do not need to be justified at that point.
+Each call still names its real consumer, owner, state, and failure contract.
+Ordinary features, `.proto` files, and entity instances do not create services.
+Human notification delivery uses the existing durable pull-consumer profile
+unless a separate request/reply capability is justified. Workspace mechanics
+retain resource affinity and allocation/binding generations; balancing cannot
+substitute for access or custody. Hundreds of agents do not imply hundreds of
+brokers or independently deployed services.
 
-These are illustrative deployment boundaries, not accepted feature IDs, new
-bounded contexts, reserved worker packages, or proven Moleculer consumers. Human
-notification handlers can use the accepted JetStream profile's shared durable
-pull consumer and call their owning application port through the inbound adapter;
-they do not need Moleculer RPC solely to distribute deliveries. Source facts,
-human presentation policy, and Agent Attention retain their separate owners.
+### Use the framework's service infrastructure
 
-Workspace Registry retains allocation, binding generations, lifecycle, release,
-and cleanup reconciliation; AR retains runtime isolation. A remote materializer
-must respect machine placement, resource access, and the current allocation and
-binding generation. Generic balancing cannot send work to a machine that lacks
-the owned resources, and a transport timeout cannot authorize duplicate
-materialization or cleanup by a different owner.
+Thin adapters isolate framework types; they do not replace its mechanisms with
+product-maintained alternatives. The initial profile deliberately configures
+the applicable built-in facilities rather than relying on their defaults:
 
-The proposed default applies once the owner declares a real capability as a
-private Node.js RPC group. Its first implementation then includes the Moleculer
-adapter; separate processes do not need to be justified at that point. A reason
-for the boundary, its consumer, and its state owner are still required. Neither
-an ordinary feature nor the existence of a `.proto` file selects this profile.
-Workspace materialization is a candidate for that boundary after OD-011 resolves
-its first capability; this proposal does not reserve a worker package or claim
-that a current slice already requires independently scaled workers. Hundreds of
-agents do not imply hundreds of brokers or independently deployed services.
+| Facility | Planned use and ownership |
+|---|---|
+| Registry, action routing, discovery, and load balancing | Moleculer owns these mechanisms for the selected group. Local routing works from the first slice; remote discovery and balancing are configured when that placement is qualified. No parallel custom registry or RPC bus |
+| Service lifecycle and request tracking | Host owns the broker resource and calls its start/stop operations; Moleculer manages registered service readiness and bounded request drain. Set `skipProcessEventRegistration: true` so broker signal handlers do not become a second process-lifecycle owner |
+| Timeouts and bulkheads | Configure finite RPC deadlines and per-action concurrency and queue limits using the built-in middleware. Reject expired RPC admission and follow the owning operation's effect-deadline policy; a caller timeout does not cancel accepted durable work |
+| Circuit breakers and retries | Configure applicable dependency failure isolation with owned error classification. Automatic mutation retries stay off unless the idempotency contract permits them; no fallback may invent a successful product outcome |
+| Metrics, tracing, and middleware | Enable bounded operational telemetry and use the existing observability adapter profile for correlation, classification, and exporters. Wire validation and invocation mapping at the adapter; do not export payloads or unbounded tenant/entity labels |
+| Caching and core events | Use only for explicitly disposable, authorized data or signals. Cache scope and invalidation belong to the capability; durable work remains on JetStream |
+
+Framework limits bound an action or broker, not total tenant fairness, database
+connections, or AR execution capacity. Compose them with the existing owners'
+budgets rather than inventing a second global scheduler. Local preference is a
+routing optimization, not data ownership or proof of balanced replica traffic.
+The first production profile proves overload rejection and drain as well as
+successful calls. Existing in-flight durable work remains recoverable after drain
+times out.
 
 ### Initial Node.js RPC deployment profile
 
@@ -129,6 +146,9 @@ service identity, network failures, resource placement, and recovery obligations
 that a local deployment cannot qualify. The same application port and consumer
 contract survive; zero deployment work or zero implementation changes are not
 promised. No distributed transporter is selected by the local default.
+Moleculer routes calls among available instances; the deployment platform starts
+and scales those instances. Broker discovery is not an autoscaler or AR's
+execution-capacity authority.
 
 ### Preserve portable contracts
 
@@ -236,22 +256,36 @@ Qualification follows the scope being materialized or claimed. A narrow Node.js
 slice does not require a language rewrite or a hundreds-of-agents benchmark
 before it can proceed through its existing implementation gates.
 
-Use the existing S2
-[`CheckTeamDraft` slice](../domain/contexts/team-topology/README.md#first-development-slice)
-as the first real adapter pilot. Team Topology owns the application input port;
-the first slice names its concrete interface. One Host-assembled implementation
-supplies the behavior fixtures. Qualify the public Connect adapter separately
-from an initial local Moleculer facade over that capability. The public path also
-exercises real HTTP between two processes under its existing contract profile.
-Both adapters preserve the same owned application behavior and typed diagnostics.
+Keep the existing S1/S2
+[`CheckTeamDraft` slices](../domain/contexts/team-topology/README.md#first-development-slice)
+as the module and public Protobuf/Connect proof. The public path exercises real
+HTTP between two processes under its existing contract profile. The checker may
+supply a small private adapter fixture; S2 does not require a product Moleculer
+service or a new deployment. The disposable experiment below is also an adapter
+proof, not the first delivered product group.
 
-A public Connect edge may call the selected private Moleculer capability through
-an owned port. Those are distinct boundaries; this does not make both frameworks
-mandatory transports for the same private RPC. The pilot adds neither a business
-feature nor a separate deployed service, and does not claim that draft checking
-needs its own worker fleet. Its side-effect-free behavior does not prove mutation
-recovery. The first state-changing portable capability separately demonstrates
-idempotency, unknown outcomes, and recovery under its owning contract.
+The first product integration is Team Topology's declared private group with
+S3 persistent Team create/get/list. Later owned Agent, version, roster, clone,
+and template capabilities may join that group as their slices are delivered.
+This does not add them to S3 or freeze unimplemented methods in a `.proto` file.
+Team Topology owns its application ports; Get Modular constructs the actual
+implementations once. The public Connect edge reaches the selected private
+group through typed ports and its local Moleculer client adapter. S4 Run
+`team-activation` is a separate consumer through its own outbound port and ACL,
+never a direct import of Team implementation or tables.
+
+The public and private edges are distinct boundaries. They do not require two
+transports for the same private hop, and public wire models need not equal the
+private models. Within the group, ordinary feature calls remain local typed
+collaboration. Agent assignment uniqueness, immutable Team versions, ETag/CAS,
+command receipt, and required outbox writes retain one Team Topology transaction;
+Run admission and AR execution remain outside it.
+
+The first state-changing subset qualifies concurrent assignment conflicts where
+applicable, stale revisions, commit followed by lost reply, and restart plus
+lookup of the original command result. Pure checker fixtures cannot supply that
+evidence. OD-006, OD-011, the public-contract decisions, and implementation
+readiness still govern the exact subset; the group plan does not close them.
 
 | Stage | Required evidence |
 |---|---|
@@ -311,6 +345,8 @@ or product qualification results.
 | Source | Evidence relevant to this proposal |
 |---|---|
 | [Moleculer 0.15 guidance](https://moleculer.services/docs/0.15/index.html) | Supports modular-monolith deployment; identifies Node.js as the first-class ecosystem and other-language implementations as third-party |
+| [Moleculer lifecycle](https://moleculer.services/docs/0.15/lifecycle.html) and [0.15.2 broker defaults](https://github.com/moleculerjs/moleculer/blob/c5a0d82b4fc4919fd8bb952a954f61d21ef5f247/src/service-broker.js) | Built-in signal handling can exit the process; tracking, bulkheads, metrics, and tracing require deliberate configuration. Host composition retains process ownership |
+| [Moleculer 0.15.2 bulkhead](https://github.com/moleculerjs/moleculer/blob/c5a0d82b4fc4919fd8bb952a954f61d21ef5f247/src/middlewares/bulkhead.js) | `maxQueueSize: 0` skips the queue-size check in this pin; it is not immediate rejection. A bounded queue needs a positive configured limit and overload evidence |
 | [Moleculer 0.15.2](https://github.com/moleculerjs/moleculer/blob/c5a0d82b4fc4919fd8bb952a954f61d21ef5f247/CHANGELOG.md) | Uses protocol v5; 0.15 removed ProtoBuf, Avro, and Thrift serializers from core. A serializer is not a gRPC protocol implementation |
 | [Moleculer Go version](https://github.com/moleculer-go/moleculer/blob/60212c60d627433b409a5a4b9f6f1ad6b25b1a77/version/version.go) | The inspected implementation declares protocol v4; interoperability with JS 0.15 cannot be assumed |
 | [Moleculer Java](https://github.com/moleculer-java/moleculer-java/blob/dddb4bbde930b24b89ac9f70de9a616bf6a92340/README.md) | Declares v5 / JS 0.15 compatibility; other-language integration is possible but still requires the selected capability's conformance evidence |

@@ -516,6 +516,11 @@
       "id": "ADR-0107",
       "path": "docs/decisions/0107-jetstream-sdk-for-durable-delivery.md",
       "immutableDigest": "sha256:44982f580369788563550c22a97a3c9add5254aa965f4c9806e6aa352e4147a8"
+    },
+    {
+      "id": "ADR-0108",
+      "path": "docs/decisions/0108-bundled-postgresql-launcher-integration.md",
+      "immutableDigest": "sha256:3544a1920da7216e564f2e27340d238d96f0883b5ffbcb525d3f24c7651851cf"
     }
   ]
 }

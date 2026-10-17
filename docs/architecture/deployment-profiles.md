@@ -15,6 +15,7 @@ related:
   - ADR-0091
   - ADR-0093
   - ADR-0106
+  - ADR-0108
   - architecture.local-host-lifecycle
   - architecture.sdk-transports
   - architecture.security
@@ -143,8 +144,11 @@ there is no database per client, project, or agent. Components are independently
 signed and lifecycle-managed; unused local infrastructure is not started merely
 because Desktop is installed.
 
-ADR-0106 selects the database strategy without choosing a Desktop framework or
-qualifying a launcher dependency. ADR-0087 still excludes this implementation
+ADR-0106 selects the database strategy; ADR-0108 selects `embedded-postgres`
+behind the Supervisor component adapter. Neither selects a Desktop framework or
+qualifies an exact launcher dependency. The [packaged PostgreSQL matrix](local-host-lifecycle.md#packaged-postgresql-qualification)
+requires evidence for each released platform and capability, including actual
+restore. ADR-0087 still excludes this implementation
 from V1, and OD-040 remains the separate package-materialization gate. OD-035
 names OpenWorkflow as the preferred local workflow spike candidate, now requiring
 its PostgreSQL backend. Deferral cannot change public resource, persistence port,

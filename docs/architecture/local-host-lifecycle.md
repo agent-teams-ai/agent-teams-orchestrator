@@ -12,6 +12,7 @@ related:
   - ADR-0090
   - ADR-0093
   - ADR-0106
+  - ADR-0108
   - ADR-0064
   - ADR-0035
   - ADR-0058
@@ -299,14 +300,14 @@ Bootstrap and custody enforce these rules:
   termination as unclean shutdown requiring crash recovery, and reconcile a
   timeout before starting another process.
 
-The first Node candidate is `embedded-postgres`; a Rust lifecycle substrate may
-instead qualify `postgresql_embedded`. Neither is a production-approved wrapper.
-Qualification covers private bootstrap password files and crash cleanup,
-readiness beyond stderr, child-process errors and already-exited children,
-timeouts, wrapper exit hooks, Windows graceful shutdown, persistent-data
-settings, and binary-cache version verification. Product custody cannot depend
-on the Desktop lifetime or unqualified wrapper defaults. ADR-0106 records the
-candidate evidence; OD-021 owns the selected implementation contract.
+[ADR-0108](../decisions/0108-bundled-postgresql-launcher-integration.md) selects
+`embedded-postgres` behind the Supervisor's PostgreSQL component adapter. The
+Supervisor consumes narrow lifecycle capabilities and typed outcomes; wrapper
+classes, process handles, and defaults do not escape that adapter. Exact
+production wrapper and engine artifacts remain subject to OD-003 and OD-021.
+Product custody cannot depend on the Desktop lifetime or unqualified wrapper
+defaults. Qualification must close the reproduced stop-after-exit failure,
+including the package's global exit hook, not only the guarded common test path.
 
 Host activation, context schema migration, and PostgreSQL engine upgrade are
 separate transitions. Candidate health checks cannot migrate a shared live
@@ -328,6 +329,32 @@ The [persistence boundary](persistence-boundary.md#backup-and-restore) owns back
 manifests, context validation, and reconciliation before restored dispatch.
 Neither the Supervisor nor a wrapper repairs business tables or substitutes a
 second authoritative database when PostgreSQL is unavailable.
+
+### Packaged PostgreSQL qualification
+
+Release evidence binds the exact application, Host, launcher, actual engine,
+helper binaries, configuration, OS version, and architecture. Every advertised
+platform tuple must pass the applicable rows below. Windows and macOS require
+their own installed-package evidence; Linux launcher experiments and unrelated
+Local Host Control CI do not qualify PostgreSQL on those platforms.
+
+| Released capability | Required evidence | Qualification owner |
+|---|---|---|
+| Installation and offline use | Actual installable package, exact payload digests, executable/helper/native-library layout, safe extraction, signing and macOS notarization, and typed rejection when OS quarantine or security software blocks launch. First start and persistent reopen require no engine download | OD-021 |
+| Bootstrap and authenticated readiness | New private root only; credential-file permissions and Windows ACLs, removal after success/failure/crash, protected endpoint, collision and foreign-cluster rejection, authenticated SQL identity, actual version, and effective durability settings before Host readiness | OD-021 and OD-003 |
+| Lifecycle and process custody | Concurrent ensure, spawn failure, startup hang, already-exited children, wrapper/global exit hooks, bounded graceful shutdown on each platform, classified unclean termination, and Supervisor death with a surviving database process without a second owner | OD-021 |
+| Application/Host and schema updates | Separate transition records, declared compatibility, no live-schema migration during candidate health checks, drain and fencing of old clients/dispatchers, interruption at each supported stage, and rollback only against compatible current data without losing later accepted writes | OD-021 and OD-003 |
+| Engine minor and major upgrades | Exact source/target payload and extension/collation/configuration compatibility; engine changes separate from app or wrapper version changes; recovery after interrupted supported transitions; verified backup and explicit irreversible boundary for incompatible changes; rejection of unsupported paths | OD-021 and OD-003 |
+| Backup and restore | Create the selected backup artifact and restore it into a clean isolated root. Validate manifests, integrity, required context schemas and migration checksums, receipts/outbox, blobs, and key access. Reject corrupt, incomplete, or incompatible sets; validate before activation and fence dispatch until fresh authority and reconciliation | OD-003 and owning persistence/context adapters |
+| Failure and controlled recovery | Interrupted initialization, update, and restore; disk exhaustion, damaged or unavailable files, and actionable degraded outcomes without deleting or reinitializing existing data. Test the supported recovery procedure; process-kill evidence does not replace power-loss or filesystem durability evidence | OD-021 and OD-003 |
+
+These are release requirements for the corresponding platform and capability,
+not completed qualification or a newly implemented CI checker. OD-039 and the
+existing deployment attestation process govern the actual evidence binding.
+An initial implementation may omit automatic updates; every shipped update or
+upgrade path passes its own rows before release. This does not require all
+future update features before an initial implementation or disposable experiment.
+OD-040 remains the separate materialization decision.
 
 ## Lifecycle invariants
 

@@ -14,6 +14,7 @@ related:
   - ADR-0051
   - ADR-0052
   - ADR-0106
+  - ADR-0108
   - OD-021
   - architecture.persistence
   - research.cross-dialect-persistence-tooling-2026-07-26
@@ -43,30 +44,27 @@ and microsecond mappings apply through its PostgreSQL column. ADR-0050's real
 concurrency evidence now applies to both profiles.
 
 Native local PostgreSQL does not resolve lifecycle or production readiness.
-Node `embedded-postgres` is the first qualification candidate for a Node
-lifecycle substrate; Rust `postgresql_embedded` is considered only after an
-independent Rust substrate choice. Exact wrapper and engine artifacts, signing,
-offline packaging, persistent durability, and operational behavior require
-qualification. The Desktop framework and production wrapper dependency remain
-unselected. The existing server-first release and local materialization gates
-are unchanged.
+ADR-0108 selects Node `embedded-postgres` behind the Local Supervisor component
+adapter. Exact wrapper and engine artifacts, signing, offline packaging,
+persistent durability, and operational behavior remain subject to qualification.
+The Desktop framework and exact production dependency remain unselected. The
+existing server-first release and local materialization gates are unchanged.
 
 Current semantics live in the [persistence boundary](../architecture/persistence-boundary.md).
 The [managed PostgreSQL lifecycle](../architecture/local-host-lifecycle.md#managed-postgresql-lifecycle)
 owns process custody, bootstrap credentials, identity, shutdown, and activation;
 this decision and OD-021 supply their remaining implementation evidence.
 
-## Proposed launcher qualification, 2026-10-17
+## Selected launcher and remaining qualification, 2026-10-17
 
-`embedded-postgres` remains the first qualification candidate under ADR-0106
-for the existing Node Local Supervisor. The supplied executable evidence
-supports that order; later source review identifies requirements still to close,
-not a demonstrated production advantage for a replacement. The separate
-comparison below establishes a tested Linux direct-tools contingency and one
-wrapper shutdown limitation. Standard PostgreSQL tools behind the same component
-adapter remain available if maintained wrapper fixes cannot satisfy its lifecycle.
-This comparison selects no production
-dependency, Desktop framework, or new lifecycle substrate.
+The product owner selected the `embedded-postgres` integration approach in
+ADR-0108 after reviewing the supplied evidence and the separate comparison
+below. That comparison establishes a tested Linux direct-tools contingency and
+one wrapper shutdown limitation, not an overall production advantage for a
+replacement. Standard PostgreSQL tools remain an explicit contingency within
+the same component boundary if maintained wrapper fixes cannot satisfy its
+contract. The choice does not select an exact production dependency, Desktop
+framework, or new lifecycle substrate.
 
 ### Supplied executable evidence
 
@@ -157,12 +155,14 @@ The Node scores retain the supplied report's planning assessment. The Rust fit
 score reflects the additional substrate choice, not a lower package quality.
 The direct adapter now has a bounded Linux implementation and evidence; its
 scores remain provisional estimates for the missing product integration.
-Table order is qualification priority, not production adoption. Every option
-still requires the accepted lifecycle and recovery evidence.
+The first approach is now selected by ADR-0108; the scores remain planning
+judgments, not qualification evidence. The other rows are contingencies, not
+parallel implementations. Every option requires the accepted lifecycle and
+recovery evidence before release.
 
 | Qualification role | Option | Confidence | Reliability | Complexity |
 |---|---|---|---|---|
-| First Node candidate | `embedded-postgres` with a small hardened adapter and maintained upstream fixes | 8/10 | 7/10 | 6/10 |
+| Selected Node approach; qualification pending | `embedded-postgres` with a small hardened adapter and maintained upstream fixes | 8/10 | 7/10 | 6/10 |
 | Tested Linux contingency for wrapper limitations | Node Supervisor adapter using `initdb`, foreground `postgres`, and `pg_ctl` with existing binary artifacts | 7/10 | 7/10 | 6–7/10, provisional |
 | Conditional alternative | `postgresql_embedded` after an independent Rust substrate decision | 5/10 | 8/10 | 8/10 |
 
@@ -220,8 +220,8 @@ must itself create a protected bootstrap password file before invoking
 data, and verify the effective durability settings required by persistence.
 
 The bounded next qualification checks the Node wrapper against the remaining
-lifecycle requirements in disposable data roots on Windows and a supported
-POSIX platform. Reuse the same-payload evidence above for its exact Linux inputs;
+lifecycle requirements in disposable data roots on Windows, macOS, and every
+other advertised platform tuple. Reuse the same-payload evidence above for its exact Linux inputs;
 do not rerun it as a substitute for closing the untested lifecycle cases.
 Qualify offline restart, bootstrap-file access and failed-initialization cleanup,
 foreign database identity, spawn failures, startup hangs, idempotent stop after
@@ -230,6 +230,10 @@ Record actual binary hashes and SQL settings for each qualified platform.
 Keep the wrapper only if supported APIs and small maintained fixes satisfy the
 contract; otherwise qualify direct tools. This experiment neither proves power-loss
 durability nor replaces packaging, backup, upgrade, or workload qualification.
+The [packaged PostgreSQL matrix](../architecture/local-host-lifecycle.md#packaged-postgresql-qualification)
+makes those checks mandatory for the corresponding release. Backup evidence
+includes an actual restore into a clean isolated root and validation before
+activation; creation of a dump file alone is insufficient.
 
 ## Decision evidence
 

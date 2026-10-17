@@ -9,6 +9,7 @@ related:
   - ADR-0047
   - ADR-0025
   - ADR-0106
+  - ADR-0108
   - ADR-0052
   - ADR-0046
   - ADR-0048
@@ -224,13 +225,14 @@ validation. Desktop and the SDK own neither responsibility. The
 [Local Host lifecycle](local-host-lifecycle.md#managed-postgresql-lifecycle)
 defines bootstrap, authentication, process custody, and activation safeguards.
 
-For a Node lifecycle substrate, `embedded-postgres` is the first qualification
-candidate. `postgresql_embedded` is considered only when a Rust lifecycle
-substrate is independently selected. Neither choice selects the Desktop shell,
-introduces Rust solely for a library score, or replaces the TypeScript Host.
-The 2026-10-03 candidate versions recorded by ADR-0106 are evidence pins, not
-production-approved dependencies. Only one launcher implementation is maintained
-by default.
+[ADR-0108](../decisions/0108-bundled-postgresql-launcher-integration.md) selects
+`embedded-postgres` behind the Node Supervisor's component adapter. It neither
+selects the Desktop shell nor replaces the TypeScript Host. Exact wrapper,
+engine, and platform artifacts remain unselected until qualification; the
+2026-10-03 and 2026-10-17 research versions are evidence pins. Only one launcher
+implementation is maintained by default. The [packaged qualification matrix](local-host-lifecycle.md#packaged-postgresql-qualification)
+binds platform, lifecycle, update, and verified-restore evidence to each released
+capability; PostgreSQL persistence semantics remain with the existing owners.
 
 Persistent data is explicit. Startup verifies the effective `fsync=on`,
 `full_page_writes=on`, and `synchronous_commit=on` configuration as well as engine

@@ -228,12 +228,14 @@ failures. Switching to a network transport preserves the contract while adding
 those deployment obligations. The same RPC path does not require a Moleculer
 facade in addition to Connect.
 
-The accepted JetStream profile supports scaling Human Notification delivery
-handlers through a shared durable consumer. Workspace Registry materialization
-may need a separate worker with resource affinity and allocation-generation
-checks. These are capability placement examples, not declared feature IDs, Get Modular entries,
-new applications, or by themselves a reason to add Moleculer. Their contexts keep state,
-admission, receipts, and business behavior; AR keeps execution ownership.
+The [planned service groups](context-map.md#planned-service-groups) distinguish
+Team Topology's first product integration from the smaller checker fixture and
+later Observation, Agent Context, and Workspace opportunities. The registry,
+routing, service lifecycle, resilience, and telemetry come from Moleculer's
+built-in mechanisms under the [framework profile](../decisions/0105-portable-service-boundaries-and-moleculer.md#use-the-frameworks-service-infrastructure).
+Typed adapters preserve the owned contract without implementing another RPC bus.
+JetStream still delivers durable work directly to its owner; AR retains execution
+ownership.
 
 A common Protobuf schema alone does not make a plain gRPC server serve the
 Connect protocol. A private caller using gRPC can keep that transport when a

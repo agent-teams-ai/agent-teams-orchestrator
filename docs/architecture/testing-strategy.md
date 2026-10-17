@@ -395,13 +395,18 @@ Local lifecycle integration also verifies:
   rejection of project-controlled endpoint or trust overrides.
 
 Native PostgreSQL packaging and lifecycle tests follow the
-[managed PostgreSQL lifecycle](local-host-lifecycle.md#managed-postgresql-lifecycle).
+[managed PostgreSQL lifecycle](local-host-lifecycle.md#managed-postgresql-lifecycle)
+and its [release qualification matrix](local-host-lifecycle.md#packaged-postgresql-qualification).
 They cover signed offline first start and persistent reopen, concurrent ensure,
 port collision, foreign-cluster rejection, interrupted initialization,
 Supervisor death with a surviving database process, effective durability
 configuration, bootstrap credential-file permissions and crash cleanup,
 child-process errors, bounded graceful and forced shutdown, and each supported
 OS/architecture. Verify actual bundled engine identity as well as wrapper version.
+Windows and macOS require tests of the installed package; Local Host Control CI
+does not exercise the PostgreSQL component. Backup tests restore into a clean
+isolated root and validate the complete required set before activation, rather
+than accepting backup-file creation as successful recovery.
 Process-kill evidence does not qualify power-loss or filesystem durability.
 
 Update fixtures separate Host replacement, context schema migration, and engine

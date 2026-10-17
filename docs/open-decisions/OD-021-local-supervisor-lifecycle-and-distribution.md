@@ -11,6 +11,7 @@ related:
   - ADR-0060
   - ADR-0064
   - ADR-0106
+  - ADR-0108
   - architecture.local-host-lifecycle
   - OD-001
   - OD-003
@@ -22,7 +23,7 @@ related:
 ## Decision required
 
 Define the implementation-level lifecycle and distribution contract beneath
-ADR-0060, ADR-0064, ADR-0035, ADR-0058, and ADR-0106 without changing their ownership
+ADR-0060, ADR-0064, ADR-0035, ADR-0058, ADR-0106, and ADR-0108 without changing their ownership
 boundaries.
 
 ## Constraints
@@ -77,8 +78,9 @@ package materialization.
     interruption-safe initialization, authenticated SQL identity, port selection,
     credential-file handling, Supervisor death with surviving database children,
     graceful and forced shutdown, actual binary version verification, and
-    compatibility across Host, schema, and engine updates. The first Node wrapper
-    remains a qualification candidate, not an approved production dependency.
+    compatibility across Host, schema, and engine updates. ADR-0108 selects
+    `embedded-postgres` behind the component adapter; its exact production
+    version, artifacts, and lifecycle integration remain to be qualified.
 13. PostgreSQL recovery authority and dispatch reconciliation with OD-003:
     restored epochs cannot establish fresh authority by themselves, binary
     rollback cannot discard accepted writes, and an absent restored receipt
@@ -191,6 +193,10 @@ operation remain release gates. The complete evidence is in the
 - native PostgreSQL fixtures cover the selected wrapper's source-audit risks
   and the packaged OS/architecture, including recovery from an interrupted
   update without reinitializing existing data;
+- every released PostgreSQL platform and capability satisfies the
+  [packaged qualification matrix](../architecture/local-host-lifecycle.md#packaged-postgresql-qualification),
+  with actual installed-package evidence on Windows and macOS and a verified
+  clean-root restore; Linux launcher tests do not substitute for those results;
 - qualification distinguishes process liveness, authenticated SQL readiness,
   storage compatibility, and controlled recovery.
 

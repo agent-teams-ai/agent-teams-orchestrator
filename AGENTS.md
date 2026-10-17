@@ -121,7 +121,12 @@ before a high-cost boundary violation.
   durable handler without deriving services from nested features. Use owned
   ports, not a generic service locator; the [Moleculer placement proposal](docs/decisions/0105-portable-service-boundaries-and-moleculer.md)
   plans its first adapter with a declared private Node.js RPC group, initially
-  in one process. A `.proto` file alone does not select Moleculer; public and
+  in one process. Follow the [planned groups](docs/architecture/context-map.md#planned-service-groups):
+  Team Topology's S3 product group is distinct from the S1/S2 checker fixture.
+  Every action names its group, real consumer, and request/reply or durable
+  semantics. Use the framework's registry, routing, lifecycle, resilience, and
+  telemetry mechanisms through typed adapters; do not rebuild them in a generic
+  abstraction. A `.proto` file alone does not select Moleculer; public and
   independently language-neutral boundaries retain Connect/gRPC. The proposal
   is not production qualification.
 - Define each application's input port and narrow trusted invocation profile
@@ -133,7 +138,11 @@ before a high-cost boundary violation.
   hosted profiles. Reuse the PostgreSQL adapter family and context-owned
   migrations; keep local process and distribution management behind the Local
   Supervisor boundary. Desktop chooses a Target and uses its Host API, never
-  direct SQL or a second authoritative local fallback.
+  direct SQL or a second authoritative local fallback. [ADR-0108](docs/decisions/0108-bundled-postgresql-launcher-integration.md)
+  selects `embedded-postgres` behind the Supervisor component adapter. Exact
+  artifacts and every released platform/capability require the [packaged PostgreSQL qualification](docs/architecture/local-host-lifecycle.md#packaged-postgresql-qualification),
+  including Windows/macOS packaging and verified restore. Library selection and
+  unrelated platform CI are not that evidence.
 - The Local Supervisor manages local component availability only. It contains no
   orchestration domain and does not proxy normal public control traffic.
 - SDKs contain contract, transport, and client ergonomics, never orchestration

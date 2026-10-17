@@ -22,7 +22,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 | Feature and dependency boundaries | `ADR-0012`, `ADR-0038`, `ADR-0075`, `ADR-0095`, `ADR-0096`, `ADR-0097`, `ADR-0103`, `ADR-0104` | [Feature profile](../architecture/feature-module-standard.md), [dependency rules](../architecture/dependency-rules.md), [extension points](../architecture/extension-points.md) |
 | Runtime ownership and AR integration | `ADR-0003`, `ADR-0028`, `ADR-0069`, `ADR-0079`, `ADR-0080`, `ADR-0083`, `ADR-0084`, `ADR-0085`, `ADR-0089`, `ADR-0092`, `ADR-0094` | [Runtime boundary](../architecture/runtime-boundary.md), [Execution Observation](../domain/contexts/execution-observation/README.md) |
 | Eventing, delivery, and replay | `ADR-0004`, `ADR-0010`, `ADR-0019`, `ADR-0035`, `ADR-0107` | [Eventing and reliability](../architecture/eventing-and-reliability.md) |
-| Persistence, migrations, and exact values | `ADR-0025`, `ADR-0046`, `ADR-0050`, `ADR-0052`, `ADR-0078`, `ADR-0106` | [Persistence boundary](../architecture/persistence-boundary.md), [testing](../architecture/testing-strategy.md) |
+| Persistence, migrations, and exact values | `ADR-0025`, `ADR-0046`, `ADR-0050`, `ADR-0052`, `ADR-0078`, `ADR-0106`, `ADR-0108` | [Persistence boundary](../architecture/persistence-boundary.md), [testing](../architecture/testing-strategy.md) |
 | Public contracts and SDK | `ADR-0016`, `ADR-0019`, `ADR-0036`, `ADR-0037`, `ADR-0058`, `ADR-0067`, `ADR-0071`, `ADR-0077`, `ADR-0086` | [SDK and transports](../architecture/sdk-and-transports.md), [public contracts](../architecture/public-control-contracts.md) |
 | Local and hosted composition | `ADR-0030`, `ADR-0058`, `ADR-0060`, `ADR-0064`, `ADR-0087`, `ADR-0088`, `ADR-0090`, `ADR-0093`, `ADR-0097` | [Deployment profiles](../architecture/deployment-profiles.md), [Local Host lifecycle](../architecture/local-host-lifecycle.md), [composition](../architecture/composition-and-dependency-injection.md) |
 | Workflow and migration | `ADR-0027`, `ADR-0029`, `ADR-0063`, `ADR-0065`, `ADR-0099` | [Extension points](../architecture/extension-points.md), [migration boundary](../architecture/migration-boundary.md) |
@@ -44,6 +44,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0104: Get Modular 0.5 Static Composition](0104-get-modular-0-5-static-composition.md)
 - [ADR-0106: Native PostgreSQL for Local and Hosted Profiles](0106-native-postgresql-for-local-and-hosted-profiles.md)
 - [ADR-0107: JetStream SDK for Durable Delivery](0107-jetstream-sdk-for-durable-delivery.md)
+- [ADR-0108: Bundled PostgreSQL Launcher Integration](0108-bundled-postgresql-launcher-integration.md)
 - [ADR-0083: Orchestrator assurance intent and AR containment ownership](0083-orchestrator-assurance-intent-and-ar-containment-ownership.md)
 - [ADR-0001: Headless event-driven modular monolith](0001-headless-event-driven-modular-monolith.md)
 - [ADR-0003: Runtime lifecycle belongs to ar](0003-ar-owns-runtime-lifecycle.md)
