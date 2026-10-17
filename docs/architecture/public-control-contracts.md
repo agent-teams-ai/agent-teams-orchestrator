@@ -16,6 +16,7 @@ related:
   - ADR-0071
   - ADR-0065
   - ADR-0067
+  - ADR-0105
   - OD-016
   - OD-019
   - architecture.security
@@ -74,6 +75,22 @@ Contracts follow ADR-0017. In particular:
 - artifacts replace large inline data.
 
 Machine linting enforces the profile. Generated code is never hand-edited.
+
+### Service implementation portability
+
+The public API is independent of the implementation language and deployment
+layout behind it. Get Modular module identities, Moleculer action names, broker
+node identities, and framework contexts do not become public resource names,
+operation identities, or request fields. A replacement implementation preserves
+the published schema and behavior through explicit boundary mappers.
+
+[ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
+proposes a corresponding profile for capabilities that actually need an
+independent network or language boundary. It does not promote every feature,
+module, or application port into a Protobuf service, and it does not make public
+control messages the Published Language of an internal context. Its private RPC
+and Moleculer placement choices remain proposed; the public Protobuf, Buf, and
+Connect decisions in ADR-0016 and ADR-0017 remain authoritative.
 
 ## Exact-value profile
 

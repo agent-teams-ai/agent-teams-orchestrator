@@ -202,12 +202,59 @@ test("projection rejects omission and source or standard drift", async () => {
     (value) => { value.modules = []; },
     (value) => { value.modules[0].sourceRoot = `${moduleRoot}/missing`; },
     (value) => { value.standard.sha256 = "0".repeat(64); },
+    (value) => { value.standard.version = "v1.1"; },
   ]) {
     await fixture(async (root) => {
       const topology = await readJson(root, QUALITY_TOPOLOGY_PATH);
       mutate(topology);
       await writeJson(root, QUALITY_TOPOLOGY_PATH, topology);
       await assert.rejects(checkQualityTopology(root), /projection has drifted/u);
+    });
+  }
+});
+
+test("flat reader projection remains bounded to the adopted v1.1 profile", async () => {
+  const authorityPath = "architecture/feature-module-standard-profile.json";
+  const authority = await readJson(repositoryRoot, authorityPath);
+  const projection = await readJson(repositoryRoot, QUALITY_TOPOLOGY_PATH);
+  assert.equal(authority.standard.version, "v1.1");
+  assert.equal(projection.standard.version, "v1");
+  assert.deepEqual(projection.productionRoots, authority.adoption.scope.production_roots);
+  assert.deepEqual(projection.excludedRoots, authority.adoption.scope.excluded_roots);
+  for (const [key, value] of [
+    ["version", "v1"],
+    ["path", "docs/architecture/feature-module-standard/unknown.md"],
+    ["sha256", "0".repeat(64)],
+  ]) {
+    await fixture(async (root) => {
+      const changed = await readJson(root, authorityPath);
+      changed.standard[key] = value;
+      await writeJson(root, authorityPath, changed);
+      await assert.rejects(checkQualityTopology(root), /requires the exact accepted FMS v1\.1 authority/u);
+    });
+  }
+});
+
+test("flat reader projection rejects declared or materialized v1.1 constructs", async () => {
+  for (const name of ["sub_features", "republications", "composition_contracts", "activation"]) {
+    await fixture(async (root) => {
+      const authorityPath = "architecture/feature-module-standard-profile.json";
+      const authority = await readJson(root, authorityPath);
+      authority.adoption.constructs[name] = name === "activation" ? "active" : [{ feature: "parent/child" }];
+      await writeJson(root, authorityPath, authority);
+      await assert.rejects(checkQualityTopology(root), /must remain empty|remain blocked/u);
+    });
+  }
+  for (const [source, expected] of [
+    ["features/host-discovery/features/child/application/execute.ts", /sub-feature materialization/u],
+    ["features/host-discovery/composition/host-discovery.contracts.ts", /composition contracts/u],
+    ["composition/host.contracts.ts", /composition contracts/u],
+  ]) {
+    await fixture(async (root) => {
+      const path = join(root, moduleRoot, "src", source);
+      await mkdir(dirname(path), { recursive: true });
+      await writeFile(path, "export const value = 1;\n");
+      await assert.rejects(checkQualityTopology(root), expected);
     });
   }
 });

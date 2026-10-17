@@ -7,6 +7,7 @@ summary: Select and qualify a lightweight durable workflow engine for a future f
 related:
   - ADR-0027
   - ADR-0030
+  - ADR-0106
   - architecture.implementation-readiness-gates
   - architecture.local-host-lifecycle
   - domain.contexts.run-orchestration
@@ -34,7 +35,7 @@ an accidental in-memory scheduler in application code.
   durable execution mechanics only.
 - Local and hosted engines drive the same commands and observable business
   outcomes through engine-independent fixtures.
-- SQLite local operation must survive process crash, restart, duplicate wake-up,
+- Native PostgreSQL local operation must survive process crash, restart, duplicate wake-up,
   cancellation, timer expiry, and code upgrade.
 - No external service, Docker installation, or manual database setup is required
   for the future fully local Desktop profile.
@@ -49,10 +50,16 @@ and PostgreSQL backends, and implements durable steps, retries, signals, timers,
 child workflows, cancellation, idempotency keys, and workflow versioning without
 a separate workflow server.
 
-It is not yet an accepted production dependency. The project is young, its
-published roadmap still lists priority and concurrency controls, compensation,
-cron, and OpenTelemetry as future work, manual retry and retention remain open,
-and its upstream CI does not currently prove Windows behavior.
+That dated inventory remains evidence, not a current dependency-readiness review.
+ADR-0106 requires the future local adapter to qualify the PostgreSQL backend;
+SQLite support does not authorize a second local persistence engine. Scheduler
+storage remains adapter-owned and cannot write business schemas or join a
+bounded-context Unit of Work.
+
+It is not yet an accepted production dependency. At that research date, its
+published roadmap listed priority and concurrency controls, compensation, cron,
+and OpenTelemetry as future work, manual retry and retention remained open,
+and its upstream CI did not prove Windows behavior.
 
 ## Qualification spike
 
@@ -65,7 +72,8 @@ consumer-owned workflow scheduling ports and proves:
 4. long timer recovery and clock discontinuity handling;
 5. ambiguous activity outcome without blind side-effect retry;
 6. worker lease loss, stale worker fencing, and orphan recovery;
-7. SQLite busy, full, corrupt, backup, and restart behavior;
+7. PostgreSQL contention, full disk, corruption, backup, and restart behavior
+   under the managed local lifecycle;
 8. bounded history, retention, manual operational recovery, and observability;
 9. N/N-1 workflow and persisted-state compatibility;
 10. macOS, Linux, and Windows packaging and lifecycle behavior;
@@ -73,6 +81,11 @@ consumer-owned workflow scheduling ports and proves:
     model;
 12. absence of OpenWorkflow types outside the local outbound adapter and
     composition root.
+
+Shared PostgreSQL does not select a workflow engine or permit database-backed
+ad hoc orchestration in domain code. The spike qualifies scheduler leases,
+transactions, migration ownership, and recovery independently of business-state
+persistence.
 
 ## Options
 

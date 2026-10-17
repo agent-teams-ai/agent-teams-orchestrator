@@ -10,6 +10,7 @@ blocked_by:
 related:
   - ADR-0090
   - ADR-0093
+  - ADR-0106
   - architecture.deployment-profiles
   - architecture.local-host-lifecycle
   - OD-021
@@ -41,6 +42,11 @@ would start the wrong architecture prematurely.
   owner;
 - the first slices must prove lifecycle and workflow boundaries before expansion.
 
+ADR-0106 selects native bundled PostgreSQL but does not resolve this decision.
+The first increment must name its PostgreSQL lifecycle and persistence scope
+under the existing owners; it cannot create a second Desktop-owned Host,
+database process, or authoritative local cache.
+
 ## Options
 
 - materialize all three reserved packages in one accepted implementation slice;
@@ -53,6 +59,9 @@ would start the wrong architecture prematurely.
 - accepted local durable workflow adapter boundary;
 - exact first package slices and owners;
 - explicit non-goals for the first Fully Local implementation increment;
+- the first supported native PostgreSQL composition and remaining packaging,
+  recovery, and workload qualification, without treating an engine choice as
+  release evidence;
 - an accepted materialization ADR referenced by the package materialization
   policy.
 

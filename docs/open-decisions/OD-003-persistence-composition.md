@@ -13,6 +13,8 @@ related:
   - ADR-0050
   - ADR-0051
   - ADR-0052
+  - ADR-0106
+  - OD-021
   - architecture.persistence
   - research.cross-dialect-persistence-tooling-2026-07-26
 ---
@@ -21,47 +23,46 @@ related:
 
 ## Accepted constraints
 
-ADR-0011 selects one SQLite file per bounded context locally and one PostgreSQL
-schema per bounded context initially when hosted. ADR-0047 fixes feature-owned
-migration plans with context-level assembly and transactional versus
-online-resumable steps. ADR-0025 selects Node.js 24 LTS,
-`node:sqlite`, `node-postgres`, adapter-local Drizzle, capability-scoped Units of
-Work, and a per-context local command lane. It rejects a repository-level database
-worker and keeps external effects after commit.
+ADR-0106 selects native PostgreSQL for both the future Fully Local profile and
+the server profiles, replacing ADR-0011's local SQLite topology. Each initially
+uses one application database with context-owned schemas. A local Target owns
+one durable bundled cluster under the Local Supervisor; Desktop is a client of
+the local or server Host and never a second persistence authority.
 
-ADR-0048 selects one authoritative persistence profile per context and separates
-logical transfer from physical recovery. ADR-0049 fixes the initial exact-value
-and microsecond-instant mapping. ADR-0050 requires capability-owned hosted
-concurrency profiles and real concurrent PostgreSQL conformance.
+The shared TypeScript persistence adapter uses asynchronous `node-postgres` and
+adapter-local Drizzle. Context schemas, immutable SQL migrations, codecs, and
+semantic suites are reused within a qualified capability matrix. SQLite,
+PGlite, and a second dialect tree are not implementation fallbacks.
 
-ADR-0052 selects adapter-local Drizzle as the default toolkit and direct drivers
-only as contingency. The initial `node:sqlite` dependency baseline is
-`drizzle-orm@1.0.0-rc.4` and `drizzle-kit@1.0.0-rc.4`, pinned without version
-ranges. Stable `0.45.2` does not expose the `node:sqlite` adapter. Installation
-must recheck the current GA release, verify the actual
-`drizzle-orm/node-sqlite` import, and run persistence conformance before changing
-this decision's readiness state.
+ADR-0106 preserves capability-scoped Units of Work and post-commit external
+effects from ADR-0025; single authority and logical transfer from ADR-0048; and
+adapter-local Drizzle with a direct-driver contingency from ADR-0052. It removes
+their local SQLite-specific implementation requirements. ADR-0047 still governs
+feature-owned migration plans and context-level assembly. ADR-0049's exact-value
+and microsecond mappings apply through its PostgreSQL column. ADR-0050's real
+concurrency evidence now applies to both profiles.
 
-Node.js 24.18.0 still classifies `node:sqlite` as Stability 1.2, Release
-Candidate. It is accepted only behind the asynchronous persistence adapter and
-the SQLite/PostgreSQL conformance suites. Its API, synchronous execution model,
-backup behavior, packaging, and failure classification cannot leak into domain or
-application code.
+Native local PostgreSQL does not resolve lifecycle or production readiness.
+Node `embedded-postgres` is the first qualification candidate for a Node
+lifecycle substrate; Rust `postgresql_embedded` is considered only after an
+independent Rust substrate choice. Exact wrapper and engine artifacts, signing,
+offline packaging, persistent durability, and operational behavior require
+qualification. The Desktop framework and production wrapper dependency remain
+unselected. The existing server-first release and local materialization gates
+are unchanged.
 
-If that readiness gate fails, a driver-level fallback such as `better-sqlite3`
-may replace only the local persistence adapter behind the same ports and
-conformance suite. The project does not maintain two local drivers in parallel by
-default.
-
-The 2026-07-26 cross-dialect tooling review found no stable library that satisfies
-the accepted `node:sqlite`, `node-postgres`, exact-value, migration, and
-capability-concurrency requirements while safely collapsing both repository
-implementations. Drizzle remains the strongest provisional adapter-local toolkit.
-Kysely lacks a current first-party `node:sqlite` dialect, Prisma's maintained
-SQLite adapter uses `better-sqlite3`, and released Effect SQL has not yet shipped
-its source migration to built-in SQLite.
+Current semantics live in the [persistence boundary](../architecture/persistence-boundary.md).
+The [managed PostgreSQL lifecycle](../architecture/local-host-lifecycle.md#managed-postgresql-lifecycle)
+owns process custody, bootstrap credentials, identity, shutdown, and activation;
+this decision and OD-021 supply their remaining implementation evidence.
 
 ## Decision evidence
+
+The following experiments retain their original dates, versions, and results.
+Their SQLite evidence describes the former local design and does not qualify
+native local PostgreSQL. The cross-dialect toolkit baseline is historical;
+production dependency review evaluates the actual PostgreSQL imports and
+supported versions rather than requiring a `node:sqlite` adapter.
 
 An isolated parity spike on 2026-07-25 ran Node.js 24.18.0 with SQLite 3.53.1,
 PostgreSQL 18.4, `pg` 8.22.0, and pinned `drizzle-orm` 1.0.0-rc.4. Twenty-five of
@@ -176,17 +177,22 @@ bounded-context restore remains a separate logical and reconciliation workflow.
 
 - the pre-production Drizzle readiness result and exact materialized dependency
   versions after checking for a compatible GA release;
-- a pre-production `node:sqlite` stability, API, crash, backup, packaging, and
-  conformance review against the pinned Node runtime;
-- concrete capability Unit of Work and hosted concurrency profiles after initial
+- exact native PostgreSQL engine, wrapper, platform artifacts, driver, and
+  configuration tuple, including collation and extension compatibility;
+- concrete capability Unit of Work and PostgreSQL concurrency profiles after initial
   aggregate discovery;
-- migration contribution API, online-step state machine, and dialect execution
+- migration contribution API, online-step state machine, and PostgreSQL execution
   tooling;
-- WAL, checkpoints, busy timeout, and supported SQLite versions;
-- PostgreSQL connections, schema qualification, relay leasing, and row security;
+- local WAL, checkpoints, resource bounds, total connection budgets, relay
+  leasing, and row-security implementation;
+- native bootstrap and custody qualification with OD-021, including source-audit
+  risks recorded by ADR-0106, interrupted updates, and major-version compatibility;
 - PgBouncer restart, upgrade, HA, credential rotation, saturation, and
   managed-provider compatibility before enabling that optional profile;
-- representative-size desktop backup pause budgets and remote artifact storage;
+- one initial local backup artifact and retention policy, representative-size
+  pause budgets, protected blob and key recovery, and remote artifact storage;
+- restored authority and receipt reconciliation before dispatch resumes, with no
+  blind external retry or implicit rollback of later accepted writes;
 - hosted backup scheduling, immutable off-site WAL storage, restore authorization,
   production-volume RTO, and recurring restore drills;
 - hosted RPO profile and degraded-write policy, automated promotion authority,

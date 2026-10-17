@@ -18,6 +18,7 @@ related:
   - ADR-0086
   - ADR-0064
   - ADR-0067
+  - ADR-0105
   - architecture.local-host-lifecycle
   - architecture.public-control-contracts
   - OD-001
@@ -186,6 +187,49 @@ NATS subjects, streams, consumers, and acknowledgements are not part of the
 normal public SDK. The orchestrator may expose explicitly durable NATS
 integration surfaces without making broker configuration the client programming
 model.
+
+## Service extraction and language portability
+
+[ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
+proposes Moleculer behind capability ports for bounded Node.js service groups.
+This is a candidate implementation profile, not a selected production dependency
+or another public SDK backend. The proposed separation is:
+
+| Boundary | Proposed implementation | Contract that survives extraction |
+|---|---|---|
+| Ordinary collaboration inside a context | Curated internal API and local calls | Owning application models and explicit feature dependency |
+| Local or distributed Node.js capability | Local or Moleculer adapter behind a consumer-owned port | Published capability semantics, without framework contexts |
+| Independently deployable capability that may change language | Protobuf with gRPC over HTTP/2, or an explicitly qualified dual-protocol endpoint | Versioned schema, errors, authorization, operation and retry semantics |
+| Public client control | Existing Connect edge and handwritten SDK | Accepted public control and SDK contracts |
+
+The private network profile is chosen at a real capability boundary, not for
+every Get Modular module, feature, team, agent, or runtime session. Candidate
+extractions include a Human Notification delivery worker or Workspace Registry
+materialization capability when independent scaling is justified. Their context
+still owns state, admission, receipts, and business behavior; these examples do
+not authorize new packages or change AR execution ownership.
+
+A common Protobuf schema alone does not make a plain gRPC server serve the
+Connect protocol. A private caller using gRPC can keep that transport when a
+Node.js implementation is replaced by another gRPC implementation. A caller
+using Connect requires a Connect-capable replacement, a qualified bridge, or an
+explicit transport change. Browser clients retain the public Connect edge;
+they do not speak native gRPC directly.
+
+The official [Connect server profile](https://connectrpc.com/docs/node/server-plugins/)
+supports native Node.js and Fastify with all three protocols over HTTP/2.
+HTTP/1.1, Express, and Next.js profiles do not provide native gRPC or bidirectional
+streaming. Choosing Fastify is not a prerequisite for portability, and this
+proposal does not change the accepted HTTP/1.1 local UDS profile.
+
+Before claiming service portability, qualification replaces one representative
+TypeScript capability with another-language implementation and runs the same
+consumer contract fixtures. Consumers retain their business code; wiring may
+change. The fixtures cover serialization, typed failures, trusted scope,
+deadlines, duplicate commands, unknown outcomes, and operation lookup. A
+Moleculer facade over a foreign service also qualifies error and metadata mapping
+and one bounded retry policy across both hops. The facade remains an explicit
+Node.js deployment dependency until removed.
 
 ## Additional client API styles
 

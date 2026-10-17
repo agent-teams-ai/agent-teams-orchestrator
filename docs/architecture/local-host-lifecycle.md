@@ -11,6 +11,7 @@ related:
   - ADR-0088
   - ADR-0090
   - ADR-0093
+  - ADR-0106
   - ADR-0064
   - ADR-0035
   - ADR-0058
@@ -75,11 +76,13 @@ flowchart LR
     SDK -->|"authenticated Connect API"| Host["Orchestrator Host"]
 
     Supervisor -->|"process availability only"| Host
+    Supervisor -->|"process and store lifecycle"| PostgreSQL["Bundled PostgreSQL"]
     Supervisor -->|"process and store lifecycle"| NATS["Bundled nats-server"]
     Supervisor -->|"binary and process lifecycle"| Realtime["Bundled Centrifugo"]
     Supervisor -. "optional host availability" .-> ARHost["Agent Runtime Host"]
 
     Host -->|"JetStream adapter"| NATS
+    Host -->|"context persistence adapters"| PostgreSQL
     Host -->|"client realtime adapter"| Realtime
     SDK -->|"live subscriptions after Host auth"| Realtime
     Host -->|"Runtime ACL + AR SDK"| ARHost
@@ -103,6 +106,8 @@ select channels, or proxy live publications.
 | Public control behavior and SDK capability negotiation | Orchestrator Host |
 | Local component discovery and process availability | Local Supervisor |
 | Version staging, activation lock, health, and bounded restart | Local Supervisor |
+| Local PostgreSQL binary, process, protected data root, endpoint, and custody | Local Supervisor |
+| PostgreSQL connections, context migrations, transaction semantics, and recovery validation | Host persistence adapters and owning context |
 | Local NATS process, binary, store path, lifetime lock, and resource lifecycle | Local Supervisor |
 | JetStream topology, publish, consume, ACK, and transport mapping | JetStream adapters |
 | Event ordering, delivery, privacy, retention, and replay requirements | Owning feature contract |
@@ -143,11 +148,11 @@ service-manager recovery remain target capabilities governed by OD-021; they are
 not prerequisites for the first local vertical slice.
 
 The default Desktop package includes pinned platform builds of managed local
-components. It does not download Centrifugo on first launch. The release pipeline
-verifies provenance and checksum, applies nested platform signing and
-notarization, and stages the binary beside the Host. The Supervisor starts the
-memory-engine profile on a protected rotating endpoint. Users install, configure,
-or start nothing manually.
+components, including PostgreSQL. It does not download managed engines on first
+launch. The release pipeline verifies provenance and checksum, applies nested
+platform signing and notarization, and stages the binaries beside the Host.
+For Centrifugo, the Supervisor starts the memory-engine profile on a protected
+rotating endpoint. Users install, configure, or start nothing manually.
 
 Bootstrap, discovery, and administration remain narrow capability surfaces even
 if they share one low-level protected connection. Exact public TypeScript names
@@ -256,6 +261,74 @@ Operational commands such as `host status`, `host version --json`, `host doctor`
 client. Exact command names remain product-level design, but machine-readable
 status, bounded waits, and typed degraded states are required.
 
+## Managed PostgreSQL lifecycle
+
+ADR-0106 selects native PostgreSQL for the future local profile without choosing
+the Desktop shell or a new implementation language. The existing Supervisor is
+its process-lifecycle owner. The Host uses asynchronous SQL through its context
+adapters; Desktop and the SDK receive neither SQL credentials nor direct SQL
+access. A remote Target skips this local component entirely.
+
+One local Target data root contains its durable PostgreSQL cluster independently
+of the selected Host binary. Updates preserve that root. Concurrent clients
+converge through the existing lifecycle authority; a project, workspace, or
+agent never creates another authoritative cluster. OD-021 still determines
+supported installation-channel and target cardinality.
+
+Bootstrap and custody enforce these rules:
+
+- initialize only a newly reserved empty data root owned by the application;
+  an existing corrupt, foreign, or incompatible root enters typed recovery and
+  is never deleted or initialized as an availability fallback;
+- pin and verify the actual engine archive, platform payload, helper binaries,
+  and release signature; normal startup requires no download or manual database
+  installation and creates no OS database account;
+- use an authenticated protected endpoint, explicit loopback binding when TCP is
+  selected, and generated SQL credentials separate from Host control credentials;
+  TCP uses SCRAM with explicit `pg_hba.conf` rules and no `trust` authentication;
+  runtime roles are not superusers, migration and maintenance credentials are
+  separate, and bootstrap secret files are created with owner-only access;
+  a port, PID, pathname, or readiness log line is not cluster identity;
+- verify SQL cluster identity, expected data ownership, version, configuration,
+  and migration compatibility before exposing Host mutation readiness;
+- handle port collisions with bounded retry or a typed unavailable outcome;
+  never kill or adopt a foreign process merely to acquire its endpoint;
+- preserve custody across Supervisor death while PostgreSQL remains alive;
+  reacquiring a parent lock alone does not prove that the child stopped;
+- perform bounded graceful PostgreSQL shutdown after Host drain; classify forced
+  termination as unclean shutdown requiring crash recovery, and reconcile a
+  timeout before starting another process.
+
+The first Node candidate is `embedded-postgres`; a Rust lifecycle substrate may
+instead qualify `postgresql_embedded`. Neither is a production-approved wrapper.
+Qualification covers private bootstrap password files and crash cleanup,
+readiness beyond stderr, child-process errors and already-exited children,
+timeouts, wrapper exit hooks, Windows graceful shutdown, persistent-data
+settings, and binary-cache version verification. Product custody cannot depend
+on the Desktop lifetime or unqualified wrapper defaults. ADR-0106 records the
+candidate evidence; OD-021 owns the selected implementation contract.
+
+Host activation, context schema migration, and PostgreSQL engine upgrade are
+separate transitions. Candidate health checks cannot migrate a shared live
+cluster before the previous Host is quiesced. Every old writer and dispatcher,
+including checked-out database clients, must be fenced before new mutation
+authority is granted. Returning the old locator alone does not revoke those
+clients.
+
+A PostgreSQL major upgrade or incompatible schema change uses exclusive
+maintenance, verified backup, a separately staged compatible cluster or migration
+plan, and an explicit activation record. An old binary can resume only against
+data it still supports. New accepted writes cannot be silently removed by an
+automatic snapshot rollback. A major-version upgrade path must declare its
+point of no return; hard-linked old and new data files are not independent
+rollback copies. Supported patch and major upgrade paths are qualified before
+shipping the corresponding update, not inferred from a wrapper's version string.
+
+The [persistence boundary](persistence-boundary.md#backup-and-restore) owns backup
+manifests, context validation, and reconciliation before restored dispatch.
+Neither the Supervisor nor a wrapper repairs business tables or substitutes a
+second authoritative database when PostgreSQL is unavailable.
+
 ## Lifecycle invariants
 
 - Concurrent `ensure` calls converge on one compatible active Host per local
@@ -265,6 +338,8 @@ status, bounded waits, and typed degraded states are required.
   ownership are separate locks with separate failure and stale-recovery rules.
 - The Supervisor holds the external exclusive lock for every managed NATS store
   for the complete broker-process lifetime.
+- PostgreSQL custody identifies the one owned cluster and process across
+  Supervisor restart; stale ownership files never authorize a second writer.
 - Readiness requires authenticated protocol and capability negotiation, not only a
   listening port.
 - Restart is bounded and classified; crash loops become a typed degraded state.
@@ -290,27 +365,33 @@ A staged Host activation follows this visibility protocol:
 2. stage and verify the immutable candidate release;
 3. durably record pending activation;
 4. start the candidate on a unique boot-scoped endpoint without mutation
-   authority;
-5. require identity, protocol, capability, and readiness attestation;
+   authority or permission to migrate the shared database;
+5. require identity, protocol, capability, and preflight attestation without
+   migration; this does not attest normal mutation readiness;
 6. quiesce the previous Host: reject new mutations, complete bounded in-flight
    Units of Work, and commit command, inbox, and outbox state;
-7. atomically replace the stable locator with the selected Host generation, then
+7. complete any required qualified migration, using the exclusive maintenance
+   path for incompatible changes, and verify schema compatibility while writes
+   remain fenced;
+8. atomically replace the stable locator with the selected Host generation, then
    allow only that generation to accept new mutations;
-8. keep the previous Host alive but mutation-fenced for a bounded
+9. keep the previous Host alive but mutation-fenced for a bounded
    stabilization/rollback window;
-9. drain remaining transport work and stop the previous Host only after the
+10. drain remaining transport work and stop the previous Host only after the
    selected candidate remains healthy;
-10. commit activation state, remove pending state durably, and reconcile with AR
+11. commit activation state, remove pending state durably, and reconcile with AR
     and JetStream before full readiness.
 
 The locator swap is the client-visibility pivot, not a substitute for Host
 mutation fencing. Existing clients may still hold the previous endpoint, so that
 Host must already be quiesced before the selected candidate accepts mutations.
-Before the pivot, recovery retains the previous Host and removes an unselected
-candidate. After it, recovery either proves the selected generation healthy,
-fences it and atomically restores the previous locator while the previous Host is
-still available, or reports that the rollback target is unavailable. At no point
-may both generations accept mutations.
+Normal mutation readiness follows migration and compatibility validation.
+Before the pivot, recovery retains the previous Host only if the current data
+remains compatible; otherwise it stays in maintenance recovery. After the pivot,
+recovery either proves the selected generation healthy, fences it and atomically
+restores a compatible previous Host, or reports that rollback is unavailable.
+Restoring a locator never rolls back accepted writes or establishes data
+compatibility. At no point may both generations accept mutations.
 
 ## Local and hosted parity
 
@@ -319,7 +400,7 @@ ACL, and JetStream adapter semantics. They differ only at deployment adapters:
 
 ```text
 Local:
-  Local Supervisor + Orchestrator Local + SQLite + managed NATS
+  Local Supervisor + Orchestrator Local + managed native PostgreSQL + managed NATS
   + managed Centrifugo memory profile
 
 Hosted:

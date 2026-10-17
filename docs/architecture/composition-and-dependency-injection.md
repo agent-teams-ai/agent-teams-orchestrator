@@ -7,7 +7,8 @@ summary: Normative composition, dependency injection, scope, and lifecycle rules
 related:
   - ADR-0042
   - ADR-0030
-  - ADR-0040
+  - ADR-0103
+  - ADR-0104
   - architecture.dependency-rules
   - architecture.feature-module-standard
 ---
@@ -16,133 +17,188 @@ related:
 
 ## Purpose
 
-Composition connects typed feature modules to concrete adapters without exposing
-the dependency injection mechanism to business code. Package boundaries express
-source ownership; containers express runtime construction and lifetime. These are
-related but not interchangeable boundaries.
+Composition connects typed feature capabilities to concrete adapters without
+exposing the construction mechanism to business code. Semantic ownership,
+workspace packages, feature groups, composition entries, and deployed services
+are distinct boundaries. Their sizes do not have to match.
+
+## Get Modular adoption profile
+
+ADR-0104 selects static Get Modular composition and replaces the Awilix default.
+The following is the local Consumer Module Standard adoption profile; the
+[feature profile](feature-module-standard.md) separately owns FMS v1.1.
+
+| Profile field | Selected value |
+|---|---|
+| Standard repository | `agent-teams-ai/get-modular` |
+| Standard path and anchor | `docs/architecture/common-assembly.md#consumer-module-standard` |
+| Immutable commit | `a3a079baca2c6af48c9d45bc08992825be1c2bbd` |
+| SHA-256 of complete document | `e5cb510c5ea83e54a6833cc40b6ad31fc5cf8c70d9838e4e0c6923edc6f70919` |
+| Core and Assembly | `@get-modular/core@0.5.0`, `@get-modular/assembly@0.5.0`, exact pair |
+| Accepting decision | `ADR-0104` |
+| Production scope | Orchestrator Host composition under `apps/**/src/composition/` and its owned context capability composition under `packages/contexts/**/src/features/**/composition/` |
+| Composition owner | Selected Host profile, with context-owned entries and curated context handles |
+| Lifecycle owner | Host for application resources; Local Supervisor for local component availability |
+| Legacy boundary | Historical Awilix ADR only; no parallel production container or direct assembly fallback |
+| Exceptions | None declared |
+| Current implementation status | Selected architecture; production materialization and first-scope conformance remain gated |
+
+The immutable [upstream standard](https://github.com/agent-teams-ai/get-modular/blob/a3a079baca2c6af48c9d45bc08992825be1c2bbd/docs/architecture/common-assembly.md#consumer-module-standard)
+owns the exact authoring rules. Other package kinds use typed factories unless a
+real independently assembled capability is included in a declared Host scope.
+Private helpers, parsers, DTOs, and fixed library calls do not receive entries
+merely because they exist.
+
+Optional resources and dynamic lifecycle packages require their own concrete
+integration need and exact dependency qualification. The upstream conformance
+kit is required development tooling for the first activated production scope;
+it is not another runtime subsystem. Core and Assembly adoption does not activate
+runtime plugin discovery or hot replacement.
+The existing extension safety and artifact-admission contracts still apply.
 
 ## Runtime topology
 
 ```mermaid
 flowchart TB
-    Host["Host Lifecycle"] --> Platform["Host-owned platform resources"]
-    Host --> Work["Work Coordination private container"]
-    Host --> Runs["Run Orchestration private container"]
-    Host --> Teams["Team Topology private container"]
-
-    Platform -->|"typed borrowed resources"| Work
-    Platform -->|"typed borrowed resources"| Runs
-    Platform -->|"typed borrowed resources"| Teams
-
-    Work --> WorkScope["command, query, event scopes"]
-    Runs --> RunScope["command, event, Temporal activity scopes"]
-    Teams --> TeamScope["command, query, event scopes"]
-
-    Work --> WorkApi["Published API handle"]
-    Runs --> RunApi["Published API handle"]
-    Teams --> TeamApi["Published API handle"]
+    Profile["Selected Host profile"] --> Root["Core and Assembly root"]
+    Root --> Work["Work Coordination group"]
+    Root --> Runs["Run Orchestration group"]
+    Root --> Teams["Team Topology group"]
+    Work --> WorkApi["Typed context handle"]
+    Runs --> RunsApi["Typed context handle"]
+    Teams --> TeamsApi["Typed context handle"]
+    Host["Host lifecycle"] --> Root
+    Host --> Resources["Owned technical resources"]
+    Resources -. "explicit borrowed capabilities" .-> Work
+    Resources -. "explicit borrowed capabilities" .-> Runs
+    Resources -. "explicit borrowed capabilities" .-> Teams
 ```
 
-The Host owns bootstrap order, process signals, health aggregation, and ordered
-shutdown. It constructs process-wide connections, clocks, telemetry, configuration,
-and other shared technical resources. Context containers borrow only explicitly
-listed capabilities and never dispose Host-owned resources.
+Each selected Host profile has one production composition authority. It selects
+bindings once, constructs the declared capabilities once, and retains the closed
+root handles. Context-internal capabilities are private even when one Host owns
+the graph. Other contexts receive only a declared Published API through their
+consumer-owned adapters. No context inspects another context's registrations,
+implementation instances, or internal graph.
 
-Each bounded-context container is independent. It has no parent and cannot inspect,
-resolve, register, or override another context's dependencies. A separately running
-Host or Worker Thread creates a separate set of containers.
+A separately running Host constructs its own declared profile. Agent, tenant,
+project, team, task, run, and session identities do not create extra graphs,
+brokers, containers, database clusters, or processes.
 
 ## Physical placement
 
+The pinned standard maps a feature's composition to flat files:
+
 ```text
 apps/<host>/src/composition/
-  bootstrap.ts
-  host-lifecycle.ts
-  profiles/
+  <profile>.root.ts
+  <owned-input>.contracts.ts
+  <owned-input>.declaration.ts
+  <owned-input>.module.ts
 
 packages/contexts/<context>/src/
   composition/
-    awilix/
-      create-context-container.ts
-      registrations.ts
-    lifecycle/
     create-context-handle.ts
-  features/
-    <feature>/
-      domain/
-      application/
-      adapters/
+  features/<feature>/
+    domain/
+    application/use-cases/
+    application/ports/
+    adapters/
+    composition/
+      <feature>.contracts.ts
+      <implementation>.declaration.ts
+      <implementation>.module.ts
+      <feature>.group.ts
+    features/<child>/
       composition/
-        feature-module-factory.ts
+        <child>.group.ts
 ```
 
-Directories are created only when their artifacts exist. This layout does not
-authorize materializing a proposed context or empty DDD folders.
+This is an ownership map, not a scaffold. Directories and composition contracts
+appear only with real adopted constructs and their enforcement. The feature
+profile currently rejects activation of new nested constructs until its scoped
+checker supports them. A Host root may import only curated composition exports;
+it never deep-imports a context's feature implementation.
 
-`FeatureModuleFactory` implementations are framework-neutral. They declare narrow
-dependency objects and return narrow feature APIs. The context composition layer
-maps those factories to Awilix registrations. Feature code never imports Awilix.
-This static factory is distinct from a dynamic `ExtensionModuleDefinition` and
-from a distributable `PluginArtifact`.
+Descriptors carry stable capability identities and revisions. Declarations use
+`declareModule` and the selected contract descriptors. `implement` and `input`
+produce entries, `group` gives a static navigable grouping, and the root lists
+entries and groups in `prepare({ modules })`. Do not reproduce wire-generation
+literals, compatibility tokens, or registry lookup in business code.
 
-SDK, contracts, integration, platform, testing, and tooling packages use typed
-factories by default. A package receives a container only when it owns an accepted
-independent runtime lifecycle, not merely because it is large or reusable.
+A parent group owns its own entries and the groups of its direct children. A
+root lists top-level groups, Host-level groups, and its own entries. It cannot
+assemble a private descendant through an alternate path. Group membership is
+static; a deployment variant has its own explicit root and profile identity.
+An entry must not be listed twice or depend on registration order.
 
-## Container contract
+A composition descriptor at `composition/<feature>.contracts.ts` is not an
+application port or a public wire message. Get Modular capability revisions
+change with the descriptor value type under its own compatibility rules;
+Protobuf, event schema, and SDK evolution remain independent contracts.
 
-Awilix is allowed only below `composition/**`. Use:
+## Construction contract
 
-- strict mode;
-- explicit registrations and typed resolver maps;
-- PROXY injection with destructured, narrowly typed dependencies;
-- context-local registration names;
-- one explicit composition entrypoint per context profile.
+Get Modular imports and types stay in composition and tests. Feature factories
+accept narrow dependency records and return narrow APIs. Application and domain
+code use only their owned ports and models, never a descriptor, resolver, broker,
+SDK DTO, or container abstraction. Port members use function-typed properties,
+not method signatures that hide parameter variance.
 
-Do not use:
+Prepare and declaration evaluation are free of external effects. Graph errors
+must fail before capability factories run. Ordinary factories build passive
+components; external startup happens in explicit Host lifecycle steps. Async
+construction, where required, retains an explicit owner for every acquired
+resource and every returned product until custody is transferred or cleaned up.
+No effect may escape a failed construction attempt.
 
-- `loadModules()` or filesystem scanning;
-- decorators or reflection metadata;
-- CLASSIC argument-name parsing;
-- parent containers or cross-context fallback;
-- raw cradle or container parameters in a feature factory;
-- `container.resolve()` outside composition;
-- dynamic singleton registration after startup;
-- async network, process, filesystem, or database effects while resolving the
-  dependency graph.
+Prohibited mechanisms include:
 
-No application port abstracts the container. `ContainerPort`, `ServiceLocator`,
-and general dependency registries are prohibited.
+- filesystem scanning, reflection, decorators, or implicit registration order;
+- mutable singleton registration or string lookup from business code;
+- a generic `ContainerPort`, `ServiceLocator`, or arbitrary capability registry;
+- a second Awilix or direct-factory production graph for the same capabilities;
+- constructing the feature graph again inside a Moleculer service factory;
+- acquiring runtime execution authority through module registration;
+- using `any`, broad casts, or a double assertion through `unknown` to hide a
+  binding, capability, or lifetime mismatch.
+
+Get Modular isolates construction; it is not wrapped in a second general-purpose
+DI framework. The Clean Architecture boundary is the owned application port.
 
 ## Lifetimes and scopes
 
-The context container lives for the context's process lifetime. A child operation
-scope is created only when an inbound command, query, event delivery, or Temporal
-activity needs scoped state such as Unit of Work, authorization facts, trace
-context, or request-local idempotency handling.
+Constructed context capabilities normally live for the Host process lifetime.
+An explicit operation scope is created when a command, query, event delivery, or
+Temporal activity needs Unit of Work, authenticated facts, trace context, or
+request-local idempotency handling. Its factory and cleanup remain private to
+the owning context adapter and lifecycle.
 
-Never create a container or long-lived scope per tenant, project, team, task, run,
-or runtime session. Those are durable business or integration identities, not
-dependency lifetimes.
-
-A longer-lived registration cannot retain a shorter-lived dependency. Strict-mode
-lifetime failures are architecture failures, not conditions to suppress. Every
-created operation scope is disposed in `finally` after commit, rollback, and
-post-commit intent handling have reached their defined boundary.
+A longer-lived capability cannot retain an operation-scoped dependency. The
+operation scope is disposed in `finally` after commit, rollback, and post-commit
+intent handling reach their defined boundary. Do not keep a SQL transaction open
+for an RPC call, model response, user approval, or durable workflow wait.
 
 ## Lifecycle
 
-Dependency resolution constructs passive components only. Lifecycle code performs
-external startup explicitly after construction. Startup proceeds in declared order;
-shutdown proceeds in reverse order and is idempotent.
+The Host owns bootstrap order, readiness, health aggregation, process signals,
+and ordered shutdown. Contexts borrow only explicitly listed technical
+capabilities and never dispose Host-owned resources. A module declaration is not
+permission to own an operating-system process.
 
-Do not rely on container disposal to infer business or infrastructure ordering.
-The context lifecycle stops consumers and admission first, drains bounded work,
-flushes owned dispatchers, closes context-owned connections, and only then disposes
-the container. The Host stops contexts before shared resources.
+Startup follows the declared dependency order; shutdown is bounded, idempotent,
+and in reverse dependency order. Stop admission and consumers, drain bounded
+work, reconcile or preserve durable dispatch intent, close context-owned
+resources, and then close shared resources. Do not infer this ordering from a
+container or a broker's global exit hook.
 
-Container restart has no business meaning. Durable runs, tasks, operations, inboxes,
-and outboxes recover from their owning stores and workflow contracts.
+The Local Supervisor separately owns the availability and activation of local
+Host, PostgreSQL, and NATS components. PostgreSQL and NATS adapters inside the
+Host own protocol connections and behavior, not a competing process lifecycle.
+Hosted component supervision belongs to the deployment platform.
+
+A graph or Host restart has no business meaning. Tasks, runs, operations, inboxes,
+outboxes, and dispatchers recover from their owning durable contracts.
 
 ## Context handle
 
@@ -151,57 +207,68 @@ Context bootstrap returns a narrow opaque handle conceptually shaped as:
 ```ts
 interface ContextHandle<TPublishedApi> {
   readonly api: TPublishedApi;
-  start(): Promise<void>;
-  health(): Promise<ContextHealth>;
-  stop(): Promise<void>;
+  readonly start: () => Promise<void>;
+  readonly health: () => Promise<ContextHealth>;
+  readonly stop: () => Promise<void>;
 }
 ```
 
-The real type is owned by composition and contains no Awilix type. The container,
-registrations, cradle, internal repositories, handlers, and operation-scope factory
-are private.
+The composition-owned real type exposes no Core, Assembly, Moleculer, or database
+implementation type. Internal factories, repositories, operation-scope creation,
+and graph inspection remain private.
 
-## Cross-context collaboration
+## Cross-context collaboration and service extraction
 
-A consuming context receives a typed adapter implementing its consumer-owned port.
-That adapter calls the provider's Published API or transport contract. Integration
-events remain the preferred decoupling mechanism where synchronous collaboration is
-not required.
+A consuming context receives an adapter implementing its consumer-owned port.
+That adapter calls the provider's Published API or versioned transport contract.
+Integration events remain the preferred mechanism where synchronous
+collaboration is not required. Synchronous dependencies form an acyclic graph;
+cycles require corrected ownership, events, or an owning process manager.
 
-The Host may wire one context API into another context's adapter, but it cannot pass
-the provider container. Synchronous context dependencies form a directed graph.
-Cycles require events, a process manager, or corrected domain ownership rather than
-lazy container resolution.
+Before creating a new independently deployed service, name its owning capability,
+reason for independent scaling or isolation, contract and wire protocol, state
+and transaction owner, durability, authorization, concurrency and recovery
+semantics, lifecycle owner, and the workload that justifies separation. Record
+these in the owning feature/context and accepted deployment decision. A file
+size, feature count, or number of agents is not an extraction criterion.
 
-## Profiles and replacement
+The candidate Moleculer placement and cross-language private RPC profile are in
+[ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md). That
+proposal does not replace the accepted public Connect API, JetStream durability,
+AR execution ownership, or Host composition. Routing adapters use constructed
+capabilities rather than constructing another business graph.
 
-Local and hosted Hosts construct the same context feature modules with different
-adapter sets. Tests construct modules directly with fakes or use a test-only context
-composition. Business tests do not start an Awilix container.
+## Profiles, verification, and replacement
 
-Tenant, project, workspace, run, and session identifiers may be authority inputs to
-an operation, but never imply a container or module lifetime. Static context
-composition initially has process and operation lifetimes. A future extension
-runtime initially activates one immutable module generation at a time; broader
-lifetime variants require independent qualification.
+Local and server profiles assemble the same application capabilities with their
+explicit adapter and deployment configuration. Business unit tests use direct
+factories and fakes, not a production graph. An in-process test implementation
+never becomes an undeclared production fallback.
 
-Awilix is replaceable because only composition imports it. Replacing the container
-may change registration, scope, and lifecycle assembly, but cannot require changes
-to domain, application, contracts, feature factories, or Published APIs.
+The upstream authoring budgets are stricter within an adopted Get Modular
+feature: 300 effective lines per non-test file, 60 per function, 4 parameters,
+and 80 effective lines per module wiring file. Other existing repository budgets
+remain in force. Do not enlarge a budget to accommodate generated wiring.
 
-## Enforcement
+Current `architecture:feature-module-profile` and the quality topology check in
+`foundation:check` bind adoption and the construct activation boundary. They do not prove
+Get Modular graph or nested-source semantic conformance. Before the first
+production scope materializes, pin a compatible `@get-modular/conformance`
+development dependency and connect the standard's checks to the existing
+Foundation execution gate with declared test identities: `checkModuleLayout`,
+`checkNamespaces`, `isolate`, `smoke`, and an independent binding oracle checked
+by `checkWiring`. A capability with two implementations, including its fake,
+also requires the owner's `contractSuite` and `runContractSuite`.
+Cover rejected duplicate entries, invalid bindings, forbidden imports, illegal
+nested visibility, cleanup on construction failure, scope disposal, and ordered
+shutdown, alongside a valid representative Host graph. Runner integration belongs
+to that materialization change; replacing the standard's required checks needs
+an explicit accepted exception rather than a weaker local substitute.
 
-Architecture gates must prove:
+Use `pnpm check:changed` during iteration, `pnpm check:fast` for handoff, and the
+complete `pnpm check` before a pull request. Passing document checks or installing
+0.5.0 does not qualify a running Host or distributed deployment.
 
-- Awilix imports appear only in `composition/**`;
-- feature modules and factories accept typed dependency objects, not a cradle;
-- business code never calls `resolve`, creates a container, or performs dynamic
-  registration;
-- no parent container is constructed;
-- valid and invalid lifetime and scope fixtures behave as specified;
-- context handles expose no container implementation type;
-- direct feature unit tests run without Awilix.
-
-Oxlint and dependency graph rules own import direction. ast-grep owns structural
-container-use patterns. Composition conformance tests own startup, scope disposal,
-failure cleanup, and reverse-order shutdown behavior.
+Replacing Core/Assembly changes composition and its conformance evidence. It
+must not require changes to domain behavior, application ports, public contracts,
+or persistence authority.

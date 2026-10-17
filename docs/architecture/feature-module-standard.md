@@ -3,7 +3,7 @@ id: architecture.feature-module-standard
 type: architecture
 status: accepted
 owner: architecture
-summary: Orchestrator adoption profile and local extensions for the organization Feature Module Standard v1.
+summary: Orchestrator adoption profile and local extensions for the organization Feature Module Standard v1.1, with gated activation of new constructs.
 related:
   - ADR-0012
   - ADR-0037
@@ -15,6 +15,9 @@ related:
   - ADR-0075
   - ADR-0093
   - ADR-0098
+  - ADR-0103
+  - ADR-0104
+  - ADR-0105
 code_anchors:
   - enforcement: required
     pattern: architecture/feature-module-standard-profile.json
@@ -35,24 +38,30 @@ code_anchors:
 ## Adoption
 
 Agent Teams Orchestrator adopts the immutable organization
-[Feature Module Standard v1](https://github.com/agent-teams-ai/.github/blob/main/docs/architecture/feature-module-standard/v1.md).
-The standard identity is `agent-teams.feature-module-standard`, version `v1`,
+[Feature Module Standard v1.1](https://github.com/agent-teams-ai/.github/blob/main/docs/architecture/feature-module-standard/v1.1.md).
+The standard identity is `agent-teams.feature-module-standard`, version `v1.1`,
 with SHA-256
-`851653f96643cf0466b67ab22963661976b00de44840fa3144a48a8c054f95fa`.
+`cfa088ef7396139554fe5e3bcc839271b23299c6b60c569a3a7f1cd7c9f0bc6c`
+and Git blob `bd949a9a670862fea851a7791fce772fdef3b4fc`.
 
 The machine-readable adoption is
 [`architecture/feature-module-standard-profile.json`](../../architecture/feature-module-standard-profile.json).
-ADR-0098 accepts the organization standard and this local profile.
+ADR-0103 accepts this version and supersedes the v1 adoption in ADR-0098.
 
 The organization standard owns universal feature ownership, layer
 responsibilities, dependency mechanisms, test ownership, shared-code policy,
 and extraction criteria. This document owns only the Orchestrator mapping,
 technology extensions, stricter constraints, and enforcement coordinates.
 
-There are no deviations from `v1`. A future deviation requires a repository
+There are no deviations from `v1.1`. A future deviation requires a repository
 architecture decision and a complete machine-readable deviation record. A
 successor organization standard does not apply until Orchestrator explicitly
 adopts it.
+
+Version 1.1 is a compatible minor: its new requirements apply to declared
+sub-features, republication edges, and composition contracts. Their current
+inventories are empty and their materialization is blocked as described below.
+Adoption does not declare an unimplemented semantic checker complete.
 
 ## Scope mapping
 
@@ -84,6 +93,15 @@ A package-level `src/` may contain only:
   feature-owned artifacts without redefining them;
 - generated artifacts under an explicitly isolated generated directory;
 - narrowly scoped package primitives accepted by an architecture decision.
+
+A bounded context, workspace package, feature, Get Modular Assembly entry, and
+deployable service are different boundaries. A feature owns a cohesive
+capability; a GM entry exists only for an independently wired implementation
+seam. Fixed helpers remain ordinary imports. Neither a feature nor a GM entry
+automatically becomes a package or a Moleculer service. Service extraction
+requires an accepted context or capability boundary and a concrete independent
+scaling, deployment, or isolation need under ADR-0105. Do not create one service
+per feature, endpoint, or class.
 
 Foundation-owned terminal cleanup evidence under the exact
 `.foundation-retired-evidence-` directory is transaction evidence rather than
@@ -255,6 +273,63 @@ Business features follow the aggregate placement and behavior rules in the
 integration, SDK, host, and tooling features do not invent ceremonial domain
 layers.
 
+## Nested features and composition contracts
+
+The accepted v1.1 model permits a real child capability at exactly
+`<parent-feature-root>/features/<child>/`, recursively without a fixed depth
+limit. A child shares the parent's bounded context and language. A capability
+that needs independent external use or ownership should be evaluated as a
+sibling or an explicitly extracted boundary. Nested directories are not a
+scaffolding requirement.
+
+The following rules govern activation of that model:
+
+- A sub-feature is visible only to its parent and the parent's descendants.
+  Other consumers use a curated ancestor surface. Nesting does not grant deep
+  imports from outside the owning subtree.
+- Only the direct parent assembles its direct children. Under ADR-0104 a static
+  GM group mirrors that feature tree; the Host root imports top-level groups
+  and its own entries rather than wiring a deep child directly.
+- Republication is an explicitly declared re-export from one direct child,
+  without behavior, mapping, or new types. An ancestor republishes one level at
+  a time; republication cannot bypass visibility.
+- The downward and lateral use graph is acyclic, including type-only edges.
+  Upward contract use, assembly, and republication have distinct edge roles and
+  are not folded into that use graph. Load-time dependency cycles between
+  features remain independently prohibited.
+- Composition contracts carry only composition-facing identifiers, descriptors,
+  and value type declarations. They contain no business behavior, factories,
+  concrete adapters, or leaked internal types. Only composition consumes them;
+  domain, application, external contracts, and adapters do not import them.
+
+The machine-readable `adoption.constructs` records `sub_features`,
+`republications`, and `composition_contracts` as empty arrays with activation
+`blocked-until-enforced`. The profile gate rejects any nonempty inventory or
+activation change. It also inventories materialized production package source
+and rejects nested `features/<parent>/features/` roots and conventional
+`composition/<name>.contracts.*` files at feature and Host/package `src` roots,
+even if the inventory remains empty. These are activation checks, not a complete
+parser for nested
+visibility, republication, assembly ownership, or edge semantics.
+
+Before the first such construct is materialized, the same reviewed change must
+extend the scoped classifiers and inventories, enforce those semantic rules,
+and add valid and invalid regression fixtures for visibility, direct-parent
+assembly, republication, and both cycle policies. Only then may it replace the
+blocked activation state and declare actual constructs. Existing package,
+dependency, readiness, and materialization gates remain required.
+
+Foundation `1.7.2` still reads the flat v1 topology format. The unchanged
+`architecture/foundation/quality-feature-topology.json` is a bounded reader
+compatibility projection, not another adoption authority. Its validator
+requires the exact v1.1 primary pin and empty, blocked construct inventories,
+checks the same physical activation restrictions, and preserves all production
+roots, excluded roots, materialized packages, and source/test trees. Activation
+of new constructs requires replacing that compatibility projection with a
+reader and checks that understand them. The
+[repository-tooling architecture](repository-tooling.md#source-coverage-adoption)
+owns the Foundation integration and source coverage evidence.
+
 ## Local extensions
 
 ### Package identity and materialization
@@ -360,30 +435,50 @@ intent into the versioned public event schema and outbox record. The
 [eventing and reliability standard](eventing-and-reliability.md) owns the exact
 publication and delivery rules.
 
+GM composition contracts describe in-process wiring, not an external DTO
+family. Consumer-owned application ports, provider-owned APIs, public Protobuf
+messages, and integration-event JSON Schemas keep their separate owners.
+External transport adapters perform explicit mappings; GM descriptors,
+containers, Moleculer `Context`, and broker handles never leak into application
+ports or public contracts. An ordinary in-process dependency does not require
+serializing its values through Protobuf.
+
 ### Composition and dependency selection
 
-Feature modules expose typed factories and narrow APIs. They do not own
-dependency-injection containers or import Awilix. Private Awilix containers may
-exist only under context or package `composition/**`; Awilix types never cross
-that boundary.
+ADR-0104 selects the exact `@get-modular/core` and `@get-modular/assembly` 0.5.0
+pair for static composition. GM descriptors, `implement`, `input`, `group`,
+`entriesOf`, and `prepare({ modules })` belong to `composition/**` and composition
+tests. Domain, application, public contracts, and adapters expose ordinary
+typed APIs and consumer-owned ports. Fixed internal helpers remain imports;
+an Assembly entry is justified by an independently wired capability rather
+than by every class or use case.
 
-Static dependencies use imports and typed factories. Replaceable internal
-implementations use consumer-owned ports selected by composition. Dynamic
-plugins use the separately accepted closed graph compiler and immutable
-activation plan only when a real runtime-selection capability requires it.
+There is one production assembly authority for a feature graph. Host
+composition builds the graph and owns process resources, startup, readiness,
+and shutdown. A Moleculer service adapter invokes the already-assembled API and
+does not build a parallel feature graph or own the Host lifecycle. Framework
+selection is an accepted design; runtime materialization and conformance still
+require their existing gates and the new-construct activation gate above.
+
+Replaceable internal implementations use consumer-owned ports selected by
+composition. Dynamic plugins use the separately accepted closed graph compiler
+and immutable activation plan only when a real runtime-selection capability
+requires it. Static groups do not turn this optional plugin mechanism into a
+default for ordinary features.
 Every dynamic dependency declares exactly one `required`, `optional`, or
 `ordered-many` cardinality.
 
 Generic `module.ts` feature files, ambient `resolve()`, service locators,
 parent-container fallback, registration-order semantics, and global mutable
-registries are prohibited. Static `FeatureModuleFactory`, dynamic
-`ExtensionModuleDefinition`, and installed `PluginArtifact` remain separate
-concepts.
+registries are prohibited. Named composition files such as
+`composition/<capability>.module.ts` do not introduce a generic feature-root
+`module.ts`. A static GM Assembly entry, dynamic `ExtensionModuleDefinition`,
+and installed `PluginArtifact` remain separate concepts.
 
 The application composition root constructs context bridges, concrete adapters,
-process resources, and lifecycle ordering. Context composition owns only
-migration assembly. Context migration assembly owns ordering, dependency
-validation, compatibility checks, and one context migration entry point. Feature
+process resources, and lifecycle ordering.
+Context migration assembly owns ordering, dependency validation, compatibility
+checks, and one context migration entry point. Feature
 schemas and dialect migrations stay with the owning persistence adapter.
 
 ### Durable workflows and transport direction
@@ -432,7 +527,6 @@ adapters/inbound/http/
 adapters/inbound/cli/
 adapters/inbound/jetstream-consumer/
 
-adapters/outbound/sqlite/
 adapters/outbound/postgres/
 adapters/outbound/jetstream-publisher/
 adapters/outbound/agent-runtime/
@@ -449,7 +543,7 @@ feature's business policy.
 Platform persistence packages may expose technical drivers and transaction
 primitives. Context-owned repository adapters, tables, migrations, inboxes,
 outboxes, and projections remain inside the owning context. Within that context,
-feature-specific artifacts stay with their owning feature as required by `v1`.
+feature-specific artifacts stay with their owning feature as required by `v1.1`.
 The [persistence boundary](persistence-boundary.md) owns the detailed rules.
 
 ### Runtime gateway ownership
@@ -499,17 +593,19 @@ The machine-readable adoption declares the gates that implement this profile:
 
 - `pnpm architecture:feature-module-profile` validates the central identity,
   immutable digest, scope, local authorities, profile markers, and declared
-  commands;
+  commands, and rejects activation or physical materialization of unsupported
+  nested features and composition contracts;
 - `pnpm architecture:topology` validates package identity, materialization,
   feature ownership, package surfaces, and source topology;
 - `pnpm architecture:dependencies` rejects dependency-specifier bypasses;
 - `pnpm architecture:conformance` runs the Foundation-backed boundary corpus.
 
 `pnpm architecture:feature-module-profile:test` proves positive adoption and
-negative identity, digest, scope, authority, deviation, and command cases. The
-profile check runs in `check:fast`; the check and its tests run in the complete
+negative identity, digest, scope, authority, deviation, command, and construct
+activation cases. The profile check runs in `check:fast`; the check and its tests
+run in the complete
 `architecture:check` and root `pnpm check` gates.
 
-Orchestrator claims adoption of Feature Module Standard `v1`, not universal
+Orchestrator claims adoption of Feature Module Standard `v1.1`, not universal
 product correctness. Domain acceptance, security, reliability, deployment, and
 release qualification remain separate repository-owned claims.
