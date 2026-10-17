@@ -92,6 +92,12 @@ control messages the Published Language of an internal context. Its private RPC
 and Moleculer placement choices remain proposed; the public Protobuf, Buf, and
 Connect decisions in ADR-0016 and ADR-0017 remain authoritative.
 
+For a selected portable capability, the proposal introduces its private schema
+with the first implementation, including an initially co-located implementation.
+It does not require forecasting every future service. A schema may evolve under
+its actual compatibility commitments; local placement does not waive obligations
+to published clients, durable records, or independently upgraded consumers.
+
 ## Exact-value profile
 
 Authoritative counts, quantities, rates, and money follow ADR-0046:

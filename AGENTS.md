@@ -116,8 +116,10 @@ before a high-cost boundary violation.
 - Before extracting a service, record its capability owner, measurable reason,
   versioned contract and wire protocol, transaction and durability boundary,
   authorization, concurrency, recovery, and lifecycle owner. Framework selection
-  or module count does not supply these decisions. Use owned ports, not a generic
-  service locator; the [Moleculer placement proposal](docs/decisions/0105-portable-service-boundaries-and-moleculer.md)
+  or module count does not supply these decisions. Name the semantic owner,
+  callable capability, and execution placement separately; justify RPC or a
+  durable handler without deriving services from nested features. Use owned
+  ports, not a generic service locator; the [Moleculer placement proposal](docs/decisions/0105-portable-service-boundaries-and-moleculer.md)
   is not production qualification.
 - Native PostgreSQL is the selected authoritative SQL engine for local and
   hosted profiles. Reuse the PostgreSQL adapter family and context-owned

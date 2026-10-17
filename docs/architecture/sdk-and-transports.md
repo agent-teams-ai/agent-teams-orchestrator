@@ -191,23 +191,42 @@ model.
 ## Service extraction and language portability
 
 [ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
-proposes Moleculer behind capability ports for bounded Node.js service groups.
-This is a candidate implementation profile, not a selected production dependency
-or another public SDK backend. The proposed separation is:
+proposes portable capability boundaries and permits Moleculer only for an
+independently justified Node.js RPC group. No initial capability requires that
+extra framework. These remain candidate private implementation profiles, not
+selected production dependencies or another public SDK backend:
 
 | Boundary | Proposed implementation | Contract that survives extraction |
 |---|---|---|
 | Ordinary collaboration inside a context | Curated internal API and local calls | Owning application models and explicit feature dependency |
-| Local or distributed Node.js capability | Local or Moleculer adapter behind a consumer-owned port | Published capability semantics, without framework contexts |
-| Independently deployable capability that may change language | Protobuf with gRPC over HTTP/2, or an explicitly qualified dual-protocol endpoint | Versioned schema, errors, authorization, operation and retry semantics |
+| Selected portable capability in one process | Protobuf and a qualified Connect router transport behind a consumer-owned port | Versioned schema and capability semantics, without framework contexts |
+| Independently deployable capability that may change language | The same Protobuf contract with Connect, gRPC over HTTP/2, or a qualified dual-protocol endpoint | Versioned schema, errors, authorization, operation and retry semantics |
+| Separately justified Node.js RPC group | Optional Moleculer adapter behind a consumer-owned port | Published capability semantics; foreign implementations still need a qualified standard RPC boundary |
 | Public client control | Existing Connect edge and handwritten SDK | Accepted public control and SDK contracts |
 
-The private network profile is chosen at a real capability boundary, not for
-every Get Modular module, feature, team, agent, or runtime session. Candidate
-extractions include a Human Notification delivery worker or Workspace Registry
-materialization capability when independent scaling is justified. Their context
-still owns state, admission, receipts, and business behavior; these examples do
-not authorize new packages or change AR execution ownership.
+Define the private schema with the first implementation of a selected portable
+capability, even when caller and owner initially share a process. This does not
+require speculative Protobuf services for every Get Modular entry, nested
+feature, team, agent, or runtime session. Ordinary feature collaboration retains
+TypeScript application models and checked dependencies. Code generation removes
+repetitive stubs; contract semantics and compatibility still require review.
+
+The official [Connect router transport](https://github.com/connectrpc/connect-es/blob/378bb8fde1209afc3ab6a9b0aa97c00d0db58c24/packages/connect/src/router-transport.ts)
+can run the binary Connect protocol in memory. A production local profile must
+explicitly configure message limits, interceptors, trusted call-context mapping,
+and lifecycle ownership; the library defaults are not the product profile.
+This checks serialization and handler behavior without opening a listener. It
+does not qualify HTTP/2, TLS, proxies, discovery, process loss, or network
+failures. Switching to a network transport preserves the contract while adding
+those deployment obligations. The same RPC path does not require a Moleculer
+facade in addition to Connect.
+
+The accepted JetStream profile supports scaling Human Notification delivery
+handlers through a shared durable consumer. Workspace Registry materialization
+may need a separate worker with resource affinity and allocation-generation
+checks. These are capability placement examples, not declared feature IDs, Get Modular entries,
+new applications, or a reason to add Moleculer. Their contexts keep state,
+admission, receipts, and business behavior; AR keeps execution ownership.
 
 A common Protobuf schema alone does not make a plain gRPC server serve the
 Connect protocol. A private caller using gRPC can keep that transport when a
@@ -226,10 +245,12 @@ Before claiming service portability, qualification replaces one representative
 TypeScript capability with another-language implementation and runs the same
 consumer contract fixtures. Consumers retain their business code; wiring may
 change. The fixtures cover serialization, typed failures, trusted scope,
-deadlines, duplicate commands, unknown outcomes, and operation lookup. A
-Moleculer facade over a foreign service also qualifies error and metadata mapping
-and one bounded retry policy across both hops. The facade remains an explicit
-Node.js deployment dependency until removed.
+deadlines, duplicate commands, unknown outcomes, and operation lookup. If a
+separate Node.js group later needs a Moleculer facade over a foreign service,
+qualification also covers error and metadata mapping and one retry budget per
+logical operation across its hops. That additional facade remains an explicit
+Node.js deployment dependency until removed; it is not the default route for a
+portable capability.
 
 ## Additional client API styles
 

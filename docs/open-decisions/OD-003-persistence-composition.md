@@ -56,6 +56,84 @@ The [managed PostgreSQL lifecycle](../architecture/local-host-lifecycle.md#manag
 owns process custody, bootstrap credentials, identity, shutdown, and activation;
 this decision and OD-021 supply their remaining implementation evidence.
 
+## Proposed launcher qualification, 2026-10-17
+
+The next proposed qualification direction is a small PostgreSQL component
+adapter under the existing Node Local Supervisor, using standard PostgreSQL
+process tools and reusable pinned binary artifacts. ADR-0106's first candidate,
+`embedded-postgres`, has received static source review; that is not an executable
+rejection. ADR-0106 already permits upstream process tools behind the same
+adapter when a wrapper limitation is established. This comparison selects no
+production dependency, Desktop framework, or new lifecycle substrate.
+
+Scores are subjective engineering judgments out of ten for this repository.
+Confidence measures recommendation fit; reliability estimates the qualified
+lifecycle integration, not a measured failure rate or a different SQL engine.
+Complexity includes packaging, operations, and maintenance; higher is worse.
+Every option still requires the accepted lifecycle and recovery evidence.
+
+| Rank | Qualification option | Confidence | Reliability | Complexity |
+|---|---|---|---|---|
+| 1 | Node Supervisor adapter using `initdb`, `postgres`/`pg_ctl`, and existing binary artifacts | 8/10 | 8/10 | 6/10 |
+| 2 | `embedded-postgres` with a small hardened adapter and maintained upstream fixes | 7/10 | 7/10 | 6/10 |
+| 3 | `postgresql_embedded` after an independent Rust substrate decision | 5/10 | 8/10 | 8/10 |
+
+The [npm registry](https://registry.npmjs.org/embedded-postgres/latest) reported
+`embedded-postgres` 18.4.0-beta.17, while the
+[PostgreSQL version policy](https://www.postgresql.org/support/versioning/)
+listed 18.6 as the current PostgreSQL 18 minor release. Reusable artifacts
+include [Theseus 18.6.0](https://github.com/theseus-rs/postgresql-binaries/releases/tag/18.6.0)
+and [embedded binary bundle 18.6.0](https://github.com/zonkyio/embedded-postgres-binaries/releases/tag/v18.6.0).
+These are review-time candidates, not selected release payloads. Their exact
+per-platform binaries, helper tools, dependencies, signatures, and offline
+installation remain unqualified. Consuming a Theseus binary does not require
+introducing its Rust wrapper.
+
+The [reviewed Node source](https://github.com/leinelissen/embedded-postgres/blob/8c8c16d1b81bec8ae3315d59a050654086a85e23/packages/embedded-postgres/src/index.ts)
+remains the upstream revision for 18.4.0-beta.17. Defaults are configurable, but
+initialization creates its own temporary password file without an explicit
+owner-only mode; effective exposure depends on directory protections and the
+process file-creation mask. Public `initdbFlags` can add tool arguments, but they
+cannot suppress the wrapper's creation of its own password file. There is also
+no public option to disable the global exit hook. Readiness from stderr,
+missing bounded process handling, and Windows forced termination also need
+qualification. These are source-review risks, not reproduced secret disclosure
+or data-loss bugs.
+If hardening replaces most initialization, startup, shutdown, and exit handling,
+direct tools avoid maintaining a parallel launcher fork.
+
+The [Rust release](https://github.com/theseus-rs/postgresql-embedded/releases/tag/v0.21.0)
+remains 0.21.0. Its
+[launcher](https://github.com/theseus-rs/postgresql-embedded/blob/a995b73d5b0b220f96b03634ec8cdfe117996c26/postgresql_embedded/src/postgresql.rs)
+uses `pg_ctl`, but temporary-data defaults and the `-F` startup option require
+explicit persistent configuration and effective durability verification. Its
+[bundler](https://github.com/theseus-rs/postgresql-embedded/blob/a995b73d5b0b220f96b03634ec8cdfe117996c26/postgresql_embedded/build/bundle.rs)
+can reuse existing output before selecting a requested archive. Another language
+and executable boundary need an independent benefit; the package alone supplies
+no reason to replace the Node Supervisor.
+
+Standard tools still require product custody. PostgreSQL documents that
+[`pg_ctl`](https://www.postgresql.org/docs/18/app-pg-ctl.html) starts a background
+server and that an operation can continue after its timeout. The server can
+outlive both the tool's Node child-process handle and the Supervisor. Completion
+therefore requires authenticated cluster identity and owned data-root checks,
+with reconciliation before another start. Fast shutdown is clean; immediate
+termination requires crash recovery.
+[`pg_isready`](https://www.postgresql.org/docs/18/app-pg-isready.html) does not
+require correct credentials and cannot establish that identity. A direct adapter
+must itself create a protected bootstrap password file before invoking
+[`initdb`](https://www.postgresql.org/docs/18/app-initdb.html), preserve existing
+data, and verify the effective durability settings required by persistence.
+
+The bounded next experiment compares the first two options in disposable data
+roots with the same engine payload on Windows and a supported POSIX platform.
+It covers offline restart with committed data, bootstrap-file access and cleanup,
+foreign occupied ports, spawn failures, early exits, bounded stop, and Supervisor
+death with a surviving server. Record actual binary hashes and SQL settings.
+Keep the wrapper only if supported APIs and small maintained fixes satisfy the
+contract; otherwise qualify direct tools. This experiment neither proves power-loss
+durability nor replaces packaging, backup, upgrade, or workload qualification.
+
 ## Decision evidence
 
 The following experiments retain their original dates, versions, and results.

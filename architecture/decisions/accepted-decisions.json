@@ -511,6 +511,11 @@
       "id": "ADR-0106",
       "path": "docs/decisions/0106-native-postgresql-for-local-and-hosted-profiles.md",
       "immutableDigest": "sha256:2f46647b263f278a56b6bae4a26011916c99b4fe037e8bcdacb26453d3c0f3b4"
+    },
+    {
+      "id": "ADR-0107",
+      "path": "docs/decisions/0107-jetstream-sdk-for-durable-delivery.md",
+      "immutableDigest": "sha256:44982f580369788563550c22a97a3c9add5254aa965f4c9806e6aa352e4147a8"
     }
   ]
 }

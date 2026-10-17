@@ -20,6 +20,8 @@ related:
   - ADR-0073
   - ADR-0080
   - ADR-0084
+  - ADR-0104
+  - ADR-0105
   - OD-011
   - OD-023
   - OD-024
@@ -47,6 +49,13 @@ materialize an empty package or freeze a schema.
 - A workspace package is a physical boundary created after acceptance.
 - A feature is a cohesive capability inside one bounded context, not a smaller
   context by default.
+- A nested feature is a child capability within the same context, assembled by
+  its direct parent under the feature module standard.
+- A Get Modular entry is an independently wired implementation seam; a group
+  assembles declared entries and child groups without changing domain ownership.
+- A deployed service is an execution placement with a lifecycle and scaling
+  boundary. It may contain several features; neither a feature nor an entry
+  automatically requires its own process or RPC contract.
 
 These concepts often align, but they are not interchangeable.
 
@@ -76,6 +85,31 @@ These concepts often align, but they are not interchangeable.
 Boundary status and dossier readiness are intentionally different. An ADR may
 accept a strategic split while its dossier remains proposed until Full DDD
 discovery proves exact aggregates, scenarios, and concurrency.
+
+## Initial placement and candidate extractions
+
+The [architecture overview](overview.md#architectural-style) selects one initial
+Orchestrator Host containing independently owned product contexts. Sharing a
+process or PostgreSQL server does not combine their models, transactions, or
+authority. AR keeps its separate runtime boundary and existing Published
+Language. Production materialization still follows each owner's accepted scope
+and the implementation readiness gates.
+
+The [service-boundary proposal](../decisions/0105-portable-service-boundaries-and-moleculer.md#select-boundaries-by-capability)
+names two illustrative extraction opportunities, not an accepted feature or
+service inventory:
+
+| Capability | Existing owner and status | Initial rule and possible extraction |
+|---|---|---|
+| Human notification delivery | Human Notification Management; strategic split accepted by ADR-0068, tactical model open under OD-026 | Context-owned durable handlers may scale through the existing JetStream consumer. A separate delivery worker does not acquire policy or source-data ownership and does not require Moleculer RPC merely to receive work |
+| Workspace materialization mechanics | Workspace Registry; context discovery remains under OD-011, responsibility split accepted by ADR-0062 | An outbound adapter implements worktree, clone, snapshot, or remote mechanics. Separate execution must preserve allocation and binding generations, machine placement, and access to the owned resources; AR keeps runtime isolation |
+
+Neither example defines a new feature ID or reserves a worker package. The
+owning dossier defines the first real capability before its feature and callable
+contract are materialized. Existing package identities remain in the
+[package catalog](../../architecture/package-catalog.yaml). No initial capability
+has yet established a requirement for Moleculer; its optional Node.js RPC role
+remains proposed in ADR-0105.
 
 ## Integration modules
 
