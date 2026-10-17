@@ -92,8 +92,8 @@ qualified subject requires evidence bound to its exact identity, adapter set,
 source revision, required suites, environment, result, and trusted issuer. An
 accepted ADR or existing file alone cannot qualify anything.
 
-- Fully Local measurements include Supervisor and Host availability, embedded
-  persistence, machine sleep, disk pressure, and event-loop delay.
+- Fully Local measurements include Supervisor and Host availability, bundled
+  native PostgreSQL, machine sleep, disk pressure, and event-loop delay.
 - Managed and Standalone server measurements include network control traffic,
   PostgreSQL, broker and worker queues, deployment failover, and external
   infrastructure.
@@ -103,7 +103,12 @@ accepted ADR or existing file alone cannot qualify anything.
   profile for service reliability and separate client-experience telemetry where
   needed.
 
-Aggregating both profiles into one objective is prohibited unless an approved SLO
+Host event-loop delay remains a candidate resource budget across these profiles.
+Calibration includes processing results of asynchronous persistence calls and
+concurrent command or event load. A separate PostgreSQL process does not remove
+that Host work; numerical limits still require evidence and owner approval.
+
+Aggregating different profiles into one objective is prohibited unless an approved SLO
 explicitly defines the weighting and user population.
 
 ## Cardinality and privacy
