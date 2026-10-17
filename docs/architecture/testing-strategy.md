@@ -5,6 +5,7 @@ status: accepted
 owner: architecture/quality
 summary: Required test layers, conformance suites, architecture checks, and quality gates.
 related:
+  - ADR-0106
   - ADR-0028
   - ADR-0015
   - ADR-0016
@@ -104,6 +105,18 @@ Validate:
 - SDK/server compatibility;
 - runtime-adapter conformance;
 - transport error mapping.
+
+For the first application capability, behavior fixtures call its input port
+without Connect, GraphQL, Moleculer, generated messages, or a DI container. The
+first wire adapter adds mapping fixtures for trusted scope, typed failures, and
+applicable deadline/cancellation behavior, plus negative architecture fixtures
+for framework leakage. The [additional API profile](sdk-and-transports.md#additional-client-api-styles)
+reuses those capability fixtures when GraphQL is introduced, adding nullability,
+error mapping, query-cost rejection, and authenticated cache isolation. An owned
+composed or batched query also proves bounded backend calls, per-key outcomes,
+and its declared consistency. Durable-work disconnect semantics are checked only
+for capabilities that accept durable work. These are first-materialization
+obligations, not a claim that unimplemented adapters are already qualified.
 
 ### Security architecture conformance
 
@@ -273,26 +286,26 @@ Exact-value conformance for Usage Metering, Usage Accounting, and Consumption
 Governance covers BigInt values above `Number.MAX_SAFE_INTEGER`, canonical decimal
 parsing, scale conversion, half-even and policy-specific rounding, currency
 mismatch, allocation conservation, malformed values, overflow, and lossless
-contract/persistence round trips. SQLite fixtures prove BigInt reads are enabled
-before result consumption and integer aggregate overflow fails safely. PostgreSQL
-fixtures prove `bigint`/`numeric` string mapping and reject exact values exposed as
+contract/persistence round trips. PostgreSQL fixtures prove bounded aggregate
+overflow, `bigint`/`numeric` string mapping, and rejection of exact values exposed as
 JSON numbers. Exact-time fixtures cover microsecond preservation, negative epoch
 conversion, explicit rounding, DST gaps and folds, period boundaries, and
 provider evidence with finer precision. The same semantic vectors run through
-both adapters.
+native local and hosted PostgreSQL bindings.
 
-Each hosted mutating capability runs its declared ADR-0050 conflict matrix against
+Each local and hosted mutating capability runs its declared conflict matrix against
 real PostgreSQL. Tests force same-revision races, write skew, deadlocks,
 serialization failures, lock-order inversions, timeout, complete-Unit-of-Work
-retry, and lost commit acknowledgement. Equivalent SQLite scenarios prove domain
-outcomes but do not substitute for hosted concurrency evidence.
+retry, and lost commit acknowledgement. ADR-0106 applies ADR-0050's concurrency
+requirements to both profiles; a single-client spike, process mutex, or
+in-memory adapter does not substitute for that evidence.
 
 Migration tests distinguish transactional and online-resumable steps. They kill
 the runner after intent persistence, external operation dispatch, ambiguous
 response, verification, and completion recording; rerun under the same generation;
 and prove that compatibility never advances before verified completion.
 
-Hosted tenant-isolation fixtures exercise application predicates and PostgreSQL
+Local and hosted tenant-isolation fixtures exercise application predicates and PostgreSQL
 RLS independently. They cover pooled connection reuse, forbidden session-level
 tenant state, transaction-local reset after commit and rollback, missing context,
 cross-tenant identifiers, prepared statements, owner and `BYPASSRLS` hazards,
@@ -305,19 +318,33 @@ session `SET`, SQL-level prepared statements, `LISTEN`, advisory locks, preserve
 temporary tables, holdable cursors, statement pooling, pool-level repository
 calls during a Unit of Work, and tenant identity in startup parameters.
 
-PostgreSQL failover and recovery suites exercise asynchronous and synchronous
+Hosted PostgreSQL failover and recovery suites exercise asynchronous and synchronous
 replication profiles separately. They verify explicit RPO outcomes, transaction
 phase classification, same-command reconciliation, replica-lag read policy,
 endpoint and deployment-epoch replacement, tenant rebinding, old-primary fencing,
 physical base backup, archived WAL, selected-point restore, context watermarks,
 and fail-closed too-early, too-late, missing-WAL, and corrupted-WAL plans.
 They treat physical cluster PITR separately from logical context export/import and
-prove that a schema dump is never accepted as disaster-recovery evidence.
+prove that a schema dump is never accepted as physical PITR evidence.
 
 Multi-context local backup tests additionally kill the coordinator after every
 barrier, manifest, staging, activation, and commit stage; time out individual
 participants; mix or tamper with generations; and prove that normal product access
-never observes a partial restore set.
+never observes a partial restore set. Native PostgreSQL fixtures additionally
+prove one verified cluster activation, required blob availability, fresh recovery
+authority, and reconciliation of restored receipts against already-performed
+external actions. Missing restored receipts never authorize blind repeat dispatch.
+
+Packaged workload qualification for 100 or more active agents states command and
+event rates, bursts, payload sizes, fanout, data size, duration, and hardware.
+Tests exercise the aggregate connection budget across context roles and workers,
+bounded admission, relay fairness, long queries, result decoding, and shared disk
+pressure. Cancellation, health, feeds, and recovery must remain usable under
+saturation. Record queue and pool waits, backlog, event-loop delay, memory, and
+disk growth; idle client counts do not establish active-agent capacity.
+These persistence workload scenarios can use deterministic loads and a fake
+runtime without launching real provider agents. They do not replace the
+separate runtime-connectivity qualification.
 
 These runtime contract suites are separate from provider-adapter conformance owned
 by `ar` and from platform or bounded-context persistence conformance. Passing one
@@ -336,7 +363,7 @@ inventory, credential detach, workspace unlink, evidence query, and restore.
 Test concrete adapters against disposable infrastructure:
 
 - NATS JetStream;
-- SQLite and PostgreSQL;
+- native local and hosted PostgreSQL;
 - Temporal test environment;
 - local Host transport and Supervisor bootstrap control;
 - Centrifugo client realtime edge;
@@ -362,8 +389,42 @@ Local lifecycle integration also verifies:
 - AR-owned provider execution is not terminated by Host replacement;
 - local NATS process ownership is separate from JetStream topology and message
   semantics;
+- local PostgreSQL process and data custody is separate from context SQL and
+  migration ownership;
 - target/profile/workspace separation, deterministic target selection, and
   rejection of project-controlled endpoint or trust overrides.
+
+Native PostgreSQL packaging and lifecycle tests follow the
+[managed PostgreSQL lifecycle](local-host-lifecycle.md#managed-postgresql-lifecycle)
+and its [release qualification matrix](local-host-lifecycle.md#packaged-postgresql-qualification).
+They cover signed offline first start and persistent reopen, concurrent ensure,
+port collision, foreign-cluster rejection, interrupted initialization,
+Supervisor death with a surviving database process, effective durability
+configuration, bootstrap credential-file permissions and crash cleanup,
+child-process errors, bounded graceful and forced shutdown, and each supported
+OS/architecture. Verify actual bundled engine identity as well as wrapper version.
+Windows and macOS require tests of the installed package; Local Host Control CI
+does not exercise the PostgreSQL component. Backup tests restore into a clean
+isolated root and validate the complete required set before activation, rather
+than accepting backup-file creation as successful recovery.
+Process-kill evidence does not qualify power-loss or filesystem durability.
+
+Retain independent lifecycle oracles when a launcher can alter its worker's
+exit status. Require fresh structured completion, the expected case inventory,
+actual owned-process state, and a separately computed verdict. Exercise stale
+control generations and losing-contender cleanup without stopping the winner.
+Helper verification rejects altered binaries, native libraries, or an untrusted
+manifest before execution; test relocation without access to the build prefix.
+Recorded hashes, version strings, a backup table of contents, and a green
+launcher exit do not individually qualify the complete released capability.
+
+Update fixtures separate Host replacement, context schema migration, and engine
+upgrade. A candidate cannot migrate the old Host's live schema during preflight;
+stale checked-out clients and dispatchers cannot commit after fencing. Interrupt
+each supported upgrade and activation stage, reject unsupported versions, and
+prove that binary rollback neither loses later acknowledged writes nor reopens
+an incompatible cluster. Restore tests qualify the recovery mechanism rather
+than treating old SQL epoch values as fresh authority.
 
 Managed JetStream store tests additionally inject active-publication process
 death, repeated crash/redelivery, configured limits, physical `ENOSPC`, store

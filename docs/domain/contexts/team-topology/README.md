@@ -8,6 +8,7 @@ blocked_by:
   - OD-006
   - OD-011
 related:
+  - ADR-0105
   - ADR-0100
   - ADR-0101
   - ADR-0076
@@ -51,6 +52,12 @@ This direction proves one real feature-module vertical slice. It does not admit
 Team persistence, organization placement, Run creation, AR calls, provider
 readiness, agent execution, or GraphQL.
 
+[ADR-0105](../../../decisions/0105-portable-service-boundaries-and-moleculer.md#adoption-and-qualification)
+may reuse the checker as a small private-adapter fixture. It does not make S2 a
+Moleculer product service or require separate deployment. S1/S2 preserve their
+existing pure and public-API scope; the first product group begins with the
+persistent S3 subset described below.
+
 The initial checker accepts only the smallest role seam: each member may carry
 one optional opaque `roleKey`. A role key is classification input, not a product
 grant, runtime type, parent-child relation, or implicit coordinator authority.
@@ -69,6 +76,24 @@ delegation, multiple coordinators, and hierarchy remain later capabilities.
 S1 and S2 are the module pilot. They must preserve extension points for S3 and
 S4 without implementing a generic profile catalog, hierarchy engine, policy DSL,
 or persistence framework in advance.
+
+### Planned product service group
+
+ADR-0105 proposes the Agent/Team definitions and versioned roster as the first
+private capability group, with its reviewed portable contract and local adapter
+from S3's first implementation. The initial operations cover only that slice's accepted Team
+create/get/list behavior. Agent definitions, roster edits, cloning, and templates
+join through their own later slices; selecting a group does not freeze their
+contracts or add them to S3.
+
+The public Connect edge and S4 Run `team-activation` consume the group through
+their typed ports and mappings. Get Modular constructs the application once;
+the selected transport adapter invokes those capabilities without a second business graph.
+The current assignment authority, immutable versions, revisions, receipts, and
+outbox retain this context's transaction boundary. Remote placement does not
+move Run admission, active Agent occupancy, organizational placement, or provider
+execution into Team Topology. Exact private contracts and production adapter
+materialization remain subject to the owning decisions and readiness gates.
 
 The complete legacy behavior map and proposed MVP dispositions are maintained in
 the [Team creation capability inventory](../../../research/team-creation-legacy-capability-inventory-2026-08-27.md).

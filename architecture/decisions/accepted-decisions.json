@@ -496,6 +496,31 @@
       "id": "ADR-0101",
       "path": "docs/decisions/0101-run-specific-rosters-coordination-and-exclusive-agent-occupancy.md",
       "immutableDigest": "sha256:d5370bc33e8e3bb12a0440bc9d1d98ca8160814d5dec441f5db3568494460e33"
+    },
+    {
+      "id": "ADR-0103",
+      "path": "docs/decisions/0103-feature-module-standard-v1-1-adoption.md",
+      "immutableDigest": "sha256:f4706503f88a586296852629642f7a81e1d21630f1da2c1b55a356d9dec1b8db"
+    },
+    {
+      "id": "ADR-0104",
+      "path": "docs/decisions/0104-get-modular-0-5-static-composition.md",
+      "immutableDigest": "sha256:ba495d3cd561645a0f28750e43dd0d0418721975ff097ae639c27ec893b9a317"
+    },
+    {
+      "id": "ADR-0106",
+      "path": "docs/decisions/0106-native-postgresql-for-local-and-hosted-profiles.md",
+      "immutableDigest": "sha256:2f46647b263f278a56b6bae4a26011916c99b4fe037e8bcdacb26453d3c0f3b4"
+    },
+    {
+      "id": "ADR-0107",
+      "path": "docs/decisions/0107-jetstream-sdk-for-durable-delivery.md",
+      "immutableDigest": "sha256:44982f580369788563550c22a97a3c9add5254aa965f4c9806e6aa352e4147a8"
+    },
+    {
+      "id": "ADR-0108",
+      "path": "docs/decisions/0108-bundled-postgresql-launcher-integration.md",
+      "immutableDigest": "sha256:3544a1920da7216e564f2e27340d238d96f0883b5ffbcb525d3f24c7651851cf"
     }
   ]
 }

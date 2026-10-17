@@ -18,6 +18,7 @@ related:
   - ADR-0086
   - ADR-0064
   - ADR-0067
+  - ADR-0105
   - architecture.local-host-lifecycle
   - architecture.public-control-contracts
   - OD-001
@@ -187,24 +188,144 @@ normal public SDK. The orchestrator may expose explicitly durable NATS
 integration surfaces without making broker configuration the client programming
 model.
 
+## Service extraction and language portability
+
+[ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
+proposes portable capability boundaries, an initial local Connect profile, and
+Dapr as the leading distributed polyglot runtime candidate. Moleculer remains
+a conditional option for an intentionally Node.js group. A group can remain
+in one process, including qualified production deployment. These remain
+candidate private implementation profiles, not
+selected production dependencies or another public SDK backend:
+
+| Boundary | Proposed implementation | Contract that survives extraction |
+|---|---|---|
+| Ordinary collaboration inside a context | Curated internal API and local calls | Owning application models and explicit feature dependency |
+| Selected portable standard-RPC capability in one process | Protobuf and a qualified Connect router transport behind a consumer-owned port | Versioned schema and capability semantics, without framework contexts |
+| Independently deployable capability that may change language | The same Protobuf contract with Connect, gRPC over HTTP/2, or a qualified dual-protocol endpoint | Versioned schema, errors, authorization, operation and retry semantics |
+| Distributed polyglot RPC group | Leading candidate: standard gRPC through a narrowly configured Dapr invocation profile; an existing qualified platform or supported resolver is a lighter alternative | Standard service contract plus explicit routing, identity, admission, drain, and recovery providers |
+| Intentionally Node.js group needing integrated action infrastructure | Conditional Moleculer adapter; one local broker without a transporter initially | Published capability semantics; its packet protocol does not confer Connect/gRPC compatibility |
+| Public client control | Existing Connect edge and handwritten SDK | Accepted public control and SDK contracts |
+
+Define the private schema with the first implementation of a selected portable
+capability, even when caller and owner initially share a process. This does not
+require speculative Protobuf services for every Get Modular entry, nested
+feature, team, agent, or runtime session. Ordinary feature collaboration retains
+TypeScript application models and checked dependencies. Code generation removes
+repetitive stubs; contract semantics and compatibility still require review.
+The owning capability record selects its private Node.js or portable standard
+RPC profile explicitly. A `.proto` service does not automatically select
+Moleculer, and a private Moleculer action is not a native Connect/gRPC endpoint.
+The [initial Node.js profile](../decisions/0105-portable-service-boundaries-and-moleculer.md#initial-nodejs-rpc-deployment-profile)
+requires codec-based value isolation and explicit invocation, error, deadline,
+and lifecycle mapping even before the group crosses a process boundary.
+
+The official [Connect router transport](https://github.com/connectrpc/connect-es/blob/378bb8fde1209afc3ab6a9b0aa97c00d0db58c24/packages/connect/src/router-transport.ts)
+can run the binary Connect protocol in memory. A production local profile must
+explicitly configure message limits, interceptors, trusted call-context mapping,
+and lifecycle ownership; the library defaults are not the product profile.
+This checks serialization and handler behavior without opening a listener. It
+does not qualify HTTP/2, TLS, proxies, discovery, process loss, or network
+failures. Switching to a network transport preserves the contract while adding
+those deployment obligations. The same RPC path does not require a Moleculer
+facade in addition to Connect.
+
+The [planned service groups](context-map.md#planned-service-groups) distinguish
+Team Topology's first product integration from the smaller checker fixture and
+later Observation, Agent Context, and Workspace opportunities. The registry,
+routing, service lifecycle, resilience, and telemetry have explicit providers in
+the [reviewed deployment recommendation](../decisions/0105-portable-service-boundaries-and-moleculer.md#reviewed-polyglot-recommendation-2026-10-17).
+For a selected Node.js alternative, use Moleculer's built-in mechanisms under
+its [framework profile](../decisions/0105-portable-service-boundaries-and-moleculer.md#use-the-frameworks-service-infrastructure).
+Typed adapters preserve the owned contract without implementing another RPC bus.
+JetStream still delivers durable work directly to its owner; AR retains execution
+ownership.
+
+Connect's fixed HTTP endpoint and persistent HTTP/2 session are not an automatic
+per-RPC replica balancer. A network profile selects qualified platform routing,
+a supported gRPC client resolver/balancer, or Dapr. Changing to another client
+library can require adapter and generated-client changes while preserving the
+consumer's application port. Static endpoint balancing does not qualify dynamic
+discovery, identity, or autoscaling.
+
+Host lifecycle closes admission before bounded drain. Connect's shutdown signal
+propagates cancellation, but does not itself reject every new invocation; the
+local profile qualifies its admission gate and active work tracking. Similarly,
+Dapr policies are verified on the selected path: remote standard unary gRPC,
+self-app invocation, and streaming must not inherit untested equivalent limits.
+The profile owns authentication, message bounds, deadlines, and its retry budget
+even when a framework supplies the implementation mechanism.
+
+A common Protobuf schema alone does not make a plain gRPC server serve the
+Connect protocol. A private caller using gRPC can keep that transport when a
+Node.js implementation is replaced by another gRPC implementation. A caller
+using Connect requires a Connect-capable replacement, a qualified bridge, or an
+explicit transport change. Browser clients retain the public Connect edge;
+they do not speak native gRPC directly.
+
+The official [Connect server profile](https://connectrpc.com/docs/node/server-plugins/)
+supports native Node.js and Fastify with all three protocols over HTTP/2.
+HTTP/1.1, Express, and Next.js profiles do not provide native gRPC or bidirectional
+streaming. Choosing Fastify is not a prerequisite for portability, and this
+proposal does not change the accepted HTTP/1.1 local UDS profile.
+
+Before claiming service portability, qualification replaces one representative
+TypeScript capability with another-language implementation and runs the same
+consumer contract fixtures. Consumers retain their business code; wiring may
+change. The fixtures cover serialization, typed failures, trusted scope,
+deadlines, duplicate commands, unknown outcomes, and operation lookup. If a
+separate Node.js group later needs a Moleculer facade over a foreign service,
+qualification also covers error and metadata mapping and one retry budget per
+logical operation across its hops. That additional facade remains an explicit
+Node.js deployment dependency until removed; it is not the default route for a
+portable capability.
+
 ## Additional client API styles
+
+From the first application capability, all inbound adapters call the same narrow
+owner-defined input port and map wire models to application input and output
+types. This boundary applies to Connect, a future GraphQL resolver, and direct
+in-process invocation. The capability declares the framework-independent
+[invocation profile](public-control-contracts.md#authentication-boundary)
+it actually consumes; no global service bag or mandatory generic context is
+introduced. Its authorization port remains responsible for access decisions.
 
 Connect remains the canonical public control transport. A real client need may
 later justify GraphQL as an additional inbound adapter, most likely for composed
-read models used by Web or Desktop clients. Adding it does not change application
-use cases, domain models, or the handwritten SDK semantics.
+read models used by Web or Desktop clients. It reuses the owning application
+commands and query ports. A new composed view may require an owned batch query
+port or read projection with declared consistency. Domain invariants, trusted
+tenant scope, authorization, mutation idempotency, operation receipts, and feed
+recovery retain their existing owners. GraphQL does not authorize cross-context
+database access.
+Composed queries use consumer-owned query ports and ACLs against the providers'
+Published APIs. Batch queries belong to the relevant query owner. A projection
+declares its consistency and watermark; nested fields do not create an atomic
+snapshot across contexts or grant access through a generic repository registry.
 
 A GraphQL adapter owns its schema, resolvers, authentication mapping, pagination,
 error and nullability mapping, query cost limits, and transport-specific tests.
-It maps into the same transport-independent application models as Connect and
-must pass the same capability behavior fixtures. It is not a second source of
-business contracts, does not expose domain entities directly, and does not turn
-the internal transport interface into a public extension point.
+Resolver execution uses bounded request-scoped batching and caching, explicit
+cost limits, and cancellation propagation. The official
+[GraphQL performance guidance](https://graphql.org/learn/performance/)
+describes batching and demand control for composed queries.
+Request caches are isolated by authenticated scope, and each data access retains
+the owning authorization policy. A request disconnect does not cancel previously
+accepted durable work. Request resources and operation transactions follow the
+[composition scopes](composition-and-dependency-injection.md#lifetimes-and-scopes).
+The adapter maps into the same transport-independent application models as
+Connect and must pass the same capability behavior fixtures. It is not a second
+source of business contracts, does not expose domain entities directly, and does
+not turn the internal transport interface into a public extension point.
 
 GraphQL is added capability by capability after an explicit consumer and query
-shape exist. The architecture keeps that addition local to the inbound edge, but
-does not pretend that schema design, authorization, limits, subscriptions, and
-compatibility are free implementation work.
+shape exist. Changes may extend the inbound and owned query paths while
+preserving existing domain and handwritten SDK behavior. Schema design,
+authorization, limits, subscriptions, and compatibility still require
+implementation work.
+The first materialized capability and adapter supply the corresponding
+[behavior and mapping evidence](testing-strategy.md#contract-tests); this plan
+does not claim that prose alone enforces cross-transport equivalence.
 
 ## Client realtime edge
 

@@ -71,15 +71,20 @@ before a high-cost boundary violation.
 - Business behavior belongs to the owning bounded context and feature. Follow the
   [context map](docs/architecture/context-map.md) and
   [Orchestrator feature profile](docs/architecture/feature-module-standard.md),
-  which adopts the organization Feature Module Standard v1.
+  which adopts the organization Feature Module Standard v1.1.
+- Distinguish a feature, nested feature, Get Modular entry/group, package, bounded
+  context, and deployed service. Do not map them one-to-one. Only a direct parent
+  assembles its children; external callers use declared ancestor republication.
+  Add the required source checks with the first materialized nested constructs.
 - Domain code is pure. Application code depends only on domain and declared
   ports. Adapters implement ports. See
   [dependency rules](docs/architecture/dependency-rules.md).
 - Cross-context collaboration uses Published Language, integration events, or a
   consumer-owned port plus ACL. Never deep-import another context or write its
   tables.
-- NATS, Temporal, AR, SQLite, PostgreSQL, Electron, HTTP, provider SDKs, and
-  Drizzle remain adapters or composition concerns.
+- NATS, Temporal, AR, PostgreSQL, Electron, HTTP, provider SDKs, Moleculer, and
+  Drizzle remain adapters or composition concerns. Get Modular imports and
+  descriptors remain in composition and tests.
 - Public transport models, integration events, domain events, application models,
   and provider contracts are separate surfaces. See
   [public contracts](docs/architecture/public-control-contracts.md).
@@ -102,17 +107,52 @@ before a high-cost boundary violation.
   function, complexity 20, depth 4, and 5 parameters; tests and conformance
   harnesses use 800, 250, 30, 5, and 6. Split responsibilities before the gate,
   rather than adding a local lint exception.
-- Process-wide resources and private Awilix containers are created only in
-  `composition/**`. Features export typed factories and public contracts, never
-  containers.
+- The selected Host assembles capabilities once through the exact Get Modular
+  Core/Assembly `0.5.0` pair. Meaningful composition seams use typed entries and
+  static groups; private helpers stay direct imports. Never retain a parallel
+  Awilix graph or reconstruct the same features in Moleculer service factories.
+  Follow the [composition profile](docs/architecture/composition-and-dependency-injection.md),
+  including its stricter authoring budgets and first-scope conformance requirements.
+- Before extracting a service, record its capability owner, measurable reason,
+  versioned contract and wire protocol, transaction and durability boundary,
+  authorization, concurrency, recovery, and lifecycle owner. Framework selection
+  or module count does not supply these decisions. Name the semantic owner,
+  callable capability, and execution placement separately; justify RPC or a
+  durable handler without deriving services from nested features. Use owned
+  ports, not a generic service locator; the [service-boundary proposal](docs/decisions/0105-portable-service-boundaries-and-moleculer.md)
+  records the reviewed portable contract, local RPC, and distributed runtime
+  alternatives. Follow the [planned groups](docs/architecture/context-map.md#planned-service-groups):
+  Team Topology's S3 product group is distinct from the S1/S2 checker fixture.
+  Every operation names its group, real consumer, and request/reply or durable
+  semantics. Distinguish a capability group, deployment role, and interchangeable
+  replica set; never split one transaction across RPC roles. Use selected
+  framework or platform mechanisms through typed adapters, with explicit
+  discovery, routing, identity, admission, drain, and retry owners. Do not rebuild
+  them as a generic framework. A `.proto` file does not select Moleculer or Dapr;
+  standard RPC and framework packet protocols remain distinct. Proposed runtime
+  choices and disposable spikes are not production qualification.
+- Define each application's input port and narrow trusted invocation profile
+  without transport types. Connect, future GraphQL, and selected private RPC
+  adapters map to that port. Keep composed queries behind owned query ports and
+  ACLs, and follow the [additional API profile](docs/architecture/sdk-and-transports.md#additional-client-api-styles)
+  for request caches, operation scopes, and first-materialization evidence.
+- Native PostgreSQL is the selected authoritative SQL engine for local and
+  hosted profiles. Reuse the PostgreSQL adapter family and context-owned
+  migrations; keep local process and distribution management behind the Local
+  Supervisor boundary. Desktop chooses a Target and uses its Host API, never
+  direct SQL or a second authoritative local fallback. [ADR-0108](docs/decisions/0108-bundled-postgresql-launcher-integration.md)
+  selects `embedded-postgres` behind the Supervisor component adapter. Exact
+  artifacts and every released platform/capability require the [packaged PostgreSQL qualification](docs/architecture/local-host-lifecycle.md#packaged-postgresql-qualification),
+  including Windows/macOS packaging and verified restore. Library selection and
+  unrelated platform CI are not that evidence.
 - The Local Supervisor manages local component availability only. It contains no
   orchestration domain and does not proxy normal public control traffic.
 - SDKs contain contract, transport, and client ergonomics, never orchestration
   business rules or process ownership.
 - Legacy code is a behavior oracle and adapter donor, not a source of domain
   boundaries. Migration keeps exactly one mutation owner.
-- Authoritative exact values never use JavaScript `number`, SQLite `REAL`, or JSON
-  numbers. Follow the exact-value profile in
+- Authoritative exact values never use JavaScript `number`, SQL binary floating
+  point, or JSON numbers. Follow the exact-value profile in
   [persistence](docs/architecture/persistence-boundary.md#exact-quantities-money-and-instants).
 - Product identity and grant facts belong to the configured authority provider;
   each owning use case owns its authorization port and business invariants.
@@ -173,6 +213,7 @@ For architecture or implementation work:
 1. identify the owning context, feature, and authoritative documents;
 2. check related open decisions and superseded ADRs;
 3. confirm language, invariants, aggregate boundary, and concurrency model;
+   distinguish the feature/module boundary from any proposed deployment boundary;
 4. define domain, application, Published Language, and client surfaces separately;
 5. implement inward dependencies and narrow consumer-owned ports;
 6. add adapters and composition at the edge;

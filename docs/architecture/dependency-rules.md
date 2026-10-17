@@ -13,6 +13,8 @@ related:
   - ADR-0040
   - ADR-0075
   - ADR-0090
+  - ADR-0104
+  - ADR-0105
   - architecture.composition
 code_anchors:
   - pattern: architecture/foundation/dependency-declarations.yaml
@@ -83,10 +85,31 @@ both roles expose separate modules and ports for each role.
 | Composition | All layers in its own package and public APIs of dependencies |
 | SDK | Published contracts and transport libraries |
 
-Awilix and every other container implementation are composition dependencies, not
+Dependency container implementations are composition dependencies, not
 application ports. They may be imported only below `composition/**`. Contexts,
 features, adapters, and SDKs cannot receive a raw container, cradle, resolver, or
 service locator.
+
+Wire models and generated service types remain in their owning contract surfaces
+and permitted transport adapters or SDKs. GraphQL resolver contexts and
+selection-set structures remain in inbound adapters; neither enters domain or
+application models.
+Adapters map to the owner's application input port and narrow invocation profile;
+application models do not grow framework fields to accommodate another API style.
+
+Get Modular imports, declarations, plans, assembly, and factory bindings belong
+only in `composition/**` and tests under the accepted composition profile. A file
+named `declaration.ts` or `module.ts` outside that boundary is not an exception.
+Feature business factories expose typed dependencies and APIs without importing
+Get Modular or exposing its lifecycle and module types.
+
+The Moleculer profile proposed by
+[ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
+keeps broker construction, service registration, and lifecycle ownership in Host
+composition. Thin inbound and outbound adapters may map framework calls to
+declared ports; domain and application code never call the broker or receive its
+context. Get Modular assembly, a Moleculer broker, and a private DI container must
+not each independently construct or stop the same resource.
 
 ## Forbidden dependencies
 
@@ -95,6 +118,7 @@ Domain and application layers must not import:
 - public SDK, HTTP, gRPC, JSON-RPC, or integration-event schemas;
 - Electron, React, browser globals, or frontend stores;
 - NATS, Temporal, HTTP servers, gRPC servers, or broker clients;
+- Get Modular or Moleculer APIs, service schemas, contexts, or lifecycle types;
 - `ar` implementation modules;
 - OpenCode, Claude, Codex, or other provider SDKs;
 - Node filesystem, child-process, or network implementations;
@@ -113,6 +137,12 @@ For synchronous collaboration, the consuming context declares a narrow outbound
 port. An adapter implements that port against the provider context's published
 contract. Asynchronous collaboration uses integration-event contracts.
 
+The same rule applies to GraphQL composition: the consuming query owns its narrow
+outbound query port and ACL. The provider owns its published batch-query API and
+projections; a composed projection has an explicitly declared query owner and
+consistency contract. Resolver nesting does not permit cross-context repositories
+or a shared transaction over several owners.
+
 Cycles between bounded-context packages are prohibited. When two contexts need
 bidirectional collaboration, prefer events, a process manager, or move the
 genuinely shared concept to the context that owns its lifecycle. Do not solve a
@@ -121,6 +151,14 @@ cycle by importing both public application facades.
 A direct in-process adapter is permitted as a deployment optimization, but it must
 implement the same consumer-owned port and published contract used by a future
 remote adapter.
+
+That contract cannot rely on shared mutable objects, closures, process-local
+identity, framework exceptions, or a database transaction crossing the boundary.
+An extracted capability keeps its own state and transaction owner. Network
+serialization and a new implementation language change its adapter and
+implementation, not the consuming application's domain model. The private wire
+profile remains the explicit proposal in ADR-0105 rather than an implicit
+requirement to serialize every internal call.
 
 Inside one bounded context, features may use only the provider feature's curated
 `domain/internal-api.ts` or `application/internal-api.ts` and an exact directed

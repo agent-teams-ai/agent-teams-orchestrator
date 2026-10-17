@@ -10,6 +10,8 @@ related:
   - ADR-0058
   - ADR-0060
   - ADR-0064
+  - ADR-0106
+  - ADR-0108
   - architecture.local-host-lifecycle
   - OD-001
   - OD-003
@@ -21,7 +23,7 @@ related:
 ## Decision required
 
 Define the implementation-level lifecycle and distribution contract beneath
-ADR-0060, ADR-0064, ADR-0035, and ADR-0058 without changing their ownership
+ADR-0060, ADR-0064, ADR-0035, ADR-0058, ADR-0106, and ADR-0108 without changing their ownership
 boundaries.
 
 ## Constraints
@@ -32,12 +34,17 @@ boundaries.
 - staged side-by-side installs, never in-place replacement of active components;
 - safe concurrency across CLI, Desktop, updater, and OS service-manager triggers;
 - recovery from partial install, crash loop, stale locator, failed activation,
-  NATS store failure, and interrupted migration;
+  NATS or PostgreSQL store failure, and interrupted migration;
 - macOS, Linux, and Windows support with one behavioral contract;
 - no secret in argv, project configuration, renderer IPC, or shared plaintext
   files;
 - no automatic downgrade across an irreversible storage migration;
 - no silent target fallback or adoption of an unknown process.
+
+The [managed PostgreSQL lifecycle](../architecture/local-host-lifecycle.md#managed-postgresql-lifecycle)
+owns the current native database invariants. This open decision qualifies their
+implementation; it does not reopen the selected engine or authorize local
+package materialization.
 
 ## Decisions to make
 
@@ -67,6 +74,17 @@ boundaries.
     realtime-publication work after a long edge outage.
 11. Whether the Supervisor uses the repository's Node runtime or a smaller native
     implementation after a measured packaging and reliability spike.
+12. Native PostgreSQL lifecycle: one owned cluster per Target data root,
+    interruption-safe initialization, authenticated SQL identity, port selection,
+    credential-file handling, Supervisor death with surviving database children,
+    graceful and forced shutdown, actual binary version verification, and
+    compatibility across Host, schema, and engine updates. ADR-0108 selects
+    `embedded-postgres` behind the component adapter; its exact production
+    version, artifacts, and lifecycle integration remain to be qualified.
+13. PostgreSQL recovery authority and dispatch reconciliation with OD-003:
+    restored epochs cannot establish fresh authority by themselves, binary
+    rollback cannot discard accepted writes, and an absent restored receipt
+    cannot authorize repeating an external effect.
 
 ## Decision evidence
 
@@ -172,6 +190,20 @@ operation remain release gates. The complete evidence is in the
 - deterministic target resolution and no project-controlled endpoint override;
 - documented operator recovery for every terminal degraded state;
 - no migration or activation step can create two lifecycle owners.
+- native PostgreSQL fixtures cover the selected wrapper's source-audit risks
+  and the packaged OS/architecture, including recovery from an interrupted
+  update without reinitializing existing data;
+- the [deeper launcher findings](OD-003-persistence-composition.md#deeper-launcher-and-helper-evidence-2026-10-17)
+  are closed for the selected integration: truthful structured outcomes despite
+  global hooks, generation-safe control and losing-contender cleanup, actual
+  platform custody, effective credential protection, and enforced helper/library
+  integrity after relocation; an extra launcher process alone is not custody;
+- every released PostgreSQL platform and capability satisfies the
+  [packaged qualification matrix](../architecture/local-host-lifecycle.md#packaged-postgresql-qualification),
+  with actual installed-package evidence on Windows and macOS and a verified
+  clean-root restore; Linux launcher tests do not substitute for those results;
+- qualification distinguishes process liveness, authenticated SQL readiness,
+  storage compatibility, and controlled recovery.
 
 ## Resolution
 

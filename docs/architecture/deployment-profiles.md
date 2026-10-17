@@ -14,6 +14,8 @@ related:
   - ADR-0090
   - ADR-0091
   - ADR-0093
+  - ADR-0106
+  - ADR-0108
   - architecture.local-host-lifecycle
   - architecture.sdk-transports
   - architecture.security
@@ -53,7 +55,7 @@ orchestration state is local.
 | Managed SaaS | Agent Teams-managed Server Host | Managed Platform authority adapter | Managed PostgreSQL and server infrastructure | V1 target, qualification blocked | Managed Web, Desktop, CLI, SDK |
 | Standalone Self-Hosted Server | Customer-operated Server Host | Standalone authority adapter | Customer PostgreSQL and server infrastructure | V1 target, qualification blocked | Co-deployed Web, Desktop, CLI, SDK |
 | Connected Self-Hosted Server | Customer-operated Server Host | Standalone authority plus optional managed capabilities | Customer PostgreSQL and server infrastructure | Future, qualification deferred | Co-deployed Web, Desktop, CLI, SDK |
-| Fully Local Desktop | Local Host on user device | Local standalone authority adapter | Context-owned SQLite and protected local components | Future, implementation deferred | Desktop, local CLI, SDK |
+| Fully Local Desktop | Local Host on user device | Local standalone authority adapter | Bundled native PostgreSQL with context-owned schemas and protected local components | Future, implementation deferred | Desktop, local CLI, SDK |
 
 The Managed and Self-Hosted profiles use the same logical Orchestrator core and
 public contracts. Composition validates one complete compatible adapter set. A
@@ -127,16 +129,30 @@ The co-deployed Web UI uses the same origin or a release-qualified reverse-proxy
 topology. Desktop can store an explicit named Target Profile for the server after
 discovery, TLS, protocol, authority, and capability validation.
 
+Desktop connects through the ordinary SDK and authorized feeds, never directly
+to PostgreSQL. Selecting a server Target does not start unused local databases,
+create a local business write model, or enable automatic synchronization. A
+failed remote request is not retried against a local Host.
+
 ## Future Fully Local topology
 
-Fully Local composes the future Local Host, context-owned SQLite adapters, local
-workflow adapter, local realtime edge, and AR execution components under the
-Local Supervisor. Components are independently signed and lifecycle-managed;
-unused local infrastructure is not started merely because Desktop is installed.
+Fully Local composes the future Local Host, shared context-owned PostgreSQL
+adapters, a bundled native PostgreSQL cluster, local workflow adapter, local
+realtime edge, and AR execution components under the Local Supervisor. One
+Target data root persists across component versions and is shared by clients;
+there is no database per client, project, or agent. Components are independently
+signed and lifecycle-managed; unused local infrastructure is not started merely
+because Desktop is installed.
 
-ADR-0087 excludes this implementation from V1. OD-035 names OpenWorkflow as the
-preferred local workflow spike candidate. Deferral cannot change public resource,
-persistence port, workflow-state, feed, recovery, or authority boundaries.
+ADR-0106 selects the database strategy; ADR-0108 selects `embedded-postgres`
+behind the Supervisor component adapter. Neither selects a Desktop framework or
+qualifies an exact launcher dependency. The [packaged PostgreSQL matrix](local-host-lifecycle.md#packaged-postgresql-qualification)
+requires evidence for each released platform and capability, including actual
+restore. ADR-0087 still excludes this implementation
+from V1, and OD-040 remains the separate package-materialization gate. OD-035
+names OpenWorkflow as the preferred local workflow spike candidate, now requiring
+its PostgreSQL backend. Deferral cannot change public resource, persistence port,
+workflow-state, feed, recovery, or authority boundaries.
 
 ## Connected and hybrid evolution
 

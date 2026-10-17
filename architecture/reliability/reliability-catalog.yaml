@@ -232,7 +232,7 @@ invariants:
 resourceBudgets:
   - id: orchestrator.event-loop-delay
     owner: platform/local-host
-    concern: Host responsiveness must remain bounded while synchronous local persistence performs work.
+    concern: Host responsiveness must remain bounded during persistence, result processing, and concurrent command or event load.
     status: candidate
     measure: histogram
     unit: milliseconds

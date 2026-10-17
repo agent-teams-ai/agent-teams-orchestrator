@@ -78,7 +78,7 @@ separate from the strategic bounded-context view.
 The model distinguishes:
 
 - local user-device processes: Desktop, CLI, Supervisor, Host, local JetStream,
-  local SQLite, and local `ar`;
+  bundled native PostgreSQL, and local `ar`;
 - the browser device, whose payload and execution environment are untrusted by
   the hosted Host;
 - the hosted control plane: Host, JetStream, and PostgreSQL;

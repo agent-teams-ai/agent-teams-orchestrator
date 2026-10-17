@@ -16,6 +16,7 @@ related:
   - ADR-0071
   - ADR-0065
   - ADR-0067
+  - ADR-0105
   - OD-016
   - OD-019
   - architecture.security
@@ -74,6 +75,28 @@ Contracts follow ADR-0017. In particular:
 - artifacts replace large inline data.
 
 Machine linting enforces the profile. Generated code is never hand-edited.
+
+### Service implementation portability
+
+The public API is independent of the implementation language and deployment
+layout behind it. Get Modular module identities, Moleculer action names, broker
+node identities, and framework contexts do not become public resource names,
+operation identities, or request fields. A replacement implementation preserves
+the published schema and behavior through explicit boundary mappers.
+
+[ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
+proposes a corresponding profile for capabilities that actually need an
+independent network or language boundary. It does not promote every feature,
+module, or application port into a Protobuf service, and it does not make public
+control messages the Published Language of an internal context. Its private RPC
+and runtime placement choices remain proposed; the public Protobuf, Buf, and
+Connect decisions in ADR-0016 and ADR-0017 remain authoritative.
+
+For a selected portable capability, the proposal introduces its private schema
+with the first implementation, including an initially co-located implementation.
+It does not require forecasting every future service. A schema may evolve under
+its actual compatibility commitments; local placement does not waive obligations
+to published clients, durable records, or independently upgraded consumers.
 
 ## Exact-value profile
 
@@ -243,6 +266,20 @@ single-flight refresh; the SDK transport applies short-lived access credentials.
 
 Authenticated actor, subject, client, tenant, and delegation facts come from
 verified transport context. They are not trusted from business payloads.
+
+Each application capability declares a narrow invocation profile alongside its
+input port. Connect, a future GraphQL adapter, and private RPC adapters map into
+the same application representation of the trusted facts and canonical resource
+scope that the capability consumes, plus applicable deadline, cancellation, and
+correlation semantics. Transport metadata becomes trusted only through the
+owning authentication and scope validation boundary. Authorization remains an
+owned application port; returned metadata cannot grant authority.
+
+The profile uses framework-independent types, not a global extensible context
+bag. It carries no broker, container, database client, framework request, or raw
+credential. A consumer ACL maps to the provider's declared invocation contract.
+Cancelling an observer or disconnecting a request does not cancel previously
+accepted durable work.
 
 ## Compatibility and tooling
 

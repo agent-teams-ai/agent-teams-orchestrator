@@ -20,6 +20,8 @@ related:
   - ADR-0073
   - ADR-0080
   - ADR-0084
+  - ADR-0104
+  - ADR-0105
   - OD-011
   - OD-023
   - OD-024
@@ -47,6 +49,23 @@ materialize an empty package or freeze a schema.
 - A workspace package is a physical boundary created after acceptance.
 - A feature is a cohesive capability inside one bounded context, not a smaller
   context by default.
+- A nested feature is a child capability within the same context, assembled by
+  its direct parent under the feature module standard.
+- A Get Modular entry is an independently wired implementation seam; a group
+  assembles declared entries and child groups without changing domain ownership.
+- A service group declares the callable capabilities of a selected private
+  boundary. It may cover several features, but does not create a new semantic
+  owner or combine the transactions of different contexts.
+- A deployment role selects the handlers, consumers, and adapters that run
+  together with one lifecycle and resource profile. A group may have several
+  roles; a role may initially host several groups.
+- A replica set contains interchangeable instances of one routing contract.
+  Replica membership does not grant ownership of a session, partition, or data.
+- A Moleculer action is one callable operation within the selected group, not an
+  independently deployed service by itself.
+- A deployed service is an execution placement with a lifecycle and scaling
+  boundary. It may contain several features; neither a feature nor an entry
+  automatically requires its own process or RPC contract.
 
 These concepts often align, but they are not interchangeable.
 
@@ -76,6 +95,63 @@ These concepts often align, but they are not interchangeable.
 Boundary status and dossier readiness are intentionally different. An ADR may
 accept a strategic split while its dossier remains proposed until Full DDD
 discovery proves exact aggregates, scenarios, and concurrency.
+
+## Initial placement and candidate extractions
+
+The [architecture overview](overview.md#architectural-style) selects one initial
+Orchestrator Host containing independently owned product contexts. Sharing a
+process or PostgreSQL server does not combine their models, transactions, or
+authority. AR keeps its separate runtime boundary and existing Published
+Language. Production materialization still follows each owner's accepted scope
+and the implementation readiness gates.
+
+### Planned service groups
+
+The [service-boundary proposal](../decisions/0105-portable-service-boundaries-and-moleculer.md#select-boundaries-by-capability)
+uses the following groups for product planning. Their names describe capability
+sets, not new contexts, package IDs, accepted wire methods, or deployed workers.
+The first group has an existing delivery path; later groups require the owning
+capability and contract decisions before their adapters are materialized.
+
+| Group | Existing semantic owner and contents | Planned placement and boundary |
+|---|---|---|
+| Agent/Team definitions and versioned roster | [Team Topology](../domain/contexts/team-topology/README.md); S3 persistent Team create/get/list, followed by separately delivered Agent definitions, immutable versions, roster changes, cloning, and templates | First planned private capability group, initially local, with its transport recommendation under ADR-0105 review. Public Connect and later Run `team-activation` use owned ports. Assignment uniqueness, Team versions, receipts, and outbox remain in one Team Topology transaction; organization placement, Run admission, and AR execution stay outside |
+| Execution activity, history, and diagnostics | [Execution Observation](../domain/contexts/execution-observation/README.md); timeline, snapshots, feed resume, authorized search, protected diagnostic access/export, and selected rebuild controls | Later query/control group with separate ingestion, indexing, and query roles where justified. Durable ingestion and indexing use direct JetStream handlers. Ingestion commits receipt/checkpoint, evidence, safe projection, feed, and indexing outbox together; indexing follows that commit. Preserve disclosure checks; Centrifugo retains client fan-out |
+| Semantic context composition and validity | [Agent Context](../domain/contexts/agent-context/README.md); contribution admission, provenance, manifests, validity, invalidation, and continuity evidence | Later bounded query/control group after its consumer contracts are accepted. Durable assembly and invalidation keep their context-owned state and delivery; avoid a synchronous call chain across source owners. AR owns technical materialization and Run owns activation |
+| Workspace materialization mechanics | [Workspace Registry](../domain/contexts/workspace-registry/README.md); outbound worktree, clone, snapshot, or remote-workspace mechanics | Later technical worker group behind the registry's owned port. Resource/machine affinity, allocation and binding generations, and cleanup reconciliation constrain routing. It is not a new context; AR retains runtime isolation |
+
+The first group is larger than a checker but is implemented incrementally.
+S1/S2 `CheckTeamDraft` remains the module and public API proof. The private
+product integration begins with the existing S3 subset; choosing the group does
+not add all later capabilities to that slice. OD-006 and OD-011 still govern
+Team Topology's exact model, and the other dossiers retain their own gates.
+The current-assignment authority and immutable Team history are not split into
+different service owners merely to increase service count.
+
+Human notification delivery is a separate durable worker opportunity. Shared
+JetStream pull consumers already distribute its accepted delivery work; an extra
+Moleculer hop is not required for that purpose. Human Notification Management
+keeps policy, attempts, and reconciliation under ADR-0068 and OD-026.
+
+One initial Host may contain several groups. Each group can contain several
+feature-owned operations; ordinary collaboration inside it stays typed and
+local. The selected profile maps operations to deployment roles and their
+interchangeable replicas. Query and command roles with different method sets
+must use distinct route identities or an ingress that routes those methods;
+they cannot be registered as equivalent replicas behind one undifferentiated
+endpoint. A durable worker does not require an RPC service registration.
+
+A context can have several write replicas without a global singleton writer.
+Its constraints, revisions, receipts, and fencing protect each invariant. Do
+not split one atomic operation across RPC roles or hold its SQL transaction
+open while waiting for another service. Roles sharing the owner's schema need
+explicit migration and mixed-version compatibility during rollout.
+
+A group is selected before its first adapter is written, while remote placement
+is separately justified by measured load, isolation, or resource needs. A
+`.proto` file, feature directory, or agent instance does not select placement.
+Existing package identities and materialization policies remain in the
+[package catalog](../../architecture/package-catalog.yaml).
 
 ## Integration modules
 

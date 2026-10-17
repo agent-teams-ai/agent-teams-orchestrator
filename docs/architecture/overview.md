@@ -13,6 +13,9 @@ related:
   - ADR-0065
   - ADR-0087
   - ADR-0088
+  - ADR-0103
+  - ADR-0104
+  - ADR-0106
   - architecture.deployment-profiles
 ---
 
@@ -44,7 +47,8 @@ The system is an event-driven modular monolith built with:
 - strategic and tactical Full Domain-Driven Design;
 - selective CQRS read models;
 - transactional outbox and idempotent inbox processing;
-- strict versioned contracts.
+- strict versioned contracts;
+- Get Modular 0.5.0 static capability composition under a selected Host profile.
 
 It starts as a modular monolith because one deployment is easier to operate and
 verify. Each bounded context keeps its own local transaction boundary even when
@@ -81,7 +85,7 @@ flowchart LR
     Temporal --> Activities["Activity Worker Inbound Adapter"]
     Activities --> Contexts
     PersistenceAdapter["Context Persistence Adapter"] -. "implements" .-> PersistencePorts
-    PersistenceAdapter --> Storage["SQLite / PostgreSQL"]
+    PersistenceAdapter --> Storage["PostgreSQL"]
     Relay["Context-Composed Outbox Relay"] --> OutboxSource["Context Outbox Source Port"]
     PersistenceAdapter -. "implements" .-> OutboxSource
     Relay --> EventPort["Broker-Neutral Event Publisher Port"]
@@ -122,7 +126,7 @@ The same core supports multiple compositions:
   ensures, discovers, monitors, drains, and activates versioned local components.
   It owns no orchestration behavior and is not on the normal SDK request path.
 - **Future Orchestrator Local**: a versioned local Host composition with protected local
-  control, SQLite, local runtime integration, and the JetStream adapter. CLI,
+  control, bundled native PostgreSQL, local runtime integration, and the JetStream adapter. CLI,
   Desktop, and other local applications share it through the SDK.
 - **Orchestrator Server**: the V1 server artifact family with network control,
   PostgreSQL, authority-provider, and JetStream adapters. Managed SaaS and
@@ -142,12 +146,15 @@ remaining historical ambiguity in ADR-0030.
 One bounded context has one authoritative persistence profile in a running
 deployment. A Desktop using Orchestrator Server does not keep a second local
 business write model; any local cache is disposable. Moving context state between
-profiles is a versioned logical transfer, never generic SQLite/PostgreSQL table
+profiles is a versioned logical transfer, never generic local/hosted table
 synchronization.
 
-Future normal local use is zero-touch. The Local Supervisor manages the bundled
-`nats-server` process and physical store lifecycle; the Host's JetStream adapters
-own broker interaction. It may supervise AR host availability, but AR remains the
+Future normal local use is zero-touch. The distribution includes the native
+PostgreSQL and `nats-server` payloads. The Local Supervisor owns those processes
+and physical data-root custody; the Host's PostgreSQL and JetStream adapters own
+their connections and protocol behavior. A Desktop using a server Target does
+not start unused local infrastructure. The Supervisor may manage AR host
+availability, but AR remains the
 only owner of provider sessions and processes. See
 [Local Host Lifecycle](local-host-lifecycle.md).
 
@@ -188,6 +195,12 @@ A transaction changes authoritative state in one bounded context only. Cross-con
 effects use integration events and process managers even when all contexts use the
 same application process or PostgreSQL cluster.
 
+ADR-0106 selects native PostgreSQL for both local and server authority. The
+profiles share owned SQL schemas, migrations, mappings, and semantic conformance;
+distribution, connection budgets, backup, version compatibility, and component
+lifecycle remain explicit deployment concerns. This selection does not qualify
+a bundled launcher or remove Fully Local implementation gates.
+
 ## Scope and access
 
 Every team, task, orchestration run, message, and runtime binding belongs to one
@@ -216,6 +229,14 @@ owner of business state and cannot write context storage.
 
 ## Evolution to services
 
+A Get Modular entry or nested feature is a composition or semantic boundary,
+not automatically a network service. ADR-0104 and the
+[composition profile](composition-and-dependency-injection.md) define one
+construction authority and typed context handles. Portable private contracts,
+the initial local RPC recommendation, and Dapr/Moleculer alternatives are recorded in
+[ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md); that
+proposal does not authorize a second RPC or durable-delivery framework.
+
 A bounded context may be extracted when there is demonstrated need for independent
 scaling, ownership, security, or deployment. Extraction should replace an in-process
 adapter with a transport adapter while preserving domain and application behavior.
@@ -227,7 +248,23 @@ Extraction readiness requires:
 - context-owned persistence;
 - idempotent consumers;
 - explicit consistency expectations;
-- no cross-context database transactions.
+- no cross-context database transactions;
+- one durable owner for each mutation and explicit lease/fencing where workers
+  compete for ownership;
+- bounded admission, connection and resource budgets, and a declared workload;
+- portable contract and wire semantics for a component intended for another
+  implementation language, including errors, retries, and unknown outcomes.
+
+Replicated ingress and worker processes must not rely on one process's memory
+as shared durable authority. Single active ownership of an individual run,
+resource, or partition is compatible with horizontal scaling when that ownership
+is scoped, durable, fenced, and recoverable. A framework registry or load balancer
+does not establish it. AR retains its separate execution capacity and fences.
+
+Hundreds of configured or idle agents are not evidence of hundreds of active
+agents. Qualification names command/event rates, bursts, payloads, fanout,
+dataset, duration, and hardware, and verifies correctness, recovery, cancellation,
+and bounded resource use under saturation.
 
 The initial context map remains proposed until it is validated against concrete
 use cases, current desktop behavior, event-storming scenarios, and concurrency

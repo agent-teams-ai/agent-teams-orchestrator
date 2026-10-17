@@ -13,6 +13,8 @@ related:
   - ADR-0058
   - ADR-0060
   - ADR-0087
+  - ADR-0105
+  - ADR-0107
   - architecture.local-host-lifecycle
   - OD-009
 ---
@@ -503,6 +505,56 @@ future local profile maintains warning and critical headroom thresholds plus an
 emergency reserve. A critical filestore write signal stops new dispatch admission; recovery
 requires released capacity, controlled restart, integrity reconciliation, and
 outbox/inbox recovery before readiness.
+
+## Service RPC and durable delivery
+
+[ADR-0107](../decisions/0107-jetstream-sdk-for-durable-delivery.md) selects the
+official modular JetStream SDK for durable delivery. The adapter uses shared
+durable pull consumers and the SDK's bounded consumption mechanisms;
+`@moleculer/channels` and a Channels fork are outside this profile. The SDK owns
+broker protocol mechanics. The application adapter maps the existing outbox,
+inbox, acknowledgement, topology, and failure contracts.
+
+The inbound path validates the envelope and schema, applies the consumer-owned
+ACL, and calls the owned application port within its existing inbox and Unit of
+Work boundary. It acknowledges only after owned state and required next intents
+commit durably. This direct adapter-to-port call adds no Moleculer dispatch hop.
+External effects still require their own durable intent, idempotency, and
+unknown-outcome reconciliation.
+
+Each logical subscription has one configured durable adapter and one consumer
+identity shared by its handler replicas. Distinct semantic subscribers retain
+distinct consumers and inboxes. Each semantic publication has one configured
+durable publisher and preserves its original event identity across retries.
+Failed or ambiguous publication is reported for reconciliation. Failure to store
+required quarantine evidence or publish a required dead-letter record cannot
+authorize acknowledgement of the original message.
+
+[ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
+records the reviewed local Connect profile, leading Dapr candidate for
+distributed polyglot invocation, and conditional Moleculer profile for a
+Node.js group. Any RPC response, timeout, retry, or in-memory pending request never replaces
+durable command acceptance, receipts, outbox, inbox, or reconciliation. Core
+events may carry disposable wake-ups or diagnostics only when their loss is
+permitted. A local Moleculer broker does not remove required JetStream delivery.
+Selecting Dapr invocation does not select Dapr pub/sub, state, or workflows.
+
+Application policy classifies retryable work. JetStream performs redelivery.
+Any selected RPC mechanism observes one retry budget per logical operation
+across its hops, with stable identity and an end-to-end deadline; this is not a
+new platform-wide coordinator. Moleculer automatic retries remain disabled
+unless the capability explicitly qualifies them. Transport retries never prove
+idempotency of a business or external effect.
+
+Get Modular composition owns process-wide clients and adapter lifecycle; the
+Supervisor owns a bundled broker process. Shutdown stops new admission and
+pulling, drains admitted work within a deadline, and leaves unacknowledged work
+recoverable. Qualification must prove replica sharing, bounded admission,
+acknowledgement after durable handling, publication failures, safe quarantine,
+and recovery after interrupted shutdown. Optional Core transporter dependencies
+must also satisfy the accepted dependency profile; selecting a framework is not
+an exception to it. These checks qualify a concrete adapter and version rather
+than inferring reliability from the framework name.
 
 ## Client realtime is not integration eventing
 
