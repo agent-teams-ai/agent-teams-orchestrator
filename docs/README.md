@@ -47,6 +47,8 @@ Agents should also follow the short repository-level
 | Add or reorganize documentation | [Documentation standards](standards/README.md) | `pnpm docs:new -- --help`, [templates](templates/README.md) |
 | Inspect experimental evidence | [Research index](research/README.md) | owning ADR or open decision |
 
+- [Desktop Runtime Migration Admission v1](contracts/desktop-runtime-migration-admission-v1.md)
+
 ## Knowledge map
 
 | Area | Owns | Index |

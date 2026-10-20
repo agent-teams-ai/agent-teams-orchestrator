@@ -5,6 +5,8 @@ status: accepted
 owner: architecture
 summary: Mandatory evidence gates that must pass before the first production orchestration vertical slice is implemented.
 related:
+  - ADR-0103
+  - contract.migration.desktop-first-slice.v1
   - ADR-0071
   - ADR-0073
   - ADR-0074
@@ -97,6 +99,29 @@ be declared qualified until Project retirement, owner-local disposition,
 cross-tenant isolation, and anti-resurrection conformance pass. That deployment
 gate does not require every first vertical slice to implement offboarding, but
 no slice may contradict the accepted ownership, epoch, freeze, or receipt model.
+
+## Scoped sandbox implementation admission
+
+ADR-0103 admits only the new server sandbox Team/Run, planned Work metadata and
+direct-message slice under the owner's A-F migration mandate. The
+[scoped contract and evidence matrix](../contracts/desktop-runtime-migration-admission-v1.md#conformance-fixtures)
+provide the five exit proofs for this exact implementation start:
+
+| Gate | Scoped exit evidence | Admission |
+|---|---|---|
+| 1: Run, Work, topology | Accepted owners, immutable identity/placement contracts, cancellation and stale/unknown models | Passed for ADR-0103 scope |
+| 2: Communication and Context | Direct audience/child receipt, separate delivery observations, context evidence rejecting text authority | Passed for ADR-0103 scope |
+| 3: SDK/Desktop | Versioned Protobuf, exact DTO oracles, request/expiry/ETag/clock and target/feed fixtures | Passed for ADR-0103 scope |
+| 4: Durable processes | Feature-owned activation/dispatch/cancel state, stable identities, post-commit dispatch and unknown reconciliation model | Passed for ADR-0103 scope |
+| 5: Deployment/authority | Existing server boundary and bounded test authority, authenticated scope and target generation rejection | Passed for ADR-0103 scope |
+
+ADR-0103 covers only the six named context reservations and retains their
+strategic owner references. The broad gate table above remains in
+review for later capabilities. This admission permits real feature implementation
+against synthetic runtime/authority adapters; it does not assert actual storage,
+Connect/MCP/Desktop conformance, real provider execution, qualified server
+availability, Fully Local materialization or any release qualification. Those
+implementation and deployment proofs follow their owning contracts.
 
 ## Gate 1: Run, Work, and topology semantics
 

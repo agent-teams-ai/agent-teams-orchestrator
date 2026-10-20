@@ -1,13 +1,12 @@
 ---
 id: domain.contexts.execution-observation
 type: bounded-context
-status: proposed
+status: accepted
 owner: execution-observation
-summary: Strategic dossier for admitted runtime evidence, protected diagnostics, normalized activity, durable feeds, and authorized search.
-blocked_by:
-  - OD-004
-  - OD-029
+summary: Scoped sandbox semantics and ownership for execution observation.
 related:
+  - ADR-0103
+  - contract.migration.desktop-first-slice.v1
   - ADR-0019
   - ADR-0028
   - ADR-0055
@@ -27,7 +26,99 @@ related:
 
 # Execution Observation
 
-## Classification and purpose
+## Accepted implementation scope
+
+ADR-0103 accepts only `src/features/sandbox-activity/` for the server sandbox
+runtime migration. This status describes that bounded scope; it does not admit
+other capabilities from the broader model below. Existing accepted ADR invariants
+remain binding. The owning reserved package and LikeC4 identity do not change.
+
+## Domain vision
+
+Expose authorized sandbox activity with honest freshness and history gaps.
+
+## Scope
+
+Owns: Normalized Activity blocks, protected diagnostic references and bounded Run-scoped read/feed projections for this slice.
+
+Excluded from this admission: Search/index qualification, broad replay/disclosure-retention implementation, billing and provider lifecycle authority.
+
+## Ubiquitous Language
+
+Activity is interpreted user-safe evidence; block identity distinguishes messages; snapshot replaces cumulative text, delta appends; recordedAt is owner clock metadata.
+
+## Invariants and business rules
+
+Evidence cannot grant Run/Work authority. Foreign Run output is rejected. Missing cursor/history stays explicit. Cumulative snapshots never append as deltas; protected payload is not public text.
+
+## Aggregates and consistency boundaries
+
+| Root and identity | Protected invariants | Commands | Domain events | Transaction | Concurrency | Growth bound | External facts | Rejected boundaries |
+|---|---|---|---|---|---|---|---|---|
+| Evidence receipt and derived Activity block/read projection | Invariants above | Admit normalized sandbox evidence; ListActivity; ReadFeed | SandboxActivityRecorded | One owner-local Unit of Work including receipt, Operation and outbox | Authenticated source coordinates and per-feed event identity deduplicate; snapshot watermark plus next cursor defines resume without global ordering. | One member/Run in this slice; history and receipts stored separately with finite declared horizons | Authenticated Run/runtime binding, source coordinates, safe normalized content and current query authorization. | No provider-state mirror, cross-context aggregate or shared transaction |
+
+Repositories persist only the owning roots/state; read queries use authorized
+projections. Transport schemas and persistence records map to separate domain and
+application models. IDs and ExactInstant values enter through explicit ports;
+no provider/transport/database type enters business policy.
+
+## Commands, processes and errors
+
+Authenticate scope -> admit evidence -> normalize/project -> expose authorized snapshot/feed. Gap requires fresh snapshot and preserves incomplete history.
+
+Application processes persist stable child identities, checkpoints and external
+intent before dispatch. Domain events above express local facts; integration
+publication intent and wire events remain separate mapped surfaces. Typed errors
+include forbidden scope, stale authority/ETag, conflicting request and explicit
+unknown outcome. A timeout never authorizes an unkeyed effect or legacy replay.
+
+## Concurrency and conflict model
+
+Authenticated source coordinates and per-feed event identity deduplicate; snapshot watermark plus next cursor defines resume without global ordering.
+
+Persistence owns one context schema, local transaction and forced RLS boundary.
+The server borrows its low-level pool; it never borrows another context's Unit
+of Work, repository or transaction. Rehydration validates invariants and exact
+values rather than trusting a transport DTO.
+
+## Context relationships
+
+Runtime owns source execution evidence; Run owns authority/readiness; Work owns Task lifecycle; client ACL maps Activity to legacy chunks and internal-message semantics.
+
+## Security and authorization
+
+Trusted scope and subject come from the selected authority adapter. The sandbox
+authority is explicitly test-only, current grants apply on replay and reads, and
+no prompt/provider payload can select trusted identity. Raw secrets and protected
+payload remain in their owning adapters. This admission does not qualify a
+deployment, authorize user-project testing or weaken accepted privacy rules.
+
+## Verification scenarios
+
+Duplicate and late target events are filtered; foreign Task/Run references reject; cumulative snapshots replace while distinct equal-text blocks remain distinct.
+
+The [accepted sandbox contract](../../../contracts/desktop-runtime-migration-admission-v1.md)
+links deterministic fixtures and exact Protobuf sources. Actual domain,
+rehydration, concurrent PostgreSQL transaction, response-loss and restart tests
+are required with implementation; their names follow the scenarios above.
+Synthetic admission models do not assert adapter or provider qualification.
+
+## Implementation links
+
+The package remains reserved until the canonical Plan/Apply scaffolder runs.
+The accepted feature's colocated documentation, public entrypoints, source
+boundaries and feature allowlist are materialized in the same implementation
+change. No other feature is authorized by this dossier status.
+
+## Excluded model and unresolved questions
+
+OD-004 and OD-029 retain broader runtime feed and product retention questions; accepted Observation ADR invariants still apply.
+
+The following retained material describes broader context discovery and existing
+ADR references. Proposed behavior outside the accepted feature remains excluded
+and must use its owning decision process before implementation.
+
+### Classification and purpose
 
 Execution Observation is a supporting bounded context. It turns authenticated AR
 runtime facts into protected evidence and deterministic product activity that a
@@ -48,7 +139,7 @@ proposed until event storming and executable fixtures prove the exact aggregate,
 transaction, retention, and public-contract boundaries. No production package is
 materialized from this dossier alone.
 
-## Ubiquitous Language
+### Ubiquitous Language
 
 | Term | Meaning |
 |---|---|
@@ -77,9 +168,9 @@ Do not use `log` as a domain synonym for all of these concepts. Operational logs
 runtime output, Observation Evidence, Activity Projection, durable feed, and
 search index have different authorities and guarantees.
 
-## Ownership
+### Ownership
 
-### Owned here
+#### Owned here
 
 - evidence admission, source identity, tenant-keyed comparison digest, protected
   integrity digest, and conflict quarantine;
@@ -94,7 +185,7 @@ search index have different authorities and guarantees.
 - context-local retention disposition and execution of externally decided
   project deletion.
 
-### Owned elsewhere
+#### Owned elsewhere
 
 | Concern | Authority | Relationship |
 |---|---|---|
@@ -111,7 +202,7 @@ search index have different authorities and guarantees.
 The Runtime ACL is stateless. It cannot become a shared runtime-event database,
 normalizer, search service, or authorization owner.
 
-## Feature slices
+### Feature slices
 
 The future context package may materialize only slices justified by an accepted
 vertical slice. The intended feature ownership is:
@@ -144,12 +235,12 @@ execution-observation/
 The slices can share context-private types through explicit public feature APIs.
 They cannot reach into each other's adapters, tables, or implementation folders.
 
-## Tactical DDD model
+### Tactical DDD model
 
 Full DDD does not require ceremonial aggregates for append-only evidence or
 read projections.
 
-### Domain policies and services
+#### Domain policies and services
 
 - `EvidenceAdmissionPolicy` validates binding, scope, source identity, supported
   schema, integrity, stale execution disposition, and replay position.
@@ -164,7 +255,7 @@ read projections.
 - `RetentionDispositionPolicy` maps accepted retention instructions to local
   payload, projection, search, and tombstone actions.
 
-### Value objects
+#### Value objects
 
 Expected value objects include `EvidenceId`, `SourceCoordinates`,
 `AuthenticatedRuntimeBindingRef`, `ComparisonDigest`, `PayloadIntegrityDigest`,
@@ -174,7 +265,7 @@ Expected value objects include `EvidenceId`, `SourceCoordinates`,
 `IndexCommitPosition`, `RedactionProfileVersion`, `DisclosureEpoch`,
 `DeletionEpoch`, and opaque authorized search cursors.
 
-### Records and projections
+#### Records and projections
 
 `ObservationEvidence`, `ActivityProjection`, search documents, feed records,
 payload manifests, and tombstones are immutable facts or projections, not
@@ -182,7 +273,7 @@ automatically Aggregate Roots. Repository terminology is reserved for a future
 aggregate that owns real consistency invariants. Append/query capabilities use
 ledger, store, projection, feed, or query names.
 
-### Process managers
+#### Process managers
 
 Feature-owned durable process managers may coordinate:
 
@@ -197,9 +288,9 @@ They own timers, retries, checkpoints, leases, and reconciliation cursors. They
 cannot grant access, invent activity facts, change Run state, or override a
 deletion epoch.
 
-## Evidence and activity models
+### Evidence and activity models
 
-### Observation Evidence minimum
+#### Observation Evidence minimum
 
 ```text
 EvidenceEnvelope
@@ -229,7 +320,7 @@ EvidenceEnvelope
 Provider timestamps never define uniqueness, idempotency, authorization, or
 cross-feed causal order.
 
-### Activity Projection minimum
+#### Activity Projection minimum
 
 ```text
 ActivityProjection
@@ -267,7 +358,7 @@ verifiedBy
 `verifiedBy` names a registered evidence mechanism or policy version, never a
 free-form assertion by an agent.
 
-### Initial semantic categories
+#### Initial semantic categories
 
 The first registry should support a small provider-neutral vocabulary rather
 than encode every provider event as a new type:
@@ -289,7 +380,7 @@ Provider-specific details remain namespaced evidence or protected payload. Addin
 a category requires typed detail schema, safe-field allowlist, renderer profile,
 correlation rules, and N/N-1 fixtures.
 
-## Commands, queries, and events
+### Commands, queries, and events
 
 Candidate application capabilities are narrow and feature-owned:
 
@@ -327,7 +418,7 @@ ObservationDispositionCompleted
 Exact public command and message names require contract design. These names are
 modeling candidates and do not create v1 contracts by appearing here.
 
-## Transaction and consistency boundaries
+### Transaction and consistency boundaries
 
 One context database transaction may atomically persist:
 
@@ -356,7 +447,7 @@ a new generation and deterministic replay, validates before cutover, and retains
 the old generation for bounded recovery. A lease and fence prevent concurrent
 writers to the same generation.
 
-## Ordering, feed, and realtime
+### Ordering, feed, and realtime
 
 - Source order exists only within a source stream that promises it.
 - The feed partition is `(tenant, project, run)`; admitted evidence without a Run
@@ -380,7 +471,7 @@ writers to the same generation.
 - Centrifugo history can bridge a short reconnect only. The durable activity feed
   remains authoritative.
 
-## Search and diagnostic payload invariants
+### Search and diagnostic payload invariants
 
 - Timeline is available when search is unavailable or rebuilding.
 - Search indexes only allowlisted, redacted fields.
@@ -414,7 +505,7 @@ writers to the same generation.
   Realtime history carries bounded wake-ups and feed positions, not replayable
   Activity content.
 
-## Security and privacy invariants
+### Security and privacy invariants
 
 1. Runtime payload cannot select tenant, project, user, Run, Work, or visibility.
 2. Access Control authorizes the subject and purpose; Observation Disclosure
@@ -433,7 +524,7 @@ writers to the same generation.
 11. Ingress enforces item size, chunk count, expansion ratio, nesting, object
     count, and per-partition rate before unbounded allocation.
 
-## Failure and edge-case matrix
+### Failure and edge-case matrix
 
 | Scenario | Required outcome |
 |---|---|
@@ -469,7 +560,7 @@ writers to the same generation.
 | Provider claims a file edit in prose | Represent an assertion or uncertain effect, not a confirmed file modification. |
 | Activity evidence later contradicts an effect | Append contradiction/correction, increment activity revision, and update feed/search without rewriting source evidence. |
 
-## Local and server adapters
+### Local and server adapters
 
 | Capability | Future fully local profile | Server profiles |
 |---|---|---|
@@ -483,7 +574,7 @@ The application observes the same authorization, evidence, activity, deletion,
 timeline, and chronological search outcomes. Physical locking, ranking, backup,
 partitioning, and maintenance are adapter-specific.
 
-## First usable slice
+### First usable slice
 
 The minimum server-profile slice should include:
 
@@ -501,7 +592,7 @@ It does not require OpenSearch, vector search, AI summarization, cold archive,
 legal-hold policy, multi-region active-active search, cross-tenant deduplication,
 or a fully local Desktop implementation.
 
-## Acceptance evidence before materialization
+### Acceptance evidence before materialization
 
 1. Event-storm provider output, streaming, duplicate, gap, correction,
    cancellation, stale execution, retention, and deletion scenarios.
@@ -517,7 +608,7 @@ or a fully local Desktop implementation.
 8. Add the context package and feature manifests only for the accepted first
    vertical slice; do not pre-create every feature directory.
 
-## Open questions
+### Open questions
 
 - Exact legal retention and hold authority remains OD-029.
 - Exact local key storage and local protected-payload backup policy remain part

@@ -1,0 +1,39 @@
+syntax = "proto3";
+package agentteams.team_topology.v1;
+
+// PROPOSED golden contract; owner team-topology.
+import "agentteams/control/v1/control.proto";
+import "google/protobuf/timestamp.proto";
+message Team {
+  string name = 1;
+  string display_name = 2;
+  string team_version = 3;
+  string agent_profile_version = 4;
+  string member_name = 5;
+  optional string role_key = 6;
+  string agent = 7;
+  string member = 8;
+  google.protobuf.Timestamp created_at = 9;
+}
+message CreateTeamRequest {
+  string parent = 1;
+  agentteams.control.v1.CommandIdentity identity = 2;
+  string display_name = 3;
+  string agent_profile_version = 4;
+  optional string role_key = 5;
+  string agent = 6;
+}
+message GetTeamRequest {
+  string name = 1;
+}
+message TeamPage {
+  repeated Team items = 1;
+  optional string next_page_token = 2;
+  string cursor = 3;
+}
+service TeamsService {
+  rpc CreateTeam(CreateTeamRequest) returns (agentteams.control.v1.Operation);
+  rpc GetTeam(GetTeamRequest) returns (Team);
+  rpc ListTeams(agentteams.control.v1.ListRequest) returns (TeamPage);
+  rpc ReadFeed(agentteams.control.v1.FeedRequest) returns (agentteams.control.v1.FeedPage);
+}

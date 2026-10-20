@@ -1,0 +1,103 @@
+syntax = "proto3";
+package agentteams.run_orchestration.v1;
+
+// PROPOSED golden contract; owner run-orchestration.
+import "agentteams/control/v1/control.proto";
+import "google/protobuf/timestamp.proto";
+message CreateRunRequest {
+  string parent = 1;
+  agentteams.control.v1.CommandIdentity identity = 2;
+  string team_version = 3;
+  string workspace = 4;
+  string policy_snapshot = 5;
+  string context_manifest = 6;
+}
+enum RunLifecycle {
+  RUN_LIFECYCLE_UNSPECIFIED = 0;
+  RUN_LIFECYCLE_ADMITTED = 1;
+  RUN_LIFECYCLE_ACTIVATING = 2;
+  RUN_LIFECYCLE_ACTIVE = 3;
+  RUN_LIFECYCLE_CANCELLING = 4;
+  RUN_LIFECYCLE_CANCELLED = 5;
+  RUN_LIFECYCLE_FAILED_UNKNOWN = 6;
+}
+enum ReadinessState {
+  READINESS_STATE_UNSPECIFIED = 0;
+  READINESS_STATE_PENDING = 1;
+  READINESS_STATE_READY = 2;
+  READINESS_STATE_FAILED = 3;
+  READINESS_STATE_UNKNOWN = 4;
+  READINESS_STATE_UNAVAILABLE = 5;
+}
+enum Freshness {
+  FRESHNESS_UNSPECIFIED = 0;
+  FRESHNESS_FRESH = 1;
+  FRESHNESS_STALE = 2;
+  FRESHNESS_UNKNOWN = 3;
+  FRESHNESS_UNAVAILABLE = 4;
+}
+message Run {
+  string name = 1;
+  string team_version = 2;
+  RunLifecycle lifecycle = 3;
+  string participant = 4;
+  optional string runtime_session_ref = 5;
+  optional string runtime_operation_ref = 6;
+  optional string conversation = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+message GetRunRequest {
+  string name = 1;
+}
+message CancelRunRequest {
+  string name = 1;
+  agentteams.control.v1.CommandIdentity identity = 2;
+  string reason = 3;
+}
+message Readiness {
+  string run = 1;
+  string observation_revision = 2;
+  RunLifecycle lifecycle = 3;
+  ReadinessState participant = 4;
+  ReadinessState context = 5;
+  ReadinessState health = 6;
+  Freshness freshness = 7;
+  optional string pending_interaction_ref = 8;
+  string cursor = 9;
+  google.protobuf.Timestamp recorded_at = 10;
+}
+
+// WorkPlacement remains internal Run-owned application process state.
+message PlanWorkRequest {
+  string name = 1;
+  agentteams.control.v1.CommandIdentity identity = 2;
+  string task = 3;
+  string expected_task_etag = 4;
+  string participant = 5;
+}
+message RunTaskReference {
+  string task = 1;
+  string participant = 2;
+}
+message RunTaskPage {
+  repeated RunTaskReference items = 1;
+  optional string next_page_token = 2;
+  string cursor = 3;
+}
+message RunPage {
+  repeated Run items = 1;
+  optional string next_page_token = 2;
+  string cursor = 3;
+  optional string active_run = 4;
+  string observation_revision = 5;
+}
+service RunsService {
+  rpc ListRuns(agentteams.control.v1.ListRequest) returns (RunPage);
+  rpc PlanWork(PlanWorkRequest) returns (agentteams.control.v1.Operation);
+  rpc ListRunTasks(agentteams.control.v1.ListRequest) returns (RunTaskPage);
+  rpc CreateRun(CreateRunRequest) returns (agentteams.control.v1.Operation);
+  rpc GetRun(GetRunRequest) returns (Run);
+  rpc GetRunReadiness(GetRunRequest) returns (Readiness);
+  rpc CancelRun(CancelRunRequest) returns (agentteams.control.v1.Operation);
+  rpc ReadFeed(agentteams.control.v1.FeedRequest) returns (agentteams.control.v1.FeedPage);
+}
