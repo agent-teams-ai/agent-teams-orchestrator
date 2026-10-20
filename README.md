@@ -2,9 +2,13 @@
 
 Headless control plane for coordinating multi-agent teams.
 
-The project is being designed as an event-driven modular monolith with Clean and
-Hexagonal Architecture, strategic and tactical Full DDD, broker-neutral
-messaging, provider-neutral runtime integration, and versioned public contracts.
+The project is being designed as an event-driven modular control plane with
+coarse service and worker processes, Clean and Hexagonal Architecture, Full DDD,
+broker-neutral messaging, provider-neutral runtime integration, and versioned
+contracts. The server architecture targets one team through thousands of
+simultaneously running agents, with Docker Compose and Kubernetes deployment
+forms. These are architecture commitments, not claims of qualified capacity.
+See the [service role map](docs/architecture/deployment-profiles.md#service-role-map).
 
 ## Project status
 

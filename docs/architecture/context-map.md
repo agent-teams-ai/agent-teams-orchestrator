@@ -22,6 +22,8 @@ related:
   - ADR-0084
   - ADR-0104
   - ADR-0105
+  - ADR-0109
+  - architecture.deployment-profiles
   - OD-011
   - OD-023
   - OD-024
@@ -61,8 +63,8 @@ materialize an empty package or freeze a schema.
   roles; a role may initially host several groups.
 - A replica set contains interchangeable instances of one routing contract.
   Replica membership does not grant ownership of a session, partition, or data.
-- A Moleculer action is one callable operation within the selected group, not an
-  independently deployed service by itself.
+- A Protobuf service declares a wire capability; its methods do not each become
+  a deployment role. Dapr routes selected private gRPC calls between roles.
 - A deployed service is an execution placement with a lifecycle and scaling
   boundary. It may contain several features; neither a feature nor an entry
   automatically requires its own process or RPC contract.
@@ -96,62 +98,41 @@ Boundary status and dossier readiness are intentionally different. An ADR may
 accept a strategic split while its dossier remains proposed until Full DDD
 discovery proves exact aggregates, scenarios, and concurrency.
 
-## Initial placement and candidate extractions
+## Capability groups and process placement
 
-The [architecture overview](overview.md#architectural-style) selects one initial
-Orchestrator Host containing independently owned product contexts. Sharing a
-process or PostgreSQL server does not combine their models, transactions, or
-authority. AR keeps its separate runtime boundary and existing Published
-Language. Production materialization still follows each owner's accepted scope
-and the implementation readiness gates.
+The accepted [service role map](deployment-profiles.md#service-role-map) is the
+single authority for coarse role processes, their owning capabilities,
+first-materialization isolation, and further separation triggers. ADR-0109
+replaces the universal one-Host starting placement. This strategic context map
+retains its proposed status and discovery gates; placement does not accept the
+unresolved detailed models or create new bounded contexts.
 
 ### Planned service groups
 
-The [service-boundary proposal](../decisions/0105-portable-service-boundaries-and-moleculer.md#select-boundaries-by-capability)
-uses the following groups for product planning. Their names describe capability
-sets, not new contexts, package IDs, accepted wire methods, or deployed workers.
-The first group has an existing delivery path; later groups require the owning
-capability and contract decisions before their adapters are materialized.
+A capability group is larger than an operation and can contain several
+feature-owned APIs. Team Topology's Agent/Team definitions and versioned roster
+form the first private product group; its first delivered subset is S3
+persistent Team create/get/list in a separate role. S1/S2 `CheckTeamDraft`
+remains a module and public-contract proof. Choosing the group does not add all
+future Agent, roster, cloning, or template methods to S3.
 
-| Group | Existing semantic owner and contents | Planned placement and boundary |
-|---|---|---|
-| Agent/Team definitions and versioned roster | [Team Topology](../domain/contexts/team-topology/README.md); S3 persistent Team create/get/list, followed by separately delivered Agent definitions, immutable versions, roster changes, cloning, and templates | First planned private capability group, initially local, with its transport recommendation under ADR-0105 review. Public Connect and later Run `team-activation` use owned ports. Assignment uniqueness, Team versions, receipts, and outbox remain in one Team Topology transaction; organization placement, Run admission, and AR execution stay outside |
-| Execution activity, history, and diagnostics | [Execution Observation](../domain/contexts/execution-observation/README.md); timeline, snapshots, feed resume, authorized search, protected diagnostic access/export, and selected rebuild controls | Later query/control group with separate ingestion, indexing, and query roles where justified. Durable ingestion and indexing use direct JetStream handlers. Ingestion commits receipt/checkpoint, evidence, safe projection, feed, and indexing outbox together; indexing follows that commit. Preserve disclosure checks; Centrifugo retains client fan-out |
-| Semantic context composition and validity | [Agent Context](../domain/contexts/agent-context/README.md); contribution admission, provenance, manifests, validity, invalidation, and continuity evidence | Later bounded query/control group after its consumer contracts are accepted. Durable assembly and invalidation keep their context-owned state and delivery; avoid a synchronous call chain across source owners. AR owns technical materialization and Run owns activation |
-| Workspace materialization mechanics | [Workspace Registry](../domain/contexts/workspace-registry/README.md); outbound worktree, clone, snapshot, or remote-workspace mechanics | Later technical worker group behind the registry's owned port. Resource/machine affinity, allocation and binding generations, and cleanup reconciliation constrain routing. It is not a new context; AR retains runtime isolation |
+Execution Observation, Agent Context, and Workspace Registry remain their
+existing semantic owners even when query, intake, compute, and mechanics run
+in different processes. Human notification delivery is a durable workload;
+its independent process does not automatically make it an RPC service. The
+role map covers these and the remaining strategic owners rather than treating
+four early opportunities as a complete service topology.
 
-The first group is larger than a checker but is implemented incrementally.
-S1/S2 `CheckTeamDraft` remains the module and public API proof. The private
-product integration begins with the existing S3 subset; choosing the group does
-not add all later capabilities to that slice. OD-006 and OD-011 still govern
-Team Topology's exact model, and the other dossiers retain their own gates.
-The current-assignment authority and immutable Team history are not split into
-different service owners merely to increase service count.
+Ordinary collaboration inside a role remains typed and local. Cross-role
+request/reply follows ADR-0105; durable handlers use direct JetStream adapters.
+Several qualified write replicas may execute operations for one semantic owner.
+State, immutable history, receipts, and required outbox intents of one atomic
+operation remain in one owned transaction, without a remote call inside it.
 
-Human notification delivery is a separate durable worker opportunity. Shared
-JetStream pull consumers already distribute its accepted delivery work; an extra
-Moleculer hop is not required for that purpose. Human Notification Management
-keeps policy, attempts, and reconciliation under ADR-0068 and OD-026.
-
-One initial Host may contain several groups. Each group can contain several
-feature-owned operations; ordinary collaboration inside it stays typed and
-local. The selected profile maps operations to deployment roles and their
-interchangeable replicas. Query and command roles with different method sets
-must use distinct route identities or an ingress that routes those methods;
-they cannot be registered as equivalent replicas behind one undifferentiated
-endpoint. A durable worker does not require an RPC service registration.
-
-A context can have several write replicas without a global singleton writer.
-Its constraints, revisions, receipts, and fencing protect each invariant. Do
-not split one atomic operation across RPC roles or hold its SQL transaction
-open while waiting for another service. Roles sharing the owner's schema need
-explicit migration and mixed-version compatibility during rollout.
-
-A group is selected before its first adapter is written, while remote placement
-is separately justified by measured load, isolation, or resource needs. A
-`.proto` file, feature directory, or agent instance does not select placement.
-Existing package identities and materialization policies remain in the
-[package catalog](../../architecture/package-catalog.yaml).
+The exact strategic relationship graph remains in LikeC4. Package identities
+and materialization policies remain in the
+[package catalog](../../architecture/package-catalog.yaml). Role labels are
+not new package identities or permission to create empty applications.
 
 ## Integration modules
 

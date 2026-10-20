@@ -18,6 +18,8 @@ related:
   - ADR-0103
   - ADR-0104
   - ADR-0105
+  - ADR-0109
+  - architecture.deployment-profiles
 code_anchors:
   - enforcement: required
     pattern: architecture/feature-module-standard-profile.json
@@ -98,9 +100,12 @@ A bounded context, workspace package, feature, Get Modular Assembly entry, and
 deployable service are different boundaries. A feature owns a cohesive
 capability; a GM entry exists only for an independently wired implementation
 seam. Fixed helpers remain ordinary imports. Neither a feature nor a GM entry
-automatically becomes a package or a Moleculer service. Service extraction
-requires an accepted context or capability boundary and a concrete independent
-scaling, deployment, or isolation need under ADR-0105. Do not create one service
+automatically becomes a package or a deployed service. ADR-0109 and the
+[service role map](deployment-profiles.md#service-role-map) select coarse process
+boundaries; ADR-0105 selects their private gRPC/Dapr invocation profile. Apply
+those boundaries from first production materialization rather than deferring
+them until a later extraction. New boundaries still require an accepted owner
+and a concrete scaling, deployment, or isolation need. Do not create one service
 per feature, endpoint, or class.
 
 Foundation-owned terminal cleanup evidence under the exact
@@ -439,9 +444,9 @@ GM composition contracts describe in-process wiring, not an external DTO
 family. Consumer-owned application ports, provider-owned APIs, public Protobuf
 messages, and integration-event JSON Schemas keep their separate owners.
 External transport adapters perform explicit mappings; GM descriptors,
-containers, Moleculer `Context`, and broker handles never leak into application
-ports or public contracts. An ordinary in-process dependency does not require
-serializing its values through Protobuf.
+containers, Dapr clients, gRPC contexts, and broker handles never leak into
+application ports or public contracts. An ordinary in-process dependency does
+not require serializing its values through Protobuf.
 
 ### Composition and dependency selection
 
@@ -453,12 +458,14 @@ typed APIs and consumer-owned ports. Fixed internal helpers remain imports;
 an Assembly entry is justified by an independently wired capability rather
 than by every class or use case.
 
-There is one production assembly authority for a feature graph. Host
-composition builds the graph and owns process resources, startup, readiness,
-and shutdown. A Moleculer service adapter invokes the already-assembled API and
-does not build a parallel feature graph or own the Host lifecycle. Framework
-selection is an accepted design; runtime materialization and conformance still
-require their existing gates and the new-construct activation gate above.
+There is one production assembly authority per Host role. Host composition
+builds its declared graph and owns application resources, startup, readiness,
+and shutdown. A gRPC inbound adapter invokes the already-assembled API and does
+not build a parallel feature graph or own process availability. Cross-role
+private calls use the selected Dapr boundary; typed local calls remain within
+the role. Framework selection is accepted architecture; exact runtime versions,
+materialization, and conformance still require their existing gates and the
+new-construct activation gate above.
 
 Replaceable internal implementations use consumer-owned ports selected by
 composition. Dynamic plugins use the separately accepted closed graph compiler

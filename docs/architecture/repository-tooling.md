@@ -19,6 +19,8 @@ related:
   - ADR-0103
   - ADR-0104
   - ADR-0105
+  - ADR-0109
+  - architecture.deployment-profiles
   - architecture.dependency-rules
   - architecture.feature-module-standard
   - architecture.machine-readable-model
@@ -687,9 +689,10 @@ are not import-graph questions. The initial rule families cover:
 
 - GM imports, descriptors, Assembly entries, static groups, and graph preparation
   containment inside `composition/**` and composition tests under ADR-0104;
-- a single Host-owned assembly graph and lifecycle, with Moleculer wrappers
-  confined to service adapters behind typed ports under ADR-0105; framework
-  handles must not enter application ports or public contracts;
+- one Host-owned assembly graph and application lifecycle per declared role,
+  with gRPC/Dapr invocation mapping confined to adapters behind typed ports
+  under ADR-0105 and the [service role map](deployment-profiles.md#service-role-map);
+  framework handles must not enter application ports or public contracts;
 - prohibited direct clocks, randomness, process APIs, and infrastructure
   constructors in domain code;
 - accepted factory and public-handle shapes where TypeScript types alone cannot
@@ -700,6 +703,16 @@ blocking only after it reports the intended invalid forms, accepts supported val
 forms, has a remediation message, and produces no unexplained findings against the
 real source tree. Generic style and import direction remain with Oxlint and the
 dependency graph stack.
+
+The first materialization PR for a selected private process boundary must connect
+its source rules and process/RPC conformance to the required quality runner with
+declared test identities and rejecting fixtures. Control Host to Team Topology
+S3 must exercise separate processes through Dapr; a same-process router cannot
+satisfy that boundary. These boundary checks must block production admission;
+an advisory-only rule does not satisfy the materialization requirement. This is
+an implementation obligation, not a claim that the current structural tooling
+verifies Dapr, deployment, or active-agent
+capacity. Deployment and workload qualification retain their own evidence.
 
 ## Dead-code and dependency hygiene
 

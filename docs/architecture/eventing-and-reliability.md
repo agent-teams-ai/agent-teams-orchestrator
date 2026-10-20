@@ -313,10 +313,11 @@ identity only, a redacted canonical fingerprint, or a versioned keyed digest.
 
 ## Independent cross-context fan-out
 
-The architecture is an event-driven modular monolith, not an event-sourced system.
-Context-owned SQL state remains authoritative. Integration events decouple
-bounded contexts and preserve the same boundary if a context is later extracted
-as a service.
+The architecture is an event-driven modular control plane with the accepted
+[role placement](deployment-profiles.md#service-role-map). Context-owned SQL
+state remains authoritative; the system is not event sourced. Integration
+events decouple bounded contexts across the declared roles and future
+placement changes.
 
 A producer publishes one semantic fact from its own Ubiquitous Language. It never
 constructs downstream notification, attention, context, analytics, or workflow
@@ -518,7 +519,7 @@ inbox, acknowledgement, topology, and failure contracts.
 The inbound path validates the envelope and schema, applies the consumer-owned
 ACL, and calls the owned application port within its existing inbox and Unit of
 Work boundary. It acknowledges only after owned state and required next intents
-commit durably. This direct adapter-to-port call adds no Moleculer dispatch hop.
+commit durably. This direct adapter-to-port call adds no Dapr or Moleculer RPC hop.
 External effects still require their own durable intent, idempotency, and
 unknown-outcome reconciliation.
 
@@ -531,29 +532,29 @@ required quarantine evidence or publish a required dead-letter record cannot
 authorize acknowledgement of the original message.
 
 [ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
-records the reviewed local Connect profile, leading Dapr candidate for
-distributed polyglot invocation, and conditional Moleculer profile for a
-Node.js group. Any RPC response, timeout, retry, or in-memory pending request never replaces
-durable command acceptance, receipts, outbox, inbox, or reconciliation. Core
-events may carry disposable wake-ups or diagnostics only when their loss is
-permitted. A local Moleculer broker does not remove required JetStream delivery.
-Selecting Dapr invocation does not select Dapr pub/sub, state, or workflows.
+selects standard gRPC through Dapr for actual private RPC boundaries. Moleculer
+is not selected for the same path. Any RPC response, timeout, retry, or in-memory
+pending request never replaces durable command acceptance, receipts, outbox,
+inbox, or reconciliation. Core NATS events may carry disposable wake-ups or
+diagnostics only when their loss is permitted. Dapr invocation does not replace
+required JetStream delivery or select
+Dapr pub/sub, state, actors, or workflows.
 
 Application policy classifies retryable work. JetStream performs redelivery.
 Any selected RPC mechanism observes one retry budget per logical operation
 across its hops, with stable identity and an end-to-end deadline; this is not a
-new platform-wide coordinator. Moleculer automatic retries remain disabled
-unless the capability explicitly qualifies them. Transport retries never prove
-idempotency of a business or external effect.
+new platform-wide coordinator. Automatic RPC mutation retries require explicit
+qualification of the owning idempotency and unknown-outcome contract. Transport
+retries never prove idempotency of a business or external effect.
 
 Get Modular composition owns process-wide clients and adapter lifecycle; the
 Supervisor owns a bundled broker process. Shutdown stops new admission and
 pulling, drains admitted work within a deadline, and leaves unacknowledged work
 recoverable. Qualification must prove replica sharing, bounded admission,
 acknowledgement after durable handling, publication failures, safe quarantine,
-and recovery after interrupted shutdown. Optional Core transporter dependencies
-must also satisfy the accepted dependency profile; selecting a framework is not
-an exception to it. These checks qualify a concrete adapter and version rather
+and recovery after interrupted shutdown. Each concrete client and adapter must
+satisfy the accepted dependency profile; selecting a framework is not an
+exception to it. These checks qualify a concrete adapter and version rather
 than inferring reliability from the framework name.
 
 ## Client realtime is not integration eventing

@@ -16,7 +16,8 @@ that contributors must implement now.
 
 - [Architecture overview](overview.md)
 - [Local Host lifecycle](local-host-lifecycle.md)
-- [Deployment profiles](deployment-profiles.md)
+- [Deployment profiles](deployment-profiles.md), including the canonical
+  [service role map](deployment-profiles.md#service-role-map) and first-materialization rules
 - [Strategic context map](context-map.md)
 - [Machine-readable architecture model](architecture-model.md)
 - [Evolution and quality attributes](evolution-quality-attributes.md)

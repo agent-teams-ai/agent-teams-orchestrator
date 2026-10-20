@@ -13,6 +13,9 @@ related:
   - ADR-0093
   - ADR-0106
   - ADR-0108
+  - ADR-0105
+  - ADR-0109
+  - architecture.deployment-profiles
   - ADR-0064
   - ADR-0035
   - ADR-0058
@@ -20,6 +23,7 @@ related:
   - OD-003
   - OD-009
   - OD-021
+  - OD-012
   - OD-035
   - OD-040
 ---
@@ -32,6 +36,12 @@ V1. ADR-0090 and ADR-0093 mark its package entries as non-materializable until
 OD-040 is resolved by an accepted implementation-start decision. Package
 creation still does not qualify the profile. Statements below describe that
 future profile and must not be read as a V1 availability claim.
+
+The [service role map](deployment-profiles.md#service-role-map) owns current
+placement and first-role process isolation under ADR-0109. This future native
+profile preserves its selected role processes; it does not silently fold them
+into Desktop or one Local Host. A compact native profile requires explicit
+approval and its own qualification before replacing any selected isolation.
 
 ## Purpose
 
@@ -93,6 +103,10 @@ flowchart LR
 The Supervisor is not on the normal SDK request path. After discovery and
 handshake, clients connect directly to the Host public control API.
 
+The diagram shows the public control path and managed dependencies, not a single
+process containing every selected service role. Separate role Hosts follow the
+service role map; they retain their own composition, admission, and drain.
+
 The SDK obtains an opaque realtime subscription descriptor and short-lived token
 from the Host through Connect. Token refresh and feed authorization also return
 to the Host. The Local Connector and Supervisor never issue subscription tokens,
@@ -106,6 +120,7 @@ select channels, or proxy live publications.
 | UoW, inbox, outbox, projections, and reconciliation | Orchestrator Host and owning feature |
 | Public control behavior and SDK capability negotiation | Orchestrator Host |
 | Local component discovery and process availability | Local Supervisor |
+| Native role Host and paired Dapr sidecar availability and process custody | Local Supervisor |
 | Version staging, activation lock, health, and bounded restart | Local Supervisor |
 | Local PostgreSQL binary, process, protected data root, endpoint, and custody | Local Supervisor |
 | PostgreSQL connections, context migrations, transaction semantics, and recovery validation | Host persistence adapters and owning context |
@@ -122,6 +137,44 @@ select channels, or proxy live publications.
 | Team project directory or execution workspace identity | Workspace Registry |
 
 Sharing a low-level process or connection does not transfer semantic ownership.
+
+## Native role processes and Dapr
+
+`daprd` is the Dapr runtime executable, deployed as a sidecar beside an
+application role instance. It is not an agent process, a bounded context, or a
+second Supervisor. Each native Host instance participating as a caller or
+callee in the selected private RPC profile has one paired `daprd` process.
+Ordinary local feature calls do not create sidecars. Durable-only JetStream
+workers have none unless an actual declared RPC dependency requires one.
+PostgreSQL, NATS, Centrifugo, Desktop, and AR do not acquire sidecars merely by
+being present in the composition.
+
+The Supervisor owns the availability, generation-bound pairing, protected
+endpoints, bounded restart, and custody of each selected Host and sidecar.
+Dapr supplies the qualified private standard-gRPC invocation mechanisms; each
+Host still constructs its own capabilities once and owns application admission,
+authorization, resource limits, and durable recovery. Starting or stopping
+`daprd` cannot confer runtime execution custody or authorize stopping provider
+processes. Development CLI launch behavior must not introduce a second process
+owner beside the Supervisor.
+
+The native profile selects and qualifies its actual resolver, peer identity,
+trust roots, credential delivery and rotation, service access policy, and
+application/sidecar endpoint protection before activation. Loopback, a Dapr
+application ID, discovery success, or a responsive port is not authority.
+OD-012 and OD-021 retain their applicable authority and lifecycle gates; local
+control endpoint selection remains under OD-001. The RPC selection does not
+adopt Dapr state, pub/sub, actors, placement, workflow, Jobs, or Redis.
+
+Readiness separates process liveness, sidecar initialization, application
+protocol and identity, compatible schema and durable topology, and current
+admission authority. Dapr's sidecar health probe alone cannot establish Host
+mutation readiness. If the profile enables Dapr application health checks,
+qualify the actual callback: its gRPC channel uses
+`dapr.proto.runtime.v1.AppCallbackHealthCheck/HealthCheck`, not the generic gRPC
+health service. Keep that callback in an infrastructure adapter and avoid a
+circular dependency between Host readiness and sidecar readiness. See the
+[official application health profile](https://docs.dapr.io/operations/resiliency/health-checks/app-health/).
 
 ## Two control paths
 
@@ -152,6 +205,12 @@ The default Desktop package includes pinned platform builds of managed local
 components, including PostgreSQL. It does not download managed engines on first
 launch. The release pipeline verifies provenance and checksum, applies nested
 platform signing and notarization, and stages the binaries beside the Host.
+The same offline, executable-verification, signing, and supported OS/architecture
+requirements apply to each selected native role Host and bundled `daprd`.
+Each released native tuple proves installed-package startup, pairing,
+authenticated readiness, bounded drain, custody after parent death, and restart;
+Linux or container evidence does not qualify Windows or macOS. Native packaging
+does not initialize development-only Dapr components as incidental dependencies.
 For Centrifugo, the Supervisor starts the memory-engine profile on a protected
 rotating endpoint. Users install, configure, or start nothing manually.
 
@@ -385,6 +444,8 @@ OD-040 remains the separate materialization decision.
   Supervisor restart; stale ownership files never authorize a second writer.
 - Readiness requires authenticated protocol and capability negotiation, not only a
   listening port.
+- Each selected role remains independently restartable; a sidecar or role crash
+  cannot transfer another role's admission or process custody.
 - Restart is bounded and classified; crash loops become a typed degraded state.
 - Client connection counts never determine Host lifetime.
 - generic SDK cleanup and observer exit detach only local I/O;
@@ -401,6 +462,14 @@ OD-040 remains the separate materialization decision.
 Storage migration rollback, compatibility windows, mixed-version behavior,
 activation failure, and service-manager fallback require the detailed state
 machine in OD-021. Implementations must not invent these policies independently.
+
+Each selected role closes application admission and stops new JetStream pulling
+before bounded drain. Accepted Units of Work persist their outcomes and required
+intents; unfinished work retains its original recovery identity. Required
+outbound adapters and sidecars remain available through that drain, then stop
+under Supervisor custody. A sidecar shutdown timer or an aborted request signal
+does not establish the application admission barrier. Role replacement does not
+terminate AR-owned provider execution.
 
 A staged Host activation follows this visibility protocol:
 
@@ -443,16 +512,19 @@ ACL, and JetStream adapter semantics. They differ only at deployment adapters:
 
 ```text
 Local:
-  Local Supervisor + Orchestrator Local + managed native PostgreSQL + managed NATS
-  + managed Centrifugo memory profile
+  Local Supervisor + selected native role Hosts and paired RPC sidecars
+  + managed native PostgreSQL + managed NATS + managed Centrifugo memory profile
 
 Hosted:
-  platform supervisor + Orchestrator Server + PostgreSQL + external NATS
-  + managed Centrifugo clustered profile
+  deployment platform + selected server role Hosts and paired RPC sidecars
+  + PostgreSQL + external NATS + managed Centrifugo clustered profile
 ```
 
 The hosted platform supervisor does not become a business service, just as the
 Local Supervisor is not a bounded context.
+Compose and Kubernetes are separate server deployment forms with separate
+qualification. Neither substitutes for native package evidence or authorizes
+automatic cloud/local mixing; the service role map owns their placement.
 
 Hosted composition may run multiple Centrifugo nodes with a Redis-compatible
 engine for connection fanout and short recovery history. Local composition uses
@@ -470,6 +542,8 @@ while SQL feeds and Connect reconciliation remain authoritative.
   authority.
 - Host and Supervisor authenticate instance and protocol generation before trust.
 - Administrative lifecycle capability is separate from normal SDK credentials.
+- Private RPC and sidecar APIs remain protected from public clients; peer trust
+  and sidecar access policy do not replace feature-owned product authorization.
 - Logs and diagnostics expose safe identifiers, never bootstrap capabilities.
 
 OD-001 selects the exact Unix socket, Windows named-pipe, or protected loopback

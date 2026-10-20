@@ -9,10 +9,12 @@ blocked_by:
   - OD-011
 related:
   - ADR-0105
+  - ADR-0109
   - ADR-0100
   - ADR-0101
   - ADR-0076
   - architecture.context-map
+  - architecture.deployment-profiles
   - OD-006
   - OD-011
   - OD-044
@@ -52,9 +54,9 @@ This direction proves one real feature-module vertical slice. It does not admit
 Team persistence, organization placement, Run creation, AR calls, provider
 readiness, agent execution, or GraphQL.
 
-[ADR-0105](../../../decisions/0105-portable-service-boundaries-and-moleculer.md#adoption-and-qualification)
+[ADR-0105](../../../decisions/0105-portable-service-boundaries-and-moleculer.md#first-product-integration-and-qualification)
 may reuse the checker as a small private-adapter fixture. It does not make S2 a
-Moleculer product service or require separate deployment. S1/S2 preserve their
+product service or require separate deployment. S1/S2 preserve their
 existing pure and public-API scope; the first product group begins with the
 persistent S3 subset described below.
 
@@ -79,16 +81,20 @@ or persistence framework in advance.
 
 ### Planned product service group
 
-ADR-0105 proposes the Agent/Team definitions and versioned roster as the first
-private capability group, with its reviewed portable contract and local adapter
-from S3's first implementation. The initial operations cover only that slice's accepted Team
-create/get/list behavior. Agent definitions, roster edits, cloning, and templates
+ADR-0105 selects the Agent/Team definitions and versioned roster as the first
+private capability group. From S3's first implementation, Control Host invokes
+the separate Team Topology process through feature-owned Protobuf and standard
+gRPC through Dapr. ADR-0109 and the
+[service role map](../../../architecture/deployment-profiles.md#service-role-map)
+require this placement for the whole implemented persistent Team create/get/list
+subset. Agent definitions, roster edits, cloning, and templates
 join through their own later slices; selecting a group does not freeze their
 contracts or add them to S3.
 
 The public Connect edge and S4 Run `team-activation` consume the group through
 their typed ports and mappings. Get Modular constructs the application once;
-the selected transport adapter invokes those capabilities without a second business graph.
+the selected transport adapter invokes those capabilities without a second
+business graph or an in-process fallback inside Control Host.
 The current assignment authority, immutable versions, revisions, receipts, and
 outbox retain this context's transaction boundary. Remote placement does not
 move Run admission, active Agent occupancy, organizational placement, or provider

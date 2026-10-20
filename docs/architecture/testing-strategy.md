@@ -5,7 +5,11 @@ status: accepted
 owner: architecture/quality
 summary: Required test layers, conformance suites, architecture checks, and quality gates.
 related:
+  - ADR-0105
   - ADR-0106
+  - ADR-0107
+  - ADR-0108
+  - ADR-0109
   - ADR-0028
   - ADR-0015
   - ADR-0016
@@ -30,6 +34,7 @@ related:
   - ADR-0064
   - ADR-0065
   - architecture.local-host-lifecycle
+  - architecture.deployment-profiles
   - architecture.security
 code_anchors:
   - pattern: architecture/executable-specs/**
@@ -107,7 +112,7 @@ Validate:
 - transport error mapping.
 
 For the first application capability, behavior fixtures call its input port
-without Connect, GraphQL, Moleculer, generated messages, or a DI container. The
+without Connect, GraphQL, Dapr, generated messages, or a DI container. The
 first wire adapter adds mapping fixtures for trusted scope, typed failures, and
 applicable deadline/cancellation behavior, plus negative architecture fixtures
 for framework leakage. The [additional API profile](sdk-and-transports.md#additional-client-api-styles)
@@ -335,17 +340,6 @@ prove one verified cluster activation, required blob availability, fresh recover
 authority, and reconciliation of restored receipts against already-performed
 external actions. Missing restored receipts never authorize blind repeat dispatch.
 
-Packaged workload qualification for 100 or more active agents states command and
-event rates, bursts, payload sizes, fanout, data size, duration, and hardware.
-Tests exercise the aggregate connection budget across context roles and workers,
-bounded admission, relay fairness, long queries, result decoding, and shared disk
-pressure. Cancellation, health, feeds, and recovery must remain usable under
-saturation. Record queue and pool waits, backlog, event-loop delay, memory, and
-disk growth; idle client counts do not establish active-agent capacity.
-These persistence workload scenarios can use deterministic loads and a fake
-runtime without launching real provider agents. They do not replace the
-separate runtime-connectivity qualification.
-
 These runtime contract suites are separate from provider-adapter conformance owned
 by `ar` and from platform or bounded-context persistence conformance. Passing one
 suite never substitutes for another.
@@ -357,6 +351,71 @@ Every owner proves a local freeze before inventory, exact receipt replay, and
 truthful policy-retained, unsupported, unknown, and reconcile-required outcomes.
 Managed Shared fixtures additionally attempt cross-tenant substitution during
 inventory, credential detach, workspace unlink, evidence query, and restore.
+
+### Concurrent execution and service-role qualification
+
+The [service role map](deployment-profiles.md#service-role-map) owns placement
+and the first owning feature's process-isolation requirement under ADR-0109.
+The first production implementation of a selected role proves its independently
+runnable composition root, separate OS process, bounded admission, lifecycle,
+and declared resource profile. A package, Get Modular group, worker thread, or
+same-process fake cannot substitute for this evidence. Unimplemented roles do
+not justify empty production packages or framework scaffolding.
+
+Applicable conformance proves:
+
+- real consumers invoke the selected private feature-owned Protobuf/gRPC contract
+  through the paired Dapr sidecars, while public clients retain Connect;
+- role and sidecar death, stall, overload, startup delay, and restart do not
+  transfer another role's mutation authority or AR execution custody;
+- replica routing includes only interchangeable method sets, and concurrent
+  replicas preserve owned revisions, receipts, claims, and transaction semantics;
+- readiness verifies the selected resolver, peer trust, authorization, schema and
+  durable topology before admission; sidecar health or a listening port alone
+  cannot satisfy it;
+- drain closes admission and pulling before bounded completion, preserves
+  accepted outcomes and recoverable work, and keeps required outbound adapters
+  available until that stage ends;
+- lost responses, peer credential rotation, direct-backend bypass attempts,
+  stale discovery, and unavailable dependencies produce typed, bounded outcomes
+  with one retry budget per logical RPC operation;
+- durable-only workers run with direct official JetStream pull adapters and no
+  Dapr dependency unless an actual separately declared RPC capability requires it.
+
+AR observation subscriptions use the AR Published Language and its qualified
+adapter. They are not assumed to be JetStream consumers. The direct JetStream
+rule applies to declared internal durable publications and subscriptions.
+
+Server workload architecture targets thousands of simultaneously running agents.
+Each qualification states the exact admitted execution concurrency, command and
+event rates, bursts, payload sizes, fanout, data size, duration, hardware, replica
+limits, and deployed adapter set. Stored Agents, queued work, idle sessions, or
+open client connections do not establish that capacity. Exercise aggregate
+connection budgets across role replicas, workers, maintenance, and rollout surge;
+bounded admission; relay fairness; long queries and result decoding; observation
+processing; and shared disk pressure. Cancellation, health, feeds, and recovery
+remain usable under the tested saturation and failure conditions. Record queue
+and pool waits, backlog, event-loop delay, memory, and disk growth.
+
+Deterministic traffic and a fake AR may qualify Orchestrator and persistence
+behavior at a modeled execution workload without launching provider agents.
+Actual simultaneous execution capacity additionally requires AR-owned runtime
+and provider-adapter evidence, including admission, custody, resources, and the
+advertised execution placement. Neither modeled traffic nor a successful RPC
+qualifies provider capacity, runtime connectivity, or a production SLO.
+
+| Deployment form | Additional qualification evidence |
+|---|---|
+| Compose server | Actual application/sidecar replica pairing, private network and selected resolver, authenticated readiness, stop order, restart, and bounded drain in the released composition |
+| Kubernetes server | Actual injected sidecars, discovery and peer identity, application and sidecar readiness, replica rollout/surge and termination, credential rotation, and bounded drain in the released cluster profile |
+| Future native Fully Local | Installed-package role processes and sidecars under Supervisor custody, signed offline artifacts, protected endpoints, authenticated readiness, and each released OS/architecture tuple under the local lifecycle requirements |
+
+Compose and Kubernetes both require their own evidence; one does not qualify the
+other. Fully Local remains deferred under OD-021, OD-035, and OD-040 and the
+existing deployment-qualification gates. Native evidence cannot be inferred from
+container tests. A compact native role composition requires explicit approval
+and separate qualification, not silent co-location that removes selected process
+isolation. These obligations do not introduce production code or a checker.
 
 ### Adapter integration tests
 
@@ -492,6 +551,10 @@ Automated checks must reject:
 - context-owned storage or projections placed in global platform packages;
 - process-wide resources instantiated below the application composition root;
 - multiple process-owner implementations wired simultaneously;
+- selected role placement implemented only as a same-process module, shared heap,
+  or worker thread instead of the required process boundary;
+- Dapr types or routing metadata in domain/application ports, incidental Dapr
+  sidecars on durable-only workers, or public clients using private sidecar APIs;
 - bounded-context domain/application imports in Local Supervisor packages;
 - process installation, supervision, update, or termination in the ordinary SDK;
 - normal public API commands proxied through Local Supervisor adapters;

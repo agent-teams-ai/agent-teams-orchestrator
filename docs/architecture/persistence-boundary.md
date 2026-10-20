@@ -10,6 +10,8 @@ related:
   - ADR-0025
   - ADR-0106
   - ADR-0108
+  - ADR-0109
+  - architecture.deployment-profiles
   - ADR-0052
   - ADR-0046
   - ADR-0048
@@ -249,18 +251,32 @@ inbox, outbox, and recovery under load. Database I/O being asynchronous does not
 bound JavaScript result decoding or an admission queue.
 
 Composition sets a total connection budget across context roles, Host replicas,
-background workers, and maintenance. Connections and pools are not allocated per
-agent; independent context defaults cannot exceed that deployment budget.
+background workers, and maintenance. Sum each role's maximum replica count times
+its pool allowance, including rolling-update surge and maintenance reserves,
+within the deployment budget and declared operational headroom. Independent
+context defaults cannot exceed that budget. Connections and pools are not
+allocated per agent, and adding role replicas does not increase PostgreSQL
+capacity by itself. The [service role map](deployment-profiles.md#service-role-map)
+owns placement; one context's semantic mutation ownership does not require one
+singleton writer process. Qualified write replicas preserve the same constraints,
+revisions, receipts, claims, and fencing rather than splitting a transaction
+across RPC roles.
 Queue depth, pool wait, transaction latency, lock wait, timer lag, rejection,
 backlog, and disk headroom are observable. PostgreSQL WAL and temporary files,
 NATS, blobs, logs, and backup staging share the local storage budget. Required
 receipts and dispatch intent are never discarded as an overload shortcut.
 
-An advertised workload of 100 or more active agents requires representative
-command and event rates, bursts, payloads, fanout, data size, duration, and
-packaged hardware. A single SQL client or idle connection count is not evidence
-for that workload. Numerical limits remain subject to the existing reliability
-qualification and approval rules.
+The server architecture targets thousands of simultaneously running agents, not
+thousands of stored Agents, queued jobs, or idle sessions. Persistence workload
+qualification states an exact concurrent-execution target and representative
+command and event rates, bursts, payloads, fanout, data size, duration, deployment
+form, and hardware. A single SQL client or idle connection count is not evidence
+for that workload. Modeled traffic with a fake AR can qualify persistence
+behavior at the declared load; it cannot qualify actual AR/provider execution
+capacity. Compose, Kubernetes, and any future native profile require evidence
+for their own composition. Numerical limits remain subject to the existing
+reliability qualification and approval rules; this target is not a capacity claim
+or SLO.
 
 ### Hosted PostgreSQL operations
 

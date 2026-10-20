@@ -17,6 +17,8 @@ related:
   - ADR-0065
   - ADR-0067
   - ADR-0105
+  - ADR-0109
+  - architecture.deployment-profiles
   - OD-016
   - OD-019
   - architecture.security
@@ -79,24 +81,29 @@ Machine linting enforces the profile. Generated code is never hand-edited.
 ### Service implementation portability
 
 The public API is independent of the implementation language and deployment
-layout behind it. Get Modular module identities, Moleculer action names, broker
-node identities, and framework contexts do not become public resource names,
+layout behind it. Get Modular module identities, Dapr app identities, replica
+identities, and framework contexts do not become public resource names,
 operation identities, or request fields. A replacement implementation preserves
 the published schema and behavior through explicit boundary mappers.
 
 [ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
-proposes a corresponding profile for capabilities that actually need an
-independent network or language boundary. It does not promote every feature,
-module, or application port into a Protobuf service, and it does not make public
-control messages the Published Language of an internal context. Its private RPC
-and runtime placement choices remain proposed; the public Protobuf, Buf, and
-Connect decisions in ADR-0016 and ADR-0017 remain authoritative.
+selects feature-owned Protobuf and standard gRPC through Dapr for actual private
+RPC boundaries. It does not promote every feature, module, or application port
+into a Protobuf service, and it does not make public
+control messages the Published Language of an internal context. Public Protobuf,
+Buf, and Connect remain governed by ADR-0016 and ADR-0017. The
+[service role map](deployment-profiles.md#service-role-map) owns placement under
+ADR-0109; neither Dapr routing nor a private service identity grants product
+authorization.
 
-For a selected portable capability, the proposal introduces its private schema
-with the first implementation, including an initially co-located implementation.
-It does not require forecasting every future service. A schema may evolve under
-its actual compatibility commitments; local placement does not waive obligations
-to published clients, durable records, or independently upgraded consumers.
+For a selected private RPC boundary, introduce its owned schema and real process
+boundary with the first production materialization. Control Host calls Team
+Topology S3 through Dapr in a separate process; a same-process router fixture
+does not satisfy that obligation. Typed local calls remain appropriate inside a
+role. A schema may evolve under its actual compatibility commitments; sharing a
+machine does not waive obligations to published clients, durable records, or
+independently upgraded consumers. Private wire models retain their own mappings
+instead of becoming public SDK models automatically.
 
 ## Exact-value profile
 

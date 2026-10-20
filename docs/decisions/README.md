@@ -18,7 +18,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 
 | Concern | Current decisions | Current architecture |
 |---|---|---|
-| System shape and long-term evolution | `ADR-0001`, `ADR-0042`, `ADR-0051`, `ADR-0054`, `ADR-0062`, `ADR-0065`, `ADR-0076` | [Overview](../architecture/overview.md), [context map](../architecture/context-map.md), [architecture model](../architecture/architecture-model.md) |
+| System shape and long-term evolution | `ADR-0109`, `ADR-0042`, `ADR-0051`, `ADR-0054`, `ADR-0062`, `ADR-0065`, `ADR-0076` | [Overview](../architecture/overview.md), [context map](../architecture/context-map.md), [architecture model](../architecture/architecture-model.md) |
 | Feature and dependency boundaries | `ADR-0012`, `ADR-0038`, `ADR-0075`, `ADR-0095`, `ADR-0096`, `ADR-0097`, `ADR-0103`, `ADR-0104` | [Feature profile](../architecture/feature-module-standard.md), [dependency rules](../architecture/dependency-rules.md), [extension points](../architecture/extension-points.md) |
 | Runtime ownership and AR integration | `ADR-0003`, `ADR-0028`, `ADR-0069`, `ADR-0079`, `ADR-0080`, `ADR-0083`, `ADR-0084`, `ADR-0085`, `ADR-0089`, `ADR-0092`, `ADR-0094` | [Runtime boundary](../architecture/runtime-boundary.md), [Execution Observation](../domain/contexts/execution-observation/README.md) |
 | Eventing, delivery, and replay | `ADR-0004`, `ADR-0010`, `ADR-0019`, `ADR-0035`, `ADR-0107` | [Eventing and reliability](../architecture/eventing-and-reliability.md) |
@@ -36,9 +36,11 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0082: Break-glass reduces Orchestrator authority](0082-break-glass-reduces-orchestrator-authority.md)
 - [ADR-0099: Foundation-scoped scaffolding recovery](0099-foundation-scoped-scaffolding-recovery.md)
 - [ADR-0102: Node.js 24 production baseline and Node.js 26 compatibility staging](0102-node-js-24-production-baseline-and-node-js-26-compatibility-staging.md)
-- [ADR-0105: Portable Service Boundaries and Moleculer](0105-portable-service-boundaries-and-moleculer.md)
 
 ## Accepted decisions
+
+- [ADR-0109: Distributed Hosts and Concurrent Agent Scale](0109-distributed-hosts-and-concurrent-agent-scale.md)
+- [ADR-0105: Portable Service Boundaries and Dapr](0105-portable-service-boundaries-and-moleculer.md)
 
 - [ADR-0103: Feature Module Standard v1.1 Adoption](0103-feature-module-standard-v1-1-adoption.md)
 - [ADR-0104: Get Modular 0.5 Static Composition](0104-get-modular-0-5-static-composition.md)
@@ -46,7 +48,6 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0107: JetStream SDK for Durable Delivery](0107-jetstream-sdk-for-durable-delivery.md)
 - [ADR-0108: Bundled PostgreSQL Launcher Integration](0108-bundled-postgresql-launcher-integration.md)
 - [ADR-0083: Orchestrator assurance intent and AR containment ownership](0083-orchestrator-assurance-intent-and-ar-containment-ownership.md)
-- [ADR-0001: Headless event-driven modular monolith](0001-headless-event-driven-modular-monolith.md)
 - [ADR-0003: Runtime lifecycle belongs to ar](0003-ar-owns-runtime-lifecycle.md)
 - [ADR-0004: Broker-neutral core with NATS JetStream adapter](0004-broker-neutral-events-with-jetstream.md)
 - [ADR-0005: Public contracts are outside application and domain](0005-public-contracts-outside-application.md)
@@ -132,6 +133,8 @@ discovery. The lifecycle lists below remain the complete status ledger.
 - [ADR-0101: Run-specific Rosters, Coordination, and Exclusive Agent Occupancy](0101-run-specific-rosters-coordination-and-exclusive-agent-occupancy.md)
 
 ## Superseded decisions
+
+- [ADR-0001: Headless event-driven modular monolith](0001-headless-event-driven-modular-monolith.md)
 
 - [ADR-0011: Context-isolated SQLite and PostgreSQL topology](0011-context-isolated-sqlite-and-postgres-topology.md)
 - [ADR-0040: Context-private Awilix containers](0040-context-private-awilix-containers.md)

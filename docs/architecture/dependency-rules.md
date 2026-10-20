@@ -15,7 +15,9 @@ related:
   - ADR-0090
   - ADR-0104
   - ADR-0105
+  - ADR-0109
   - architecture.composition
+  - architecture.deployment-profiles
 code_anchors:
   - pattern: architecture/foundation/dependency-declarations.yaml
     enforcement: required
@@ -103,13 +105,14 @@ named `declaration.ts` or `module.ts` outside that boundary is not an exception.
 Feature business factories expose typed dependencies and APIs without importing
 Get Modular or exposing its lifecycle and module types.
 
-The Moleculer profile proposed by
+The private invocation profile selected by
 [ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md)
-keeps broker construction, service registration, and lifecycle ownership in Host
-composition. Thin inbound and outbound adapters may map framework calls to
-declared ports; domain and application code never call the broker or receive its
-context. Get Modular assembly, a Moleculer broker, and a private DI container must
-not each independently construct or stop the same resource.
+keeps standard gRPC and Dapr clients, servers, and transport mapping at the edge.
+Each Host role owns one Get Modular graph and its application resources. Thin
+inbound and outbound adapters map calls to declared ports; domain and application
+code never receive sidecar clients, generated messages, or framework contexts.
+Local Supervisor or the hosted platform owns process availability. An adapter or
+private DI container must not independently reconstruct or stop the same resource.
 
 ## Forbidden dependencies
 
@@ -118,7 +121,7 @@ Domain and application layers must not import:
 - public SDK, HTTP, gRPC, JSON-RPC, or integration-event schemas;
 - Electron, React, browser globals, or frontend stores;
 - NATS, Temporal, HTTP servers, gRPC servers, or broker clients;
-- Get Modular or Moleculer APIs, service schemas, contexts, or lifecycle types;
+- Get Modular, Dapr, or Moleculer APIs, contexts, or lifecycle types;
 - `ar` implementation modules;
 - OpenCode, Claude, Codex, or other provider SDKs;
 - Node filesystem, child-process, or network implementations;
@@ -148,17 +151,22 @@ bidirectional collaboration, prefer events, a process manager, or move the
 genuinely shared concept to the context that owns its lifecycle. Do not solve a
 cycle by importing both public application facades.
 
-A direct in-process adapter is permitted as a deployment optimization, but it must
-implement the same consumer-owned port and published contract used by a future
-remote adapter.
+A direct in-process adapter is permitted within one declared role and in tests.
+It cannot replace a selected production process boundary. The
+[service role map](deployment-profiles.md#service-role-map) owns placement under
+ADR-0109; real private RPC boundaries use feature-owned Protobuf and standard gRPC
+through Dapr from their first production materialization. Control Host to Team
+Topology S3 is the first such boundary, not a same-process router deployment.
 
-That contract cannot rely on shared mutable objects, closures, process-local
-identity, framework exceptions, or a database transaction crossing the boundary.
-An extracted capability keeps its own state and transaction owner. Network
-serialization and a new implementation language change its adapter and
+The private RPC contract cannot rely on shared mutable objects, closures,
+process-local identity, framework exceptions, or a database transaction crossing
+the boundary.
+A separately running capability keeps its own state and transaction owner.
+Network serialization and a new implementation language change its adapter and
 implementation, not the consuming application's domain model. The private wire
-profile remains the explicit proposal in ADR-0105 rather than an implicit
-requirement to serialize every internal call.
+profile does not require serializing ordinary collaboration within a role or
+creating a service per feature. Durable JetStream handlers invoke their owner's
+application ports directly; no extra RPC hop is implied by process placement.
 
 Inside one bounded context, features may use only the provider feature's curated
 `domain/internal-api.ts` or `application/internal-api.ts` and an exact directed
@@ -230,6 +238,14 @@ expected to shrink as validators are added:
 - public Protobuf outside the accepted cross-language profile;
 - context packages importing consumer-owned ports from an integration adapter;
 - broad `spi` and package-root barrel exports.
+
+The first materialization of a selected service boundary must add rejecting
+source fixtures and process/RPC conformance to the required quality runner in
+the same PR. Those checks must cover bypass imports, transport leakage, duplicate
+construction, and an in-process production replacement of the declared boundary.
+Until that implementation exists, this is a materialization obligation; the
+current import graph and documentation checks do not prove process isolation or
+Dapr conformance.
 
 TypeScript path aliases are conveniences, not boundaries. `package.json` exports,
 workspace dependencies, lint rules, and architecture tests enforce boundaries.

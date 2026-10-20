@@ -7,6 +7,8 @@ summary: Normative quality attributes and review rules for long-term orchestrato
 related:
   - ADR-0043
   - ADR-0042
+  - ADR-0109
+  - architecture.deployment-profiles
   - architecture.overview
   - architecture.testing
 ---
@@ -20,8 +22,11 @@ frontend backend or a provider-specific launcher. Architecture must remain usabl
 across many runtimes, local and hosted deployments, multiple clients and languages,
 multi-tenancy, and future bounded-context extraction.
 
-This horizon changes the evidence required for a design; it does not permit
-speculative abstractions without an owner.
+The [service role map](deployment-profiles.md#service-role-map) commits the
+coarse process boundaries and server target of thousands of concurrently running
+agents now. Their first owning features establish those boundaries rather than
+leaving extraction to a later reminder. This horizon changes the required
+evidence; it does not permit speculative abstractions without an owner.
 
 ## Priority quality attributes
 
@@ -53,7 +58,8 @@ A durable abstraction, extension point, package, service, or context needs:
 - replacement or extraction semantics when replaceability is claimed;
 - conformance tests for behavior shared by multiple implementations;
 - a migration and compatibility strategy for persisted or public state;
-- operational evidence before adding distributed deployment complexity.
+- the accepted role placement and first-materialization process evidence;
+- operational qualification before advertising a distributed deployment.
 
 Two similar classes or a possible future integration are not sufficient evidence.
 Conversely, implementation convenience cannot collapse models with different

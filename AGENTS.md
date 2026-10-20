@@ -82,7 +82,7 @@ before a high-cost boundary violation.
 - Cross-context collaboration uses Published Language, integration events, or a
   consumer-owned port plus ACL. Never deep-import another context or write its
   tables.
-- NATS, Temporal, AR, PostgreSQL, Electron, HTTP, provider SDKs, Moleculer, and
+- NATS, Temporal, AR, PostgreSQL, Electron, HTTP, provider SDKs, Dapr, and
   Drizzle remain adapters or composition concerns. Get Modular imports and
   descriptors remain in composition and tests.
 - Public transport models, integration events, domain events, application models,
@@ -110,27 +110,33 @@ before a high-cost boundary violation.
 - The selected Host assembles capabilities once through the exact Get Modular
   Core/Assembly `0.5.0` pair. Meaningful composition seams use typed entries and
   static groups; private helpers stay direct imports. Never retain a parallel
-  Awilix graph or reconstruct the same features in Moleculer service factories.
+  Awilix graph or reconstruct a remote role's features in transport service factories.
   Follow the [composition profile](docs/architecture/composition-and-dependency-injection.md),
   including its stricter authoring budgets and first-scope conformance requirements.
-- Before extracting a service, record its capability owner, measurable reason,
-  versioned contract and wire protocol, transaction and durability boundary,
-  authorization, concurrency, recovery, and lifecycle owner. Framework selection
-  or module count does not supply these decisions. Name the semantic owner,
-  callable capability, and execution placement separately; justify RPC or a
-  durable handler without deriving services from nested features. Use owned
-  ports, not a generic service locator; the [service-boundary proposal](docs/decisions/0105-portable-service-boundaries-and-moleculer.md)
-  records the reviewed portable contract, local RPC, and distributed runtime
-  alternatives. Follow the [planned groups](docs/architecture/context-map.md#planned-service-groups):
-  Team Topology's S3 product group is distinct from the S1/S2 checker fixture.
-  Every operation names its group, real consumer, and request/reply or durable
-  semantics. Distinguish a capability group, deployment role, and interchangeable
-  replica set; never split one transaction across RPC roles. Use selected
-  framework or platform mechanisms through typed adapters, with explicit
-  discovery, routing, identity, admission, drain, and retry owners. Do not rebuild
-  them as a generic framework. A `.proto` file does not select Moleculer or Dapr;
-  standard RPC and framework packet protocols remain distinct. Proposed runtime
-  choices and disposable spikes are not production qualification.
+- Design for thousands of simultaneously running agents, not stored definitions
+  or idle sessions. Follow the accepted
+  [service role map](docs/architecture/deployment-profiles.md#service-role-map)
+  and its Compose, Kubernetes, and future native-local mappings. A semantic
+  mutation owner can have many qualified replicas; process lifecycle and AR
+  execution custody remain separate ownership questions.
+- Materialize each selected isolated role as a separate OS process with its first
+  owning feature. Control Host to Team Topology S3 is the first stateful private
+  boundary. Do not postpone the role to a later scaling milestone, create empty
+  services, or hide it behind an in-process production fallback. Before the first
+  role or new handler ships, complete the
+  [placement record](docs/architecture/deployment-profiles.md#first-materialization-placement-record)
+  and [blocking role gate](docs/architecture/implementation-readiness-gates.md#first-materialization-role-gate),
+  including actual process/transport evidence and rejecting source checks in the
+  required runner. Current documentation is not proof those checks exist.
+- Private request/reply uses feature-owned Protobuf and standard gRPC through
+  Dapr under [ADR-0105](docs/decisions/0105-portable-service-boundaries-and-moleculer.md).
+  Public clients use Connect; ordinary calls inside a role remain typed local
+  collaboration. Durable JetStream handlers invoke owned application ports
+  directly and receive no Dapr sidecar without a real RPC dependency. Do not
+  introduce Moleculer, a custom registry/RPC bus, or incidental Dapr state,
+  pub/sub, actors, jobs, or workflows on that path. Keep framework and wire types
+  in adapters/composition, with explicit discovery, trust, admission, drain,
+  retry, and recovery ownership.
 - Define each application's input port and narrow trusted invocation profile
   without transport types. Connect, future GraphQL, and selected private RPC
   adapters map to that port. Keep composed queries behind owned query ports and

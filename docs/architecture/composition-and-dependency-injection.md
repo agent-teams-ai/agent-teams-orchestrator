@@ -9,7 +9,10 @@ related:
   - ADR-0030
   - ADR-0103
   - ADR-0104
+  - ADR-0105
+  - ADR-0109
   - architecture.dependency-rules
+  - architecture.deployment-profiles
   - architecture.feature-module-standard
 ---
 
@@ -37,8 +40,8 @@ The following is the local Consumer Module Standard adoption profile; the
 | Core and Assembly | `@get-modular/core@0.5.0`, `@get-modular/assembly@0.5.0`, exact pair |
 | Accepting decision | `ADR-0104` |
 | Production scope | Orchestrator Host composition under `apps/**/src/composition/` and its owned context capability composition under `packages/contexts/**/src/features/**/composition/` |
-| Composition owner | Selected Host profile, with context-owned entries and curated context handles |
-| Lifecycle owner | Host for application resources; Local Supervisor for local component availability |
+| Composition owner | One selected Host process role, with context-owned entries and curated context handles |
+| Lifecycle owner | Each Host for its application resources; Local Supervisor or hosted platform for component availability |
 | Legacy boundary | Historical Awilix ADR only; no parallel production container or direct assembly fallback |
 | Exceptions | None declared |
 | Current implementation status | Selected architecture; production materialization and first-scope conformance remain gated |
@@ -60,29 +63,30 @@ The existing extension safety and artifact-admission contracts still apply.
 
 ```mermaid
 flowchart TB
-    Profile["Selected Host profile"] --> Root["Core and Assembly root"]
-    Root --> Work["Work Coordination group"]
-    Root --> Runs["Run Orchestration group"]
-    Root --> Teams["Team Topology group"]
-    Work --> WorkApi["Typed context handle"]
-    Runs --> RunsApi["Typed context handle"]
-    Teams --> TeamsApi["Typed context handle"]
+    Profile["Selected process role"] --> Root["Core and Assembly root"]
+    Root --> Capabilities["Declared owned capabilities"]
+    Root --> Inbound["Inbound adapters"]
+    Root --> Outbound["Outbound port adapters"]
+    Inbound --> Capabilities
+    Capabilities --> Outbound
     Host["Host lifecycle"] --> Root
     Host --> Resources["Owned technical resources"]
-    Resources -. "explicit borrowed capabilities" .-> Work
-    Resources -. "explicit borrowed capabilities" .-> Runs
-    Resources -. "explicit borrowed capabilities" .-> Teams
+    Resources -. "explicit borrowed capabilities" .-> Inbound
+    Resources -. "explicit borrowed capabilities" .-> Outbound
 ```
 
-Each selected Host profile has one production composition authority. It selects
-bindings once, constructs the declared capabilities once, and retains the closed
-root handles. Context-internal capabilities are private even when one Host owns
-the graph. Other contexts receive only a declared Published API through their
-consumer-owned adapters. No context inspects another context's registrations,
-implementation instances, or internal graph.
+Each declared Host process role has one production composition authority. It
+selects bindings once, constructs its declared capabilities once, and retains
+the closed root handles. The [service role map](deployment-profiles.md#service-role-map)
+owns process placement under ADR-0109; this diagram describes construction
+inside one role. Context-internal capabilities remain private. Other contexts
+receive only a declared Published API through their consumer-owned adapters. No
+context inspects another context's registrations, implementation instances, or
+internal graph.
 
-A separately running Host constructs its own declared profile. Agent, tenant,
-project, team, task, run, and session identities do not create extra graphs,
+A separately running Host constructs only its own declared profile; it does not
+reconstruct a remote owner's capabilities as an in-process fallback. Agent,
+tenant, project, team, task, run, and session identities do not create extra graphs,
 brokers, containers, database clusters, or processes.
 
 ## Physical placement
@@ -158,7 +162,7 @@ Prohibited mechanisms include:
 - mutable singleton registration or string lookup from business code;
 - a generic `ContainerPort`, `ServiceLocator`, or arbitrary capability registry;
 - a second Awilix or direct-factory production graph for the same capabilities;
-- constructing the feature graph again inside a Moleculer service factory;
+- constructing the feature graph again inside a gRPC handler or service adapter;
 - acquiring runtime execution authority through module registration;
 - using `any`, broad casts, or a double assertion through `unknown` to hide a
   binding, capability, or lifetime mismatch.
@@ -201,9 +205,11 @@ resources, and then close shared resources. Do not infer this ordering from a
 container or a broker's global exit hook.
 
 The Local Supervisor separately owns the availability and activation of local
-Host, PostgreSQL, and NATS components. PostgreSQL and NATS adapters inside the
-Host own protocol connections and behavior, not a competing process lifecycle.
-Hosted component supervision belongs to the deployment platform.
+Host roles, Dapr sidecars, PostgreSQL, and NATS components. Host adapters own
+protocol connections and behavior, not a competing process lifecycle. Hosted
+component supervision belongs to the deployment platform. Dapr service readiness
+and Host application readiness are explicit observations; neither transfers
+business ownership or qualifies the other component automatically.
 
 A graph or Host restart has no business meaning. Tasks, runs, operations, inboxes,
 outboxes, and dispatchers recover from their owning durable contracts.
@@ -221,11 +227,11 @@ interface ContextHandle<TPublishedApi> {
 }
 ```
 
-The composition-owned real type exposes no Core, Assembly, Moleculer, or database
+The composition-owned real type exposes no Core, Assembly, Dapr, gRPC, or database
 implementation type. Internal factories, repositories, operation-scope creation,
 and graph inspection remain private.
 
-## Cross-context collaboration and service extraction
+## Cross-context collaboration and service boundaries
 
 A consuming context receives an adapter implementing its consumer-owned port.
 That adapter calls the provider's Published API or versioned transport contract.
@@ -233,18 +239,27 @@ Integration events remain the preferred mechanism where synchronous
 collaboration is not required. Synchronous dependencies form an acyclic graph;
 cycles require corrected ownership, events, or an owning process manager.
 
-Before creating a new independently deployed service, name its owning capability,
-reason for independent scaling or isolation, contract and wire protocol, state
-and transaction owner, durability, authorization, concurrency and recovery
-semantics, lifecycle owner, and the workload that justifies separation. Record
-these in the owning feature/context and accepted deployment decision. A file
-size, feature count, or number of agents is not an extraction criterion.
+Before materializing a declared service role, name its owning capability,
+selected placement, contract and wire protocol, state and transaction owner,
+durability, authorization, concurrency and recovery semantics, lifecycle owner,
+and resource budgets. Record these in the owning feature/context and accepted
+deployment profile. A new role beyond the accepted map requires a concrete
+scaling or isolation reason and an accepted deployment decision; file size,
+feature count, or an entity count does not create another service.
 
-The reviewed local and distributed runtime alternatives and portable RPC profile are in
-[ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md). That
-proposal does not replace the accepted public Connect API, JetStream durability,
-AR execution ownership, or Host composition. Routing adapters use constructed
-capabilities rather than constructing another business graph.
+[ADR-0105](../decisions/0105-portable-service-boundaries-and-moleculer.md) selects
+feature-owned Protobuf and standard gRPC through Dapr at real private RPC
+boundaries. Apply the process separation from first production materialization.
+Control Host reaches Team Topology S3 through its consumer-owned port and ACL in
+a separate process through Dapr; an in-process router cannot satisfy that
+boundary. Each process assembles its capabilities once, and adapters invoke the
+resulting handles. Ordinary collaboration within a role remains typed and local.
+
+The public Connect API, direct JetStream durable handlers, AR execution ownership,
+and Host construction retain their existing contracts. Moleculer is not selected
+as an additional private RPC layer. Dapr invocation does not adopt Dapr state,
+pub/sub, actors, or workflows. Exact dependency and deployment qualification
+remains separate from these architecture selections.
 
 ## Profiles, verification, and replacement
 
