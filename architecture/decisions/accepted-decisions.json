@@ -508,6 +508,11 @@
       "immutableDigest": "sha256:ba495d3cd561645a0f28750e43dd0d0418721975ff097ae639c27ec893b9a317"
     },
     {
+      "id": "ADR-0105",
+      "path": "docs/decisions/0105-portable-service-boundaries-and-moleculer.md",
+      "immutableDigest": "sha256:dae50b235ee2eb99fb9df420c9fafd7a8504ac3122af5c226362601fccb9a07f"
+    },
+    {
       "id": "ADR-0106",
       "path": "docs/decisions/0106-native-postgresql-for-local-and-hosted-profiles.md",
       "immutableDigest": "sha256:2f46647b263f278a56b6bae4a26011916c99b4fe037e8bcdacb26453d3c0f3b4"
@@ -521,6 +526,11 @@
       "id": "ADR-0108",
       "path": "docs/decisions/0108-bundled-postgresql-launcher-integration.md",
       "immutableDigest": "sha256:3544a1920da7216e564f2e27340d238d96f0883b5ffbcb525d3f24c7651851cf"
+    },
+    {
+      "id": "ADR-0109",
+      "path": "docs/decisions/0109-distributed-hosts-and-concurrent-agent-scale.md",
+      "immutableDigest": "sha256:9c215da99eb0b0a308d44ff9e6b24a6c7daf0c4849878b27f13b7df03c8f55b5"
     }
   ]
 }
