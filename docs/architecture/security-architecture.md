@@ -96,6 +96,31 @@ flow records the configured product authority provider, not an internal Access
 Control context, as the owner of product authorization, matching ADR-0080 and
 the authority table above; provider topology stays open under OD-012.
 
+### Private RPC trust
+
+The selected Dapr invocation profile qualifies three separate protections:
+authorized workload enrollment into a service identity, authenticated and
+authorized sidecar-to-sidecar invocation, and both application/sidecar hops.
+A service identity authenticates a workload; it does not establish a product
+actor, delegation, tenant, or grant. The receiving feature validates the narrow
+trusted invocation context under its owned authorization port.
+
+Self-hosted and future native profiles must replace or otherwise exclude
+unauthorized enrollment through Dapr Sentry's default insecure validator before
+release. The [Dapr mTLS reference](https://docs.dapr.io/operations/security/mtls/#sentry-token-validators)
+documents that default and the JWKS validator. A selected validator must bind
+the authorized workload to the requested service identity, audience, expiry,
+and trusted issuer, with qualified rotation and failure behavior. This does not
+select a product IdP or resolve OD-012; workload enrollment is also distinct
+from OD-038 device enrollment.
+
+The caller-to-local-sidecar API and receiving-sidecar-to-application endpoint
+each need a qualified protection. Network reachability, loopback, a shared
+container network, or a caller-supplied identity header is insufficient. Direct
+backend calls and forged invocation metadata must not bypass that protection.
+Release evidence covers denial of unauthorized enrollment, both hop bypasses,
+stale credentials, and mismatched product scope, as well as successful calls.
+
 ## Authority and untrusted content
 
 Trusted identity and tenant scope come from authenticated context and canonical

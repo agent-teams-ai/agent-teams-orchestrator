@@ -129,10 +129,10 @@ separate deployment decisions.
 |---|---|---|---|
 | Control Host | Public API and lightweight interactive handlers: Orchestration Scope, Agent Organization, Work Coordination, Policy and Risk, Approval Management, Consumption Governance, and the interactive handlers of contexts with worker roles below. Identity Registry and Access Control remain provider-facing authority seams under OD-012 | Separate from AR, background coordination, heavy intake/compute, workspace mechanics, and external delivery. It never constructs the private Team or Observation query implementation as a fallback | Public Connect; typed local ports and ACLs; Dapr for actual private RPC dependencies |
 | Team Topology service | Team Topology's Agent/Team definitions and versioned roster; initially only S3 persistent Team create/get/list | Separate from Control Host from S3. Commands and queries can share this role; assignment uniqueness, immutable history, receipts, and outbox retain one owned transaction | Feature-owned Protobuf and standard gRPC through Dapr; owned outbox through JetStream |
-| Coordination worker | Run Orchestration processes; Orchestration Scope disposition/reconciliation; Work Coordination processes; Agent Communication delivery policy; Agent Attention decisions | Separate from Control Host from the first durable coordination feature. Owners may share the role with independent handlers and budgets. Cutoff, revocation, cancellation, and recovery retain reserved progress under ordinary delivery backlog | Direct JetStream or selected workflow Activity adapters to owned ports; consumer-owned AR ACL; Dapr only for an actual private RPC dependency such as Team activation |
+| Coordination worker | Run Orchestration processes; Orchestration Scope disposition/reconciliation; Work Coordination processes; Agent Communication delivery policy; Agent Attention decisions; Approval Management expiry/revocation reconciliation; Consumption Governance reservation expiry, period rollover, and reconciliation | Separate from Control Host from the first durable coordination feature. Owners may share the role with independent handlers and budgets. Cutoff, revocation, cancellation, and recovery retain reserved progress under ordinary delivery backlog | Direct JetStream or selected workflow Activity adapters to owned ports; consumer-owned AR ACL; Dapr only for an actual private RPC dependency such as Team activation |
 | Observation ingestion worker | Execution Observation admission, receipts/checkpoints, evidence, safe activity, feed, and required downstream intents | Separate from Control, query, and derived workloads from first runtime evidence intake. Its atomic admission transaction is not split between services | Qualified AR source adapter and applicable durable consumers; indexing/publication follow committed owner intents |
 | Observation query service | Execution Observation authorized snapshots, timeline, feed resume, search, diagnostics, and selected export control | Separate from intake and index/rebuild work from first query feature. Query disclosure and availability do not depend on indexing being healthy | Private query/control port through Dapr; only owned stores and published dependencies |
-| Derived-data worker | Execution Observation indexing/rebuild; independent Usage Metering normalization/correction and Usage Accounting rating/reconciliation handlers | Separate from Control, evidence intake, and interactive queries from the first derived-data feature. Shared placement creates no shared analytics model, transaction, or storage authority | Direct durable handlers and owner-specific outbox/source ports; no incidental RPC hop |
+| Derived-data worker | Execution Observation indexing/rebuild; independent Usage Metering source admission/checkpoints, quarantine, normalization/correction; Usage Accounting rating/reconciliation handlers | Separate from Control, Execution Observation intake, and interactive queries from the first owning feature. Shared placement creates no shared analytics model, transaction, or storage authority | Direct durable handlers and owner-specific outbox/source ports; no incidental RPC hop |
 | Agent Context worker/service | Agent Context contribution admission, semantic assembly, manifests, validity, invalidation, and continuity evidence | Separate compute role from its first assembly feature. Assembly stays durable and bounded; it does not become a synchronous call chain through all source owners | Durable intake and assembly; Dapr only for declared private queries/control. Run owns activation and AR owns technical materialization |
 | Workspace mechanics worker | Workspace Registry materialization/release/cleanup through worktree, clone, snapshot, and remote-workspace adapters; registry control may remain in Control Host | Separate from Control from first effectful materialization. Machine/resource affinity, privileges, allocation/binding generations, and cleanup custody constrain placement | Resource-affine durable dispatch through the owned port; Dapr only for an explicitly selected request/reply boundary |
 | Outbound-effects worker | Human Notification Management delivery attempts and reconciliation; other accepted external-effect adapters only with distinct owners and budgets | Separate from Control from first external delivery. Secrets, quotas, attempts, idempotency, and uncertain outcomes remain owner-specific | Direct durable consumers and controlled egress; no RPC registration solely because it is a worker |
@@ -143,6 +143,19 @@ context's authority and concurrency rules, not a process-local authoritative
 cache. A role containing several contexts receives only their explicitly owned
 capabilities and scoped credentials; it has no cross-context Unit of Work or
 unrestricted access to other owners' tables.
+
+Placement covers background lifecycle work as well as interactive APIs. The
+Approval and Consumption Governance entries place their future admitted durable
+handlers; they do not resolve those contexts' open domain decisions or require
+their implementation in S3. Each first-materialization record also places the
+owner's outbox relay, expiry, reconciliation, and disposition handlers where
+applicable. A context name in the Control row alone does not place that work.
+Shared queues, separate consumers, or separate SQL pools cannot by themselves
+prove CPU, event-loop, memory, or failure isolation inside a shared process.
+Usage Metering retains its own source receipts and checkpoints; Execution
+Observation intake does not become its ingestion authority. Before admitting
+that workload, demonstrate that normalization or rebuild cannot prevent bounded
+usage admission and recovery, or select the required further role separation.
 
 Scope, Run, and Execution Observation keep their independent AR subscriptions,
 receipts, and checkpoints. The Observation role does not become the universal
@@ -184,6 +197,13 @@ scope share a route identity. Command and query roles with different methods
 need separate identities or a qualified method-routing ingress. A group may
 therefore contain multiple services; a role may contain multiple compatible
 groups. Neither relation changes semantic ownership.
+
+Route qualification covers the complete configured namespace and application
+identity on the actual invocation path. A profile that reuses application IDs
+across namespaces must prove that a requested remote namespace cannot collapse
+to the caller's local application. An unsupported routing combination is
+rejected explicitly; generic namespace support does not qualify every proxy
+path or authorize a cross-Target route.
 
 One semantic mutation owner may have several qualified write replicas. Database
 constraints, revisions, receipts, claims, and fencing protect its invariants.
@@ -227,14 +247,20 @@ the configuration for one pair is not evidence for multiple pairs.
 Kubernetes supplies workload placement and replica management; an approved
 controller policy binds scaling to measured demand and bounded resources.
 HPA or another controller does not replace application admission, tenant
-fairness, SQL connection budgets, or AR capacity limits. Maximum replicas and
-rolling-update surge fit the deployment's aggregate budgets.
+fairness, SQL connection budgets, or AR capacity limits. Aggregate budgets cover
+all simultaneously live instances, including rolling-update surge, terminating
+instances that still hold resources, and overlapping rollouts. A readiness
+change does not prove that a draining instance has closed its SQL pools.
 
 Self-hosted Dapr discovery is explicitly qualified on the real native or
 container network. Compose DNS alone is not a Dapr resolver, and multicast
 availability is not assumed. Select exact resolver, peer trust, certificates,
 rotation, protected application hops, and direct-backend access policy before
 profile activation. Dapr peer authentication never replaces product grants.
+Workload enrollment must authenticate which process may obtain each service
+identity; enabling mTLS and invocation ACLs alone does not establish that right.
+The [private RPC trust profile](security-architecture.md#private-rpc-trust)
+owns this distinction and the two protected application/sidecar hops.
 OD-012 and the local lifecycle decisions retain their relevant authority.
 
 The future native reference profile preserves the selected role isolation.

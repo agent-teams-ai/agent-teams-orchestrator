@@ -251,16 +251,28 @@ inbox, outbox, and recovery under load. Database I/O being asynchronous does not
 bound JavaScript result decoding or an admission queue.
 
 Composition sets a total connection budget across context roles, Host replicas,
-background workers, and maintenance. Sum each role's maximum replica count times
-its pool allowance, including rolling-update surge and maintenance reserves,
-within the deployment budget and declared operational headroom. Independent
-context defaults cannot exceed that budget. Connections and pools are not
+background workers, and maintenance. Sum every pool allowance in each role
+instance across the maximum simultaneously live instances, then include
+maintenance reserves and declared operational headroom. Count rollout surge,
+terminating instances that still hold connections, and overlapping rollouts;
+the desired replica count plus surge alone is not a hard bound. The released
+profile bounds drain duration and rollout overlap and verifies when pools
+actually close. It also budgets server-retained connections after lost client
+connectivity until qualified detection and cleanup complete. Independent
+context defaults cannot exceed that budget.
+Connections and pools are not
 allocated per agent, and adding role replicas does not increase PostgreSQL
 capacity by itself. The [service role map](deployment-profiles.md#service-role-map)
 owns placement; one context's semantic mutation ownership does not require one
 singleton writer process. Qualified write replicas preserve the same constraints,
 revisions, receipts, claims, and fencing rather than splitting a transaction
 across RPC roles.
+
+[Kubernetes Deployment behavior](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment)
+explicitly permits resource use above desired replicas plus surge while old
+Pods terminate. Resource admission must account for that overlap instead of
+assuming removal from readiness releases connections.
+
 Queue depth, pool wait, transaction latency, lock wait, timer lag, rejection,
 backlog, and disk headroom are observable. PostgreSQL WAL and temporary files,
 NATS, blobs, logs, and backup staging share the local storage budget. Required

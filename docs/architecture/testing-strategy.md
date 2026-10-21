@@ -370,6 +370,9 @@ Applicable conformance proves:
   transfer another role's mutation authority or AR execution custody;
 - replica routing includes only interchangeable method sets, and concurrent
   replicas preserve owned revisions, receipts, claims, and transaction semantics;
+- when the profile supports repeated application IDs across namespaces, actual
+  proxy-path fixtures distinguish a foreign namespace from the caller's local
+  application and reject unqualified routing combinations;
 - readiness verifies the selected resolver, peer trust, authorization, schema and
   durable topology before admission; sidecar health or a listening port alone
   cannot satisfy it;
@@ -379,6 +382,10 @@ Applicable conformance proves:
 - lost responses, peer credential rotation, direct-backend bypass attempts,
   stale discovery, and unavailable dependencies produce typed, bounded outcomes
   with one retry budget per logical RPC operation;
+- unauthorized workload enrollment and forged service identity fail before
+  admission; protected caller-to-sidecar and sidecar-to-application hops reject
+  bypass attempts, and a valid workload identity cannot substitute for product
+  actor, delegation, tenant, or grant evidence;
 - durable-only workers run with direct official JetStream pull adapters and no
   Dapr dependency unless an actual separately declared RPC capability requires it.
 
@@ -391,11 +398,21 @@ Each qualification states the exact admitted execution concurrency, command and
 event rates, bursts, payload sizes, fanout, data size, duration, hardware, replica
 limits, and deployed adapter set. Stored Agents, queued work, idle sessions, or
 open client connections do not establish that capacity. Exercise aggregate
-connection budgets across role replicas, workers, maintenance, and rollout surge;
+connection budgets across all pools in live role replicas, workers, maintenance,
+rollout surge, terminating instances, and overlapping rollouts;
 bounded admission; relay fairness; long queries and result decoding; observation
 processing; and shared disk pressure. Cancellation, health, feeds, and recovery
 remain usable under the tested saturation and failure conditions. Record queue
 and pool waits, backlog, event-loop delay, memory, and disk growth.
+
+At the same total active-agent count, qualify many independent Runs and tenants
+separately from a concentrated workload in one Run or tenant. Run authority
+gates, per-Run feed sequencing, and shared quota keys may serialize conflicting
+work even when other work scales across replicas. Record key contention and
+cancel/revocation progress under both shapes; do not weaken receipts, fences, or
+ordering to obtain a throughput number. The advertised per-Run and per-tenant
+envelopes remain explicit product qualification choices, not consequences of
+the aggregate target.
 
 Deterministic traffic and a fake AR may qualify Orchestrator and persistence
 behavior at a modeled execution workload without launching provider agents.

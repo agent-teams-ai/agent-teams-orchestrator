@@ -174,6 +174,14 @@ before a high-cost boundary violation.
   resource saturation remain separate invariants or budgets. Numerical targets
   require calibration and explicit approval under
   [reliability objectives](docs/architecture/reliability-objectives.md).
+- When presenting implementation alternatives, include expected reliability,
+  confidence, and complexity on a 10-point scale plus a scoped estimate of
+  hand-maintained lines of code. Higher reliability means stronger expected
+  robustness, higher confidence means stronger evidence, and higher complexity
+  means harder engineering and operations. Separate integration code, tests, and
+  configuration where useful; exclude generated and vendor code. State scope,
+  exclusions, and estimate uncertainty. Scores and line ranges are engineering
+  judgments, not measured uptime or delivery commitments.
 
 The root quality tooling lane defaults to Node `26.11.1` and pnpm `11.18.0`
 under the product owner's explicit Node default migration. Node `24.21.0`
