@@ -204,6 +204,45 @@ the [module foundation gate](implementation-readiness-gates.md#module-foundation
 No exact package train is installed by this documentation decision, and no
 runtime, scale, browser, or complete source conformance is claimed.
 
+### Upstream review on 2026-10-21
+
+The accepted ADR-0110 pin remains
+`ddf1e0b0053f546f12ca70190b237b4f7e78d09d`. Its complete Consumer Module
+Standard SHA-256 is
+`c2fe582a14ff6e79620b232ca7ffc914afb0474ec21fd43f208251dd7252f4a3`.
+The reviewed upstream revision
+`7131d0d7a6bb5dd4c3e8906ccac065c0be0e0333` has complete-document SHA-256
+`a6dac5d303adf80be3151c6703c919b715fd880a941a4ad68e927c87a7ee5882`.
+The exact file delta contains seven added lines documenting
+[ADR-0039](https://github.com/agent-teams-ai/get-modular/blob/7131d0d7a6bb5dd4c3e8906ccac065c0be0e0333/docs/decisions/0039-retain-observation-load-drain-until-its-run-settles.md):
+an escalated Observation load still owns its active loader and dependencies;
+the Host may abandon a bounded wait but retains the original cleanup flight
+and infrastructure until actual completion. Re-observing that flight is not
+a new cleanup attempt.
+
+This review closes the unknown-delta question without rewriting ADR-0110 or
+claiming consumer qualification. Before production activation, migrate the
+consumer adoption evidence through the normal decision/profile route and prove
+the pending-load behavior with the selected package train. The
+[current installation recipe](https://github.com/agent-teams-ai/get-modular/blob/main/docs/guides/consumer-quickstart.md#install-the-current-release)
+selects `@latest` for a new installation, saves exact resolved versions and
+requires a committed lockfile. An existing approved consumer still reviews
+compatibility and qualifies that resolved train; a moving channel is not an
+adoption identity.
+
+This documentation is based on the owner-approved direction in
+[PR #86](https://github.com/agent-teams-ai/agent-teams-orchestrator/pull/86).
+The parallel [PR #79](https://github.com/agent-teams-ai/agent-teams-orchestrator/pull/79)
+and its stacked [PR #87](https://github.com/agent-teams-ai/agent-teams-orchestrator/pull/87)
+require reconciliation through their branch history. In particular, the two
+ADR-0103 subjects cannot be combined by copying an older tree or silently
+renumbering an accepted decision. Preserve the existing Sandbox Manifest slice
+and the immutable accepted records; the
+[research review record](https://github.com/agent-teams-ai/extension-foundation/blob/main/docs/research/plugin-research-review-and-decision-record.md)
+retains the exact inspected branch revisions and disposition.
+
+### Remaining activation evidence
+
 At reviewed main `98f653172215e2a2c73cc484db3fa4fe72ed21ba`, the materialized
 `agent-context/sandbox-manifest/composition/feature-module-factory.ts` remains a
 known migration seam. `packages/platform/local-host-control` also requires
