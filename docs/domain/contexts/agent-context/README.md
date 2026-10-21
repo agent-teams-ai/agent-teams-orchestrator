@@ -238,5 +238,7 @@ scenarios prove their need.
 
 ### Implementation links
 
-The package is reserved but not materialized. Gate 2 must accept the scenario
-matrix, aggregate decisions, contracts, and conformance fixtures first.
+The [Agent Context package](../../../../packages/contexts/agent-context/README.md)
+materializes only the ADR-0103
+[Sandbox Manifest feature](../../../../packages/contexts/agent-context/src/features/sandbox-manifest/README.md).
+Broader context capabilities and deployment qualification remain deferred.

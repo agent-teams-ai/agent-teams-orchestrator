@@ -70,6 +70,30 @@ authoring:
         - workspace-registry
 
   artifactTypes:
+    - type: index
+      initialStatus: active
+      ownerSetId: registered-owners
+      identity:
+        kind: explicit
+        format: qualified
+        grammar:
+          prefixSegments:
+            - package
+          minSuffixSegments: 1
+          maxSuffixSegments: 4
+      placement:
+        kind: qualified-leaf-index
+        root: packages
+        requiredBasename: README.md
+      template:
+        kind: fenced-markdown-body
+        path: docs/templates/index.md
+      heading:
+        kind: title
+      reachability:
+        kind: manual-fixed-index
+        indexPath: docs/README.md
+
     - type: adr
       initialStatus: proposed
       ownerSetId: registered-owners

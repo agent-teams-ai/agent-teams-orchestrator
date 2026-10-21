@@ -12,6 +12,9 @@
   ],
   "references": [
     {
+      "path": "./packages/contexts/agent-context"
+    },
+    {
       "path": "./packages/platform/local-host-control"
     }
   ]

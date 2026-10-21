@@ -107,6 +107,7 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
     "bounded-context",
     "contract",
     "feature",
+    "index",
     "open-decision",
     "runbook",
   ]);
@@ -118,9 +119,12 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
     profile.authoring.artifactTypes.filter((artifact) =>
       artifact.ownerSetId === "registered-owners",
     ).length,
-    6,
-    "all six types must preserve the registered-owner authoring boundary",
+    7,
+    "all seven types must preserve the registered-owner authoring boundary",
   );
+  assert.deepEqual(artifacts.index.placement, { kind: "qualified-leaf-index", root: "packages", requiredBasename: "README.md" });
+  assert.deepEqual(artifacts.index.identity.grammar, { prefixSegments: ["package"], minSuffixSegments: 1, maxSuffixSegments: 4 });
+  assert.deepEqual(artifacts.index.reachability, { kind: "manual-fixed-index", indexPath: "docs/README.md" });
   assert.deepEqual(artifacts.adr.reachability, {
     kind: "manual-fixed-index",
     indexPath: "docs/decisions/README.md",

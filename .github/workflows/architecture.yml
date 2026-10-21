@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   architecture:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -31,6 +31,12 @@ jobs:
           cache: pnpm
       - run: bash scripts/ci/check-frozen-peer-enforcement.sh
       - run: pnpm install --frozen-lockfile --config.engine-strict=true --strict-peer-dependencies && pnpm peers check
+      - name: Prepare isolated PostgreSQL conformance binaries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16
+          echo "TEST_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
+          echo "RUN_CONTEXT_OBSERVATION_PG=1" >> "$GITHUB_ENV"
       - run: pnpm check
       - name: Run advisory quality diagnostics
         continue-on-error: true
@@ -40,7 +46,7 @@ jobs:
 
   node-24-compatibility:
     name: Node.js 24 compatibility
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -56,6 +62,12 @@ jobs:
           cache: pnpm
       - run: bash scripts/ci/check-frozen-peer-enforcement.sh
       - run: pnpm install --frozen-lockfile --config.engine-strict=true --strict-peer-dependencies && pnpm peers check
+      - name: Prepare isolated PostgreSQL conformance binaries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16
+          echo "TEST_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
+          echo "RUN_CONTEXT_OBSERVATION_PG=1" >> "$GITHUB_ENV"
       - run: pnpm check
 
   local-host-control-cross-platform:

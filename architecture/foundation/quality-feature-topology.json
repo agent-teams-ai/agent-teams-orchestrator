@@ -22,6 +22,13 @@
   },
   "modules": [
     {
+      "root": "packages/contexts/agent-context",
+      "sourceRoot": "packages/contexts/agent-context/src",
+      "testRoots": [
+        "packages/contexts/agent-context/tests"
+      ]
+    },
+    {
       "root": "packages/platform/local-host-control",
       "sourceRoot": "packages/platform/local-host-control/src",
       "testRoots": [

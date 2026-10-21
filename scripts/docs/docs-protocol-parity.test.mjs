@@ -402,3 +402,18 @@ test("public writer rejects malformed, mismatched, and stale reviewed plan diges
     await rm(source, { recursive: true, force: true });
   }
 });
+
+test('package index authoring uses native package-root placement and refuses owner or path substitution',async()=>{
+  const source=await makeSourceFixture();
+  try{
+    const request={consumerRoot:source,profilePath:'architecture/foundation/docs-protocol.yaml',intent:{type:'index',id:'package.contexts.example',title:'Example Package',owner:'team-topology',summary:'Navigation for one declared package and its real feature documentation.'},related:['ADR-0001'],apply:false};
+    const preview=await docsNewV2(request);
+    assert.equal(preview.exitCode,0,JSON.stringify(preview.envelope));
+    assert.equal(preview.envelope.result.documentPath,'packages/contexts/example/README.md');
+    assert.match(preview.envelope.result.compiled.document.content,/type: index\nstatus: active\nowner: team-topology/u);
+    assert.deepEqual(preview.envelope.result.reachability,{state:'manual-required',indexPath:'docs/README.md',markdownLink:'[Example Package](../packages/contexts/example/README.md)'});
+    await assert.rejects(docsNewV2({...request,intent:{...request.intent,owner:'not/registered'}}),/not allowed/u);
+    await assert.rejects(docsNewV2({...request,intent:{...request.intent,destination:'apps/example/README.md'}}),/destination|Destination/u);
+    await assert.rejects(readFile(path.join(source,'packages/contexts/example/README.md')),{code:'ENOENT'});
+  }finally{await rm(source,{recursive:true,force:true});}
+});

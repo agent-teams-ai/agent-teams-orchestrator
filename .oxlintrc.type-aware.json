@@ -13,6 +13,7 @@
   "overrides": [
     {
       "files": [
+        "packages/contexts/agent-context/tests/**",
         "packages/platform/local-host-control/tests/**"
       ],
       "rules": {
@@ -25,7 +26,9 @@
     },
     {
       "files": [
+        "packages/contexts/agent-context/src/**/*.{ts,tsx,mts,cts}",
         "packages/platform/local-host-control/src/**/*.{ts,tsx,mts,cts}",
+        "packages/contexts/agent-context/tests/**/*.{ts,tsx,mts,cts}",
         "packages/platform/local-host-control/tests/**/*.{ts,tsx,mts,cts}"
       ],
       "rules": {
@@ -69,6 +72,10 @@
     },
     {
       "files": [
+        "packages/contexts/agent-context/src/features/*/application/**/*.{ts,tsx,mts,cts}",
+        "packages/contexts/agent-context/src/features/*/domain/**/*.{ts,tsx,mts,cts}",
+        "packages/contexts/agent-context/src/features/*/contracts/**/*.{ts,tsx,mts,cts}",
+        "packages/contexts/agent-context/src/features/*/projections/**/*.{ts,tsx,mts,cts}",
         "packages/platform/local-host-control/src/features/*/application/**/*.{ts,tsx,mts,cts}",
         "packages/platform/local-host-control/src/features/*/domain/**/*.{ts,tsx,mts,cts}",
         "packages/platform/local-host-control/src/features/*/contracts/**/*.{ts,tsx,mts,cts}",

@@ -75,7 +75,7 @@ is complete.
 | Structural AST rules | Accepted in ADR-0041 | Planned for the first matching production source and invariant fixture |
 | Dead-code analysis | Accepted in ADR-0041 | Planned after the first production vertical slice |
 | Publishable API and package validation | Accepted in ADR-0041 | Planned before the first publishable package release |
-| Production package graph | Catalog reservations accepted | Not materialized; validators currently exercise conformance fixtures |
+| Production package graph | Scoped sandbox admission accepted in ADR-0103 | Agent Context sandbox manifests and Local Host Control materialized; broader reservations remain deferred |
 | Federated Consistency Evidence Gate | Accepted in ADR-0078 | Planned; Phase 1 starts with the first real durable mutation and remains build-time only |
 
 The implementation state changes only with executable evidence in this
@@ -134,7 +134,8 @@ These source pins do not replace a fresh frozen install and native qualification
 Foundation's flat FMS v1 reader. The accepted organization authority remains
 `architecture/feature-module-standard-profile.json`; it is unchanged. The adapter
 maps its production and excluded roots and the materialized package catalog to
-`packages/platform/local-host-control`, its `src` tree, and its `tests` tree.
+`packages/contexts/agent-context` and `packages/platform/local-host-control`, their
+`src` trees, and their `tests` trees.
 There are no materialized applications. `validate-quality-topology.mjs` rejects
 projection drift, missing source or test directories, and unreviewed application
 materialization. Foundation independently rejects unclassified workspace packages,
@@ -345,7 +346,7 @@ The quality lanes are deliberately different:
 | Lane | Command | Policy |
 |---|---|---|
 | Focused fast feedback | `pnpm lint:fast:files -- <paths>` | Blocking rules for files being edited |
-| Focused typed feedback | `pnpm lint:type-aware:files -- <paths>` | Blocking typed safety for one or more explicit TypeScript files or directories |
+| Focused typed feedback | `pnpm lint:type-aware:files <paths>` | Blocking typed safety for one or more explicit TypeScript files or directories |
 | Repository fast gate | `pnpm lint:fast` | Blocking correctness, suspicious-code, runtime, test, and boundary rules |
 | Type-aware gate | `pnpm lint:type-aware` | Blocking typed safety over production TypeScript roots |
 | Full lint gate | `pnpm lint` | Fast, type-aware, suppression-policy, and lint-configuration conformance |
@@ -378,6 +379,13 @@ suite proves that representative blocking diagnostics really fire. The
 type-aware runner resolves explicit source roots, reports the number of selected
 TypeScript files, and fails closed when that count is zero. Blocking lanes also
 deny warnings so a newly introduced warning cannot silently weaken CI.
+
+Explicit typed-lint targets must exist and contain TypeScript inputs. The runner
+checks both repository-relative containment and canonical physical containment,
+rejecting parent or symlink escapes. It invokes Oxlint from this repository root
+with repository-relative paths, so the exact consumer override selectors apply
+to focused inputs as they do to the full typed route. There is no implicit
+whole-repository fallback when paths are absent.
 
 Inline suppressions are exceptional evidence, not a local configuration surface.
 `eslint-disable`, file-wide disables, unexplained exceptions, and local

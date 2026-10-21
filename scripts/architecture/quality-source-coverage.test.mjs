@@ -14,6 +14,7 @@ const foundation = JSON.parse(await readFile(join(foundationRoot, "package.json"
 const cli = join(foundationRoot, foundation.bin["agent-teams-foundation"]);
 const profilePath = "architecture/foundation/quality-source-coverage.yaml";
 const moduleRoot = "packages/platform/local-host-control";
+const admittedRoots = ["packages/contexts/agent-context", "packages/platform/local-host-control"];
 const ceiling = (max) => ({ "max-lines": ["error", { max, skipBlankLines: true, skipComments: true }] });
 
 async function readJson(root, name) {
@@ -30,6 +31,7 @@ async function fixture(action) {
   try {
     await mkdir(join(root, "apps"));
     await mkdir(join(root, "tooling"));
+    const topology = await readJson(repositoryRoot, QUALITY_TOPOLOGY_PATH);
     for (const name of [
       "package.json", "pnpm-workspace.yaml", "foundation.config.yaml",
       "architecture/feature-module-standard-profile.json", "architecture/package-catalog.yaml",
@@ -37,8 +39,8 @@ async function fixture(action) {
       "architecture/foundation/source-dependencies.yaml",
       "architecture/foundation/suppression-governance.yaml",
       ".oxlintrc.base.json", ".oxlintrc.common.json", ".oxlintrc.type-aware.json",
-      `${moduleRoot}/src`, `${moduleRoot}/tests`, `${moduleRoot}/package.json`,
-      `${moduleRoot}/tsconfig.json`,
+      ...topology.modules.flatMap(({ root: packageRoot }) =>
+        ["src", "tests", "package.json", "tsconfig.json"].map((leaf) => `${packageRoot}/${leaf}`)),
     ]) {
       await mkdir(join(root, dirname(name)), { recursive: true });
       await cp(join(repositoryRoot, name), join(root, name), { recursive: true, filter: (source) => !source.split(/[\\/]/u).includes("node_modules") });
@@ -68,7 +70,7 @@ test("active coverage binds exact tools, authority, scope and a single full type
   assert.equal(profile.schemaVersion, 1);
   assert.equal(profile.featureProfilePath, QUALITY_TOPOLOGY_PATH);
   assert.equal(profile.lintConfigPath, ".oxlintrc.type-aware.json");
-  assert.deepEqual(profile.compilerProjects, [`${moduleRoot}/tsconfig.json`]);
+  assert.deepEqual(profile.compilerProjects.toSorted(), admittedRoots.map((root) => `${root}/tsconfig.json`).toSorted());
   const pkg = await readJson(repositoryRoot, "package.json");
   assert.equal(pkg.scripts["quality:coverage:scope"], "agent-teams-foundation quality check --consumer . --scope-only");
   assert.equal(pkg.scripts["lint:typed"], "agent-teams-foundation quality check --consumer .");
@@ -97,7 +99,16 @@ test("published coverage accepts the real consumer profile", async () => {
     assert.equal(result.status, 0, JSON.stringify(result.report));
     await checkQualityTopology(root);
     const typed = await readJson(root, ".oxlintrc.type-aware.json");
-    // Recreate the pre-remediation closure without changing its normal policy.
+    // Exact validator inputs may include excluded TypeScript tooling. Keep that
+    // closure present while isolating this legacy relaxed test-selector witness
+    // from common's independent global TypeScript selector.
+    const fixtureCommon = await readJson(root, ".oxlintrc.common.json");
+    const typescriptRules = fixtureCommon.overrides.find((entry) =>
+      entry.files.includes("**/*.{ts,tsx,mts,cts}"));
+    assert.ok(typescriptRules);
+    typescriptRules.files = [...typed.overrides[1].files];
+    await writeJson(root, ".oxlintrc.common.json", fixtureCommon);
+    // Recreate the pre-remediation test-selector closure without weakening assertions.
     await writeJson(root, ".oxlintrc.type-aware.json", { ...typed,
       extends: ["./.oxlintrc.common.json", ...typed.extends.slice(1)] });
     assert.equal(inspect(root).status, 0, "pre-remediation disposable baseline must pass");

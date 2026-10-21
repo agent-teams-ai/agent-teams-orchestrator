@@ -102,3 +102,27 @@ test("the project dictionary is sorted and unique", async () => {
     "project dictionary must not contain case-insensitive duplicates",
   );
 });
+
+function literalTargetArray(source, pattern) {
+  const match = source.match(pattern);
+  assert.ok(match, "the runner must declare an inspectable literal default target list");
+  return JSON.parse(match[1].replace(/,\s*\]/u, "]"));
+}
+
+test("prose defaults include both governed Agent Context documents", async () => {
+  const governedDocuments = [
+    "packages/contexts/agent-context/README.md",
+    "packages/contexts/agent-context/src/features/sandbox-manifest/README.md",
+  ];
+  for (const document of governedDocuments) {
+    await readFile(path.join(repositoryRoot, document), "utf8");
+  }
+  const cspell = JSON.parse(await readFile(path.join(repositoryRoot, ".cspell.json"), "utf8"));
+  const markdown = await readFile(path.join(repositoryRoot, "scripts/lint/markdownlint-cli2.mjs"), "utf8");
+  const vale = await readFile(valeRunnerPath, "utf8");
+  assert.deepEqual(cspell.files, ["README.md", "AGENTS.md", "docs/**/*.md", ...governedDocuments]);
+  assert.deepEqual(literalTargetArray(markdown, /globs:\s*(\[[^\]]+\])/u),
+    ["README.md", "AGENTS.md", "docs/**/*.md", ...governedDocuments]);
+  assert.deepEqual(literalTargetArray(vale, /:\s*(\[[^\]]+\]);\s*const code = await run/u),
+    ["README.md", "AGENTS.md", "docs", ...governedDocuments]);
+});

@@ -109,3 +109,5 @@ CI applies the same metadata, ID, hierarchy, index, navigation, link, anchor,
 code-impact, Skill, LikeC4, Mermaid, Markdown, terminology, and spelling checks. Vale enforces only
 project-owned terminology rules; CSpell uses the reviewed project dictionary.
 External HTTP availability is checked separately because it is nondeterministic.
+
+- [Agent Context Package](../packages/contexts/agent-context/README.md)

@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { readdir, stat } from "node:fs/promises";
+import { readdir, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -61,8 +61,17 @@ async function resolveTargets(cliArguments) {
   }
   const requested = cliArguments.map((target) => path.resolve(repositoryRoot, target));
   const targets = [];
+  const canonicalRoot = await realpath(repositoryRoot);
   for (const target of requested) {
+    const relative = path.relative(repositoryRoot, target);
+    if (path.isAbsolute(relative) || relative === ".." || relative.startsWith(`..${path.sep}`)) {
+      throw new Error("type-aware lint target is outside repository authority");
+    }
     if (await exists(target)) {
+      const physical = path.relative(canonicalRoot, await realpath(target));
+      if (path.isAbsolute(physical) || physical === ".." || physical.startsWith(`..${path.sep}`)) {
+        throw new Error("type-aware lint target is outside repository authority");
+      }
       targets.push(target);
     } else if (cliArguments.length > 0) {
       throw new Error(`type-aware lint target does not exist: ${target}`);
@@ -103,7 +112,8 @@ async function main() {
   if (!advisory) {
     oxlintArguments.push("--deny-warnings");
   }
-  oxlintArguments.push(...targets);
+  // Oxlint override selectors are consumer-relative, including for explicit inputs.
+  oxlintArguments.push(...targets.map((target) => path.relative(repositoryRoot, target) || "."));
   const result = spawnSync(
     oxlintBinary,
     oxlintArguments,
