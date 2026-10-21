@@ -96,6 +96,18 @@ and clients. Running means current admitted execution evidenced by AR's
 Published Language. Stored Agent definitions, idle sessions, registered workers,
 queued work, and open browser connections do not establish that concurrency.
 
+The primary scaling and release-qualification target is aggregate admitted
+execution across many independent Runs, including Runs within one team and
+tenant. Per-Run capacity is qualified and advertised separately; thousands of
+agents within a single Run are not a baseline release requirement. Qualification
+still exercises the largest advertised Run and concentrated tenant load.
+
+Concurrent Runs retain the exclusive active Agent occupancy required by
+[ADR-0101](../decisions/0101-run-specific-rosters-coordination-and-exclusive-agent-occupancy.md)
+and use separately eligible participants. Do not split one semantic Run merely
+to meet a throughput target or weaken receipts, fences, ordering, cancellation,
+or revocation to increase the reported capacity.
+
 Each advertised capacity names an exact concurrent workload, active Run and
 participant shape, command and observation rates, output bytes, bursts,
 payloads, fanout, stored data, duration, hardware, failure conditions, and

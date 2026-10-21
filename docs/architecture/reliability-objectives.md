@@ -117,9 +117,12 @@ Calibration includes processing results of asynchronous persistence calls and
 concurrent command or event load. A separate PostgreSQL process does not remove
 that Host work; numerical limits still require evidence and owner approval.
 
-The server architecture targets thousands of simultaneously running agents;
-this is not an approved SLO, a measured capacity, or an instruction to run one
-process per agent. Qualification records the exact admitted execution concurrency
+The server architecture targets thousands of simultaneously running agents
+across independent Runs, including Runs within one team and tenant, under the
+[concurrent execution target](deployment-profiles.md#concurrent-execution-target).
+Per-Run capacity is qualified separately. This target is not an approved SLO,
+a measured capacity, or an instruction to run one process per agent.
+Qualification records the exact admitted execution concurrency
 and its workload, rates, duration, hardware, replica limits, and deployment form. Stored
 Agents, queued work, idle sessions, and open connections do not establish that
 target. Modeled Orchestrator traffic with a fake AR and actual AR/provider

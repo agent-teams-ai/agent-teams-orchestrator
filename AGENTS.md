@@ -113,8 +113,10 @@ before a high-cost boundary violation.
   Awilix graph or reconstruct a remote role's features in transport service factories.
   Follow the [composition profile](docs/architecture/composition-and-dependency-injection.md),
   including its stricter authoring budgets and first-scope conformance requirements.
-- Design for thousands of simultaneously running agents, not stored definitions
-  or idle sessions. Follow the accepted
+- Design for thousands of simultaneously running agents across independent Runs,
+  including Runs within one team and tenant, under the
+  [concurrent execution target](docs/architecture/deployment-profiles.md#concurrent-execution-target).
+  Qualify per-Run capacity separately. Follow the accepted
   [service role map](docs/architecture/deployment-profiles.md#service-role-map)
   and its Compose, Kubernetes, and future native-local mappings. A semantic
   mutation owner can have many qualified replicas; process lifecycle and AR
@@ -231,7 +233,9 @@ For architecture or implementation work:
 4. define domain, application, Published Language, and client surfaces separately;
 5. implement inward dependencies and narrow consumer-owned ports;
 6. add adapters and composition at the edge;
-7. add tests and conformance evidence proportional to risk;
+7. add or extend tests only for concrete plausible risks using the smallest sufficient
+   layer under the [risk-based testing policy](docs/architecture/testing-strategy.md#risk-based-test-selection);
+   preserve all applicable mandatory gates;
 8. update canonical documentation in the same change;
 9. run `pnpm check:changed` during iteration; Foundation routes the current Git
    delta to the configured path-aware and project-wide checks;

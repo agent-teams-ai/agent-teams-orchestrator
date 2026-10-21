@@ -389,10 +389,26 @@ whole-project development percentage follows from this review.
 
 Engineering can select exact bounded fixtures, adapters, pins, shutdown order,
 and initial tested limits within the accepted policy. Product choices remain
-the advertised per-Run versus aggregate capacity, local support envelope,
+the local support envelope,
 availability and recovery commitments, and any actual change of placement or
 supported profiles. Already approved Dapr, Compose/Kubernetes, and native
 PostgreSQL choices do not need repeated confirmation without new evidence.
+
+### Owner follow-up: capacity and test selection
+
+On 2026-10-21, the product owner selected the approach that scales better and
+confirmed risk-based testing. The primary capacity target is aggregate admitted
+execution across independent Runs, including Runs within one team and tenant.
+The [deployment profile](../architecture/deployment-profiles.md#concurrent-execution-target)
+owns this decision and the separate per-Run qualification requirement. Thousands
+within one Run are not a baseline release requirement; Agent occupancy and
+semantic Run boundaries remain unchanged.
+
+The [testing policy](../architecture/testing-strategy.md#risk-based-test-selection)
+requires concrete risk coverage and the smallest sufficient test layer, avoids
+redundant or implementation-mirroring tests, and preserves mandatory gates.
+These are documentation clarifications; they neither add production behavior
+nor establish measured capacity.
 
 ### Integration with current main
 

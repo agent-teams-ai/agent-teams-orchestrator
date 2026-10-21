@@ -45,6 +45,29 @@ code_anchors:
 
 # Testing Strategy
 
+## Risk-based test selection
+
+Add or extend tests only when they protect a concrete, plausible regression,
+invariant, or declared contract that existing evidence does not adequately
+cover. Use the smallest sufficient test layer that can actually expose that
+failure. Reuse existing behavioral fixtures; duplicate coverage across layers
+only when each layer detects a distinct failure.
+
+Do not add tests that copy production logic as their oracle, verify only a
+mock's configured response, assert incidental implementation details, inflate
+coverage percentages or test counts, or create snapshot churn without
+protecting a meaningful contract. Independent expected outcomes and contract
+golden fixtures remain valid.
+
+Prose-only, reversible documentation changes do not require new tests. Run the
+existing checks required for the changed surface. Broaden or repeat testing only
+for a concrete remaining risk, changed evidence inputs, or an applicable
+mandatory gate.
+
+This selection rule does not waive accepted conformance, security, concurrency,
+process-boundary, deployment, or release gates. It introduces no separate
+approval or reporting artifact.
+
 ## Test layers
 
 ### Domain tests
@@ -405,14 +428,16 @@ processing; and shared disk pressure. Cancellation, health, feeds, and recovery
 remain usable under the tested saturation and failure conditions. Record queue
 and pool waits, backlog, event-loop delay, memory, and disk growth.
 
-At the same total active-agent count, qualify many independent Runs and tenants
-separately from a concentrated workload in one Run or tenant. Run authority
-gates, per-Run feed sequencing, and shared quota keys may serialize conflicting
-work even when other work scales across replicas. Record key contention and
-cancel/revocation progress under both shapes; do not weaken receipts, fences, or
-ordering to obtain a throughput number. The advertised per-Run and per-tenant
-envelopes remain explicit product qualification choices, not consequences of
-the aggregate target.
+The primary workload follows the
+[aggregate concurrent execution target](deployment-profiles.md#concurrent-execution-target):
+many independent Runs, including Runs within one team and tenant. Qualify
+per-Run limits separately and exercise the largest advertised Run and
+concentrated tenant load; thousands within one Run are not a baseline release
+requirement. Run authority gates, per-Run feed sequencing, and shared quota
+keys may serialize conflicting work even when other work scales across
+replicas. Record key contention and cancellation/revocation progress under
+these workload shapes. Preserve exclusive Agent occupancy, receipts, fences,
+and ordering; do not split one semantic Run merely to meet a throughput target.
 
 Deterministic traffic and a fake AR may qualify Orchestrator and persistence
 behavior at a modeled execution workload without launching provider agents.
