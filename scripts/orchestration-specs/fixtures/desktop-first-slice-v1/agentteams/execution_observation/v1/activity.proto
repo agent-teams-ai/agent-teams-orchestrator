@@ -1,0 +1,38 @@
+syntax = "proto3";
+package agentteams.execution_observation.v1;
+
+// PROPOSED golden contract; owner execution-observation.
+import "agentteams/control/v1/control.proto";
+import "google/protobuf/timestamp.proto";
+enum ActivityKind {
+  ACTIVITY_KIND_UNSPECIFIED = 0;
+  ACTIVITY_KIND_TEXT_DELTA = 1;
+  ACTIVITY_KIND_TEXT_COMPLETE = 2;
+  ACTIVITY_KIND_TOOL = 3;
+  ACTIVITY_KIND_DIAGNOSTIC = 4;
+  ACTIVITY_KIND_TEXT_SNAPSHOT = 5;
+}
+message Activity {
+  string event_id = 1;
+  string run = 2;
+  string participant = 3;
+  ActivityKind kind = 4;
+  string text = 5;
+  bool internal = 6;
+  string block_id = 7;
+  optional string task = 8;
+  optional string runtime_operation_ref = 9;
+  google.protobuf.Timestamp recorded_at = 10;
+}
+message ActivitySnapshot {
+  repeated Activity items = 1;
+  string watermark = 2;
+  string cursor = 3;
+  string freshness = 4;
+  bool gap = 5;
+  optional string next_page_token = 6;
+}
+service ActivityService {
+  rpc ListActivity(agentteams.control.v1.ListRequest) returns (ActivitySnapshot);
+  rpc ReadFeed(agentteams.control.v1.FeedRequest) returns (agentteams.control.v1.FeedPage);
+}

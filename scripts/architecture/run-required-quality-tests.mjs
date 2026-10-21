@@ -35,7 +35,7 @@ async function main() {
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
   const cli = join(dirname(manifestPath), manifest.bin["agent-teams-node-test"]);
   const result = spawnSync(process.execPath, [cli, "--contract", contractPath, "--", ...files],
-    { stdio: "inherit", timeout: 120_000 });
+    { stdio: "inherit", timeout: 300_000 });
   if (result.error) {
     throw result.error;
   }

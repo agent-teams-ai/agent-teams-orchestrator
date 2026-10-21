@@ -6,15 +6,15 @@ import test from "node:test";
 
 import {
   validateRepositoryReviewRouterWorkflow,
-  validateReviewRouterCodexWorkflow,
+  validateReviewRouterReviewWorkflow,
   validateReviewRouterWorkflow,
 } from "./validate-reviewrouter-workflow.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "../..");
 const workflowRoot = path.join(repositoryRoot, ".github/workflows");
-const canonicalCodex = await readFile(
-  path.join(workflowRoot, "reviewrouter-codex.yml"),
+const canonicalReview = await readFile(
+  path.join(workflowRoot, "reviewrouter-review.yml"),
   "utf8",
 );
 const canonicalInteraction = await readFile(
@@ -32,36 +32,19 @@ function replaceExactlyOnce(source, expected, replacement) {
 }
 
 const negativeCases = [
-  {
-    name: "rejects review trigger trust-boundary drift",
-    validate: validateReviewRouterCodexWorkflow,
-    source: canonicalCodex,
-    expected: "  pull_request_target:",
-    replacement: "  pull_request:",
-  },
-  {
-    name: "rejects a mutable review reusable workflow ref",
-    validate: validateReviewRouterCodexWorkflow,
-    source: canonicalCodex,
-    expected:
-      "reviewrouter-t0-reusable.yml@75cbecab131d74021677fcd1fb21962994d306b8",
-    replacement: "reviewrouter-t0-reusable.yml@main",
-  },
-  {
-    name: "rejects review schema drift",
-    validate: validateReviewRouterCodexWorkflow,
-    source: canonicalCodex,
-    expected: "      workflow_schema_version: 4",
-    replacement: "      workflow_schema_version: 3",
-  },
-  {
-    name: "rejects review namespace drift",
-    validate: validateReviewRouterCodexWorkflow,
-    source: canonicalCodex,
-    expected:
-      "name: ReviewRouter Codex OAuth [namespace=sns_345c07992e6e38d5af4602d735d9cc73;epoch=3;secret=REVIEWROUTER_CODEX_AUTH_JSON_R1310245598_P0f52b3eeb12a23d4_E3_345c07992e6e38d5af4602d735d9cc73]",
-    replacement: "name: ReviewRouter Codex OAuth",
-  },
+  { name: "rejects Gateway review trigger trust-boundary drift", expected: "  workflow_dispatch:", replacement: "  pull_request_target:" },
+  { name: "rejects optional Gateway head qualification", expected: "      review_head_sha: { required: true, type: string }", replacement: "      review_head_sha: { required: false, type: string }" },
+  { name: "rejects Gateway root permission drift", expected: "permissions: {}", replacement: "permissions: { contents: write }" },
+  { name: "rejects Gateway job write permission drift", expected: "      pull-requests: read", replacement: "      pull-requests: write" },
+  { name: "rejects missing Gateway OIDC permission", expected: "      id-token: write", replacement: "      id-token: read" },
+  { name: "rejects Gateway request cancellation drift", expected: "      cancel-in-progress: false", replacement: "      cancel-in-progress: true" },
+  { name: "rejects Gateway serialization scope drift", expected: "      group: reviewrouter-request-${{ github.repository_id }}-${{ inputs.review_request_id }}", replacement: "      group: reviewrouter-request-${{ github.repository_id }}" },
+  { name: "rejects Gateway input guard drift", expected: "    if: ${{ inputs.review_request_id != '' && inputs.pr_number != '' && inputs.review_head_sha != '' }}", replacement: "    if: ${{ true }}" },
+  { name: "rejects Gateway runtime custody drift", expected: "reviewrouter-runtime.yml@workflow-v1", replacement: "reviewrouter-runtime.yml@main" },
+  { name: "rejects unbound Gateway head forwarding", expected: "      review_head_sha: ${{ inputs.review_head_sha }}", replacement: "      review_head_sha: main" },
+  { name: "rejects inherited Gateway secrets", expected: "    with:", replacement: "    secrets: inherit\n    with:" },
+].map((entry) => ({ ...entry, validate: validateReviewRouterReviewWorkflow, source: canonicalReview }));
+const interactionNegativeCases = [
   {
     name: "rejects interaction trigger drift",
     validate: validateReviewRouterWorkflow,
@@ -121,7 +104,7 @@ const negativeCases = [
 ];
 
 test("accepts the exact ReviewRouter canonical workflows", async () => {
-  assert.deepEqual(validateReviewRouterCodexWorkflow(canonicalCodex), []);
+  assert.deepEqual(validateReviewRouterReviewWorkflow(canonicalReview), []);
   assert.deepEqual(validateReviewRouterWorkflow(canonicalInteraction), []);
   assert.deepEqual(
     await validateRepositoryReviewRouterWorkflow(repositoryRoot),
@@ -129,10 +112,15 @@ test("accepts the exact ReviewRouter canonical workflows", async () => {
   );
 });
 
-for (const { name, validate, source, expected, replacement } of negativeCases) {
+for (const { name, validate, source, expected, replacement } of [...negativeCases, ...interactionNegativeCases]) {
   test(name, () => {
     const mutated = replaceExactlyOnce(source, expected, replacement);
     assert.notEqual(mutated, source, "mutant must change the canonical fixture");
-    assert.equal(validate(mutated).length, 1);
+    const errors = validate(mutated);
+    if (validate === validateReviewRouterReviewWorkflow) {
+      assert.ok(errors.some((error) => error.startsWith("RR-WORKFLOW-003")), "Gateway mutants must fail semantic authority checks independently of byte hashing");
+    } else {
+      assert.equal(errors.length, 1);
+    }
   });
 }

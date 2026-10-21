@@ -31,15 +31,18 @@ dossier readiness, not boundary existence.
 
 | Context | Readiness | Primary gate | Dossier |
 |---|---|---|---|
-| Team Topology | Proposed | `OD-006`, `OD-011` | [Team Topology](team-topology/README.md) |
+| Team Topology | Accepted | | [Team Topology](team-topology/README.md) |
 | Agent Organization | Proposed | `OD-023` | [Agent Organization](agent-organization/README.md) |
-| Work Coordination | Proposed | `OD-006`, `OD-015`, `OD-026`, `OD-027` | [Work Coordination](work-coordination/README.md) |
-| Run Orchestration | Proposed | `OD-005`, `OD-006`, `OD-013` | [Run Orchestration](run-orchestration/README.md) |
-| Execution Observation | Proposed | `OD-004`, `OD-029` | [Execution Observation](execution-observation/README.md) |
-| Agent Communication | Proposed | `OD-006`, `OD-013`, `OD-026` | [Agent Communication](agent-communication/README.md) |
+| Work Coordination | Accepted | | [Work Coordination](work-coordination/README.md) |
+| Run Orchestration | Accepted | | [Run Orchestration](run-orchestration/README.md) |
+| Execution Observation | Accepted | | [Execution Observation](execution-observation/README.md) |
+| Agent Communication | Accepted | | [Agent Communication](agent-communication/README.md) |
 | Human Notification Management | Proposed | `OD-026` | [Human Notification Management](human-notification/README.md) |
 | Agent Attention | Proposed | `OD-026`, `OD-033` | [Agent Attention](agent-attention/README.md) |
-| Agent Context | Proposed | `OD-006`, `OD-029`, `OD-031`, `OD-032`, `OD-033` | [Agent Context](agent-context/README.md) |
+| Agent Context | Accepted | | [Agent Context](agent-context/README.md) |
+
+Accepted rows cover only [ADR-0103](../../decisions/0103-first-sandbox-runtime-migration-slice-admission.md)
+and each dossier's named sandbox feature; broader questions remain excluded.
 
 ## Governance
 

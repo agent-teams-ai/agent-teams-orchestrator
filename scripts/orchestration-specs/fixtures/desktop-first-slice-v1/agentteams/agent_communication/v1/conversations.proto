@@ -1,0 +1,46 @@
+syntax = "proto3";
+package agentteams.agent_communication.v1;
+
+// PROPOSED golden contract; owner agent-communication.
+import "agentteams/control/v1/control.proto";
+import "google/protobuf/timestamp.proto";
+message SendMessageRequest {
+  string parent = 1;
+  agentteams.control.v1.CommandIdentity identity = 2;
+  string conversation = 3;
+  string recipient = 4;
+  string text = 5;
+  optional string task = 6;
+  optional string reply_to = 7;
+}
+message DeliveryEvidence {
+  optional bool committed = 1;
+  optional bool runtime_accepted = 2;
+  optional bool context_applied = 3;
+  optional bool presented = 4;
+  optional bool read = 5;
+  optional bool acknowledged = 6;
+  optional bool acted = 7;
+  optional bool replied = 8;
+}
+message Message {
+  string name = 1;
+  string conversation = 2;
+  string author = 3;
+  string recipient = 4;
+  string text = 5;
+  DeliveryEvidence delivery = 6;
+  optional string task = 7;
+  optional string reply_to = 8;
+  google.protobuf.Timestamp recorded_at = 9;
+}
+message MessagePage {
+  repeated Message items = 1;
+  optional string next_page_token = 2;
+  string cursor = 3;
+}
+service ConversationsService {
+  rpc SendMessage(SendMessageRequest) returns (agentteams.control.v1.Operation);
+  rpc ListMessages(agentteams.control.v1.ListRequest) returns (MessagePage);
+  rpc ReadFeed(agentteams.control.v1.FeedRequest) returns (agentteams.control.v1.FeedPage);
+}

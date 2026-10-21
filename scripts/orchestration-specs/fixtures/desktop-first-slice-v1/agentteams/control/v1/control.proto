@@ -1,0 +1,89 @@
+syntax = "proto3";
+package agentteams.control.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// PROPOSED golden contract; owner platform/control-api. No production materialization.
+message CommandIdentity {
+  string request_id = 1;
+  google.protobuf.Timestamp valid_until = 2;
+}
+message Retention {
+  google.protobuf.Timestamp result_expires_at = 1;
+  google.protobuf.Timestamp reuse_detection_expires_at = 2;
+}
+message ResourceResult {
+  string resource_name = 1;
+  optional string etag = 2;
+}
+message Failure {
+  string code = 1;
+  string safe_message = 2;
+}
+enum OperationPhase {
+  OPERATION_PHASE_UNSPECIFIED = 0;
+  OPERATION_PHASE_ACCEPTED = 1;
+  OPERATION_PHASE_RUNNING = 2;
+  OPERATION_PHASE_SUCCEEDED = 3;
+  OPERATION_PHASE_FAILED = 4;
+  OPERATION_PHASE_OUTCOME_UNKNOWN = 5;
+}
+message Operation {
+  string name = 1;
+  string request_id = 2;
+  string command_descriptor = 3;
+  OperationPhase phase = 4;
+  Retention retention = 5;
+  google.protobuf.Timestamp accepted_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  oneof outcome {
+    ResourceResult result = 6;
+    Failure failure = 7;
+  }
+}
+message GetOperationRequest {
+  string name = 1;
+}
+message ResolveCommandOutcomeRequest {
+  string parent = 1;
+  string command_descriptor = 2;
+  string request_id = 3;
+}
+message ResolveCommandOutcomeResponse {
+  oneof outcome {
+    Operation accepted = 1;
+    Failure rejected = 2;
+    bool expired = 3;
+    bool not_seen = 4;
+  }
+}
+message ListRequest {
+  string parent = 1;
+  optional string page_token = 2;
+  uint32 page_size = 3;
+  optional string run = 4;
+  optional string conversation = 5;
+  optional string team_version = 6;
+}
+message FeedRequest {
+  string parent = 1;
+  optional string cursor = 2;
+  uint32 page_size = 3;
+  optional string run = 4;
+  optional string conversation = 5;
+  optional string team_version = 6;
+}
+message FeedEvent {
+  string event_id = 1;
+  string resource_name = 2;
+  string change = 3;
+}
+message FeedPage {
+  repeated FeedEvent events = 1;
+  string next_cursor = 2;
+  bool gap = 3;
+}
+service OperationsService {
+  rpc GetOperation(GetOperationRequest) returns (Operation);
+  rpc ResolveCommandOutcome(ResolveCommandOutcomeRequest) returns (ResolveCommandOutcomeResponse);
+}

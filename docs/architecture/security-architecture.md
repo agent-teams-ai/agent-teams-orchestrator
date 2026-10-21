@@ -342,21 +342,27 @@ maintainability budgets. Generated or vendor code may be exempt from the five
 size and complexity budgets, but it is not exempt from security discovery,
 classification, suppression governance, or the allow/deny fixture contract.
 
-The accepted security baseline is ReviewRouter `v1.0.138` at commit
-`75cbecab131d74021677fcd1fb21962994d306b8`. Its canonical V4/T0 review workflow
-is default-branch trusted, same-repository and non-bot filtered, least-privilege,
-and bound to the exact versioned secret namespace. Its explicit interaction V2
-workflow keeps the fallback GitHub token read-only, uses OIDC for App authority,
-and pins every checkout and runtime source immutably.
-The migration changes only the interaction-runner default from Node.js 24 to
-Node.js 26.11.1 and updates the interaction V2 workflow's exact-source SHA-256 to
-`336a904791d2e84164b44b2342aa5acc6d63cff36aac71cbce80a8c6fc8b8843`; the security
-boundary and immutable pins remain unchanged.
+Repository review dispatch uses the Gateway wrapper introduced on current main
+by commit `dec970e`. An explicit dispatch supplies a required review request ID,
+PR number and review head input. The wrapper guards all three inputs, groups
+execution by repository and request, grants read-only access plus OIDC, forwards
+only the bound inputs and inherits no secrets. Its reusable workflow ref remains
+`777genius/review-router/.github/workflows/reviewrouter-runtime.yml@workflow-v1`.
+The reviewed source digest and targeted semantic checks enforce this consumer
+boundary; remote Gateway runtime behavior requires separate qualification.
 
-`pnpm security:check` parses both workflow files and then verifies their complete
-reviewed SHA-256 digests. Mutation fixtures prove that trust-boundary triggers,
-permissions, schema, namespace, runtime refs, configuration mode, and immutable
-action pins cannot drift independently.
+The explicit interaction V2 workflow retains ReviewRouter `v1.0.138` at commit
+`75cbecab131d74021677fcd1fb21962994d306b8`. It keeps the fallback GitHub token
+read-only, uses OIDC for App authority and pins checkout and runtime sources
+immutably. Its Node.js 26.11.1 runner keeps exact-source SHA-256
+`336a904791d2e84164b44b2342aa5acc6d63cff36aac71cbce80a8c6fc8b8843`.
+
+`pnpm security:check` requires both current workflow files and verifies their
+complete reviewed source digests. Gateway mutation witnesses independently reject
+changes to dispatch inputs, guards, request serialization, permissions, runtime
+custody, forwarding and secret isolation. Interaction witnesses retain trigger,
+permission, runtime, configuration-mode and immutable-action checks. The
+[tooling profile](repository-tooling.md) records the current consumer source pins.
 
 `pnpm architecture:check` includes this gate. The documentation and architecture
 CI workflows execute it independently so changes to prose, schemas, fixtures, or

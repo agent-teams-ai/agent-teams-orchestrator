@@ -496,6 +496,11 @@
       "id": "ADR-0101",
       "path": "docs/decisions/0101-run-specific-rosters-coordination-and-exclusive-agent-occupancy.md",
       "immutableDigest": "sha256:d5370bc33e8e3bb12a0440bc9d1d98ca8160814d5dec441f5db3568494460e33"
+    },
+    {
+      "id": "ADR-0103",
+      "path": "docs/decisions/0103-first-sandbox-runtime-migration-slice-admission.md",
+      "immutableDigest": "sha256:3b009d7a13893f5be7628dbf42bcaccaf5f01267064c3354e5fef237af5f84c0"
     }
   ]
 }

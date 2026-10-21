@@ -39,6 +39,8 @@ discovery. The lifecycle lists below remain the complete status ledger.
 
 ## Accepted decisions
 
+- [ADR-0103: First Sandbox Runtime Migration Slice Admission](0103-first-sandbox-runtime-migration-slice-admission.md)
+
 - [ADR-0083: Orchestrator assurance intent and AR containment ownership](0083-orchestrator-assurance-intent-and-ar-containment-ownership.md)
 - [ADR-0001: Headless event-driven modular monolith](0001-headless-event-driven-modular-monolith.md)
 - [ADR-0003: Runtime lifecycle belongs to ar](0003-ar-owns-runtime-lifecycle.md)

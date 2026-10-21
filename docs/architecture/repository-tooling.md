@@ -611,22 +611,27 @@ Agents working in this repository must:
 6. update a conformance fixture with every new permitted dependency shape or fixed
    false negative.
 
-The ReviewRouter `v1.0.138` baseline at commit
-`75cbecab131d74021677fcd1fb21962994d306b8` uses the canonical V4/T0 review
-workflow and explicit interaction V2 workflow. The review workflow is bound to
-the versioned repository secret namespace and immutable reusable runtime. The
-interaction workflow keeps its event filters, read-only fallback permissions,
-OIDC exchange, immutable checkout actions, and explicit runtime steps local.
-The generated interaction workflow source changes only the interaction-runner
-default from Node.js 24 to Node.js 26.11.1 and updates its exact-source SHA-256 to
-`336a904791d2e84164b44b2342aa5acc6d63cff36aac71cbce80a8c6fc8b8843`; the listed
-controls remain unchanged and inside the same reviewed security boundary.
+The Gateway review wrapper in `.github/workflows/reviewrouter-review.yml` comes
+from the current-main migration in commit `dec970e`. It dispatches an explicit
+review request, PR number and exact review head to
+`777genius/review-router/.github/workflows/reviewrouter-runtime.yml@workflow-v1`.
+The consumer guard checks the dispatch-only boundary, required inputs, input guard,
+request-scoped serialization, read-only repository permissions, OIDC permission,
+bound input forwarding and absence of inherited secrets. It also freezes the
+complete reviewed wrapper bytes with SHA-256
+`d30c359c172a2d2e6ad8af7b5557894ae8d601f5f4957a87153aa93810966cc4`. This verifies the consumer workflow,
+not the remote Gateway service's runtime behavior.
 
-The security gate binds both complete generated workflow sources to their
-reviewed SHA-256 digests. Any trigger, permission, namespace, runtime ref, action
-pin, input, secret mapping, or execution-step drift therefore fails closed. An
-upgrade must regenerate both workflows and update both digests and mutation
-fixtures together.
+The explicit interaction V2 workflow retains the ReviewRouter `v1.0.138` baseline
+at commit `75cbecab131d74021677fcd1fb21962994d306b8`: event filters,
+read-only fallback permissions, OIDC exchange, immutable checkout actions and
+explicit runtime steps remain local. Its Node.js 26.11.1 runner source keeps
+SHA-256 `336a904791d2e84164b44b2342aa5acc6d63cff36aac71cbce80a8c6fc8b8843`.
+
+The security gate requires both current workflow files. Targeted Gateway and
+interaction mutation fixtures reject authority drift, and exact-source checks
+reject any other unreviewed changes. An upgrade updates the affected reviewed
+digest, semantic expectations and negative witnesses together.
 
 ## Upgrade policy
 

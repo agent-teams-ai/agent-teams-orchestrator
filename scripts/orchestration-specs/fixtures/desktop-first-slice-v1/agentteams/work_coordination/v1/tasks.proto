@@ -1,0 +1,49 @@
+syntax = "proto3";
+package agentteams.work_coordination.v1;
+
+// PROPOSED golden contract; owner work-coordination.
+import "agentteams/control/v1/control.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+enum TaskLifecycle {
+  TASK_LIFECYCLE_UNSPECIFIED = 0;
+  TASK_LIFECYCLE_OPEN = 1;
+}
+message Task {
+  string name = 1;
+  string subject = 2;
+  string description = 3;
+  string etag = 4;
+  TaskLifecycle lifecycle = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+message CreateTaskRequest {
+  string parent = 1;
+  agentteams.control.v1.CommandIdentity identity = 2;
+  string subject = 3;
+  string description = 4;
+}
+message UpdateTaskRequest {
+  string name = 1;
+  agentteams.control.v1.CommandIdentity identity = 2;
+  string etag = 3;
+  google.protobuf.FieldMask update_mask = 4;
+  optional string subject = 5;
+  optional string description = 6;
+}
+message GetTaskRequest {
+  string name = 1;
+}
+message TaskPage {
+  repeated Task items = 1;
+  optional string next_page_token = 2;
+  string cursor = 3;
+}
+service TasksService {
+  rpc CreateTask(CreateTaskRequest) returns (agentteams.control.v1.Operation);
+  rpc UpdateTask(UpdateTaskRequest) returns (agentteams.control.v1.Operation);
+  rpc GetTask(GetTaskRequest) returns (Task);
+  rpc ListTasks(agentteams.control.v1.ListRequest) returns (TaskPage);
+  rpc ReadFeed(agentteams.control.v1.FeedRequest) returns (agentteams.control.v1.FeedPage);
+}
