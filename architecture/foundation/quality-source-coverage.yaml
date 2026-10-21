@@ -4,6 +4,7 @@ suppressionPolicyPath: architecture/foundation/suppression-governance.yaml
 featureProfilePath: architecture/foundation/quality-feature-topology.json
 lintConfigPath: .oxlintrc.type-aware.json
 compilerProjects:
+  - packages/contexts/agent-context/tsconfig.json
   - packages/platform/local-host-control/tsconfig.json
 scripts:
   fast: check:fast

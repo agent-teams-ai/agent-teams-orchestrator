@@ -103,7 +103,7 @@ function lintMappedSource(target, name, source, config = ".oxlintrc.type-aware.j
       compilerOptions: { module: "NodeNext", moduleResolution: "NodeNext", strict: true, noEmit: true, target: "ES2024" },
       include: ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
     }));
-    const result = spawnSync(oxlintBinary, ["--config", config, "--disable-nested-config", "--no-ignore", input],
+    const result = spawnSync(oxlintBinary, ["--config", config, "--disable-nested-config", "--no-ignore", path.relative(root, input)],
       { cwd: root, encoding: "utf8", timeout: 60_000 });
     assert.equal(result.error, undefined, result.stderr);
     return { status: result.status, diagnostics: `${result.stdout}${result.stderr}` };
@@ -299,11 +299,28 @@ test("local type-aware runner requires explicit paths", () => {
   const result = runTypeAware();
   assert.notEqual(result.status, 0);
   assert.match(result.diagnostics, /requires explicit paths/u);
+  const escaped = runTypeAware(path.join(os.tmpdir(), "TEST-outside-lint.ts"));
+  assert.notEqual(escaped.status, 0);
+  assert.match(escaped.diagnostics, /outside repository authority/u);
+  const outside = mkdtempSync(path.join(os.tmpdir(), "TEST-outside-lint-"));
+  const inside = mkdtempSync(path.join(repositoryRoot, ".TEST-lint-link-"));
+  try {
+    const source = path.join(outside, "unsafe.ts");
+    writeFileSync(source, "export const now = Date.now();\n");
+    const linked = path.join(inside, "unsafe.ts");
+    symlinkSync(source, linked);
+    const physicalEscape = runTypeAware(linked);
+    assert.notEqual(physicalEscape.status, 0);
+    assert.match(physicalEscape.diagnostics, /outside repository authority/u);
+  } finally {
+    rmSync(inside, { recursive: true, force: true });
+    rmSync(outside, { recursive: true, force: true });
+  }
 });
 
 test("type-aware runner fails closed on an empty target", () => {
   const emptyDirectory = mkdtempSync(
-    path.join(os.tmpdir(), "orchestrator-empty-lint-"),
+    path.join(repositoryRoot, ".TEST-empty-lint-"),
   );
   try {
     const result = runTypeAware(emptyDirectory);

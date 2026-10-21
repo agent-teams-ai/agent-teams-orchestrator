@@ -211,7 +211,11 @@ async function main() {
   const targets =
     process.argv.length > 2
       ? process.argv.slice(2)
-      : ["README.md", "AGENTS.md", "docs"];
+      : [
+        "README.md", "AGENTS.md", "docs",
+        "packages/contexts/agent-context/README.md",
+        "packages/contexts/agent-context/src/features/sandbox-manifest/README.md",
+      ];
   const code = await run(binaryPath, ["--no-global", ...targets]);
   process.exitCode = code;
 }

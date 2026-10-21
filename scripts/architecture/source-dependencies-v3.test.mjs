@@ -21,6 +21,7 @@ test("live source policy is schema v3 with root package and workspace package ro
   assert.equal(policy.rootPackage, true);
   assert.equal(Object.hasOwn(policy, "includeRootPackage"), false);
   assert.deepEqual(policy.packageRoots, [
+    "packages/contexts/agent-context",
     "packages/platform/local-host-control",
     "tooling/architecture-conformance",
   ]);

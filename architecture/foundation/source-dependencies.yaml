@@ -3,10 +3,12 @@ workspace:
   kind: pnpm
   manifest: pnpm-workspace.yaml
 packageRoots:
+  - packages/contexts/agent-context
   - packages/platform/local-host-control
   - tooling/architecture-conformance
 rootPackage: true
 governedRoots:
+  - packages/contexts/agent-context
   - packages/platform/local-host-control
   - scripts
   - tooling/architecture-conformance
@@ -331,3 +333,166 @@ boundaries:
       builtins: []
       runtimeReferences:
         - dynamic
+  - id: context.agent-context.sandbox-manifest.outbound
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/adapters/outbound
+    entrypoints:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/adapters/outbound/persistence/migrations/0001-sandbox-manifest.ts
+      - packages/contexts/agent-context/src/features/sandbox-manifest/adapters/outbound/persistence/postgres-manifest-store.ts
+    allow:
+      boundaries:
+        - context.agent-context.sandbox-manifest.application
+        - context.agent-context.sandbox-manifest.ports
+        - context.agent-context.sandbox-manifest.models
+        - context.agent-context.sandbox-manifest.domain
+      packages:
+        - pg
+      builtins:
+        - node:crypto
+      runtimeReferences: []
+  - id: context.agent-context.sandbox-manifest.feature-api
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/api.ts
+      - packages/contexts/agent-context/src/features/sandbox-manifest/index.ts
+    entrypoints:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/api.ts
+      - packages/contexts/agent-context/src/features/sandbox-manifest/index.ts
+    packageExports:
+      - ./api
+    allow:
+      boundaries:
+        - context.agent-context.sandbox-manifest.application
+        - context.agent-context.sandbox-manifest.ports
+        - context.agent-context.sandbox-manifest.models
+        - context.agent-context.sandbox-manifest.domain
+        - context.agent-context.sandbox-manifest.composition
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.agent-context.sandbox-manifest.models
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/application/api.ts
+    entrypoints:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/application/api.ts
+    allow:
+      boundaries:
+        - context.agent-context.sandbox-manifest.domain
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.agent-context.sandbox-manifest.application
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/application/register-sandbox-manifest.ts
+      - packages/contexts/agent-context/src/features/sandbox-manifest/application/create-manifest-api.ts
+      - packages/contexts/agent-context/src/features/sandbox-manifest/application/manifest-validation.ts
+    entrypoints:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/application/register-sandbox-manifest.ts
+      - packages/contexts/agent-context/src/features/sandbox-manifest/application/create-manifest-api.ts
+      - packages/contexts/agent-context/src/features/sandbox-manifest/application/manifest-validation.ts
+    allow:
+      boundaries:
+        - context.agent-context.sandbox-manifest.domain
+        - context.agent-context.sandbox-manifest.ports
+        - context.agent-context.sandbox-manifest.models
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.agent-context.sandbox-manifest.ports
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/application/ports
+    entrypoints:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/application/ports/manifest-store.ts
+    allow:
+      boundaries:
+        - context.agent-context.sandbox-manifest.domain
+        - context.agent-context.sandbox-manifest.models
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.agent-context.sandbox-manifest.composition
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/composition
+    entrypoints:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/composition/feature-module-factory.ts
+    packageExports:
+      - ./module
+    allow:
+      boundaries:
+        - context.agent-context.sandbox-manifest.outbound
+        - context.agent-context.sandbox-manifest.feature-api
+        - context.agent-context.sandbox-manifest.models
+        - context.agent-context.sandbox-manifest.application
+        - context.agent-context.sandbox-manifest.ports
+        - context.agent-context.sandbox-manifest.domain
+      packages:
+        - pg
+      builtins:
+        - node:crypto
+      runtimeReferences: []
+  - id: context.agent-context.sandbox-manifest.domain
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/domain
+    entrypoints:
+      - packages/contexts/agent-context/src/features/sandbox-manifest/domain/manifest.ts
+    allow:
+      boundaries: []
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.agent-context.sandbox-manifest.public-api
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/agent-context/src/index.ts
+    entrypoints:
+      - packages/contexts/agent-context/src/index.ts
+    packageExports:
+      - .
+    allow:
+      boundaries:
+        - context.agent-context.sandbox-manifest.feature-api
+        - context.agent-context.sandbox-manifest.composition
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.agent-context.sandbox-manifest.tests
+    dependencyMode: development
+    roots:
+      - packages/contexts/agent-context/tests
+    entrypoints: []
+    allow:
+      boundaries:
+        - context.agent-context.sandbox-manifest.outbound
+        - context.agent-context.sandbox-manifest.feature-api
+        - context.agent-context.sandbox-manifest.models
+        - context.agent-context.sandbox-manifest.application
+        - context.agent-context.sandbox-manifest.ports
+        - context.agent-context.sandbox-manifest.composition
+        - context.agent-context.sandbox-manifest.domain
+        - context.agent-context.sandbox-manifest.public-api
+      packages:
+        - pg
+        - "@bufbuild/protobuf"
+        - "@connectrpc/connect"
+      builtins:
+        - node:assert/strict
+        - node:test
+        - node:child_process
+        - node:fs
+        - node:fs/promises
+        - node:os
+        - node:path
+        - node:url
+        - node:crypto
+        - node:net
+        - node:module
+        - node:http
+        - node:https
+        - node:util
+      runtimeReferences: []

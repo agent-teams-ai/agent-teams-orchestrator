@@ -1,5 +1,7 @@
 schemaVersion: 1
 governedRoots:
+  - packages/contexts/agent-context/src
+  - packages/contexts/agent-context/tests
   - packages/platform/local-host-control/src
   - packages/platform/local-host-control/tests
   - scripts/architecture

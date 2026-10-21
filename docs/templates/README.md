@@ -10,6 +10,7 @@ summary: Navigation index for governed documentation templates and their intende
 
 | Template | Use when |
 |---|---|
+| [Package index](index.md) | A declared package needs navigation to its canonical owner and actual features |
 | [ADR](adr.md) | A significant choice needs durable rationale and consequences |
 | [Open decision](open-decision.md) | An unresolved question must be addressable and blocked from implicit implementation |
 | [Bounded-context dossier](bounded-context.md) | Domain discovery proposes or evolves a strategic context |
