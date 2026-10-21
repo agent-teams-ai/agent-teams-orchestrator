@@ -14,6 +14,7 @@ related:
   - OD-015
   - OD-026
   - OD-027
+  - OD-048
 ---
 
 # Work Coordination
@@ -114,6 +115,23 @@ Proposed scope: project-scoped tasks, assignment, dependencies, blocking,
 handoffs, subscriptions, and external task-board synchronization intent. Agent
 execution remains observed evidence rather than owned runtime state.
 
+### Human and AI work direction
+
+The owner directs support for human manual Tasks alongside AI work. Manual work
+does not require a Run, Agent profile, AR session, or runtime occupancy. Authorized
+humans may claim Tasks, and authorized agents may request assignment to a human,
+through Work-owned typed commands. The authenticated actor and any delegation
+are checked separately from Agent identity; Team membership or agent text alone
+cannot authorize a mutation.
+
+[OD-048](../../../open-decisions/OD-048-mixed-human-and-ai-team-participation.md)
+keeps accountable-assignee cardinality, immediate assignment versus a proposal
+requiring acceptance, human membership rules, and exact command semantics open.
+The eventual claim/assignment contract must resolve concurrent claims with the
+expected Work revision and idempotency. Work remains the sole lifecycle and
+completion owner. These directions do not widen ADR-0103's metadata-only Task
+admission or implement assignment, review, or completion in that slice.
+
 Work Coordination is the only authority that changes Task or Work lifecycle. It
 executes versioned work commands and publishes work facts. Run cancellation,
 participant-failure, late-completion, and compensation policy remain owned by the
@@ -142,7 +160,7 @@ aggregate boundaries and acceptance transitions remain open in OD-006.
 Kanban columns, lists, timelines, calendars, review queues, and external boards are
 views or adapters over Work state. They cannot become an additional lifecycle
 authority. OD-027 decides the configurable workflow language, versioning,
-transition rules, semantic traits, migration, and board projection model.
+transition rules, semantic traits, migration, and the generic TaskView candidate.
 
 Task-scoped discussion remains a Work concern unless OD-026 proves a different
 consistency boundary. A task comment never becomes a Conversation message

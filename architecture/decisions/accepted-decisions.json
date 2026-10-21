@@ -501,6 +501,11 @@
       "id": "ADR-0103",
       "path": "docs/decisions/0103-first-sandbox-runtime-migration-slice-admission.md",
       "immutableDigest": "sha256:3b009d7a13893f5be7628dbf42bcaccaf5f01267064c3354e5fef237af5f84c0"
+    },
+    {
+      "id": "ADR-0110",
+      "path": "docs/decisions/0110-mandatory-get-modular-and-nested-feature-foundation.md",
+      "immutableDigest": "sha256:7f9df2297f1643ee385cff436ee4b923442d08be15d6f9da6f6e4a041bd0f2f5"
     }
   ]
 }

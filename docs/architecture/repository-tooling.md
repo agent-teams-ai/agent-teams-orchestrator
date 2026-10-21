@@ -131,8 +131,11 @@ The consumer catalog and lockfile now pin Oxlint `1.83.0`, matching that adapter
 These source pins do not replace a fresh frozen install and native qualification.
 
 `architecture/foundation/quality-feature-topology.json` is a checked adapter for
-Foundation's flat FMS v1 reader. The accepted organization authority remains
-`architecture/feature-module-standard-profile.json`; it is unchanged. The adapter
+Foundation's flat FMS v1 reader. The accepted organization authority is the v1.1
+`architecture/feature-module-standard-profile.json` under ADR-0110. This bounded
+projection applies only while nested features and composition contracts are
+absent and their activation is blocked. It does not claim nested conformance.
+The adapter
 maps its production and excluded roots and the materialized package catalog to
 `packages/contexts/agent-context` and `packages/platform/local-host-control`, their
 `src` trees, and their `tests` trees.
@@ -679,7 +682,7 @@ Status: accepted, implementation begins with the first matching production sourc
 ast-grep owns structural code invariants that are more precise than text search and
 are not import-graph questions. The initial rule families cover:
 
-- Awilix import, container creation, registration, scope, cradle, and resolution
+- Get Modular import, declaration, entry, group, scope, and wiring
   containment under `composition/**`;
 - prohibited direct clocks, randomness, process APIs, and infrastructure
   constructors in domain code;

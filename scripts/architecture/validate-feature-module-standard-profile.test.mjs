@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import test from "node:test";
 
 import {
   AGENT_INSTRUCTIONS_PATH,
   PROFILE_DOCUMENT_PATH,
   PROFILE_PATH,
+  readProductionFeaturePaths,
   validateFeatureModuleStandardProfile,
 } from "./validate-feature-module-standard-profile.mjs";
 
@@ -39,6 +42,44 @@ test("rejects central identity or digest drift", () => {
     changed.standard[key] = value;
     assert.throws(() => validate({ profile: changed }), /Standard binding does not match/u);
   }
+});
+
+test("blocks new constructs until their semantic enforcement is implemented", () => {
+  for (const name of ["sub_features", "republications", "composition_contracts"]) {
+    const changed = clone(profile);
+    changed.adoption.constructs[name].push({ feature: "parent/child" });
+    assert.throws(() => validate({ profile: changed }), /must remain empty/u);
+  }
+  const changed = clone(profile);
+  changed.adoption.constructs.activation = "active";
+  assert.throws(() => validate({ profile: changed }), /remain blocked/u);
+});
+
+test("finds undeclared new constructs in materialized production source", async () => {
+  for (const [sourcePath, expected] of [
+    ["src/features/parent/features/child/application/execute.ts", /sub-feature materialization/u],
+    ["src/features/parent/composition/parent.contracts.ts", /composition contracts/u],
+    ["src/composition/host.contracts.ts", /composition contracts/u],
+  ]) {
+    const repositoryRoot = await mkdtemp(join(tmpdir(), "orchestrator-feature-profile-"));
+    try {
+      const packageRoot = join(repositoryRoot, "packages/example");
+      const filePath = join(packageRoot, sourcePath);
+      await mkdir(dirname(filePath), { recursive: true });
+      await writeFile(join(packageRoot, "package.json"), "{}\n");
+      await writeFile(filePath, "export const value = 1;\n");
+      const sourcePaths = await readProductionFeaturePaths(repositoryRoot, ["packages"]);
+      assert.throws(() => validate({ sourcePaths }), expected);
+    } finally {
+      await rm(repositoryRoot, { recursive: true, force: true });
+    }
+  }
+});
+
+test("keeps ordinary feature source inside the existing activation", async () => {
+  const sourcePaths = await readProductionFeaturePaths(process.cwd(), ["apps", "packages"]);
+  assert(sourcePaths.some((sourcePath) => sourcePath.includes("src/features/host-discovery/")));
+  assert.doesNotThrow(() => validate({ sourcePaths }));
 });
 
 test("rejects silent scope, authority, and enforcement drift", () => {

@@ -9,6 +9,8 @@ related:
   - architecture.context-map
   - OD-011
   - domain.contexts.team-topology
+  - OD-019
+  - OD-048
 ---
 
 # OD-023: Agent Organization Detailed Model
@@ -58,6 +60,38 @@ typed relationships, not by weakening containment into an unrestricted graph.
 Exact aggregate and transaction boundaries remain open until the required
 scenarios are event-stormed.
 
+## Growth from one team to company structures
+
+The product direction supports a small team first, then companies, departments,
+and nested organizational teams without requiring a new layer for every size.
+A default view may show one Project and its Team directly. Existing Organization,
+Structure, Unit, and TeamPlacement concepts support later organization-wide views
+over project-qualified Teams; they do not require nested Tenants or duplicate
+Task, Team, Project, or permission authorities.
+
+An organizational unit called a team may contain other units and Team placements.
+This does not make an operational Team contain another Team or recursively
+expand its executable roster. That alternative changes Team versions, duplicate
+Agent checks, coordinator selection, and Run snapshots and requires a separate
+decision with [OD-048](OD-048-mixed-human-and-ai-team-participation.md).
+
+| Model under consideration | Confidence /10 | Complexity /10 | Reliability /10 | Estimated production TS LOC |
+|---|---|---|---|---|
+| Existing units and project-qualified Team placements | 9 | 5 | 9 | 2,500–6,000 |
+| Recursive operational Team rosters | 4 | 8 | 6 | 5,000–12,000 additional to base Team/Run support |
+
+These judgments estimate one bounded hierarchy/placement slice or the additional
+recursive-roster behavior. They exclude UI, tests, generated code, federation,
+and base service infrastructure; exact aggregate boundaries may change the cost.
+The existing units/placements model is the lean candidate. Tactical acceptance
+still requires the scenarios below and does not follow from a view label.
+
+Mixed teams retain separate human principal and Agent identities. Whether a
+human belongs to several Teams remains OD-048's choice; the current Agent
+one-Team invariant is unchanged. Cross-organization collaboration, especially
+across Tenants or authority realms, remains future work here: no shared aggregate,
+implicit access inheritance, or cross-tenant transfer is admitted by this direction.
+
 ## Required scenarios
 
 - concurrent moves of the same subtree;
@@ -68,7 +102,9 @@ scenarios are event-stormed.
 - one team represented in multiple structures;
 - permissions whose evaluation depends on organization facts;
 - import of the legacy graph with ambiguous or missing identities;
-- federation between independently governed organizations.
+- federation between independently governed organizations;
+- a single-Team view grows into department structures without changing Team identity;
+- an organizational team label never silently expands an operational Run roster.
 
 ## Acceptance criteria
 

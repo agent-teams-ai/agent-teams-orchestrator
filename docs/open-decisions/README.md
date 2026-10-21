@@ -65,6 +65,7 @@ question. `Resolved` is historical and must relate to at least one deciding ADR.
 | OD-045 | [Concurrent Agent Profile use](OD-045-concurrent-agent-profile-use.md) | run-orchestration | Resolved by ADR-0101 |
 | OD-046 | [Run roster overrides](OD-046-run-roster-overrides.md) | run-orchestration | Resolved by ADR-0101 |
 | OD-047 | [Team coordination model](OD-047-team-coordination-model.md) | architecture/domain | Resolved by ADR-0101 |
+| OD-048 | [OD-048: Mixed Human and AI Team Participation](OD-048-mixed-human-and-ai-team-participation.md) | architecture/domain | Open |
 
 Use the [open-decision template](../templates/open-decision.md) for new entries.
 CI verifies that every record is listed and that table owner and status match its

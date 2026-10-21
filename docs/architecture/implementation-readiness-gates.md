@@ -5,6 +5,7 @@ status: accepted
 owner: architecture
 summary: Mandatory evidence gates that must pass before the first production orchestration vertical slice is implemented.
 related:
+  - ADR-0110
   - ADR-0103
   - contract.migration.desktop-first-slice.v1
   - ADR-0071
@@ -122,6 +123,58 @@ against synthetic runtime/authority adapters; it does not assert actual storage,
 Connect/MCP/Desktop conformance, real provider execution, qualified server
 availability, Fully Local materialization or any release qualification. Those
 implementation and deployment proofs follow their owning contracts.
+
+## Module foundation before business expansion
+
+ADR-0110 makes Get Modular mandatory and adds a composition prerequisite before
+new or expanded business module assembly. It does not rewrite the five business
+gates or retract ADR-0103's exact sandbox evidence. Existing admission is not
+evidence that the new module foundation has passed.
+
+The current foundation state is **pending**. Foundation work, migration of actual
+composition seams, disposable qualification, and corrections to already admitted
+behavior may proceed. New or expanded business module assembly waits for these
+bounded proofs within an explicitly selected initial adoption envelope. That
+envelope states the supported feature depth, Assembly entry/group counts,
+process profiles, and fixed compile/runtime budgets; it must not rely on an
+unqualified scale claim.
+
+| Evidence | Required result | Current state |
+|---|---|---|
+| Scope and artifact reconciliation | Exact central pins, compatible released package/archive train, supported compiler, and actual composition inventory | Framework selected; package activation pending |
+| Existing seam migration | Sandbox Manifest and other applicable seams use one Get Modular production path; pure helpers remain classified explicitly | Pending |
+| Nested source conformance | Deepest feature ownership, visibility, direct-parent assembly, republication, composition-only imports, type-level use cycles and load-time cycles | Production activation blocked |
+| Representative consumer | Real nested feature, two meaningful profiles, exact bindings, independent oracle, public packed imports | Pending |
+| Failure and lifecycle | Zero factories on invalid wiring, isolated attempts, cancellation, returned-product custody, drain and cleanup debt | Pending |
+| Initial adoption envelope | Representative consumer at the selected initial scale on the accepted supported compiler, within fixed compile/runtime budgets and with actual source checks | Pending |
+| Growth evidence | Separate 100/500/1,000-entry qualification matrix on the same supported toolchain; each larger scale remains unavailable until its row passes | Pending; does not block a smaller qualified envelope |
+
+The representative consumer uses existing Get Modular conformance APIs and the
+Foundation source classifier. It does not introduce another parser, module
+framework, or generic lifecycle manager. Feature, Assembly entry, package, and
+service counts are measured separately; thousands of agent executions do not
+imply thousands of modules or dependency containers.
+
+The reviewed upstream
+[growth record](https://github.com/agent-teams-ai/get-modular/blob/ddf1e0b0053f546f12ca70190b237b4f7e78d09d/tests/qualification/consumer-fixtures/growth/README.md)
+reports an inherited-map N=500 compile reaching its 180-second limit on
+TypeScript 7.0.2. A private compiler experiment completed N=1,000, but it is not
+a maintained adopted compiler artifact and did not qualify source conformance.
+The foundation must close that supported-toolchain gap before claiming the
+corresponding consumer scale. A smaller envelope may activate after its own
+correctness, nested source, lifecycle, and growth-budget evidence passes; it
+does not have to wait for N=1,000. Expanding beyond that envelope requires the
+corresponding additional evidence first. Do not hide a failed scale with wiring
+casts, weakened source maps, larger timeouts, or a claim that the private result
+already passed.
+
+The same review found finite Assembly group depth and aggregate entry/group
+limits. The selected feature tree and diagnostics must agree with the library's
+qualified envelope; unlimited semantic nesting is not a promise of unlimited
+runtime graph depth. Resources release qualification must include the reviewed
+shutdown reentry fix. Observation needs a separate browser lane if a browser
+consumer is introduced. These are scoped readiness requirements, not a request
+to build every possible extension facility before one useful feature.
 
 ## Gate 1: Run, Work, and topology semantics
 
