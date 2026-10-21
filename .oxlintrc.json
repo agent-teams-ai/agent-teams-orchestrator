@@ -573,6 +573,12 @@
           }
         ]
       }
+    },
+    {
+      "files": ["packages/contexts/execution-observation/src/generated/**/*.ts"],
+      "rules": {
+        "jsdoc/check-tag-names": ["error", {"definedTags": ["generated"]}]
+      }
     }
   ],
   "ignorePatterns": [

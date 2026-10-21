@@ -25,6 +25,10 @@ code_anchors:
     pattern: scripts/orchestration-specs/desktop-first-slice-v1.test.ts
   - enforcement: advisory
     pattern: scripts/orchestration-specs/fixtures/desktop-first-slice-v1/**
+  - enforcement: advisory
+    pattern: contracts/proto/agentteams/control/v1/control.proto
+  - enforcement: advisory
+    pattern: packages/contexts/execution-observation/src/features/sandbox-activity/contracts/control-api/agentteams/execution_observation/v1/activity.proto
 ---
 
 # Desktop Runtime Migration Admission v1
@@ -91,12 +95,17 @@ The versioned deterministic semantic model is
 [`desktop-first-slice-v1.test.ts`](../../scripts/orchestration-specs/desktop-first-slice-v1.test.ts).
 It extends the existing `specs:model` and seeded property lane. It performs no IO
 or provider launch and is not a production business kernel. Its fixture version
-is `desktop-first-slice/v1`. Proposed feature-owned Protobuf golden sources live under
-[`fixtures/desktop-first-slice-v1/agentteams`](../../scripts/orchestration-specs/fixtures/desktop-first-slice-v1/agentteams/control/v1/control.proto).
-They are checked by `buf build` and admitted for the exact sandbox scope of
-ADR-0103; shipping compatibility and deployment qualification remain separate.
-Materialization moves each unchanged owned contract to its admitted feature;
-TypeScript fixtures never become public DTO aliases.
+is `desktop-first-slice/v1`. The materialized
+[common control envelope](../../contracts/proto/agentteams/control/v1/control.proto)
+and feature-owned [Activity contract](../../packages/contexts/execution-observation/src/features/sandbox-activity/contracts/control-api/agentteams/execution_observation/v1/activity.proto)
+retain the admitted golden field semantics. The other owners' golden contracts
+remain under `scripts/orchestration-specs/fixtures/desktop-first-slice-v1/agentteams`.
+Each contract has one source location; materialization moves its authority once.
+
+`pnpm wire:check` verifies the exact source inventory, generated Observation
+descriptors and actual Buf build, lint and formatting. These contracts are admitted
+for the exact sandbox scope of ADR-0103; shipping compatibility and deployment
+qualification remain separate. TypeScript fixtures never become public DTO aliases.
 
 ## Identity and scope
 

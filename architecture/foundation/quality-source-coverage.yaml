@@ -1,9 +1,10 @@
-schemaVersion: 1
+schemaVersion: 3
 sourcePolicyPath: architecture/foundation/source-dependencies.yaml
 suppressionPolicyPath: architecture/foundation/suppression-governance.yaml
 featureProfilePath: architecture/foundation/quality-feature-topology.json
 lintConfigPath: .oxlintrc.type-aware.json
 compilerProjects:
+  - packages/contexts/execution-observation/tsconfig.json
   - packages/contexts/agent-context/tsconfig.json
   - packages/platform/local-host-control/tsconfig.json
 scripts:
@@ -11,3 +12,8 @@ scripts:
   full: check
   scope: quality:coverage:scope
   typed: lint:typed
+assets:
+  - path: packages/contexts/execution-observation/src/features/sandbox-activity/contracts/control-api/agentteams/execution_observation/v1/activity.proto
+    kind: protobuf
+    boundaryId: context.execution-observation.sandbox-activity.contracts
+    script: wire:check

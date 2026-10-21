@@ -1,7 +1,8 @@
 syntax = "proto3";
 package agentteams.execution_observation.v1;
 
-// PROPOSED golden contract; owner execution-observation.
+// ADR-0103 admitted sandbox contract; owner execution-observation.
+// This scope does not qualify broader observation or production deployment.
 import "agentteams/control/v1/control.proto";
 import "google/protobuf/timestamp.proto";
 enum ActivityKind {

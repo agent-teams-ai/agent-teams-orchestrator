@@ -3,7 +3,7 @@ package agentteams.control.v1;
 
 import "google/protobuf/timestamp.proto";
 
-// PROPOSED golden contract; owner platform/control-api. No production materialization.
+// Admitted sandbox control envelope; owner platform/control-api.
 message CommandIdentity {
   string request_id = 1;
   google.protobuf.Timestamp valid_until = 2;

@@ -3,11 +3,14 @@ workspace:
   kind: pnpm
   manifest: pnpm-workspace.yaml
 packageRoots:
+  - packages/contexts/execution-observation
   - packages/contexts/agent-context
   - packages/platform/local-host-control
   - tooling/architecture-conformance
 rootPackage: true
 governedRoots:
+  - contracts/proto
+  - packages/contexts/execution-observation
   - packages/contexts/agent-context
   - packages/platform/local-host-control
   - scripts
@@ -495,4 +498,256 @@ boundaries:
         - node:http
         - node:https
         - node:util
+      runtimeReferences: []
+  - id: context.execution-observation.sandbox-activity.inbound
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/adapters/inbound
+    entrypoints:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/adapters/inbound/connect/index.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/adapters/inbound/connect/time.ts
+    packageExports:
+      - ./connect
+    allow:
+      boundaries:
+        - context.execution-observation.sandbox-activity.application
+        - context.execution-observation.sandbox-activity.ports
+        - context.execution-observation.sandbox-activity.models
+        - context.execution-observation.sandbox-activity.contracts
+        - context.execution-observation.sandbox-activity.generated
+        - context.execution-observation.sandbox-activity.domain
+      packages:
+        - "@bufbuild/protobuf"
+        - "@connectrpc/connect"
+      builtins: []
+      runtimeReferences: []
+  - id: context.execution-observation.sandbox-activity.outbound
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/adapters/outbound
+    entrypoints:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/adapters/outbound/persistence/activity-cursors.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/adapters/outbound/persistence/migrations/0001-sandbox-activity.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/adapters/outbound/persistence/postgres-activity-projections.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/adapters/outbound/persistence/postgres-activity-state.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/adapters/outbound/persistence/postgres-activity-store.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/adapters/outbound/persistence/postgres-read-tokens.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/adapters/outbound/persistence/postgres-transaction.ts
+    allow:
+      boundaries:
+        - context.execution-observation.sandbox-activity.application
+        - context.execution-observation.sandbox-activity.ports
+        - context.execution-observation.sandbox-activity.models
+        - context.execution-observation.sandbox-activity.contracts
+        - context.execution-observation.sandbox-activity.domain
+      packages:
+        - pg
+      builtins:
+        - node:crypto
+      runtimeReferences: []
+  - id: context.execution-observation.sandbox-activity.feature-api
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/api.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/index.ts
+    entrypoints:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/api.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/index.ts
+    packageExports:
+      - ./api
+    allow:
+      boundaries:
+        - context.execution-observation.sandbox-activity.application
+        - context.execution-observation.sandbox-activity.ports
+        - context.execution-observation.sandbox-activity.models
+        - context.execution-observation.sandbox-activity.domain
+        - context.execution-observation.sandbox-activity.composition
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.execution-observation.sandbox-activity.application
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/application/admit-sandbox-activity.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/application/activity-validation.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/application/create-activity-api.ts
+    entrypoints:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/application/admit-sandbox-activity.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/application/activity-validation.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/application/create-activity-api.ts
+    allow:
+      boundaries:
+        - context.execution-observation.sandbox-activity.domain
+        - context.execution-observation.sandbox-activity.ports
+        - context.execution-observation.sandbox-activity.models
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.execution-observation.sandbox-activity.models
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/application/api.ts
+    entrypoints:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/application/api.ts
+    allow:
+      boundaries:
+        - context.execution-observation.sandbox-activity.domain
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.execution-observation.sandbox-activity.ports
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/application/ports
+    entrypoints:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/application/ports/activity-store.ts
+    allow:
+      boundaries:
+        - context.execution-observation.sandbox-activity.domain
+        - context.execution-observation.sandbox-activity.models
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.execution-observation.sandbox-activity.composition
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/composition
+    entrypoints:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/composition/feature-module-factory.ts
+    packageExports:
+      - ./module
+    allow:
+      boundaries:
+        - context.execution-observation.sandbox-activity.inbound
+        - context.execution-observation.sandbox-activity.outbound
+        - context.execution-observation.sandbox-activity.feature-api
+        - context.execution-observation.sandbox-activity.application
+        - context.execution-observation.sandbox-activity.models
+        - context.execution-observation.sandbox-activity.ports
+        - context.execution-observation.sandbox-activity.domain
+        - context.execution-observation.sandbox-activity.generated
+        - context.execution-observation.sandbox-activity.contracts
+      packages:
+        - pg
+      builtins:
+        - node:crypto
+      runtimeReferences: []
+  - id: context.execution-observation.sandbox-activity.domain
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/domain
+    entrypoints:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/domain/activity-admission.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/domain/activity-state.ts
+      - packages/contexts/execution-observation/src/features/sandbox-activity/domain/state-codec.ts
+    allow:
+      boundaries: []
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.execution-observation.sandbox-activity.generated
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/execution-observation/src/generated
+    entrypoints:
+      - packages/contexts/execution-observation/src/generated/agentteams/control/v1/control_pb.ts
+      - packages/contexts/execution-observation/src/generated/agentteams/execution_observation/v1/activity_pb.ts
+    allow:
+      boundaries: []
+      packages:
+        - "@bufbuild/protobuf"
+      builtins: []
+      runtimeReferences: []
+  - id: context.execution-observation.sandbox-activity.public-api
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/execution-observation/src/index.ts
+    entrypoints:
+      - packages/contexts/execution-observation/src/index.ts
+    packageExports:
+      - .
+    allow:
+      boundaries:
+        - context.execution-observation.sandbox-activity.feature-api
+        - context.execution-observation.sandbox-activity.composition
+        - context.execution-observation.sandbox-activity.contracts
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.execution-observation.sandbox-activity.contracts
+    dependencyMode: runtime
+    roots:
+      - packages/contexts/execution-observation/src/features/sandbox-activity/contracts
+    entrypoints: []
+    allow:
+      boundaries: []
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: context.execution-observation.sandbox-activity.tests
+    dependencyMode: development
+    roots:
+      - packages/contexts/execution-observation/tests
+    entrypoints: []
+    allow:
+      boundaries:
+        - context.execution-observation.sandbox-activity.inbound
+        - context.execution-observation.sandbox-activity.outbound
+        - context.execution-observation.sandbox-activity.feature-api
+        - context.execution-observation.sandbox-activity.application
+        - context.execution-observation.sandbox-activity.models
+        - context.execution-observation.sandbox-activity.ports
+        - context.execution-observation.sandbox-activity.composition
+        - context.execution-observation.sandbox-activity.domain
+        - context.execution-observation.sandbox-activity.generated
+        - context.execution-observation.sandbox-activity.public-api
+        - context.execution-observation.sandbox-activity.contracts
+      packages:
+        - pg
+        - "@bufbuild/protobuf"
+        - "@connectrpc/connect"
+      builtins:
+        - node:assert/strict
+        - node:test
+        - node:child_process
+        - node:fs
+        - node:fs/promises
+        - node:os
+        - node:path
+        - node:url
+        - node:crypto
+        - node:net
+        - node:module
+        - node:http
+        - node:https
+        - node:util
+      runtimeReferences: []
+  - id: platform.control-api.contracts
+    dependencyMode: runtime
+    roots:
+      - contracts/proto
+    entrypoints: []
+    allow:
+      boundaries: []
+      packages: []
+      builtins: []
+      runtimeReferences: []
+  - id: tooling.control-contracts
+    dependencyMode: development
+    roots:
+      - scripts/control-contracts
+    entrypoints: []
+    allow:
+      boundaries: []
+      packages:
+        - yaml
+      builtins:
+        - node:assert/strict
+        - node:child_process
+        - node:fs
+        - node:fs/promises
+        - node:os
+        - node:path
+        - node:test
+        - node:url
       runtimeReferences: []

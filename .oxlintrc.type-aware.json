@@ -13,6 +13,7 @@
   "overrides": [
     {
       "files": [
+        "packages/contexts/execution-observation/tests/**",
         "packages/contexts/agent-context/tests/**",
         "packages/platform/local-host-control/tests/**"
       ],
@@ -26,8 +27,10 @@
     },
     {
       "files": [
+        "packages/contexts/execution-observation/src/**/*.{ts,tsx,mts,cts}",
         "packages/contexts/agent-context/src/**/*.{ts,tsx,mts,cts}",
         "packages/platform/local-host-control/src/**/*.{ts,tsx,mts,cts}",
+        "packages/contexts/execution-observation/tests/**/*.{ts,tsx,mts,cts}",
         "packages/contexts/agent-context/tests/**/*.{ts,tsx,mts,cts}",
         "packages/platform/local-host-control/tests/**/*.{ts,tsx,mts,cts}"
       ],
@@ -72,6 +75,10 @@
     },
     {
       "files": [
+        "packages/contexts/execution-observation/src/features/*/application/**/*.{ts,tsx,mts,cts}",
+        "packages/contexts/execution-observation/src/features/*/domain/**/*.{ts,tsx,mts,cts}",
+        "packages/contexts/execution-observation/src/features/*/contracts/**/*.{ts,tsx,mts,cts}",
+        "packages/contexts/execution-observation/src/features/*/projections/**/*.{ts,tsx,mts,cts}",
         "packages/contexts/agent-context/src/features/*/application/**/*.{ts,tsx,mts,cts}",
         "packages/contexts/agent-context/src/features/*/domain/**/*.{ts,tsx,mts,cts}",
         "packages/contexts/agent-context/src/features/*/contracts/**/*.{ts,tsx,mts,cts}",
@@ -99,6 +106,12 @@
           {"object": "crypto", "property": "randomUUID", "message": "Receive identifiers through an IdGenerator port."},
           {"object": "globalThis", "property": "fetch", "message": "Network access belongs in an outbound adapter."}
         ]
+      }
+    },
+    {
+      "files": ["packages/contexts/execution-observation/src/generated/**/*.ts"],
+      "rules": {
+        "jsdoc/check-tag-names": ["error", {"definedTags": ["generated"]}]
       }
     }
   ]

@@ -75,7 +75,7 @@ is complete.
 | Structural AST rules | Accepted in ADR-0041 | Planned for the first matching production source and invariant fixture |
 | Dead-code analysis | Accepted in ADR-0041 | Planned after the first production vertical slice |
 | Publishable API and package validation | Accepted in ADR-0041 | Planned before the first publishable package release |
-| Production package graph | Scoped sandbox admission accepted in ADR-0103 | Agent Context sandbox manifests and Local Host Control materialized; broader reservations remain deferred |
+| Production package graph | Scoped sandbox admission accepted in ADR-0103 | Agent Context sandbox manifests, Execution Observation sandbox Activity and Local Host Control materialized; broader reservations remain deferred |
 | Federated Consistency Evidence Gate | Accepted in ADR-0078 | Planned; Phase 1 starts with the first real durable mutation and remains build-time only |
 
 The implementation state changes only with executable evidence in this
@@ -121,8 +121,8 @@ rejected by CI.
 
 ### Source coverage adoption
 
-Engineering Foundation `1.7.2` is the source target for `quality.source-coverage`
-capability through `architecture/foundation/quality-source-coverage.yaml` and
+Engineering Foundation `2.1.0` is the source target for `quality.source-coverage`
+through `architecture/foundation/quality-source-coverage.yaml` schema v3 and
 Foundation configuration schema v2. `quality:coverage:scope` runs the shared
 scope check in `check:fast`; `lint:typed` runs shared selection, compiler context,
 and typed lint once in the full `lint` and `check` chain. The public adapter
@@ -134,8 +134,8 @@ These source pins do not replace a fresh frozen install and native qualification
 Foundation's flat FMS v1 reader. The accepted organization authority remains
 `architecture/feature-module-standard-profile.json`; it is unchanged. The adapter
 maps its production and excluded roots and the materialized package catalog to
-`packages/contexts/agent-context` and `packages/platform/local-host-control`, their
-`src` trees, and their `tests` trees.
+`packages/contexts/agent-context`, `packages/contexts/execution-observation` and
+`packages/platform/local-host-control`, their `src` trees, and their `tests` trees.
 There are no materialized applications. `validate-quality-topology.mjs` rejects
 projection drift, missing source or test directories, and unreviewed application
 materialization. Foundation independently rejects unclassified workspace packages,
@@ -154,12 +154,35 @@ All 36 stricter TypeScript rules, explicit root suppression options, and the loc
 suppression validator remain required. The architecture, FMS, and immutable
 history gates remain blocking.
 
-Foundation `1.7.2` supports production TypeScript extensions through the shared
+Foundation `2.1.0` supports production TypeScript extensions through the shared
 selection and compiler route. The existing local typed runner remains available
 through `lint:type-aware:files` for explicit file feedback. Full typed execution
 also rejects assertion chains through `unknown` by default. There are no bridge
 admissions in this consumer; an unsafe production assertion must be fixed at its
 owner rather than hidden by a wildcard exception.
+
+The v3 asset declaration binds the exact Activity Protobuf file to its owning
+contracts boundary and mandatory `wire:check`. Assets retain suppression
+governance and do not enter TypeScript or Oxlint selection. The canonical common
+control envelope at `contracts/proto` remains outside the module source census;
+its explicit platform source boundary and the same mandatory wire inventory
+protect that separate authority. No new module or broader asset exemption is
+introduced.
+
+The wire route checks the exact common, feature and remaining golden input
+inventory, compares regenerated private descriptors byte for byte, compiles the
+actual Observation consumer, and runs pinned Buf build, lint and formatting.
+Missing or unlisted common inputs, malformed schemas and semantic or generated
+byte drift fail. Generation removes only the known standalone preamble directive
+from the pinned generator before comparison or copy; unexpected preamble variants
+reject. The source contracts, generated bodies and complete suppression audit
+remain protected. Rejection fixtures exercise both generated drift and the real
+suppression validator.
+
+Observation's `tests/tsconfig.json` extends its existing strict test project
+without overriding any option or input. This gives explicit-file Oxlint checks
+the same Node types, ES2024 libraries and five test files as the package's actual
+strict test compilation; it does not create a second test runner.
 
 The default root tooling lane uses Node `26.11.1`; pnpm remains `11.18.0`.
 Node `24.21.0` retains an explicit compatibility lane. Foundation's public
@@ -200,10 +223,14 @@ Managed Docs adoption retains its historical qualification boundary. The old
 `0.2.8`; it does not qualify the current upgrade. The public adapter has now
 migrated the authentic stable24 origin to `docs-2026-10-03-stable31` against
 protected Central revision `9625c6e6a73555d747cc4b0ba99a29549a75f107`, and its
-after-check returned current. The current manifest and regenerated frozen lock
-select Foundation `1.7.2`, Docs `0.6.2` and adapter `0.3.2`; frozen install passes.
-The old receipts remain historical. Final installed/full consumer qualification,
-independent review, delivery and observed admission still require their own proof.
+after-check returned current for that historical migration. The retained managed
+authority records Foundation `1.7.2`, Docs `0.6.2` and adapter `0.3.2`; those managed
+coordinates remain historical and unchanged. The current ordinary quality-tool
+adoption pins Foundation `2.1.0` while retaining the same Docs and adapter roots.
+It does not establish managed Docs currentness, a new cohort or observed admission.
+Native managed consumer checks retain their separately observed Node 24 guard;
+root Node 26 compatibility does not qualify that path. Portable Docs checks and
+the existing required trusted workflow remain blocking.
 
 ### Advisory quality diagnostics
 

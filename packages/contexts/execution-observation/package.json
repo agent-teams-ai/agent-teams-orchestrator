@@ -1,0 +1,49 @@
+{
+  "name": "@agent-teams/execution-observation",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --project tsconfig.json --pretty false",
+    "check": "pnpm run clean && pnpm run typecheck && pnpm run build && pnpm run test",
+    "clean": "node -e \"const fs=require('node:fs'); for (const path of ['dist','.cache']) fs.rmSync(path, { recursive: true, force: true })\"",
+    "prepack": "pnpm run clean && pnpm run build",
+    "test": "tsc --project tsconfig.test.json --pretty false && node --test --test-concurrency=1",
+    "typecheck": "tsc --project tsconfig.json --noEmit --pretty false"
+  },
+  "agentTeamsArchitecture": {
+    "role": "bounded-context",
+    "ownerDocument": "domain.contexts.execution-observation"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./api": {
+      "types": "./dist/features/sandbox-activity/api.d.ts",
+      "import": "./dist/features/sandbox-activity/api.js"
+    },
+    "./module": {
+      "types": "./dist/features/sandbox-activity/composition/feature-module-factory.d.ts",
+      "import": "./dist/features/sandbox-activity/composition/feature-module-factory.js"
+    },
+    "./connect": {
+      "types": "./dist/features/sandbox-activity/adapters/inbound/connect/index.d.ts",
+      "import": "./dist/features/sandbox-activity/adapters/inbound/connect/index.js"
+    }
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "catalog:",
+    "@connectrpc/connect": "catalog:",
+    "pg": "catalog:",
+    "@types/pg": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.21.0 <25 || >=26.0.0 <27"
+  },
+  "devDependencies": {}
+}

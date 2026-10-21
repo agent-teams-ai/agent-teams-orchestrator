@@ -373,7 +373,15 @@ test("common, fast and typed configs keep separate responsibilities", () => {
   assert.deepEqual(Object.keys(typed).toSorted(), ["$schema", "extends", "options", "overrides"]);
   assert.deepEqual(Object.keys(common).toSorted(), ["$schema", "extends", "overrides"]);
   assert.equal(Object.hasOwn(base, "overrides"), false);
-  assert.deepEqual(typed.overrides.map(({ rules }) => rules), common.overrides.map(({ rules }) => rules));
+  const generatedGrammar = {
+    files: ["packages/contexts/execution-observation/src/generated/**/*.ts"],
+    rules: { "jsdoc/check-tag-names": ["error", { definedTags: ["generated"] }] },
+  };
+  assert.deepEqual(typed.overrides.at(-1), generatedGrammar);
+  assert.deepEqual(fast.overrides.at(-1), generatedGrammar);
+  assert.deepEqual(typed.overrides.map(({ rules }) => rules), [
+    ...common.overrides.map(({ rules }) => rules), generatedGrammar.rules,
+  ]);
   const sourceRoots = topology.modules.map(({ sourceRoot }) => sourceRoot);
   const testRoots = topology.modules.flatMap(({ testRoots: moduleTestRoots }) => moduleTestRoots);
   assert.deepEqual(typed.overrides.map(({ files }) => files), [
@@ -381,6 +389,7 @@ test("common, fast and typed configs keep separate responsibilities", () => {
     [...sourceRoots, ...testRoots].map((root) => `${root}/**/*.{ts,tsx,mts,cts}`),
     sourceRoots.flatMap((root) => ["application", "domain", "contracts", "projections"]
       .map((layer) => `${root}/features/*/${layer}/**/*.{ts,tsx,mts,cts}`)),
+    generatedGrammar.files,
   ]);
   assert.deepEqual(Object.keys(fast).toSorted(), ["$schema", "extends", "ignorePatterns", "jsPlugins", "options", "overrides", "rules", "settings"]);
   assert.deepEqual(fast.jsPlugins, [{ name: "boundaries", specifier: "eslint-plugin-boundaries" }]);

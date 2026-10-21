@@ -1,0 +1,16 @@
+version: v2
+modules:
+  - path: contracts/proto
+  - path: packages/contexts/execution-observation/src/features/sandbox-activity/contracts/control-api
+  - path: scripts/orchestration-specs/fixtures/desktop-first-slice-v1
+lint:
+  use:
+    - STANDARD
+  except:
+    # Admitted shared envelopes intentionally serve multiple owner services.
+    - RPC_REQUEST_RESPONSE_UNIQUE
+    - RPC_REQUEST_STANDARD_NAME
+    - RPC_RESPONSE_STANDARD_NAME
+breaking:
+  use:
+    - FILE
