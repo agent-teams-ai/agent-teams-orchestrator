@@ -54,7 +54,13 @@ function runChecker(fixtureRoot, arguments_) {
   });
 }
 
-function runGit(fixtureRoot, arguments_) {
+async function runGit(fixtureRoot, arguments_) {
+  if (arguments_[0] === "commit") {
+    for (const kind of ["GIT_AUTHOR_IDENT", "GIT_COMMITTER_IDENT"]) {
+      const identity = await runGit(fixtureRoot, ["var", kind]);
+      assert.match(identity, /^iliya <iliyazelenkog@gmail\.com> /u);
+    }
+  }
   return new Promise((resolve, reject) => {
     const child = spawn("git", arguments_, {
       cwd: fixtureRoot,
@@ -131,17 +137,17 @@ test("detects required impact from a Git merge-base range", async () => {
   const fixtureRoot = await createFixture("required");
   try {
     await runGit(fixtureRoot, ["init", "--quiet"]);
-    await runGit(fixtureRoot, ["config", "user.email", "fixture@example.com"]);
-    await runGit(fixtureRoot, ["config", "user.name", "Fixture"]);
+    await runGit(fixtureRoot, ["config", "user.email", "iliyazelenkog@gmail.com"]);
+    await runGit(fixtureRoot, ["config", "user.name", "iliya"]);
     await runGit(fixtureRoot, ["add", "."]);
-    await runGit(fixtureRoot, ["commit", "--quiet", "-m", "fixture baseline"]);
+    await runGit(fixtureRoot, ["commit", "--quiet", "-m", "test: add fixture baseline"]);
     const base = await runGit(fixtureRoot, ["rev-parse", "HEAD"]);
     await writeFile(
       path.join(fixtureRoot, "src/example.ts"),
       "export const changed = true;\n",
     );
     await runGit(fixtureRoot, ["add", "src/example.ts"]);
-    await runGit(fixtureRoot, ["commit", "--quiet", "-m", "change source"]);
+    await runGit(fixtureRoot, ["commit", "--quiet", "-m", "test: change fixture source"]);
 
     const result = await runChecker(fixtureRoot, [
       "--base",
