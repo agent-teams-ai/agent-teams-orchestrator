@@ -109,10 +109,12 @@ function literalTargetArray(source, pattern) {
   return JSON.parse(match[1].replace(/,\s*\]/u, "]"));
 }
 
-test("prose defaults include both governed Agent Context documents", async () => {
+test("prose defaults include governed Context and Observation documents", async () => {
   const governedDocuments = [
     "packages/contexts/agent-context/README.md",
     "packages/contexts/agent-context/src/features/sandbox-manifest/README.md",
+    "packages/contexts/execution-observation/README.md",
+    "packages/contexts/execution-observation/src/features/sandbox-activity/README.md",
   ];
   for (const document of governedDocuments) {
     await readFile(path.join(repositoryRoot, document), "utf8");

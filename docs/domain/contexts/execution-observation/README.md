@@ -33,6 +33,9 @@ runtime migration. This status describes that bounded scope; it does not admit
 other capabilities from the broader model below. Existing accepted ADR invariants
 remain binding. The owning reserved package and LikeC4 identity do not change.
 
+The [package implementation](../../../../packages/contexts/execution-observation/README.md)
+contains the admitted [Sandbox Activity feature](../../../../packages/contexts/execution-observation/src/features/sandbox-activity/README.md).
+
 ## Domain vision
 
 Expose authorized sandbox activity with honest freshness and history gaps.

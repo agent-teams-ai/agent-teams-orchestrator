@@ -193,7 +193,7 @@ test("pins current direct roots while package release-age waiting stays disabled
   const roots = {
     "@agent-teams/docs-protocol": "0.6.2",
     "@agent-teams/docs-protocol-agent-teams": "0.3.2",
-    "@agent-teams/engineering-foundation": "1.7.2",
+    "@agent-teams/engineering-foundation": "2.1.0",
   };
   assert.deepEqual(
     Object.fromEntries(Object.entries(devDependencies).filter(([name]) => name.startsWith("@agent-teams/"))),

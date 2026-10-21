@@ -1,5 +1,9 @@
 schemaVersion: 1
 governedRoots:
+  - contracts/proto
+  - scripts/control-contracts
+  - packages/contexts/execution-observation/src
+  - packages/contexts/execution-observation/tests
   - packages/contexts/agent-context/src
   - packages/contexts/agent-context/tests
   - packages/platform/local-host-control/src

@@ -14,7 +14,7 @@ const foundation = JSON.parse(await readFile(join(foundationRoot, "package.json"
 const cli = join(foundationRoot, foundation.bin["agent-teams-foundation"]);
 const profilePath = "architecture/foundation/quality-source-coverage.yaml";
 const moduleRoot = "packages/platform/local-host-control";
-const admittedRoots = ["packages/contexts/agent-context", "packages/platform/local-host-control"];
+const admittedRoots = ["packages/contexts/execution-observation", "packages/contexts/agent-context", "packages/platform/local-host-control"];
 const ceiling = (max) => ({ "max-lines": ["error", { max, skipBlankLines: true, skipComments: true }] });
 
 async function readJson(root, name) {
@@ -33,7 +33,7 @@ async function fixture(action) {
     await mkdir(join(root, "tooling"));
     const topology = await readJson(repositoryRoot, QUALITY_TOPOLOGY_PATH);
     for (const name of [
-      "package.json", "pnpm-workspace.yaml", "foundation.config.yaml",
+      "package.json", "pnpm-workspace.yaml", "foundation.config.yaml", "buf.yaml", "contracts/proto", "scripts/control-contracts",
       "architecture/feature-module-standard-profile.json", "architecture/package-catalog.yaml",
       profilePath, QUALITY_TOPOLOGY_PATH,
       "architecture/foundation/source-dependencies.yaml",
@@ -67,7 +67,11 @@ test("active coverage binds exact tools, authority, scope and a single full type
   assert.equal(config.schemaVersion, 2);
   assert.deepEqual(config.capabilities["quality.source-coverage"], { configPath: profilePath });
   const profile = parse(await readFile(join(repositoryRoot, profilePath), "utf8"));
-  assert.equal(profile.schemaVersion, 1);
+  assert.equal(profile.schemaVersion, 3);
+  assert.deepEqual(profile.assets, [{
+    path: "packages/contexts/execution-observation/src/features/sandbox-activity/contracts/control-api/agentteams/execution_observation/v1/activity.proto",
+    kind: "protobuf", boundaryId: "context.execution-observation.sandbox-activity.contracts", script: "wire:check",
+  }]);
   assert.equal(profile.featureProfilePath, QUALITY_TOPOLOGY_PATH);
   assert.equal(profile.lintConfigPath, ".oxlintrc.type-aware.json");
   assert.deepEqual(profile.compilerProjects.toSorted(), admittedRoots.map((root) => `${root}/tsconfig.json`).toSorted());
@@ -89,7 +93,7 @@ test("active coverage binds exact tools, authority, scope and a single full type
 
 test("adoption pins the installed Foundation and Docs adapter", async () => {
   const pkg = await readJson(repositoryRoot, "package.json");
-  assert.equal(pkg.devDependencies["@agent-teams/engineering-foundation"], "1.7.2");
+  assert.equal(pkg.devDependencies["@agent-teams/engineering-foundation"], "2.1.0");
   assert.equal(pkg.devDependencies["@agent-teams/docs-protocol-agent-teams"], "0.3.2");
 });
 
@@ -290,5 +294,33 @@ test("installed typed gate rejects an unknown assertion bridge by default", asyn
     const corrected = runTyped();
     assert.equal(corrected.error, undefined, corrected.stderr);
     assert.equal(corrected.status, 0, `${corrected.stdout}${corrected.stderr}`);
+    const generated = "packages/contexts/execution-observation/src/generated/agentteams/control/v1/control_pb.ts";
+    await cp(join(repositoryRoot, ".oxlintrc.json"), join(root, ".oxlintrc.json"));
+    const runSyntax = (path, config) => {
+      const syntaxResult = spawnSync(join(repositoryRoot, "node_modules/.bin/oxlint"),
+        ["--config", config, "--format", "json", path],
+        { cwd: root, encoding: "utf8", timeout: 60_000 });
+      assert.equal(syntaxResult.error, undefined, syntaxResult.stderr);
+      assert.match(syntaxResult.stdout.trimStart(), /^\{/u, `${syntaxResult.stdout}${syntaxResult.stderr}`);
+      return { status: syntaxResult.status, report: JSON.parse(syntaxResult.stdout) };
+    };
+    for (const config of [".oxlintrc.json", ".oxlintrc.type-aware.json"]) {
+      const accepted = runSyntax(generated, config);
+      assert.equal(accepted.status, 0, JSON.stringify(accepted.report));
+      const descriptor = await readFile(join(root, generated), "utf8");
+      assert.ok(descriptor.includes("@generated from message"));
+      await writeFile(join(root, generated), descriptor.replace("@generated from message", "@unapprovedGeneratedTag from message"));
+      const unknown = runSyntax(generated, config);
+      assert.equal(unknown.status, 1, JSON.stringify(unknown.report));
+      assert.ok(unknown.report.diagnostics.some(({ code, help }) =>
+        code === "jsdoc(check-tag-names)" && help.includes("@unapprovedGeneratedTag")));
+      await writeFile(join(root, generated), descriptor);
+      await writeFile(join(root, source), `${original}\n/** @generated metadata is restricted to generated code. */\nexport const metadataWitness = true;\n`);
+      const outside = runSyntax(source, config);
+      assert.equal(outside.status, 1, JSON.stringify(outside.report));
+      assert.ok(outside.report.diagnostics.some(({ code, help }) =>
+        code === "jsdoc(check-tag-names)" && help.includes("@generated")));
+      await writeFile(join(root, source), original);
+    }
   });
 });

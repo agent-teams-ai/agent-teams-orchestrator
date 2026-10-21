@@ -48,6 +48,7 @@ Agents should also follow the short repository-level
 | Inspect experimental evidence | [Research index](research/README.md) | owning ADR or open decision |
 
 - [Desktop Runtime Migration Admission v1](contracts/desktop-runtime-migration-admission-v1.md)
+- [Execution Observation package](../packages/contexts/execution-observation/README.md)
 
 ## Knowledge map
 
