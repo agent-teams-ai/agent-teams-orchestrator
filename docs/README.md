@@ -39,7 +39,7 @@ Agents should also follow the short repository-level
 | Add an SDK or API capability | [SDK and transports](architecture/sdk-and-transports.md) | [Public control contracts](architecture/public-control-contracts.md) |
 | Change local lifecycle | [Local Host lifecycle](architecture/local-host-lifecycle.md) | `OD-001`, `OD-021` |
 | Add or split a service or worker role | [Service role map](architecture/deployment-profiles.md#service-role-map) | [ADR-0109](decisions/0109-distributed-hosts-and-concurrent-agent-scale.md), [private RPC decision](decisions/0105-portable-service-boundaries-and-moleculer.md), [first-materialization gate](architecture/implementation-readiness-gates.md#first-materialization-role-gate) |
-| Change deployment profiles or client targets | [Deployment profiles](architecture/deployment-profiles.md) | `ADR-0087`, `ADR-0088`, `ADR-0090`, `ADR-0091`, `OD-035`, `OD-037`, `OD-038` |
+| Change deployment profiles or client targets | [Deployment profiles](architecture/deployment-profiles.md) | [Fully Local V1 and shared backend profiles](decisions/0112-fully-local-v1-with-shared-backend-profiles.md), `ADR-0088`, `ADR-0091`, `OD-035`, `OD-037`, `OD-038` |
 | Migrate legacy behavior | [Migration boundary](architecture/migration-boundary.md) | owning context dossier and migration open decision |
 | Change repository tooling | [Repository tooling](architecture/repository-tooling.md) | [Testing strategy](architecture/testing-strategy.md) |
 | Change strategic relationships | [Machine-readable architecture model](architecture/architecture-model.md) | [Context map](architecture/context-map.md), owning context dossiers |

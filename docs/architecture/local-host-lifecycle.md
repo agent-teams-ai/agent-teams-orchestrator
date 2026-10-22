@@ -15,6 +15,7 @@ related:
   - ADR-0108
   - ADR-0105
   - ADR-0109
+  - ADR-0112
   - architecture.deployment-profiles
   - ADR-0064
   - ADR-0035
@@ -30,15 +31,15 @@ related:
 
 # Local Host Lifecycle
 
-ADR-0087 preserves this document as the target architecture for the future Fully
-Local profile but defers its implementation and production qualification from
-V1. ADR-0090 and ADR-0093 mark its package entries as non-materializable until
-OD-040 is resolved by an accepted implementation-start decision. Package
-creation still does not qualify the profile. Statements below describe that
-future profile and must not be read as a V1 availability claim.
+ADR-0112 requires this Fully Local profile in V1 alongside both server profiles.
+The profile remains unqualified. ADR-0093 and ADR-0097 keep its package entries
+non-materializable until the exact OD-021, OD-035, and OD-040 implementation-start
+gates are resolved. Package creation precedes the release evidence it must
+produce; it does not itself qualify the profile. Statements below describe the
+required local architecture and are not an availability claim.
 
 The [service role map](deployment-profiles.md#service-role-map) owns current
-placement and first-role process isolation under ADR-0109. This future native
+placement and first-role process isolation under ADR-0109. This native V1
 profile preserves its selected role processes; it does not silently fold them
 into Desktop or one Local Host. A compact native profile requires explicit
 approval and its own qualification before replacing any selected isolation.
@@ -323,7 +324,7 @@ status, bounded waits, and typed degraded states are required.
 
 ## Managed PostgreSQL lifecycle
 
-ADR-0106 selects native PostgreSQL for the future local profile without choosing
+ADR-0106 selects native PostgreSQL for the local profile without choosing
 the Desktop shell or a new implementation language. The existing Supervisor is
 its process-lifecycle owner. The Host uses asynchronous SQL through its context
 adapters; Desktop and the SDK receive neither SQL credentials nor direct SQL

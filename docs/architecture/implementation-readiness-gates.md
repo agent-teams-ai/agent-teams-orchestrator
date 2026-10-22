@@ -21,6 +21,7 @@ related:
   - ADR-0094
   - ADR-0105
   - ADR-0109
+  - ADR-0112
   - architecture.deployment-profiles
   - ADR-0062
   - ADR-0063
@@ -63,12 +64,14 @@ The first production orchestration package or vertical slice must not be
 implemented until all five gates below pass. Documentation, research, diagrams,
 contract fixtures, deterministic models, and disposable spikes remain allowed.
 
-These gates admit the first V1 orchestration slice and profile advertising. A
-future Fully Local implementation increment follows its separate OD-040
+These gates admit the first V1 orchestration slice and profile advertising. The
+required Fully Local implementation increment follows its separate OD-040
 materialization decision after the relevant lifecycle and workflow boundaries
 are accepted. Package materialization may then start before Fully Local release
 qualification, because the implementation is required to produce that evidence;
-it still grants no availability or shipping claim.
+it still grants no availability or shipping claim. ADR-0112 puts local contract
+resolution, implementation, and qualification on the V1 delivery path. A narrow
+first server slice can precede them; completed V1 cannot omit the local profile.
 
 Passing a gate does not require resolving every future feature. It requires
 enough accepted ownership, invariants, contracts, transition behavior, and
@@ -213,16 +216,17 @@ Required evidence:
   reconciliation.
 
 The gate does not require deploying Temporal in every profile or implementing a
-Fully Local workflow engine in the first production slice. ADR-0087 defers Fully
-Local implementation from V1, while OD-035 keeps the local engine decision
-explicit for the future profile.
+Fully Local workflow engine in the first server slice. ADR-0112 requires the
+local profile for V1; OD-035 must select and qualify its durable adapter before
+the corresponding local release. The common workflow port does not select the
+same engine or lifecycle for both profiles.
 
 ## Gate 5: Deployment authority, target fencing, and runtime connectivity
 
 Required evidence:
 
 - machine-readable Managed SaaS, Standalone Self-Hosted, Connected Self-Hosted,
-  and Fully Local profile states agree with ADR-0087 and ADR-0090;
+  and Fully Local profile states agree with ADR-0112 and ADR-0093;
 - the OD-039 qualification framework has a blocking trusted-attestation verifier
   before any profile or capability becomes `qualified`;
 - profile qualification is closed over the exact mandatory capability registry
@@ -255,10 +259,11 @@ The reliability catalog separately blocks profile qualification on OD-003 and
 OD-012. The OD-003 blocker is a qualification gate, not a slice-admission
 criterion of this gate.
 
-This gate does not require implementing Fully Local or a commercial capability,
-and optional commercial capability does not block a baseline profile.
-It does require that a server profile advertise only capabilities whose
-authority and connectivity are qualified.
+For the first server slice, this gate does not require implementing Fully Local
+or an optional commercial capability. Completed V1 requires the local profile
+and its mandatory capability evidence under ADR-0112. Every profile advertises
+only capabilities whose authority and connectivity are qualified; optional
+commercial capability does not block a baseline profile.
 
 ## First-materialization role gate
 

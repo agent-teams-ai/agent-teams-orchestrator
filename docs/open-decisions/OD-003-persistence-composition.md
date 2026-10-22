@@ -15,6 +15,7 @@ related:
   - ADR-0052
   - ADR-0106
   - ADR-0108
+  - ADR-0112
   - OD-021
   - architecture.persistence
   - research.cross-dialect-persistence-tooling-2026-07-26
@@ -24,7 +25,7 @@ related:
 
 ## Accepted constraints
 
-ADR-0106 selects native PostgreSQL for both the future Fully Local profile and
+ADR-0106 selects native PostgreSQL for both the Fully Local profile and
 the server profiles, replacing ADR-0011's local SQLite topology. Each initially
 uses one application database with context-owned schemas. A local Target owns
 one durable bundled cluster under the Local Supervisor; Desktop is a client of
@@ -48,7 +49,8 @@ ADR-0108 selects Node `embedded-postgres` behind the Local Supervisor component
 adapter. Exact wrapper and engine artifacts, signing, offline packaging,
 persistent durability, and operational behavior remain subject to qualification.
 The Desktop framework and exact production dependency remain unselected. The
-existing server-first release and local materialization gates are unchanged.
+local materialization and qualification gates are unchanged. ADR-0112 now
+requires Fully Local alongside both server profiles in V1.
 
 Current semantics live in the [persistence boundary](../architecture/persistence-boundary.md).
 The [managed PostgreSQL lifecycle](../architecture/local-host-lifecycle.md#managed-postgresql-lifecycle)

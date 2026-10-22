@@ -18,6 +18,7 @@ related:
   - ADR-0106
   - ADR-0108
   - ADR-0109
+  - ADR-0112
   - architecture.composition
   - architecture.context-map
   - architecture.testing
@@ -41,7 +42,7 @@ choices:
 
 ```text
 Orchestrator deployment profile
-  Managed SaaS | Standalone Self-Hosted | future Connected | future Fully Local
+  Managed SaaS | Standalone Self-Hosted | future Connected | Fully Local
 
 Client surface
   Web | Desktop | CLI | SDK consumer
@@ -50,7 +51,7 @@ Agent execution placement
   local device | customer worker | managed remote worker
 
 Deployment form
-  server Docker Compose | server Kubernetes | future native local components
+  server Docker Compose | server Kubernetes | native local components
 ```
 
 No axis is inferred from another. Desktop is not automatically local authority,
@@ -64,15 +65,21 @@ orchestration state is local.
 | Managed SaaS | Agent Teams-managed Server Host | Managed Platform authority adapter | Managed PostgreSQL and server infrastructure | V1 target, qualification blocked | Managed Web, Desktop, CLI, SDK |
 | Standalone Self-Hosted Server | Customer-operated Server Host | Standalone authority adapter | Customer PostgreSQL and server infrastructure | V1 target, qualification blocked | Co-deployed Web, Desktop, CLI, SDK |
 | Connected Self-Hosted Server | Customer-operated Server Host | Standalone authority plus optional managed capabilities | Customer PostgreSQL and server infrastructure | Future, qualification deferred | Co-deployed Web, Desktop, CLI, SDK |
-| Fully Local Desktop | Local Host on user device | Local standalone authority adapter | Bundled native PostgreSQL with context-owned schemas and protected local components | Future, implementation deferred | Desktop, local CLI, SDK |
+| Fully Local Desktop | Local Host on user device | Local standalone authority adapter | Bundled native PostgreSQL with context-owned schemas and protected local components | V1 target, qualification blocked | Desktop, local CLI, SDK |
 
-The Managed and Self-Hosted profiles use the same logical Orchestrator core and
-public contracts. Composition validates one complete compatible adapter set. A
-profile name never appears as a business-rule branch.
+Managed, Self-Hosted, and Fully Local use the same logical Orchestrator core and
+public contracts. Context-owned use cases, PostgreSQL adapters and migrations,
+and applicable business conformance are reused. Composition selects authority,
+infrastructure, and lifecycle adapters and validates one complete compatible set.
+A profile name never appears as a business-rule branch. The
+[shared-profile decision](../decisions/0112-fully-local-v1-with-shared-backend-profiles.md)
+defines the DRY boundary without combining native supervision with server
+orchestration or merging Platform, Orchestrator, and AR ownership.
 
 The reliability catalog is the machine-readable profile registry. `V1 target`
-does not mean `qualified`: Managed and Standalone remain blocked by their listed
-authority and persistence decisions. Connected Self-Hosted is a fourth
+does not mean `qualified`: Managed, Standalone, and Fully Local remain blocked by
+their listed decisions and capability evidence. ADR-0112 requires all three for
+V1 while retaining separate implementation-start gates. Connected Self-Hosted is a fourth
 future profile in that registry even though it is not a V1 target.
 
 Each profile binds exactly one product-authority adapter and an independent
@@ -231,7 +238,7 @@ Kubernetes is the large-cloud composition. They package the same selected
 roles and contracts without creating new business authority profiles. Neither
 form is currently qualified by this documentation change.
 
-| Concern | Desktop with hosted Target | Future Fully Local Target | Server Compose | Server Kubernetes |
+| Concern | Desktop with hosted Target | Fully Local V1 Target | Server Compose | Server Kubernetes |
 |---|---|---|---|---|
 | State authority | Selected remote Target | One explicit local Target | Selected server Target | Selected server Target |
 | Component availability | Remote platform; Desktop is a client | Local Supervisor | Container platform/operator | Kubernetes workload controllers |
@@ -275,12 +282,13 @@ The [private RPC trust profile](security-architecture.md#private-rpc-trust)
 owns this distinction and the two protected application/sidecar hops.
 OD-012 and the local lifecycle decisions retain their relevant authority.
 
-The future native reference profile preserves the selected role isolation.
+The native V1 reference profile preserves the selected role isolation.
 Only implemented and advertised local capabilities are bundled. A smaller
 local workload does not silently permit co-location: a compact profile needs
 an explicit placement decision and independent failure/resource qualification.
 It cannot collapse AR custody, privileged workspace effects, semantic owners,
-or Target authority. Fully Local stays deferred under ADR-0087 and OD-040.
+or Target authority. Fully Local is a required V1 target under ADR-0112; OD-040
+still gates implementation start and the profile remains unqualified.
 
 Official [Dapr Docker hosting](https://docs.dapr.io/operations/hosting/self-hosted/self-hosted-with-docker/),
 [Kubernetes integration](https://docs.dapr.io/operations/hosting/kubernetes/kubernetes-overview/),
@@ -367,9 +375,9 @@ to PostgreSQL. Selecting a server Target does not start unused local databases,
 create a local business write model, or enable automatic synchronization. A
 failed remote request is not retried against a local Host.
 
-## Future Fully Local topology
+## Fully Local V1 topology
 
-Fully Local composes the future Local Host, shared context-owned PostgreSQL
+Fully Local composes the Local Host, shared context-owned PostgreSQL
 adapters, a bundled native PostgreSQL cluster, local workflow adapter, local
 realtime edge, and AR execution components under the Local Supervisor. One
 Target data root persists across component versions and is shared by clients;
@@ -381,15 +389,20 @@ ADR-0106 selects the database strategy; ADR-0108 selects `embedded-postgres`
 behind the Supervisor component adapter. Neither selects a Desktop framework or
 qualifies an exact launcher dependency. The [packaged PostgreSQL matrix](local-host-lifecycle.md#packaged-postgresql-qualification)
 requires evidence for each released platform and capability, including actual
-restore. ADR-0087 still excludes this implementation
-from V1, and OD-040 remains the separate package-materialization gate. OD-035
+restore. ADR-0112 requires this profile in V1, while OD-040 remains the separate
+package-materialization gate. OD-035
 names OpenWorkflow as the preferred local workflow spike candidate, now requiring
-its PostgreSQL backend. Deferral cannot change public resource, persistence port,
+its PostgreSQL backend. Engine selection cannot change public resource, persistence port,
 workflow-state, feed, recovery, or authority boundaries.
+
+Baseline local orchestration has no required Agent Teams cloud account, Platform
+runtime, or managed commercial connection. External provider capabilities retain
+their declared network requirements. Local selection does not promise offline
+inference from every provider, or enable automatic local/cloud synchronization.
 
 ## Connected and hybrid evolution
 
-A customer-operated or future Local Host may later consume selected managed
+A customer-operated or Local Host may later consume selected managed
 identity, commercial, update, relay, or collaboration services while retaining
 local orchestration state. That is a separate Connected Self-Hosted or Connected
 Local profile, not Managed SaaS and not an implicit fallback.
@@ -432,8 +445,9 @@ discards its requests, subscriptions, cursors, caches, optimistic state,
 operation handles, and late responses. These client fields never enter the
 server-side Project Aggregate.
 
-The first-use choices are Agent Teams Cloud, Connect to your server, and future
-This device. Profiles are persistent and explicitly switched. Project identity
+The V1 first-use choices are Agent Teams Cloud, Connect to your server, and
+This device, available only after their release qualification. Profiles are
+persistent and explicitly switched. Project identity
 is bound to one Target; profile switching never migrates data, retries a command
 against another Host, or duplicates a Run.
 

@@ -15,19 +15,20 @@ related:
   - ADR-0087
   - ADR-0105
   - ADR-0107
+  - ADR-0112
   - architecture.local-host-lifecycle
   - OD-009
 ---
 
 # Eventing and Reliability
 
-ADR-0087 qualifies only the Managed SaaS and Standalone Self-Hosted Server
-profiles in V1; they connect to NATS JetStream operated outside the Host
-process, as the JetStream section below describes. Statements below about the
-local composition, the Local Supervisor, and the bundled `nats-server` describe
-the future Fully Local profile owned by
-[Local Host Lifecycle](local-host-lifecycle.md) and must not be read as a V1
-availability claim.
+ADR-0112 requires Managed SaaS, Standalone Self-Hosted Server, and Fully Local in
+V1. All use the shared JetStream adapter family with a broker outside the Host
+process. Server infrastructure operates the server broker; the Local Supervisor
+owns bundled `nats-server` availability under
+[Local Host Lifecycle](local-host-lifecycle.md). Shared delivery semantics do not
+replace each profile's implementation-start and operational qualification gates.
+These requirements are not an availability claim.
 
 ## Event categories
 
@@ -435,9 +436,9 @@ Core contracts remain broker-neutral. Responsibility is split deliberately:
   physical store path, health, restart, upgrade, and resource-limit lifecycle.
 
 Local and hosted deployments use the same JetStream adapter family and applicable
-conformance suites. The future local composition is zero-touch and connects to
+conformance suites. The required local composition is zero-touch and connects to
 Supervisor-managed NATS. The V1 server composition connects to NATS operated
-outside the Host process. In the future local profile, the user never installs,
+outside the Host process. In the qualified local profile, the user never installs,
 configures, or starts a broker for normal local use.
 
 Hosted clustered readiness verifies JetStream metadata quorum, peer placement,
@@ -502,7 +503,7 @@ manifest before leaving degraded mode. Bit-flipped or truncated stores, unexplai
 sequence gaps, and content-hash mismatches fail closed even when the broker starts.
 
 Physical disk exhaustion is not equivalent to a configured stream limit. The
-future local profile maintains warning and critical headroom thresholds plus an
+local profile maintains warning and critical headroom thresholds plus an
 emergency reserve. A critical filestore write signal stops new dispatch admission; recovery
 requires released capacity, controlled restart, integrity reconciliation, and
 outbox/inbox recovery before readiness.

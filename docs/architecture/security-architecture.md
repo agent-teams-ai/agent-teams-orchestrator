@@ -105,7 +105,7 @@ A service identity authenticates a workload; it does not establish a product
 actor, delegation, tenant, or grant. The receiving feature validates the narrow
 trusted invocation context under its owned authorization port.
 
-Self-hosted and future native profiles must replace or otherwise exclude
+Self-hosted and native profiles must replace or otherwise exclude
 unauthorized enrollment through Dapr Sentry's default insecure validator before
 release. The [Dapr mTLS reference](https://docs.dapr.io/operations/security/mtls/#sentry-token-validators)
 documents that default and the JWKS validator. A selected validator must bind

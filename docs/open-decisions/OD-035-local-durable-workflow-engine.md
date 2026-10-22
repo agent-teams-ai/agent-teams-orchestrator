@@ -3,11 +3,12 @@ id: OD-035
 type: open-decision
 status: open
 owner: run-orchestration
-summary: Select and qualify a lightweight durable workflow engine for a future fully local Orchestrator Host profile.
+summary: Select and qualify a lightweight durable workflow engine for the required Fully Local V1 Orchestrator Host profile.
 related:
   - ADR-0027
   - ADR-0030
   - ADR-0106
+  - ADR-0112
   - architecture.implementation-readiness-gates
   - architecture.local-host-lifecycle
   - domain.contexts.run-orchestration
@@ -20,13 +21,13 @@ related:
 ## Decision required
 
 Choose the implementation behind the Run Orchestration workflow scheduling ports
-when the fully local profile is admitted. The choice must not affect domain
+for the required Fully Local V1 profile. The choice must not affect domain
 invariants, process-manager authority, public SDK contracts, or the hosted
 Temporal adapter accepted by ADR-0027.
 
-This decision does not require Fully Local in the first usable release. It keeps
-that future profile implementable without introducing a local Temporal service or
-an accidental in-memory scheduler in application code.
+ADR-0112 requires Fully Local in V1. This engine decision remains open and must
+be resolved for its local implementation and release gates. V1 scope does not
+select a local Temporal service, OpenWorkflow, or an in-memory scheduler.
 
 ## Constraints
 
@@ -38,7 +39,7 @@ an accidental in-memory scheduler in application code.
 - Native PostgreSQL local operation must survive process crash, restart, duplicate wake-up,
   cancellation, timer expiry, and code upgrade.
 - No external service, Docker installation, or manual database setup is required
-  for the future fully local Desktop profile.
+  for the fully local Desktop profile.
 - Windows, macOS, and Linux packaging and recovery must be qualified.
 - Engine licensing must permit signed redistribution.
 
@@ -106,9 +107,11 @@ persistence.
 - Operational recovery and upgrade behavior are documented and executable.
 - A dependency exit test proves persisted runs can be drained or migrated without
   changing domain state or public identities.
-- The product owner separately admits the Fully Local profile into a release.
+- The selected adapter supplies the evidence required for the Fully Local V1
+  release target accepted by ADR-0112; target selection alone is not qualification.
 
 ## Resolution
 
 Open. OpenWorkflow is the preferred candidate for the qualification spike, not a
-committed dependency or a requirement for the first usable release.
+committed dependency. A qualified durable adapter is required for Fully Local V1;
+the candidate library is not mandatory merely because that profile is required.

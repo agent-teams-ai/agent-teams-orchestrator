@@ -10,6 +10,7 @@ related:
   - ADR-0107
   - ADR-0108
   - ADR-0109
+  - ADR-0112
   - ADR-0028
   - ADR-0015
   - ADR-0016
@@ -450,11 +451,12 @@ qualifies provider capacity, runtime connectivity, or a production SLO.
 |---|---|
 | Compose server | Actual application/sidecar replica pairing, private network and selected resolver, authenticated readiness, stop order, restart, and bounded drain in the released composition |
 | Kubernetes server | Actual injected sidecars, discovery and peer identity, application and sidecar readiness, replica rollout/surge and termination, credential rotation, and bounded drain in the released cluster profile |
-| Future native Fully Local | Installed-package role processes and sidecars under Supervisor custody, signed offline artifacts, protected endpoints, authenticated readiness, and each released OS/architecture tuple under the local lifecycle requirements |
+| Native Fully Local V1 target | Installed-package role processes and sidecars under Supervisor custody, signed offline artifacts, protected endpoints, authenticated readiness, and each released OS/architecture tuple under the local lifecycle requirements |
 
 Compose and Kubernetes both require their own evidence; one does not qualify the
-other. Fully Local remains deferred under OD-021, OD-035, and OD-040 and the
-existing deployment-qualification gates. Native evidence cannot be inferred from
+other. ADR-0112 requires Fully Local for V1; OD-021, OD-035, and OD-040 still gate
+its implementation start, followed by the existing deployment-qualification
+gates. Native evidence cannot be inferred from
 container tests. A compact native role composition requires explicit approval
 and separate qualification, not silent co-location that removes selected process
 isolation. These obligations do not introduce production code or a checker.

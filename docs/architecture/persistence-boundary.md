@@ -11,6 +11,7 @@ related:
   - ADR-0106
   - ADR-0108
   - ADR-0109
+  - ADR-0112
   - architecture.deployment-profiles
   - ADR-0052
   - ADR-0046
@@ -25,14 +26,14 @@ related:
 
 # Persistence Boundary
 
-ADR-0106 selects native PostgreSQL for the server profiles and the future Fully
+ADR-0106 selects native PostgreSQL for the server profiles and the Fully
 Local profile. The local deployment bundles and manages an ordinary PostgreSQL
-process; it does not use an in-process SQL emulator. ADR-0087 still selects only
-Managed SaaS and Standalone Self-Hosted Server for V1. Native local persistence
-remains deferred behind the existing implementation and qualification gates;
-this engine decision does not authorize placeholder repositories or local
-package materialization. Interface-level fixtures and disposable spikes remain
-allowed.
+process; it does not use an in-process SQL emulator. ADR-0112 requires Managed
+SaaS, Standalone Self-Hosted Server, and Fully Local for V1. Native local
+persistence remains behind its existing implementation-start and qualification
+gates; selecting a release target does not authorize placeholder repositories or
+local package materialization. Interface-level fixtures and disposable spikes
+remain allowed.
 
 ## Principle
 
@@ -151,7 +152,7 @@ ownership.
 
 Both profiles initially use one PostgreSQL application database with one schema
 per bounded context. The server deployment supplies its database endpoint. The
-future Fully Local deployment owns one bundled PostgreSQL cluster and database
+Fully Local deployment owns one bundled PostgreSQL cluster and database
 per local Target data root, shared by its contexts and clients. Component updates
 preserve that data ownership; clients, workspaces, projects, and agents do not
 create independent authoritative clusters.
@@ -220,7 +221,7 @@ provide locks, transactions, or a production handler registry.
 
 ### Native local PostgreSQL
 
-This profile remains deferred from V1. The Local Supervisor owns the PostgreSQL
+This profile is required for V1 but remains unqualified. The Local Supervisor owns the PostgreSQL
 binary, process, protected data root, endpoint, and lifecycle. Host persistence
 adapters own connections, context migrations, SQL behavior, and context recovery
 validation. Desktop and the SDK own neither responsibility. The
@@ -285,7 +286,7 @@ command and event rates, bursts, payloads, fanout, data size, duration, deployme
 form, and hardware. A single SQL client or idle connection count is not evidence
 for that workload. Modeled traffic with a fake AR can qualify persistence
 behavior at the declared load; it cannot qualify actual AR/provider execution
-capacity. Compose, Kubernetes, and any future native profile require evidence
+capacity. Compose, Kubernetes, and the native V1 profile require evidence
 for their own composition. Numerical limits remain subject to the existing
 reliability qualification and approval rules; this target is not a capacity claim
 or SLO.

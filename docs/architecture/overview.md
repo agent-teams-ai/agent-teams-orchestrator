@@ -12,6 +12,7 @@ related:
   - ADR-0064
   - ADR-0065
   - ADR-0087
+  - ADR-0112
   - ADR-0088
   - ADR-0103
   - ADR-0104
@@ -142,10 +143,10 @@ The boundary is detailed in [Runtime boundary](runtime-boundary.md).
 
 The same core supports multiple compositions:
 
-- **Future Local Supervisor**: a small per-user technical deployment-control process. It
+- **Local Supervisor**: the V1 per-user technical deployment-control process. It
   ensures, discovers, monitors, drains, and activates versioned local components.
   It owns no orchestration behavior and is not on the normal SDK request path.
-- **Future Orchestrator Local**: a versioned local Host composition with protected local
+- **Orchestrator Local**: the V1 local Host composition with protected local
   control, bundled native PostgreSQL, local runtime integration, and the JetStream adapter. CLI,
   Desktop, and other local applications share it through the SDK.
 - **Orchestrator Server**: the V1 server artifact family with network control,
@@ -170,7 +171,7 @@ business write model; any local cache is disposable. Moving context state betwee
 profiles is a versioned logical transfer, never generic local/hosted table
 synchronization.
 
-Future normal local use is zero-touch. The distribution includes the native
+The required normal local experience is zero-touch. The distribution includes the native
 PostgreSQL and `nats-server` payloads. The Local Supervisor owns those processes
 and physical data-root custody; the Host's PostgreSQL and JetStream adapters own
 their connections and protocol behavior. A Desktop using a server Target does
@@ -179,10 +180,12 @@ availability, but AR remains the
 only owner of provider sessions and processes. See
 [Local Host Lifecycle](local-host-lifecycle.md).
 
-ADR-0087 defers Fully Local implementation from V1 without removing these
-boundaries. The selected V1 targets, their still-blocking qualification gates,
-and independent client and execution axes are defined in
-[Deployment Profiles](deployment-profiles.md) and ADR-0090.
+ADR-0112 requires Fully Local, Managed SaaS, and Standalone Self-Hosted in V1.
+They reuse owned domain/application code, contracts, and PostgreSQL migrations;
+composition and operational adapters own deployment differences. This is a
+release target, not a statement that the local artifacts exist or are qualified.
+The still-blocking implementation and qualification gates and independent client
+and execution axes are defined in [Deployment Profiles](deployment-profiles.md).
 
 Client configuration distinguishes:
 

@@ -12,6 +12,7 @@ related:
   - ADR-0093
   - ADR-0106
   - ADR-0108
+  - ADR-0112
   - architecture.deployment-profiles
   - architecture.local-host-lifecycle
   - OD-021
@@ -25,6 +26,11 @@ related:
 When may the reserved Local Supervisor, Local Orchestrator application, and Local
 Host SDK packages become real code, and which accepted lifecycle and workflow
 contracts must their first slices implement?
+
+ADR-0112 requires Fully Local in V1. This decision is now implementation-start
+work on that release path, not a question of deferring the profile beyond V1.
+It remains open until the lifecycle, workflow, and exact first-slice contracts
+below are accepted; the release-scope decision does not resolve those contracts.
 
 ## Why this remains open
 

@@ -10,6 +10,7 @@ related:
   - ADR-0079
   - ADR-0080
   - ADR-0090
+  - ADR-0112
   - ADR-0091
   - ADR-0093
   - ADR-0109
@@ -84,7 +85,7 @@ objective.
 
 ## Deployment profiles
 
-Managed SaaS, Standalone Self-Hosted, future Connected Self-Hosted, and future
+Managed SaaS, Standalone Self-Hosted, future Connected Self-Hosted, and
 Fully Local share indicator meaning but not assumed targets or failure domains.
 The reliability catalog records their release scope, qualification state,
 mandatory capabilities, and blocking decisions in addition to metric
@@ -97,7 +98,8 @@ accepted ADR or existing file alone cannot qualify anything.
 The [service role map](deployment-profiles.md#service-role-map) owns selected
 process placement. Compose and Kubernetes are both server target forms, with
 independent qualification rather than inferred equivalent failure domains.
-Future Fully Local remains deferred under its existing gates. A Desktop using a
+Fully Local is a required V1 target under ADR-0112, with implementation-start and
+release qualification still gated. A Desktop using a
 remote Target does not add local authority, infrastructure, or automatic fallback
 to that service profile.
 

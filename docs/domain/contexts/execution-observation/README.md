@@ -19,6 +19,7 @@ related:
   - ADR-0092
   - ADR-0094
   - ADR-0106
+  - ADR-0112
   - architecture.context-map
   - architecture.runtime-boundary
   - architecture.security
@@ -473,7 +474,7 @@ writers to the same generation.
 
 ## Local and server adapters
 
-| Capability | Future fully local profile | Server profiles |
+| Capability | Fully Local V1 target | Server profiles |
 |---|---|---|
 | Canonical state | Context-owned schema in bundled native PostgreSQL | Context-owned PostgreSQL schema |
 | Protected payload | Encrypted local filesystem adapter | S3-compatible encrypted object adapter |
@@ -523,7 +524,8 @@ or a fully local Desktop implementation.
 
 - Exact legal retention and hold authority remains OD-029.
 - Exact local key storage and local protected-payload backup policy remain part
-  of the future Fully Local profile.
+  of the required Fully Local V1 profile; its implementation and release gates
+  remain independent of this context's proposed feature scope.
 - The initial public semantic-registry categories and typed detail schemas need
   contract fixtures before package materialization.
 - AR exact output-feed schemas, cursor guarantees, and capability negotiation are

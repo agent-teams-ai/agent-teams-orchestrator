@@ -3,12 +3,13 @@ id: OD-036
 type: open-decision
 status: resolved
 owner: architecture/composition
-summary: Decide whether the first usable release qualifies server profiles only while preserving the future fully local composition.
+summary: Record the original server-first scope and its successor requiring Fully Local alongside both server profiles in V1.
 resolved_by: ADR-0087
 related:
   - ADR-0030
   - ADR-0060
   - ADR-0087
+  - ADR-0112
   - architecture.implementation-readiness-gates
   - architecture.local-host-lifecycle
   - OD-021
@@ -22,10 +23,12 @@ related:
 Select the deployment profiles that must be production-qualified for the first
 usable release integrated by Web and Desktop clients.
 
-The current preferred release scope is Managed SaaS plus Standalone Self-Hosted
-Server. Fully Local Desktop remains an explicit architectural profile but its
-Local Host, SQLite workflow engine, local realtime sidecars, packaging, and
-upgrade lifecycle are not implemented for that release.
+ADR-0087 originally selected Managed SaaS plus Standalone Self-Hosted Server and
+deferred Fully Local. The owner replaced that scope with ADR-0112 on 2026-10-22:
+Fully Local is now also a required V1 profile. The `resolved_by` field retains
+the original decision provenance; ADR-0112 is the current release-scope authority.
+The local profile remains unqualified and its implementation-start gates remain
+open.
 
 ## Constraints
 
@@ -34,11 +37,11 @@ upgrade lifecycle are not implemented for that release.
   manifests, never as domain or application branching.
 - `@agent-teams/orchestrator-sdk` exposes the same product capabilities wherever
   the selected Host advertises them.
-- `@agent-teams/orchestrator-local-host` is reserved for the future Node-only
+- `@agent-teams/orchestrator-local-host` is reserved for the Node-only
   Local Host lifecycle and is not imported by browser-safe or remote SDK code.
 - Desktop remains usable as a remote client and may run local AR execution
   components without running a local Orchestrator Host.
-- Deferring Fully Local cannot introduce hosted assumptions into domain models,
+- Fully Local delivery cannot introduce hosted assumptions into domain models,
   persistence ports, workflow boundaries, identities, feeds, or recovery
   semantics.
 - Self-hosted operation must not depend on the private Agent Teams Platform.
@@ -47,30 +50,34 @@ upgrade lifecycle are not implemented for that release.
 
 1. Qualify Managed SaaS and Standalone Self-Hosted Server first; defer Fully
    Local implementation while retaining conformance seams and composition
-   manifests. This is the current preferred option.
-2. Qualify Hosted and Fully Local together. This proves parity earlier but adds
-   SQLite, local workflow, Supervisor, signing, updater, and cross-platform
-   recovery to the first critical path.
+   manifests. This was selected by ADR-0087 and is now superseded.
+2. Qualify both server profiles and Fully Local for V1. ADR-0112 selects this
+   option. Native PostgreSQL lifecycle, local workflow, Supervisor, signing,
+   updater, and cross-platform recovery enter the V1 critical path.
 3. Ship Managed SaaS only. This is fastest but violates the product goal that
    users can operate independently of Agent Teams infrastructure.
 
 ## Acceptance criteria
 
-- Every MVP capability states whether it is available in Managed SaaS and
-  Standalone Self-Hosted Server.
+- Every MVP capability states its availability in Managed SaaS, Standalone
+  Self-Hosted Server, and Fully Local, with required baseline capabilities
+  qualified in each V1 profile.
 - Self-hosted setup is one documented deployment flow with no private registry or
   Agent Teams Platform runtime dependency.
 - Desktop and Web use the public SDK against either server profile.
+- Desktop and supported local clients use the selected local Target through its
+  qualified public API; they do not receive direct database access.
 - Composition validation rejects unsupported adapter combinations and silent
   fallback.
-- Local-ready ports, SQLite conformance contracts, Supervisor boundaries, and
-  workflow engine decision remain explicit and tested with contract fixtures
-  where feasible, without shipping an unused local implementation.
-- The future Fully Local profile can be added by adapters and composition rather
-  than by changing business ownership or public resources.
+- Shared PostgreSQL adapters and migrations, Supervisor boundaries, and the
+  selected local workflow adapter pass their applicable conformance and native
+  packaging/recovery qualification for the declared release matrix.
+- Local and server profiles reuse business implementations and public resources;
+  their deployment-specific adapters preserve their separate operating limits.
 
 ## Resolution
 
-Resolved by ADR-0087. V1 qualifies Managed SaaS and Standalone Self-Hosted
-Server. Fully Local remains a first-class future profile whose implementation and
-packaging are deferred.
+Originally resolved by ADR-0087. Its release deferral is superseded by ADR-0112,
+which requires Managed SaaS, Standalone Self-Hosted Server, and Fully Local in V1.
+The new scope does not itself resolve OD-021, OD-035, or OD-040, or qualify any
+profile for release.

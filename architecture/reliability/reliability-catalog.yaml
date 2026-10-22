@@ -43,9 +43,9 @@ profiles:
       decisionRefs: []
       conformanceRefs: []
   - id: fully-local
-    description: Future user-device Host with local authority, persistence, and supervised components.
-    releaseScope: future
-    qualification: deferred
+    description: User-device Host with local authority, persistence, and supervised components.
+    releaseScope: v1-target
+    qualification: blocked
     blockedBy: [OD-001, OD-003, OD-009, OD-021, OD-035]
     productAuthorityAdapter: local-standalone
     commercialAuthorityAdapter: none

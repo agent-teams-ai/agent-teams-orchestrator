@@ -1,8 +1,9 @@
 ---
 id: ADR-0087
 type: adr
-status: accepted
-superseded_by: []
+status: superseded
+superseded_by:
+  - ADR-0112
 supersedes: []
 owner: architecture/composition
 summary: Qualify Managed SaaS and Standalone Self-Hosted Server in V1 while preserving Fully Local as a future first-class profile.

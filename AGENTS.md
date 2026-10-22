@@ -124,9 +124,14 @@ before a high-cost boundary violation.
   [concurrent execution target](docs/architecture/deployment-profiles.md#concurrent-execution-target).
   Qualify per-Run capacity separately. Follow the accepted
   [service role map](docs/architecture/deployment-profiles.md#service-role-map)
-  and its Compose, Kubernetes, and future native-local mappings. A semantic
+  and its Compose, Kubernetes, and native-local V1 mappings. A semantic
   mutation owner can have many qualified replicas; process lifecycle and AR
   execution custody remain separate ownership questions.
+- V1 requires Managed SaaS, Standalone Self-Hosted, and native Fully Local under
+  [ADR-0112](docs/decisions/0112-fully-local-v1-with-shared-backend-profiles.md).
+  Reuse owned business implementations, contracts, and PostgreSQL migrations;
+  select lifecycle and infrastructure adapters in composition. Required V1 scope
+  does not resolve local implementation-start or release-qualification gates.
 - Materialize each selected isolated role as a separate OS process with its first
   owning feature. Control Host to Team Topology S3 is the first stateful private
   boundary. Do not postpone the role to a later scaling milestone, create empty
