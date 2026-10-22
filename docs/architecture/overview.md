@@ -20,9 +20,21 @@ related:
 
 ## Purpose
 
-Agent Teams Orchestrator is a headless control plane for coordinating teams of
-software agents. It owns product-level coordination and delegates agent execution
-to a provider-neutral runtime.
+Agent Teams Orchestrator is a headless control plane for coordinating people and
+AI agents through Teams and Tasks. It owns product-level coordination and
+delegates AI execution to a provider-neutral runtime. Human manual work does not
+require a runtime session or agent activation. Mixed participation is confirmed
+product direction; [OD-048](../open-decisions/OD-048-mixed-human-and-ai-team-participation.md)
+owns its remaining contracts and implementation admission.
+
+Standalone Self-Hosted and managed delivery share the orchestration core. The
+standalone product must support multiple organizations and independent human
+memberships without commercial Platform dependencies. The
+[deployment profiles](deployment-profiles.md) own qualification; the
+[Platform boundary direction](https://github.com/agent-teams-ai/agent-teams-platform/blob/main/docs/architecture/platform-orchestrator-boundary.md)
+owns the companion hosted relationship. Platform does not implement another
+Task engine. The [coverage review](../research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
+links each confirmed requirement and unresolved choice to its owner.
 
 The architecture must support:
 

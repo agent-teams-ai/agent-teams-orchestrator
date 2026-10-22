@@ -475,11 +475,13 @@ cursor begins strictly after that position.
 
 ## Tenant
 
-The top-level ownership and isolation identity for projects, principals, grants,
-and tenant-scoped policy. The configured product authority owns external Tenant
-lifecycle. Orchestration Scope owns stable, provider-neutral Orchestrator tenant
-and Project identities and their bindings; other contexts hold opaque local
-references.
+The top-level ownership and isolation identity for projects, scope-qualified
+access relationships, grants, and tenant-scoped policy. The configured product authority
+owns external Tenant lifecycle and principal bindings. A human identity can
+participate in several authorized organizations through independent memberships;
+Tenant scope does not itself require a separate human account per organization.
+Orchestration Scope owns stable, provider-neutral Orchestrator tenant and Project
+identities and their bindings; other contexts hold opaque local references.
 
 ## Trust boundary
 

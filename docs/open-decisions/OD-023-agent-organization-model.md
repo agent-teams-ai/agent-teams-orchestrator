@@ -69,6 +69,25 @@ Structure, Unit, and TeamPlacement concepts support later organization-wide view
 over project-qualified Teams; they do not require nested Tenants or duplicate
 Task, Team, Project, or permission authorities.
 
+The terms describe different responsibilities:
+
+| Term | Meaning and owner |
+|---|---|
+| Customer organization | Platform's customer relationship; it is not automatically an Orchestrator Organization or IAM organization. |
+| Tenant | Isolation and lifecycle scope supplied by the configured authority and mapped to stable Orchestrator scope identity. It is not a department or navigation folder. |
+| Organization, Structure, Unit | The accepted tenant-scoped semantic organization model: company structures, departments, and matrix relationships. Exact human membership bindings remain open. |
+| Project | Operational scope for Teams, Tasks, Runs, and workspace resources. Their owning contexts keep lifecycle authority. |
+| Operational Team | Saved collaboration composition owned by Team Topology; an organizational placement does not recursively expand its roster. |
+| Frontend Workspace | Navigation or a saved view over an authorized Target and Tenant/Project, under OD-019. |
+| Technical execution resource | Registered and allocated filesystem materialization owned by Workspace Registry; its public naming remains open under OD-019. |
+
+One Platform customer organization may already own several Tenants under
+[Platform ADR-0007](https://github.com/agent-teams-ai/agent-teams-platform/blob/83d761b84e23bb6d1e9c446f3666951e94fa90d8/docs/decisions/0007-platform-strategic-context-map-and-first-project-management-slice.md).
+Those customer ownership constraints do not make every company, department,
+semantic Organization, IAM group, or deployment the same resource. The complete
+binding model remains an explicit cross-system design. No new Employee or human
+Organization aggregate is accepted by this vocabulary map.
+
 An organizational unit called a team may contain other units and Team placements.
 This does not make an operational Team contain another Team or recursively
 expand its executable roster. That alternative changes Team versions, duplicate
@@ -91,6 +110,15 @@ human belongs to several Teams remains OD-048's choice; the current Agent
 one-Team invariant is unchanged. Cross-organization collaboration, especially
 across Tenants or authority realms, remains future work here: no shared aggregate,
 implicit access inheritance, or cross-tenant transfer is admitted by this direction.
+
+A future guest collaboration requires explicit target-scope authority under the
+owning policy. Membership plus bounded grants is a candidate for standalone
+collaboration; its exact guest contract remains open. Platform's accepted
+organization-owned Tenant semantics require both membership and Tenant access.
+Guest access alone does not establish federation, cross-installation identity,
+shared lifecycle, or cross-tenant Work execution. The
+[collaboration research](../research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
+preserves the alternatives and related Platform constraints.
 
 ## Required scenarios
 

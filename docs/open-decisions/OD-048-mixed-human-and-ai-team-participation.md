@@ -98,13 +98,14 @@ human cardinality is not yet accepted as an implementation contract.
 
 ### Assignment responsibility
 
-The leading first slice has one accountable assignee, with collaborators,
+The leading first slice has at most one accountable assignee, with collaborators,
 watchers, and reviewers as different relationships. Shared participation does not
-require multiple equal owners of the Task's completion.
+require multiple equal owners of the Task's completion. A Task may remain
+unassigned until a valid assignment or claim succeeds.
 
 | Option | Confidence /10 | Complexity /10 | Expected reliability /10 | Production TypeScript lines for assignment and claim |
 |---|---|---|---|---|
-| One accountable assignee, explicit claim/reassign/release | 9 | 4 | 9 | 2,500-5,000 |
+| At most one accountable assignee, explicit claim/reassign/release | 9 | 4 | 9 | 2,500-5,000 |
 | Multiple equal assignees with joint acceptance/completion rules | 6 | 7 | 7 | 4,000-8,000 |
 
 An authorized assignment can either take effect immediately or create an offer
@@ -118,6 +119,32 @@ Complexity 10 means harder. Line ranges assume existing authority, transaction,
 outbox, identity, and Task primitives; they exclude UI, generated code, tests,
 provider implementation, and infrastructure foundations. Estimate confidence is
 4/10. The ranges overlap and must not be added as independent module budgets.
+
+### Immediate assignment or offer
+
+The following additional planning judgments were made during the 2026-10-22
+coverage audit; they are not recovered measurements or a completed implementation.
+The leading small-team option is immediate authorized assignment. Self-claim is
+one atomic acceptance of responsibility, not an offer to oneself.
+
+| Option | Confidence /10 | Complexity /10 | Expected reliability /10 | Incremental production TypeScript lines |
+|---|---|---|---|---|
+| Immediate third-party assignment using the future authorized single-assignee primitive | 8 | 3 | 8 | 0-300 |
+| A mandatory offer accepted by the intended person | 6 | 6 | 8 | 800-2,000 |
+
+These are deltas assuming the future baseline assignment/claim primitive exists;
+its 2,500-5,000-line estimate above is separate and that runtime capability is
+not currently admitted. Zero incremental lines does not mean zero implementation.
+Estimate confidence is 2/10. Both options assume the same current authority,
+target eligibility, revision, idempotency, persistence, and outbox controls.
+
+The offer estimate covers one pending offer on an unassigned Task to one person:
+create, accept, decline, cancel, stale/concurrent rejection, and current authority
+and target eligibility checked when acceptance commits. Any validity deadline is
+checked by commands; a new durable expiry scheduler is not included. Active-work
+reassignment offers, batches, joint assignees, consent chains, cross-organization
+collaboration, notification infrastructure, UI, tests, and base infrastructure are
+excluded. An offer lifecycle is separate from Work lifecycle and board columns.
 
 ## Proposed ownership model
 
@@ -134,6 +161,13 @@ or required Run participant is a separate product decision.
 Organization structures under ADR-0044 arrange project-qualified Team references.
 They do not recursively expand executable rosters. Cross-tenant and independent
 installation cooperation remain future work in OD-023.
+
+Platform consumes these Orchestrator-owned collaboration capabilities through
+API/SDK contracts. Its [boundary direction](https://github.com/agent-teams-ai/agent-teams-platform/blob/main/docs/architecture/platform-orchestrator-boundary.md)
+records the hosted relationship and future cross-customer limits. The
+[collaboration review](../research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
+preserves the comparison evidence and remaining product questions without
+selecting the contracts here.
 
 ## Acceptance criteria
 

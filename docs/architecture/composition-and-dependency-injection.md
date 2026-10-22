@@ -181,6 +181,14 @@ deployment policy. Its product authority adapter is one selected deployment
 integration. Standalone Self-Hosted selects its independent authority and must
 operate without a Platform endpoint or private package registry.
 
+The companion [Platform boundary direction](https://github.com/agent-teams-ai/agent-teams-platform/blob/main/docs/architecture/platform-orchestrator-boundary.md)
+owns the hosted product relationship and its proposed exact integration
+contracts. Each product can release independently; a managed composition binds
+compatible contract and capability versions explicitly. A shared mechanism must
+not force standalone Orchestrator to deploy Platform or update both products
+together. [The research coverage](../research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
+records the evidence, pending Platform adoption, and remaining product choices.
+
 Reusable libraries may own concrete mechanisms shared by real consumers: OIDC
 validation, provider administration adapters, the selected relationship-
 authorization client and its conformance suite, transport primitives, and Get
