@@ -52,10 +52,13 @@ not make it a public SDK field.
 
 ## Single-owner cutover
 
-One capability has one authoritative writer and one process owner at any moment.
-Routing selects either the legacy implementation or the new implementation before
-a mutation begins. It cannot retry the same mutation through the other owner after
-an ambiguous outcome.
+During cutover, one authoritative implementation and mutation path handles a
+capability. That implementation may have qualified replicas protected by its
+owning constraints, revisions, receipts, claims, and fences. Process lifecycle
+and custody migration are separately explicit; cutover must not create competing
+lifecycle owners. Routing selects the legacy or new implementation before a
+mutation begins and cannot retry through the other owner after an ambiguous
+outcome.
 
 Shadow reads may compare projections. Shadow commands may validate serialization
 only when they cannot produce a side effect. Runtime start, input, approval,

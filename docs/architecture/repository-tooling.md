@@ -16,6 +16,10 @@ related:
   - ADR-0059
   - ADR-0078
   - ADR-0102
+  - ADR-0103
+  - ADR-0113
+  - ADR-0114
+  - architecture.deployment-profiles
   - architecture.dependency-rules
   - architecture.feature-module-standard
   - architecture.machine-readable-model
@@ -131,9 +135,19 @@ The consumer catalog and lockfile now pin Oxlint `1.83.0`, matching that adapter
 These source pins do not replace a fresh frozen install and native qualification.
 
 `architecture/foundation/quality-feature-topology.json` is a checked adapter for
-Foundation's flat FMS v1 reader. The accepted organization authority remains
-`architecture/feature-module-standard-profile.json`; it is unchanged. The adapter
-maps its production and excluded roots and the materialized package catalog to
+Foundation 1.7.2's flat FMS v1 reader. ADR-0113 adopts the exact v1.1 authority in
+`architecture/feature-module-standard-profile.json`. Version 1.1 preserves the
+v1 obligations when its new constructs are absent. The adapter therefore keeps
+the historical v1 reader binding without becoming another adoption authority.
+Its validator requires the exact v1.1 primary pin, empty construct inventories,
+and `blocked-until-enforced` activation. It rejects physical nested feature roots
+and conventional composition contract files at feature and Host/package `src`
+roots before permitting this
+compatibility projection. New constructs require a reader and scoped semantic
+checks that understand them; the old view cannot be silently widened.
+
+The adapter maps the same production and excluded roots and materialized
+package catalog to
 `packages/contexts/agent-context` and `packages/platform/local-host-control`, their
 `src` trees, and their `tests` trees.
 There are no materialized applications. `validate-quality-topology.mjs` rejects
@@ -141,6 +155,12 @@ projection drift, missing source or test directories, and unreviewed application
 materialization. Foundation independently rejects unclassified workspace packages,
 including packages omitted from the projection or source policy. Catalog
 reservations alone do not create production modules.
+
+The projection is a reader-format mapping with no reduction in source coverage,
+typed rules, or materialization checks. Consumer tests prove installed Foundation
+acceptance, reject primary and projected pin drift, and reject both declared and
+materialized new constructs. The profile and projection checks do not yet claim
+to parse the full v1.1 visibility, assembly, and dependency graph semantics.
 
 Shared global categories, plugins, rules, and preset references live in
 `.oxlintrc.base.json`. `.oxlintrc.common.json` extends that base and retains normal
@@ -679,8 +699,12 @@ Status: accepted, implementation begins with the first matching production sourc
 ast-grep owns structural code invariants that are more precise than text search and
 are not import-graph questions. The initial rule families cover:
 
-- Awilix import, container creation, registration, scope, cradle, and resolution
-  containment under `composition/**`;
+- GM imports, descriptors, Assembly entries, static groups, and graph preparation
+  containment inside `composition/**` and composition tests under ADR-0113;
+- one Host-owned assembly graph and application lifecycle per declared role,
+  with gRPC/Dapr invocation mapping confined to adapters behind typed ports
+  under ADR-0114 and the [service role map](deployment-profiles.md#service-role-map);
+  framework handles must not enter application ports or public contracts;
 - prohibited direct clocks, randomness, process APIs, and infrastructure
   constructors in domain code;
 - accepted factory and public-handle shapes where TypeScript types alone cannot
@@ -691,6 +715,16 @@ blocking only after it reports the intended invalid forms, accepts supported val
 forms, has a remediation message, and produces no unexplained findings against the
 real source tree. Generic style and import direction remain with Oxlint and the
 dependency graph stack.
+
+The first materialization PR for a selected private process boundary must connect
+its source rules and process/RPC conformance to the required quality runner with
+declared test identities and rejecting fixtures. Control Host to Team Topology
+S3 must exercise separate processes through Dapr; a same-process router cannot
+satisfy that boundary. These boundary checks must block production admission;
+an advisory-only rule does not satisfy the materialization requirement. This is
+an implementation obligation, not a claim that the current structural tooling
+verifies Dapr, deployment, or active-agent
+capacity. Deployment and workload qualification retain their own evidence.
 
 ## Dead-code and dependency hygiene
 

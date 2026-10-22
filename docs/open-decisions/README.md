@@ -16,6 +16,11 @@ Use the owner column to find the decision that gates a change. `Open` blocks an
 implicit implementation choice. `Deferred` records a consciously postponed
 question. `Resolved` is historical and must relate to at least one deciding ADR.
 
+OD-036 retains its original ADR-0087 resolution provenance. The current release
+scope is [ADR-0115: Fully Local V1 with Shared Backend Profiles](../decisions/0115-canonical-fully-local-v1-adoption.md);
+the open local lifecycle, workflow, and materialization decisions are required
+work for V1, without becoming resolved merely from that target selection.
+
 | ID | Decision | Owner | Status |
 |---|---|---|---|
 | OD-001 | [Local control transport](OD-001-local-control-transport.md) | platform/control-api | Open |

@@ -21,6 +21,9 @@ related:
   - ADR-0092
   - ADR-0093
   - ADR-0094
+  - ADR-0114
+  - ADR-0115
+  - architecture.deployment-profiles
   - ADR-0062
   - ADR-0063
   - ADR-0064
@@ -62,12 +65,14 @@ The first production orchestration package or vertical slice must not be
 implemented until all five gates below pass. Documentation, research, diagrams,
 contract fixtures, deterministic models, and disposable spikes remain allowed.
 
-These gates admit the first V1 orchestration slice and profile advertising. A
-future Fully Local implementation increment follows its separate OD-040
+These gates admit the first V1 orchestration slice and profile advertising. The
+required Fully Local implementation increment follows its separate OD-040
 materialization decision after the relevant lifecycle and workflow boundaries
 are accepted. Package materialization may then start before Fully Local release
 qualification, because the implementation is required to produce that evidence;
-it still grants no availability or shipping claim.
+it still grants no availability or shipping claim. ADR-0115 puts local contract
+resolution, implementation, and qualification on the V1 delivery path. A narrow
+first server slice can precede them; completed V1 cannot omit the local profile.
 
 Passing a gate does not require resolving every future feature. It requires
 enough accepted ownership, invariants, contracts, transition behavior, and
@@ -235,16 +240,17 @@ Required evidence:
   reconciliation.
 
 The gate does not require deploying Temporal in every profile or implementing a
-Fully Local workflow engine in the first production slice. ADR-0087 defers Fully
-Local implementation from V1, while OD-035 keeps the local engine decision
-explicit for the future profile.
+Fully Local workflow engine in the first server slice. ADR-0115 requires the
+local profile for V1; OD-035 must select and qualify its durable adapter before
+the corresponding local release. The common workflow port does not select the
+same engine or lifecycle for both profiles.
 
 ## Gate 5: Deployment authority, target fencing, and runtime connectivity
 
 Required evidence:
 
 - machine-readable Managed SaaS, Standalone Self-Hosted, Connected Self-Hosted,
-  and Fully Local profile states agree with ADR-0087 and ADR-0090;
+  and Fully Local profile states agree with ADR-0115 and ADR-0093;
 - the OD-039 qualification framework has a blocking trusted-attestation verifier
   before any profile or capability becomes `qualified`;
 - profile qualification is closed over the exact mandatory capability registry
@@ -277,10 +283,55 @@ The reliability catalog separately blocks profile qualification on OD-003 and
 OD-012. The OD-003 blocker is a qualification gate, not a slice-admission
 criterion of this gate.
 
-This gate does not require implementing Fully Local or a commercial capability,
-and optional commercial capability does not block a baseline profile.
-It does require that a server profile advertise only capabilities whose
-authority and connectivity are qualified.
+For the first server slice, this gate does not require implementing Fully Local
+or an optional commercial capability. Completed V1 requires the local profile
+and its mandatory capability evidence under ADR-0115. Every profile advertises
+only capabilities whose authority and connectivity are qualified; optional
+commercial capability does not block a baseline profile.
+
+## First-materialization role gate
+
+ADR-0114 and the [service role map](deployment-profiles.md#service-role-map)
+add a scoped implementation obligation to the existing five gates. They do not
+mark any current gate passed or require empty services for undelivered features.
+The first PR implementing a selected role, and every PR extending its handler
+set, must satisfy the
+[placement record](deployment-profiles.md#first-materialization-placement-record)
+before that implementation is accepted.
+
+Required evidence is attached to the owning feature and role composition:
+
+- the semantic owner, delivered capabilities, actual consumer, transaction and
+  recovery authority, and local, private RPC, or durable semantics are explicit;
+- the role is a separately runnable OS process from the roles it must isolate;
+  static Host composition cannot register forbidden remote or worker handlers
+  in Control Host as a fallback;
+- first private S3 integration crosses Control Host to Team Topology through
+  standard gRPC and Dapr; all implemented stateful Team methods use the owned
+  role rather than duplicated application graphs;
+- both server Compose and Kubernetes mappings and required integration lanes
+  accompany the role; each advertised form has actual environment evidence;
+- owned contracts, trusted scope, scoped SQL credentials, migration authority,
+  compatible replicas, resource limits, readiness, drain, and uncertainty
+  reconciliation are recorded and exercised at the real boundary;
+- rejecting source and composition fixtures cover forbidden dependencies,
+  transport leakage, cross-context storage access, and production bypasses;
+  their exact test identities and commands are registered in the required
+  repository runner with the first implementation;
+- independent process/sidecar failure, overload, lost reply after commit, and
+  original-outcome recovery pass the applicable
+  [role qualification suite](testing-strategy.md#concurrent-execution-and-service-role-qualification).
+
+A `.proto` file, Dockerfile, manifest, source-check declaration, or in-process
+fixture alone cannot pass this gate. Production claims stay limited to actually
+qualified capabilities and environments. Native Fully Local implementation and
+shipping retain OD-040 and their existing separate gates; an undeclared local
+fallback cannot satisfy a server integration requirement.
+
+Permitted co-location must be re-evaluated before shipping a feature or raising
+its qualified workload when a role-map separation trigger applies. The owning
+change supplies a recorded placement outcome and evidence; leaving extraction
+as an untracked future task is not an admissible outcome.
 
 ## Review rule
 

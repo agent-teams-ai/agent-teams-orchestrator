@@ -18,6 +18,8 @@ related:
   - ADR-0086
   - ADR-0064
   - ADR-0067
+  - ADR-0114
+  - architecture.deployment-profiles
   - architecture.local-host-lifecycle
   - architecture.public-control-contracts
   - OD-001
@@ -94,8 +96,8 @@ explicit compatibility policy. Domain entities, application command models, and
 frontend DTOs are never reused as public SDK models.
 
 The internal transport interface is not a public extension point in the first
-version. Any accepted in-process, local-Host, and hosted adapters implement it
-in parallel behind the same facade. Publishing a third-party transport SPI
+version. The local-Host and hosted adapters implement it behind the same facade;
+an in-process backend is limited to tests. Publishing a third-party transport SPI
 requires a separate ADR because it would freeze lifecycle, streaming, error, and
 retry semantics beyond the supported adapters.
 
@@ -147,6 +149,30 @@ Schema-generated contract artifacts are lower-level inputs to language SDKs.
 Every supported language receives an idiomatic facade rather than exposing a
 foreign language's object model or generated RPC stub as the product API.
 
+## Public HTTP host
+
+[ADR-0114](../decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md)
+selects Fastify with `@connectrpc/connect-fastify` for the public Node HTTP Host.
+Connect handlers are registered in the same server and process; Fastify is not
+an extra network proxy in front of Connect. The feature-owned inbound adapters
+map public messages into application models and invoke capabilities constructed
+once by the role's composition. Framework and generated wire types remain at
+the adapter boundary.
+
+An application capability uses typed local calls within its role or an outbound
+gRPC/Dapr adapter for a declared remote dependency. It does not reach private
+services by calling its own public HTTP routes. Public and private adapters
+preserve their separate contracts, trusted scopes and authorization rules.
+Fastify is not mandatory for private RPC servers or durable workers that need
+no public HTTP host. Direct JetStream delivery retains its owning consumer path.
+
+The first Host implementation qualifies its exact Fastify/Connect versions
+against the existing public API behavior and deployment probes. Framework
+selection does not qualify load, Windows IPC, local packaging or graceful drain.
+OD-001 retains the unresolved local transport choices. The
+[shared backend adoption](../decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md#shared-reference-and-local-adoption)
+records the central source without duplicating its stack catalog here.
+
 ## Transport adapters
 
 Expected inbound adapters:
@@ -169,8 +195,8 @@ unknown-outcome semantics. An event is an immutable fact and may have many
 consumers.
 
 Every accepted official adapter passes one behavioral conformance suite.
-In-process operation may remove serialization and network overhead, but it must
-not bypass authorization, idempotency, validation, scoping, error mapping, or
+An in-process test adapter may remove serialization and network overhead, but it
+must not bypass authorization, idempotency, validation, scoping, error mapping, or
 lifecycle semantics. OD-001 still selects the protected local IPC substrate; it
 cannot replace the Supervisor-owned lifecycle fixed by ADR-0060.
 
@@ -187,24 +213,114 @@ normal public SDK. The orchestrator may expose explicitly durable NATS
 integration surfaces without making broker configuration the client programming
 model.
 
+## Service boundaries and language portability
+
+[ADR-0114](../decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md)
+selects feature-owned Protobuf and standard gRPC through Dapr service invocation
+for real private RPC boundaries. ADR-0114 selects coarse service roles; the
+[service role map](deployment-profiles.md#service-role-map) owns their global
+placement. These are accepted architecture choices, not qualification of an
+exact runtime version or another public SDK backend.
+
+| Boundary | Selected implementation | Contract preserved across deployment or language changes |
+|---|---|---|
+| Ordinary collaboration within a role | Curated internal APIs and typed local calls | Owning application models and explicit feature dependency |
+| Private RPC between declared roles | Feature-owned Protobuf and standard gRPC through Dapr | Versioned schema, trusted scope, errors, deadlines, acceptance, and retry semantics |
+| Durable integration delivery | Official JetStream SDK adapter directly invoking the owned application port | Event or command contract, inbox, outbox, acknowledgement, and reconciliation semantics |
+| Public client control | Connect edge and handwritten SDK | Accepted public control and SDK contracts |
+
+The first real private boundary is Control Host to Team Topology's S3 persistent
+Team create/get/list capability in a separate process through Dapr. Its first
+production materialization includes the private schema, actual consumer, typed
+port and ACL, role composition, and process/RPC conformance. A same-process
+Connect router transport is useful for tests but does not satisfy this boundary.
+Moleculer is not selected for this path and must not become an additional facade.
+S1/S2 checker fixtures do not establish S3 persistence or deployment readiness.
+
+Do not create speculative Protobuf services for every Get Modular entry, nested
+feature, team, agent, or runtime session. Ordinary collaboration inside a role
+retains application models and checked dependencies. Each Host role constructs
+its capabilities once; inbound adapters invoke those handles. Code generation
+removes repetitive stubs; contract semantics and compatibility still require
+review. JetStream handlers call their owner directly without an incidental RPC
+hop, and AR retains execution ownership.
+
+Dapr supplies configured invocation discovery and routing mechanisms. The
+selected deployment profile still names peer identity, authorization mapping,
+message bounds, admission, deadlines, retries, recovery, and lifecycle owners.
+Discovery and routing do not establish durable business ownership or autoscaling.
+Selecting invocation does not adopt Dapr state, pub/sub, actors, or workflows.
+Compose and Kubernetes qualification follows the deployment profile; the future
+local Desktop composition retains Supervisor-owned component availability.
+
+Host lifecycle closes admission before bounded drain. A propagated shutdown or
+cancellation signal does not itself establish that admission barrier. Verify
+Dapr policies on the actual standard-gRPC path, including sidecar and application
+loss, typed failures, restart, overload, and accepted work recovery. Unary,
+self-app, and streaming paths cannot inherit untested equivalent limits. One
+retry budget applies to a logical operation across its hops; a timeout does not
+prove a mutation failed or authorize another owner to repeat it.
+
+A common Protobuf schema alone does not make a plain gRPC server serve the
+Connect protocol. Private callers use the selected gRPC contract; browser clients
+retain the public Connect edge. The private boundary does not change the accepted
+HTTP/1.1 local UDS profile for public control. ADR-0114 separately selects the
+public HTTP framework; it does not change that local transport contract.
+
+Before claiming language portability, qualification replaces one representative
+TypeScript capability with another-language implementation and runs the same
+consumer contract fixtures. Consumers retain their business code; wiring may
+change. The fixtures cover serialization, typed failures, trusted scope,
+deadlines, duplicate commands, unknown outcomes, and original-operation lookup.
+Accepted architecture and in-process fixtures do not establish that result.
+
 ## Additional client API styles
+
+From the first application capability, all inbound adapters call the same narrow
+owner-defined input port and map wire models to application input and output
+types. This boundary applies to Connect, a future GraphQL resolver, and the
+selected private gRPC adapter. Direct invocation remains available within a
+role and in tests. The capability declares the framework-independent
+[invocation profile](public-control-contracts.md#authentication-boundary)
+it actually consumes; no global service bag or mandatory generic context is
+introduced. Its authorization port remains responsible for access decisions.
 
 Connect remains the canonical public control transport. A real client need may
 later justify GraphQL as an additional inbound adapter, most likely for composed
-read models used by Web or Desktop clients. Adding it does not change application
-use cases, domain models, or the handwritten SDK semantics.
+read models used by Web or Desktop clients. It reuses the owning application
+commands and query ports. A new composed view may require an owned batch query
+port or read projection with declared consistency. Domain invariants, trusted
+tenant scope, authorization, mutation idempotency, operation receipts, and feed
+recovery retain their existing owners. GraphQL does not authorize cross-context
+database access.
+Composed queries use consumer-owned query ports and ACLs against the providers'
+Published APIs. Batch queries belong to the relevant query owner. A projection
+declares its consistency and watermark; nested fields do not create an atomic
+snapshot across contexts or grant access through a generic repository registry.
 
 A GraphQL adapter owns its schema, resolvers, authentication mapping, pagination,
 error and nullability mapping, query cost limits, and transport-specific tests.
-It maps into the same transport-independent application models as Connect and
-must pass the same capability behavior fixtures. It is not a second source of
-business contracts, does not expose domain entities directly, and does not turn
-the internal transport interface into a public extension point.
+Resolver execution uses bounded request-scoped batching and caching, explicit
+cost limits, and cancellation propagation. The official
+[GraphQL performance guidance](https://graphql.org/learn/performance/)
+describes batching and demand control for composed queries.
+Request caches are isolated by authenticated scope, and each data access retains
+the owning authorization policy. A request disconnect does not cancel previously
+accepted durable work. Request resources and operation transactions follow the
+[composition scopes](composition-and-dependency-injection.md#lifetimes-and-scopes).
+The adapter maps into the same transport-independent application models as
+Connect and must pass the same capability behavior fixtures. It is not a second
+source of business contracts, does not expose domain entities directly, and does
+not turn the internal transport interface into a public extension point.
 
 GraphQL is added capability by capability after an explicit consumer and query
-shape exist. The architecture keeps that addition local to the inbound edge, but
-does not pretend that schema design, authorization, limits, subscriptions, and
-compatibility are free implementation work.
+shape exist. Changes may extend the inbound and owned query paths while
+preserving existing domain and handwritten SDK behavior. Schema design,
+authorization, limits, subscriptions, and compatibility still require
+implementation work.
+The first materialized capability and adapter supply the corresponding
+[behavior and mapping evidence](testing-strategy.md#contract-tests); this plan
+does not claim that prose alone enforces cross-transport equivalence.
 
 ## Client realtime edge
 

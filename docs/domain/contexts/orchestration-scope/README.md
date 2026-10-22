@@ -7,6 +7,7 @@ summary: Model boundary for orchestration tenant and Project identity, authority
 related:
   - ADR-0079
   - ADR-0080
+  - ADR-0114
   - architecture.context-map
   - OD-006
   - OD-012
@@ -263,10 +264,11 @@ does not remove this dossier's open-decision blockers.
 
 ## Persistence ownership
 
-Orchestration Scope owns its schema or SQLite database, migrations, inbox,
+Orchestration Scope owns its PostgreSQL schema, migrations, inbox,
 outbox, command receipts, binding indexes, disposition work items, projections,
-and tombstones. It does not join or mutate another context's storage. Hosted
-repositories require trusted tenant predicates and RLS defense in depth.
+and tombstones. It does not join or mutate another context's storage. Both local
+and server PostgreSQL repositories require trusted tenant predicates and RLS
+defense in depth under the persistence profile.
 
 ## Security and authorization
 

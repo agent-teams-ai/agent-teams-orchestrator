@@ -17,6 +17,8 @@ related:
   - ADR-0089
   - ADR-0092
   - ADR-0094
+  - ADR-0114
+  - ADR-0115
   - architecture.context-map
   - architecture.runtime-boundary
   - architecture.security
@@ -495,8 +497,9 @@ writers to the same generation.
   completeness but cannot admit a late index commit into an older snapshot.
 - Chronological search is a required baseline. Relevance, phrase, prefix,
   language stemming, and deep snapshot pagination are adapter capabilities.
-- SQLite FTS5 and PostgreSQL FTS are semantically conformant for the baseline,
-  not ranking-equivalent.
+- Local and hosted PostgreSQL FTS must qualify the same semantic baseline.
+  Ranking equivalence is not implied by sharing an engine; language,
+  configuration, collation, and index versions remain explicit capabilities.
 - Search generation rebuild is blue/green and cannot expose partial results.
 - A current deletion tombstone hides data even through old search generations,
   open cursors, realtime cache, and delayed indexing work.
@@ -562,11 +565,11 @@ writers to the same generation.
 
 ### Local and server adapters
 
-| Capability | Future fully local profile | Server profiles |
+| Capability | Fully Local V1 target | Server profiles |
 |---|---|---|
-| Canonical state | Context-owned SQLite | Context-owned PostgreSQL |
+| Canonical state | Context-owned schema in bundled native PostgreSQL | Context-owned PostgreSQL schema |
 | Protected payload | Encrypted local filesystem adapter | S3-compatible encrypted object adapter |
-| Search | SQLite FTS5 | PostgreSQL `tsvector` and GIN |
+| Search | PostgreSQL `tsvector` and GIN | PostgreSQL `tsvector` and GIN |
 | Realtime | Replaceable local edge when profile is implemented | Hosted Centrifugo adapter |
 | Encryption keys | OS-backed or packaged local secret adapter, still open | KMS-backed adapter |
 
@@ -612,7 +615,8 @@ or a fully local Desktop implementation.
 
 - Exact legal retention and hold authority remains OD-029.
 - Exact local key storage and local protected-payload backup policy remain part
-  of the future Fully Local profile.
+  of the required Fully Local V1 profile; its implementation and release gates
+  remain independent of this context's proposed feature scope.
 - The initial public semantic-registry categories and typed detail schemas need
   contract fixtures before package materialization.
 - AR exact output-feed schemas, cursor guarantees, and capability negotiation are

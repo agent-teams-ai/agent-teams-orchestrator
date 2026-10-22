@@ -1,19 +1,23 @@
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { resolve } from "node:path";
+import { relative, resolve, sep } from "node:path";
 
 export const PROFILE_PATH = "architecture/feature-module-standard-profile.json";
 export const PROFILE_DOCUMENT_PATH = "docs/architecture/feature-module-standard.md";
 export const AGENT_INSTRUCTIONS_PATH = "AGENTS.md";
 
-const EXPECTED_STANDARD = Object.freeze({
+export const EXPECTED_STANDARD = Object.freeze({
   id: "agent-teams.feature-module-standard",
-  version: "v1",
+  version: "v1.1",
   repository: "agent-teams-ai/.github",
-  path: "docs/architecture/feature-module-standard/v1.md",
-  git_blob_sha: "d0bfff2033faf544fe65268c1dcdfd524d093015",
-  sha256: "851653f96643cf0466b67ab22963661976b00de44840fa3144a48a8c054f95fa",
+  path: "docs/architecture/feature-module-standard/v1.1.md",
+  git_blob_sha: "bd949a9a670862fea851a7791fce772fdef3b4fc",
+  sha256: "cfa088ef7396139554fe5e3bcc839271b23299c6b60c569a3a7f1cd7c9f0bc6c",
 });
+
+const CONSTRUCT_INVENTORIES = Object.freeze([
+  "sub_features", "republications", "composition_contracts",
+]);
 
 const EXPECTED_EXTENSIONS = Object.freeze([
   { id: "workspace-package-topology", authority: "architecture/package-catalog.yaml" },
@@ -60,11 +64,58 @@ function equalJson(actual, expected, label) {
   assert(JSON.stringify(actual) === JSON.stringify(expected), `${label} does not match.`);
 }
 
+export function validateConstructActivation(constructs, sourcePaths) {
+  exactKeys(constructs, ["activation", ...CONSTRUCT_INVENTORIES], "constructs");
+  assert(constructs.activation === "blocked-until-enforced",
+    "New FMS constructs remain blocked until their semantic enforcement is implemented.");
+  for (const name of CONSTRUCT_INVENTORIES) {
+    assert(Array.isArray(constructs[name]) && constructs[name].length === 0,
+      `${name} must remain empty until visibility, assembly, and graph enforcement is implemented.`);
+  }
+  for (const sourcePath of sourcePaths) {
+    const normalized = sourcePath.split(sep).join("/");
+    assert(!/(?:^|\/)src\/features\/[^/]+\/features(?:\/|$)/u.test(normalized),
+      `${normalized}: sub-feature materialization requires semantic enforcement before activation.`);
+    assert(!/(?:^|\/)src\/(?:features\/[^/]+\/)*composition\/[^/]+\.contracts\.[cm]?[jt]sx?$/u.test(normalized),
+      `${normalized}: composition contracts require semantic enforcement before activation.`);
+  }
+}
+
+export async function readProductionFeaturePaths(repositoryRoot, productionRoots) {
+  const sourcePaths = [];
+  async function visitSource(directory) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const entryPath = resolve(directory, entry.name);
+      sourcePaths.push(relative(repositoryRoot, entryPath).split(sep).join("/"));
+      if (entry.isDirectory()) {
+        await visitSource(entryPath);
+      }
+    }
+  }
+  async function visitPackages(directory) {
+    const entries = await readdir(directory, { withFileTypes: true });
+    if (entries.some((entry) => entry.isFile() && entry.name === "package.json")) {
+      if (entries.some((entry) => entry.isDirectory() && entry.name === "src")) {
+        await visitSource(resolve(directory, "src"));
+      }
+      return;
+    }
+    for (const entry of entries) {
+      if (entry.isDirectory() && entry.name !== "node_modules") {
+        await visitPackages(resolve(directory, entry.name));
+      }
+    }
+  }
+  await Promise.all(productionRoots.map((root) => visitPackages(resolve(repositoryRoot, root))));
+  return sourcePaths.toSorted();
+}
+
 export function validateFeatureModuleStandardProfile({
   profile,
   document,
   agentInstructions,
   packageJson,
+  sourcePaths = [],
 }) {
   exactKeys(profile, ["schema_version", "standard", "adoption"], "profile");
   assert(profile.schema_version === 1, "Profile schema_version must be 1.");
@@ -73,14 +124,14 @@ export function validateFeatureModuleStandardProfile({
 
   const adoption = profile.adoption;
   exactKeys(adoption, [
-    "status", "owner", "profile_document", "decision", "scope",
+    "status", "owner", "profile_document", "decision", "scope", "constructs",
     "extensions", "deviations", "enforcement",
   ], "adoption");
   assert(adoption.status === "adopted", "Adoption status must be adopted.");
   assert(adoption.owner === "architecture", "Adoption owner must be architecture.");
   assert(adoption.profile_document === "architecture.feature-module-standard",
     "Adoption must reference the local profile document ID.");
-  assert(adoption.decision === "ADR-0098", "Adoption must reference ADR-0098.");
+  assert(adoption.decision === "ADR-0113", "Adoption must reference ADR-0113.");
 
   exactKeys(adoption.scope, [
     "production_roots", "module_roots", "application_roots", "excluded_roots",
@@ -89,6 +140,7 @@ export function validateFeatureModuleStandardProfile({
   equalJson(adoption.scope.module_roots, ["packages"], "Module roots");
   equalJson(adoption.scope.application_roots, ["apps"], "Application roots");
   equalJson(adoption.scope.excluded_roots, ["scripts", "tooling"], "Excluded roots");
+  validateConstructActivation(adoption.constructs, sourcePaths);
 
   assert(Array.isArray(adoption.extensions) && adoption.extensions.length > 0,
     "Adoption extensions must be non-empty.");
@@ -157,7 +209,9 @@ export function validateFeatureModuleStandardProfile({
     EXPECTED_STANDARD.version,
     EXPECTED_STANDARD.sha256,
     canonicalUrl,
-    "ADR-0098",
+    "ADR-0113",
+    "## Nested features and composition contracts",
+    "blocked-until-enforced",
     ...REQUIRED_LOCAL_EQUIVALENCE_MARKERS,
   ]) {
     assert(document.includes(marker), `Profile document is missing required marker: ${marker}`);
@@ -165,7 +219,7 @@ export function validateFeatureModuleStandardProfile({
 
   for (const marker of [
     "docs/architecture/feature-module-standard.md",
-    "organization Feature Module Standard v1",
+    "organization Feature Module Standard v1.1",
   ]) {
     assert(agentInstructions.includes(marker),
       `Agent instructions are missing the local profile route: ${marker}`);
@@ -182,16 +236,18 @@ export async function checkFeatureModuleStandardProfile(repositoryRoot = process
     readFile(resolve(repositoryRoot, "package.json"), "utf8"),
   ]);
   const profile = JSON.parse(profileSource);
+  const sourcePaths = await readProductionFeaturePaths(repositoryRoot, ["apps", "packages"]);
   const authorities = validateFeatureModuleStandardProfile({
     profile,
     document,
     agentInstructions,
     packageJson: JSON.parse(packageSource),
+    sourcePaths,
   });
   await Promise.all(authorities.map((authority) => access(resolve(repositoryRoot, authority))));
 }
 
 if (resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   await checkFeatureModuleStandardProfile();
-  console.log("Orchestrator Feature Module Standard v1 profile is valid.");
+  console.log("Orchestrator Feature Module Standard v1.1 profile is valid.");
 }

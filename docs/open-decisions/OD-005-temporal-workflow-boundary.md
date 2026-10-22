@@ -7,6 +7,8 @@ summary: Select initial Run Orchestration workflows, worker topology, versioning
 related:
   - ADR-0027
   - ADR-0067
+  - ADR-0114
+  - OD-004
   - architecture.extensions
   - domain.contexts.run-orchestration
   - research.pre-implementation-gate-critique-2026-07-30
@@ -99,6 +101,23 @@ scheduler-ownership fence.
 ADR-0067 removes caller-specific readiness waits from process-manager ownership.
 SDK `waitFor` observes a readiness snapshot and feed; it is not a Temporal or
 in-process business workflow.
+
+## Agent graph integration question
+
+The backend-stack discussion on 2026-10-22 introduces LangGraph as a candidate,
+not an accepted dependency. If selected, a graph belongs to an execution-side
+capability behind its own adapter. It does not acquire Team, Run or Work state,
+Temporal scheduling authority, or AR process, sandbox and custody ownership.
+
+Before that integration, the owner must choose its actual graph use case,
+checkpoint scope, stable execution identity, retry and cancellation semantics.
+A retry of the same launch must attach to or reconcile the existing execution
+rather than create a competing graph. Different layers may retry different
+operations, but they must not independently repeat the same external effect.
+These constraints preserve ADR-0027 and the runtime boundary; they do not select
+the implementation of every provider's agent loop. OD-004 retains runtime-port
+ownership. No LangGraph package or separate graph service is required by the
+shared backend reference.
 
 ## Resolution
 

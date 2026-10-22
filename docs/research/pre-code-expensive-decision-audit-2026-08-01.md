@@ -11,6 +11,10 @@ related:
   - ADR-0074
   - ADR-0075
   - ADR-0077
+  - ADR-0114
+  - architecture.deployment-profiles
+  - architecture.persistence
+  - architecture.testing
   - architecture.implementation-readiness-gates
   - OD-003
   - OD-004
@@ -197,3 +201,247 @@ not invalidate durable commands.
 
 This report is evidence only. Accepted ADRs, owning dossiers, schemas, and open
 decisions remain normative.
+
+## 2026-10-21 review addendum
+
+### Scope and review method
+
+The owner requested overlapping independent criticism of the scalable service
+plan, including the complete product vision: one team through thousands of
+simultaneously executing agents, multiple human users and clients, polyglot
+services, server Compose and Kubernetes, hosted-target Desktop, and a future
+native local profile. Cheap AI-generated boilerplate does not remove distributed
+failure, authority, upgrade, or support costs.
+
+Nine independent reviewers using GPT-6.1 with reasoning effort `xhigh` received
+the same detailed brief and answered the same six questions before reading peer
+reports. Their specialties covered boundaries twice, protocols, native storage,
+security, capacity, delivery cost, deployment, and governance. They inspected
+the immutable PR79 source at `8f761d3`, current main at `98f6531`, and the separately
+prepared `8483949` composition/collaboration change where applicable. That
+separate source snapshot is not evidence of publication or merge.
+
+The original PostgreSQL comparison dated 2026-10-03 and the retained transport,
+launcher, restore, integrity, and multi-writer evidence were available to every
+reviewer. Existing Linux synthetic results were not counted as new experiments,
+packaged Windows/macOS evidence, or achieved enterprise capacity. Read-only
+source and merge-tree inspection added integration evidence, not load results.
+Three further critics using the same model and reasoning setting then read all
+nine final reports and the synthesis, independently of the other cross-reviews.
+They challenged protocol/trust conclusions, placement/capacity, and evidence/
+governance respectively. All twelve reports are complete. Common inputs and one
+model family make opinions correlated; review agreement is not independent
+experimental replication.
+
+### Agreement and substantive dissent
+
+| Topic | Review outcome | Practical meaning |
+|---|---|---|
+| Narrow Dapr, standard gRPC/Protobuf, public Connect, direct JetStream | All nine recommend retaining the current direction while qualifying its actual profiles | No new private transport or custom registry is justified by this review |
+| Nine coarse roles | All preserve the accepted policy for implementation; none proves nine is an optimal fixed count | Roles appear with actual features, not empty services or one service per module/agent |
+| Mandatory isolation from the first feature | Delivery review prefers a compact initial placement for Team CRUD, bounded Observation reads, and minimal Context assembly; other reviews also identify their weaker initial resource argument | Early Team isolation is an explicit owner tradeoff that exercises a real stateful boundary, not a demonstrated throughput requirement |
+| Shared Coordination and Derived roles | Repeatedly identified as the most fragile groupings | Ordinary delivery must not block cutoff/recovery; index rebuild must not block owned usage admission/rating |
+| Native PostgreSQL and selected launcher | No evidence justifies changing the accepted engine or wrapper selection | Qualification remains per artifact, OS, architecture, lifecycle, update, and restore capability |
+| Large concurrent execution capacity | No review claims it is measured | Model workload and AR/provider execution require separate evidence |
+
+The strongest alternative to Dapr is standard gRPC with existing platform
+discovery, balancing, and identity mechanisms. It does not require writing a
+private RPC framework. Standard Protobuf/gRPC supplies the language-neutral
+contract; Dapr supplies a selected invocation runtime. A comparison must hold
+authentication, receipts, admission, recovery, drain, supported languages, and
+deployment forms constant. Adding a second stack speculatively would increase
+the support surface before either profile is qualified.
+
+Retaining an accepted choice does not prove its comparative superiority. A
+future direct-gRPC proposal could justify a successor through lower total cost
+at the same guarantees even if Dapr is technically workable. Neither comparative
+cost nor production superiority was measured by these reviews.
+
+The dissent does not authorize a hidden local fallback or an implementation
+exception to ADR-0114. A compact placement would need an explicit later decision
+and evidence for the actual supported workload. The current owner mandate
+remains the governing choice.
+
+The dissent concerns initial server placement as well as a future native
+profile. A bounded Run path with Team, durable coordination, and Observation
+intake/query already reaches five named roles. A true Context assembly feature
+adds a sixth; the existing main manifest read/bootstrap alone does not trigger
+that assembly role. This is a conditional reading of the map, not a measured
+minimum installation or a requirement to create missing capabilities.
+
+### Adversarial review corrections
+
+The three cross-reviewers challenged the common conclusions instead of counting
+additional votes. They produced three concrete corrections:
+
+1. A shared process can demonstrate bounded interference and control progress
+   under a declared failure model. It cannot demonstrate independent process
+   crash, global memory-exhaustion, or credential-compromise isolation between
+   its handlers. When that independence is required, the role must split.
+2. Inspection of the retained Dapr `1.18.7` source at
+   `b32a815fa2260983e181b95272ea555fe17d3895` found that transparent gRPC proxy
+   local-target selection compares the application ID alone, while ordinary
+   direct invocation compares application ID and namespace. After successful
+   resolution of the same application ID in another namespace, the proxy's
+   local branch is therefore selected in that source path. This is a static
+   counterexample, not an executed cross-namespace exploit, a finding about the
+   latest release, or a failure of the distinct Control-to-Team IDs in S3.
+   The route/testing rules now require actual namespace-sensitive qualification
+   before advertising such a profile, or explicit rejection of unsupported
+   combinations. See the immutable
+   [proxy source](https://github.com/dapr/dapr/blob/b32a815fa2260983e181b95272ea555fe17d3895/pkg/messaging/grpc_proxy.go)
+   and [direct invocation source](https://github.com/dapr/dapr/blob/b32a815fa2260983e181b95272ea555fe17d3895/pkg/messaging/direct_messaging.go).
+3. A fresh canonical integration record must carry the original decisions'
+   supersession effects, not just source links. Otherwise old monolith-first
+   and local-database rules could remain authoritative beside their replacements.
+   The exact planned lifecycle transition belongs in the proposed record's
+   body until acceptance; the current Foundation rejects active supersession
+   metadata on a proposed ADR. The acceptance change applies the new decision's
+   lifecycle edges and predecessor statuses together while retaining historical
+   body/path/digest tuples.
+
+### Findings incorporated into current documents
+
+Two concrete omissions were independently identified in the placement/resource
+description:
+
+1. Approval expiry/revocation reconciliation and Consumption Governance expiry,
+   period rollover, and reconciliation lacked explicit background placement.
+   The role map now places their future admitted handlers in Coordination.
+   Usage Metering's own admission, checkpoints, and quarantine are also explicit;
+   Execution Observation does not acquire that authority. No unresolved domain
+   model or new S3 capability is accepted by this placement clarification.
+2. A connection budget expressed as replicas plus surge did not explicitly count
+   terminating instances and overlapping rollouts. The current resource rules
+   count all pools in all simultaneously live instances and qualify actual
+   closure, bounded drain, and overlap. A readiness change does not release SQL
+   resources by itself. This follows documented
+   [Kubernetes Deployment behavior](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment).
+
+The review also made existing qualification obligations more concrete:
+
+- Self-hosted workload enrollment, sidecar peer invocation, and both application
+  hops are separate trust questions. Dapr's documented default insecure Sentry
+  validator cannot establish entitlement to a service identity. The
+  [private RPC trust profile](../architecture/security-architecture.md#private-rpc-trust)
+  now requires negative enrollment and bypass evidence. This is an existing
+  release blocker made precise, not a newly demonstrated product exploit.
+- Many independent Runs and tenants and one concentrated Run or tenant are
+  distinct load shapes. Run authority gates, feed heads, and quota keys may
+  serialize conflicts despite more replicas. The testing strategy now names
+  both shapes; it does not weaken fences or promise an unmeasured limit.
+- Separate consumers, schemas, or SQL pools do not establish CPU, memory,
+  event-loop, or failure isolation inside a shared process. Existing role split
+  triggers apply before shipping a workload that cannot preserve neighboring
+  control and recovery progress.
+- Agent instructions now record the owner's comparison format: expected
+  reliability, confidence, and complexity out of ten, with scoped manually
+  maintained code ranges and explicit uncertainty.
+
+### Deployment and storage evidence limits
+
+The current Dapr resolver table labels Kubernetes and mDNS Stable, while generic
+Consul, NameFormat, and SQLite resolvers are Alpha. This is a component-specific
+distinction, not a verdict that all Dapr discovery is immature. One working
+Compose app/sidecar pair does not qualify arbitrary replica scaling, and native
+or container multicast availability must be demonstrated on the supported
+network. A small declared Compose replica envelope and a separately qualified
+Kubernetes scaling envelope remain consistent with the accepted deployment
+forms. See the [resolver catalog](https://docs.dapr.io/reference/components-reference/supported-name-resolution/)
+and [mDNS limitations](https://docs.dapr.io/reference/components-reference/supported-name-resolution/nr-mdns/),
+reviewed on 2026-10-21.
+
+The original storage report rated Rust native PostgreSQL 8.5/10 and Node native
+PostgreSQL 8/10 for their respective launcher contexts. It did not select a
+Desktop framework or compare equivalent end-to-end startup intervals. The later
+Node selection remains consistent with that evidence. Isolated launcher
+containment and observer checks address specific wrapper failures; they do not
+prove OS process custody, Supervisor adoption, signed installation, interrupted
+updates, or product restore on every released platform. Hosted-target Desktop
+does not start this local infrastructure. Fully Local remains deferred.
+
+### Comparable estimates and decision boundaries
+
+Scores describe expected robustness after the stated controls, evidence
+confidence, and engineering/operational complexity. Ten means strongest
+robustness, strongest evidence, or greatest difficulty respectively. They are
+not uptime or production-readiness measurements. Code ranges are forecasts;
+confidence in the ranges below is only 3/10.
+
+The following comparison uses one security review's common scope: S3
+Control-to-Team, two tenants, two Team replicas, a representative Go replacement,
+trusted context, workload enrollment/rotation, bounded admission/drain/retry,
+lost-reply recovery, and actual Compose/Kubernetes rejection cases. Existing
+domain/storage logic, issuer infrastructure, full IAM, native packaging, UI,
+AR, generated code, and vendor code are excluded. It is not total S3 cost.
+
+| Alternative | Reliability / confidence / complexity | Integration code | Qualification tests | Configuration |
+|---|---|---|---|---|
+| Selected Dapr with qualified trust and both application hops | 8 / 7 / 7 | 2,200-4,500 lines | 4,500-9,000 lines | 600-1,300 lines |
+| Standard gRPC with platform discovery and managed workload identity | 8 / 6 / 7 | 2,500-5,500 lines | 4,500-9,500 lines | 450-1,100 lines |
+
+Other reviews scoped smaller transport-only increments, PostgreSQL lifecycle,
+or broader deployment work. Their numbers overlap and must not be added,
+averaged as a common estimate, or multiplied by nine roles. No measured
+whole-project development percentage follows from this review.
+
+Engineering can select exact bounded fixtures, adapters, pins, shutdown order,
+and initial tested limits within the accepted policy. Product choices remain
+the local support envelope,
+availability and recovery commitments, and any actual change of placement or
+supported profiles. Already approved Dapr, Compose/Kubernetes, and native
+PostgreSQL choices do not need repeated confirmation without new evidence.
+
+### Owner follow-up: capacity and test selection
+
+On 2026-10-21, the product owner selected the approach that scales better and
+confirmed risk-based testing. The primary capacity target is aggregate admitted
+execution across independent Runs, including Runs within one team and tenant.
+The [deployment profile](../architecture/deployment-profiles.md#concurrent-execution-target)
+owns this decision and the separate per-Run qualification requirement. Thousands
+within one Run are not a baseline release requirement; Agent occupancy and
+semantic Run boundaries remain unchanged.
+
+The [testing policy](../architecture/testing-strategy.md#risk-based-test-selection)
+requires concrete risk coverage and the smallest sufficient test layer, avoids
+redundant or implementation-mirroring tests, and preserves mandatory gates.
+These are documentation clarifications; they neither add production behavior
+nor establish measured capacity.
+
+### Canonical integration on 2026-10-22
+
+The published PR79/87 histories and current main contain different accepted
+records with ADR-0103. The parallel modules/collaboration PR86 also uses ADR-0111
+for a different decision. Accepted IDs, paths, and immutable digests cannot be
+renamed or replaced to combine those histories.
+
+The owner authorized review, substantive fixes, and merge of the already selected
+architecture. Integration starts from main `98f6531`, preserves its accepted
+sandbox admission and materialized Agent Context package, and records the same
+approved module, backend, and local-profile decisions in fresh canonical
+[ADR-0113](../decisions/0113-canonical-module-and-composition-adoption.md),
+[ADR-0114](../decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md),
+and [ADR-0115](../decisions/0115-canonical-fully-local-v1-adoption.md).
+Those records bind the original decisions through immutable source links.
+The source branches remain historical provenance; their accepted records are not
+renamed into the canonical catalog. Every historical main ledger entry remains
+unchanged, with only supported additions and predecessor lifecycle transitions.
+
+Canonical ADR-0103 continues to own the bounded sandbox slice. The new adoption
+neither widens that admission nor removes first-materialization process gates.
+It preserves the supersession of ADR-0001/0011/0040/0087/0090/0098 and the bounded
+replacement of SQLite-specific provisions in ADR-0025/0048/0052, with their
+remaining guarantees carried forward by the new records.
+
+The parallel PR86 module standard uses a different immutable source pin from the
+composition profile adopted here. Its separate scope and terminology are not
+silently imported; its integration must reconcile both adopted pins and preserve
+its distinct decisions. Publication of that parallel branch is not evidence of
+canonical main adoption.
+
+Independent review found a narrower authority error in the current feature
+profile: it described a concrete dynamic compiler as accepted while OD-043 still
+owns the unresolved mechanism. The profile now preserves the accepted graph,
+binding, cardinality and immutable-plan constraints without choosing that API.
+No new plugin implementation or additional test suite is required for this
+correction.

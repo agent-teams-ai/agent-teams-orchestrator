@@ -43,7 +43,7 @@ const expectedProfileDefinitions = new Map([
   [
     "fully-local",
     [
-      "future",
+      "v1-target",
       "local-standalone",
       "none",
       ["local-host-runtime-execution"],
