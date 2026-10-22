@@ -10,6 +10,7 @@ related:
   - ADR-0100
   - ADR-0101
   - ADR-0076
+  - ADR-0111
   - architecture.context-map
   - OD-006
   - OD-011
@@ -127,9 +128,11 @@ Team membership describes collaboration and does not itself grant Project access
 assignment, approval, or execution authority. Agent actions require authenticated
 or delegated commands under the configured authority provider.
 
+[ADR-0111](../../../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+accepts human membership in several Teams and one authorized personal-work query.
 [OD-048](../../../open-decisions/OD-048-mixed-human-and-ai-team-participation.md)
-owns the typed member model and remaining product choices. Human membership in
-several Teams is recommended for evaluation, not accepted silently. ADR-0100's
+retains the exact typed member model, successor contracts and qualification.
+ADR-0100's
 one-current-Team rule for an Agent, exact Agent definition versions, and ADR-0101's
 Run snapshot and occupancy rules remain unchanged. The current single-Agent
 ADR-0103 admission does not implement mixed membership. Organizational nesting

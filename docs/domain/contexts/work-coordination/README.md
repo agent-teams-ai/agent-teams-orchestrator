@@ -9,11 +9,13 @@ related:
   - contract.migration.desktop-first-slice.v1
   - ADR-0072
   - ADR-0066
+  - ADR-0111
   - architecture.context-map
   - OD-006
   - OD-015
   - OD-026
   - OD-027
+  - OD-032
   - OD-048
 ---
 
@@ -107,9 +109,9 @@ change. No other feature is authorized by this dossier status.
 
 OD-006, OD-015, OD-026 and OD-027 retain broader lifecycle, board, discussion and completion questions.
 
-The following retained material describes broader context discovery and existing
-ADR references. Proposed behavior outside the accepted feature remains excluded
-and must use its owning decision process before implementation.
+The following retained material describes broader context discovery and accepted
+product policy. Capabilities outside the accepted feature remain excluded from
+implementation and must satisfy their owning tactical decisions and admission.
 
 Proposed scope: project-scoped tasks, assignment, dependencies, blocking,
 handoffs, subscriptions, and external task-board synchronization intent. Agent
@@ -117,20 +119,62 @@ execution remains observed evidence rather than owned runtime state.
 
 ### Human and AI work direction
 
-The owner directs support for human manual Tasks alongside AI work. Manual work
-does not require a Run, Agent profile, AR session, or runtime occupancy. Authorized
-humans may claim Tasks, and authorized agents may request assignment to a human,
-through Work-owned typed commands. The authenticated actor and any delegation
-are checked separately from Agent identity; Team membership or agent text alone
-cannot authorize a mutation.
+[ADR-0111](../../../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+accepts human manual Tasks alongside AI work, multiple human Team memberships,
+and one unified authorized personal-work query. Manual work requires no Run,
+Agent profile, AR session, or runtime occupancy. Personal work preserves each
+Task's tenant/Project identity and deduplicates Tasks reached through several
+Team memberships; it creates no second Task or assignment store.
+
+A Task may have zero or more distinct, equal executor assignments. Every real
+co-executor sees the same Task in their authorized personal work. Canonical
+scope-qualified human or Agent identity defines uniqueness; the same person in
+two Teams is one executor of a given Task. Zero executors means unassigned.
+Reviewers, watchers, and approvers are separate relationships. Neither a mandatory
+coordinator nor artificial subtasks are required for joint work; independent
+deliverables may be split when useful.
+
+Authorized assignment takes effect immediately. Self-claim adds the authenticated
+subject while preserving other executors; it requires explicit self-assignment
+authority, current project eligibility, and any declared Task or Team restriction.
+Read access alone cannot authorize claiming. Authorized agents use the same
+Work-owned commands to assign human work, with actor, target, and delegation
+checked separately from Agent identity. Assignment neither grants access nor
+starts an Agent or reserves occupancy.
+
+Release removes the authenticated executor. Removing the last leaves the Task
+unassigned without completing, cancelling, or reopening it. Reassignment
+atomically replaces an explicitly named executor with an eligible target while
+preserving other executors. Assignment changes use the expected Work revision,
+command idempotency, and the Work-owned transaction and outbox. Only one
+conflicting change commits against a revision; a stale claimant can reload and
+retry to join the existing executors. This is not a one-executor invariant.
+Duplicate commands or several membership paths cannot create duplicate
+assignments. Revoked access blocks reads and commands even when assignment
+history remains; it cannot silently transfer or complete Work.
+
+Assignment does not grant completion permission. An authorized executor may
+request completion, and Work applies its pinned plan and evidence. Multiple
+executors imply no mandatory acceptance offer, individual completion lifecycle,
+or all-executor quorum. A simple manual plan can accept one authorized executor
+or separately authorized manager's request. An assignment change is not
+automatically material rework; a future plan depending on the executor set must
+pin its relevant identities and define candidate invalidation explicitly.
 
 [OD-048](../../../open-decisions/OD-048-mixed-human-and-ai-team-participation.md)
-keeps accountable-assignee cardinality, immediate assignment versus a proposal
-requiring acceptance, human membership rules, and exact command semantics open.
-The eventual claim/assignment contract must resolve concurrent claims with the
-expected Work revision and idempotency. Work remains the sole lifecycle and
-completion owner. These directions do not widen ADR-0103's metadata-only Task
-admission or implement assignment, review, or completion in that slice.
+remains open for exact identities and commands, assignment-set limits,
+storage/aggregate boundaries, terminal-Task edits, eligibility policy,
+deprovisioning/reassignment recovery, and qualification. Optional offers,
+executor-dependent completion gates, and human Run participation require further
+semantics. ADR-0111 does not widen ADR-0103's metadata-only Task admission or
+implement assignment, review, or completion in that slice.
+
+Dangerous-action approval is a separate unresolved design under
+[OD-032](../../../open-decisions/OD-032-last-mile-side-effect-safety.md).
+Assignment acceptance concerns taking work; it never approves a dangerous action.
+Product approval policy, exact action/scope binding, approvers, expiry/revocation,
+last-mile checks, retries, and audit evidence remain deferred. Technical runtime
+permission and sandbox enforcement remain owned by `ar`.
 
 Work Coordination is the only authority that changes Task or Work lifecycle. It
 executes versioned work commands and publishes work facts. Run cancellation,

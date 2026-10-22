@@ -6,6 +6,7 @@ owner: agent-organization
 summary: Refine Agent Organization aggregates, relationships, lifecycle, persistence, and concurrency semantics.
 related:
   - ADR-0044
+  - ADR-0111
   - architecture.context-map
   - OD-011
   - domain.contexts.team-topology
@@ -79,7 +80,7 @@ The terms describe different responsibilities:
 | Project | Operational scope for Teams, Tasks, Runs, and workspace resources. Their owning contexts keep lifecycle authority. |
 | Operational Team | Saved collaboration composition owned by Team Topology; an organizational placement does not recursively expand its roster. |
 | Frontend Workspace | Navigation or a saved view over an authorized Target and Tenant/Project, under OD-019. |
-| Technical execution resource | Registered and allocated filesystem materialization owned by Workspace Registry; its public naming remains open under OD-019. |
+| Execution Directory | Selected technical term for the registered and allocated filesystem resource owned by Workspace Registry under [ADR-0111](../decisions/0111-human-collaboration-and-execution-directory-terminology.md); exact public API spelling and any migration remain open under OD-019. |
 
 One Platform customer organization may already own several Tenants under
 [Platform ADR-0007](https://github.com/agent-teams-ai/agent-teams-platform/blob/83d761b84e23bb6d1e9c446f3666951e94fa90d8/docs/decisions/0007-platform-strategic-context-map-and-first-project-management-slice.md).

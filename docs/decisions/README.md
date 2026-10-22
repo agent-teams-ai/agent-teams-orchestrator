@@ -27,7 +27,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 | Local and hosted composition | `ADR-0030`, `ADR-0058`, `ADR-0060`, `ADR-0064`, `ADR-0087`, `ADR-0088`, `ADR-0090`, `ADR-0093`, `ADR-0097` | [Deployment profiles](../architecture/deployment-profiles.md), [Local Host lifecycle](../architecture/local-host-lifecycle.md), [composition](../architecture/composition-and-dependency-injection.md) |
 | Workflow and migration | `ADR-0027`, `ADR-0029`, `ADR-0063`, `ADR-0065`, `ADR-0099` | [Extension points](../architecture/extension-points.md), [migration boundary](../architecture/migration-boundary.md) |
 | Repository publication and enforcement | `ADR-0031`, `ADR-0032`, `ADR-0039`, `ADR-0053`, `ADR-0056`, `ADR-0059`, `ADR-0070`, `ADR-0081` | [Repository tooling](../architecture/repository-tooling.md), [documentation standard](../standards/documentation.md), [testing](../architecture/testing-strategy.md) |
-| Domain capability boundaries | `ADR-0044`, `ADR-0045`, `ADR-0046`, `ADR-0068`, `ADR-0072`, `ADR-0073`, `ADR-0074`, `ADR-0080`, `ADR-0084`, `ADR-0100`, `ADR-0101` | [Context map](../architecture/context-map.md), [context dossiers](../domain/contexts/README.md) |
+| Domain capability boundaries | `ADR-0044`, `ADR-0045`, `ADR-0046`, `ADR-0068`, `ADR-0072`, `ADR-0073`, `ADR-0074`, `ADR-0080`, `ADR-0084`, `ADR-0100`, `ADR-0101`, `ADR-0111` | [Context map](../architecture/context-map.md), [context dossiers](../domain/contexts/README.md) |
 | Security boundaries and data handling | `ADR-0021`, `ADR-0028`, `ADR-0055`, `ADR-0083`, `ADR-0089`, `ADR-0090`, `ADR-0092`, `ADR-0094` | [Security architecture](../architecture/security-architecture.md), [runtime boundary](../architecture/runtime-boundary.md) |
 | Reliability objectives | `ADR-0057`, `ADR-0091`, `ADR-0093` | [Reliability objectives](../architecture/reliability-objectives.md), [testing](../architecture/testing-strategy.md) |
 
@@ -39,6 +39,7 @@ discovery. The lifecycle lists below remain the complete status ledger.
 
 ## Accepted decisions
 
+- [ADR-0111: Human Collaboration and Execution Directory Terminology](0111-human-collaboration-and-execution-directory-terminology.md)
 - [ADR-0110: Mandatory Get Modular and Nested Feature Foundation](0110-mandatory-get-modular-and-nested-feature-foundation.md)
 
 - [ADR-0103: First Sandbox Runtime Migration Slice Admission](0103-first-sandbox-runtime-migration-slice-admission.md)

@@ -18,6 +18,7 @@ related:
   - ADR-0086
   - ADR-0064
   - ADR-0067
+  - ADR-0111
   - architecture.local-host-lifecycle
   - architecture.public-control-contracts
   - OD-001
@@ -274,10 +275,19 @@ Target resolution is deterministic:
 
 - `Target` identifies a concrete local or remote deployment and trust boundary;
 - `Client Profile` selects a target and optional default scope;
-- `Workspace` is an orchestrator resource, not connection configuration;
+- an Execution Directory is a project-scoped technical filesystem resource;
+- a frontend Workspace presents navigation or a saved view over the selected
+  Target and authorized Tenant/Project;
 - no failed target silently falls back to another local or remote target;
 - project and workspace files cannot select endpoints, credentials, installation
   channels, or trust policy.
+
+[ADR-0111](../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+selects Execution Directory while preserving `WorkspaceRegistration` and
+`ExecutionWorkspaceAllocation`. Neither the filesystem resource nor the frontend
+Workspace controls connection configuration or grants authorization. The term
+includes remote filesystem views; exact public API spelling and any migration
+remain open under OD-019.
 
 The default local target is zero-touch. Foreground and ephemeral modes are
 explicit target modes for development and CI and cannot accidentally adopt the

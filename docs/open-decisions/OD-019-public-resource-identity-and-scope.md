@@ -3,7 +3,7 @@ id: OD-019
 type: open-decision
 status: open
 owner: platform/control-api
-summary: Define stable public resource identity and tenant, project, and workspace scoping.
+summary: Define stable public resource identity and tenant, project, and Execution Directory scoping.
 related:
   - ADR-0015
   - ADR-0017
@@ -17,6 +17,7 @@ related:
   - OD-012
   - OD-048
   - ADR-0062
+  - ADR-0111
   - domain.contexts.workspace-registry
   - research.pre-implementation-gate-critique-2026-07-30
 ---
@@ -26,7 +27,7 @@ related:
 ## Decision required
 
 Define stable public identifiers and resource references for tenants, projects,
-workspaces, teams, tasks, runs, messages, approvals, and runtime bindings;
+Execution Directories, teams, tasks, runs, messages, approvals, and runtime bindings;
 determine which scope is explicit in paths or requests; and define how clients
 select and validate authorization context.
 
@@ -84,32 +85,33 @@ and AR runtime identity. An Agent profile or display name cannot mint a principa
 Team membership alone does not grant permission. Exact reference shapes remain
 open here with the authority-provider contract in OD-012.
 
-A frontend **Workspace** may be a navigation or saved-view concept over the
+The frontend keeps **Workspace** as its navigation or saved-view label over the
 selected Target and authorized Tenant/Project. That label creates no additional
 isolation boundary, permission owner, Task store, or parent of Project identity.
 Company and department structure belongs to the organizational model in OD-023.
 If a later Workspace requires an independent lifecycle or scope, this decision
 must define that need before it becomes a new resource.
 
-The owner requested reconsideration of the technical execution-resource name.
-ADR-0062 currently separates registration, materialization allocation, access and
-consistency, and AR runtime isolation. The following alternatives concern naming
-that filesystem materialization; they do not rename accepted IDs or expand its
-authority. Selection, exact public names, and any migration remain open.
+[ADR-0111](../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+records the owner's selection of **Execution Directory** for the technical
+filesystem resource. It includes shared directories, worktrees, clones, snapshots,
+and remote filesystem views. Its identity remains opaque; the term does not make
+an arbitrary caller-supplied path authoritative or require a local directory.
 
-| Candidate | Meaning and tradeoff | Confidence /10 | Complexity /10 | Reliability /10 | Estimated production TS LOC |
-|---|---|---|---|---|---|
-| Execution Workspace | Retains the current broad name for shared, cloned, snapshot, and remote materializations; requires distinguishing frontend Workspace. | 9 | 2 | 9 | 0–200 |
-| Execution Directory | Makes the filesystem purpose clearer; must still represent an opaque managed materialization, including remote views, rather than an arbitrary caller-supplied path. | 8 | 3 | 8 | 200–800 |
-| Execution Environment | May suggest ownership of processes, network policy, or sandbox enforcement that remains AR-owned; requires a narrower definition to avoid that confusion. | 4 | 6 | 5 | 400–1,200 |
+ADR-0062 continues to separate registration, materialization allocation, access
+and consistency, and AR runtime isolation. `WorkspaceRegistration`,
+`ExecutionWorkspaceAllocation`, and `WorkspaceAccessAndConsistency` retain their
+existing names and meanings. Workspace Registry retains registration,
+materialization, release, and cleanup ownership; AR retains runtime enforcement.
+The selected term does not add a security guarantee or merge those lifecycles.
 
-These are planning judgments, not measured reliability. The ranges cover bounded
-handwritten TypeScript naming and adapter changes after selection, excluding UI,
-tests, generated code, and implementation of the underlying workspace capability.
-The range depends on which public surfaces exist at adoption. This documentation
-change adds no production TypeScript and preserves `WorkspaceRegistration` and
-`ExecutionWorkspaceAllocation` until a specific rename is accepted.
+Exact public resource spelling, reference shapes, scope representation, and any
+API, package, code, or persisted-state rename or migration remain open. The
+terminology decision admits no implementation. The earlier naming comparison is
+preserved in the [research record](../research/collaboration-hierarchy-and-workspace-review-2026-10-22.md#workspace-and-task-views).
 
 ## Resolution
 
-Open.
+Partially resolved: ADR-0111 selects Execution Directory for the technical
+resource and retains Workspace for the UI. Public identity and scope contracts,
+exact API spelling, and any migration remain open.

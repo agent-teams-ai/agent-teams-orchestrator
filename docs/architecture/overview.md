@@ -13,6 +13,7 @@ related:
   - ADR-0065
   - ADR-0087
   - ADR-0088
+  - ADR-0111
   - architecture.deployment-profiles
 ---
 
@@ -112,8 +113,11 @@ The orchestrator decides:
 - when to send, queue, retry, escalate, or complete work;
 - what desired runtime state should be requested.
 
-Workspace Registry owns execution-workspace allocation and materialization through
-replaceable worktree, clone, snapshot, or remote-workspace adapters.
+Workspace Registry owns Execution Directory registration, allocation,
+materialization, and cleanup through replaceable adapters for shared directories,
+worktrees, clones, snapshots, or remote filesystem views. [ADR-0111](../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+selects this technical term while preserving ADR-0062's model identities and
+separate runtime-isolation boundary.
 
 The runtime decides and enforces:
 
@@ -172,12 +176,17 @@ Client configuration distinguishes:
 
 - a `Target`, which identifies one concrete deployment and trust boundary;
 - a `Client Profile`, which selects a target and optional default scope;
-- a `Workspace`, which is a project-owned domain resource.
+- an Execution Directory, which is a project-scoped technical filesystem resource;
+- a frontend Workspace, which presents navigation or a saved view over the
+  selected Target and authorized Tenant/Project.
 
-Workspace or project configuration cannot redirect a client, choose credentials,
-or lower target trust. Durable work always survives client exit. Attached CLI
-work uses an explicit client-bound Run sponsorship whose clean exit or fenced
-expiry requests business cancellation without stopping shared infrastructure.
+Project, Workspace, or Execution Directory configuration cannot redirect a
+client, choose credentials, or lower target trust. Workspace adds no permission
+owner or Project identity boundary. Exact public resource spelling and any
+migration remain open under OD-019. Durable work always survives client exit.
+Attached CLI work uses an explicit client-bound Run sponsorship whose clean exit
+or fenced expiry requests business cancellation without stopping shared
+infrastructure.
 
 ## Persistence model
 
@@ -203,8 +212,10 @@ same application process or PostgreSQL cluster.
 ## Scope and access
 
 Every team, task, orchestration run, message, and runtime binding belongs to one
-project. Workspace registrations belong to Workspace Registry and are referenced
-by opaque workspace identities rather than arbitrary paths.
+project. Execution Directory registrations and allocations belong to Workspace
+Registry and use opaque identities rather than arbitrary paths. The existing
+`WorkspaceRegistration` and `ExecutionWorkspaceAllocation` model names remain
+unchanged by the terminology selection.
 
 Authentication may be delegated to an external identity provider. Inbound adapters
 authenticate and establish a principal. The configured product authority provider

@@ -9,10 +9,12 @@ related:
   - ADR-0072
   - ADR-0100
   - ADR-0110
+  - ADR-0111
   - OD-012
   - OD-019
   - OD-023
   - OD-027
+  - OD-032
   - OD-048
   - architecture.composition
 ---
@@ -39,6 +41,13 @@ capacity experiment, or new product implementation was executed for this report.
 An accepted decision, confirmed product direction, leading option, and future
 idea have different status. Research records all four without promoting the
 last three into accepted implementation contracts.
+
+The initial comparison below is retained as historical evidence. The owner's
+later choices and a second critic review are recorded in
+[Later owner decisions and critic review](#later-owner-decisions-and-critic-review).
+That section corrects the earlier coupling of multiple executors to mandatory
+joint acceptance/completion and links the deciding ADR rather than silently
+rewriting the earlier recommendation.
 
 ## Findings and design options
 
@@ -71,10 +80,11 @@ compatible contract/capability versions, not simultaneous product upgrades.
 
 ### Coverage of the discussion
 
-The following map records where to find current authority or the owning open
+The following map records authority or the owning open
 question. "Confirmed direction" describes the requested product, not a claim
 that the capability is implemented. "Accepted" refers to the cited decision in
-its own branch history; pending PRs are not merged main-branch authority.
+its own branch history; pending PRs are not merged main-branch authority. Statuses
+in this initial map precede the later owner decisions recorded below.
 
 | Discussed requirement | Record and owner | Status and remaining boundary |
 |---|---|---|
@@ -286,7 +296,7 @@ code or excuse a missing acceptance gate.
 [services-pr]: https://github.com/agent-teams-ai/agent-teams-orchestrator/pull/79
 [plugins-pr]: https://github.com/agent-teams-ai/agent-teams-orchestrator/pull/88
 
-## Limitations and remaining questions
+## Limitations and remaining questions at the initial review
 
 Three visible product choices should be answered before their corresponding
 implementation slice: human multiple-Team membership; at-most-one accountable
@@ -304,3 +314,92 @@ availability, or implementation size. Dated comparative scores and line ranges
 are planning aids with stated scope; they are not combined delivery estimates.
 The archive preserves what was discussed and where to resolve it without
 claiming that every detailed contract has already been decided.
+
+## Later owner decisions and critic review
+
+Later on 2026-10-22 the owner explicitly confirmed human multiple-Team membership
+with one personal queue, selected **Execution Directory**, and delegated the
+assignment-model choice after describing two equal people solving one Task.
+The owner also asked to record dangerous-action approvals as a separate,
+unresolved subject for later detailed research. This follow-up uses the published
+Orchestrator `9bfc1526a286d386339144a9a376a94de06f3ce4` and Platform
+`e653450ece39743eff881842c4b06b9d276deda9` baselines.
+
+Three further `gpt-6.1-sol` critics at `xhigh` reviewed joint Task assignment,
+approval boundaries, and Execution Directory adoption. This was source and
+contract review, not a runtime experiment or the deferred industry-practice
+study of dangerous-action approval systems. The resulting policy is recorded in
+[ADR-0111](../decisions/0111-human-collaboration-and-execution-directory-terminology.md).
+
+### Updated coverage
+
+| Discussed requirement | Outcome and owner | Remaining boundary |
+|---|---|---|
+| A human can belong to several Teams and see personal work across them | Selected in ADR-0111; OD-048 owns the tactical slice | One authorized query preserves source scope and deduplicates Tasks; exact membership/identity contracts and qualification remain open. |
+| Two people can solve one Task as equals | Selected: zero or more equal human or Agent executors, immediate authorized assignment | Work retains one lifecycle and completion authority; exact commands, limits, storage and recovery remain open. |
+| Assignment offers and dangerous-action approval are different | No mandatory assignment offer; dangerous actions require product approvals under [OD-032](../open-decisions/OD-032-last-mile-side-effect-safety.md#deferred-dangerous-action-approval-research) | Approver eligibility, exact action binding, expiry/revocation and enforcement details are deferred. No detailed approval architecture is accepted. |
+| Workspace and technical execution resource need different names | Workspace remains the UI term; Execution Directory is selected under ADR-0111 | ADR-0062's registration/allocation identities and owners remain intact; exact API spelling and any migration remain in OD-019. |
+| Both products must record their relationship and use the same owner contracts | [Platform PR #55](https://github.com/agent-teams-ai/agent-teams-platform/pull/55) records the companion relationship and links Orchestrator policy | Platform consumes API/SDK contracts; exact cross-repository protocols remain proposed. |
+
+### Correction to the assignment comparison
+
+The earlier comparison combined two independent dimensions: how many people can
+execute a Task, and whether every participant must accept or complete it.
+Multiple equal executors require a bounded set, identity uniqueness and explicit
+mutations, but do not require an offer engine or a completion quorum. ADR-0072
+already supplies one Work-owned completion decision with configurable evidence.
+
+The selected model lets two people share one result. Both are real executors;
+neither becomes a subordinate collaborator merely to preserve a single-assignee
+field. Self-claim adds oneself without removing existing executors; release
+removes oneself; replacing an executor names that source and target explicitly.
+Removing the last leaves the Task unassigned. Assignment never grants access,
+starts an Agent, or approves a dangerous action.
+
+Changes use the expected Work revision, idempotency and authoritative transaction.
+If Alice and Bob both claim revision 12, only one command commits revision 13.
+The other may reload and retry to join the updated set. This is one winning
+change against a revision, not one executor for the Task's lifetime. Completion
+permission and the pinned Work plan remain separate from executor membership.
+
+| Assignment model | Confidence /10 | Complexity /10 | Expected reliability /10 | Handwritten production TypeScript lines |
+|---|---|---|---|---|
+| Selected: zero or more equal executors, immediate assignment, ordinary Work completion plan | 9 | 5 | 9 | 3,000-6,000 |
+| One accountable assignee plus real executing collaborators in personal work | 6 | 6 | 8 | 3,000-6,500 |
+| Multiple executors with mandatory offers, individual completion and joint quorum | 5 | 8 | 7 | 5,000-10,000 |
+
+Estimate confidence is 3/10. These are engineering judgments, not measurements;
+higher complexity means harder. Scope covers assignment domain/application
+behavior, consumer-owned authority checks, revision/idempotency integration,
+one persistence adapter and migration, outbox/public-contract mappings, and
+handwritten API/SDK changes over existing Task and infrastructure primitives.
+It excludes UI, tests, generated code, authority-provider implementation,
+infrastructure foundations, notifications, Agent activation and a general
+offer/quorum engine. The richer option includes its bounded mandatory offer and
+joint-completion behavior, not a universal workflow system. These ranges replace
+the earlier assignment comparison for current planning and cannot be added to
+membership estimates without reviewing their overlapping scope.
+
+### Remaining research and implementation limits
+
+Human membership cardinality, equal joint assignment, initial immediate
+assignment and the technical name no longer require another product choice.
+Exact public identities, typed commands, aggregate/storage boundaries,
+deprovisioning, terminal-Task assignment edits, human Run participation and
+conformance still belong to OD-048, OD-006, OD-019 and OD-027. The current
+metadata-only production admission is unchanged.
+
+Dangerous-action approval research must resolve which actions require approval,
+who may approve with current authority or delegation, the exact action/argument/
+resource-version binding, expiry and revocation, final dispatch checks, and
+unknown or duplicate outcomes. Task consent, authorization, product approval,
+AR technical permission and Work completion remain separate. The existing
+Approval Management, Policy and Risk, feature and runtime ownership applies;
+this follow-up chooses no new central engine, reusable approval credential,
+quorum or mandatory human-review policy.
+
+Execution Directory terminology includes managed remote filesystem views. This
+documentation update adds no production TypeScript and renames no existing
+public, package, catalog, code or stored identity. The earlier naming LOC ranges
+were conditional migration estimates; they are not the cost of this terminology
+record or an admitted implementation budget.
