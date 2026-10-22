@@ -18,6 +18,7 @@ related:
   - ADR-0106
   - ADR-0105
   - ADR-0109
+  - ADR-0111
   - architecture.deployment-profiles
 ---
 
@@ -44,6 +45,13 @@ The architecture must support:
 - Docker Compose and Kubernetes server deployment forms.
 
 ## Architectural style
+
+The [shared backend reference adoption](../decisions/0111-shared-backend-stack-and-fastify-public-host.md#shared-reference-and-local-adoption)
+pins the organization technology catalog and defines its local scope. Exact
+contracts, process placement, dependency versions and qualification remain owned
+here. The [public HTTP Host](sdk-and-transports.md#public-http-host) uses Fastify
+and Connect in one server; private RPC retains the gRPC/Dapr boundary.
+Frontend and desktop-shell choices remain outside this backend reference.
 
 The system is a headless event-driven modular control plane deployed through
 coarse application and worker roles. It is built with:

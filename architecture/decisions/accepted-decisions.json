@@ -531,6 +531,11 @@
       "id": "ADR-0109",
       "path": "docs/decisions/0109-distributed-hosts-and-concurrent-agent-scale.md",
       "immutableDigest": "sha256:9c215da99eb0b0a308d44ff9e6b24a6c7daf0c4849878b27f13b7df03c8f55b5"
+    },
+    {
+      "id": "ADR-0111",
+      "path": "docs/decisions/0111-shared-backend-stack-and-fastify-public-host.md",
+      "immutableDigest": "sha256:84151a83ff75daea53c3d3c323ead8187ec49fb55a7125355b7e598142ac865f"
     }
   ]
 }

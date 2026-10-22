@@ -32,6 +32,12 @@ only in disposable fixtures, never against the real repository.
 
 ## Current phase
 
+Before selecting or changing backend technologies, read the
+[shared backend adoption](docs/decisions/0111-shared-backend-stack-and-fastify-public-host.md#shared-reference-and-local-adoption)
+and [public HTTP Host boundary](docs/architecture/sdk-and-transports.md#public-http-host).
+Follow the pinned central reference and local owners; do not copy the stack
+catalog, update dependency pins implicitly, or include frontend choices.
+
 The repository is in architecture definition. Do not introduce production
 behavior, runtime dependencies, transports, databases, or framework scaffolding
 until the owning boundary and required decision are accepted.

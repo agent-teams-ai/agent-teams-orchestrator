@@ -39,6 +39,8 @@ discovery. The lifecycle lists below remain the complete status ledger.
 
 ## Accepted decisions
 
+- [ADR-0111: Shared Backend Stack and Fastify Public Host](0111-shared-backend-stack-and-fastify-public-host.md)
+
 - [ADR-0109: Distributed Hosts and Concurrent Agent Scale](0109-distributed-hosts-and-concurrent-agent-scale.md)
 - [ADR-0105: Portable Service Boundaries and Dapr](0105-portable-service-boundaries-and-moleculer.md)
 

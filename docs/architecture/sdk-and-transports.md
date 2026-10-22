@@ -20,6 +20,7 @@ related:
   - ADR-0067
   - ADR-0105
   - ADR-0109
+  - ADR-0111
   - architecture.deployment-profiles
   - architecture.local-host-lifecycle
   - architecture.public-control-contracts
@@ -150,6 +151,30 @@ Schema-generated contract artifacts are lower-level inputs to language SDKs.
 Every supported language receives an idiomatic facade rather than exposing a
 foreign language's object model or generated RPC stub as the product API.
 
+## Public HTTP host
+
+[ADR-0111](../decisions/0111-shared-backend-stack-and-fastify-public-host.md)
+selects Fastify with `@connectrpc/connect-fastify` for the public Node HTTP Host.
+Connect handlers are registered in the same server and process; Fastify is not
+an extra network proxy in front of Connect. The feature-owned inbound adapters
+map public messages into application models and invoke capabilities constructed
+once by the role's composition. Framework and generated wire types remain at
+the adapter boundary.
+
+An application capability uses typed local calls within its role or an outbound
+gRPC/Dapr adapter for a declared remote dependency. It does not reach private
+services by calling its own public HTTP routes. Public and private adapters
+preserve their separate contracts, trusted scopes and authorization rules.
+Fastify is not mandatory for private RPC servers or durable workers that need
+no public HTTP host. Direct JetStream delivery retains its owning consumer path.
+
+The first Host implementation qualifies its exact Fastify/Connect versions
+against the existing public API behavior and deployment probes. Framework
+selection does not qualify load, Windows IPC, local packaging or graceful drain.
+OD-001 retains the unresolved local transport choices. The
+[shared backend adoption](../decisions/0111-shared-backend-stack-and-fastify-public-host.md#shared-reference-and-local-adoption)
+records the central source without duplicating its stack catalog here.
+
 ## Transport adapters
 
 Expected inbound adapters:
@@ -241,7 +266,8 @@ prove a mutation failed or authorize another owner to repeat it.
 A common Protobuf schema alone does not make a plain gRPC server serve the
 Connect protocol. Private callers use the selected gRPC contract; browser clients
 retain the public Connect edge. The private boundary does not change the accepted
-HTTP/1.1 local UDS profile for public control or select a public server framework.
+HTTP/1.1 local UDS profile for public control. ADR-0111 separately selects the
+public HTTP framework; it does not change that local transport contract.
 
 Before claiming language portability, qualification replaces one representative
 TypeScript capability with another-language implementation and runs the same
