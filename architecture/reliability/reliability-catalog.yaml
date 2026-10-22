@@ -43,9 +43,9 @@ profiles:
       decisionRefs: []
       conformanceRefs: []
   - id: fully-local
-    description: Future user-device Host with local authority, persistence, and supervised components.
-    releaseScope: future
-    qualification: deferred
+    description: User-device Host with local authority, persistence, and supervised components.
+    releaseScope: v1-target
+    qualification: blocked
     blockedBy: [OD-001, OD-003, OD-009, OD-021, OD-035]
     productAuthorityAdapter: local-standalone
     commercialAuthorityAdapter: none
@@ -232,7 +232,7 @@ invariants:
 resourceBudgets:
   - id: orchestrator.event-loop-delay
     owner: platform/local-host
-    concern: Host responsiveness must remain bounded while synchronous local persistence performs work.
+    concern: Host responsiveness must remain bounded during persistence, result processing, and concurrent command or event load.
     status: candidate
     measure: histogram
     unit: milliseconds

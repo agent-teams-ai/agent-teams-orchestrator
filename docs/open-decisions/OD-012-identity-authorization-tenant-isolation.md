@@ -48,6 +48,15 @@ This decision still selects concrete identity providers, grant flows, token
 validation, revocation propagation, service identities, and authorization
 consistency.
 
+The selected private RPC profile also needs authorized workload enrollment.
+Self-hosted Sentry's default insecure validator is not evidence that a caller
+is entitled to a service identity. Qualification under the
+[private RPC trust profile](../architecture/security-architecture.md#private-rpc-trust)
+binds workload identity, protected application/sidecar hops, credential
+rotation, and negative bypass fixtures. This service enrollment is separate
+from product membership and OD-038 device enrollment; selecting Dapr does not
+resolve any of those authority decisions.
+
 OD-031 separately owns semantic claim admission and conflict resolution. The
 configured authority provider determines whether a principal may attempt an
 operation; it does not

@@ -9,6 +9,7 @@ related:
   - ADR-0046
   - ADR-0049
   - ADR-0050
+  - ADR-0114
   - architecture.context-map
   - architecture.persistence
   - architecture.extensions
@@ -27,15 +28,15 @@ Within the ADR-0045 and ADR-0046 baseline, decide:
 - attribution evidence, disputes, rate tiers, FX, and period closing;
 - budget, alert, soft-limit, hard-limit, reservation, and reconciliation rules;
 - exact aggregate boundaries, commands, events, feeds, and retention policies;
-- Drizzle codecs and projection strategies preserving SQLite/PostgreSQL semantic
-  parity.
+- Drizzle codecs and projection strategies preserving local/server PostgreSQL
+  semantic parity.
 
 ## Confirmed requirements
 
 - Exact token/resource accounting, statistics, user-configured alerts, budgets,
   limits, and related settings are initial product capabilities.
 - Authoritative counts, quantities, prices, and money never use JavaScript
-  `number`, SQLite `REAL`, or other binary floating-point representations.
+  `number` or SQL binary floating-point representations.
 - Provider observations are immutable and deduplicated by stable source identity.
   Corrections append new evidence and never overwrite the original observation.
 - Meter and rate definitions are versioned. Re-rating or replay records which
@@ -51,8 +52,9 @@ Within the ADR-0045 and ADR-0046 baseline, decide:
   and projector version. They are not quota or accounting authority.
 - Hosted fact tables are partition-ready. Partition activation and interval are
   selected by representative workload and retention evidence.
-- Every mutating usage capability owns the ADR-0050 hosted concurrency profile
-  protecting its aggregate invariants.
+- Every mutating usage capability owns the ADR-0050 concurrency profile
+  protecting its aggregate invariants in both PostgreSQL deployment profiles
+  under ADR-0114.
 
 ## Accepted context split
 
@@ -81,11 +83,10 @@ state. Exact commands, events, and consistency traces remain open.
 - PostgreSQL maps exact quantities and money to `NUMERIC(P, 0)` coefficients plus
   explicit scale and maps bounded integers to `bigint`, preserving strings until
   domain mapping and casting exact JSON fields to text.
-- SQLite maps range-proven whole values to `INTEGER`/BigInt and wider values to
-  canonical coefficient text plus scale. `REAL` and `NUMERIC` affinity are
-  prohibited for authoritative values.
-- Exact time uses BigInt-backed epoch microseconds in the domain, SQLite signed
-  integers, PostgreSQL `TIMESTAMPTZ(6)` text codecs, and fixed UTC RFC3339 wire
+- ADR-0114 selects PostgreSQL for local and server authority. The earlier
+  SQLite-specific mappings remain historical evidence in ADR-0049.
+- Exact time uses BigInt-backed epoch microseconds in the domain,
+  PostgreSQL `TIMESTAMPTZ(6)` text codecs, and fixed UTC RFC3339 wire
   strings. OD-025 owns only the internal calendar engine for Node 24.
 - Every aggregate query has a declared overflow strategy.
 
@@ -102,7 +103,7 @@ state. Exact commands, events, and consistency traces remain open.
 - DST gaps and folds, negative epoch values, timezone-data changes, and exact
   budget-period boundaries;
 - replay after parser, meter, attribution, or rate algorithm upgrades;
-- overflow, malformed decimal input, and SQLite/PostgreSQL parity;
+- overflow, malformed decimal input, and local/server PostgreSQL parity;
 - telemetry sampling, outage, redaction, and high-cardinality protection.
 
 ## Acceptance criteria
@@ -110,7 +111,7 @@ state. Exact commands, events, and consistency traces remain open.
 - bounded contexts have distinct language, ownership, lifecycle, and consistency
   reasons rather than package symmetry;
 - every authoritative quantity round-trips losslessly through domain, contracts,
-  SQLite, PostgreSQL, JSON, and Protobuf;
+  local/server PostgreSQL, JSON, and Protobuf;
 - rounding occurs only at named business boundaries with a recorded policy;
 - property-based tests cover arithmetic, scale conversion, allocation, and
   overflow;

@@ -32,6 +32,12 @@ only in disposable fixtures, never against the real repository.
 
 ## Current phase
 
+Before selecting or changing backend technologies, read the
+[shared backend adoption](docs/decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md#shared-reference-and-local-adoption)
+and [public HTTP Host boundary](docs/architecture/sdk-and-transports.md#public-http-host).
+Follow the pinned central reference and local owners; do not copy the stack
+catalog, update dependency pins implicitly, or include frontend choices.
+
 The repository is in architecture definition. Do not introduce production
 behavior, runtime dependencies, transports, databases, or framework scaffolding
 until the owning boundary and required decision are accepted.
@@ -71,15 +77,20 @@ before a high-cost boundary violation.
 - Business behavior belongs to the owning bounded context and feature. Follow the
   [context map](docs/architecture/context-map.md) and
   [Orchestrator feature profile](docs/architecture/feature-module-standard.md),
-  which adopts the organization Feature Module Standard v1.
+  which adopts the organization Feature Module Standard v1.1.
+- Distinguish a feature, nested feature, Get Modular entry/group, package, bounded
+  context, and deployed service. Do not map them one-to-one. Only a direct parent
+  assembles its children; external callers use declared ancestor republication.
+  Add the required source checks with the first materialized nested constructs.
 - Domain code is pure. Application code depends only on domain and declared
   ports. Adapters implement ports. See
   [dependency rules](docs/architecture/dependency-rules.md).
 - Cross-context collaboration uses Published Language, integration events, or a
   consumer-owned port plus ACL. Never deep-import another context or write its
   tables.
-- NATS, Temporal, AR, SQLite, PostgreSQL, Electron, HTTP, provider SDKs, and
-  Drizzle remain adapters or composition concerns.
+- NATS, Temporal, AR, PostgreSQL, Electron, HTTP, provider SDKs, Dapr, and
+  Drizzle remain adapters or composition concerns. Get Modular imports and
+  descriptors remain in composition and tests.
 - Public transport models, integration events, domain events, application models,
   and provider contracts are separate surfaces. See
   [public contracts](docs/architecture/public-control-contracts.md).
@@ -102,17 +113,65 @@ before a high-cost boundary violation.
   function, complexity 20, depth 4, and 5 parameters; tests and conformance
   harnesses use 800, 250, 30, 5, and 6. Split responsibilities before the gate,
   rather than adding a local lint exception.
-- Process-wide resources and private Awilix containers are created only in
-  `composition/**`. Features export typed factories and public contracts, never
-  containers.
+- The selected Host assembles capabilities once through the exact Get Modular
+  Core/Assembly `0.5.0` pair. Meaningful composition seams use typed entries and
+  static groups; private helpers stay direct imports. Never retain a parallel
+  Awilix graph or reconstruct a remote role's features in transport service factories.
+  Follow the [composition profile](docs/architecture/composition-and-dependency-injection.md),
+  including its stricter authoring budgets and first-scope conformance requirements.
+- Design for thousands of simultaneously running agents across independent Runs,
+  including Runs within one team and tenant, under the
+  [concurrent execution target](docs/architecture/deployment-profiles.md#concurrent-execution-target).
+  Qualify per-Run capacity separately. Follow the accepted
+  [service role map](docs/architecture/deployment-profiles.md#service-role-map)
+  and its Compose, Kubernetes, and native-local V1 mappings. A semantic
+  mutation owner can have many qualified replicas; process lifecycle and AR
+  execution custody remain separate ownership questions.
+- V1 requires Managed SaaS, Standalone Self-Hosted, and native Fully Local under
+  [ADR-0115](docs/decisions/0115-canonical-fully-local-v1-adoption.md).
+  Reuse owned business implementations, contracts, and PostgreSQL migrations;
+  select lifecycle and infrastructure adapters in composition. Required V1 scope
+  does not resolve local implementation-start or release-qualification gates.
+- Materialize each selected isolated role as a separate OS process with its first
+  owning feature. Control Host to Team Topology S3 is the first stateful private
+  boundary. Do not postpone the role to a later scaling milestone, create empty
+  services, or hide it behind an in-process production fallback. Before the first
+  role or new handler ships, complete the
+  [placement record](docs/architecture/deployment-profiles.md#first-materialization-placement-record)
+  and [blocking role gate](docs/architecture/implementation-readiness-gates.md#first-materialization-role-gate),
+  including actual process/transport evidence and rejecting source checks in the
+  required runner. Current documentation is not proof those checks exist.
+- Private request/reply uses feature-owned Protobuf and standard gRPC through
+  Dapr under [ADR-0114](docs/decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md).
+  Public clients use Connect; ordinary calls inside a role remain typed local
+  collaboration. Durable JetStream handlers invoke owned application ports
+  directly and receive no Dapr sidecar without a real RPC dependency. Do not
+  introduce Moleculer, a custom registry/RPC bus, or incidental Dapr state,
+  pub/sub, actors, jobs, or workflows on that path. Keep framework and wire types
+  in adapters/composition, with explicit discovery, trust, admission, drain,
+  retry, and recovery ownership.
+- Define each application's input port and narrow trusted invocation profile
+  without transport types. Connect, future GraphQL, and selected private RPC
+  adapters map to that port. Keep composed queries behind owned query ports and
+  ACLs, and follow the [additional API profile](docs/architecture/sdk-and-transports.md#additional-client-api-styles)
+  for request caches, operation scopes, and first-materialization evidence.
+- Native PostgreSQL is the selected authoritative SQL engine for local and
+  hosted profiles. Reuse the PostgreSQL adapter family and context-owned
+  migrations; keep local process and distribution management behind the Local
+  Supervisor boundary. Desktop chooses a Target and uses its Host API, never
+  direct SQL or a second authoritative local fallback. [ADR-0114](docs/decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md)
+  selects `embedded-postgres` behind the Supervisor component adapter. Exact
+  artifacts and every released platform/capability require the [packaged PostgreSQL qualification](docs/architecture/local-host-lifecycle.md#packaged-postgresql-qualification),
+  including Windows/macOS packaging and verified restore. Library selection and
+  unrelated platform CI are not that evidence.
 - The Local Supervisor manages local component availability only. It contains no
   orchestration domain and does not proxy normal public control traffic.
 - SDKs contain contract, transport, and client ergonomics, never orchestration
   business rules or process ownership.
 - Legacy code is a behavior oracle and adapter donor, not a source of domain
   boundaries. Migration keeps exactly one mutation owner.
-- Authoritative exact values never use JavaScript `number`, SQLite `REAL`, or JSON
-  numbers. Follow the exact-value profile in
+- Authoritative exact values never use JavaScript `number`, SQL binary floating
+  point, or JSON numbers. Follow the exact-value profile in
   [persistence](docs/architecture/persistence-boundary.md#exact-quantities-money-and-instants).
 - Product identity and grant facts belong to the configured authority provider;
   each owning use case owns its authorization port and business invariants.
@@ -128,6 +187,14 @@ before a high-cost boundary violation.
   resource saturation remain separate invariants or budgets. Numerical targets
   require calibration and explicit approval under
   [reliability objectives](docs/architecture/reliability-objectives.md).
+- When presenting implementation alternatives, include expected reliability,
+  confidence, and complexity on a 10-point scale plus a scoped estimate of
+  hand-maintained lines of code. Higher reliability means stronger expected
+  robustness, higher confidence means stronger evidence, and higher complexity
+  means harder engineering and operations. Separate integration code, tests, and
+  configuration where useful; exclude generated and vendor code. State scope,
+  exclusions, and estimate uncertainty. Scores and line ranges are engineering
+  judgments, not measured uptime or delivery commitments.
 
 The root quality tooling lane defaults to Node `26.11.1` and pnpm `11.18.0`
 under the product owner's explicit Node default migration. Node `24.21.0`
@@ -173,10 +240,13 @@ For architecture or implementation work:
 1. identify the owning context, feature, and authoritative documents;
 2. check related open decisions and superseded ADRs;
 3. confirm language, invariants, aggregate boundary, and concurrency model;
+   distinguish the feature/module boundary from any proposed deployment boundary;
 4. define domain, application, Published Language, and client surfaces separately;
 5. implement inward dependencies and narrow consumer-owned ports;
 6. add adapters and composition at the edge;
-7. add tests and conformance evidence proportional to risk;
+7. add or extend tests only for concrete plausible risks using the smallest sufficient
+   layer under the [risk-based testing policy](docs/architecture/testing-strategy.md#risk-based-test-selection);
+   preserve all applicable mandatory gates;
 8. update canonical documentation in the same change;
 9. run `pnpm check:changed` during iteration; Foundation routes the current Git
    delta to the configured path-aware and project-wide checks;

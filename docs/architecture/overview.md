@@ -12,7 +12,10 @@ related:
   - ADR-0064
   - ADR-0065
   - ADR-0087
+  - ADR-0115
   - ADR-0088
+  - ADR-0113
+  - ADR-0114
   - architecture.deployment-profiles
 ---
 
@@ -32,11 +35,23 @@ The architecture must support:
 - durable commands, retries, recovery, and integration events with
   contract-declared retention and replay semantics;
 - future Temporal workflows without coupling the domain to Temporal;
-- future extraction of bounded contexts into services.
+- coarse service roles from their first delivered workloads, with contracts
+  portable across implementation languages;
+- one team through thousands of simultaneously running agents as the server
+  architecture target, with explicit capacity qualification;
+- Docker Compose and Kubernetes server deployment forms.
 
 ## Architectural style
 
-The system is an event-driven modular monolith built with:
+The [shared backend reference adoption](../decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md#shared-reference-and-local-adoption)
+pins the organization technology catalog and defines its local scope. Exact
+contracts, process placement, dependency versions and qualification remain owned
+here. The [public HTTP Host](sdk-and-transports.md#public-http-host) uses Fastify
+and Connect in one server; private RPC retains the gRPC/Dapr boundary.
+Frontend and desktop-shell choices remain outside this backend reference.
+
+The system is a headless event-driven modular control plane deployed through
+coarse application and worker roles. It is built with:
 
 - Clean Architecture dependency direction;
 - Hexagonal Architecture ports and adapters;
@@ -44,12 +59,18 @@ The system is an event-driven modular monolith built with:
 - strategic and tactical Full Domain-Driven Design;
 - selective CQRS read models;
 - transactional outbox and idempotent inbox processing;
-- strict versioned contracts.
+- strict versioned contracts;
+- Get Modular 0.5.0 static capability composition under a selected Host profile.
 
-It starts as a modular monolith because one deployment is easier to operate and
-verify. Each bounded context keeps its own local transaction boundary even when
-contexts share one physical database server. Bounded contexts remain
-extraction-ready without paying the operational cost of premature microservices.
+ADR-0114 replaces the universal monolith-first placement with the
+[service role map](deployment-profiles.md#service-role-map). Selected roles are
+separate processes from their first owning feature; ordinary internal modules
+remain typed local capabilities. Each bounded context keeps its own transaction
+boundary even when roles share one physical PostgreSQL cluster. More agents
+require capacity and role replicas, not a service or sidecar per agent.
+
+The diagram below shows logical application dependencies, not a single-process
+deployment. The deployment profile owns the mapping of capabilities to roles.
 
 ```mermaid
 flowchart LR
@@ -81,7 +102,7 @@ flowchart LR
     Temporal --> Activities["Activity Worker Inbound Adapter"]
     Activities --> Contexts
     PersistenceAdapter["Context Persistence Adapter"] -. "implements" .-> PersistencePorts
-    PersistenceAdapter --> Storage["SQLite / PostgreSQL"]
+    PersistenceAdapter --> Storage["PostgreSQL"]
     Relay["Context-Composed Outbox Relay"] --> OutboxSource["Context Outbox Source Port"]
     PersistenceAdapter -. "implements" .-> OutboxSource
     Relay --> EventPort["Broker-Neutral Event Publisher Port"]
@@ -118,11 +139,11 @@ The boundary is detailed in [Runtime boundary](runtime-boundary.md).
 
 The same core supports multiple compositions:
 
-- **Future Local Supervisor**: a small per-user technical deployment-control process. It
+- **Local Supervisor**: the V1 per-user technical deployment-control process. It
   ensures, discovers, monitors, drains, and activates versioned local components.
   It owns no orchestration behavior and is not on the normal SDK request path.
-- **Future Orchestrator Local**: a versioned local Host composition with protected local
-  control, SQLite, local runtime integration, and the JetStream adapter. CLI,
+- **Orchestrator Local**: the V1 local Host composition with protected local
+  control, bundled native PostgreSQL, local runtime integration, and the JetStream adapter. CLI,
   Desktop, and other local applications share it through the SDK.
 - **Orchestrator Server**: the V1 server artifact family with network control,
   PostgreSQL, authority-provider, and JetStream adapters. Managed SaaS and
@@ -130,8 +151,9 @@ The same core supports multiple compositions:
 - **Embedded testing composition**: tests use in-memory adapters and a fake
   runtime without launching real agents.
 
-The local and server artifacts are thin composition roots, not separate product
-implementations. Deployment mode must not change domain behavior.
+Local and server artifact families contain the selected thin role composition
+roots; they are not separate product implementations. A family is not one
+mandatory process. Deployment mode must not change domain behavior.
 
 When the Fully Local profile is implemented, the shared per-user Local Supervisor
 is the only local process-lifecycle owner.
@@ -142,19 +164,24 @@ remaining historical ambiguity in ADR-0030.
 One bounded context has one authoritative persistence profile in a running
 deployment. A Desktop using Orchestrator Server does not keep a second local
 business write model; any local cache is disposable. Moving context state between
-profiles is a versioned logical transfer, never generic SQLite/PostgreSQL table
+profiles is a versioned logical transfer, never generic local/hosted table
 synchronization.
 
-Future normal local use is zero-touch. The Local Supervisor manages the bundled
-`nats-server` process and physical store lifecycle; the Host's JetStream adapters
-own broker interaction. It may supervise AR host availability, but AR remains the
+The required normal local experience is zero-touch. The distribution includes the native
+PostgreSQL and `nats-server` payloads. The Local Supervisor owns those processes
+and physical data-root custody; the Host's PostgreSQL and JetStream adapters own
+their connections and protocol behavior. A Desktop using a server Target does
+not start unused local infrastructure. The Supervisor may manage AR host
+availability, but AR remains the
 only owner of provider sessions and processes. See
 [Local Host Lifecycle](local-host-lifecycle.md).
 
-ADR-0087 defers Fully Local implementation from V1 without removing these
-boundaries. The selected V1 targets, their still-blocking qualification gates,
-and independent client and execution axes are defined in
-[Deployment Profiles](deployment-profiles.md) and ADR-0090.
+ADR-0115 requires Fully Local, Managed SaaS, and Standalone Self-Hosted in V1.
+They reuse owned domain/application code, contracts, and PostgreSQL migrations;
+composition and operational adapters own deployment differences. This is a
+release target, not a statement that the local artifacts exist or are qualified.
+The still-blocking implementation and qualification gates and independent client
+and execution axes are defined in [Deployment Profiles](deployment-profiles.md).
 
 Client configuration distinguishes:
 
@@ -188,6 +215,12 @@ A transaction changes authoritative state in one bounded context only. Cross-con
 effects use integration events and process managers even when all contexts use the
 same application process or PostgreSQL cluster.
 
+ADR-0114 selects native PostgreSQL for both local and server authority. The
+profiles share owned SQL schemas, migrations, mappings, and semantic conformance;
+distribution, connection budgets, backup, version compatibility, and component
+lifecycle remain explicit deployment concerns. This selection does not qualify
+a bundled launcher or remove Fully Local implementation gates.
+
 ## Scope and access
 
 Every team, task, orchestration run, message, and runtime binding belongs to one
@@ -214,24 +247,41 @@ Write-side bounded contexts own their context-local projections. A query-composi
 adapter may join published read models for a client view, but it does not become an
 owner of business state and cannot write context storage.
 
-## Evolution to services
+## Service boundaries and scaling
 
-A bounded context may be extracted when there is demonstrated need for independent
-scaling, ownership, security, or deployment. Extraction should replace an in-process
-adapter with a transport adapter while preserving domain and application behavior.
+A Get Modular entry or nested feature is a composition or semantic boundary,
+not automatically a network service. ADR-0113 defines one construction authority
+per Host role. ADR-0114 selects Protobuf and standard gRPC through Dapr for real
+private RPC. Public Connect and direct durable JetStream delivery keep their
+separate responsibilities.
 
-Extraction readiness requires:
+The first stateful private product boundary is Control Host to the implemented
+Team Topology S3 group in a separate process. Durable coordination, Observation
+intake and queries, derived work, Agent Context compute, workspace mechanics,
+and outbound effects acquire their required process boundaries with their
+first corresponding feature. The
+[role map and first-materialization record](deployment-profiles.md#service-role-map)
+make this a delivery obligation instead of an unspecified future extraction.
 
-- no deep imports across bounded contexts;
-- versioned integration contracts;
-- context-owned persistence;
-- idempotent consumers;
-- explicit consistency expectations;
-- no cross-context database transactions.
+Roles can share a deployment and physical database without merging semantic
+owners. Concurrency protection requires owned constraints, revisions, receipts,
+claims, and fences. A single active claim for one run, resource, or partition
+can coexist with many concurrent replicas; it is not a global singleton writer.
+AR retains execution custody, technical capacity, and its private fences.
 
-The initial context map remains proposed until it is validated against concrete
-use cases, current desktop behavior, event-storming scenarios, and concurrency
-boundaries.
+Additional separation follows declared differences in trust, affinity,
+language, rollout, or resource demand before shipping the affected workload.
+It preserves versioned consumer contracts and context-owned persistence. A
+language rewrite still requires implementing and qualifying the replacement;
+standard protocols do not promise zero migration work.
+
+The server target is thousands of simultaneously running agents with concurrent
+users. Stored definitions and idle sessions are not capacity evidence.
+Qualification declares actual command/event/output rates, bursts, fanout,
+dataset, duration, hardware, role replicas, and aggregate budgets and proves
+bounded overload, cancellation, tenant isolation, and recovery. Compose and
+Kubernetes require their own execution evidence. The strategic context map and
+existing implementation readiness gates retain their unresolved scope.
 
 ## Non-goals
 

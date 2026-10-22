@@ -86,7 +86,7 @@ model {
         }
       }
 
-      database = stateStore 'Local SQLite Stores' {
+      database = stateStore 'Bundled PostgreSQL Cluster' {
         metadata {
           owner_document 'architecture.persistence'
           security_role 'state-store'
@@ -270,6 +270,13 @@ model {
       status 'accepted'
     }
   }
+  securityLandscape.localDevice.supervisor -[lifecycleControl]-> securityLandscape.localDevice.database 'Own binary, process, and durable data root' {
+    metadata {
+      integration_style 'Qualified native PostgreSQL component lifecycle'
+      authority 'Supervisor owns process custody; Host adapters own SQL, context migrations, and recovery validation'
+      status 'accepted'
+    }
+  }
   securityLandscape.browserDevice.browser -[authenticatedControl]-> securityLandscape.hostedControlPlane.host 'HTTPS control API' {
     metadata {
       integration_style 'Untrusted-network authenticated control channel'
@@ -405,7 +412,7 @@ model {
   }
   securityLandscape.localDevice.host -[stateAccess]-> securityLandscape.localDevice.database 'Context-owned state, inbox, outbox, and feeds' {
     metadata {
-      integration_style 'Context-owned SQLite persistence adapters'
+      integration_style 'Context-owned PostgreSQL adapters over a protected local endpoint'
       authority 'Each bounded context owns its state and transaction boundary'
       status 'accepted'
     }

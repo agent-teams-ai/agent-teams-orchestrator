@@ -6,6 +6,7 @@ owner: agent-organization
 summary: Refine Agent Organization aggregates, relationships, lifecycle, persistence, and concurrency semantics.
 related:
   - ADR-0044
+  - ADR-0114
   - architecture.context-map
   - OD-011
   - domain.contexts.team-topology
@@ -77,7 +78,7 @@ scenarios are event-stormed.
 - every lifecycle and invariant has exactly one owner;
 - hierarchy mutations have transaction, revision, ordering, and recovery rules;
 - security consumers define freshness and fail-closed behavior;
-- SQLite and PostgreSQL persistence strategies preserve identical semantics;
+- local and server PostgreSQL profiles preserve the same declared semantics;
 - event-storming examples cover the required scenarios before package creation.
 
 ## Resolution

@@ -28,8 +28,9 @@ Agents should also follow the short repository-level
 | Task | Primary source | Supporting sources |
 |---|---|---|
 | Understand the system | [Architecture index](architecture/README.md) | [Overview](architecture/overview.md), [quality attributes](architecture/evolution-quality-attributes.md) |
+| Select backend technology or public HTTP hosting | [Shared backend adoption](decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md#shared-reference-and-local-adoption) | [Public HTTP Host](architecture/sdk-and-transports.md#public-http-host); the central reference owns the reusable stack, local documents own its application |
 | Model or change a business capability | [Domain index](domain/README.md) | [Context dossiers](domain/contexts/README.md), [Full DDD standard](domain/modeling-standard.md) |
-| Add a package or feature | [Orchestrator feature module profile](architecture/feature-module-standard.md) | [Organization Feature Module Standard v1](https://github.com/agent-teams-ai/.github/blob/main/docs/architecture/feature-module-standard/v1.md), [dependency rules](architecture/dependency-rules.md), [package catalog](../architecture/package-catalog.yaml) |
+| Add a package or feature | [Orchestrator feature module profile](architecture/feature-module-standard.md) | [Organization Feature Module Standard v1.1](https://github.com/agent-teams-ai/.github/blob/f5653f5630057524a4ee44e50c16e138442a9b42/docs/architecture/feature-module-standard/v1.1.md), [composition profile](architecture/composition-and-dependency-injection.md), [dependency rules](architecture/dependency-rules.md), [package catalog](../architecture/package-catalog.yaml) |
 | Integrate AR or a provider runtime | [Runtime boundary](architecture/runtime-boundary.md) | `OD-004`, [eventing](architecture/eventing-and-reliability.md) |
 | Design persistence or concurrency | [Persistence boundary](architecture/persistence-boundary.md) | `OD-003`, [testing](architecture/testing-strategy.md) |
 | Add events, feeds, inbox, or outbox | [Eventing and reliability](architecture/eventing-and-reliability.md) | [Public contracts](architecture/public-control-contracts.md) |
@@ -37,7 +38,8 @@ Agents should also follow the short repository-level
 | Classify data or cross a trust boundary | [Security architecture](architecture/security-architecture.md) | [Machine-readable security schemas](../architecture/security/data-classification.schema.json), `OD-012`, `OD-029` |
 | Add an SDK or API capability | [SDK and transports](architecture/sdk-and-transports.md) | [Public control contracts](architecture/public-control-contracts.md) |
 | Change local lifecycle | [Local Host lifecycle](architecture/local-host-lifecycle.md) | `OD-001`, `OD-021` |
-| Change deployment profiles or client targets | [Deployment profiles](architecture/deployment-profiles.md) | `ADR-0087`, `ADR-0088`, `ADR-0090`, `ADR-0091`, `OD-035`, `OD-037`, `OD-038` |
+| Add or split a service or worker role | [Service role map](architecture/deployment-profiles.md#service-role-map) | [ADR-0114](decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md), [private RPC decision](decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md), [first-materialization gate](architecture/implementation-readiness-gates.md#first-materialization-role-gate) |
+| Change deployment profiles or client targets | [Deployment profiles](architecture/deployment-profiles.md) | [Fully Local V1 and shared backend profiles](decisions/0115-canonical-fully-local-v1-adoption.md), `ADR-0088`, `ADR-0091`, `OD-035`, `OD-037`, `OD-038` |
 | Migrate legacy behavior | [Migration boundary](architecture/migration-boundary.md) | owning context dossier and migration open decision |
 | Change repository tooling | [Repository tooling](architecture/repository-tooling.md) | [Testing strategy](architecture/testing-strategy.md) |
 | Change strategic relationships | [Machine-readable architecture model](architecture/architecture-model.md) | [Context map](architecture/context-map.md), owning context dossiers |

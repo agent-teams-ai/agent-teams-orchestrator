@@ -10,13 +10,16 @@ related:
   - ADR-0079
   - ADR-0080
   - ADR-0090
+  - ADR-0115
   - ADR-0091
   - ADR-0093
+  - ADR-0114
   - OD-014
   - OD-030
   - architecture.eventing
   - architecture.security
   - architecture.testing
+  - architecture.deployment-profiles
 code_anchors:
   - pattern: architecture/reliability/**
     enforcement: required
@@ -82,7 +85,7 @@ objective.
 
 ## Deployment profiles
 
-Managed SaaS, Standalone Self-Hosted, future Connected Self-Hosted, and future
+Managed SaaS, Standalone Self-Hosted, future Connected Self-Hosted, and
 Fully Local share indicator meaning but not assumed targets or failure domains.
 The reliability catalog records their release scope, qualification state,
 mandatory capabilities, and blocking decisions in addition to metric
@@ -92,8 +95,16 @@ qualified subject requires evidence bound to its exact identity, adapter set,
 source revision, required suites, environment, result, and trusted issuer. An
 accepted ADR or existing file alone cannot qualify anything.
 
-- Fully Local measurements include Supervisor and Host availability, embedded
-  persistence, machine sleep, disk pressure, and event-loop delay.
+The [service role map](deployment-profiles.md#service-role-map) owns selected
+process placement. Compose and Kubernetes are both server target forms, with
+independent qualification rather than inferred equivalent failure domains.
+Fully Local is a required V1 target under ADR-0115, with implementation-start and
+release qualification still gated. A Desktop using a
+remote Target does not add local authority, infrastructure, or automatic fallback
+to that service profile.
+
+- Fully Local measurements include Supervisor and Host availability, bundled
+  native PostgreSQL, machine sleep, disk pressure, and event-loop delay.
 - Managed and Standalone server measurements include network control traffic,
   PostgreSQL, broker and worker queues, deployment failover, and external
   infrastructure.
@@ -103,7 +114,32 @@ accepted ADR or existing file alone cannot qualify anything.
   profile for service reliability and separate client-experience telemetry where
   needed.
 
-Aggregating both profiles into one objective is prohibited unless an approved SLO
+Host event-loop delay remains a candidate resource budget across these profiles.
+Calibration includes processing results of asynchronous persistence calls and
+concurrent command or event load. A separate PostgreSQL process does not remove
+that Host work; numerical limits still require evidence and owner approval.
+
+The server architecture targets thousands of simultaneously running agents
+across independent Runs, including Runs within one team and tenant, under the
+[concurrent execution target](deployment-profiles.md#concurrent-execution-target).
+Per-Run capacity is qualified separately. This target is not an approved SLO,
+a measured capacity, or an instruction to run one process per agent.
+Qualification records the exact admitted execution concurrency
+and its workload, rates, duration, hardware, replica limits, and deployment form. Stored
+Agents, queued work, idle sessions, and open connections do not establish that
+target. Modeled Orchestrator traffic with a fake AR and actual AR/provider
+capacity evidence remain distinct, as specified by the
+[workload qualification rules](testing-strategy.md#concurrent-execution-and-service-role-qualification).
+
+Resource calibration covers the complete selected role set, including sidecars,
+maximum replicas, rollout surge, database connections, handler queues, broker
+backlog, memory, event-loop delay, and disk headroom. Dapr routing does not start
+or autoscale replicas, allocate AR execution capacity, or establish product
+correctness. The deployment platform owns its declared replica controller; AR
+owns runtime admission and execution capacity. Cancellation, health, and recovery
+remain usable under the tested saturation and failure conditions.
+
+Aggregating different profiles into one objective is prohibited unless an approved SLO
 explicitly defines the weighting and user population.
 
 ## Cardinality and privacy

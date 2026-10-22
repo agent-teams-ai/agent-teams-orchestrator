@@ -1,8 +1,9 @@
 ---
 id: ADR-0011
 type: adr
-status: accepted
-superseded_by: []
+status: superseded
+superseded_by:
+  - ADR-0114
 supersedes: []
 owner: platform/persistence
 summary: Isolate local SQLite files and hosted PostgreSQL schemas by bounded context.

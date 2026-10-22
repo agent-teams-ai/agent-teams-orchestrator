@@ -6,7 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const contractPath = "architecture/foundation/required-quality-tests.json";
-const reviewedContractSha256 = "78b2b819ae3f842a82303248d7af75efe7d07948823394b5b2922b59f62e502b";
+const reviewedContractSha256 = "167835044e04203b2872ad08a5e72e5829517d677f3621b167699a13b1c79f6e";
 
 // Bind the reviewed consumer identities without duplicating their inventory or
 // the shared runner's schema validation and execution accounting.

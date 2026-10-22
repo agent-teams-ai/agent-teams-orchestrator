@@ -20,6 +20,9 @@ related:
   - ADR-0073
   - ADR-0080
   - ADR-0084
+  - ADR-0113
+  - ADR-0114
+  - architecture.deployment-profiles
   - OD-011
   - OD-023
   - OD-024
@@ -47,6 +50,23 @@ materialize an empty package or freeze a schema.
 - A workspace package is a physical boundary created after acceptance.
 - A feature is a cohesive capability inside one bounded context, not a smaller
   context by default.
+- A nested feature is a child capability within the same context, assembled by
+  its direct parent under the feature module standard.
+- A Get Modular entry is an independently wired implementation seam; a group
+  assembles declared entries and child groups without changing domain ownership.
+- A service group declares the callable capabilities of a selected private
+  boundary. It may cover several features, but does not create a new semantic
+  owner or combine the transactions of different contexts.
+- A deployment role selects the handlers, consumers, and adapters that run
+  together with one lifecycle and resource profile. A group may have several
+  roles; a role may initially host several groups.
+- A replica set contains interchangeable instances of one routing contract.
+  Replica membership does not grant ownership of a session, partition, or data.
+- A Protobuf service declares a wire capability; its methods do not each become
+  a deployment role. Dapr routes selected private gRPC calls between roles.
+- A deployed service is an execution placement with a lifecycle and scaling
+  boundary. It may contain several features; neither a feature nor an entry
+  automatically requires its own process or RPC contract.
 
 These concepts often align, but they are not interchangeable.
 
@@ -76,6 +96,42 @@ These concepts often align, but they are not interchangeable.
 Boundary status and dossier readiness are intentionally different. An ADR may
 accept a strategic split while its dossier remains proposed until Full DDD
 discovery proves exact aggregates, scenarios, and concurrency.
+
+## Capability groups and process placement
+
+The accepted [service role map](deployment-profiles.md#service-role-map) is the
+single authority for coarse role processes, their owning capabilities,
+first-materialization isolation, and further separation triggers. ADR-0114
+replaces the universal one-Host starting placement. This strategic context map
+retains its proposed status and discovery gates; placement does not accept the
+unresolved detailed models or create new bounded contexts.
+
+### Planned service groups
+
+A capability group is larger than an operation and can contain several
+feature-owned APIs. Team Topology's Agent/Team definitions and versioned roster
+form the first private product group; its first delivered subset is S3
+persistent Team create/get/list in a separate role. S1/S2 `CheckTeamDraft`
+remains a module and public-contract proof. Choosing the group does not add all
+future Agent, roster, cloning, or template methods to S3.
+
+Execution Observation, Agent Context, and Workspace Registry remain their
+existing semantic owners even when query, intake, compute, and mechanics run
+in different processes. Human notification delivery is a durable workload;
+its independent process does not automatically make it an RPC service. The
+role map covers these and the remaining strategic owners rather than treating
+four early opportunities as a complete service topology.
+
+Ordinary collaboration inside a role remains typed and local. Cross-role
+request/reply follows ADR-0114; durable handlers use direct JetStream adapters.
+Several qualified write replicas may execute operations for one semantic owner.
+State, immutable history, receipts, and required outbox intents of one atomic
+operation remain in one owned transaction, without a remote call inside it.
+
+The exact strategic relationship graph remains in LikeC4. Package identities
+and materialization policies remain in the
+[package catalog](../../architecture/package-catalog.yaml). Role labels are
+not new package identities or permission to create empty applications.
 
 ## Integration modules
 
