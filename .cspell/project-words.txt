@@ -57,6 +57,7 @@ retryability
 ReviewRouter
 revisioned
 rollups
+SCIM
 Semble
 Sigstore
 SQLite
@@ -74,3 +75,5 @@ upcasters
 upcasting
 Vale
 worktree
+worktrees
+ZITADEL

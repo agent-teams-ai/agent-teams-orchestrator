@@ -3,14 +3,32 @@ import { readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
+import {
+  EXPECTED_STANDARD,
+  readProductionFeaturePaths,
+  validateConstructActivation,
+} from "./validate-feature-module-standard-profile.mjs";
 
 export const QUALITY_TOPOLOGY_PATH = "architecture/foundation/quality-feature-topology.json";
 
-// Adapt the accepted organization profile and materialized catalog, without
-// making the Foundation reader's flat representation a second authority.
+// Foundation 1.7.2 accepts only the flat v1 input. This reader-format projection
+// preserves current flat obligations, not a second adoption authority.
+const FLAT_READER_STANDARD = Object.freeze({
+  id: "agent-teams.feature-module-standard",
+  version: "v1",
+  repository: "agent-teams-ai/.github",
+  path: "docs/architecture/feature-module-standard/v1.md",
+  git_blob_sha: "d0bfff2033faf544fe65268c1dcdfd524d093015",
+  sha256: "851653f96643cf0466b67ab22963661976b00de44840fa3144a48a8c054f95fa",
+});
+
 export async function checkQualityTopology(root = process.cwd()) {
   const read = (name) => readFile(resolve(root, name), "utf8");
   const authority = JSON.parse(await read("architecture/feature-module-standard-profile.json"));
+  assert.deepEqual(authority.standard, EXPECTED_STANDARD,
+    "Quality compatibility projection requires the exact accepted FMS v1.1 authority.");
+  validateConstructActivation(authority.adoption.constructs,
+    await readProductionFeaturePaths(root, ["apps", "packages"]));
   const catalog = parse(await read("architecture/package-catalog.yaml"));
   const modules = [];
   for (const entry of catalog.packages) {
@@ -36,7 +54,7 @@ export async function checkQualityTopology(root = process.cwd()) {
   assert.ok(modules.length > 0, "Quality topology requires a materialized module.");
   assert.deepEqual(JSON.parse(await read(QUALITY_TOPOLOGY_PATH)), {
     schemaVersion: 1,
-    standard: authority.standard,
+    standard: FLAT_READER_STANDARD,
     productionRoots: authority.adoption.scope.production_roots,
     applicationRoots: [],
     excludedRoots: authority.adoption.scope.excluded_roots,

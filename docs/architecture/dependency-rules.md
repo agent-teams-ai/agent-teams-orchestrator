@@ -10,7 +10,7 @@ related:
   - ADR-0012
   - ADR-0037
   - ADR-0038
-  - ADR-0040
+  - ADR-0110
   - ADR-0075
   - ADR-0090
   - architecture.composition
@@ -83,10 +83,18 @@ both roles expose separate modules and ports for each role.
 | Composition | All layers in its own package and public APIs of dependencies |
 | SDK | Published contracts and transport libraries |
 
-Awilix and every other container implementation are composition dependencies, not
-application ports. They may be imported only below `composition/**`. Contexts,
-features, adapters, and SDKs cannot receive a raw container, cradle, resolver, or
-service locator.
+Get Modular is mandatory for applicable TypeScript composition seams under
+ADR-0110. Its imports and descriptors belong only in composition and tests;
+domain, application, contracts, and adapters do not import `@get-modular/*`.
+SDK composition follows the same rule without exposing framework types in its
+public client API. A container, cradle, resolver, or service locator cannot be
+passed into business code. Awilix and a second handwritten production assembly
+path are prohibited. Fixed private helpers remain static dependencies.
+
+Nested visibility, direct-parent assembly, republication, and both cycle rules
+follow the [v1.1 feature profile](feature-module-standard.md). Their production
+activation remains blocked until semantic enforcement is complete; a flat
+Foundation projection does not prove nested conformance.
 
 ## Forbidden dependencies
 
@@ -307,9 +315,9 @@ The consuming application declares a narrow capability:
 
 ```ts
 interface RuntimeSessionLifecyclePort {
-  startSession(
+  readonly startSession: (
     command: StartRuntimeSessionCommand,
-  ): Promise<StartRuntimeSessionResult>;
+  ) => Promise<StartRuntimeSessionResult>;
 }
 ```
 

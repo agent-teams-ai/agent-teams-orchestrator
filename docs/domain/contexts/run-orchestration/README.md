@@ -20,6 +20,7 @@ related:
   - OD-005
   - OD-006
   - OD-013
+  - OD-048
 ---
 
 # Run Orchestration
@@ -124,6 +125,22 @@ obligations, lifetime runtime-session allocation tombstones, business-effect
 references, retry, escalation, completion, compensation, Work placement, and
 desired-versus-observed reconciliation. Technical execution remains owned by
 `ar`.
+
+### Mixed-team participation boundary
+
+The mixed human and AI Team direction does not change the accepted AI Run roster
+implicitly. ADR-0101 still requires the exact source Team version, normalized
+Run-only overlay, materialized effective Agent participants, and exact Agent
+definition versions. Agent occupancy remains exclusive and durable; it is not
+applied to humans as a substitute for Task assignment.
+
+Human manual Tasks need no Run or AR session. Whether a human becomes a product
+Run participant, and how that affects waiting, coordination, cancellation, or
+completion, remains in
+[OD-048](../../../open-decisions/OD-048-mixed-human-and-ai-team-participation.md).
+A later mixed roster must define typed selection and snapshot semantics before
+adoption; neither silently dropping human members nor creating artificial runtime
+bindings is an accepted mapping. ADR-0103's single-Agent admission remains intact.
 
 The `team-activation` feature owns the durable composite process that creates or
 selects a Team, optionally requests organizational placement, and admits a Run.

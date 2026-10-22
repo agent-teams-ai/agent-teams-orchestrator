@@ -17,6 +17,7 @@ summary: Navigation index for governed documentation templates and their intende
 | [Feature documentation](feature.md) | A materialized feature needs colocated implementation guidance |
 | [Contract documentation](contract.md) | A versioned public or integration contract needs semantic documentation |
 | [Runbook](runbook.md) | A real operational failure mode needs diagnosis, recovery, and verification |
+| [Research report](research.md) | Dated source review, discussion synthesis, comparison, or bounded experiment needs durable evidence and explicit limits |
 
 Templates define required structure, not domain answers. Remove irrelevant
 optional sections only when the governing standard permits it; never fill a

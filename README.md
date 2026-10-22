@@ -1,6 +1,7 @@
 # Agent Teams Orchestrator
 
-Headless control plane for coordinating multi-agent teams.
+Headless control plane being designed for collaboration between people and AI
+agents, with shared Teams and Tasks and separate agent execution.
 
 The project is being designed as an event-driven modular monolith with Clean and
 Hexagonal Architecture, strategic and tactical Full DDD, broker-neutral
@@ -78,3 +79,23 @@ The orchestrator is headless. Desktop, web, CLI, automation, and third-party
 applications use versioned APIs and SDKs. Local and hosted compositions share the
 same business core and contracts. Client applications do not own orchestration or
 agent-runtime state.
+
+Standalone Self-Hosted is an independent product direction: one installation can
+serve multiple separately governed organizations, and one human can have
+independent memberships in several of them. People perform manual Tasks without
+an agent process. Team participation, permissions, and AI activation remain
+separate; their remaining choices are recorded in
+[mixed collaboration](docs/open-decisions/OD-048-mixed-human-and-ai-team-participation.md).
+
+The commercial [Platform](https://github.com/agent-teams-ai/agent-teams-platform)
+consumes Orchestrator API/SDK capabilities. Its
+[product relationship and boundary](https://github.com/agent-teams-ai/agent-teams-platform/blob/main/docs/architecture/platform-orchestrator-boundary.md)
+owns the hosted integration direction. Orchestrator retains the independent
+authority adapters and [composition boundaries](docs/architecture/composition-and-dependency-injection.md#shared-mechanisms-and-independent-products)
+needed by standalone and managed delivery.
+
+The [discussion and research coverage](docs/research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
+maps organizations, human/AI Teams, Tasks, Workspace naming, module foundation,
+and Platform integration to their owners and remaining decisions. Service
+topology and Dapr/Protobuf adoption are tracked separately in
+[PR #79](https://github.com/agent-teams-ai/agent-teams-orchestrator/pull/79).

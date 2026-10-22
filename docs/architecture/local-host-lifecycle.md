@@ -14,6 +14,7 @@ related:
   - ADR-0064
   - ADR-0035
   - ADR-0058
+  - ADR-0111
   - OD-001
   - OD-003
   - OD-009
@@ -113,7 +114,7 @@ select channels, or proxy live publications.
 | AR host availability when locally managed | Local Supervisor |
 | Runtime sessions, AR execution identity and custody, provider processes, sandbox, and permission enforcement | Agent Runtime |
 | User defaults for target and scope | Client Profile |
-| Team project directory or execution workspace identity | Workspace Registry |
+| Execution Directory registration, allocation identity, and materialization cleanup | Workspace Registry |
 
 Sharing a low-level process or connection does not transfer semantic ownership.
 
@@ -206,7 +207,10 @@ OD-001 and OD-021.
 
 ## Target, profile, and workspace
 
-`Target`, `Client Profile`, and `Workspace` are independent:
+`Target`, `Client Profile`, Execution Directory, and frontend Workspace are
+independent. [ADR-0111](../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+selects Execution Directory for the technical filesystem resource and retains
+Workspace for the UI:
 
 ```text
 Client Profile
@@ -216,14 +220,23 @@ Client Profile
 Target
   -> identifies deployment endpoint and trust configuration
 
-Workspace
-  -> domain resource inside a project
+Execution Directory
+  -> project-scoped technical filesystem resource with opaque identity
   -> never controls deployment endpoint or credentials
+
+Workspace
+  -> frontend navigation or saved view over authorized scope
+  -> creates no additional permission owner or Project identity boundary
 ```
 
+Execution Directories include shared, cloned, snapshot, and remote filesystem
+views. Existing `WorkspaceRegistration` and `ExecutionWorkspaceAllocation` model
+names remain unchanged; exact public API spelling and any migration remain open
+under OD-019. The selected term changes no runtime or cleanup ownership.
+
 A local Host identity is scoped by installation and data ownership, not by the
-current directory, project, workspace, terminal, or client process. Multiple
-profiles may reference the same target.
+current directory, Project, Execution Directory, Workspace, terminal, or client
+process. Multiple profiles may reference the same target.
 
 Project-controlled files cannot replace target endpoints, lower trust, select
 credentials, or trigger installation. This prevents opening an untrusted

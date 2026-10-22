@@ -71,7 +71,12 @@ before a high-cost boundary violation.
 - Business behavior belongs to the owning bounded context and feature. Follow the
   [context map](docs/architecture/context-map.md) and
   [Orchestrator feature profile](docs/architecture/feature-module-standard.md),
-  which adopts the organization Feature Module Standard v1.
+  which adopts the organization Feature Module Standard v1.1 under ADR-0110.
+- Nested features, republication, and composition contracts remain
+  `blocked-until-enforced`; their profile inventories are empty. Implement the
+  scoped semantic checks and rejecting fixtures before activating them. Only a
+  direct parent assembles its children; external consumers use declared
+  ancestor republication.
 - Domain code is pure. Application code depends only on domain and declared
   ports. Adapters implement ports. See
   [dependency rules](docs/architecture/dependency-rules.md).
@@ -102,9 +107,24 @@ before a high-cost boundary violation.
   function, complexity 20, depth 4, and 5 parameters; tests and conformance
   harnesses use 800, 250, 30, 5, and 6. Split responsibilities before the gate,
   rather than adding a local lint exception.
-- Process-wide resources and private Awilix containers are created only in
-  `composition/**`. Features export typed factories and public contracts, never
-  containers.
+- Get Modular is mandatory at every applicable TypeScript production composition
+  seam across applications, contexts, platform, integration, SDK, contract, and
+  testing packages. Entries and groups wire meaningful implementation seams;
+  fixed dependencies and pure private helpers remain ordinary imports and typed
+  factories. Do not create artificial nodes or a competing hand-wired factory
+  graph, Awilix container, or resolver. Framework imports and descriptors stay
+  in `composition/**` and composition tests; business code and adapters expose
+  ordinary typed APIs and consumer-owned ports. Follow the
+  [composition profile](docs/architecture/composition-and-dependency-injection.md)
+  for authoring, lifecycle, the named sandbox-manifest migration gap, and
+  qualification. Framework selection is accepted; current source and runtime
+  conformance, exact package train, scale, nesting, and browser qualification
+  must not be claimed from this decision or a profile check.
+- When presenting implementation alternatives, include confidence, complexity,
+  and expected reliability on a 10-point scale plus an estimated TypeScript
+  line range. Higher complexity means harder. State scope, exclusions, and
+  estimate uncertainty; scores are engineering judgments, not measured uptime
+  or exact delivery commitments.
 - The Local Supervisor manages local component availability only. It contains no
   orchestration domain and does not proxy normal public control traffic.
 - SDKs contain contract, transport, and client ergonomics, never orchestration
