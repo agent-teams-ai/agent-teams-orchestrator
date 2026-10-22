@@ -311,6 +311,15 @@ rollback remain open in OD-043. The Web and Desktop contribution model remains
 an unapproved proposal in OD-042. Neither open decision authorizes publication
 of a public SPI.
 
+Before resolving lifecycle or hot replacement, use the maintained
+[plugin system research reference](https://github.com/agent-teams-ai/extension-foundation/blob/main/docs/research/plugin-system-research-reference.md)
+and its primary-source failure scenarios, including the pinned OpenClaw audit.
+The research distinguishes static modules, artifact installation, candidate
+readiness, new-call admission, accepted-work drain and physical retirement.
+It proposes a bounded qualification target; it does not activate an extension
+Host, adopt the private lifecycle-kernel candidate or waive OD-041's production
+qualification floor.
+
 ## Provider capability tiers
 
 Lite, medium, and high tool modes are policy profiles, not provider branches in

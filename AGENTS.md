@@ -18,6 +18,10 @@ Use [.agents/skills/docs-authoring/SKILL.md](.agents/skills/docs-authoring/SKILL
 <!-- agent-teams-docs:route/v1 end -->
 
 Use the single task router in [the documentation map](docs/README.md#navigate-by-task).
+For plugin lifecycle and hot replacement, follow OD-043 and its maintained
+cross-repository research reference before proposing mechanisms. Read the
+relevant source-backed patterns and critic dispositions; do not treat research
+as runtime adoption or silently rewrite an approved ADR.
 Do not preload every architecture document when a change touches one boundary.
 Search stable IDs such as `ADR-0051`, `OD-004`, or
 `domain.contexts.run-orchestration`, not only filenames.

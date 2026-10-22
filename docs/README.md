@@ -38,6 +38,7 @@ Agents should also follow the short repository-level
 | Classify data or cross a trust boundary | [Security architecture](architecture/security-architecture.md) | [Machine-readable security schemas](../architecture/security/data-classification.schema.json), `OD-012`, `OD-029` |
 | Add an SDK or API capability | [SDK and transports](architecture/sdk-and-transports.md) | [Public control contracts](architecture/public-control-contracts.md) |
 | Change local lifecycle | [Local Host lifecycle](architecture/local-host-lifecycle.md) | `OD-001`, `OD-021` |
+| Design plugin lifecycle or hot replacement | [OD-043](open-decisions/OD-043-extension-lifecycle-catalog-and-hot-update.md) | [Extension points](architecture/extension-points.md), [maintained industry research](https://github.com/agent-teams-ai/extension-foundation/blob/main/docs/research/plugin-system-research-reference.md) |
 | Change deployment profiles or client targets | [Deployment profiles](architecture/deployment-profiles.md) | `ADR-0087`, `ADR-0088`, `ADR-0090`, `ADR-0091`, `OD-035`, `OD-037`, `OD-038` |
 | Migrate legacy behavior | [Migration boundary](architecture/migration-boundary.md) | owning context dossier and migration open decision |
 | Change repository tooling | [Repository tooling](architecture/repository-tooling.md) | [Testing strategy](architecture/testing-strategy.md) |
