@@ -32,6 +32,7 @@ fullScanPaths:
   - .oxlintrc.advisory.json
   - .oxlintrc.common.json
   - .oxlintrc.json
+  - .oxlintrc.research.json
   - .oxlintrc.type-aware.json
   - architecture/foundation
   - architecture/executable-specs

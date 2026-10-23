@@ -1,0 +1,10 @@
+{
+  "extends": "@agent-teams/engineering-foundation/presets/typescript/node.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts"]
+}
