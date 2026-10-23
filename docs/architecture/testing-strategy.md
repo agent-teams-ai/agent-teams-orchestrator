@@ -450,9 +450,11 @@ qualifies provider capacity, runtime connectivity, or a production SLO.
 | Native Fully Local V1 target | Installed-package role processes and sidecars under Supervisor custody, signed offline artifacts, protected endpoints, authenticated readiness, and each released OS/architecture tuple under the local lifecycle requirements |
 
 Compose and Kubernetes both require their own evidence; one does not qualify the
-other. ADR-0115 requires Fully Local for V1; OD-021, OD-035, and OD-040 still gate
-its implementation start, followed by the existing deployment-qualification
-gates. Native evidence cannot be inferred from
+other. ADR-0115 requires Fully Local for V1. ADR-0116 resolves the OD-035 engine
+selection prerequisite with full native Temporal; OD-021 and OD-040 still block
+local package implementation start. The exact historical prerequisite set stays
+in the materialization policy. The selected adapter must then satisfy ADR-0116
+and the existing deployment-qualification gates. Native evidence cannot be inferred from
 container tests. A compact native role composition requires explicit approval
 and separate qualification, not silent co-location that removes selected process
 isolation. These obligations do not introduce production code or a checker.

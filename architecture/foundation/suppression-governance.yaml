@@ -1,5 +1,6 @@
 schemaVersion: 1
 governedRoots:
+  - scripts/research/od035
   - packages/contexts/agent-context/src
   - packages/contexts/agent-context/tests
   - packages/platform/local-host-control/src

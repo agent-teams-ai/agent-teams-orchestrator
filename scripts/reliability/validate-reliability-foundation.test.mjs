@@ -64,7 +64,7 @@ function minimalCatalog() {
         requiredCapabilities: ["server-runtime-execution"],
       },
       {
-        blockedBy: ["OD-001", "OD-003", "OD-009", "OD-021", "OD-035"],
+        blockedBy: ["OD-001", "OD-003", "OD-009", "OD-021"],
         commercialAuthorityAdapter: "none",
         id: "fully-local",
         productAuthorityAdapter: "local-standalone",
@@ -87,7 +87,7 @@ function minimalCatalog() {
         qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
       },
       {
-        blockedBy: ["OD-004", "OD-021", "OD-035"],
+        blockedBy: ["OD-004", "OD-021"],
         id: "local-host-runtime-execution",
         profiles: ["fully-local"],
         qualification: "blocked",
@@ -146,6 +146,18 @@ test("accepts the canonical reliability foundation", async () => {
   assert.equal(result.catalog.indicators.length, 5);
   assert.equal(result.catalog.invariants.length, 5);
   assert.equal(result.catalog.resourceBudgets.length, 4);
+  const localProfile = result.catalog.profiles.find(
+    (profile) => profile.id === "fully-local",
+  );
+  const localCapability = result.catalog.capabilities.find(
+    (capability) => capability.id === "local-host-runtime-execution",
+  );
+  assert.equal(localProfile.qualification, "blocked");
+  assert.deepEqual(localProfile.blockedBy, ["OD-001", "OD-003", "OD-009", "OD-021"]);
+  assert.equal(localCapability.qualification, "blocked");
+  assert.deepEqual(localCapability.blockedBy, ["OD-004", "OD-021"]);
+  assert.equal(result.catalog.qualificationFramework.qualification, "blocked");
+  assert.deepEqual(result.catalog.qualificationFramework.blockedBy, ["OD-039"]);
 });
 
 test("returns schema diagnostics without running semantic validation", async () => {
@@ -320,6 +332,33 @@ test("rejects deleting a deployment capability blocker", () => {
   );
 });
 
+test("rejects removing any remaining Fully Local qualification blocker", () => {
+  for (const blocker of ["OD-001", "OD-003", "OD-009", "OD-021"]) {
+    const catalog = minimalCatalog();
+    const localProfile = catalog.profiles.find(
+      (profile) => profile.id === "fully-local",
+    );
+    localProfile.blockedBy = localProfile.blockedBy.filter((id) => id !== blocker);
+    assert.match(
+      validateReliabilitySemantics(catalog, owners).join("\n"),
+      /REL-PROFILE-008/u,
+      `Fully Local must retain ${blocker}`,
+    );
+  }
+  for (const blocker of ["OD-004", "OD-021"]) {
+    const catalog = minimalCatalog();
+    const localCapability = catalog.capabilities.find(
+      (capability) => capability.id === "local-host-runtime-execution",
+    );
+    localCapability.blockedBy = localCapability.blockedBy.filter((id) => id !== blocker);
+    assert.match(
+      validateReliabilitySemantics(catalog, owners).join("\n"),
+      /REL-PROFILE-020/u,
+      `Local runtime execution must retain ${blocker}`,
+    );
+  }
+});
+
 test("rejects making optional commercial work a profile blocker", () => {
   const catalog = minimalCatalog();
   const connectedProfile = catalog.profiles.find(
@@ -348,7 +387,7 @@ test("rejects a qualified profile whose mandatory capability is not qualified", 
   );
 });
 
-test("rejects unknown blockers and missing conformance artifacts", async () => {
+test("rejects unknown or resolved blockers and missing conformance artifacts", async () => {
   const catalog = minimalCatalog();
   catalog.profiles[0].blockedBy = [];
   catalog.profiles[0].qualification = "qualified";
@@ -358,12 +397,13 @@ test("rejects unknown blockers and missing conformance artifacts", async () => {
     ],
     decisionRefs: ["ADR-0090"],
   };
-  catalog.capabilities[0].blockedBy = ["OD-999"];
+  catalog.capabilities[0].blockedBy = ["OD-999", "OD-002"];
 
   const errors = await validateQualificationReferences(
     catalog,
     repositoryRoot,
   );
   assert.match(errors.join("\n"), /REL-PROFILE-011/u);
+  assert.match(errors.join("\n"), /REL-PROFILE-012/u);
   assert.match(errors.join("\n"), /REL-PROFILE-016/u);
 });

@@ -47,7 +47,7 @@ const expectedProfileDefinitions = new Map([
       "local-standalone",
       "none",
       ["local-host-runtime-execution"],
-      ["OD-001", "OD-003", "OD-009", "OD-021", "OD-035"],
+      ["OD-001", "OD-003", "OD-009", "OD-021"],
     ],
   ],
 ]);
@@ -66,7 +66,7 @@ const expectedDeploymentCapabilities = new Map([
   [
     "local-host-runtime-execution",
     {
-      blockedBy: ["OD-004", "OD-021", "OD-035"],
+      blockedBy: ["OD-004", "OD-021"],
       profiles: ["fully-local"],
     },
   ],

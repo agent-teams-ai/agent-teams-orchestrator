@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "decision": "OD-035",
+  "researchDate": "2026-10-23",
+  "baseRepository": "https://github.com/agent-teams-ai/agent-teams-orchestrator",
+  "baseCommit": "aaabc1e7cd2e2482668530e4412e61c2bca1f515",
+  "scope": "Native engine-to-PostgreSQL component E2E. No production adapter or release qualification.",
+  "researchTeam": {
+    "model": "gpt-6.1-sol",
+    "reasoningEffort": "xhigh",
+    "parallelCandidateOwners": 3,
+    "crossReview": "DBOS -> OpenWorkflow -> Temporal -> DBOS"
+  },
+  "initialExecution": {
+    "platform": "linux",
+    "arch": "x64",
+    "node": "24.19.0",
+    "typescript": "7.0.2",
+    "postgres": "18.4",
+    "postgresDistribution": "embedded-postgres@18.4.0-beta.17",
+    "durability": {
+      "fsync": "on",
+      "full_page_writes": "on",
+      "synchronous_commit": "on"
+    },
+    "pg": "8.23.1",
+    "tsx": {
+      "openworkflow": "4.21.0",
+      "dbos": "4.20.6",
+      "temporal": "4.20.6"
+    }
+  },
+  "engines": {
+    "openworkflow": {
+      "version": "0.11.0",
+      "sourceCommit": "80d90b8d06b0cd43023dd324caa51fe35de4588f",
+      "matchingAssertions": 18
+    },
+    "dbos": {
+      "version": "5.3.0",
+      "sourceCommit": "8643d389db64351f2acfce45e96e9747b4be8465",
+      "matchingAssertions": 15,
+      "conductor": false
+    },
+    "temporal": {
+      "serverVersion": "1.32.1",
+      "sdkVersion": "1.24.0",
+      "matchingScenarioAssertions": 11,
+      "resourceSnapshotIsNotAssertion": true,
+      "fullPostgresService": true
+    }
+  },
+  "negativeControlsAreNotProductionSuccess": true,
+  "identicalBusinessTraceOracleQualified": false,
+  "nativeCI": {
+    "workflow": ".github/workflows/od035-native-research.yml",
+    "node": "24.21.0",
+    "tsx": "4.21.0",
+    "status": "passed-with-explicit-platform-skips",
+    "runId": 39988635688,
+    "headCommit": "e6037277984c9b408ff45bf9a840369a71a7af3c",
+    "checkedOutMergeCommit": "91d29078e007997cf53945f8035f5d4db138e173",
+    "matrix": "docs/research/evidence/od035-2026-10-23/native-ci/matrix.json",
+    "jobsPassed": 9,
+    "posixSuspensionSkippedOnWindows": true,
+    "releaseQualification": false
+  },
+  "sourceDigestScope": "Retained fixture source digests match the source executed by native CI run 39988635688 at e6037277984c9b408ff45bf9a840369a71a7af3c. The initial standalone Linux artifacts remain historical evidence and predate the final ESM/type/assertion, Windows exit, bootstrap, and metadata corrections; their hashes do not claim an exact historical source snapshot.",
+  "sourceSha256": {
+    "scripts/research/od035/bootstrap/postgres-binaries.ts": "5e98e1db17a2c7a65481c8406359d8c48748d8cde50ff68e12efa7bdf26fc194",
+    "scripts/research/od035/bootstrap/run-native.ts": "69bce9fc22df98ec797e7d273fa19528e50cabb53a1ff27ea6b1d1a935ee874f",
+    "scripts/research/od035/bootstrap/verify-failure-exit.ts": "d568d048080980cf27407eef4e7f05078037b2802051abfe19e7714372ea31c2",
+    "scripts/research/od035/dbos/business.ts": "5eb4ee8d9630fe51361c4bc3c97c3f686b67084d774f8459d0d1bb5a9590a67a",
+    "scripts/research/od035/dbos/harness.ts": "717b0e1018fa178948a792145f146c7e5fc217a994f17d18ba39f27dcc128cc3",
+    "scripts/research/od035/dbos/protocol.ts": "6f5b6f90c56efb838f6961b08b6c892e13d3bb8c2de3fda66605949ddced8028",
+    "scripts/research/od035/dbos/worker.ts": "28b9d860c49524557c73c489293e5fef5c4007b9854340452eababc8e996f22c",
+    "scripts/research/od035/openworkflow/business-postgres.ts": "da77ed2d0d758b2274206d5503a032e2c05c4ede5357fe88b5b179f09d65d355",
+    "scripts/research/od035/openworkflow/business.ts": "0c0af728f18801e1c9b6518ba045c51110a8b7b2359fa0d6aca47b878513df51",
+    "scripts/research/od035/openworkflow/harness.ts": "ea2a064ab2870ec5b4815f3960d94a8606061bf96badf50ae172f3c4acc86463",
+    "scripts/research/od035/openworkflow/worker.ts": "e585f5a11f64e3abcdd83c4c076b4767f0e895d95e2f80abdff34235319ae0a9",
+    "scripts/research/od035/temporal/activities.ts": "8784aebce79ef16187aa12b2fb9727f84d557c7893627f7ba466449f3a9efbf7",
+    "scripts/research/od035/temporal/business.ts": "0d020681f7f98d473536f412f281003df2dd75dcaa21a066bd3fba19aab0a857",
+    "scripts/research/od035/temporal/domain.ts": "d35ca4cc8803f1ba4f7b13853bc17d8ad542f4e7e465af02b7996810c36d78da",
+    "scripts/research/od035/temporal/initialize.ts": "030ca59ed6fe0d283fbc17c8fe0699ea1214d2c868a9e1a7c8c36eb088868b93",
+    "scripts/research/od035/temporal/paths.ts": "45b402b5180df91b8c5cacea5c6fab945fbe92952dbf3689b30b73858bb525ab",
+    "scripts/research/od035/temporal/run.ts": "0abc057e0f7574710934649ead3ef720e008c4837a2a45d847e8764ff897b252",
+    "scripts/research/od035/temporal/worker.ts": "90de3fb1ed88fc7c0bca3e79ba792aa98330991764428cfec62af03001d68006",
+    "scripts/research/od035/temporal/workflow-common.ts": "2303041c71df82de198f9f4ee598dab96ef36613efd76506054275819fa6de7d",
+    "scripts/research/od035/temporal/workflows-incompatible.ts": "d01db2151989cb4999b2e35952b29c1fb582fb956249d502410cd1b011e48599",
+    "scripts/research/od035/temporal/workflows-v1.ts": "596dfea6a6708a97ec6d306df013613951d5a1cc114ba516836e6d1d67de1f44",
+    "scripts/research/od035/temporal/workflows-v2.ts": "16c5208961f07b6ec3f84ec1259a3322462f25b9c71ed5b83a375013c1ceddef"
+  },
+  "evidenceSha256": {
+    "docs/research/evidence/od035-2026-10-23/dbos/bootstrap-native-summary-linux-x64.json": "324cf6f502cbe3aa4ef09a058fa7d8fedbe2a1cdda36b2f05fcd2e4f8615a476",
+    "docs/research/evidence/od035-2026-10-23/dbos/bootstrap-results-linux-x64.json": "e9560f106caa80a76cf2f857c2ed47d654a3ac6ca3b07d6e60ffec5d08452614",
+    "docs/research/evidence/od035-2026-10-23/dbos/results.json": "0780339ff8d388a7e3f8a71f0e98fa44df4ff30a673d0612ae82e639ee20151e",
+    "docs/research/evidence/od035-2026-10-23/native-ci/dbos/macos-latest/native-summary.json": "181a79fab1428b2b0f5334bf0942555f9ab4006da3c04942232a7da50b727fa7",
+    "docs/research/evidence/od035-2026-10-23/native-ci/dbos/macos-latest/results.json": "170553af8c895afce181dfa55e972f19a160a9a02a78240fb63cb43955d05475",
+    "docs/research/evidence/od035-2026-10-23/native-ci/dbos/ubuntu-24.04/native-summary.json": "608b061369b6a4d87cb7abbd24e7ec1e9dceb8f5cf58ea99620a26d8c523a5de",
+    "docs/research/evidence/od035-2026-10-23/native-ci/dbos/ubuntu-24.04/results.json": "ecf5ec8fc2d70e5be83d77b4992acf91a17c76e7435e9e2ffb0ddf37a9c8fd5b",
+    "docs/research/evidence/od035-2026-10-23/native-ci/dbos/windows-latest/native-summary.json": "25e84d574a0ed1c99d09468e878a7a80326cd54e77e290534f54654c9f0e67be",
+    "docs/research/evidence/od035-2026-10-23/native-ci/dbos/windows-latest/results.json": "5f466cdee5a2893ae101fa4889fff37ea0620978a1c8393f09d8f2dbd1d54eec",
+    "docs/research/evidence/od035-2026-10-23/native-ci/initial-windows-bootstrap-failures/dbos.json": "eac0bd387bc9bffd1fc3d9bbf5bd23d6ba372b05eae5cf8986dad853d660ad82",
+    "docs/research/evidence/od035-2026-10-23/native-ci/initial-windows-bootstrap-failures/openworkflow.json": "94aabbe74bbb12df55e29849fa37fac1e49ade0537c43ef27736c225c418876f",
+    "docs/research/evidence/od035-2026-10-23/native-ci/initial-windows-bootstrap-failures/temporal.json": "d7bfc186eb5a75cb7df772c1eb72a3425d39d30441aa73d66aa0a204b2dff202",
+    "docs/research/evidence/od035-2026-10-23/native-ci/matrix.json": "ef6668ea118e7326685bf7abdec2dd8d379e3d68a02257ec5d259db60e81d797",
+    "docs/research/evidence/od035-2026-10-23/native-ci/openworkflow/macos-latest/native-summary.json": "e3430a358cfd649ff0c7b1cf9d73e77d3c10328c66da46c9b3daa10ed0348b29",
+    "docs/research/evidence/od035-2026-10-23/native-ci/openworkflow/macos-latest/results.json": "2a1650a00e27b2b55a4ef3b8866828308cd186a4430c8cc2b0902d022f214bb5",
+    "docs/research/evidence/od035-2026-10-23/native-ci/openworkflow/ubuntu-24.04/native-summary.json": "1f7a69decdb573a644f9f428028f18d468461458b5fc3c11fd58178af6d9b0b0",
+    "docs/research/evidence/od035-2026-10-23/native-ci/openworkflow/ubuntu-24.04/results.json": "30ad638509a3c604386bbcde69eaa7ec04118bd5551af16d148e63a225e412be",
+    "docs/research/evidence/od035-2026-10-23/native-ci/openworkflow/windows-latest/native-summary.json": "4ce15aa961d27134974882314a450d871b43384fe913ad7b075acb8234f5c9a4",
+    "docs/research/evidence/od035-2026-10-23/native-ci/openworkflow/windows-latest/results.json": "3eb711cb36676170d02f1ca567dcb03c777905009cd1a27cea3c08787481bd57",
+    "docs/research/evidence/od035-2026-10-23/native-ci/temporal/macos-latest/native-summary.json": "37f7e0221de49fb9d65e2873f72b049a85206a00b28e6f0667e4f134f1bff111",
+    "docs/research/evidence/od035-2026-10-23/native-ci/temporal/macos-latest/results.json": "c905c4ef90d9b1f75635efd38c6c12efcff677238b6945af0046d77be3b2f461",
+    "docs/research/evidence/od035-2026-10-23/native-ci/temporal/ubuntu-24.04/native-summary.json": "636378ba8850e125b2e57f134e04a059f507af54fcd394ae18174c6586e4cdd6",
+    "docs/research/evidence/od035-2026-10-23/native-ci/temporal/ubuntu-24.04/results.json": "2105de6e348c7d252862dca831a29251aae7c2ff40722aba42c8855d76746bd4",
+    "docs/research/evidence/od035-2026-10-23/native-ci/temporal/windows-latest/native-summary.json": "6113b0d0cecff3d9e157d1ea4eeeb6c1d75b269b0395ba87eb3d511fef59373f",
+    "docs/research/evidence/od035-2026-10-23/native-ci/temporal/windows-latest/results.json": "aa1af793251b9ca21694b82231779fdf0f9fdd7e1cd0fa87f8e452202d15ca96",
+    "docs/research/evidence/od035-2026-10-23/openworkflow/results.json": "b9b2cb1d7300c329590fc0bbe1779e579b5f9e816883ee44800dca5e8204b265",
+    "docs/research/evidence/od035-2026-10-23/temporal/artifact-evidence.json": "66f866feefcaeced01cf6298305c101783c91bda1455dad6142d6ce95a983211",
+    "docs/research/evidence/od035-2026-10-23/temporal/checksums.txt": "2a59896f80e27864c7a817ed54aec9d8f5fd2b82d9a794e09951ec243503f70c",
+    "docs/research/evidence/od035-2026-10-23/temporal/results-esm-smoke-linux-x64.json": "a2f9d3dce2a2ab516f4ee7a6df4210a05d8945904ae5505f5ab2866522cf4748",
+    "docs/research/evidence/od035-2026-10-23/temporal/results-linux-x64.json": "78fc3266936c0dbba40be6c143296bf49a025d85bfbbaf493f82fd0dcd396ac3",
+    "docs/research/evidence/od035-2026-10-23/temporal/sdk-release.json": "89599aa8f3529a88d08ef595243ea5f65332c094262ede0e0d95aeba1c023174",
+    "docs/research/evidence/od035-2026-10-23/temporal/server-release.json": "9a8f42334163993c52049c2a3fe5f29138f841c23bee850c7fb0b3f6029045f9"
+  },
+  "repositoryLockfileSha256": "5b411a3b054017041ad9ebb5f4d42eb9d5c39ceddb7242885831ee7bca80df13",
+  "remainingQualification": [
+    "Complete product-owned business trace parity",
+    "Native signed installed lifecycle for every released OS/architecture",
+    "N/N-1 SDK and schema upgrades, skipped app versions, interrupted upgrades, rollback/restore",
+    "PostgreSQL crash, backup/restore, disk full and corruption",
+    "Long timers and clock discontinuities",
+    "Bounded history rollover and unattended retention",
+    "Thousands of active agents and control fairness",
+    "Generation fencing and ambiguous external provider outcomes",
+    "Dependency exit without new public identities or duplicate mutation owner"
+  ],
+  "localBootstrapValidation": {
+    "candidate": "dbos",
+    "result": "passed",
+    "assertions": 15,
+    "databaseStopped": true,
+    "node": "24.19.0",
+    "tsx": "4.20.6",
+    "at": "2026-10-23T15:53:29.770Z",
+    "freshNativeCluster": true
+  }
+}

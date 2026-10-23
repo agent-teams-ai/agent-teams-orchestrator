@@ -516,6 +516,11 @@
       "id": "ADR-0115",
       "path": "docs/decisions/0115-canonical-fully-local-v1-adoption.md",
       "immutableDigest": "sha256:ad92838d720dd08de10e64803bfd0b77fe3a3f3e7944ed508f61e64cba2307bc"
+    },
+    {
+      "id": "ADR-0116",
+      "path": "docs/decisions/0116-native-temporal-for-fully-local-durable-workflows.md",
+      "immutableDigest": "sha256:cc66ce84836fa56684cdfea8b334730404efa0bcc995aa7f1fe984ddd2ab5068"
     }
   ]
 }

@@ -9,3 +9,7 @@ dist/
 *.tsbuildinfo
 .lycheecache
 .oxlintrc.conformance.*.json
+scripts/research/od035/native-results/
+scripts/research/od035/**/server-config.private.json
+scripts/research/od035/**/committed-*.json
+scripts/research/od035/**/paused-*.json

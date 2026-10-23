@@ -370,6 +370,7 @@ The quality lanes are deliberately different:
 | Repository fast gate | `pnpm lint:fast` | Blocking correctness, suspicious-code, runtime, test, and boundary rules |
 | Type-aware gate | `pnpm lint:type-aware` | Blocking typed safety over production TypeScript roots |
 | Full lint gate | `pnpm lint` | Fast, type-aware, suppression-policy, and lint-configuration conformance |
+| Durable workflow research | `pnpm research:od035:check` | Strict TypeScript and protected typed lint for the disposable engine fixtures |
 | Evaluation lane | `pnpm lint:advisory` | Non-blocking bounded complexity and modernization findings |
 
 The advisory lane runs fast repository-wide analysis first, then limits its
@@ -387,7 +388,8 @@ The root policy explicitly extends the Foundation Node and production
 maintainability presets. Handwritten product and repository-tooling source is
 limited to 500 effective lines per file, 150 per function, complexity 20,
 nesting depth 4, and 5 parameters. Package tests, `*.test.mjs`, intentional
-fixtures, and architecture-conformance harnesses use the Foundation test profile:
+fixtures, architecture-conformance harnesses, and the disposable
+`scripts/research/od035` engine harnesses use the Foundation test profile:
 800, 250, 30, 5, and 6 respectively. Generated and vendored paths disable only
 these five budgets. Agents must split responsibilities before crossing a budget;
 there is no untracked per-file maintainability exception.
@@ -423,6 +425,40 @@ Source classes remain distinct:
   source v3 as `fixture.lint`, and exercised directly by conformance tests.
 
 Stage 0 remains active through every later stage. Nx does not replace it.
+
+### Durable workflow research tooling
+
+[OD-035](../open-decisions/OD-035-local-durable-workflow-engine.md) owns the
+comparison of native workflow engines. Its disposable fixtures live under
+`scripts/research/od035`. Their SDKs, PostgreSQL distribution, execution loader,
+and supporting libraries are exact catalog-pinned root development dependencies.
+These research pins do not accept a production engine or qualify a PostgreSQL
+distribution for release.
+
+`research:od035:typecheck` compiles every fixture with the primary TypeScript
+compiler and the Foundation Node profile. `research:od035:check` also runs
+`.oxlintrc.research.json`, which inherits the protected Foundation typed preset
+and repository common policy, enables type-aware analysis, denies warnings, and
+disables nested configurations. Root `typecheck:root` invokes this explicit gate,
+so both full and fast verification include the research source. The production
+quality topology and its mandatory test identities remain unchanged.
+
+The source graph declares development boundaries for the bootstrap and each
+candidate. A small PostgreSQL binary adapter resolves fixed public optional
+distribution exports relative to the wrapper package. Its reviewed CommonJS
+runtime-reference capability is limited to that file; it accepts no arbitrary
+module name or path. Research sources also remain inside suppression governance
+and the existing conformance-harness maintainability budgets.
+
+`pnpm research:od035 <candidate>` starts an owned disposable native PostgreSQL
+cluster, executes process-failure scenarios, records public JSON evidence, and
+stops its cluster. The native CI matrix uses the explicit Node 24 compatibility
+lane on Linux, macOS, and Windows. A negative control verifies that a bootstrap
+failure returns a nonzero status. Windows uses PostgreSQL's own `pg_ctl`
+restricted-process startup; all platforms initialize UTF-8 data. The results
+distinguish executed assertions, expected negative controls, and unsupported
+process-suspension probes. Successful runtime CI does not qualify signed
+installation, upgrades, restore, or every OS/architecture combination.
 
 ### Dependency catalogs
 

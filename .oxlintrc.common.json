@@ -9,7 +9,8 @@
         "packages/**/tests/**",
         "scripts/**/*.test.mjs",
         "scripts/**/fixtures/**",
-        "tooling/architecture-conformance/**"
+        "tooling/architecture-conformance/**",
+        "scripts/research/od035/**"
       ],
       "rules": {
         "complexity": [

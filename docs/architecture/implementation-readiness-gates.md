@@ -50,6 +50,7 @@ related:
   - OD-026
   - OD-033
   - OD-035
+  - ADR-0116
   - OD-036
   - OD-037
   - OD-038
@@ -239,11 +240,14 @@ Required evidence:
   queries, versioning, deployment routing, continue-as-new, and divergence
   reconciliation.
 
-The gate does not require deploying Temporal in every profile or implementing a
-Fully Local workflow engine in the first server slice. ADR-0115 requires the
-local profile for V1; OD-035 must select and qualify its durable adapter before
-the corresponding local release. The common workflow port does not select the
-same engine or lifecycle for both profiles.
+The gate does not require implementing the full local runtime in the first
+server slice. ADR-0115 requires Fully Local for V1, and ADR-0116 resolves OD-035
+by selecting full native Temporal with PostgreSQL. Local and hosted profiles
+use the same engine family behind an engine-independent port, with separately
+qualified lifecycle and resource limits. Deterministic in-process test schedulers
+remain valid; they do not become an in-memory production local fallback.
+OD-005's concrete workflow boundary and ADR-0116's implementation and release
+qualification conditions remain applicable.
 
 ## Gate 5: Deployment authority, target fencing, and runtime connectivity
 
@@ -276,8 +280,9 @@ Required evidence:
   cannot block cancellation, containment, recovery, deletion, or baseline access
   and export of customer-owned data;
 - deferred Fully Local packages retain the exact OD-021, OD-035, and OD-040 gate
-  set and are rejected by scaffolding and topology checks until OD-040 names the
-  accepted materialization decision.
+  set, with OD-035 resolved by ADR-0116; scaffolding and topology checks still
+  reject materialization until the remaining gates are resolved and OD-040
+  names the accepted materialization decision.
 
 The reliability catalog separately blocks profile qualification on OD-003 and
 OD-012. The OD-003 blocker is a qualification gate, not a slice-admission

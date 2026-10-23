@@ -6,12 +6,12 @@ owner: architecture/composition
 summary: Authorize the exact implementation start and package materialization scope for Fully Local.
 blocked_by:
   - OD-021
-  - OD-035
 related:
   - ADR-0090
   - ADR-0093
   - ADR-0114
   - ADR-0115
+  - ADR-0116
   - architecture.deployment-profiles
   - architecture.local-host-lifecycle
   - OD-021
@@ -28,8 +28,10 @@ contracts must their first slices implement?
 
 ADR-0115 requires Fully Local in V1. This decision is now implementation-start
 work on that release path, not a question of deferring the profile beyond V1.
-It remains open until the lifecycle, workflow, and exact first-slice contracts
-below are accepted; the release-scope decision does not resolve those contracts.
+ADR-0116 has resolved OD-035 by selecting full native Temporal behind owned
+ports. This materialization decision remains open until the remaining lifecycle
+and exact first-slice contracts below are accepted. Engine selection does not
+authorize package creation or qualify the native product.
 
 ## Why this remains open
 
@@ -63,7 +65,8 @@ database process, or authoritative local cache.
 ## Acceptance criteria
 
 - accepted Local Supervisor lifecycle and distribution boundary;
-- accepted local durable workflow adapter boundary;
+- accepted local durable workflow adapter boundary, now selected by ADR-0116,
+  with the first slice's concrete OD-005 contracts still required;
 - exact first package slices and owners;
 - explicit non-goals for the first Fully Local implementation increment;
 - the first supported native PostgreSQL composition and remaining packaging,

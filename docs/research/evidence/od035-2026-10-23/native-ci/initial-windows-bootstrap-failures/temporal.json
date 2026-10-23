@@ -1,0 +1,12 @@
+{
+  "candidate": "temporal",
+  "platform": "win32",
+  "architecture": "x64",
+  "node": "v24.21.0",
+  "startedAt": "2026-10-23T16:28:30.814Z",
+  "kind": "native-engine-research",
+  "releaseQualification": false,
+  "outcome": "failed",
+  "error": "Unknown bootstrap failure",
+  "finishedAt": "2026-10-23T16:28:33.484Z"
+}

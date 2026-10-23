@@ -1,0 +1,20 @@
+{
+  "candidate": "openworkflow",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "node": "v24.21.0",
+  "startedAt": "2026-10-23T16:40:24.211Z",
+  "kind": "native-engine-research",
+  "releaseQualification": false,
+  "postgresBinaryArchitecture": "Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64]\n/Users/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/node_modules/.pnpm/@embedded-postgres+darwin-arm64@18.4.0-beta.17/node_modules/@embedded-postgres/darwin-arm64/native/bin/postgres (for architecture x86_64):\tMach-O 64-bit executable x86_64\n/Users/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/node_modules/.pnpm/@embedded-postgres+darwin-arm64@18.4.0-beta.17/node_modules/@embedded-postgres/darwin-arm64/native/bin/postgres (for architecture arm64):\tMach-O 64-bit executable arm64",
+  "postgresLifecycle": "embedded-postgres direct child",
+  "postgres": {
+    "version": "PostgreSQL 18.4 on x86_64-apple-darwin24.6.0, compiled by Apple clang version 17.0.0 (clang-1700.6.3.2), 64-bit",
+    "fsync": "on",
+    "full_page_writes": "on",
+    "synchronous_commit": "on"
+  },
+  "outcome": "passed",
+  "databaseStopped": true,
+  "finishedAt": "2026-10-23T16:41:03.482Z"
+}

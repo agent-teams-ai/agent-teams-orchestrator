@@ -16,6 +16,7 @@ related:
   - ADR-0093
   - ADR-0114
   - ADR-0115
+  - ADR-0116
   - architecture.composition
   - architecture.context-map
   - architecture.testing
@@ -375,7 +376,7 @@ failed remote request is not retried against a local Host.
 ## Fully Local V1 topology
 
 Fully Local composes the Local Host, shared context-owned PostgreSQL
-adapters, a bundled native PostgreSQL cluster, local workflow adapter, local
+adapters, a bundled native PostgreSQL cluster, full native Temporal, local
 realtime edge, and AR execution components under the Local Supervisor. One
 Target data root persists across component versions and is shared by clients;
 there is no database per client, project, or agent. Components are independently
@@ -387,10 +388,15 @@ behind the Supervisor component adapter. Neither selects a Desktop framework or
 qualifies an exact launcher dependency. The [packaged PostgreSQL matrix](local-host-lifecycle.md#packaged-postgresql-qualification)
 requires evidence for each released platform and capability, including actual
 restore. ADR-0115 requires this profile in V1, while OD-040 remains the separate
-package-materialization gate. OD-035
-names OpenWorkflow as the preferred local workflow spike candidate, now requiring
-its PostgreSQL backend. Engine selection cannot change public resource, persistence port,
-workflow-state, feed, recovery, or authority boundaries.
+package-materialization gate. [ADR-0116](../decisions/0116-native-temporal-for-fully-local-durable-workflows.md)
+resolves OD-035 by selecting full native Temporal with PostgreSQL behind owned,
+engine-independent scheduling ports. Local and hosted profiles use the same
+engine family with their distinct lifecycle and resource budgets. The SQLite
+development server is not a production local implementation. Engine selection
+cannot change public resource, persistence port, business workflow state, feed,
+recovery, or authority boundaries. Signed native packaging, upgrades, restore,
+history maintenance, and workload qualification remain required; the research
+matrix does not qualify the complete local product.
 
 Baseline local orchestration has no required Agent Teams cloud account, Platform
 runtime, or managed commercial connection. External provider capabilities retain
