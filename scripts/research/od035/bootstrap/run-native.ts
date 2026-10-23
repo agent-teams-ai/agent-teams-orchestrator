@@ -3,9 +3,10 @@ import { spawn } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
 import { mkdir, mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { createServer } from 'node:net';
-import { tmpdir, platform, arch } from 'node:os';
+import { tmpdir, platform, arch, userInfo } from 'node:os';
 import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { postgresBinaries } from './postgres-binaries.ts';
 
 const root = resolvePath(dirname(fileURLToPath(import.meta.url)), '..');
 const candidate = process.argv[2];
@@ -21,6 +22,20 @@ const summary: Record<string, unknown> = {
   startedAt: new Date().toISOString(), kind: 'native-engine-research',
   releaseQualification: false,
 };
+
+async function binaryArchitecture(binary: string): Promise<string> {
+  if (platform() === 'win32') { return 'Windows x64 distribution; no independent PE inspection in this fixture'; }
+  return new Promise((resolve, reject) => {
+    const child = spawn('file', ['-b', binary], { stdio: ['ignore', 'pipe', 'pipe'] });
+    let outputText = '';
+    child.stdout.on('data', (chunk: Buffer) => { outputText += chunk.toString(); });
+    child.once('error', reject);
+    child.once('exit', (code) => {
+      if (code === 0) { resolve(outputText.trim()); }
+      else { reject(new Error(`PostgreSQL binary inspection exited ${String(code)}`)); }
+    });
+  });
+}
 
 async function availablePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -85,19 +100,41 @@ async function temporalArtifacts(): Promise<NodeJS.ProcessEnv> {
 }
 
 const port = await availablePort();
+const dataDirectory = join(temporary, 'postgres');
+const postgresFlags = ['-h', '127.0.0.1', '-c', 'max_connections=160', '-c', 'fsync=on', '-c', 'full_page_writes=on', '-c', 'synchronous_commit=on'];
 const database = new EmbeddedPostgres({
-  databaseDir: join(temporary, 'postgres'), user: 'od035', password, port,
+  databaseDir: dataDirectory, user: 'od035', password, port,
   authMethod: 'scram-sha-256', persistent: true,
-  postgresFlags: ['-h', '127.0.0.1', '-c', 'max_connections=160', '-c', 'fsync=on', '-c', 'full_page_writes=on', '-c', 'synchronous_commit=on'],
+  initdbFlags: ['--encoding=UTF8'], postgresFlags,
 });
 let started = false;
+let exitStatus = 0;
+let phase = 'bootstrap fault control';
+let binaryPaths: {postgres: string; pgCtl: string} | undefined;
 try {
+  if (process.env.OD035_RESEARCH_FORCE_BOOTSTRAP_FAILURE === '1') { throw new Error('intentional-bootstrap-failure'); }
+  phase = 'resolve PostgreSQL distribution';
+  binaryPaths = postgresBinaries();
+  summary.postgresBinaryArchitecture = await binaryArchitecture(binaryPaths.postgres);
+  if (platform() === 'win32') {
+    // pg_ctl uses upstream CreateRestrictedProcess; grant this user, not an admin group, the owned directory.
+    await execute('icacls', [temporary, '/grant', `${userInfo().username}:(OI)(CI)F`, '/T', '/Q'], temporary);
+  }
+  phase = 'initialize PostgreSQL';
   await database.initialise();
-  await database.start();
+  phase = 'start PostgreSQL';
+  if (platform() === 'win32') {
+    await execute(binaryPaths.pgCtl, ['start', '-D', dataDirectory, '-l', join(temporary, 'postgres.log'), '-w', '-t', '60', '-o', `-p ${String(port)} ${postgresFlags.join(' ')}`], temporary);
+    summary.postgresLifecycle = 'upstream pg_ctl restricted-process start and fast stop';
+  } else {
+    await database.start();
+    summary.postgresLifecycle = 'embedded-postgres direct child';
+  }
   started = true;
-  await database.createDatabase('workflow_spikes');
-  const client = database.getPgClient();
+  phase = 'probe PostgreSQL and create fixture database';
+  const client = database.getPgClient('postgres', '127.0.0.1');
   await client.connect();
+  await client.query('CREATE DATABASE workflow_spikes');
   summary.postgres = (await client.query<{version: string; fsync: string; full_page_writes: string; synchronous_commit: string}>("SELECT version(), current_setting('fsync') AS fsync, current_setting('full_page_writes') AS full_page_writes, current_setting('synchronous_commit') AS synchronous_commit")).rows[0];
   await client.end();
   const url = `postgresql://od035:${password}@127.0.0.1:${String(port)}/workflow_spikes`;
@@ -109,19 +146,29 @@ try {
     PG_CONFIG_PATH: configPath, SPIKE_OUTPUT_DIR: output,
   };
   const script = candidate === 'temporal' ? 'run.ts' : 'harness.ts';
+  phase = `execute ${candidate} scenarios`;
   await execute(process.execPath, ['--import', 'tsx', script], join(root, candidate), environment);
+  const results: unknown = JSON.parse(await readFile(join(output, 'results.json'), 'utf8'));
+  if (typeof results !== 'object' || results === null) { throw new Error('Engine fixture did not produce a JSON result object'); }
   summary.outcome = 'passed';
 } catch (error) {
   summary.outcome = 'failed';
-  summary.error = (error instanceof Error ? error.message : 'Unknown bootstrap failure').replaceAll(password, '[redacted]');
-  process.exitCode = 1;
+  summary.error = `${phase}: ${error instanceof Error ? error.message : 'Native process failed without an error value; inspect its startup output'}`.replaceAll(password, '[redacted]');
+  exitStatus = 1;
 } finally {
   if (started) {
-    try { await database.stop(); summary.databaseStopped = true; }
-    catch (error) { summary.databaseStopped = false; summary.cleanupError = (error instanceof Error ? error.message : 'Unknown cleanup failure').replaceAll(password, '[redacted]'); process.exitCode = 1; }
+    try {
+      if (platform() === 'win32' && binaryPaths !== undefined) {
+        await execute(binaryPaths.pgCtl, ['stop', '-D', dataDirectory, '-m', 'fast', '-w', '-t', '60'], temporary);
+      } else { await database.stop(); }
+      summary.databaseStopped = true;
+    } catch (error) { summary.databaseStopped = false; summary.cleanupError = (error instanceof Error ? error.message : 'Unknown cleanup failure').replaceAll(password, '[redacted]'); exitStatus = 1; }
   }
   summary.finishedAt = new Date().toISOString();
   await writeFile(join(output, 'native-summary.json'), `${JSON.stringify(summary, null, 2)}\n`);
   console.log(JSON.stringify(summary));
-  if (summary.databaseStopped === true) { await rm(temporary, { recursive: true, force: true }); }
+  if (summary.databaseStopped === true || phase === 'bootstrap fault control') { await rm(temporary, { recursive: true, force: true }); }
 }
+// async-exit-hook in this distribution forces beforeExit to zero, overriding exitCode.
+// All owned cleanup and evidence writes have completed before this explicit status.
+process.exit(exitStatus);

@@ -43,6 +43,8 @@ jobs:
         run: pnpm install --frozen-lockfile --config.engine-strict=true --strict-peer-dependencies
       - name: Check spike types and typed lint
         run: pnpm research:od035:check
+      - name: Reject a false-green bootstrap failure
+        run: node --import tsx scripts/research/od035/bootstrap/verify-failure-exit.ts
       - name: Run the native PostgreSQL engine fixture
         run: pnpm research:od035 ${{ matrix.engine }}
       - name: Preserve public research evidence

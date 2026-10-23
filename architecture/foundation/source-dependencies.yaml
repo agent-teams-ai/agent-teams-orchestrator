@@ -22,14 +22,18 @@ boundaries:
   - id: research.od035.bootstrap
     dependencyMode: development
     roots:
-      - scripts/research/od035/bootstrap
+      - scripts/research/od035/bootstrap/run-native.ts
+      - scripts/research/od035/bootstrap/verify-failure-exit.ts
     entrypoints:
       - scripts/research/od035/bootstrap/run-native.ts
+      - scripts/research/od035/bootstrap/verify-failure-exit.ts
     allow:
-      boundaries: []
+      boundaries:
+        - research.od035.postgres-binaries
       packages:
         - embedded-postgres
       builtins:
+        - node:assert/strict
         - node:child_process
         - node:crypto
         - node:fs/promises
@@ -38,6 +42,28 @@ boundaries:
         - node:path
         - node:url
       runtimeReferences: []
+  - id: research.od035.postgres-binaries
+    dependencyMode: development
+    roots:
+      - scripts/research/od035/bootstrap/postgres-binaries.ts
+    entrypoints:
+      - scripts/research/od035/bootstrap/postgres-binaries.ts
+    allow:
+      boundaries: []
+      packages:
+        - embedded-postgres
+        - "@embedded-postgres/windows-x64"
+        - "@embedded-postgres/darwin-arm64"
+        - "@embedded-postgres/darwin-x64"
+        - "@embedded-postgres/linux-arm64"
+        - "@embedded-postgres/linux-x64"
+      builtins:
+        - node:module
+        - node:os
+      # Fixed public optional packages are resolved from the wrapper's manifest.
+      # The adapter accepts no arbitrary module name or path.
+      runtimeReferences:
+        - commonjs
   - id: research.od035.openworkflow
     dependencyMode: development
     roots:

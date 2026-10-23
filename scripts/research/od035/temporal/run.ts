@@ -153,7 +153,7 @@ async function main(): Promise<void> {
   catch (error) { if (!hasCode(error, 6)) {throw error;} }
   client = new Client({ connection, namespace });
   let worker = await startWorker();
-  record('resourceSnapshot', { coldStartToGrpcMs: coldStartMs, serverPid: service.pid, workerPid: worker.pid, serverRssKb: rssKb(service.pid), workerRssKb: rssKb(worker.pid), databaseExcluded: true, methodology: 'One cold process launch after schemas were migrated and PostgreSQL was already running; /proc/PID/status VmRSS immediately after Worker ready. No benchmark claim.' });
+  record('resourceSnapshot', { coldStartToGrpcMs: coldStartMs, serverPid: service.pid, workerPid: worker.pid, serverRssKb: rssKb(service.pid), workerRssKb: rssKb(worker.pid), databaseExcluded: true, methodology: 'One cold process launch after schemas were migrated and PostgreSQL was already running; Linux-only /proc/PID/status VmRSS immediately after Worker ready, null on other platforms. No benchmark claim.' });
 
   await approvalScenarios();
   if (process.env.TEMPORAL_SMOKE_ONLY === '1') {
@@ -216,7 +216,7 @@ async function waitingScenario(): Promise<void> {
   record('boundedWorkersWith80DurableWaits', { pass: true, waitingWorkflows: 80, workflowTaskExecutionConcurrency: 4,
     activityTaskExecutionConcurrency: 4, businessPoolMaxPerWorker: 4,
     serverPoolMaxPerService: { default: 8, visibility: 2 }, observedConnectionsByDatabase: connections.rows,
-    cancelLatencyMs, controlCompletionMs, limitation: 'One Linux x64 process/sample; no large-scale throughput claim. Workflow task slots are released across durable waits.' });
+    cancelLatencyMs, controlCompletionMs, limitation: `One ${process.platform} ${process.arch} process/sample; no large-scale throughput claim. Workflow task slots are released across durable waits.` });
 
 }
 
