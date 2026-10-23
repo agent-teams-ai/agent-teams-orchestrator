@@ -1,0 +1,27 @@
+{
+  "candidate": "temporal",
+  "platform": "win32",
+  "architecture": "x64",
+  "node": "v24.21.0",
+  "startedAt": "2026-10-23T16:41:16.716Z",
+  "kind": "native-engine-research",
+  "releaseQualification": false,
+  "postgresBinaryArchitecture": "Windows x64 distribution; no independent PE inspection in this fixture",
+  "postgresLifecycle": "upstream pg_ctl restricted-process start and fast stop",
+  "postgres": {
+    "version": "PostgreSQL 18.4 on x86_64-windows, compiled by msvc-19.44.35226, 64-bit",
+    "fsync": "on",
+    "full_page_writes": "on",
+    "synchronous_commit": "on"
+  },
+  "temporalArtifacts": {
+    "filename": "temporal_1.32.1_windows_amd64.zip",
+    "sha256": "bf630fbe2666bd951f22f2625ee18c3b2062d809a1ff4b6adbc74f5ca9a56202",
+    "sourceArchiveSha256": "9a1766efcdc2acf03165e0304549d00930e18ff4fbf2c5abe27732fe7c04f7ee",
+    "server": "1.32.1",
+    "sdk": "1.24.0"
+  },
+  "outcome": "passed",
+  "databaseStopped": true,
+  "finishedAt": "2026-10-23T16:43:01.971Z"
+}

@@ -127,6 +127,7 @@ Retained evidence:
 - [DBOS assertions and observations](../research/evidence/od035-2026-10-23/dbos/results.json)
 - [Temporal assertions and observations](../research/evidence/od035-2026-10-23/temporal/results-linux-x64.json)
 - [Temporal native artifacts and SDK targets](../research/evidence/od035-2026-10-23/temporal/artifact-evidence.json)
+- [Native CI matrix and original platform results](../research/evidence/od035-2026-10-23/native-ci/matrix.json)
 - [Source and evidence manifest](../research/evidence/od035-2026-10-23/manifest.json)
 
 A passing assertion can mean an **expected negative control was reproduced**.
@@ -135,6 +136,42 @@ Temporal replay is not a successful production behavior. Counts across the
 harnesses are not comparable reliability measurements. These fixtures exercise
 comparable business invariants; they are not yet a shared production contract
 suite or identical event-trace oracle.
+
+### Native cross-platform execution
+
+The reviewed [native CI run](https://github.com/agent-teams-ai/agent-teams-orchestrator/actions/runs/39988635688)
+executed the retained source at commit
+`e6037277984c9b408ff45bf9a840369a71a7af3c`, using Node `24.21.0` and the frozen
+repository toolchain. All nine jobs passed actual result and cleanup inspection.
+Original JSON bytes and artifact digests are retained in the matrix evidence.
+
+| Candidate | Linux x64 | macOS arm64 runner | Windows x64 |
+| --- | --- | --- | --- |
+| OpenWorkflow | 18 assertions matched | 18 assertions matched | 17 matched, 1 explicit skip |
+| DBOS OSS | 15 assertions matched | 15 assertions matched | 13 matched, 2 explicit skips |
+| Full native Temporal | 11 assertions matched | 11 assertions matched | 10 matched, 1 explicit skip |
+
+Windows skips are the POSIX `SIGSTOP`/`SIGCONT` predecessor-suspension probes.
+They are not passes. Resource snapshots are excluded from assertion counts.
+The Windows Temporal result includes the actual full native service, PostgreSQL,
+Worker/service termination, persisted timer recovery, patching, and incompatible
+replay rejection. It does not depend on WSL, Docker, or the development server.
+
+The first matrix exposed a bootstrap defect before any Windows engine ran:
+direct PostgreSQL startup rejected the administrative runner token, while the
+distribution's `async-exit-hook` dependency converted the failure into exit zero.
+Those job conclusions were rejected as evidence. The corrected fixture uses
+upstream `pg_ctl` restricted-process startup, explicit access to its owned
+directory, UTF-8 initialization, and an explicit exit status after cleanup.
+A deliberate bootstrap-failure control passed in all nine corrected jobs.
+The original failure summaries remain in the evidence set.
+
+Independent binary inspection identifies Linux PostgreSQL as ELF x86-64 and
+macOS PostgreSQL as a universal Mach-O binary with both x86_64 and arm64 slices.
+The macOS version string alone had misleading x86_64 build metadata. Windows
+uses the pinned x64 package and reports x86_64; independent PE inspection is not
+part of this fixture. These results establish the tested runtime combinations,
+not signed installation, supported Windows ARM64, or release qualification.
 
 ### Results that affect the choice
 
@@ -357,8 +394,9 @@ or database credentials. The
 [native research workflow](../../.github/workflows/od035-native-research.yml)
 runs each candidate on Linux, macOS, and Windows and retains only public JSON
 results. POSIX `SIGSTOP` probes explicitly skip native Windows; the result is
-not counted as passed there. Its run links and results must be reviewed before
-claiming any cross-platform coverage.
+not counted as passed there. The reviewed run above qualifies only its recorded
+runtime combinations and fixture source; later source changes require new
+execution evidence.
 
 ## Remaining production qualification gates
 

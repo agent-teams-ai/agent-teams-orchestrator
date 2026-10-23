@@ -1,0 +1,20 @@
+{
+  "candidate": "dbos",
+  "platform": "linux",
+  "architecture": "x64",
+  "node": "v24.21.0",
+  "startedAt": "2026-10-23T16:40:10.751Z",
+  "kind": "native-engine-research",
+  "releaseQualification": false,
+  "postgresBinaryArchitecture": "ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=d3a31edfd6c6b2c9cac9d3e0f99f18fb46e336bc, not stripped",
+  "postgresLifecycle": "embedded-postgres direct child",
+  "postgres": {
+    "version": "PostgreSQL 18.4 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0, 64-bit",
+    "fsync": "on",
+    "full_page_writes": "on",
+    "synchronous_commit": "on"
+  },
+  "outcome": "passed",
+  "databaseStopped": true,
+  "finishedAt": "2026-10-23T16:40:40.455Z"
+}

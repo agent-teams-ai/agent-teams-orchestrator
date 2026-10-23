@@ -1,0 +1,1428 @@
+{
+  "resultInterpretation": "Passed means assertion matched, including deliberately observed negative controls; this is not engine or release qualification",
+  "engine": "OpenWorkflow",
+  "version": "0.11.0",
+  "sourceCommit": "80d90b8d06b0cd43023dd324caa51fe35de4588f",
+  "runtime": "v24.21.0",
+  "os": "darwin",
+  "arch": "arm64",
+  "namespaceId": "od035-20261023164025625",
+  "started": {
+    "scenario": "raw-early-signal-is-lost-negative-control",
+    "status": "passed",
+    "started": "2026-10-23T16:40:25.684Z",
+    "finished": "2026-10-23T16:40:26.446Z",
+    "details": {
+      "id": "od035-20261023164025625-raw-1",
+      "runId": "d9e1def1-eae1-44bc-a62b-582ce12f2b36",
+      "sent": {
+        "workflowRunIds": []
+      },
+      "final": {
+        "workflowScheduleId": null,
+        "namespaceId": "od035-20261023164025625",
+        "id": "d9e1def1-eae1-44bc-a62b-582ce12f2b36",
+        "workflowName": "raw",
+        "version": "1",
+        "status": "completed",
+        "idempotencyKey": null,
+        "config": {},
+        "context": null,
+        "input": {
+          "id": "od035-20261023164025625-raw-1",
+          "race": false
+        },
+        "output": {
+          "received": false
+        },
+        "error": null,
+        "attempts": 2,
+        "parentStepAttemptNamespaceId": null,
+        "parentStepAttemptId": null,
+        "workerId": "c917d4ca-8831-4021-8e7c-c566237762fb",
+        "availableAt": null,
+        "deadlineAt": null,
+        "startedAt": "2026-10-23T16:40:25.876Z",
+        "finishedAt": "2026-10-23T16:40:26.436Z",
+        "createdAt": "2026-10-23T16:40:25.694Z",
+        "updatedAt": "2026-10-23T16:40:26.436Z"
+      }
+    }
+  },
+  "results": [
+    {
+      "scenario": "raw-early-signal-is-lost-negative-control",
+      "status": "passed",
+      "started": "2026-10-23T16:40:25.684Z",
+      "finished": "2026-10-23T16:40:26.446Z",
+      "details": {
+        "id": "od035-20261023164025625-raw-1",
+        "runId": "d9e1def1-eae1-44bc-a62b-582ce12f2b36",
+        "sent": {
+          "workflowRunIds": []
+        },
+        "final": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "d9e1def1-eae1-44bc-a62b-582ce12f2b36",
+          "workflowName": "raw",
+          "version": "1",
+          "status": "completed",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-raw-1",
+            "race": false
+          },
+          "output": {
+            "received": false
+          },
+          "error": null,
+          "attempts": 2,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": "c917d4ca-8831-4021-8e7c-c566237762fb",
+          "availableAt": null,
+          "deadlineAt": null,
+          "startedAt": "2026-10-23T16:40:25.876Z",
+          "finishedAt": "2026-10-23T16:40:26.436Z",
+          "createdAt": "2026-10-23T16:40:25.694Z",
+          "updatedAt": "2026-10-23T16:40:26.436Z"
+        }
+      }
+    },
+    {
+      "scenario": "approval-commit-before-wait-durable-timeout-rechecks",
+      "status": "passed",
+      "started": "2026-10-23T16:40:26.448Z",
+      "finished": "2026-10-23T16:40:27.864Z",
+      "details": {
+        "id": "od035-20261023164025625-approval-2",
+        "runId": "72eaa598-dfb3-4622-b562-ff3c6fd8b12c",
+        "sent": {
+          "workflowRunIds": []
+        },
+        "final": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "72eaa598-dfb3-4622-b562-ff3c6fd8b12c",
+          "workflowName": "approval",
+          "version": "1",
+          "status": "completed",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-approval-2",
+            "race": true
+          },
+          "output": {
+            "outcome": "applied"
+          },
+          "error": null,
+          "attempts": 2,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": "62634e59-f797-418c-9383-7ebaadce5b1d",
+          "availableAt": null,
+          "deadlineAt": null,
+          "startedAt": "2026-10-23T16:40:26.627Z",
+          "finishedAt": "2026-10-23T16:40:27.856Z",
+          "createdAt": "2026-10-23T16:40:26.449Z",
+          "updatedAt": "2026-10-23T16:40:27.856Z"
+        },
+        "snapshot": {
+          "state": {
+            "id": "od035-20261023164025625-approval-2",
+            "approved": true,
+            "canceled": false,
+            "generation": "1",
+            "counter": "1"
+          },
+          "trace": [
+            {
+              "seq": "1",
+              "event": "activate-attempt",
+              "detail": "applied",
+              "created_at": "2026-10-23T16:40:27.854Z"
+            }
+          ]
+        },
+        "mechanism": "feature-specific loop; step.waitForSignal timeout; named step per authoritative read"
+      }
+    },
+    {
+      "scenario": "approval-COMMIT-process-dies-before-signal-recovered-with-no-send",
+      "status": "passed",
+      "started": "2026-10-23T16:40:27.866Z",
+      "finished": "2026-10-23T16:40:30.069Z",
+      "details": {
+        "id": "od035-20261023164025625-approval-3",
+        "runId": "68a70660-4159-46b7-96ec-1b772d446da1",
+        "committed": {
+          "state": {
+            "id": "od035-20261023164025625-approval-3",
+            "approved": true,
+            "canceled": false,
+            "generation": "1",
+            "counter": "0"
+          },
+          "trace": []
+        },
+        "final": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "68a70660-4159-46b7-96ec-1b772d446da1",
+          "workflowName": "approval",
+          "version": "1",
+          "status": "completed",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-approval-3",
+            "race": true
+          },
+          "output": {
+            "outcome": "applied"
+          },
+          "error": null,
+          "attempts": 3,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": "18f35757-ada0-486d-8b8d-b96b205146ee",
+          "availableAt": null,
+          "deadlineAt": null,
+          "startedAt": "2026-10-23T16:40:28.075Z",
+          "finishedAt": "2026-10-23T16:40:30.047Z",
+          "createdAt": "2026-10-23T16:40:27.881Z",
+          "updatedAt": "2026-10-23T16:40:30.047Z"
+        },
+        "snapshot": {
+          "state": {
+            "id": "od035-20261023164025625-approval-3",
+            "approved": true,
+            "canceled": false,
+            "generation": "1",
+            "counter": "1"
+          },
+          "trace": [
+            {
+              "seq": "2",
+              "event": "activate-attempt",
+              "detail": "applied",
+              "created_at": "2026-10-23T16:40:30.046Z"
+            }
+          ]
+        },
+        "signalSends": 0,
+        "observation": "durable authoritative approval survives sender/worker crash with no wake delivery; engine timeout causes fresh read"
+      }
+    },
+    {
+      "scenario": "supported-recurring-reconciliation-after-worker-outage",
+      "status": "passed",
+      "started": "2026-10-23T16:40:30.071Z",
+      "finished": "2026-10-23T16:40:33.462Z",
+      "details": {
+        "id": "od035-20261023164025625-reconcile-4",
+        "schedule": {
+          "namespaceId": "od035-20261023164025625",
+          "id": "od035-20261023164025625-reconcile-4:schedule",
+          "workflowName": "reconcile",
+          "input": {
+            "id": "od035-20261023164025625-reconcile-4"
+          },
+          "cron": "* * * * * *",
+          "timezone": "UTC",
+          "nextRunAt": "2026-10-23T16:40:31.000Z",
+          "createdAt": "2026-10-23T16:40:30.113Z",
+          "updatedAt": "2026-10-23T16:40:30.113Z"
+        },
+        "committed": {
+          "state": {
+            "id": "od035-20261023164025625-reconcile-4",
+            "approved": true,
+            "canceled": false,
+            "generation": "1",
+            "counter": "0"
+          },
+          "trace": [
+            {
+              "seq": "3",
+              "event": "activate-attempt",
+              "detail": "approval-pending",
+              "created_at": "2026-10-23T16:40:31.379Z"
+            }
+          ]
+        },
+        "snapshot": {
+          "state": {
+            "id": "od035-20261023164025625-reconcile-4",
+            "approved": true,
+            "canceled": false,
+            "generation": "1",
+            "counter": "1"
+          },
+          "trace": [
+            {
+              "seq": "3",
+              "event": "activate-attempt",
+              "detail": "approval-pending",
+              "created_at": "2026-10-23T16:40:31.379Z"
+            },
+            {
+              "seq": "4",
+              "event": "activate-attempt",
+              "detail": "applied",
+              "created_at": "2026-10-23T16:40:33.452Z"
+            }
+          ]
+        },
+        "runs": [
+          {
+            "id": "a3c4e3b5-7721-48bf-be65-b39653ce8608",
+            "version": null,
+            "status": "completed",
+            "workflowScheduleId": "od035-20261023164025625-reconcile-4:schedule"
+          },
+          {
+            "id": "f82d3778-ef32-40a7-916e-d5764d861a23",
+            "version": null,
+            "status": "completed",
+            "workflowScheduleId": "od035-20261023164025625-reconcile-4:schedule"
+          }
+        ],
+        "observation": "supported persisted cron dispatch; finite per-tick workflow, no repository scheduler; retention still unbounded across runs"
+      }
+    },
+    {
+      "scenario": "recurring-schedule-rejects-versioned-workflow-negative-control",
+      "status": "passed",
+      "started": "2026-10-23T16:40:33.462Z",
+      "finished": "2026-10-23T16:40:33.463Z",
+      "details": {
+        "id": "od035-20261023164025625-schedule-version-5",
+        "error": "Error: Recurring schedules require an unversioned workflow",
+        "observation": "supported recurring schedule entrypoint must be unversioned; no silent version drop, no versioned recurring entrypoint"
+      }
+    },
+    {
+      "scenario": "duplicate-approval-and-command-receipt",
+      "status": "passed",
+      "started": "2026-10-23T16:40:33.463Z",
+      "finished": "2026-10-23T16:40:34.906Z",
+      "details": {
+        "id": "od035-20261023164025625-approval-6",
+        "runId": "853290ae-b3e5-467c-9050-34f6262d3c41",
+        "first": {
+          "workflowRunIds": [
+            "853290ae-b3e5-467c-9050-34f6262d3c41"
+          ]
+        },
+        "second": {
+          "workflowRunIds": [
+            "853290ae-b3e5-467c-9050-34f6262d3c41"
+          ]
+        },
+        "duplicate": {
+          "outcome": "duplicate-receipt"
+        },
+        "snapshot": {
+          "state": {
+            "id": "od035-20261023164025625-approval-6",
+            "approved": true,
+            "canceled": false,
+            "generation": "1",
+            "counter": "1"
+          },
+          "trace": [
+            {
+              "seq": "5",
+              "event": "activate-attempt",
+              "detail": "applied",
+              "created_at": "2026-10-23T16:40:34.900Z"
+            },
+            {
+              "seq": "6",
+              "event": "activate-attempt",
+              "detail": "duplicate-receipt",
+              "created_at": "2026-10-23T16:40:34.905Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "SIGKILL-after-business-commit-before-engine-checkpoint",
+      "status": "passed",
+      "started": "2026-10-23T16:40:34.908Z",
+      "finished": "2026-10-23T16:40:35.940Z",
+      "details": {
+        "id": "od035-20261023164025625-gap-7",
+        "runId": "8a851d19-628b-48b6-956e-a77c733aa2f4",
+        "historyBefore": [
+          {
+            "stepName": "activate",
+            "status": "running"
+          }
+        ],
+        "before": {
+          "state": {
+            "id": "od035-20261023164025625-gap-7",
+            "approved": true,
+            "canceled": false,
+            "generation": "1",
+            "counter": "1"
+          },
+          "trace": [
+            {
+              "seq": "7",
+              "event": "activate-attempt",
+              "detail": "applied",
+              "created_at": "2026-10-23T16:40:35.092Z"
+            }
+          ]
+        },
+        "after": {
+          "state": {
+            "id": "od035-20261023164025625-gap-7",
+            "approved": true,
+            "canceled": false,
+            "generation": "1",
+            "counter": "1"
+          },
+          "trace": [
+            {
+              "seq": "7",
+              "event": "activate-attempt",
+              "detail": "applied",
+              "created_at": "2026-10-23T16:40:35.092Z"
+            },
+            {
+              "seq": "8",
+              "event": "activate-attempt",
+              "detail": "duplicate-receipt",
+              "created_at": "2026-10-23T16:40:35.915Z"
+            }
+          ]
+        },
+        "final": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "8a851d19-628b-48b6-956e-a77c733aa2f4",
+          "workflowName": "gap",
+          "version": "1",
+          "status": "completed",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-gap-7",
+            "race": false
+          },
+          "output": {
+            "outcome": "duplicate-receipt"
+          },
+          "error": null,
+          "attempts": 2,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": "213863f0-bf09-4879-bfb4-ef3f84e0fbab",
+          "availableAt": null,
+          "deadlineAt": null,
+          "startedAt": "2026-10-23T16:40:35.077Z",
+          "finishedAt": "2026-10-23T16:40:35.917Z",
+          "createdAt": "2026-10-23T16:40:34.909Z",
+          "updatedAt": "2026-10-23T16:40:35.917Z"
+        },
+        "guaranteeOwner": "business transaction + command receipt, not engine exactly-once"
+      }
+    },
+    {
+      "scenario": "durable-timer-SIGKILL-restart",
+      "status": "passed",
+      "started": "2026-10-23T16:40:35.942Z",
+      "finished": "2026-10-23T16:40:37.864Z",
+      "details": {
+        "id": "od035-20261023164025625-timer-8",
+        "runId": "726eea9d-e54c-488b-8ff7-9b1e34c3036b",
+        "asleep": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "726eea9d-e54c-488b-8ff7-9b1e34c3036b",
+          "workflowName": "timer",
+          "version": "1",
+          "status": "running",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-timer-8",
+            "race": false
+          },
+          "output": null,
+          "error": null,
+          "attempts": 1,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": null,
+          "availableAt": "2026-10-23T16:40:37.422Z",
+          "deadlineAt": null,
+          "startedAt": "2026-10-23T16:40:36.177Z",
+          "finishedAt": null,
+          "createdAt": "2026-10-23T16:40:35.943Z",
+          "updatedAt": "2026-10-23T16:40:36.224Z"
+        },
+        "final": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "726eea9d-e54c-488b-8ff7-9b1e34c3036b",
+          "workflowName": "timer",
+          "version": "1",
+          "status": "completed",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-timer-8",
+            "race": false
+          },
+          "output": {
+            "outcome": "applied"
+          },
+          "error": null,
+          "attempts": 2,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": "03310873-4ac9-4e78-9293-cdf1cbb4367b",
+          "availableAt": null,
+          "deadlineAt": null,
+          "startedAt": "2026-10-23T16:40:36.177Z",
+          "finishedAt": "2026-10-23T16:40:37.833Z",
+          "createdAt": "2026-10-23T16:40:35.943Z",
+          "updatedAt": "2026-10-23T16:40:37.833Z"
+        },
+        "snapshot": {
+          "state": {
+            "id": "od035-20261023164025625-timer-8",
+            "approved": true,
+            "canceled": false,
+            "generation": "1",
+            "counter": "1"
+          },
+          "trace": [
+            {
+              "seq": "10",
+              "event": "activate-attempt",
+              "detail": "applied",
+              "created_at": "2026-10-23T16:40:37.831Z"
+            },
+            {
+              "seq": "9",
+              "event": "before-timer",
+              "detail": "",
+              "created_at": "2026-10-23T16:40:36.220Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "pending-approval-compatible-code-named-step-identity",
+      "status": "passed",
+      "started": "2026-10-23T16:40:37.865Z",
+      "finished": "2026-10-23T16:40:38.350Z",
+      "details": {
+        "id": "od035-20261023164025625-upgrade-9",
+        "runId": "034a5444-464c-4576-a01e-1a11aa469bb2",
+        "final": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "034a5444-464c-4576-a01e-1a11aa469bb2",
+          "workflowName": "upgrade",
+          "version": "1",
+          "status": "completed",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-upgrade-9",
+            "race": false
+          },
+          "output": {
+            "outcome": "applied"
+          },
+          "error": null,
+          "attempts": 2,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": "06ec5030-6ac3-4ee5-a765-0bed57621f1d",
+          "availableAt": null,
+          "deadlineAt": null,
+          "startedAt": "2026-10-23T16:40:38.037Z",
+          "finishedAt": "2026-10-23T16:40:38.323Z",
+          "createdAt": "2026-10-23T16:40:37.867Z",
+          "updatedAt": "2026-10-23T16:40:38.323Z"
+        },
+        "snapshot": {
+          "state": {
+            "id": "od035-20261023164025625-upgrade-9",
+            "approved": true,
+            "canceled": false,
+            "generation": "1",
+            "counter": "1"
+          },
+          "trace": [
+            {
+              "seq": "11",
+              "event": "prepared",
+              "detail": "1",
+              "created_at": "2026-10-23T16:40:38.050Z"
+            },
+            {
+              "seq": "12",
+              "event": "new-compatible-step",
+              "detail": "",
+              "created_at": "2026-10-23T16:40:38.290Z"
+            },
+            {
+              "seq": "13",
+              "event": "version-route",
+              "detail": "1",
+              "created_at": "2026-10-23T16:40:38.299Z"
+            },
+            {
+              "seq": "14",
+              "event": "activate-attempt",
+              "detail": "applied",
+              "created_at": "2026-10-23T16:40:38.322Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "scenario": "pending-approval-explicit-incompatible-version-routes-N-and-Nminus1",
+      "status": "passed",
+      "started": "2026-10-23T16:40:38.352Z",
+      "finished": "2026-10-23T16:40:49.488Z",
+      "details": {
+        "old": {
+          "id": "od035-20261023164025625-upgrade-10",
+          "runId": "c5144c3d-98ee-4580-b516-1cdb7513a7cf"
+        },
+        "next": {
+          "id": "od035-20261023164025625-upgrade-11",
+          "runId": "53626371-d9e7-46a5-924b-7a4d5f2c4f0c"
+        },
+        "oldWithOnlyV2": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "c5144c3d-98ee-4580-b516-1cdb7513a7cf",
+          "workflowName": "upgrade",
+          "version": "1",
+          "status": "pending",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-upgrade-10",
+            "race": false
+          },
+          "output": null,
+          "error": {
+            "message": "Workflow \"upgrade\" (version: 1) is not registered"
+          },
+          "attempts": 2,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": null,
+          "availableAt": "2026-10-23T16:40:48.700Z",
+          "deadlineAt": null,
+          "startedAt": null,
+          "finishedAt": null,
+          "createdAt": "2026-10-23T16:40:38.354Z",
+          "updatedAt": "2026-10-23T16:40:38.700Z"
+        },
+        "finals": [
+          {
+            "workflowScheduleId": null,
+            "namespaceId": "od035-20261023164025625",
+            "id": "c5144c3d-98ee-4580-b516-1cdb7513a7cf",
+            "workflowName": "upgrade",
+            "version": "1",
+            "status": "completed",
+            "idempotencyKey": null,
+            "config": {},
+            "context": null,
+            "input": {
+              "id": "od035-20261023164025625-upgrade-10",
+              "race": false
+            },
+            "output": {
+              "outcome": "applied"
+            },
+            "error": null,
+            "attempts": 3,
+            "parentStepAttemptNamespaceId": null,
+            "parentStepAttemptId": null,
+            "workerId": "99561f4b-58ce-41be-acfd-afe83ec15460",
+            "availableAt": null,
+            "deadlineAt": null,
+            "startedAt": "2026-10-23T16:40:49.422Z",
+            "finishedAt": "2026-10-23T16:40:49.448Z",
+            "createdAt": "2026-10-23T16:40:38.354Z",
+            "updatedAt": "2026-10-23T16:40:49.448Z"
+          },
+          {
+            "workflowScheduleId": null,
+            "namespaceId": "od035-20261023164025625",
+            "id": "53626371-d9e7-46a5-924b-7a4d5f2c4f0c",
+            "workflowName": "upgrade",
+            "version": "2",
+            "status": "completed",
+            "idempotencyKey": null,
+            "config": {},
+            "context": null,
+            "input": {
+              "id": "od035-20261023164025625-upgrade-11",
+              "race": false
+            },
+            "output": {
+              "outcome": "applied"
+            },
+            "error": null,
+            "attempts": 2,
+            "parentStepAttemptNamespaceId": null,
+            "parentStepAttemptId": null,
+            "workerId": "99561f4b-58ce-41be-acfd-afe83ec15460",
+            "availableAt": null,
+            "deadlineAt": null,
+            "startedAt": "2026-10-23T16:40:38.696Z",
+            "finishedAt": "2026-10-23T16:40:38.983Z",
+            "createdAt": "2026-10-23T16:40:38.539Z",
+            "updatedAt": "2026-10-23T16:40:38.983Z"
+          }
+        ],
+        "snapshots": [
+          {
+            "state": {
+              "id": "od035-20261023164025625-upgrade-10",
+              "approved": true,
+              "canceled": false,
+              "generation": "1",
+              "counter": "1"
+            },
+            "trace": [
+              {
+                "seq": "15",
+                "event": "prepared",
+                "detail": "1",
+                "created_at": "2026-10-23T16:40:38.530Z"
+              },
+              {
+                "seq": "19",
+                "event": "version-route",
+                "detail": "1",
+                "created_at": "2026-10-23T16:40:49.441Z"
+              },
+              {
+                "seq": "20",
+                "event": "activate-attempt",
+                "detail": "applied",
+                "created_at": "2026-10-23T16:40:49.446Z"
+              }
+            ]
+          },
+          {
+            "state": {
+              "id": "od035-20261023164025625-upgrade-11",
+              "approved": true,
+              "canceled": false,
+              "generation": "1",
+              "counter": "1"
+            },
+            "trace": [
+              {
+                "seq": "16",
+                "event": "prepared",
+                "detail": "2",
+                "created_at": "2026-10-23T16:40:38.712Z"
+              },
+              {
+                "seq": "17",
+                "event": "version-route",
+                "detail": "2",
+                "created_at": "2026-10-23T16:40:38.978Z"
+              },
+              {
+                "seq": "18",
+                "event": "activate-attempt",
+                "detail": "applied",
+                "created_at": "2026-10-23T16:40:38.982Z"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "unsafe-step-rename-same-version-negative-control",
+      "status": "passed",
+      "started": "2026-10-23T16:40:49.491Z",
+      "finished": "2026-10-23T16:40:49.942Z",
+      "details": {
+        "id": "od035-20261023164025625-upgrade-12",
+        "runId": "11eb1bbe-4f20-40ee-935b-a938a7c8745c",
+        "final": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "11eb1bbe-4f20-40ee-935b-a938a7c8745c",
+          "workflowName": "upgrade",
+          "version": "1",
+          "status": "completed",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-upgrade-12",
+            "race": false
+          },
+          "output": {
+            "outcome": "applied"
+          },
+          "error": null,
+          "attempts": 2,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": "1eb810df-f03d-4db1-a078-3c551daddf10",
+          "availableAt": null,
+          "deadlineAt": null,
+          "startedAt": "2026-10-23T16:40:49.680Z",
+          "finishedAt": "2026-10-23T16:40:49.909Z",
+          "createdAt": "2026-10-23T16:40:49.493Z",
+          "updatedAt": "2026-10-23T16:40:49.909Z"
+        },
+        "snapshot": {
+          "state": {
+            "id": "od035-20261023164025625-upgrade-12",
+            "approved": true,
+            "canceled": false,
+            "generation": "1",
+            "counter": "1"
+          },
+          "trace": [
+            {
+              "seq": "21",
+              "event": "prepared",
+              "detail": "1",
+              "created_at": "2026-10-23T16:40:49.692Z"
+            },
+            {
+              "seq": "22",
+              "event": "prepared",
+              "detail": "1",
+              "created_at": "2026-10-23T16:40:49.901Z"
+            },
+            {
+              "seq": "23",
+              "event": "version-route",
+              "detail": "1",
+              "created_at": "2026-10-23T16:40:49.905Z"
+            },
+            {
+              "seq": "24",
+              "event": "activate-attempt",
+              "detail": "applied",
+              "created_at": "2026-10-23T16:40:49.908Z"
+            }
+          ]
+        },
+        "observation": "renaming a completed named step executes callback again; no incompatible-history rejection"
+      }
+    },
+    {
+      "scenario": "cancel-parked-run-before-late-approval",
+      "status": "passed",
+      "started": "2026-10-23T16:40:49.943Z",
+      "finished": "2026-10-23T16:40:50.657Z",
+      "details": {
+        "id": "od035-20261023164025625-cancel-13",
+        "runId": "817b5116-e967-44e0-9cb6-afccfeab97f5",
+        "final": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "817b5116-e967-44e0-9cb6-afccfeab97f5",
+          "workflowName": "cancel",
+          "version": "1",
+          "status": "canceled",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-cancel-13",
+            "race": false
+          },
+          "output": null,
+          "error": null,
+          "attempts": 1,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": null,
+          "availableAt": null,
+          "deadlineAt": null,
+          "startedAt": "2026-10-23T16:40:50.113Z",
+          "finishedAt": "2026-10-23T16:40:50.128Z",
+          "createdAt": "2026-10-23T16:40:49.945Z",
+          "updatedAt": "2026-10-23T16:40:50.128Z"
+        },
+        "sent": {
+          "workflowRunIds": []
+        },
+        "snapshot": {
+          "state": {
+            "id": "od035-20261023164025625-cancel-13",
+            "approved": true,
+            "canceled": true,
+            "generation": "1",
+            "counter": "0"
+          },
+          "trace": []
+        }
+      }
+    },
+    {
+      "scenario": "cancel-active-callback-requires-business-cutoff",
+      "status": "passed",
+      "started": "2026-10-23T16:40:50.660Z",
+      "finished": "2026-10-23T16:40:52.715Z",
+      "details": {
+        "id": "od035-20261023164025625-cancel-active-14",
+        "runId": "f65cbf5b-4c18-449c-88de-12b9e80ff645",
+        "final": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "f65cbf5b-4c18-449c-88de-12b9e80ff645",
+          "workflowName": "cancel-active",
+          "version": "1",
+          "status": "canceled",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-cancel-active-14",
+            "race": false
+          },
+          "output": null,
+          "error": null,
+          "attempts": 1,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": null,
+          "availableAt": null,
+          "deadlineAt": null,
+          "startedAt": "2026-10-23T16:40:50.864Z",
+          "finishedAt": "2026-10-23T16:40:50.907Z",
+          "createdAt": "2026-10-23T16:40:50.670Z",
+          "updatedAt": "2026-10-23T16:40:50.907Z"
+        },
+        "snapshot": {
+          "state": {
+            "id": "od035-20261023164025625-cancel-active-14",
+            "approved": true,
+            "canceled": true,
+            "generation": "1",
+            "counter": "0"
+          },
+          "trace": [
+            {
+              "seq": "25",
+              "event": "activate-attempt",
+              "detail": "canceled",
+              "created_at": "2026-10-23T16:40:52.394Z"
+            }
+          ]
+        },
+        "observation": "callback continues after engine cancellation; business cutoff rejects effect"
+      }
+    },
+    {
+      "scenario": "SIGSTOP-predecessor-lease-takeover-resume-fencing",
+      "status": "passed",
+      "started": "2026-10-23T16:40:52.716Z",
+      "finished": "2026-10-23T16:40:56.238Z",
+      "details": {
+        "id": "od035-20261023164025625-stale-15",
+        "runId": "ffced774-dc12-4901-bfc3-7111e2a97f01",
+        "final": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "ffced774-dc12-4901-bfc3-7111e2a97f01",
+          "workflowName": "stale",
+          "version": "1",
+          "status": "completed",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-stale-15",
+            "race": false
+          },
+          "output": "done",
+          "error": null,
+          "attempts": 2,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": "b0b26f5f-eb6a-4908-956f-2bb2b06527a9",
+          "availableAt": null,
+          "deadlineAt": null,
+          "startedAt": "2026-10-23T16:40:52.885Z",
+          "finishedAt": "2026-10-23T16:40:54.118Z",
+          "createdAt": "2026-10-23T16:40:52.718Z",
+          "updatedAt": "2026-10-23T16:40:54.118Z"
+        },
+        "snapshot": {
+          "state": {
+            "id": "od035-20261023164025625-stale-15",
+            "approved": true,
+            "canceled": false,
+            "generation": "2",
+            "counter": "1"
+          },
+          "trace": [
+            {
+              "seq": "26",
+              "event": "activate-attempt",
+              "detail": "applied",
+              "created_at": "2026-10-23T16:40:54.114Z"
+            },
+            {
+              "seq": "27",
+              "event": "after-effect",
+              "detail": "",
+              "created_at": "2026-10-23T16:40:54.117Z"
+            },
+            {
+              "seq": "28",
+              "event": "activate-attempt",
+              "detail": "stale-generation",
+              "created_at": "2026-10-23T16:40:54.704Z"
+            }
+          ]
+        },
+        "history": [
+          {
+            "stepName": "after-effect",
+            "status": "completed",
+            "count": "1"
+          },
+          {
+            "stepName": "effect",
+            "status": "completed",
+            "count": "1"
+          },
+          {
+            "stepName": "effect",
+            "status": "running",
+            "count": "1"
+          }
+        ],
+        "observation": "old callback attempted business write; app generation rejected it; engine ownership fence rejected stale checkpoint"
+      }
+    },
+    {
+      "scenario": "waiting-workflows-free-concurrency-slot-control-progress",
+      "status": "passed",
+      "started": "2026-10-23T16:40:56.242Z",
+      "finished": "2026-10-23T16:40:57.469Z",
+      "details": {
+        "waiters": 15,
+        "workerConcurrency": 1,
+        "control": {
+          "id": "od035-20261023164025625-control-31",
+          "runId": "921b3228-162a-4052-810a-b3cd3a3a0c88"
+        },
+        "latencyMs": 77,
+        "scope": "15 parked waits only; not enterprise scale or CPU/control reserve evidence"
+      }
+    },
+    {
+      "scenario": "pending-backlog-delays-awakened-control-negative-control",
+      "status": "passed",
+      "started": "2026-10-23T16:40:57.471Z",
+      "finished": "2026-10-23T16:41:02.369Z",
+      "details": {
+        "control": {
+          "id": "od035-20261023164025625-wake-control-32",
+          "runId": "64e7fcce-2ea8-4273-815e-32dc5ad49e67"
+        },
+        "ordinaryRuns": 20,
+        "workerConcurrency": 1,
+        "latencyMs": 4693,
+        "allOrdinaryFinishedBeforeControl": true,
+        "observation": "all twenty ordinary pending runs admitted before an already-due awakened running control; no reserved control progress in shared namespace"
+      }
+    },
+    {
+      "scenario": "process-readiness-and-RSS-sample",
+      "status": "passed",
+      "started": "2026-10-23T16:41:02.371Z",
+      "finished": "2026-10-23T16:41:02.557Z",
+      "details": {
+        "workerPid": 2196,
+        "workerReadyMs": 186,
+        "workerRssKb": null,
+        "databaseExcluded": true,
+        "methodology": "one native Node24.19 process launch after engine/business schemas migrated and PostgreSQL already running; readiness is worker.start resolved, RSS read immediately afterward; tsx loader included; no benchmark/peak/steady/load claim"
+      }
+    },
+    {
+      "scenario": "1000-total-step-attempt-limit-negative-control",
+      "status": "passed",
+      "started": "2026-10-23T16:41:02.558Z",
+      "finished": "2026-10-23T16:41:03.391Z",
+      "details": {
+        "id": "od035-20261023164025625-limit-53",
+        "runId": "3bf106c2-0e03-4f46-91b9-567ee0931775",
+        "final": {
+          "workflowScheduleId": null,
+          "namespaceId": "od035-20261023164025625",
+          "id": "3bf106c2-0e03-4f46-91b9-567ee0931775",
+          "workflowName": "limit",
+          "version": "1",
+          "status": "failed",
+          "idempotencyKey": null,
+          "config": {},
+          "context": null,
+          "input": {
+            "id": "od035-20261023164025625-limit-53",
+            "race": false
+          },
+          "output": null,
+          "error": {
+            "code": "STEP_LIMIT_EXCEEDED",
+            "name": "StepLimitExceededError",
+            "limit": 1000,
+            "message": "Exceeded the step limit of 1000 attempts (current count: 1000)",
+            "stepCount": 1000
+          },
+          "attempts": 1,
+          "parentStepAttemptNamespaceId": null,
+          "parentStepAttemptId": null,
+          "workerId": null,
+          "availableAt": null,
+          "deadlineAt": null,
+          "startedAt": null,
+          "finishedAt": "2026-10-23T16:41:03.377Z",
+          "createdAt": "2026-10-23T16:41:02.559Z",
+          "updatedAt": "2026-10-23T16:41:03.377Z"
+        },
+        "count": [
+          {
+            "count": "1000"
+          }
+        ],
+        "observation": "a permanent polling loop needs bounded segments and cannot run forever in one engine run"
+      }
+    }
+  ],
+  "events": [
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1585,
+      "detail": "base",
+      "at": "2026-10-23T16:40:25.863Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1591,
+      "detail": "base",
+      "at": "2026-10-23T16:40:26.616Z"
+    },
+    {
+      "event": "before-wait",
+      "id": "od035-20261023164025625-approval-2",
+      "pid": 1591,
+      "detail": "",
+      "at": "2026-10-23T16:40:26.644Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1599,
+      "detail": "base",
+      "at": "2026-10-23T16:40:28.063Z"
+    },
+    {
+      "event": "before-wait",
+      "id": "od035-20261023164025625-approval-3",
+      "pid": 1599,
+      "detail": "",
+      "at": "2026-10-23T16:40:28.139Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1604,
+      "detail": "base",
+      "at": "2026-10-23T16:40:28.322Z"
+    },
+    {
+      "event": "before-wait",
+      "id": "od035-20261023164025625-approval-3",
+      "pid": 1604,
+      "detail": "",
+      "at": "2026-10-23T16:40:28.916Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1613,
+      "detail": "base",
+      "at": "2026-10-23T16:40:30.276Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1694,
+      "detail": "base",
+      "at": "2026-10-23T16:40:33.360Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1699,
+      "detail": "base",
+      "at": "2026-10-23T16:40:33.625Z"
+    },
+    {
+      "event": "before-wait",
+      "id": "od035-20261023164025625-approval-6",
+      "pid": 1699,
+      "detail": "",
+      "at": "2026-10-23T16:40:33.657Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1706,
+      "detail": "crash",
+      "at": "2026-10-23T16:40:35.065Z"
+    },
+    {
+      "event": "after-commit-before-checkpoint",
+      "id": "od035-20261023164025625-gap-7",
+      "pid": 1706,
+      "detail": "",
+      "at": "2026-10-23T16:40:35.098Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1711,
+      "detail": "base",
+      "at": "2026-10-23T16:40:35.286Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1734,
+      "detail": "base",
+      "at": "2026-10-23T16:40:36.162Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1800,
+      "detail": "base",
+      "at": "2026-10-23T16:40:37.803Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1805,
+      "detail": "base",
+      "at": "2026-10-23T16:40:38.026Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1811,
+      "detail": "compatible",
+      "at": "2026-10-23T16:40:38.264Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1816,
+      "detail": "base",
+      "at": "2026-10-23T16:40:38.503Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1821,
+      "detail": "v2-only",
+      "at": "2026-10-23T16:40:38.685Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1826,
+      "detail": "base",
+      "at": "2026-10-23T16:40:38.868Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1938,
+      "detail": "base",
+      "at": "2026-10-23T16:40:49.669Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1943,
+      "detail": "unsafe-change",
+      "at": "2026-10-23T16:40:49.878Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1949,
+      "detail": "base",
+      "at": "2026-10-23T16:40:50.100Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 1959,
+      "detail": "base",
+      "at": "2026-10-23T16:40:50.851Z"
+    },
+    {
+      "event": "active-callback",
+      "id": "od035-20261023164025625-cancel-active-14",
+      "pid": 1959,
+      "detail": "",
+      "at": "2026-10-23T16:40:50.872Z"
+    },
+    {
+      "event": "engine-error",
+      "id": "",
+      "pid": 1959,
+      "detail": "Heartbeat failed: Error: Failed to extend lease for workflow run",
+      "at": "2026-10-23T16:40:51.278Z"
+    },
+    {
+      "event": "engine-error",
+      "id": "",
+      "pid": 1959,
+      "detail": "Heartbeat failed: Error: Failed to extend lease for workflow run",
+      "at": "2026-10-23T16:40:51.682Z"
+    },
+    {
+      "event": "engine-error",
+      "id": "",
+      "pid": 1959,
+      "detail": "Heartbeat failed: Error: Failed to extend lease for workflow run",
+      "at": "2026-10-23T16:40:52.089Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 2062,
+      "detail": "predecessor",
+      "at": "2026-10-23T16:40:52.872Z"
+    },
+    {
+      "event": "pause-before-effect",
+      "id": "od035-20261023164025625-stale-15",
+      "pid": 2062,
+      "detail": "",
+      "at": "2026-10-23T16:40:52.890Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 2068,
+      "detail": "successor",
+      "at": "2026-10-23T16:40:54.081Z"
+    },
+    {
+      "event": "business-callback-finished",
+      "id": "od035-20261023164025625-stale-15",
+      "pid": 2068,
+      "detail": "applied",
+      "at": "2026-10-23T16:40:54.115Z"
+    },
+    {
+      "event": "engine-error",
+      "id": "",
+      "pid": 2062,
+      "detail": "Heartbeat failed: Error: Failed to extend lease for workflow run",
+      "at": "2026-10-23T16:40:54.127Z"
+    },
+    {
+      "event": "engine-error",
+      "id": "",
+      "pid": 2062,
+      "detail": "Heartbeat failed: Error: Failed to extend lease for workflow run",
+      "at": "2026-10-23T16:40:54.529Z"
+    },
+    {
+      "event": "business-callback-finished",
+      "id": "od035-20261023164025625-stale-15",
+      "pid": 2062,
+      "detail": "stale-generation",
+      "at": "2026-10-23T16:40:54.705Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 2087,
+      "detail": "base",
+      "at": "2026-10-23T16:40:56.404Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 2096,
+      "detail": "base",
+      "at": "2026-10-23T16:40:57.626Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 2099,
+      "detail": "base",
+      "at": "2026-10-23T16:40:57.819Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 2196,
+      "detail": "base",
+      "at": "2026-10-23T16:41:02.531Z"
+    },
+    {
+      "event": "worker-ready",
+      "id": "",
+      "pid": 2200,
+      "detail": "base",
+      "at": "2026-10-23T16:41:02.715Z"
+    }
+  ],
+  "limitations": [
+    "This invocation exercised Node on darwin/arm64; signed packaging and other OS/architecture combinations remain unqualified",
+    "Timer shortened to 1.2s; no clock discontinuity/full disk/corruption test",
+    "No retention API qualification or bounded-history continuation solution",
+    "No cloud, no Docker; PG managed by native supervisor fixture",
+    "SIGSTOP/SIGCONT evidence on darwin/arm64 does not qualify native Windows process suspension",
+    "No external provider side effect exercised; receipts protect one owned PostgreSQL mutation"
+  ]
+}

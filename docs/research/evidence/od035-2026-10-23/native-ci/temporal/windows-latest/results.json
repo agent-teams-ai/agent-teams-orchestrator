@@ -1,0 +1,300 @@
+{
+  "engine": "Temporal full server",
+  "serverVersion": "1.32.1",
+  "sdkVersion": "1.24.0",
+  "node": "v24.21.0",
+  "platform": "win32",
+  "arch": "x64",
+  "startedAt": "2026-10-23T16:41:28.190Z",
+  "scenarios": {
+    "leastPrivilegeRuntime": {
+      "pass": true,
+      "role": "temporal_spike_runtime",
+      "createTableDenied": true,
+      "migrationAuthority": "Separate driver/admin invoked matching temporal-sql-tool before service/Worker startup; runtime has DML and schema USAGE only."
+    },
+    "resourceSnapshot": {
+      "coldStartToGrpcMs": 1681,
+      "serverPid": 5872,
+      "workerPid": 6044,
+      "serverRssKb": null,
+      "workerRssKb": null,
+      "databaseExcluded": true,
+      "methodology": "One cold process launch after schemas were migrated and PostgreSQL was already running; Linux-only /proc/PID/status VmRSS immediately after Worker ready, null on other platforms. No benchmark claim."
+    },
+    "earlyAndDuplicateApproval": {
+      "pass": true,
+      "result": "active",
+      "state": {
+        "approved": true,
+        "status": "active",
+        "effects": 1
+      },
+      "receipts": [
+        {
+          "command_id": "activate:t1792773688190-early",
+          "kind": "activate"
+        },
+        {
+          "command_id": "approval:t1792773688190-early",
+          "kind": "approve"
+        }
+      ],
+      "attempts": [
+        {
+          "worker_pid": 6044,
+          "observed_at": "2026-10-23T16:41:39.916Z"
+        }
+      ]
+    },
+    "approvalCommitWithoutSignal": {
+      "pass": true,
+      "result": "active",
+      "mechanism": "The adapter has a supported durable two-second Temporal timer around authoritative feature-state rereads. A production outbox remains the normal reliable wake delivery path.",
+      "state": {
+        "approved": true,
+        "status": "active",
+        "effects": 1
+      },
+      "receipts": [
+        {
+          "command_id": "activate:t1792773688190-approval-no-wake",
+          "kind": "activate"
+        },
+        {
+          "command_id": "approval:t1792773688190-approval-no-wake",
+          "kind": "approve"
+        }
+      ],
+      "attempts": [
+        {
+          "worker_pid": 6044,
+          "observed_at": "2026-10-23T16:41:42.168Z"
+        }
+      ]
+    },
+    "boundedWorkersWith80DurableWaits": {
+      "pass": true,
+      "waitingWorkflows": 80,
+      "workflowTaskExecutionConcurrency": 4,
+      "activityTaskExecutionConcurrency": 4,
+      "businessPoolMaxPerWorker": 4,
+      "serverPoolMaxPerService": {
+        "default": 8,
+        "visibility": 2
+      },
+      "observedConnectionsByDatabase": [
+        {
+          "datname": "temporal_spike_engine",
+          "count": 20
+        },
+        {
+          "datname": "temporal_spike_visibility",
+          "count": 5
+        },
+        {
+          "datname": "workflow_spikes",
+          "count": 1
+        }
+      ],
+      "cancelLatencyMs": 24,
+      "controlCompletionMs": 842,
+      "limitation": "One win32 x64 process/sample; no large-scale throughput claim. Workflow task slots are released across durable waits."
+    },
+    "workerSigkillAfterBusinessCommitBeforeEngineCheckpoint": {
+      "pass": true,
+      "crashMarker": {
+        "pid": 7076,
+        "id": "t1792773688190-crash",
+        "result": {
+          "approved": true,
+          "status": "active",
+          "effects": 1
+        }
+      },
+      "workerExit": {
+        "exitCode": 1,
+        "signalCode": null
+      },
+      "afterCrash": {
+        "state": {
+          "approved": true,
+          "status": "active",
+          "effects": 1
+        },
+        "receipts": [
+          {
+            "command_id": "activate:t1792773688190-crash",
+            "kind": "activate"
+          },
+          {
+            "command_id": "approval:t1792773688190-crash",
+            "kind": "approve"
+          }
+        ],
+        "attempts": [
+          {
+            "worker_pid": 7076,
+            "observed_at": "2026-10-23T16:41:52.114Z"
+          }
+        ]
+      },
+      "recovered": {
+        "state": {
+          "approved": true,
+          "status": "active",
+          "effects": 1
+        },
+        "receipts": [
+          {
+            "command_id": "activate:t1792773688190-crash",
+            "kind": "activate"
+          },
+          {
+            "command_id": "approval:t1792773688190-crash",
+            "kind": "approve"
+          }
+        ],
+        "attempts": [
+          {
+            "worker_pid": 7076,
+            "observed_at": "2026-10-23T16:41:52.114Z"
+          },
+          {
+            "worker_pid": 6544,
+            "observed_at": "2026-10-23T16:41:59.163Z"
+          }
+        ]
+      }
+    },
+    "timerThroughWorkerAndFullServiceSigkillRestart": {
+      "pass": true,
+      "result": "timer-fired",
+      "elapsedMs": 7268,
+      "serverRestartToGrpcMs": 1018,
+      "timerEvents": [
+        {
+          "eventId": "5",
+          "eventTime": {
+            "seconds": "1792773729",
+            "nanos": 305852800
+          },
+          "eventType": "EVENT_TYPE_TIMER_STARTED",
+          "taskId": "1050204",
+          "timerStartedEventAttributes": {
+            "timerId": "1",
+            "startToFireTimeout": {
+              "seconds": "5"
+            },
+            "workflowTaskCompletedEventId": "4"
+          }
+        },
+        {
+          "eventId": "6",
+          "eventTime": {
+            "seconds": "1792773734",
+            "nanos": 307975000
+          },
+          "eventType": "EVENT_TYPE_TIMER_FIRED",
+          "taskId": "2097152",
+          "timerFiredEventAttributes": {
+            "timerId": "1",
+            "startedEventId": "5"
+          }
+        }
+      ],
+      "state": {
+        "approved": false,
+        "status": "timer-fired",
+        "effects": 0
+      },
+      "receipts": [],
+      "attempts": []
+    },
+    "pendingApprovalCompatiblePatchedWorkerUpdate": {
+      "pass": true,
+      "result": "active",
+      "eventCount": 31,
+      "patchMarkerCount": 0,
+      "state": {
+        "approved": true,
+        "status": "active",
+        "effects": 1
+      },
+      "receipts": [
+        {
+          "command_id": "activate:t1792773688190-upgrade",
+          "kind": "activate"
+        },
+        {
+          "command_id": "approval:t1792773688190-upgrade",
+          "kind": "approve"
+        }
+      ],
+      "attempts": [
+        {
+          "worker_pid": 4168,
+          "observed_at": "2026-10-23T16:42:28.963Z"
+        }
+      ]
+    },
+    "newWorkflowUsesV2Patch": {
+      "pass": true,
+      "markers": [
+        {
+          "markerName": "core_patch",
+          "details": {
+            "patch-data": {
+              "payloads": [
+                {
+                  "metadata": {
+                    "encoding": "anNvbi9wbGFpbg=="
+                  },
+                  "data": "eyJpZCI6ImFwcHJvdmFsLXByZWx1ZGUtdjIiLCJkZXByZWNhdGVkIjpmYWxzZX0="
+                }
+              ]
+            }
+          },
+          "workflowTaskCompletedEventId": "4"
+        }
+      ]
+    },
+    "incompatibleWorkflowUpdateNegativeAndRecovery": {
+      "pass": true,
+      "expectedNondeterminism": {
+        "scheduledEventId": "16",
+        "startedEventId": "17",
+        "cause": "WORKFLOW_TASK_FAILED_CAUSE_NON_DETERMINISTIC_ERROR",
+        "failure": {
+          "message": "[TMPRL1100] Nondeterminism error: Timer machine does not handle this event: HistoryEvent(id: 5, ActivityTaskScheduled)",
+          "applicationFailureInfo": {}
+        },
+        "identity": "8196@runnervmdaln5"
+      },
+      "businessStateWhileBlocked": {
+        "approved": true,
+        "status": "waiting",
+        "effects": 0
+      },
+      "recoveredWithPatchedV2": "active"
+    },
+    "cancelPendingApproval": {
+      "pass": true,
+      "cancellationFailure": "WorkflowFailedError",
+      "cancelStatus": "CANCELLED",
+      "state": {
+        "approved": false,
+        "status": "cancelled",
+        "effects": 0
+      },
+      "receipts": [],
+      "attempts": []
+    },
+    "pausedPredecessorAfterReplacement": {
+      "executed": false,
+      "reason": "POSIX SIGSTOP/SIGCONT fault injection; requires a Windows-specific equivalent"
+    }
+  },
+  "completedAt": "2026-10-23T16:42:56.744Z",
+  "allExecutedScenariosPassed": true
+}
