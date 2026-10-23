@@ -1,14 +1,16 @@
 ---
 id: OD-035
 type: open-decision
-status: open
+status: resolved
 owner: run-orchestration
-summary: Compare executed native workflow spikes and qualify an engine-independent durable adapter for the required Fully Local V1 profile.
+summary: Retain the native workflow comparison and evidence supporting ADR-0116's accepted Temporal selection for Fully Local.
+resolved_by: ADR-0116
 related:
   - ADR-0027
   - ADR-0030
   - ADR-0114
   - ADR-0115
+  - ADR-0116
   - architecture.implementation-readiness-gates
   - architecture.local-host-lifecycle
   - domain.contexts.run-orchestration
@@ -25,9 +27,12 @@ for the required Fully Local V1 profile. The choice must not affect domain
 invariants, process-manager authority, public SDK contracts, or the hosted
 Temporal adapter accepted by ADR-0027.
 
-ADR-0115 requires Fully Local in V1. This engine decision remains open and must
-be resolved for its local implementation and release gates. V1 scope does not
-select a local Temporal service, OpenWorkflow, DBOS, or an in-memory scheduler.
+ADR-0115 requires Fully Local in V1. On 2026-10-23 the product owner accepted
+[ADR-0116](../decisions/0116-native-temporal-for-fully-local-durable-workflows.md),
+selecting full native Temporal with PostgreSQL behind engine-independent owned
+ports. That ADR owns the current decision. This resolved dossier preserves the
+research and alternatives; implementation and release qualification remain
+separate obligations.
 
 ## Constraints
 
@@ -43,7 +48,7 @@ select a local Temporal service, OpenWorkflow, DBOS, or an in-memory scheduler.
 - Windows, macOS, and Linux packaging and recovery must be qualified.
 - Engine licensing must permit signed redistribution.
 
-## Current qualification order
+## Research recommendation before adoption
 
 The executed research on **2026-10-23** changes the recommended order to:
 
@@ -58,10 +63,11 @@ The executed research on **2026-10-23** changes the recommended order to:
    after an explicitly bounded process and reconciliation design addresses its
    observed signal, history, versioning, and admission constraints.
 
-This replaces the earlier OpenWorkflow-first **research preference**, not an
-accepted architecture decision. OD-035 remains open. Research dependencies are
-pinned development tooling; no production adapter or dependency is selected by
-this document. A production choice still requires owner approval and an ADR.
+This research replaced the earlier OpenWorkflow-first preference. The subsequent
+owner approval is recorded in ADR-0116, which selects Temporal and treats DBOS
+as an alternative requiring a future accepted successor decision. Research
+dependencies remain pinned development tooling; the research itself is not a
+production implementation or release qualification.
 
 ### Deployment profiles already accepted
 
@@ -73,7 +79,7 @@ these V1 targets:
 | --- | --- | --- |
 | Managed SaaS | Hosted service roles and managed infrastructure | Hosted Temporal remains accepted by ADR-0027. |
 | Standalone Self-Hosted | Customer-operated service roles and infrastructure | The hosted Temporal adapter remains the reference implementation. |
-| Fully Local | Local Supervisor manages native PostgreSQL, NATS, service roles, and applicable Dapr processes | OD-035 selects the local workflow adapter and its lifecycle. |
+| Fully Local | Local Supervisor manages native PostgreSQL, Temporal, NATS, service roles, and applicable Dapr processes | ADR-0116 selects full native Temporal; implementation and release gates remain. |
 
 Connected operation remains future scope. The profiles reuse owned business
 implementations, public contracts, PostgreSQL migrations, inboxes, outboxes, and
@@ -427,8 +433,13 @@ lifecycle, not just the disposable process fixture:
 
 ## Resolution
 
-Open. Proceed with full native Temporal as the first production-qualification
-candidate and retain DBOS OSS as the alternative. The research materially reduces
-engine-semantic uncertainty, but does not accept a production dependency or
-certify a Fully Local release. Resolve OD-035 through an owner-approved ADR after
-the remaining target-specific evidence is available.
+Resolved by [ADR-0116](../decisions/0116-native-temporal-for-fully-local-durable-workflows.md)
+with explicit product-owner approval on 2026-10-23. Full native Temporal with
+PostgreSQL is the selected Fully Local engine behind owned, engine-independent
+ports. DBOS and OpenWorkflow remain researched alternatives; changing the
+selection requires another accepted decision rather than automatic fallback.
+
+The remaining production qualification gates above are retained implementation
+and release obligations. They do not keep the engine choice open. OD-005,
+OD-021, and OD-040 retain their independent unresolved scope, and no profile
+becomes production-qualified through this decision alone.

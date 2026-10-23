@@ -23,6 +23,7 @@ related:
   - OD-021
   - OD-012
   - OD-035
+  - ADR-0116
   - OD-040
 ---
 
@@ -31,7 +32,8 @@ related:
 ADR-0115 requires this Fully Local profile in V1 alongside both server profiles.
 The profile remains unqualified. ADR-0093 and ADR-0097 keep its package entries
 non-materializable until the exact OD-021, OD-035, and OD-040 implementation-start
-gates are resolved. Package creation precedes the release evidence it must
+gates are resolved. ADR-0116 resolves OD-035's engine selection; OD-021 and
+OD-040 remain open. Package creation precedes the release evidence it must
 produce; it does not itself qualify the profile. Statements below describe the
 required local architecture and are not an availability claim.
 
@@ -123,6 +125,9 @@ select channels, or proxy live publications.
 | Local PostgreSQL binary, process, protected data root, endpoint, and custody | Local Supervisor |
 | PostgreSQL connections, context migrations, transaction semantics, and recovery validation | Host persistence adapters and owning context |
 | Local NATS process, binary, store path, lifetime lock, and resource lifecycle | Local Supervisor |
+| Native Temporal service availability, binary activation, protected endpoints, and resource custody | Local Supervisor through the Temporal component adapter |
+| Temporal schema migrations and service configuration | Temporal adapter with separate migration authority |
+| Workflow scheduling contracts, command receipts, cancellation cutoffs, and business reconciliation | Owning feature; Temporal adapters provide execution mechanics |
 | JetStream topology, publish, consume, ACK, and transport mapping | JetStream adapters |
 | Event ordering, delivery, privacy, retention, and replay requirements | Owning feature contract |
 | Local Centrifugo binary, endpoint, process health, staged activation, and cleanup | Local Supervisor |
@@ -135,6 +140,15 @@ select channels, or proxy live publications.
 | Team project directory or execution workspace identity | Workspace Registry |
 
 Sharing a low-level process or connection does not transfer semantic ownership.
+
+[ADR-0116](../decisions/0116-native-temporal-for-fully-local-durable-workflows.md)
+selects the full native Temporal Service with PostgreSQL for local durable
+execution. Its binary and schema transitions must be qualified under this
+lifecycle, including sequential supported server upgrades when Desktop versions
+are skipped. The Supervisor does not acquire workflow or business-state
+authority, and the selected engine does not imply a second generic recovery
+scheduler. Production Worker placement remains within the accepted service-role
+map and OD-005's concrete workflow boundary.
 
 ## Native role processes and Dapr
 

@@ -20,6 +20,16 @@ and limitations. They are evidence, not normative architecture.
 
 - [Centrifugo Desktop spike, 2026-07-28](centrifugo-desktop-spike-2026-07-28.md)
 
+## Durable workflow engines
+
+- [OpenWorkflow, DBOS, and native Temporal comparison, 2026-10-23](../open-decisions/OD-035-local-durable-workflow-engine.md#executed-research-on-2026-10-23)
+- [Original results and source hashes](evidence/od035-2026-10-23/manifest.json)
+- [Native Linux, macOS, and Windows matrix](evidence/od035-2026-10-23/native-ci/matrix.json)
+
+[ADR-0116](../decisions/0116-native-temporal-for-fully-local-durable-workflows.md)
+owns the accepted engine selection. The resolved OD-035 dossier preserves the
+full dated comparison and reproduction instructions.
+
 ## Legacy migration evidence
 
 - [Legacy Electron and OpenCode behavior audit, 2026-07-30](legacy-electron-opencode-behavior-audit-2026-07-30.md)

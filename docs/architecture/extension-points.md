@@ -9,6 +9,7 @@ related:
   - ADR-0095
   - ADR-0096
   - ADR-0027
+  - ADR-0116
   - ADR-0045
   - OD-005
   - OD-014
@@ -43,6 +44,13 @@ flowchart LR
 ```
 
 ## Temporal
+
+[ADR-0116](../decisions/0116-native-temporal-for-fully-local-durable-workflows.md)
+selects full native Temporal with PostgreSQL for Fully Local, using the same
+engine family as hosted operation. This selection preserves the replaceable
+adapter boundary below. Engine replacement requires qualified drain or
+reconciliation and a fenced handoff; it does not promise portable histories or
+automatic cross-engine failover. Native release qualification remains separate.
 
 Placement:
 
