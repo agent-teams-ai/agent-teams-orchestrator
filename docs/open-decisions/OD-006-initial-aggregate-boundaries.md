@@ -84,17 +84,17 @@ not an accepted aggregate shape.
 
 ## Current leading Run matrix
 
-| Model | Leading tactical role |
-|---|---|
-| `OrchestrationRun` | Small aggregate root with no participant, activation, Work, runtime, or history collections |
-| `RunPlanVersion` | Immutable domain artifact |
-| `RunPlanTransitionProcess` | Application process state that requests a separate revision-checked Run promotion |
-| `RunParticipant` | Run-scoped aggregate candidate for one concrete occupant |
-| `ParticipantActivationProcess` | Application process state for one participant and plan generation |
-| `ManagedRuntimeBinding` | Opaque application integration record, not imported AR state |
-| `WorkExecution` | Work Coordination aggregate root |
-| `WorkPlacementProcess` | Run-owned application process state |
-| `RuntimeOperation` | AR aggregate outside this repository |
+| Model                          | Leading tactical role                                                                       |
+| ------------------------------ | ------------------------------------------------------------------------------------------- |
+| `OrchestrationRun`             | Small aggregate root with no participant, activation, Work, runtime, or history collections |
+| `RunPlanVersion`               | Immutable domain artifact                                                                   |
+| `RunPlanTransitionProcess`     | Application process state that requests a separate revision-checked Run promotion           |
+| `RunParticipant`               | Run-scoped aggregate candidate for one concrete occupant                                    |
+| `ParticipantActivationProcess` | Application process state for one participant and plan generation                           |
+| `ManagedRuntimeBinding`        | Opaque application integration record, not imported AR state                                |
+| `WorkExecution`                | Work Coordination aggregate root                                                            |
+| `WorkPlacementProcess`         | Run-owned application process state                                                         |
+| `RuntimeOperation`             | AR aggregate outside this repository                                                        |
 
 The unresolved proof is the exact repository, containment, cardinality, and
 transaction boundary for `RunParticipant`, activation, and runtime-binding

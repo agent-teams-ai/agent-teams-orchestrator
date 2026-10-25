@@ -76,15 +76,15 @@ both roles expose separate modules and ports for each role.
 
 ## Allowed dependency matrix
 
-| From | May depend on |
-|---|---|
-| Domain | Owning context domain modules and explicitly exposed context-internal domain types |
-| Application | Owning context domain, application models, internal APIs, and consumer-owned ports |
-| Contracts | Narrow Protobuf or JSON Schema primitives allowed by the owning external surface |
-| Inbound adapters | Feature contracts and application input ports |
+| From              | May depend on                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| Domain            | Owning context domain modules and explicitly exposed context-internal domain types       |
+| Application       | Owning context domain, application models, internal APIs, and consumer-owned ports       |
+| Contracts         | Narrow Protobuf or JSON Schema primitives allowed by the owning external surface         |
+| Inbound adapters  | Feature contracts and application input ports                                            |
 | Outbound adapters | Application output ports, public event contracts when publishing, and external libraries |
-| Composition | All layers in its own package and public APIs of dependencies |
-| SDK | Published contracts and transport libraries |
+| Composition       | All layers in its own package and public APIs of dependencies                            |
+| SDK               | Published contracts and transport libraries                                              |
 
 Dependency container implementations are composition dependencies, not
 application ports. They may be imported only below `composition/**`. Contexts,
@@ -360,9 +360,7 @@ The consuming application declares a narrow capability:
 
 ```ts
 interface RuntimeSessionLifecyclePort {
-  startSession(
-    command: StartRuntimeSessionCommand,
-  ): Promise<StartRuntimeSessionResult>;
+  startSession(command: StartRuntimeSessionCommand): Promise<StartRuntimeSessionResult>;
 }
 ```
 

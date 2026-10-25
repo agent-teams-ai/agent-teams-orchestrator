@@ -3,10 +3,7 @@ import { readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const repositoryRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../..",
-);
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const foundationCli = path.join(
   repositoryRoot,
   "node_modules",
@@ -15,11 +12,7 @@ const foundationCli = path.join(
   "dist",
   "cli.js",
 );
-const protectedFiles = [
-  "package.json",
-  "pnpm-lock.yaml",
-  "pnpm-workspace.yaml",
-];
+const protectedFiles = ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml"];
 
 function runFoundation(args, { expectSuccess = true } = {}) {
   const result = spawnSync(process.execPath, [foundationCli, ...args], {
@@ -33,14 +26,10 @@ function runFoundation(args, { expectSuccess = true } = {}) {
     throw result.error;
   }
   if (expectSuccess && result.status !== 0) {
-    throw new Error(
-      `Foundation command failed (${args.join(" ")}):\n${output}`,
-    );
+    throw new Error(`Foundation command failed (${args.join(" ")}):\n${output}`);
   }
   if (!expectSuccess && result.status === 0) {
-    throw new Error(
-      `Foundation command unexpectedly succeeded (${args.join(" ")}):\n${output}`,
-    );
+    throw new Error(`Foundation command unexpectedly succeeded (${args.join(" ")}):\n${output}`);
   }
   return { output, status: result.status };
 }
@@ -76,13 +65,10 @@ async function assertProtectedFilesUnchanged(before) {
 }
 
 const rawArguments = process.argv.slice(2);
-const argumentsWithoutSeparator =
-  rawArguments[0] === "--" ? rawArguments.slice(1) : rawArguments;
+const argumentsWithoutSeparator = rawArguments[0] === "--" ? rawArguments.slice(1) : rawArguments;
 const targetArgument = argumentsWithoutSeparator[0];
 if (!targetArgument || argumentsWithoutSeparator.length !== 1) {
-  throw new Error(
-    "Usage: pnpm foundation:e2e -- /absolute/path/to/engineering-foundation",
-  );
+  throw new Error("Usage: pnpm foundation:e2e -- /absolute/path/to/engineering-foundation");
 }
 
 const targetRoot = await realpath(path.resolve(targetArgument));
@@ -103,18 +89,12 @@ try {
   runFoundation(["attach", targetRoot, "--json"]);
   attached = true;
 
-  const local = parseStatus(
-    runFoundation(["status", "--json"]),
-    "status",
-  );
+  const local = parseStatus(runFoundation(["status", "--json"]), "status");
   if (local.mode !== "LOCAL") {
     throw new Error(`Expected LOCAL after attach, got ${local.mode}`);
   }
   const actualTarget = await realpath(local.linkState.targetPackageRoot);
-  const possibleTargets = [
-    targetRoot,
-    path.join(targetRoot, "packages", "engineering-foundation"),
-  ];
+  const possibleTargets = [targetRoot, path.join(targetRoot, "packages", "engineering-foundation")];
   const matchesTarget = await Promise.all(
     possibleTargets.map(async (candidate) => {
       try {
@@ -133,9 +113,7 @@ try {
     expectSuccess: false,
   });
   if (!rejected.output.includes("REGISTRY_MODE_REQUIRED")) {
-    throw new Error(
-      `Local registry assertion failed for the wrong reason:\n${rejected.output}`,
-    );
+    throw new Error(`Local registry assertion failed for the wrong reason:\n${rejected.output}`);
   }
   await assertProtectedFilesUnchanged(before);
 } catch (error) {
@@ -159,10 +137,7 @@ if (primaryError) {
   throw primaryError;
 }
 
-const registryAfter = parseStatus(
-  runFoundation(["assert-registry", "--json"]),
-  "assert-registry",
-);
+const registryAfter = parseStatus(runFoundation(["assert-registry", "--json"]), "assert-registry");
 if (registryAfter.mode !== "REGISTRY") {
   throw new Error(`Expected REGISTRY after detach, got ${registryAfter.mode}`);
 }

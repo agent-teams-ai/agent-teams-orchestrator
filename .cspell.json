@@ -26,16 +26,6 @@
     "softwareTerms",
     "typescript"
   ],
-  "ignorePaths": [
-    ".cache/**",
-    "node_modules/**",
-    "scripts/docs/fixtures/**"
-  ],
-  "ignoreRegExpList": [
-    "Urls",
-    "Email",
-    "Base64",
-    "CommitHash",
-    "/`[^`\\n]+`/g"
-  ]
+  "ignorePaths": [".cache/**", "node_modules/**", "scripts/docs/fixtures/**"],
+  "ignoreRegExpList": ["Urls", "Email", "Base64", "CommitHash", "/`[^`\\n]+`/g"]
 }

@@ -2,26 +2,16 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 
-const toolingRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-);
+const toolingRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(toolingRoot, "../..");
-const { createConformanceOxlintConfig } = await import(pathToFileURL(path.join(
-  repositoryRoot,
-  "scripts/lint/create-conformance-config.mjs",
-)).href);
+const { createConformanceOxlintConfig } = await import(
+  pathToFileURL(path.join(repositoryRoot, "scripts/lint/create-conformance-config.mjs")).href
+);
 const generatedOxlintConfig = createConformanceOxlintConfig(repositoryRoot);
 const conformanceOxlintConfig = generatedOxlintConfig.filePath;
 process.once("exit", generatedOxlintConfig.dispose);
-const graphConfig = path.join(
-  toolingRoot,
-  "dependency-cruiser.config.cjs",
-);
-const dependencyCruiserBin = path.join(
-  toolingRoot,
-  "node_modules/.bin/dependency-cruiser",
-);
+const graphConfig = path.join(toolingRoot, "dependency-cruiser.config.cjs");
+const dependencyCruiserBin = path.join(toolingRoot, "node_modules/.bin/dependency-cruiser");
 
 function run(command, args, cwd) {
   return spawnSync(command, args, {
@@ -47,9 +37,7 @@ function requireSuccess(label, result) {
 function requireFailure(label, result, expectedText) {
   const output = combinedOutput(result);
   if (result.status === 0 || !output.includes(expectedText)) {
-    throw new Error(
-      `${label} did not fail with ${expectedText}:\n${output}`,
-    );
+    throw new Error(`${label} did not fail with ${expectedText}:\n${output}`);
   }
 }
 
@@ -58,27 +46,15 @@ requireSuccess("dependency-cruiser environment check", info);
 const infoOutput = combinedOutput(info);
 for (const expected of ["typescript@6.0.3"]) {
   if (!infoOutput.includes(expected)) {
-    throw new Error(
-      `dependency-cruiser environment is missing ${expected}:\n${infoOutput}`,
-    );
+    throw new Error(`dependency-cruiser environment is missing ${expected}:\n${infoOutput}`);
   }
 }
 
-const fixtureRoot = path.join(
-  repositoryRoot,
-  "tooling/architecture-conformance-fixtures",
-);
+const fixtureRoot = path.join(repositoryRoot, "tooling/architecture-conformance-fixtures");
 const validRoot = path.join(fixtureRoot, "valid");
 const validLint = run(
   "pnpm",
-  [
-    "exec",
-    "oxlint",
-    "--config",
-    conformanceOxlintConfig,
-    "--disable-nested-config",
-    validRoot,
-  ],
+  ["exec", "oxlint", "--config", conformanceOxlintConfig, "--disable-nested-config", validRoot],
   repositoryRoot,
 );
 requireSuccess("valid Oxlint boundary fixture", validLint);
@@ -86,14 +62,7 @@ requireSuccess("valid Oxlint boundary fixture", validLint);
 const validCoreRoot = path.join(fixtureRoot, "core-valid");
 const validCoreLint = run(
   "pnpm",
-  [
-    "exec",
-    "oxlint",
-    "--config",
-    conformanceOxlintConfig,
-    "--disable-nested-config",
-    validCoreRoot,
-  ],
+  ["exec", "oxlint", "--config", conformanceOxlintConfig, "--disable-nested-config", validCoreRoot],
   repositoryRoot,
 );
 requireSuccess("valid core-module adapter fixture", validCoreLint);
@@ -116,21 +85,10 @@ const invalidBoundaryFiles = [
 const invalidRoot = path.join(fixtureRoot, "invalid");
 const invalidLint = run(
   "pnpm",
-  [
-    "exec",
-    "oxlint",
-    "--config",
-    conformanceOxlintConfig,
-    "--disable-nested-config",
-    invalidRoot,
-  ],
+  ["exec", "oxlint", "--config", conformanceOxlintConfig, "--disable-nested-config", invalidRoot],
   repositoryRoot,
 );
-requireFailure(
-  "invalid Oxlint boundary fixtures",
-  invalidLint,
-  "boundaries(dependencies)",
-);
+requireFailure("invalid Oxlint boundary fixtures", invalidLint, "boundaries(dependencies)");
 const invalidLintOutput = combinedOutput(invalidLint);
 for (const fileName of invalidBoundaryFiles) {
   if (!invalidLintOutput.includes(fileName)) {
@@ -142,13 +100,7 @@ for (const fileName of invalidBoundaryFiles) {
 
 const validGraph = run(
   dependencyCruiserBin,
-  [
-    "--config",
-    graphConfig,
-    "--output-type",
-    "err",
-    path.relative(repositoryRoot, validRoot),
-  ],
+  ["--config", graphConfig, "--output-type", "err", path.relative(repositoryRoot, validRoot)],
   repositoryRoot,
 );
 requireSuccess("valid dependency graph fixture", validGraph);
@@ -160,27 +112,14 @@ const invalidGraph = run(
     graphConfig,
     "--output-type",
     "err",
-    path.relative(
-      repositoryRoot,
-    invalidRoot,
-    ),
-    path.relative(
-      repositoryRoot,
-      path.join(fixtureRoot, "cycles"),
-    ),
+    path.relative(repositoryRoot, invalidRoot),
+    path.relative(repositoryRoot, path.join(fixtureRoot, "cycles")),
   ],
   repositoryRoot,
 );
 
-for (const expectedRule of [
-  "domain-must-not-depend-on-outer-layers",
-  "no-circular-dependencies",
-]) {
-  requireFailure(
-    "invalid dependency graph fixtures",
-    invalidGraph,
-    expectedRule,
-  );
+for (const expectedRule of ["domain-must-not-depend-on-outer-layers", "no-circular-dependencies"]) {
+  requireFailure("invalid dependency graph fixtures", invalidGraph, expectedRule);
 }
 
 console.log("Architecture tooling conformance passed.");

@@ -1,10 +1,5 @@
 function validateReferences(document, documentsById, errors, relative) {
-  for (const field of [
-    "blocked_by",
-    "related",
-    "supersedes",
-    "superseded_by",
-  ]) {
+  for (const field of ["blocked_by", "related", "supersedes", "superseded_by"]) {
     for (const targetId of document.metadata?.[field] ?? []) {
       if (targetId === document.metadata.id) {
         errors.push(
@@ -12,9 +7,7 @@ function validateReferences(document, documentsById, errors, relative) {
         );
       }
       if (!documentsById.has(targetId)) {
-        errors.push(
-          `${relative(document.filePath)}: ${field} references unknown id ${targetId}`,
-        );
+        errors.push(`${relative(document.filePath)}: ${field} references unknown id ${targetId}`);
       }
     }
   }
@@ -25,9 +18,7 @@ function validateBlockers(document, documentsById, errors, relative) {
     document.metadata?.status === "superseded" &&
     (document.metadata.superseded_by?.length ?? 0) === 0
   ) {
-    errors.push(
-      `${relative(document.filePath)}: superseded document must declare superseded_by`,
-    );
+    errors.push(`${relative(document.filePath)}: superseded document must declare superseded_by`);
   }
   for (const blockerId of document.metadata?.blocked_by ?? []) {
     const blocker = documentsById.get(blockerId);
@@ -58,9 +49,7 @@ function validateBlockers(document, documentsById, errors, relative) {
 function validateResolution(document, documentsById, errors, relative) {
   if (document.metadata?.resolved_by) {
     if (document.metadata.type !== "open-decision") {
-      errors.push(
-        `${relative(document.filePath)}: resolved_by is allowed only on open decisions`,
-      );
+      errors.push(`${relative(document.filePath)}: resolved_by is allowed only on open decisions`);
     } else {
       const decidingAdr = documentsById.get(document.metadata.resolved_by);
       if (
@@ -71,14 +60,8 @@ function validateResolution(document, documentsById, errors, relative) {
           `${relative(document.filePath)}: resolved_by must reference an accepted or superseded ADR`,
         );
       }
-      if (
-        !(document.metadata.related ?? []).includes(
-          document.metadata.resolved_by,
-        )
-      ) {
-        errors.push(
-          `${relative(document.filePath)}: resolved_by ADR must also appear in related`,
-        );
+      if (!(document.metadata.related ?? []).includes(document.metadata.resolved_by)) {
+        errors.push(`${relative(document.filePath)}: resolved_by ADR must also appear in related`);
       }
     }
   }
@@ -87,9 +70,7 @@ function validateResolution(document, documentsById, errors, relative) {
     document.metadata.status === "resolved" &&
     !document.metadata.resolved_by
   ) {
-    errors.push(
-      `${relative(document.filePath)}: resolved open decision requires resolved_by`,
-    );
+    errors.push(`${relative(document.filePath)}: resolved open decision requires resolved_by`);
   }
   if (
     document.metadata?.type === "open-decision" &&
@@ -105,10 +86,7 @@ function validateResolution(document, documentsById, errors, relative) {
 function validateSupersession(document, documentsById, errors, relative) {
   for (const targetId of document.metadata?.supersedes ?? []) {
     const target = documentsById.get(targetId);
-    if (
-      target &&
-      !(target.metadata?.superseded_by ?? []).includes(document.metadata.id)
-    ) {
+    if (target && !(target.metadata?.superseded_by ?? []).includes(document.metadata.id)) {
       errors.push(
         `${relative(document.filePath)}: supersedes ${targetId}, but the target does not declare superseded_by ${document.metadata.id}`,
       );
@@ -116,10 +94,7 @@ function validateSupersession(document, documentsById, errors, relative) {
   }
   for (const targetId of document.metadata?.superseded_by ?? []) {
     const target = documentsById.get(targetId);
-    if (
-      target &&
-      !(target.metadata?.supersedes ?? []).includes(document.metadata.id)
-    ) {
+    if (target && !(target.metadata?.supersedes ?? []).includes(document.metadata.id)) {
       errors.push(
         `${relative(document.filePath)}: superseded_by ${targetId}, but the target does not declare supersedes ${document.metadata.id}`,
       );

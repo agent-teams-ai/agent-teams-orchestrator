@@ -9,17 +9,8 @@ const validFeaturePolicy =
   "version: 1\ndefault: deny\nedges:\n  - from: app.test\n    to: context.work-coordination\n    imports:\n      - ./module\nfeature_edges:\n  - package: context.work-coordination\n    from: dependency-model\n    to: task-model\n    imports:\n      - domain\n";
 
 export async function checkFeatureDependencyTopology(context) {
-  const {
-    dependencyPolicyPath,
-    requireFailure,
-    requireSuccess,
-    run,
-    temporaryRoot,
-  } = context;
-  const featuresRoot = path.join(
-    temporaryRoot,
-    "packages/contexts/work-coordination/src/features",
-  );
+  const { dependencyPolicyPath, requireFailure, requireSuccess, run, temporaryRoot } = context;
+  const featuresRoot = path.join(temporaryRoot, "packages/contexts/work-coordination/src/features");
   const taskFeatureRoot = path.join(featuresRoot, "task-model");
   const dependencyFeatureRoot = path.join(featuresRoot, "dependency-model");
   const dependencyDomainRoot = path.join(dependencyFeatureRoot, "domain");
@@ -41,10 +32,7 @@ export async function checkFeatureDependencyTopology(context) {
     path.join(taskDomainRoot, "internal-api.ts"),
     'export type { TaskReference } from "./task-reference.js";\n',
   );
-  const dependencyDomainPath = path.join(
-    dependencyDomainRoot,
-    "task-dependency.ts",
-  );
+  const dependencyDomainPath = path.join(dependencyDomainRoot, "task-dependency.ts");
   await writeFile(
     dependencyDomainPath,
     'import type { TaskReference } from "../../task-model/domain/internal-api.js";\nexport type TaskDependency = TaskReference;\n',
@@ -102,10 +90,7 @@ export async function checkFeatureDependencyTopology(context) {
     'import type { TaskReference } from "../../task-model/domain/internal-api.js";\nexport type TaskDependency = TaskReference;\n',
   );
 
-  const dependencyAdapterRoot = path.join(
-    dependencyFeatureRoot,
-    "adapters/inbound",
-  );
+  const dependencyAdapterRoot = path.join(dependencyFeatureRoot, "adapters/inbound");
   await mkdir(dependencyAdapterRoot, { recursive: true });
   await writeFile(
     path.join(dependencyAdapterRoot, "direct-sibling.ts"),
@@ -121,10 +106,7 @@ export async function checkFeatureDependencyTopology(context) {
 
   await writeFile(
     dependencyPolicyPath,
-    validFeaturePolicy.replace(
-      "      - domain\n",
-      "      - domain\n      - application\n",
-    ),
+    validFeaturePolicy.replace("      - domain\n", "      - domain\n      - application\n"),
   );
   requireFailure(
     "unused feature surface",
@@ -141,10 +123,7 @@ export async function checkFeatureDependencyTopology(context) {
     "feature dependency cycle context.work-coordination",
   );
 
-  await writeFile(
-    path.join(dependencyFeatureRoot, "module.ts"),
-    "export {};\n",
-  );
+  await writeFile(path.join(dependencyFeatureRoot, "module.ts"), "export {};\n");
   await writeFile(dependencyPolicyPath, validFeaturePolicy);
   requireFailure(
     "ambiguous feature module name",
@@ -153,10 +132,7 @@ export async function checkFeatureDependencyTopology(context) {
   );
   await rm(path.join(dependencyFeatureRoot, "module.ts"));
   await mkdir(path.join(dependencyFeatureRoot, "tests"), { recursive: true });
-  await writeFile(
-    path.join(dependencyFeatureRoot, "tests/integration.test.ts"),
-    "export {};\n",
-  );
+  await writeFile(path.join(dependencyFeatureRoot, "tests/integration.test.ts"), "export {};\n");
   requireFailure(
     "detached tests inside production feature",
     run(temporaryRoot),

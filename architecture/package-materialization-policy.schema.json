@@ -4,10 +4,7 @@
   "title": "Agent Teams Orchestrator package materialization policy",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "version",
-    "entries"
-  ],
+  "required": ["version", "entries"],
   "properties": {
     "version": {
       "const": 1
@@ -31,22 +28,14 @@
     "entry": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "package_id",
-        "state",
-        "blocked_by",
-        "decision"
-      ],
+      "required": ["package_id", "state", "blocked_by", "decision"],
       "properties": {
         "package_id": {
           "type": "string",
           "pattern": "^(app|context|integration|platform|sdk|testing)\\.[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)*$"
         },
         "state": {
-          "enum": [
-            "allowed",
-            "deferred"
-          ]
+          "enum": ["allowed", "deferred"]
         },
         "blocked_by": {
           "type": "array",

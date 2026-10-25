@@ -7,13 +7,7 @@ const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "../..");
 const oxlintBinary = path.join(repositoryRoot, "node_modules/.bin/oxlint");
 const typeScriptExtensions = new Set([".cts", ".mts", ".ts", ".tsx"]);
-const excludedDirectories = new Set([
-  ".git",
-  ".nx",
-  "coverage",
-  "dist",
-  "node_modules",
-]);
+const excludedDirectories = new Set([".git", ".nx", "coverage", "dist", "node_modules"]);
 
 async function exists(filePath) {
   try {
@@ -45,10 +39,7 @@ async function countTypeScriptFiles(target) {
     const entryPath = path.join(target, entry.name);
     if (entry.isDirectory()) {
       count += await countTypeScriptFiles(entryPath);
-    } else if (
-      entry.isFile() &&
-      typeScriptExtensions.has(path.extname(entry.name))
-    ) {
+    } else if (entry.isFile() && typeScriptExtensions.has(path.extname(entry.name))) {
       count += 1;
     }
   }
@@ -57,7 +48,9 @@ async function countTypeScriptFiles(target) {
 
 async function resolveTargets(cliArguments) {
   if (cliArguments.length === 0) {
-    throw new Error("type-aware lint requires explicit paths; use lint:typed for production coverage");
+    throw new Error(
+      "type-aware lint requires explicit paths; use lint:typed for production coverage",
+    );
   }
   const requested = cliArguments.map((target) => path.resolve(repositoryRoot, target));
   const targets = [];
@@ -83,9 +76,7 @@ async function resolveTargets(cliArguments) {
 async function main() {
   const cliArguments = process.argv.slice(2);
   const advisory = cliArguments[0] === "--advisory";
-  const targets = await resolveTargets(
-    advisory ? cliArguments.slice(1) : cliArguments,
-  );
+  const targets = await resolveTargets(advisory ? cliArguments.slice(1) : cliArguments);
   let fileCount = 0;
   for (const target of targets) {
     fileCount += await countTypeScriptFiles(target);
@@ -102,10 +93,7 @@ async function main() {
   );
   const oxlintArguments = [
     "--config",
-    path.join(
-      repositoryRoot,
-      advisory ? ".oxlintrc.advisory.json" : ".oxlintrc.type-aware.json",
-    ),
+    path.join(repositoryRoot, advisory ? ".oxlintrc.advisory.json" : ".oxlintrc.type-aware.json"),
     "--disable-nested-config",
     "--type-aware",
   ];
@@ -114,14 +102,10 @@ async function main() {
   }
   // Oxlint override selectors are consumer-relative, including for explicit inputs.
   oxlintArguments.push(...targets.map((target) => path.relative(repositoryRoot, target) || "."));
-  const result = spawnSync(
-    oxlintBinary,
-    oxlintArguments,
-    {
-      cwd: repositoryRoot,
-      stdio: "inherit",
-    },
-  );
+  const result = spawnSync(oxlintBinary, oxlintArguments, {
+    cwd: repositoryRoot,
+    stdio: "inherit",
+  });
   if (result.error) {
     throw result.error;
   }

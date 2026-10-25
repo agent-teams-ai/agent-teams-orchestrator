@@ -17,16 +17,10 @@ import { interruptScaffold } from "./scaffolding-transaction-fixture.mjs";
 
 const toolingRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(toolingRoot, "../..");
-const scaffolder = path.join(
-  repositoryRoot,
-  "scripts/architecture/scaffold-package.mjs",
-);
+const scaffolder = path.join(repositoryRoot, "scripts/architecture/scaffold-package.mjs");
 const schemaPaths = {
   catalog: path.join(repositoryRoot, "architecture/package-catalog.schema.json"),
-  dependencyPolicy: path.join(
-    repositoryRoot,
-    "architecture/source-dependency-policy.schema.json",
-  ),
+  dependencyPolicy: path.join(repositoryRoot, "architecture/source-dependency-policy.schema.json"),
   materializationPolicy: path.join(
     repositoryRoot,
     "architecture/package-materialization-policy.schema.json",
@@ -37,15 +31,11 @@ const targetPath = "packages/contexts/work-coordination";
 const planPath = `.agent-teams-local/scaffolding-plans/${targetId}.json`;
 
 function run(root, ...arguments_) {
-  return spawnSync(
-    process.execPath,
-    [scaffolder, ...arguments_, "--root", root],
-    {
-      cwd: repositoryRoot,
-      encoding: "utf8",
-      env: { ...process.env, NO_COLOR: "1" },
-    },
-  );
+  return spawnSync(process.execPath, [scaffolder, ...arguments_, "--root", root], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+    env: { ...process.env, NO_COLOR: "1" },
+  });
 }
 
 async function exists(pathname) {
@@ -68,15 +58,7 @@ try {
     writePlatformOwner(root),
     writeRootReferences(root, []),
   ]);
-  const planned = run(
-    root,
-    "plan",
-    "--id",
-    targetId,
-    "--plan",
-    planPath,
-    "--json",
-  );
+  const planned = run(root, "plan", "--id", targetId, "--plan", planPath, "--json");
   assert.equal(planned.status, 0, `${planned.stdout}\n${planned.stderr}`);
 
   await writeFile(
@@ -101,11 +83,7 @@ try {
 
   interruptScaffold(root, JSON.parse(planned.stdout).plan);
   const recovered = run(root, "recover", "--json");
-  assert.notEqual(
-    recovered.status,
-    0,
-    "invalid policy unexpectedly recovered a pending Plan",
-  );
+  assert.notEqual(recovered.status, 0, "invalid policy unexpectedly recovered a pending Plan");
   assert.match(`${recovered.stdout}\n${recovered.stderr}`, /duplicate package_id/u);
   assert.equal(await exists(path.join(root, targetPath)), false);
   console.log("Package scaffolding policy qualification passed.");

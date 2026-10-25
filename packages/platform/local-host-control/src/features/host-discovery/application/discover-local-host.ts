@@ -7,10 +7,7 @@ import type {
   HostDiscoveryObservation,
   TargetId,
 } from "./model/host-discovery.js";
-import type {
-  HostDiscoveryClock,
-  HostDiscoverySource,
-} from "./ports/host-discovery-source.js";
+import type { HostDiscoveryClock, HostDiscoverySource } from "./ports/host-discovery-source.js";
 import {
   evaluateCompatibility,
   isRecord,
@@ -51,10 +48,7 @@ function resolveDependencies(
     }
     const rawClockNow: unknown = Reflect.get(rawClock, "now");
     const rawSourceRead: unknown = Reflect.get(rawSource, "read");
-    if (
-      typeof rawClockNow !== "function" ||
-      typeof rawSourceRead !== "function"
-    ) {
+    if (typeof rawClockNow !== "function" || typeof rawSourceRead !== "function") {
       throw new TypeError("invalid dependency operation");
     }
     clockNow = () => Reflect.apply(rawClockNow, rawClock, []);
@@ -85,9 +79,7 @@ async function readSource(
   }
 }
 
-function snapshotClock(
-  clockNow: () => unknown,
-): EpochMicroseconds | undefined {
+function snapshotClock(clockNow: () => unknown): EpochMicroseconds | undefined {
   try {
     return snapshotEpochMicroseconds(clockNow());
   } catch {
@@ -96,9 +88,7 @@ function snapshotClock(
 }
 
 function assertNeverSourceResult(value: never): never {
-  throw new TypeError(
-    `Host discovery source result is not exhaustive: ${String(value)}`,
-  );
+  throw new TypeError(`Host discovery source result is not exhaustive: ${String(value)}`);
 }
 
 function sourceTerminalResult(
@@ -122,9 +112,7 @@ function sourceTerminalResult(
   }
   const sourceResult = sourceSnapshot.result;
   const resolvedTargetId =
-    sourceResult.kind === "observed"
-      ? sourceResult.observation.targetId
-      : sourceResult.targetId;
+    sourceResult.kind === "observed" ? sourceResult.observation.targetId : sourceResult.targetId;
   if (!sameTarget(resolvedTargetId, query.targetId)) {
     return {
       kind: "rejected",
@@ -179,10 +167,7 @@ function evaluateFreshness(
       validUntil: observation.freshness.validUntil,
     };
   }
-  if (
-    observation.freshness.observedAt.value >
-    currentTime.value + policy.maximumFutureSkew.value
-  ) {
+  if (observation.freshness.observedAt.value > currentTime.value + policy.maximumFutureSkew.value) {
     return {
       kind: "rejected",
       reason: "future-observation",
@@ -190,10 +175,7 @@ function evaluateFreshness(
     };
   }
   const observationAge = currentTime.value - observation.freshness.observedAt.value;
-  if (
-    observationAge > 0n &&
-    observationAge > policy.maximumObservationAge.value
-  ) {
+  if (observationAge > 0n && observationAge > policy.maximumObservationAge.value) {
     return {
       kind: "stale",
       reason: "observation-too-old",
@@ -211,10 +193,7 @@ async function discoverLocalHost(
   if (resolvedQuery === undefined) {
     return { kind: "rejected", reason: "invalid-query" };
   }
-  const rawSourceResult = await readSource(
-    dependencies.sourceRead,
-    resolvedQuery.targetId,
-  );
+  const rawSourceResult = await readSource(dependencies.sourceRead, resolvedQuery.targetId);
   const sourceResult = sourceTerminalResult(resolvedQuery, rawSourceResult);
   if (!isObservation(sourceResult)) {
     return sourceResult;
@@ -228,18 +207,12 @@ async function discoverLocalHost(
     };
   }
   return (
-    evaluateFreshness(
-      resolvedQuery,
-      sourceResult,
-      currentTime,
-      dependencies.freshnessPolicy,
-    ) ?? evaluateCompatibility(resolvedQuery, sourceResult)
+    evaluateFreshness(resolvedQuery, sourceResult, currentTime, dependencies.freshnessPolicy) ??
+    evaluateCompatibility(resolvedQuery, sourceResult)
   );
 }
 
-export function createHostDiscovery(
-  dependencies: HostDiscoveryDependencies,
-): HostDiscovery {
+export function createHostDiscovery(dependencies: HostDiscoveryDependencies): HostDiscovery {
   const resolvedDependencies = resolveDependencies(dependencies);
   return {
     discover(query) {

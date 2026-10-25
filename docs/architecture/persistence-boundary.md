@@ -391,12 +391,12 @@ ADR-0046 governs authoritative counts, quantities, rates, and money.
 
 The initial exact mapping profile is:
 
-| Semantic value | Local and hosted PostgreSQL |
-|---|---|
-| Bounded whole count | `BIGINT` read as string |
-| Exact quantity | coefficient `NUMERIC(P, 0)` plus `SMALLINT` scale |
-| Money | coefficient `NUMERIC(P, 0)`, scale, currency |
-| Exact instant | `TIMESTAMPTZ(6)` read and written as text |
+| Semantic value      | Local and hosted PostgreSQL                       |
+| ------------------- | ------------------------------------------------- |
+| Bounded whole count | `BIGINT` read as string                           |
+| Exact quantity      | coefficient `NUMERIC(P, 0)` plus `SMALLINT` scale |
+| Money               | coefficient `NUMERIC(P, 0)`, scale, currency      |
+| Exact instant       | `TIMESTAMPTZ(6)` read and written as text         |
 
 `P` comes from an explicit domain bound and overflow policy. PostgreSQL special
 numeric values are rejected. A fixed-scale

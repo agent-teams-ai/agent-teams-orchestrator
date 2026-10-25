@@ -11,9 +11,7 @@
         "docs/decisions/0079-runtime-authority-binding-cutoff-and-disposition.md",
         "docs/decisions/0080-orchestration-scope-project-authority-and-disposition.md"
       ],
-      "schemaPaths": [
-        "architecture/executable-specs/orchestrator-state-machine.schema.json"
-      ],
+      "schemaPaths": ["architecture/executable-specs/orchestrator-state-machine.schema.json"],
       "documents": [
         {
           "path": "architecture/executable-specs/orchestration-project-lifecycle.json",

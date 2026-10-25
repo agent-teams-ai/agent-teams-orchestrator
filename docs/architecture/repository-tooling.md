@@ -69,18 +69,18 @@ DDD boundaries, or source dependency rules.
 An accepted tooling decision is target architecture, not proof that its rollout
 is complete.
 
-| Capability | Decision state | Implementation state |
-|---|---|---|
-| Repository-local Stage 0 validators, lint, docs, security, and reliability gates | Accepted | Implemented and blocking |
-| Repository-local documentation authoring workflow | Accepted in ADR-0053 | Implemented with metadata discovery, template-backed guarded creation, code-impact routing, and blocking validation |
-| Versioned engineering foundation distribution | Accepted in ADR-0059 | Implemented with exact public npm dependency, explicit local lifecycle, consumer E2E proof, and fail-closed CI registry checks |
-| Nx package graph and affected foundation | Accepted in ADR-0039 | Implemented with pinned Nx Core and blocking pnpm-workspace discovery validation |
-| Nx task pipelines and local cache | Accepted in ADR-0039 | Planned; no task is cacheable until its complete inputs and outputs are proven |
-| Structural AST rules | Accepted in ADR-0041 | Planned for the first matching production source and invariant fixture |
-| Dead-code analysis | Accepted in ADR-0041 | Planned after the first production vertical slice |
-| Publishable API and package validation | Accepted in ADR-0041 | Planned before the first publishable package release |
-| Production package graph | Scoped sandbox admission accepted in ADR-0103 | Agent Context sandbox manifests and Local Host Control materialized; broader reservations remain deferred |
-| Federated Consistency Evidence Gate | Accepted in ADR-0078 | Planned; Phase 1 starts with the first real durable mutation and remains build-time only |
+| Capability                                                                       | Decision state                                | Implementation state                                                                                                           |
+| -------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Repository-local Stage 0 validators, lint, docs, security, and reliability gates | Accepted                                      | Implemented and blocking                                                                                                       |
+| Repository-local documentation authoring workflow                                | Accepted in ADR-0053                          | Implemented with metadata discovery, template-backed guarded creation, code-impact routing, and blocking validation            |
+| Versioned engineering foundation distribution                                    | Accepted in ADR-0059                          | Implemented with exact public npm dependency, explicit local lifecycle, consumer E2E proof, and fail-closed CI registry checks |
+| Nx package graph and affected foundation                                         | Accepted in ADR-0039                          | Implemented with pinned Nx Core and blocking pnpm-workspace discovery validation                                               |
+| Nx task pipelines and local cache                                                | Accepted in ADR-0039                          | Planned; no task is cacheable until its complete inputs and outputs are proven                                                 |
+| Structural AST rules                                                             | Accepted in ADR-0041                          | Planned for the first matching production source and invariant fixture                                                         |
+| Dead-code analysis                                                               | Accepted in ADR-0041                          | Planned after the first production vertical slice                                                                              |
+| Publishable API and package validation                                           | Accepted in ADR-0041                          | Planned before the first publishable package release                                                                           |
+| Production package graph                                                         | Scoped sandbox admission accepted in ADR-0103 | Agent Context sandbox manifests and Local Host Control materialized; broader reservations remain deferred                      |
+| Federated Consistency Evidence Gate                                              | Accepted in ADR-0078                          | Planned; Phase 1 starts with the first real durable mutation and remains build-time only                                       |
 
 The implementation state changes only with executable evidence in this
 repository. Documentation must not describe a planned dependency, wrapper, or
@@ -302,16 +302,16 @@ mandatory for first-party packages.
 
 ## Sources of truth
 
-| Concern | Authoritative source |
-|---|---|
-| Workspace membership | `pnpm-workspace.yaml` and package manifests |
-| Allowed package identity and role | `architecture/package-catalog.yaml` |
-| Context acceptance and domain ownership | Owning bounded-context dossier and ADR |
-| Source dependency direction | Dependency rules and architecture conformance gates |
-| Compiler behavior | Package and root TypeScript configurations |
-| Portable task command | Package manifest script |
-| Task and project execution graph | Nx derived view |
-| Strategic relationship graph | LikeC4 source model |
+| Concern                                 | Authoritative source                                |
+| --------------------------------------- | --------------------------------------------------- |
+| Workspace membership                    | `pnpm-workspace.yaml` and package manifests         |
+| Allowed package identity and role       | `architecture/package-catalog.yaml`                 |
+| Context acceptance and domain ownership | Owning bounded-context dossier and ADR              |
+| Source dependency direction             | Dependency rules and architecture conformance gates |
+| Compiler behavior                       | Package and root TypeScript configurations          |
+| Portable task command                   | Package manifest script                             |
+| Task and project execution graph        | Nx derived view                                     |
+| Strategic relationship graph            | LikeC4 source model                                 |
 
 Nx consumes or validates the standard sources. Nx metadata never becomes a
 parallel hand-maintained architecture catalog.
@@ -363,14 +363,14 @@ remain provable.
 
 The quality lanes are deliberately different:
 
-| Lane | Command | Policy |
-|---|---|---|
-| Focused fast feedback | `pnpm lint:fast:files -- <paths>` | Blocking rules for files being edited |
+| Lane                   | Command                              | Policy                                                                         |
+| ---------------------- | ------------------------------------ | ------------------------------------------------------------------------------ |
+| Focused fast feedback  | `pnpm lint:fast:files -- <paths>`    | Blocking rules for files being edited                                          |
 | Focused typed feedback | `pnpm lint:type-aware:files <paths>` | Blocking typed safety for one or more explicit TypeScript files or directories |
-| Repository fast gate | `pnpm lint:fast` | Blocking correctness, suspicious-code, runtime, test, and boundary rules |
-| Type-aware gate | `pnpm lint:type-aware` | Blocking typed safety over production TypeScript roots |
-| Full lint gate | `pnpm lint` | Fast, type-aware, suppression-policy, and lint-configuration conformance |
-| Evaluation lane | `pnpm lint:advisory` | Non-blocking bounded complexity and modernization findings |
+| Repository fast gate   | `pnpm lint:fast`                     | Blocking correctness, suspicious-code, runtime, test, and boundary rules       |
+| Type-aware gate        | `pnpm lint:type-aware`               | Blocking typed safety over production TypeScript roots                         |
+| Full lint gate         | `pnpm lint`                          | Fast, type-aware, suppression-policy, and lint-configuration conformance       |
+| Evaluation lane        | `pnpm lint:advisory`                 | Non-blocking bounded complexity and modernization findings                     |
 
 The advisory lane runs fast repository-wide analysis first, then limits its
 type-aware pass to materialized paths from the package catalog. Invalid fixtures
@@ -386,8 +386,9 @@ valid and invalid fixtures and a clean baseline review.
 The root policy explicitly extends the Foundation Node and production
 maintainability presets. Handwritten product and repository-tooling source is
 limited to 500 effective lines per file, 150 per function, complexity 20,
-nesting depth 4, and 5 parameters. Package tests, `*.test.mjs`, intentional
-fixtures, and architecture-conformance harnesses use the Foundation test profile:
+nesting depth 4, and 5 parameters. Package tests, script `*.test.mjs` and
+`*.test.ts` files, intentional fixtures, and architecture-conformance harnesses
+use the Foundation test profile:
 800, 250, 30, 5, and 6 respectively. Generated and vendored paths disable only
 these five budgets. Agents must split responsibilities before crossing a budget;
 there is no untracked per-file maintainability exception.
@@ -764,21 +765,21 @@ published artifact is correct.
 
 ## Tool ownership
 
-| Failure class | Owning tool |
-|---|---|
-| Package identity | Package catalog and topology validator |
-| Package materialization | Package materialization policy, topology validator, and scaffolder |
-| Project and task impact | Nx |
-| Structural source import boundaries | Oxlint with boundary rules |
-| Exact package and feature dependency edges | Topology validator and conformance fixtures |
-| Complete dependency graph and cycles | dependency-cruiser |
-| Repository-specific structural patterns | ast-grep |
-| Unused code and dependencies | Knip |
-| TypeScript public API review | API Extractor |
-| Protobuf compatibility | Buf |
-| Packed npm runtime and type resolution | publint and Are The Types Wrong |
-| Strategic context relationship topology | LikeC4 plus repository consistency validator |
-| Documentation workflow and implementation impact | Repository-local Skill and code anchors |
+| Failure class                                    | Owning tool                                                        |
+| ------------------------------------------------ | ------------------------------------------------------------------ |
+| Package identity                                 | Package catalog and topology validator                             |
+| Package materialization                          | Package materialization policy, topology validator, and scaffolder |
+| Project and task impact                          | Nx                                                                 |
+| Structural source import boundaries              | Oxlint with boundary rules                                         |
+| Exact package and feature dependency edges       | Topology validator and conformance fixtures                        |
+| Complete dependency graph and cycles             | dependency-cruiser                                                 |
+| Repository-specific structural patterns          | ast-grep                                                           |
+| Unused code and dependencies                     | Knip                                                               |
+| TypeScript public API review                     | API Extractor                                                      |
+| Protobuf compatibility                           | Buf                                                                |
+| Packed npm runtime and type resolution           | publint and Are The Types Wrong                                    |
+| Strategic context relationship topology          | LikeC4 plus repository consistency validator                       |
+| Documentation workflow and implementation impact | Repository-local Skill and code anchors                            |
 
 Do not add overlapping task runners or multiple tools that claim the same
 architectural authority. A new tool needs a distinct failure class, deterministic

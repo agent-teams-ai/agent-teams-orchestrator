@@ -4,8 +4,7 @@ import path from "node:path";
 export function qualifiedLibraryScripts() {
   return {
     build: "tsc --project tsconfig.json --pretty false",
-    check:
-      "pnpm run clean && pnpm run typecheck && pnpm run build && pnpm run test",
+    check: "pnpm run clean && pnpm run typecheck && pnpm run build && pnpm run test",
     clean:
       "node -e \"const fs=require('node:fs'); for (const path of ['dist','.cache']) fs.rmSync(path, { recursive: true, force: true })\"",
     prepack: "pnpm run clean && pnpm run build",
@@ -112,10 +111,7 @@ export async function writeEmptyMaterializationPolicy(root, schemaPath) {
   const architectureRoot = path.join(root, "architecture");
   await mkdir(architectureRoot, { recursive: true });
   await Promise.all([
-    cp(
-      schemaPath,
-      path.join(architectureRoot, "package-materialization-policy.schema.json"),
-    ),
+    cp(schemaPath, path.join(architectureRoot, "package-materialization-policy.schema.json")),
     writeFile(
       path.join(architectureRoot, "package-materialization-policy.yaml"),
       "version: 1\nentries: []\n",
@@ -126,10 +122,7 @@ export async function writeEmptyMaterializationPolicy(root, schemaPath) {
 export async function writeCatalog(root, schemaPaths) {
   const architectureRoot = path.join(root, "architecture");
   await mkdir(architectureRoot, { recursive: true });
-  await cp(
-    schemaPaths.catalog,
-    path.join(architectureRoot, "package-catalog.schema.json"),
-  );
+  await cp(schemaPaths.catalog, path.join(architectureRoot, "package-catalog.schema.json"));
   await cp(
     schemaPaths.dependencyPolicy,
     path.join(architectureRoot, "source-dependency-policy.schema.json"),
@@ -236,18 +229,12 @@ export async function materializeContext(root) {
     JSON.stringify({ compilerOptions: { strict: true } }, null, 2),
   );
   await writeFile(path.join(packageRoot, "src/index.ts"), "export {};\n");
-  await writeFile(
-    path.join(packageRoot, "src/features/task-model/index.ts"),
-    "export {};\n",
-  );
-  await writeFeatureReadme(
-    path.join(packageRoot, "src/features/task-model"),
-    {
-      id: "feature.work-coordination.task-model",
-      owner: "work-coordination/task-model",
-      ownerDocument: "domain.contexts.work-coordination",
-    },
-  );
+  await writeFile(path.join(packageRoot, "src/features/task-model/index.ts"), "export {};\n");
+  await writeFeatureReadme(path.join(packageRoot, "src/features/task-model"), {
+    id: "feature.work-coordination.task-model",
+    owner: "work-coordination/task-model",
+    ownerDocument: "domain.contexts.work-coordination",
+  });
 }
 
 export async function materializeApp(root) {

@@ -105,12 +105,7 @@
       ],
       "properties": {
         "id": {
-          "enum": [
-            "managed-saas",
-            "standalone-self-hosted",
-            "connected-self-hosted",
-            "fully-local"
-          ]
+          "enum": ["managed-saas", "standalone-self-hosted", "connected-self-hosted", "fully-local"]
         },
         "description": {
           "$ref": "#/$defs/nonEmptyText"
@@ -257,12 +252,7 @@
       "minItems": 1,
       "uniqueItems": true,
       "items": {
-        "enum": [
-          "managed-saas",
-          "standalone-self-hosted",
-          "connected-self-hosted",
-          "fully-local"
-        ]
+        "enum": ["managed-saas", "standalone-self-hosted", "connected-self-hosted", "fully-local"]
       }
     },
     "attributeRefs": {
@@ -366,13 +356,7 @@
           "$ref": "#/$defs/nonEmptyText"
         },
         "status": {
-          "enum": [
-            "candidate",
-            "calibrating",
-            "aspirational",
-            "active",
-            "retired"
-          ]
+          "enum": ["candidate", "calibrating", "aspirational", "active", "retired"]
         },
         "measure": {
           "enum": ["ratio", "histogram", "gauge"]

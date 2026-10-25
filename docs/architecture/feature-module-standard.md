@@ -613,6 +613,18 @@ activation cases. The profile check runs in `check:fast`; the check and its test
 run in the complete
 `architecture:check` and root `pnpm check` gates.
 
+The conformance harness in
+`tooling/architecture-conformance/scripts/check-package-topology.mjs` invokes
+the root topology validator against disposable rejecting package fixtures.
+`architecture:topology` separately validates the checked-in repository.
+
+Mechanical normalization retains the pinned standard identity, source-policy
+scope, construct-activation inventory, and maintainability caps. Its review
+binds before/after source hashes and finite AST/comment comparison for code;
+JSON values and Markdown receive separate semantic review. A formatter pass
+confirms layout, while the profile, topology, rejecting conformance, and full
+native repository gates remain required.
+
 Orchestrator claims adoption of Feature Module Standard `v1.1`, not universal
 product correctness. Domain acceptance, security, reliability, deployment, and
 release qualification remain separate repository-owned claims.

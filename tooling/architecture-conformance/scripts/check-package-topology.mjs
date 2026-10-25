@@ -1,7 +1,5 @@
 import { spawnSync } from "node:child_process";
-import {
-  mkdtemp, mkdir, readFile, rm, symlink, writeFile,
-} from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -20,23 +18,11 @@ import {
   writeRootReferences,
 } from "./topology-fixture-lib.mjs";
 
-const toolingRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-);
+const toolingRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(toolingRoot, "../..");
-const validator = path.join(
-  repositoryRoot,
-  "scripts/architecture/validate-package-topology.mjs",
-);
-const scaffolder = path.join(
-  repositoryRoot,
-  "scripts/architecture/scaffold-package.mjs",
-);
-const catalogSchema = path.join(
-  repositoryRoot,
-  "architecture/package-catalog.schema.json",
-);
+const validator = path.join(repositoryRoot, "scripts/architecture/validate-package-topology.mjs");
+const scaffolder = path.join(repositoryRoot, "scripts/architecture/scaffold-package.mjs");
+const catalogSchema = path.join(repositoryRoot, "architecture/package-catalog.schema.json");
 const dependencyPolicySchema = path.join(
   repositoryRoot,
   "architecture/source-dependency-policy.schema.json",
@@ -61,16 +47,7 @@ function runScaffolder(root, id) {
   const planPath = `.agent-teams-local/scaffolding-plans/${id}.json`;
   const planned = spawnSync(
     process.execPath,
-    [
-      scaffolder,
-      "plan",
-      "--root",
-      root,
-      "--id",
-      id,
-      "--plan",
-      planPath,
-    ],
+    [scaffolder, "plan", "--root", root, "--id", id, "--plan", planPath],
     {
       cwd: repositoryRoot,
       encoding: "utf8",
@@ -83,25 +60,14 @@ function runScaffolder(root, id) {
   if (planned.status !== 0) {
     return planned;
   }
-  return spawnSync(
-    process.execPath,
-    [
-      scaffolder,
-      "apply",
-      "--root",
-      root,
-      "--plan",
-      planPath,
-    ],
-    {
-      cwd: repositoryRoot,
-      encoding: "utf8",
-      env: {
-        ...process.env,
-        NO_COLOR: "1",
-      },
+  return spawnSync(process.execPath, [scaffolder, "apply", "--root", root, "--plan", planPath], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      NO_COLOR: "1",
     },
-  );
+  });
 }
 
 function output(result) {
@@ -117,15 +83,11 @@ function requireSuccess(label, result) {
 function requireFailure(label, result, expectedText) {
   const actual = output(result);
   if (result.status === 0 || !actual.includes(expectedText)) {
-    throw new Error(
-      `${label} did not fail with ${expectedText}:\n${actual}`,
-    );
+    throw new Error(`${label} did not fail with ${expectedText}:\n${actual}`);
   }
 }
 
-const temporaryRoot = await mkdtemp(
-  path.join(os.tmpdir(), "agent-teams-topology-"),
-);
+const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), "agent-teams-topology-"));
 
 try {
   await writeCatalog(temporaryRoot, {
@@ -136,18 +98,12 @@ try {
   await writeDossier(temporaryRoot, "proposed");
   await writeMaterializationGate(temporaryRoot);
   await writePlatformOwner(temporaryRoot);
-  requireSuccess(
-    "reserved proposed context",
-    run(temporaryRoot),
-  );
+  requireSuccess("reserved proposed context", run(temporaryRoot));
   const fixtureMaterializationPath = path.join(
     temporaryRoot,
     "architecture/package-materialization-policy.yaml",
   );
-  const allowedMaterializationPolicy = await readFile(
-    fixtureMaterializationPath,
-    "utf8",
-  );
+  const allowedMaterializationPolicy = await readFile(fixtureMaterializationPath, "utf8");
   const deferredMaterializationPolicy = `version: 1
 entries:
   - package_id: context.work-coordination
@@ -169,9 +125,7 @@ entries:
   );
 
   await materializeContext(temporaryRoot);
-  await writeRootReferences(temporaryRoot, [
-    "packages/contexts/work-coordination",
-  ]);
+  await writeRootReferences(temporaryRoot, ["packages/contexts/work-coordination"]);
   requireFailure(
     "materialized proposed context",
     run(temporaryRoot),
@@ -179,10 +133,7 @@ entries:
   );
 
   await writeDossier(temporaryRoot, "accepted");
-  requireSuccess(
-    "materialized accepted context",
-    run(temporaryRoot),
-  );
+  requireSuccess("materialized accepted context", run(temporaryRoot));
   await writeFile(fixtureMaterializationPath, deferredMaterializationPolicy);
   requireFailure(
     "materialized deferred context",
@@ -191,10 +142,7 @@ entries:
   );
   await writeFile(fixtureMaterializationPath, allowedMaterializationPolicy);
 
-  await rm(
-    path.join(temporaryRoot, "packages/contexts/work-coordination"),
-    { recursive: true },
-  );
+  await rm(path.join(temporaryRoot, "packages/contexts/work-coordination"), { recursive: true });
   requireFailure(
     "stale project reference",
     run(temporaryRoot),
@@ -209,21 +157,15 @@ entries:
     temporaryRoot,
     "packages/contexts/work-coordination/package.json",
   );
-  const scaffoldedManifest = JSON.parse(
-    await readFile(scaffoldedManifestPath, "utf8"),
-  );
+  const scaffoldedManifest = JSON.parse(await readFile(scaffoldedManifestPath, "utf8"));
   if (
-    JSON.stringify(scaffoldedManifest.scripts) !==
-      JSON.stringify(qualifiedLibraryScripts()) ||
-    JSON.stringify(scaffoldedManifest.exports) !==
-      JSON.stringify(qualifiedLibraryExports()) ||
+    JSON.stringify(scaffoldedManifest.scripts) !== JSON.stringify(qualifiedLibraryScripts()) ||
+    JSON.stringify(scaffoldedManifest.exports) !== JSON.stringify(qualifiedLibraryExports()) ||
     JSON.stringify(scaffoldedManifest.files) !== JSON.stringify(["dist"])
   ) {
     throw new Error("scaffolder did not emit the qualified library manifest");
   }
-  await writeRootReferences(temporaryRoot, [
-    "packages/contexts/work-coordination",
-  ]);
+  await writeRootReferences(temporaryRoot, ["packages/contexts/work-coordination"]);
   requireFailure(
     "package-only scaffold",
     run(temporaryRoot),
@@ -238,31 +180,20 @@ entries:
     path.join(scaffoldedFeatureRoot, "index.ts"),
     "export interface TaskFixture { readonly id: string; }\n",
   );
-  requireFailure(
-    "feature source without documentation",
-    run(temporaryRoot),
-    "requires colocated",
-  );
+  requireFailure("feature source without documentation", run(temporaryRoot), "requires colocated");
   await writeFeatureReadme(scaffoldedFeatureRoot, {
     id: "feature.work-coordination.task-model",
     owner: "work-coordination/task-model",
     ownerDocument: "domain.contexts.work-coordination",
     status: "proposed",
   });
-  requireFailure(
-    "proposed feature metadata",
-    run(temporaryRoot),
-    "status accepted",
-  );
+  requireFailure("proposed feature metadata", run(temporaryRoot), "status accepted");
   await writeFeatureReadme(scaffoldedFeatureRoot, {
     id: "feature.work-coordination.task-model",
     owner: "work-coordination/task-model",
     ownerDocument: "domain.contexts.work-coordination",
   });
-  requireSuccess(
-    "scaffolded accepted context",
-    run(temporaryRoot),
-  );
+  requireSuccess("scaffolded accepted context", run(temporaryRoot));
   const foundationEvidenceRoot = path.join(
     temporaryRoot,
     "packages/contexts/work-coordination/src/.foundation-retired-evidence-/fixture",
@@ -282,20 +213,10 @@ entries:
     "production source must belong to src/features/**",
   );
   await rm(hiddenSourceRoot, { recursive: true });
-  await writeRootReferences(temporaryRoot, [
-    "packages/contexts/work-coordination/",
-  ]);
-  requireSuccess(
-    "project reference with trailing slash",
-    run(temporaryRoot),
-  );
-  await writeRootReferences(temporaryRoot, [
-    "packages/contexts/work-coordination/tsconfig.json",
-  ]);
-  requireSuccess(
-    "project reference to explicit tsconfig",
-    run(temporaryRoot),
-  );
+  await writeRootReferences(temporaryRoot, ["packages/contexts/work-coordination/"]);
+  requireSuccess("project reference with trailing slash", run(temporaryRoot));
+  await writeRootReferences(temporaryRoot, ["packages/contexts/work-coordination/tsconfig.json"]);
+  requireSuccess("project reference to explicit tsconfig", run(temporaryRoot));
   await writeFile(
     path.join(temporaryRoot, "tsconfig.json"),
     JSON.stringify(
@@ -362,15 +283,10 @@ entries:
     run(temporaryRoot),
     "must appear exactly once in project references (found 2)",
   );
-  await writeRootReferences(temporaryRoot, [
-    "packages/contexts/work-coordination",
-  ]);
+  await writeRootReferences(temporaryRoot, ["packages/contexts/work-coordination"]);
 
   await writeFile(
-    path.join(
-      temporaryRoot,
-      "packages/contexts/work-coordination/src/rogue.ts",
-    ),
+    path.join(temporaryRoot, "packages/contexts/work-coordination/src/rogue.ts"),
     "export {};\n",
   );
   requireFailure(
@@ -378,12 +294,7 @@ entries:
     run(temporaryRoot),
     "production source must belong to src/features/**",
   );
-  await rm(
-    path.join(
-      temporaryRoot,
-      "packages/contexts/work-coordination/src/rogue.ts",
-    ),
-  );
+  await rm(path.join(temporaryRoot, "packages/contexts/work-coordination/src/rogue.ts"));
 
   const detachedUnitRoot = path.join(
     temporaryRoot,
@@ -422,10 +333,7 @@ entries:
   );
   await rm(unknownRoot, { recursive: true });
 
-  const manifestPath = path.join(
-    temporaryRoot,
-    "packages/contexts/work-coordination/package.json",
-  );
+  const manifestPath = path.join(temporaryRoot, "packages/contexts/work-coordination/package.json");
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
   delete manifest.scripts.test;
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
@@ -544,10 +452,7 @@ entries:
     },
   });
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
-  requireSuccess(
-    "library exports may precede generated build output",
-    run(temporaryRoot),
-  );
+  requireSuccess("library exports may precede generated build output", run(temporaryRoot));
   const dependencyPolicyPath = path.join(
     temporaryRoot,
     "architecture/source-dependency-policy.yaml",
@@ -567,25 +472,16 @@ entries:
   });
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
   await writeFile(
-    path.join(
-      temporaryRoot,
-      "packages/contexts/work-coordination/src/module.ts",
-    ),
+    path.join(temporaryRoot, "packages/contexts/work-coordination/src/module.ts"),
     "export const workCoordinationModuleFixture = true;\n",
   );
   await materializeApp(temporaryRoot);
-  await writeRootReferences(temporaryRoot, [
-    "packages/contexts/work-coordination",
-    "apps/test",
-  ]);
+  await writeRootReferences(temporaryRoot, ["packages/contexts/work-coordination", "apps/test"]);
   requireSuccess(
     "materialized app with accepted feature and public package import",
     run(temporaryRoot),
   );
-  const appFeaturePath = path.join(
-    temporaryRoot,
-    "apps/test/src/features/launch/index.ts",
-  );
+  const appFeaturePath = path.join(temporaryRoot, "apps/test/src/features/launch/index.ts");
   const appManifestPath = path.join(temporaryRoot, "apps/test/package.json");
   const appManifest = JSON.parse(await readFile(appManifestPath, "utf8"));
   delete appManifest.dependencies;
@@ -616,23 +512,14 @@ entries:
     appFeaturePath,
     'import "@agent-teams/work-coordination/src/features/task-model";\n',
   );
-  requireFailure(
-    "deep internal source import",
-    run(temporaryRoot),
-    "bypasses package exports",
-  );
-  await writeFile(
-    appFeaturePath,
-    'import "@agent-teams/work-coordination/private";\n',
-  );
+  requireFailure("deep internal source import", run(temporaryRoot), "bypasses package exports");
+  await writeFile(appFeaturePath, 'import "@agent-teams/work-coordination/private";\n');
   requireFailure(
     "unexported internal package subpath",
     run(temporaryRoot),
     "is not exported by @agent-teams/work-coordination",
   );
-  const contextManifest = JSON.parse(
-    await readFile(manifestPath, "utf8"),
-  );
+  const contextManifest = JSON.parse(await readFile(manifestPath, "utf8"));
   contextManifest.exports = {
     ...qualifiedLibraryExports({
       "./module": {
@@ -646,14 +533,8 @@ entries:
     },
     "./blocked/*": null,
   };
-  await writeFile(
-    manifestPath,
-    JSON.stringify(contextManifest, null, 2),
-  );
-  await writeFile(
-    appFeaturePath,
-    'import "@agent-teams/work-coordination/blocked/internal";\n',
-  );
+  await writeFile(manifestPath, JSON.stringify(contextManifest, null, 2));
+  await writeFile(appFeaturePath, 'import "@agent-teams/work-coordination/blocked/internal";\n');
   requireFailure(
     "null export overrides a broader wildcard",
     run(temporaryRoot),
@@ -665,18 +546,9 @@ entries:
       import: "./dist/module.js",
     },
   });
-  await writeFile(
-    manifestPath,
-    JSON.stringify(contextManifest, null, 2),
-  );
-  await writeFile(
-    appFeaturePath,
-    'import "@agent-teams/work-coordination/module";\n',
-  );
-  await writeFile(
-    path.join(temporaryRoot, "apps/test/src/rogue.ts"),
-    "export {};\n",
-  );
+  await writeFile(manifestPath, JSON.stringify(contextManifest, null, 2));
+  await writeFile(appFeaturePath, 'import "@agent-teams/work-coordination/module";\n');
+  await writeFile(path.join(temporaryRoot, "apps/test/src/rogue.ts"), "export {};\n");
   requireFailure(
     "app source outside feature or assembly",
     run(temporaryRoot),
@@ -685,15 +557,9 @@ entries:
   await rm(path.join(temporaryRoot, "apps/test/src/rogue.ts"));
   requireSuccess("restored valid app topology", run(temporaryRoot));
 
-  await writeFile(
-    appFeaturePath,
-    "await import(`@agent-teams/work-coordination/module`);\n",
-  );
+  await writeFile(appFeaturePath, "await import(`@agent-teams/work-coordination/module`);\n");
   requireSuccess("static template import", run(temporaryRoot));
-  await writeFile(
-    appFeaturePath,
-    "await import(`@agent-teams/work-coordination/private`);\n",
-  );
+  await writeFile(appFeaturePath, "await import(`@agent-teams/work-coordination/private`);\n");
   requireFailure(
     "template import outside allowed surface",
     run(temporaryRoot),
@@ -712,38 +578,19 @@ entries:
     appFeaturePath,
     "const surface = 'module';\nawait import('@agent-teams/work-coordination/' + surface);\n",
   );
-  requireFailure(
-    "concatenated import",
-    run(temporaryRoot),
-    "non-literal import module specifier",
-  );
+  requireFailure("concatenated import", run(temporaryRoot), "non-literal import module specifier");
   await writeFile(
     appFeaturePath,
     "await import(`@agent-teams\\u002fwork-coordination/private`);\n",
   );
-  requireFailure(
-    "escaped template import",
-    run(temporaryRoot),
-    "is not an allowed surface",
-  );
-  await writeFile(
-    appFeaturePath,
-    "import '@agent-teams\\u002fwork-coordination/private';\n",
-  );
-  requireFailure(
-    "escaped side-effect import",
-    run(temporaryRoot),
-    "is not an allowed surface",
-  );
+  requireFailure("escaped template import", run(temporaryRoot), "is not an allowed surface");
+  await writeFile(appFeaturePath, "import '@agent-teams\\u002fwork-coordination/private';\n");
+  requireFailure("escaped side-effect import", run(temporaryRoot), "is not an allowed surface");
   await writeFile(
     appFeaturePath,
     "const marker = /https?:\\/\\/example/;\nawait import(`@agent-teams/work-coordination/private`);\n",
   );
-  requireFailure(
-    "regex before template import",
-    run(temporaryRoot),
-    "is not an allowed surface",
-  );
+  requireFailure("regex before template import", run(temporaryRoot), "is not an allowed surface");
 
   await writeFile(
     appFeaturePath,
@@ -754,29 +601,19 @@ entries:
     run(temporaryRoot),
     "bypasses the source dependency policy",
   );
-  await writeFile(
-    appFeaturePath,
-    'import "@agent-teams/work-coordination/module";\n',
-  );
+  await writeFile(appFeaturePath, 'import "@agent-teams/work-coordination/module";\n');
   await writeFile(
     dependencyPolicyPath,
     "version: 1\ndefault: deny\nedges:\n  - from: app.test\n    to: context.work-coordination\n    imports:\n      - ./module\n  - from: context.work-coordination\n    to: app.test\n    imports:\n      - ./module\nfeature_edges: []\n",
   );
-  requireFailure(
-    "source dependency cycle",
-    run(temporaryRoot),
-    "source dependency cycle",
-  );
+  requireFailure("source dependency cycle", run(temporaryRoot), "source dependency cycle");
   await writeFile(
     dependencyPolicyPath,
     "version: 1\ndefault: deny\nedges:\n  - from: app.test\n    to: context.work-coordination\n    imports:\n      - ./module\nfeature_edges: []\n",
   );
   requireSuccess("restored source dependency policy", run(temporaryRoot));
 
-  requireSuccess(
-    "scaffold platform package",
-    runScaffolder(temporaryRoot, "platform.test"),
-  );
+  requireSuccess("scaffold platform package", runScaffolder(temporaryRoot, "platform.test"));
   await writeRootReferences(temporaryRoot, [
     "packages/contexts/work-coordination",
     "apps/test",
@@ -796,20 +633,12 @@ entries:
     owner: "architecture/tooling",
     ownerDocument: "architecture.platform-test",
   });
-  const platformManifestPath = path.join(
-    temporaryRoot,
-    "packages/platform/test/package.json",
-  );
-  const platformManifest = JSON.parse(
-    await readFile(platformManifestPath, "utf8"),
-  );
+  const platformManifestPath = path.join(temporaryRoot, "packages/platform/test/package.json");
+  const platformManifest = JSON.parse(await readFile(platformManifestPath, "utf8"));
   platformManifest.dependencies = {
     "@agent-teams/work-coordination": "workspace:*",
   };
-  await writeFile(
-    platformManifestPath,
-    JSON.stringify(platformManifest, null, 2),
-  );
+  await writeFile(platformManifestPath, JSON.stringify(platformManifest, null, 2));
   requireFailure(
     "platform depends on business context",
     run(temporaryRoot),

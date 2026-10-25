@@ -1,15 +1,8 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-import {
-  exists,
-  parseFrontmatter,
-  relative,
-} from "./package-catalog-lib.mjs";
-import {
-  isExportedSubpath,
-  packageNameFromSpecifier,
-} from "./package-topology-exports.mjs";
+import { exists, parseFrontmatter, relative } from "./package-catalog-lib.mjs";
+import { isExportedSubpath, packageNameFromSpecifier } from "./package-topology-exports.mjs";
 import {
   validateCrossFeatureSpecifier,
   validateFeatureDependencyUsage,
@@ -27,35 +20,21 @@ const productionSourceExtensions = new Set([
   ".tsx",
 ]);
 const testSourcePattern = /\.(?:test|spec)\.[cm]?[jt]sx?$/u;
-const documentIdPattern =
-  /^(ADR-[0-9]{4}|OD-[0-9]{3}|[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+)$/;
+const documentIdPattern = /^(ADR-[0-9]{4}|OD-[0-9]{3}|[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+)$/;
 const documentOwnerPattern = /^[a-z][a-z0-9-]*(\/[a-z][a-z0-9-]*)*$/;
-export const engineeringFoundationPackage =
-  "@agent-teams/engineering-foundation";
+export const engineeringFoundationPackage = "@agent-teams/engineering-foundation";
 export const allowedInternalDependencyRoles = {
   app: new Set(["bounded-context", "integration", "platform", "sdk"]),
-  "bounded-context": new Set([
-    "bounded-context",
-    "integration",
-    "platform",
-  ]),
+  "bounded-context": new Set(["bounded-context", "integration", "platform"]),
   integration: new Set(["integration", "platform"]),
   platform: new Set(["platform"]),
   sdk: new Set(["sdk"]),
-  testing: new Set([
-    "app",
-    "bounded-context",
-    "integration",
-    "platform",
-    "sdk",
-    "testing",
-  ]),
+  testing: new Set(["app", "bounded-context", "integration", "platform", "sdk", "testing"]),
 };
 
 function isProductionSourceFile(filePath) {
   return (
-    productionSourceExtensions.has(path.extname(filePath)) &&
-    !testSourcePattern.test(filePath)
+    productionSourceExtensions.has(path.extname(filePath)) && !testSourcePattern.test(filePath)
   );
 }
 
@@ -91,9 +70,7 @@ export async function validateFeatureDocumentation(context) {
   const featureNames = new Set(
     sourceFiles
       .filter(isProductionSourceFile)
-      .map((filePath) =>
-        relative(sourceRoot, filePath).match(/^features\/([^/]+)\//)?.[1],
-      )
+      .map((filePath) => relative(sourceRoot, filePath).match(/^features\/([^/]+)\//)?.[1])
       .filter(Boolean),
   );
   if (featureNames.size === 0) {
@@ -106,17 +83,12 @@ export async function validateFeatureDocumentation(context) {
     const readmePath = path.join(sourceRoot, "features", featureName, "README.md");
     const readmeRelative = relative(repositoryRoot, readmePath);
     if (!(await exists(readmePath))) {
-      errors.push(
-        `${entry.path}: feature ${featureName} requires colocated ${readmeRelative}`,
-      );
+      errors.push(`${entry.path}: feature ${featureName} requires colocated ${readmeRelative}`);
       continue;
     }
     let metadata;
     try {
-      metadata = parseFrontmatter(
-        await readFile(readmePath, "utf8"),
-        readmeRelative,
-      );
+      metadata = parseFrontmatter(await readFile(readmePath, "utf8"), readmeRelative);
     } catch (error) {
       errors.push(error.message);
       continue;
@@ -164,9 +136,7 @@ function validateDependencyEdge(context) {
   if (dependencyName === current.manifest.name) {
     return;
   }
-  const edge = dependencyEdges.get(
-    dependencyEdgeKey(current.entry.id, dependency.id),
-  );
+  const edge = dependencyEdges.get(dependencyEdgeKey(current.entry.id, dependency.id));
   if (!edge) {
     errors.push(
       `${relative(repositoryRoot, filePath)}: source dependency ${current.entry.id} -> ${dependency.id} is denied by default`,
@@ -208,10 +178,7 @@ function validateInternalSpecifier(context, specifier) {
     );
     return;
   }
-  if (
-    dependencyName !== current.manifest.name &&
-    !declaredDependencies.has(dependencyName)
-  ) {
+  if (dependencyName !== current.manifest.name && !declaredDependencies.has(dependencyName)) {
     errors.push(
       `${relative(repositoryRoot, filePath)}: internal package import ${dependencyName} is not declared in ${current.entry.path}/package.json`,
     );
@@ -246,11 +213,7 @@ function validateInternalSpecifier(context, specifier) {
 }
 
 export async function validateInternalPackageImports(context) {
-  const {
-    errors,
-    materializedPackages,
-    repositoryRoot,
-  } = context;
+  const { errors, materializedPackages, repositoryRoot } = context;
   const usedFeatureSurfaces = new Set();
   for (const current of materializedPackages.values()) {
     const currentRoot = path.join(repositoryRoot, current.entry.path);
@@ -314,13 +277,19 @@ export function validateSourceDependencyPolicy(policy, catalog, errors) {
     const from = byId.get(edge.from);
     const to = byId.get(edge.to);
     if (!from) {
-      errors.push(`architecture/source-dependency-policy.yaml: unknown consumer package ${edge.from}`);
+      errors.push(
+        `architecture/source-dependency-policy.yaml: unknown consumer package ${edge.from}`,
+      );
     }
     if (!to) {
-      errors.push(`architecture/source-dependency-policy.yaml: unknown provider package ${edge.to}`);
+      errors.push(
+        `architecture/source-dependency-policy.yaml: unknown provider package ${edge.to}`,
+      );
     }
     if (edge.from === edge.to) {
-      errors.push(`architecture/source-dependency-policy.yaml: self dependency ${edge.from} is prohibited`);
+      errors.push(
+        `architecture/source-dependency-policy.yaml: self dependency ${edge.from} is prohibited`,
+      );
     }
     if (from && to && !allowedInternalDependencyRoles[from.role]?.has(to.role)) {
       errors.push(
@@ -329,7 +298,9 @@ export function validateSourceDependencyPolicy(policy, catalog, errors) {
     }
     const key = dependencyEdgeKey(edge.from, edge.to);
     if (dependencyEdges.has(key)) {
-      errors.push(`architecture/source-dependency-policy.yaml: duplicate edge ${edge.from} -> ${edge.to}`);
+      errors.push(
+        `architecture/source-dependency-policy.yaml: duplicate edge ${edge.from} -> ${edge.to}`,
+      );
     } else {
       dependencyEdges.set(key, edge);
     }

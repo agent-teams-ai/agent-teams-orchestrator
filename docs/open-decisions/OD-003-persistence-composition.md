@@ -69,22 +69,22 @@ framework, or new lifecycle substrate.
 
 ### Supplied executable evidence
 
-The product-owner-supplied report *Bundled PostgreSQL options: research and
-executable comparison*, dated 2026-10-03, reports these isolated Linux results
+The product-owner-supplied report _Bundled PostgreSQL options: research and
+executable comparison_, dated 2026-10-03, reports these isolated Linux results
 with Node 24.21.0 and one SQL client. Build and dependency assets were staged
 before the runs; runtime network namespaces contained only loopback.
 
-| Observed behavior | Node `embedded-postgres` | Rust `postgresql_embedded` |
-|---|---|---|
-| Wrapper and actual engine | 18.4.0-beta.17; PostgreSQL 18.4 | 0.21.0; PostgreSQL 18.6 |
-| Offline first start | Passed with staged npm platform payload | Passed with fresh bundled archive extraction |
-| Drizzle transaction rollback | Passed | Passed |
-| Receipt and outbox in one transaction | Passed | Passed |
-| Deliberately discarded completed reply | Reconciled | Reconciled |
-| Persistent reopen | Passed | Passed |
-| Effective `fsync`, `full_page_writes`, `synchronous_commit` | All on | All on |
-| Graceful shutdown and owned postmaster cleanup | Passed | Passed |
-| Control-loop timer during slow SQL | 22 ticks | 24 ticks |
+| Observed behavior                                           | Node `embedded-postgres`                | Rust `postgresql_embedded`                   |
+| ----------------------------------------------------------- | --------------------------------------- | -------------------------------------------- |
+| Wrapper and actual engine                                   | 18.4.0-beta.17; PostgreSQL 18.4         | 0.21.0; PostgreSQL 18.6                      |
+| Offline first start                                         | Passed with staged npm platform payload | Passed with fresh bundled archive extraction |
+| Drizzle transaction rollback                                | Passed                                  | Passed                                       |
+| Receipt and outbox in one transaction                       | Passed                                  | Passed                                       |
+| Deliberately discarded completed reply                      | Reconciled                              | Reconciled                                   |
+| Persistent reopen                                           | Passed                                  | Passed                                       |
+| Effective `fsync`, `full_page_writes`, `synchronous_commit` | All on                                  | All on                                       |
+| Graceful shutdown and owned postmaster cleanup              | Passed                                  | Passed                                       |
+| Control-loop timer during slow SQL                          | 22 ticks                                | 24 ticks                                     |
 
 The timer used `pg_sleep(0.25)` and a 10 ms interval. It measures that blocking
 boundary, not agent capacity, general fairness, or comparative throughput.
@@ -93,7 +93,7 @@ backup restore, and major upgrades remain outside this comparison's evidence.
 The supplied report text does not include its linked raw artifacts. Its original
 experiments were not rerun; the following comparison has a separate harness and
 scope. The second supplied report,
-*Hosted full-Internet default: implementation and qualification*, dated
+_Hosted full-Internet default: implementation and qualification_, dated
 2026-10-03, qualifies hosted worker networking, not bundled PostgreSQL.
 
 ### Same-payload lifecycle comparison, 2026-10-17
@@ -106,14 +106,14 @@ Both paths used an existing unprivileged UID, separate private data roots,
 loopback TCP only, SCRAM, and authenticated cluster identity. Effective `fsync`,
 `full_page_writes`, and `synchronous_commit` were all on.
 
-| Observed lifecycle behavior | Configured wrapper behind a guard | Direct tools |
-|---|---|---|
-| Initialization and bootstrap-file removal | Passed | Passed |
-| Authenticated startup and committed sentinel | Passed | Passed |
-| Graceful stop and persistent reopen of the same cluster | Passed | Passed |
-| Owned postmaster process crash and committed-data recovery | Passed | Passed |
-| Occupied test port rejects startup and preserves its listener | Passed | Passed |
-| Final owned process cleanup | Passed | Passed |
+| Observed lifecycle behavior                                    | Configured wrapper behind a guard        | Direct tools   |
+| -------------------------------------------------------------- | ---------------------------------------- | -------------- |
+| Initialization and bootstrap-file removal                      | Passed                                   | Passed         |
+| Authenticated startup and committed sentinel                   | Passed                                   | Passed         |
+| Graceful stop and persistent reopen of the same cluster        | Passed                                   | Passed         |
+| Owned postmaster process crash and committed-data recovery     | Passed                                   | Passed         |
+| Occupied test port rejects startup and preserves its listener  | Passed                                   | Passed         |
+| Final owned process cleanup                                    | Passed                                   | Passed         |
 | Separate raw-wrapper diagnostic after the startup child exited | `stop()` did not resolve within 1,000 ms | Not applicable |
 
 The guarded common paths passed six checks each. The failed raw-wrapper
@@ -161,11 +161,11 @@ judgments, not qualification evidence. The other rows are contingencies, not
 parallel implementations. Every option requires the accepted lifecycle and
 recovery evidence before release.
 
-| Qualification role | Option | Confidence | Reliability | Complexity |
-|---|---|---|---|---|
-| Selected Node approach; qualification pending | `embedded-postgres` with a small hardened adapter and maintained upstream fixes | 8/10 | 7/10 | 6/10 |
-| Tested Linux contingency for wrapper limitations | Node Supervisor adapter using `initdb`, foreground `postgres`, and `pg_ctl` with existing binary artifacts | 7/10 | 7/10 | 6–7/10, provisional |
-| Conditional alternative | `postgresql_embedded` after an independent Rust substrate decision | 5/10 | 8/10 | 8/10 |
+| Qualification role                               | Option                                                                                                     | Confidence | Reliability | Complexity          |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- | ---------- | ----------- | ------------------- |
+| Selected Node approach; qualification pending    | `embedded-postgres` with a small hardened adapter and maintained upstream fixes                            | 8/10       | 7/10        | 6/10                |
+| Tested Linux contingency for wrapper limitations | Node Supervisor adapter using `initdb`, foreground `postgres`, and `pg_ctl` with existing binary artifacts | 7/10       | 7/10        | 6–7/10, provisional |
+| Conditional alternative                          | `postgresql_embedded` after an independent Rust substrate decision                                         | 5/10       | 8/10        | 8/10                |
 
 ### Source review and remaining qualification
 
@@ -245,15 +245,15 @@ official helper tools, and parent-death/duplicate-start behavior. Historical
 sources and results remain unchanged; the observations below do not qualify an
 installed Windows/macOS package or change ADR-0114.
 
-| Profile or finding | Observed result | Required interpretation |
-|---|---|---|
-| Raw npm Linux payload | Eight required research cases passed; `postgres`, `initdb`, and `pg_ctl` are present, while `pg_dump`, `pg_restore`, and `pg_controldata` are absent | The launcher dependency does not supply a complete backup/maintenance distribution |
-| Raw stop after child exit | The promise did not finish within 1.5 seconds | The public guard and package-global shutdown paths both need a bounded solution |
-| Natural worker exit | The installed `async-exit-hook` waited about ten seconds and converted intended exit 2 into actual exit 0 | An independent controller must inspect fresh structured results; a zero worker exit is not a valid success oracle for this experiment |
-| Official additional helpers | Nine required cases passed, including a real custom-format dump, restore to a different clean cluster, exact four-table comparison, and persistent reopen | This qualifies the measured synthetic SQL combination, not complete product recovery |
-| Duplicate start | A second sequential start was rejected; the original authenticated server and committed data remained | Useful positive evidence; simultaneous ensure and generation-safe losing-attempt cleanup remain separate checks |
-| Abrupt launcher death | PostgreSQL survived SIGKILL of its Node launcher with the same authenticated identity and committed sentinel | The wrapper hook does not provide forced-parent custody. Survival is not data loss and can be valid under a qualified external custodian |
-| Windows stop source | The exact wrapper uses `taskkill /f /t` | Source evidence identifies forced termination; no Windows execution result is inferred |
+| Profile or finding          | Observed result                                                                                                                                           | Required interpretation                                                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Raw npm Linux payload       | Eight required research cases passed; `postgres`, `initdb`, and `pg_ctl` are present, while `pg_dump`, `pg_restore`, and `pg_controldata` are absent      | The launcher dependency does not supply a complete backup/maintenance distribution                                                       |
+| Raw stop after child exit   | The promise did not finish within 1.5 seconds                                                                                                             | The public guard and package-global shutdown paths both need a bounded solution                                                          |
+| Natural worker exit         | The installed `async-exit-hook` waited about ten seconds and converted intended exit 2 into actual exit 0                                                 | An independent controller must inspect fresh structured results; a zero worker exit is not a valid success oracle for this experiment    |
+| Official additional helpers | Nine required cases passed, including a real custom-format dump, restore to a different clean cluster, exact four-table comparison, and persistent reopen | This qualifies the measured synthetic SQL combination, not complete product recovery                                                     |
+| Duplicate start             | A second sequential start was rejected; the original authenticated server and committed data remained                                                     | Useful positive evidence; simultaneous ensure and generation-safe losing-attempt cleanup remain separate checks                          |
+| Abrupt launcher death       | PostgreSQL survived SIGKILL of its Node launcher with the same authenticated identity and committed sentinel                                              | The wrapper hook does not provide forced-parent custody. Survival is not data loss and can be valid under a qualified external custodian |
+| Windows stop source         | The exact wrapper uses `taskkill /f /t`                                                                                                                   | Source evidence identifies forced termination; no Windows execution result is inferred                                                   |
 
 The helper profile built `pg_dump`, `pg_restore`, `pg_controldata`, and libpq
 from the official PostgreSQL 18.4 source archive, keeping the original npm

@@ -1,25 +1,18 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "extends": [
-    "./.oxlintrc.base.json"
-  ],
+  "extends": ["./.oxlintrc.base.json"],
   "overrides": [
     {
       "files": [
         "packages/**/tests/**",
         "scripts/**/*.test.mjs",
+        "scripts/**/*.test.ts",
         "scripts/**/fixtures/**",
         "tooling/architecture-conformance/**"
       ],
       "rules": {
-        "complexity": [
-          "error",
-          30
-        ],
-        "max-depth": [
-          "error",
-          5
-        ],
+        "complexity": ["error", 30],
+        "max-depth": ["error", 5],
         "max-lines": [
           "error",
           {
@@ -36,16 +29,11 @@
             "skipComments": true
           }
         ],
-        "max-params": [
-          "error",
-          6
-        ]
+        "max-params": ["error", 6]
       }
     },
     {
-      "files": [
-        "**/*.{ts,tsx,mts,cts}"
-      ],
+      "files": ["**/*.{ts,tsx,mts,cts}"],
       "rules": {
         "typescript/await-thenable": "error",
         "typescript/ban-ts-comment": [

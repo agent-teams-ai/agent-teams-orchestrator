@@ -16,11 +16,7 @@ test("semantic mutation pack is killed by the owned invariant validator", () => 
     const source = specsById.get(mutation.specId);
     const mutant = mutation.apply(source);
     assert.notDeepEqual(mutant, source, `${mutation.id} must materially mutate data`);
-    assert.throws(
-      () => assertOwnedSemantics(mutant),
-      undefined,
-      mutation.id,
-    );
+    assert.throws(() => assertOwnedSemantics(mutant), undefined, mutation.id);
   }
 });
 
@@ -32,9 +28,7 @@ test("a missing canonical transition is rejected after mutant construction", () 
   const mutant = mutation.apply(source);
 
   assert.equal(
-    mutant.transitions.some(
-      (transition) => transition.event === "AUTHORITY_EXPIRED",
-    ),
+    mutant.transitions.some((transition) => transition.event === "AUTHORITY_EXPIRED"),
     false,
   );
   assert.throws(() => assertOwnedSemantics(mutant));
@@ -47,9 +41,7 @@ test("undeclared trace, fault, and invariant ADR references are rejected", () =>
     "use-non-authoritative-invariant-adr",
   ]);
 
-  for (const mutation of semanticMutations.filter((candidate) =>
-    mutationIds.has(candidate.id),
-  )) {
+  for (const mutation of semanticMutations.filter((candidate) => mutationIds.has(candidate.id))) {
     const source = specsById.get(mutation.specId);
     const mutant = mutation.apply(source);
     assert.throws(() => assertOwnedSemantics(mutant), undefined, mutation.id);
@@ -63,9 +55,7 @@ test("state coordinates are closed over modeled axes and declared values", () =>
     "use-undeclared-coordinate-value",
   ]);
 
-  for (const mutation of semanticMutations.filter((candidate) =>
-    mutationIds.has(candidate.id),
-  )) {
+  for (const mutation of semanticMutations.filter((candidate) => mutationIds.has(candidate.id))) {
     const source = specsById.get(mutation.specId);
     const mutant = mutation.apply(source);
     assert.throws(() => assertOwnedSemantics(mutant), undefined, mutation.id);

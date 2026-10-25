@@ -81,13 +81,13 @@ expensive architecture decision.
 
 ## Gate status
 
-| Gate | Current state | Owning authorities |
-|---|---|---|
-| Run, Work, and topology semantics | In review | Run Orchestration, Work Coordination, Team Topology |
-| Communication, Attention, and Agent Context boundary | In review | Agent Communication, Human Notification Management, Agent Attention, Agent Context, and Run Orchestration |
-| Public SDK and Desktop compatibility boundary | In review | Feature owners, Control API, SDK, Desktop integration |
-| Temporal-ready durable process boundaries | In review | Run Orchestration application and workflow scheduling adapters |
-| Deployment authority, target fencing, and runtime connectivity | In review | Access Control, composition, clients, runtime gateway |
+| Gate                                                           | Current state | Owning authorities                                                                                        |
+| -------------------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------- |
+| Run, Work, and topology semantics                              | In review     | Run Orchestration, Work Coordination, Team Topology                                                       |
+| Communication, Attention, and Agent Context boundary           | In review     | Agent Communication, Human Notification Management, Agent Attention, Agent Context, and Run Orchestration |
+| Public SDK and Desktop compatibility boundary                  | In review     | Feature owners, Control API, SDK, Desktop integration                                                     |
+| Temporal-ready durable process boundaries                      | In review     | Run Orchestration application and workflow scheduling adapters                                            |
+| Deployment authority, target fencing, and runtime connectivity | In review     | Access Control, composition, clients, runtime gateway                                                     |
 
 `In review` is blocking. A gate becomes `passed` only when its exit evidence is
 linked from this document and the owning accepted artifacts. An unresolved
@@ -112,13 +112,13 @@ direct-message slice under the owner's A-F migration mandate. The
 [scoped contract and evidence matrix](../contracts/desktop-runtime-migration-admission-v1.md#conformance-fixtures)
 provide the five exit proofs for this exact implementation start:
 
-| Gate | Scoped exit evidence | Admission |
-|---|---|---|
-| 1: Run, Work, topology | Accepted owners, immutable identity/placement contracts, cancellation and stale/unknown models | Passed for ADR-0103 scope |
-| 2: Communication and Context | Direct audience/child receipt, separate delivery observations, context evidence rejecting text authority | Passed for ADR-0103 scope |
-| 3: SDK/Desktop | Versioned Protobuf, exact DTO oracles, request/expiry/ETag/clock and target/feed fixtures | Passed for ADR-0103 scope |
-| 4: Durable processes | Feature-owned activation/dispatch/cancel state, stable identities, post-commit dispatch and unknown reconciliation model | Passed for ADR-0103 scope |
-| 5: Deployment/authority | Existing server boundary and bounded test authority, authenticated scope and target generation rejection | Passed for ADR-0103 scope |
+| Gate                         | Scoped exit evidence                                                                                                     | Admission                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| 1: Run, Work, topology       | Accepted owners, immutable identity/placement contracts, cancellation and stale/unknown models                           | Passed for ADR-0103 scope |
+| 2: Communication and Context | Direct audience/child receipt, separate delivery observations, context evidence rejecting text authority                 | Passed for ADR-0103 scope |
+| 3: SDK/Desktop               | Versioned Protobuf, exact DTO oracles, request/expiry/ETag/clock and target/feed fixtures                                | Passed for ADR-0103 scope |
+| 4: Durable processes         | Feature-owned activation/dispatch/cancel state, stable identities, post-commit dispatch and unknown reconciliation model | Passed for ADR-0103 scope |
+| 5: Deployment/authority      | Existing server boundary and bounded test authority, authenticated scope and target generation rejection                 | Passed for ADR-0103 scope |
 
 ADR-0103 covers only the six named context reservations and retains their
 strategic owner references. The broad gate table above remains in

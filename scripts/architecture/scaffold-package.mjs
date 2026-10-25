@@ -1,13 +1,5 @@
 import { spawnSync } from "node:child_process";
-import {
-  lstat,
-  mkdir,
-  readFile,
-  realpath,
-  rm,
-  stat,
-  writeFile,
-} from "node:fs/promises";
+import { lstat, mkdir, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
@@ -32,25 +24,17 @@ import { loadPackageMaterializationInputs } from "./package-topology-inputs.mjs"
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
-const validatorPath = path.join(
-  scriptDirectory,
-  "validate-package-topology.mjs",
-);
+const validatorPath = path.join(scriptDirectory, "validate-package-topology.mjs");
 const localStateDirectory = ".agent-teams-local";
 const defaultCompositionId = "orchestrator-library-boundary";
-const canonicalScaffoldingConfigPath =
-  "architecture/foundation/scaffolding.yaml";
+const canonicalScaffoldingConfigPath = "architecture/foundation/scaffolding.yaml";
 const scaffoldingRecoveryScope = Object.freeze({
   projectId: "agent-teams-orchestrator",
   configPath: canonicalScaffoldingConfigPath,
   targetCatalogPath: "architecture/package-catalog.yaml",
   compositionId: defaultCompositionId,
 });
-const successfulOutcomes = new Set([
-  "applied",
-  "already-applied",
-  "failed-recovered",
-]);
+const successfulOutcomes = new Set(["applied", "already-applied", "failed-recovered"]);
 
 function requiredValue(argv, index, option) {
   const value = argv[index + 1];
@@ -89,9 +73,7 @@ function parseArguments(argv) {
       values.planPath = requiredValue(normalizedArgv, index, argument);
       index += 1;
     } else if (argument === "--root") {
-      values.repositoryRoot = path.resolve(
-        requiredValue(normalizedArgv, index, argument),
-      );
+      values.repositoryRoot = path.resolve(requiredValue(normalizedArgv, index, argument));
       index += 1;
     } else {
       throw new Error(`unknown argument: ${argument}`);
@@ -115,18 +97,14 @@ function parseArguments(argv) {
 }
 
 function validateRepository(repositoryRoot) {
-  const result = spawnSync(
-    process.execPath,
-    [validatorPath, "--root", repositoryRoot],
-    {
-      cwd: repositoryRoot,
-      encoding: "utf8",
-      env: {
-        ...process.env,
-        NO_COLOR: "1",
-      },
+  const result = spawnSync(process.execPath, [validatorPath, "--root", repositoryRoot], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      NO_COLOR: "1",
     },
-  );
+  });
 
   if (result.status !== 0) {
     throw new Error(
@@ -137,8 +115,10 @@ function validateRepository(repositoryRoot) {
 
 async function validateMaterializationPolicy(repositoryRoot) {
   const errors = [];
-  const { catalog, documents, materializationPolicy } =
-    await loadPackageMaterializationInputs(repositoryRoot, errors);
+  const { catalog, documents, materializationPolicy } = await loadPackageMaterializationInputs(
+    repositoryRoot,
+    errors,
+  );
   validatePackageMaterializationPolicy(
     materializationPolicy && Array.isArray(materializationPolicy.entries)
       ? materializationPolicy
@@ -149,9 +129,7 @@ async function validateMaterializationPolicy(repositoryRoot) {
   );
   if (errors.length > 0) {
     throw new Error(
-      `package materialization policy must be valid before apply:\n${[
-        ...new Set(errors),
-      ]
+      `package materialization policy must be valid before apply:\n${[...new Set(errors)]
         .toSorted()
         .map((error) => `ERROR ${error}`)
         .join("\n")}`,
@@ -240,10 +218,7 @@ async function pathEntryExists(pathname) {
 }
 
 function sameDefinitionRef(actual, expected) {
-  return (
-    actual?.id === expected?.id &&
-    actual?.contractVersion === expected?.contractVersion
-  );
+  return actual?.id === expected?.id && actual?.contractVersion === expected?.contractVersion;
 }
 
 function matchesCanonicalAuthority(config, plan) {
@@ -258,10 +233,7 @@ function matchesCanonicalAuthority(config, plan) {
 function matchesCanonicalComposition(composition, plan) {
   return [
     plan.composition?.id === composition.id,
-    sameDefinitionRef(
-      plan.composition?.scaffoldProfile,
-      composition.scaffoldProfile?.ref,
-    ),
+    sameDefinitionRef(plan.composition?.scaffoldProfile, composition.scaffoldProfile?.ref),
     sameDefinitionRef(plan.composition?.recipe, composition.recipe?.ref),
     Array.isArray(plan.composition?.facets),
     plan.composition?.facets.length === 0,
@@ -285,10 +257,7 @@ function materializationFor(policy, packageId) {
 
 async function assertCanonicalOrchestratorPlan(repositoryRoot, plan) {
   const config = YAML.parse(
-    await readFile(
-      path.join(repositoryRoot, canonicalScaffoldingConfigPath),
-      "utf8",
-    ),
+    await readFile(path.join(repositoryRoot, canonicalScaffoldingConfigPath), "utf8"),
   );
   const composition = config.compositions?.find(
     (candidate) => candidate.id === defaultCompositionId,
@@ -297,9 +266,7 @@ async function assertCanonicalOrchestratorPlan(repositoryRoot, plan) {
     loadPackageCatalog(repositoryRoot),
     loadPackageMaterializationPolicy(repositoryRoot),
   ]);
-  const target = catalog.packages?.find(
-    (candidate) => candidate.id === plan.target?.id,
-  );
+  const target = catalog.packages?.find((candidate) => candidate.id === plan.target?.id);
   if (materializationFor(materializationPolicy, target?.id)?.state === "deferred") {
     throw new Error(`${target.id}: package materialization is deferred`);
   }
@@ -317,16 +284,12 @@ async function assertCanonicalOrchestratorPlan(repositoryRoot, plan) {
 }
 
 async function planCommand(options) {
-  const repositoryRoot = await canonicalRepositoryRoot(
-    options.repositoryRoot,
-  );
+  const repositoryRoot = await canonicalRepositoryRoot(options.repositoryRoot);
   const [catalog, materializationPolicy] = await Promise.all([
     loadPackageCatalog(repositoryRoot),
     loadPackageMaterializationPolicy(repositoryRoot),
   ]);
-  const entry = catalog.packages?.find(
-    (candidate) => candidate.id === options.id,
-  );
+  const entry = catalog.packages?.find((candidate) => candidate.id === options.id);
   if (!entry) {
     throw new Error(`${options.id}: package ID is not registered in the catalog`);
   }
@@ -338,10 +301,7 @@ async function planCommand(options) {
   }
   validateRepository(repositoryRoot);
 
-  const intentDirectory = await ensureLocalStateDirectory(
-    repositoryRoot,
-    "scaffolding-intents",
-  );
+  const intentDirectory = await ensureLocalStateDirectory(repositoryRoot, "scaffolding-intents");
   const intentRelative = path.posix.join(
     localStateDirectory,
     "scaffolding-intents",
@@ -390,10 +350,7 @@ async function planCommand(options) {
         `${options.id}.${digestSuffix}.json`,
       ),
   );
-  const planDirectory = await ensureLocalStateDirectory(
-    repositoryRoot,
-    "scaffolding-plans",
-  );
+  const planDirectory = await ensureLocalStateDirectory(repositoryRoot, "scaffolding-plans");
   const planAbsolute = path.join(planDirectory, path.basename(planRelative));
   const source = `${JSON.stringify(plan, null, 2)}\n`;
   const writeOutcome = await writeExclusive(planAbsolute, source);
@@ -401,11 +358,7 @@ async function planCommand(options) {
 
   if (options.json) {
     process.stdout.write(
-      `${JSON.stringify(
-        { plan, planPath: normalizedPlanPath, writeOutcome },
-        null,
-        2,
-      )}\n`,
+      `${JSON.stringify({ plan, planPath: normalizedPlanPath, writeOutcome }, null, 2)}\n`,
     );
     return;
   }
@@ -421,19 +374,14 @@ function renderReceipt(receipt, phase) {
 
 function writeReceipt(options, receipt, phase) {
   process.stdout.write(
-    options.json
-      ? `${JSON.stringify(receipt, null, 2)}\n`
-      : renderReceipt(receipt, phase),
+    options.json ? `${JSON.stringify(receipt, null, 2)}\n` : renderReceipt(receipt, phase),
   );
   if (!successfulOutcomes.has(receipt.outcome)) {
     process.exitCode = 1;
   }
 }
 
-async function recoverPendingScaffoldingTransaction(
-  repositoryRoot,
-  options,
-) {
+async function recoverPendingScaffoldingTransaction(repositoryRoot, options) {
   const status = await inspectFoundationTransactionAwareMode(repositoryRoot);
   const transaction = status.transaction;
   if (!transaction || transaction.state === "idle") {
@@ -449,10 +397,7 @@ async function recoverPendingScaffoldingTransaction(
         "A different Foundation transaction requires recovery before scaffolding Apply.",
     );
   }
-  const receipt = await recoverFilesystemScaffold(
-    repositoryRoot,
-    scaffoldingRecoveryScope,
-  );
+  const receipt = await recoverFilesystemScaffold(repositoryRoot, scaffoldingRecoveryScope);
   if (!receipt) {
     return false;
   }
@@ -461,31 +406,21 @@ async function recoverPendingScaffoldingTransaction(
 }
 
 async function applyCommand(options) {
-  const repositoryRoot = await canonicalRepositoryRoot(
-    options.repositoryRoot,
-  );
+  const repositoryRoot = await canonicalRepositoryRoot(options.repositoryRoot);
   await validateMaterializationPolicy(repositoryRoot);
   if (await recoverPendingScaffoldingTransaction(repositoryRoot, options)) {
     return;
   }
-  const plan = await readScaffoldPlanFile(
-    repositoryRoot,
-    options.planPath,
-  );
+  const plan = await readScaffoldPlanFile(repositoryRoot, options.planPath);
   await assertCanonicalOrchestratorPlan(repositoryRoot, plan);
   const receipt = await applyFilesystemScaffold(repositoryRoot, plan);
   writeReceipt(options, receipt, "Apply");
 }
 
 async function recoverCommand(options) {
-  const repositoryRoot = await canonicalRepositoryRoot(
-    options.repositoryRoot,
-  );
+  const repositoryRoot = await canonicalRepositoryRoot(options.repositoryRoot);
   await validateMaterializationPolicy(repositoryRoot);
-  const receipt = await recoverFilesystemScaffold(
-    repositoryRoot,
-    scaffoldingRecoveryScope,
-  );
+  const receipt = await recoverFilesystemScaffold(repositoryRoot, scaffoldingRecoveryScope);
   if (!receipt) {
     process.stdout.write(
       options.json

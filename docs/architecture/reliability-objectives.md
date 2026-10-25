@@ -51,12 +51,12 @@ OpenTelemetry Views, alerts, and OpenSLO documents are derived adapters.
 
 The initial catalog deliberately contains five candidate indicators:
 
-| Indicator | User-visible question |
-|---|---|
-| Command acceptance latency | Did the caller quickly receive a durable acceptance outcome? |
-| Dispatch age | Did accepted work reach the responsible external capability? |
-| Observation freshness | Can a subscriber see recent durable progress? |
-| Recovery duration | Did orchestration return to a known state after continuity loss? |
+| Indicator                  | User-visible question                                                       |
+| -------------------------- | --------------------------------------------------------------------------- |
+| Command acceptance latency | Did the caller quickly receive a durable acceptance outcome?                |
+| Dispatch age               | Did accepted work reach the responsible external capability?                |
+| Observation freshness      | Can a subscriber see recent durable progress?                               |
+| Recovery duration          | Did orchestration return to a known state after continuity loss?            |
 | Scope disposition duration | Did Project retirement reach a truthful outcome across all required owners? |
 
 Candidate means the instrumentation contract is being designed. It is not a

@@ -51,9 +51,9 @@ One Agent has at most one current Team assignment and appears once in the roster
 
 ## Aggregates and consistency boundaries
 
-| Root and identity | Protected invariants | Commands | Domain events | Transaction | Concurrency | Growth bound | External facts | Rejected boundaries |
-|---|---|---|---|---|---|---|---|---|
-| Team and Agent assignment | Invariants above | CreateTeam; GetTeam; ListTeams | TeamCreated; AgentAssigned | One owner-local Unit of Work including receipt, Operation and outbox | Unique current Agent assignment plus row/CAS protection; request replay precedes new mutation after current authorization. | One member/Run in this slice; history and receipts stored separately with finite declared horizons | Existing authorized Agent and exact profile version; clock and server-generated identity inputs. | No provider-state mirror, cross-context aggregate or shared transaction |
+| Root and identity         | Protected invariants | Commands                       | Domain events              | Transaction                                                          | Concurrency                                                                                                                | Growth bound                                                                                       | External facts                                                                                   | Rejected boundaries                                                     |
+| ------------------------- | -------------------- | ------------------------------ | -------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Team and Agent assignment | Invariants above     | CreateTeam; GetTeam; ListTeams | TeamCreated; AgentAssigned | One owner-local Unit of Work including receipt, Operation and outbox | Unique current Agent assignment plus row/CAS protection; request replay precedes new mutation after current authorization. | One member/Run in this slice; history and receipts stored separately with finite declared horizons | Existing authorized Agent and exact profile version; clock and server-generated identity inputs. | No provider-state mirror, cross-context aggregate or shared transaction |
 
 Repositories persist only the owning roots/state; read queries use authorized
 projections. Transport schemas and persistence records map to separate domain and
@@ -158,12 +158,12 @@ delegation, multiple coordinators, and hierarchy remain later capabilities.
 
 ### Delivery map
 
-| Slice | Capability | Persistence or effects |
-|---|---|---|
-| S1 | Pure `CheckTeamDraft` and deterministic diagnostics | None |
-| S2 | Handwritten SDK plus Protobuf/Connect adapter for the same check | None |
-| S3 | Create, get, and list persistent Team definitions | Team Topology only |
-| S4 | Start a Run from an immutable Team version with explicit Run overrides | Run Orchestration and AR boundaries |
+| Slice | Capability                                                             | Persistence or effects              |
+| ----- | ---------------------------------------------------------------------- | ----------------------------------- |
+| S1    | Pure `CheckTeamDraft` and deterministic diagnostics                    | None                                |
+| S2    | Handwritten SDK plus Protobuf/Connect adapter for the same check       | None                                |
+| S3    | Create, get, and list persistent Team definitions                      | Team Topology only                  |
+| S4    | Start a Run from an immutable Team version with explicit Run overrides | Run Orchestration and AR boundaries |
 
 S1 and S2 are the module pilot. They must preserve extension points for S3 and
 S4 without implementing a generic profile catalog, hierarchy engine, policy DSL,

@@ -13,8 +13,7 @@ const dependencySections = [
   "optionalDependencies",
   "peerDependencies",
 ];
-const dependencyPolicyPath =
-  "architecture/foundation/dependency-declarations.yaml";
+const dependencyPolicyPath = "architecture/foundation/dependency-declarations.yaml";
 const productionSourceExtensions = new Set([
   ".cjs",
   ".cts",
@@ -25,14 +24,7 @@ const productionSourceExtensions = new Set([
   ".ts",
   ".tsx",
 ]);
-const ignoredDirectories = [
-  ".git",
-  ".nx",
-  ".turbo",
-  "coverage",
-  "dist",
-  "node_modules",
-];
+const ignoredDirectories = [".git", ".nx", ".turbo", "coverage", "dist", "node_modules"];
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
 
@@ -50,9 +42,7 @@ function parseArguments(argv) {
 }
 
 function isExactRegistryVersion(value) {
-  return /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(
-    value,
-  );
+  return /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(value);
 }
 
 function matchesWorkspace(relativeDirectory, patterns) {
@@ -61,9 +51,7 @@ function matchesWorkspace(relativeDirectory, patterns) {
     .some((pattern) => path.matchesGlob(relativeDirectory, pattern));
   const excluded = patterns
     .filter((pattern) => pattern.startsWith("!"))
-    .some((pattern) =>
-      path.matchesGlob(relativeDirectory, pattern.slice(1)),
-    );
+    .some((pattern) => path.matchesGlob(relativeDirectory, pattern.slice(1)));
   return included && !excluded;
 }
 
@@ -76,9 +64,7 @@ function loadCatalogs(workspace, errors) {
 
   for (const [catalogName, catalog] of configuredCatalogs) {
     if (!catalog || typeof catalog !== "object" || Array.isArray(catalog)) {
-      errors.push(
-        `pnpm-workspace.yaml: catalog ${catalogName} must be an object`,
-      );
+      errors.push(`pnpm-workspace.yaml: catalog ${catalogName} must be an object`);
       catalogs.set(catalogName, {});
       continue;
     }
@@ -86,10 +72,7 @@ function loadCatalogs(workspace, errors) {
     catalogs.set(catalogName, catalog);
 
     for (const [dependencyName, version] of Object.entries(catalog)) {
-      if (
-        typeof version !== "string" ||
-        !isExactRegistryVersion(version)
-      ) {
+      if (typeof version !== "string" || !isExactRegistryVersion(version)) {
         errors.push(
           `pnpm-workspace.yaml: catalog ${catalogName} dependency ${dependencyName} must use an exact registry version`,
         );
@@ -110,15 +93,10 @@ function selectedCatalogName(specifier) {
   return;
 }
 
-async function loadExactRegistryDevelopmentOnlyPackages(
-  repositoryRoot,
-  errors,
-) {
+async function loadExactRegistryDevelopmentOnlyPackages(repositoryRoot, errors) {
   let policy;
   try {
-    policy = YAML.parse(
-      await readFile(path.join(repositoryRoot, dependencyPolicyPath), "utf8"),
-    );
+    policy = YAML.parse(await readFile(path.join(repositoryRoot, dependencyPolicyPath), "utf8"));
   } catch (error) {
     errors.push(`${dependencyPolicyPath}: invalid YAML: ${error.message}`);
     return new Set();
@@ -127,8 +105,7 @@ async function loadExactRegistryDevelopmentOnlyPackages(
   if (
     !Array.isArray(packages) ||
     packages.length === 0 ||
-    packages.some((packageName) =>
-      typeof packageName !== "string" || packageName.length === 0)
+    packages.some((packageName) => typeof packageName !== "string" || packageName.length === 0)
   ) {
     errors.push(
       `${dependencyPolicyPath}: exactRegistryDevelopmentOnlyPackages must be a non-empty string array`,
@@ -136,9 +113,7 @@ async function loadExactRegistryDevelopmentOnlyPackages(
     return new Set();
   }
   if (new Set(packages).size !== packages.length) {
-    errors.push(
-      `${dependencyPolicyPath}: exactRegistryDevelopmentOnlyPackages must be unique`,
-    );
+    errors.push(`${dependencyPolicyPath}: exactRegistryDevelopmentOnlyPackages must be unique`);
   }
   return new Set(packages);
 }
@@ -150,9 +125,7 @@ async function loadWorkspaceManifests(repositoryRoot, workspace, errors) {
     patterns.length === 0 ||
     patterns.some((pattern) => typeof pattern !== "string")
   ) {
-    errors.push(
-      "pnpm-workspace.yaml: packages must be a non-empty string array",
-    );
+    errors.push("pnpm-workspace.yaml: packages must be a non-empty string array");
     return [];
   }
 
@@ -179,9 +152,7 @@ async function loadWorkspaceManifests(repositoryRoot, workspace, errors) {
         manifest: JSON.parse(await readFile(filePath, "utf8")),
       });
     } catch (error) {
-      errors.push(
-        `${relative(repositoryRoot, filePath)}: invalid JSON: ${error.message}`,
-      );
+      errors.push(`${relative(repositoryRoot, filePath)}: invalid JSON: ${error.message}`);
     }
   }
 
@@ -226,9 +197,7 @@ function validateDependency({
 
   if (workspaceNames.has(dependencyName)) {
     if (!dependencySpecifier.startsWith("workspace:")) {
-      errors.push(
-        `${location} is internal and must use the workspace: protocol`,
-      );
+      errors.push(`${location} is internal and must use the workspace: protocol`);
     }
     return;
   }
@@ -239,25 +208,19 @@ function validateDependency({
         `${location} is engineering tooling and is allowed only as an exact devDependency`,
       );
     } else if (!isExactRegistryVersion(dependencySpecifier)) {
-      errors.push(
-        `${location} must use an exact registry version`,
-      );
+      errors.push(`${location} must use an exact registry version`);
     }
     return;
   }
 
   if (dependencyName.startsWith("@agent-teams/")) {
-    errors.push(
-      `${location} uses the reserved internal scope but is not a workspace package`,
-    );
+    errors.push(`${location} uses the reserved internal scope but is not a workspace package`);
     return;
   }
 
   const catalogName = selectedCatalogName(dependencySpecifier);
   if (!catalogName) {
-    errors.push(
-      `${location} is external and must use catalog: instead of ${dependencySpecifier}`,
-    );
+    errors.push(`${location} is external and must use catalog: instead of ${dependencySpecifier}`);
     return;
   }
 
@@ -281,8 +244,7 @@ async function validateProductionToolingImports(
       ["apps", "packages"].map((directory) =>
         walk(
           path.join(repositoryRoot, directory),
-          (filePath) =>
-            productionSourceExtensions.has(path.extname(filePath)),
+          (filePath) => productionSourceExtensions.has(path.extname(filePath)),
           { skipDirectories: ignoredDirectories },
         ),
       ),
@@ -293,9 +255,10 @@ async function validateProductionToolingImports(
     const source = await readFile(filePath, "utf8");
     const importedToolingPackage = extractModuleSpecifiers(source, filePath)
       .map((specifier) =>
-        [...exactRegistryDevelopmentOnlyPackages].find((packageName) =>
-          specifier === packageName || specifier.startsWith(`${packageName}/`)
-        ))
+        [...exactRegistryDevelopmentOnlyPackages].find(
+          (packageName) => specifier === packageName || specifier.startsWith(`${packageName}/`),
+        ),
+      )
       .find(Boolean);
     if (importedToolingPackage) {
       errors.push(
@@ -312,10 +275,7 @@ async function main() {
 
   try {
     workspace = YAML.parse(
-      await readFile(
-        path.join(repositoryRoot, "pnpm-workspace.yaml"),
-        "utf8",
-      ),
+      await readFile(path.join(repositoryRoot, "pnpm-workspace.yaml"), "utf8"),
     );
   } catch (error) {
     console.error(`ERROR pnpm-workspace.yaml: ${error.message}`);
@@ -334,14 +294,12 @@ async function main() {
   }
 
   const catalogs = loadCatalogs(workspace, errors);
-  const manifests = await loadWorkspaceManifests(
+  const manifests = await loadWorkspaceManifests(repositoryRoot, workspace, errors);
+  const workspaceNames = validateManifestNames(manifests, errors);
+  const exactRegistryDevelopmentOnlyPackages = await loadExactRegistryDevelopmentOnlyPackages(
     repositoryRoot,
-    workspace,
     errors,
   );
-  const workspaceNames = validateManifestNames(manifests, errors);
-  const exactRegistryDevelopmentOnlyPackages =
-    await loadExactRegistryDevelopmentOnlyPackages(repositoryRoot, errors);
 
   for (const entry of manifests) {
     for (const section of dependencySections) {

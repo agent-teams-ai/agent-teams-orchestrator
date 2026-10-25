@@ -26,11 +26,7 @@ const int64Maximum = int64Magnitude - 1n;
 const uint64Maximum = (1n << 64n) - 1n;
 
 function parseString(value: string, label: string): string {
-  if (
-    typeof value !== "string" ||
-    value.length === 0 ||
-    value.length > identifierMaximumLength
-  ) {
+  if (typeof value !== "string" || value.length === 0 || value.length > identifierMaximumLength) {
     throw new TypeError(`${label} must be a bounded non-empty string`);
   }
   if (value.trim() !== value) {
@@ -46,11 +42,7 @@ function parseString(value: string, label: string): string {
 }
 
 function parseInt64BigInt(value: unknown, label: string): bigint {
-  if (
-    typeof value !== "bigint" ||
-    value < int64Minimum ||
-    value > int64Maximum
-  ) {
+  if (typeof value !== "bigint" || value < int64Minimum || value > int64Maximum) {
     throw new TypeError(`${label} must be an int64 bigint`);
   }
   return value;
@@ -71,10 +63,7 @@ function parsePositiveUint64BigInt(value: unknown, label: string): bigint {
   return parsed;
 }
 
-function parseHostProtocolVersion(
-  value: unknown,
-  label: string,
-): HostProtocolVersion {
+function parseHostProtocolVersion(value: unknown, label: string): HostProtocolVersion {
   try {
     if (typeof value !== "object" || value === null) {
       throw new TypeError("invalid protocol token");
@@ -88,9 +77,7 @@ function parseHostProtocolVersion(
       throw new TypeError("invalid protocol token type");
     }
     const tokenValue = candidate.value;
-    return hostProtocolVersion(
-      parsePositiveUint64BigInt(tokenValue, `${label} value`),
-    );
+    return hostProtocolVersion(parsePositiveUint64BigInt(tokenValue, `${label} value`));
   } catch {
     throw new TypeError(`${label} must be a HostProtocolVersion`);
   }
@@ -124,9 +111,7 @@ export function hostCapabilityId(value: string): HostCapabilityId {
   });
 }
 
-export function hostFreshnessEvidenceRef(
-  value: string,
-): HostFreshnessEvidenceRef {
+export function hostFreshnessEvidenceRef(value: string): HostFreshnessEvidenceRef {
   return Object.freeze({
     type: "HostFreshnessEvidenceRef",
     value: parseString(value, "HostFreshnessEvidenceRef"),
@@ -177,14 +162,8 @@ export function hostProtocolRange(
   minimum: HostProtocolVersion,
   maximum: HostProtocolVersion,
 ): HostProtocolRange {
-  const parsedMinimum = parseHostProtocolVersion(
-    minimum,
-    "HostProtocolRange minimum",
-  );
-  const parsedMaximum = parseHostProtocolVersion(
-    maximum,
-    "HostProtocolRange maximum",
-  );
+  const parsedMinimum = parseHostProtocolVersion(minimum, "HostProtocolRange minimum");
+  const parsedMaximum = parseHostProtocolVersion(maximum, "HostProtocolRange maximum");
   if (parsedMinimum.value > parsedMaximum.value) {
     throw new TypeError("HostProtocolRange minimum must not exceed maximum");
   }
@@ -231,10 +210,7 @@ export type HostDiscoveryStaleReason =
   | "ownership-unproven"
   | "superseded";
 
-export type HostDiscoverySourceRejectedReason =
-  | "foreign-identity"
-  | "malformed"
-  | "unsafe-state";
+export type HostDiscoverySourceRejectedReason = "foreign-identity" | "malformed" | "unsafe-state";
 
 export type DiscoverLocalHostResult =
   | {
@@ -291,7 +267,5 @@ export type DiscoverLocalHostResult =
     };
 
 export interface HostDiscovery {
-  discover(
-    query: DiscoverLocalHostQuery,
-  ): Promise<DiscoverLocalHostResult>;
+  discover(query: DiscoverLocalHostQuery): Promise<DiscoverLocalHostResult>;
 }

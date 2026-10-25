@@ -222,12 +222,12 @@ for real private RPC boundaries. ADR-0114 selects coarse service roles; the
 placement. These are accepted architecture choices, not qualification of an
 exact runtime version or another public SDK backend.
 
-| Boundary | Selected implementation | Contract preserved across deployment or language changes |
-|---|---|---|
-| Ordinary collaboration within a role | Curated internal APIs and typed local calls | Owning application models and explicit feature dependency |
-| Private RPC between declared roles | Feature-owned Protobuf and standard gRPC through Dapr | Versioned schema, trusted scope, errors, deadlines, acceptance, and retry semantics |
-| Durable integration delivery | Official JetStream SDK adapter directly invoking the owned application port | Event or command contract, inbox, outbox, acknowledgement, and reconciliation semantics |
-| Public client control | Connect edge and handwritten SDK | Accepted public control and SDK contracts |
+| Boundary                             | Selected implementation                                                     | Contract preserved across deployment or language changes                                |
+| ------------------------------------ | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Ordinary collaboration within a role | Curated internal APIs and typed local calls                                 | Owning application models and explicit feature dependency                               |
+| Private RPC between declared roles   | Feature-owned Protobuf and standard gRPC through Dapr                       | Versioned schema, trusted scope, errors, deadlines, acceptance, and retry semantics     |
+| Durable integration delivery         | Official JetStream SDK adapter directly invoking the owned application port | Event or command contract, inbox, outbox, acknowledgement, and reconciliation semantics |
+| Public client control                | Connect edge and handwritten SDK                                            | Accepted public control and SDK contracts                                               |
 
 The first real private boundary is Control Host to Team Topology's S3 persistent
 Team create/get/list capability in a separate process through Dapr. Its first
