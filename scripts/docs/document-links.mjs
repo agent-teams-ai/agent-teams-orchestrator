@@ -20,9 +20,7 @@ export function markdownLinks(tree) {
   const links = [];
   visit(tree, (node) => {
     if (
-      (node.type === "link" ||
-        node.type === "image" ||
-        node.type === "definition") &&
+      (node.type === "link" || node.type === "image" || node.type === "definition") &&
       typeof node.url === "string"
     ) {
       links.push(node.url);
@@ -31,15 +29,8 @@ export function markdownLinks(tree) {
   return links;
 }
 
-export function resolveMarkdownTarget(
-  repositoryRoot,
-  sourcePath,
-  rawTarget,
-) {
-  if (
-    /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(rawTarget) ||
-    rawTarget.startsWith("/")
-  ) {
+export function resolveMarkdownTarget(repositoryRoot, sourcePath, rawTarget) {
+  if (/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(rawTarget) || rawTarget.startsWith("/")) {
     return null;
   }
   const [rawPath, rawAnchor = ""] = rawTarget.split("#", 2);
@@ -50,8 +41,7 @@ export function resolveMarkdownTarget(
   return {
     anchor: decodeURIComponent(rawAnchor).toLowerCase(),
     escapedRepository:
-      repositoryRelative === ".." ||
-      repositoryRelative.startsWith(`..${path.sep}`),
+      repositoryRelative === ".." || repositoryRelative.startsWith(`..${path.sep}`),
     targetPath,
   };
 }
@@ -59,9 +49,7 @@ export function resolveMarkdownTarget(
 export async function normalizeExistingTarget(targetPath) {
   try {
     const targetStat = await stat(targetPath);
-    return targetStat.isDirectory()
-      ? path.join(targetPath, "README.md")
-      : targetPath;
+    return targetStat.isDirectory() ? path.join(targetPath, "README.md") : targetPath;
   } catch {
     return targetPath;
   }
@@ -82,18 +70,12 @@ export async function validateLocalLinks(context) {
   for (const filePath of allMarkdownFiles) {
     const targets = new Set();
     for (const rawTarget of markdownLinks(markdownTrees.get(filePath))) {
-      const resolved = resolveMarkdownTarget(
-        repositoryRoot,
-        filePath,
-        rawTarget,
-      );
+      const resolved = resolveMarkdownTarget(repositoryRoot, filePath, rawTarget);
       if (!resolved) {
         continue;
       }
       if (resolved.escapedRepository) {
-        errors.push(
-          `${relative(filePath)}: local link escapes repository root: ${rawTarget}`,
-        );
+        errors.push(`${relative(filePath)}: local link escapes repository root: ${rawTarget}`);
         continue;
       }
       const targetPath = await normalizeExistingTarget(resolved.targetPath);
@@ -111,8 +93,7 @@ export async function validateLocalLinks(context) {
       }
       if (resolved.anchor && path.extname(targetPath) === ".md") {
         const targetTree =
-          markdownTrees.get(targetPath) ??
-          parseMarkdown(await readFile(targetPath, "utf8"));
+          markdownTrees.get(targetPath) ?? parseMarkdown(await readFile(targetPath, "utf8"));
         if (!headingAnchors(targetTree).has(resolved.anchor)) {
           errors.push(
             `${relative(filePath)}: missing anchor #${resolved.anchor} in ${relative(targetPath)}`,
@@ -136,9 +117,7 @@ export async function validateLocalLinks(context) {
   }
   for (const document of documents) {
     if (!reachable.has(document.filePath)) {
-      errors.push(
-        `${relative(document.filePath)}: unreachable from docs/README.md`,
-      );
+      errors.push(`${relative(document.filePath)}: unreachable from docs/README.md`);
     }
   }
 }

@@ -12,9 +12,7 @@ import {
 } from "./code-anchors.mjs";
 import { discoverGovernedMarkdown } from "./document-files.mjs";
 import { validateDocumentIndexes } from "./document-indexes.mjs";
-import {
-  validateLocalLinks,
-} from "./document-links.mjs";
+import { validateLocalLinks } from "./document-links.mjs";
 import { parseFrontmatter, parseMarkdown } from "./document-parser.mjs";
 import { validateDocumentRelations } from "./document-relations.mjs";
 import { validateMermaid } from "./mermaid-runner.mjs";
@@ -91,9 +89,7 @@ function validateDocumentStructure(filePath, tree) {
     (node) => node.type !== "yaml" && node.type !== "definition",
   );
   if (firstContent?.type !== "heading" || firstContent.depth !== 1) {
-    errors.push(
-      `${relative(filePath)}: first content node must be the level-one document title`,
-    );
+    errors.push(`${relative(filePath)}: first content node must be the level-one document title`);
   }
 }
 
@@ -124,17 +120,13 @@ function validateFilename(document) {
 
   const basename = path.basename(filePath);
   if (metadata.type === "index" && basename !== "README.md") {
-    errors.push(
-      `${relative(filePath)}: index documents must use the directory README.md`,
-    );
+    errors.push(`${relative(filePath)}: index documents must use the directory README.md`);
   }
 
   if (metadata.type === "adr") {
     const match = basename.match(/^(\d{4})-[a-z0-9-]+\.md$/);
     if (!match || metadata.id !== `ADR-${match?.[1]}`) {
-      errors.push(
-        `${relative(filePath)}: ADR filename and id ${metadata.id} do not match`,
-      );
+      errors.push(`${relative(filePath)}: ADR filename and id ${metadata.id} do not match`);
     }
   }
 
@@ -174,9 +166,7 @@ function validateDocumentPlacement(document) {
 
   if (
     metadata.type === "bounded-context" &&
-    (!filePath.startsWith(
-      `${path.join(docsRoot, "domain/contexts")}${path.sep}`,
-    ) ||
+    (!filePath.startsWith(`${path.join(docsRoot, "domain/contexts")}${path.sep}`) ||
       basename !== "README.md")
   ) {
     errors.push(
@@ -186,19 +176,14 @@ function validateDocumentPlacement(document) {
 
   if (
     metadata.type === "feature" &&
-    !/^(?:apps|packages|tooling)\/.+\/src\/features\/.+\/README\.md$/.test(
-      repositoryPath,
-    )
+    !/^(?:apps|packages|tooling)\/.+\/src\/features\/.+\/README\.md$/.test(repositoryPath)
   ) {
     errors.push(
       `${repositoryPath}: feature documentation must be colocated under src/features/**/README.md`,
     );
   }
 
-  if (
-    metadata.type === "glossary" &&
-    filePath !== path.join(docsRoot, "glossary.md")
-  ) {
+  if (metadata.type === "glossary" && filePath !== path.join(docsRoot, "glossary.md")) {
     errors.push(`${repositoryPath}: glossary must be docs/glossary.md`);
   }
 }
@@ -235,9 +220,7 @@ function validateRequiredHeadings(document) {
     requireHeading("Decision");
     requireHeading("Consequences");
     if (![...headings].some((heading) => heading.endsWith("alternatives"))) {
-      errors.push(
-        `${relative(filePath)}: ADR requires a level-two alternatives section`,
-      );
+      errors.push(`${relative(filePath)}: ADR requires a level-two alternatives section`);
     }
   }
 
@@ -299,31 +282,22 @@ function validateAdrApproval(document) {
   const { filePath, metadata } = document;
   if (metadata?.type !== "adr") {
     if (metadata?.approved_by || metadata?.accepted_at) {
-      errors.push(
-        `${relative(filePath)}: approval metadata is allowed only on ADRs`,
-      );
+      errors.push(`${relative(filePath)}: approval metadata is allowed only on ADRs`);
     }
     return;
   }
 
   const adrNumber = Number.parseInt(metadata.id.slice("ADR-".length), 10);
   const governedByApprovalPolicy = adrNumber >= adrApprovalPolicyStart;
-  const isAcceptedDecision =
-    metadata.status === "accepted" || metadata.status === "superseded";
+  const isAcceptedDecision = metadata.status === "accepted" || metadata.status === "superseded";
   const hasApprovedBy = typeof metadata.approved_by === "string";
   const hasAcceptedAt = typeof metadata.accepted_at === "string";
 
   if (metadata.status === "proposed" && (hasApprovedBy || hasAcceptedAt)) {
-    errors.push(
-      `${relative(filePath)}: proposed ADR must not declare approved_by or accepted_at`,
-    );
+    errors.push(`${relative(filePath)}: proposed ADR must not declare approved_by or accepted_at`);
   }
 
-  if (
-    governedByApprovalPolicy &&
-    isAcceptedDecision &&
-    (!hasApprovedBy || !hasAcceptedAt)
-  ) {
+  if (governedByApprovalPolicy && isAcceptedDecision && (!hasApprovedBy || !hasAcceptedAt)) {
     errors.push(
       `${relative(filePath)}: accepted ADR-${String(adrNumber).padStart(4, "0")} requires approved_by and accepted_at`,
     );

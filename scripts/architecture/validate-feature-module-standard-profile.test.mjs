@@ -97,17 +97,12 @@ test("rejects silent scope, authority, and enforcement drift", () => {
 
   const missingCommand = clone(packageJson);
   delete missingCommand.scripts["architecture:conformance"];
-  assert.throws(
-    () => validate({ packageJson: missingCommand }),
-    /missing from package.json/u,
-  );
+  assert.throws(() => validate({ packageJson: missingCommand }), /missing from package.json/u);
 
   const missingArchitectureGate = clone(packageJson);
-  missingArchitectureGate.scripts["architecture:check"] =
-    missingArchitectureGate.scripts["architecture:check"].replace(
-      " && pnpm run architecture:conformance",
-      "",
-    );
+  missingArchitectureGate.scripts["architecture:check"] = missingArchitectureGate.scripts[
+    "architecture:check"
+  ].replace(" && pnpm run architecture:conformance", "");
   assert.throws(
     () => validate({ packageJson: missingArchitectureGate }),
     /architecture:check must include architecture:conformance/u,
@@ -137,12 +132,13 @@ test("binds the human profile to the machine-readable adoption", () => {
     /missing required marker/u,
   );
   assert.throws(
-    () => validate({
-      agentInstructions: agentInstructions.replace(
-        "docs/architecture/feature-module-standard.md",
-        "docs/architecture/overview.md",
-      ),
-    }),
+    () =>
+      validate({
+        agentInstructions: agentInstructions.replace(
+          "docs/architecture/feature-module-standard.md",
+          "docs/architecture/overview.md",
+        ),
+      }),
     /Agent instructions are missing/u,
   );
 });

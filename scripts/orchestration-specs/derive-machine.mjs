@@ -2,8 +2,7 @@ import { createMachine, initialTransition, transition } from "xstate";
 
 import { deriveStateModel } from "./state-model.mjs";
 
-export const deriveMachine = (spec) =>
-  createMachine(deriveStateModel(spec));
+export const deriveMachine = (spec) => createMachine(deriveStateModel(spec));
 
 export const initialSnapshot = (machine) => initialTransition(machine)[0];
 

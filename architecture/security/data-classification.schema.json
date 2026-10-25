@@ -4,11 +4,7 @@
   "title": "Agent Teams data classification manifest v1",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "schemaVersion",
-    "owner",
-    "assets"
-  ],
+  "required": ["schemaVersion", "owner", "assets"],
   "properties": {
     "schemaVersion": {
       "const": 1
@@ -46,39 +42,16 @@
           "pattern": "^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$"
         },
         "surface": {
-          "enum": [
-            "public-contract",
-            "integration-event",
-            "feed",
-            "blob",
-            "telemetry"
-          ]
+          "enum": ["public-contract", "integration-event", "feed", "blob", "telemetry"]
         },
         "classification": {
-          "enum": [
-            "public",
-            "internal",
-            "sensitive",
-            "secret",
-            "authority-evidence"
-          ]
+          "enum": ["public", "internal", "sensitive", "secret", "authority-evidence"]
         },
         "tenantScope": {
-          "enum": [
-            "none",
-            "tenant",
-            "project",
-            "resource"
-          ]
+          "enum": ["none", "tenant", "project", "resource"]
         },
         "retentionClass": {
-          "enum": [
-            "transient",
-            "operational",
-            "durable",
-            "audit",
-            "policy-governed"
-          ]
+          "enum": ["transient", "operational", "durable", "audit", "policy-governed"]
         },
         "redactionProfile": {
           "enum": [
@@ -91,12 +64,7 @@
           ]
         },
         "exportPolicy": {
-          "enum": [
-            "unrestricted",
-            "tenant-authorized",
-            "restricted",
-            "prohibited"
-          ]
+          "enum": ["unrestricted", "tenant-authorized", "restricted", "prohibited"]
         },
         "containsUserContent": {
           "type": "boolean"

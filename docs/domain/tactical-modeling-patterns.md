@@ -185,18 +185,18 @@ as distributed rollback.
 Before implementation, every aggregate candidate has a reviewed matrix in its
 context dossier or feature domain documentation:
 
-| Field | Required evidence |
-|---|---|
-| Root and identity | Stable semantic owner and identity scope |
-| Protected invariants | Rules requiring one consistency boundary |
-| Commands | Every legal mutation entry point |
-| Domain events | Facts produced after valid transitions |
-| Transaction | State, command receipt, and outbox intent committed atomically; only explicitly transactional read-model updates join that Unit of Work, while asynchronous projections use their own inbox/checkpoint transaction |
-| Concurrency | Revision, conflict set, lock or isolation strategy |
-| Collection growth | Explicit bound or extraction trigger |
-| External facts | Values supplied before the domain decision |
-| Failure outcomes | Stable domain conflicts and invariant violations |
-| Rejected boundaries | Why smaller and larger aggregates are unsafe |
+| Field                | Required evidence                                                                                                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Root and identity    | Stable semantic owner and identity scope                                                                                                                                                                           |
+| Protected invariants | Rules requiring one consistency boundary                                                                                                                                                                           |
+| Commands             | Every legal mutation entry point                                                                                                                                                                                   |
+| Domain events        | Facts produced after valid transitions                                                                                                                                                                             |
+| Transaction          | State, command receipt, and outbox intent committed atomically; only explicitly transactional read-model updates join that Unit of Work, while asynchronous projections use their own inbox/checkpoint transaction |
+| Concurrency          | Revision, conflict set, lock or isolation strategy                                                                                                                                                                 |
+| Collection growth    | Explicit bound or extraction trigger                                                                                                                                                                               |
+| External facts       | Values supplied before the domain decision                                                                                                                                                                         |
+| Failure outcomes     | Stable domain conflicts and invariant violations                                                                                                                                                                   |
+| Rejected boundaries  | Why smaller and larger aggregates are unsafe                                                                                                                                                                       |
 
 The same matrix drives repository ports, Unit of Work shape, concurrency tests,
 and package ownership. A class diagram alone is not aggregate evidence.

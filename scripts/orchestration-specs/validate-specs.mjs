@@ -6,27 +6,15 @@ import { runEventSequence } from "./derive-machine.mjs";
 
 const uniqueBy = (items, selector, label) => {
   const values = items.map(selector);
-  assert.equal(
-    new Set(values).size,
-    values.length,
-    `${label} must be unique`,
-  );
+  assert.equal(new Set(values).size, values.length, `${label} must be unique`);
 };
 
 const transitionKey = ({ source, event }) => `${source}:${event}`;
 
 const transitionFor = (spec, source, event) =>
-  spec.transitions.find(
-    (transition) => transition.source === source && transition.event === event,
-  );
+  spec.transitions.find((transition) => transition.source === source && transition.event === event);
 
-const assertTransition = (
-  spec,
-  source,
-  event,
-  disposition,
-  target = null,
-) => {
+const assertTransition = (spec, source, event, disposition, target = null) => {
   const item = transitionFor(spec, source, event);
   assert.ok(item, `${spec.id} must declare ${source} + ${event}`);
   assert.equal(item.disposition, disposition);
@@ -124,10 +112,7 @@ const assertGenericSemantics = (spec) => {
   }
 
   for (const fault of spec.faultCases) {
-    assert.ok(
-      stateIds.has(fault.source),
-      `${spec.id} fault ${fault.id} source must exist`,
-    );
+    assert.ok(stateIds.has(fault.source), `${spec.id} fault ${fault.id} source must exist`);
     assert.ok(
       eventIds.has(fault.event),
       `${spec.id} fault ${fault.id} event ${fault.event} must be declared`,
@@ -137,10 +122,7 @@ const assertGenericSemantics = (spec) => {
       `${spec.id} fault ${fault.id} expected state must exist`,
     );
     const item = transitionFor(spec, fault.source, fault.event);
-    assert.ok(
-      item,
-      `${spec.id} fault ${fault.id} must reference an explicit transition`,
-    );
+    assert.ok(item, `${spec.id} fault ${fault.id} must reference an explicit transition`);
     assert.equal(item.disposition, fault.expectedDisposition);
     assert.equal(fault.expectedState, fault.source);
   }
@@ -157,21 +139,13 @@ const assertGenericSemantics = (spec) => {
 
 const assertRunAuthoritySemantics = (spec) => {
   assert.deepEqual(spec.authority.adrRefs, ["ADR-0079"]);
-  assert.equal(
-    spec.axes.find((axis) => axis.id === "run-authority-state")?.modeled,
-    true,
-  );
+  assert.equal(spec.axes.find((axis) => axis.id === "run-authority-state")?.modeled, true);
   assert.deepEqual(
     spec.axes.filter((axis) => axis.modeled).map((axis) => axis.id),
     ["run-authority-state", "run-authority-generation"],
   );
 
-  assertTransition(
-    spec,
-    "active-generation-1-basis-a",
-    "EXPLICIT_REAUTHORIZATION",
-    "rejected",
-  );
+  assertTransition(spec, "active-generation-1-basis-a", "EXPLICIT_REAUTHORIZATION", "rejected");
   assertTransition(
     spec,
     "active-generation-1-basis-a",
@@ -193,28 +167,16 @@ const assertRunAuthoritySemantics = (spec) => {
     "accepted",
     "active-generation-3-basis-b",
   );
-  assertTransition(
-    spec,
-    "suspended-generation-2",
-    "REOPEN_CUT_PREDECESSOR",
-    "rejected",
-  );
+  assertTransition(spec, "suspended-generation-2", "REOPEN_CUT_PREDECESSOR", "rejected");
 
   const stateById = new Map(spec.states.map((state) => [state.id, state]));
   const acceptedTransitions = spec.transitions.filter(
     (transition) => transition.disposition === "accepted",
   );
   for (const item of acceptedTransitions) {
-    const sourceGeneration = stateById.get(item.source).coordinates[
-      "run-authority-generation"
-    ];
-    const targetGeneration = stateById.get(item.target).coordinates[
-      "run-authority-generation"
-    ];
-    assert.ok(
-      targetGeneration >= sourceGeneration,
-      "Run authority generation cannot decrease",
-    );
+    const sourceGeneration = stateById.get(item.source).coordinates["run-authority-generation"];
+    const targetGeneration = stateById.get(item.target).coordinates["run-authority-generation"];
+    assert.ok(targetGeneration >= sourceGeneration, "Run authority generation cannot decrease");
   }
 
   const generationAdvancingEvents = new Set([
@@ -225,12 +187,8 @@ const assertRunAuthoritySemantics = (spec) => {
   for (const item of acceptedTransitions.filter((transition) =>
     generationAdvancingEvents.has(transition.event),
   )) {
-    const sourceGeneration = stateById.get(item.source).coordinates[
-      "run-authority-generation"
-    ];
-    const targetGeneration = stateById.get(item.target).coordinates[
-      "run-authority-generation"
-    ];
+    const sourceGeneration = stateById.get(item.source).coordinates["run-authority-generation"];
+    const targetGeneration = stateById.get(item.target).coordinates["run-authority-generation"];
     assert.equal(
       targetGeneration,
       sourceGeneration + 1,
@@ -249,10 +207,7 @@ const assertRunAuthoritySemantics = (spec) => {
 
 const assertProjectSemantics = (spec) => {
   assert.deepEqual(spec.authority.adrRefs, ["ADR-0080", "ADR-0079"]);
-  assert.equal(
-    spec.axes.find((axis) => axis.id === "project-identity-lifecycle")?.modeled,
-    true,
-  );
+  assert.equal(spec.axes.find((axis) => axis.id === "project-identity-lifecycle")?.modeled, true);
   assert.deepEqual(
     spec.axes.filter((axis) => axis.modeled).map((axis) => axis.id),
     ["project-identity-lifecycle", "deletion-epoch"],
@@ -262,25 +217,12 @@ const assertProjectSemantics = (spec) => {
     ["OPEN", "RETIRED"],
   );
 
-  assertTransition(
-    spec,
-    "open-epoch-1",
-    "COMMIT_RETIREMENT",
-    "accepted",
-    "retired-epoch-2",
-  );
+  assertTransition(spec, "open-epoch-1", "COMMIT_RETIREMENT", "accepted", "retired-epoch-2");
   assertTransition(spec, "open-epoch-1", "CANCEL_RETIREMENT", "ignored");
   assertTransition(spec, "retired-epoch-2", "REOPEN_PROJECT", "rejected");
-  assertTransition(
-    spec,
-    "retired-epoch-2",
-    "FRESH_EXTERNAL_AUTHORIZATION",
-    "rejected",
-  );
+  assertTransition(spec, "retired-epoch-2", "FRESH_EXTERNAL_AUTHORIZATION", "rejected");
 
-  const accepted = spec.transitions.filter(
-    (transition) => transition.disposition === "accepted",
-  );
+  const accepted = spec.transitions.filter((transition) => transition.disposition === "accepted");
   assert.deepEqual(
     accepted.map(({ source, event, target }) => ({ source, event, target })),
     [

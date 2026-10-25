@@ -8,10 +8,7 @@ import test from "node:test";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "../..");
-const validatorPath = path.join(
-  scriptDirectory,
-  "validate-architecture-model.mjs",
-);
+const validatorPath = path.join(scriptDirectory, "validate-architecture-model.mjs");
 
 async function createFixture() {
   const root = await mkdtemp(path.join(tmpdir(), "agent-teams-likec4-test-"));
@@ -182,10 +179,7 @@ test("rejects a security view that collapses required trust-zone detail", async 
     );
     const result = await runValidator(root);
     assert.equal(result.code, 1);
-    assert.match(
-      result.output,
-      /securityTrustBoundaries view omits security element/,
-    );
+    assert.match(result.output, /securityTrustBoundaries view omits security element/);
   } finally {
     await rm(root, { force: true, recursive: true });
   }

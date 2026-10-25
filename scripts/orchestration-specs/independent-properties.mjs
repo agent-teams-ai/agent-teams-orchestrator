@@ -2,9 +2,7 @@ import assert from "node:assert/strict";
 
 export const assertProjectEpochProperty = (spec) => {
   const stateById = new Map(spec.states.map((state) => [state.id, state]));
-  const accepted = spec.transitions.filter(
-    (transition) => transition.disposition === "accepted",
-  );
+  const accepted = spec.transitions.filter((transition) => transition.disposition === "accepted");
   assert.equal(accepted.length, 1);
   const [transition] = accepted;
   assert.equal(transition.event, "COMMIT_RETIREMENT");

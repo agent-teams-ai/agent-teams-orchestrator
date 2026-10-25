@@ -4,12 +4,7 @@
   "title": "Agent Teams Orchestrator source dependency policy",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "version",
-    "default",
-    "edges",
-    "feature_edges"
-  ],
+  "required": ["version", "default", "edges", "feature_edges"],
   "properties": {
     "version": {
       "const": 1
@@ -44,19 +39,12 @@
       "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
     },
     "internalSurface": {
-      "enum": [
-        "domain",
-        "application"
-      ]
+      "enum": ["domain", "application"]
     },
     "edge": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "from",
-        "to",
-        "imports"
-      ],
+      "required": ["from", "to", "imports"],
       "properties": {
         "from": {
           "$ref": "#/$defs/packageId"
@@ -77,12 +65,7 @@
     "featureEdge": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "package",
-        "from",
-        "to",
-        "imports"
-      ],
+      "required": ["package", "from", "to", "imports"],
       "properties": {
         "package": {
           "$ref": "#/$defs/packageId"

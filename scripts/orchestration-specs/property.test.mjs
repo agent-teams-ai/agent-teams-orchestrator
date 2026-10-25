@@ -1,18 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {
-  array,
-  assert as assertProperty,
-  constantFrom,
-  property,
-} from "fast-check";
+import { array, assert as assertProperty, constantFrom, property } from "fast-check";
 
-import {
-  applyMachineEvent,
-  deriveMachine,
-  initialSnapshot,
-} from "./derive-machine.mjs";
+import { applyMachineEvent, deriveMachine, initialSnapshot } from "./derive-machine.mjs";
 import {
   assertCutPredecessorProperty,
   assertProjectEpochProperty,
@@ -23,9 +14,7 @@ const propertyParameters = { numRuns: 300, seed: 8_020_026 };
 const specs = loadSpecs();
 const specsById = new Map(specs.map((spec) => [spec.id, spec]));
 const transitionFor = (spec, source, event) =>
-  spec.transitions.find(
-    (transition) => transition.source === source && transition.event === event,
-  );
+  spec.transitions.find((transition) => transition.source === source && transition.event === event);
 
 for (const spec of specs) {
   test(`${spec.id} arbitrary event sequences never invent a state`, () => {
@@ -34,16 +23,13 @@ for (const spec of specs) {
     const eventIds = spec.events.map((event) => event.id);
 
     assertProperty(
-      property(
-        array(constantFrom(...eventIds), { maxLength: 100 }),
-        (events) => {
-          let snapshot = initialSnapshot(machine);
-          for (const event of events) {
-            snapshot = applyMachineEvent(machine, snapshot, event);
-            assert.ok(stateIds.has(snapshot.value));
-          }
-        },
-      ),
+      property(array(constantFrom(...eventIds), { maxLength: 100 }), (events) => {
+        let snapshot = initialSnapshot(machine);
+        for (const event of events) {
+          snapshot = applyMachineEvent(machine, snapshot, event);
+          assert.ok(stateIds.has(snapshot.value));
+        }
+      }),
       propertyParameters,
     );
   });
@@ -56,26 +42,23 @@ for (const spec of specs) {
     );
 
     assertProperty(
-      property(
-        array(constantFrom(...eventIds), { maxLength: 100 }),
-        (suffix) => {
-          for (const trace of spec.traces) {
-            let snapshot = initialSnapshot(machine);
-            for (const step of trace.steps) {
-              snapshot = applyMachineEvent(machine, snapshot, step.event);
-            }
-            if (!terminalStates.has(snapshot.value)) {
-              continue;
-            }
-
-            const terminal = snapshot.value;
-            for (const event of suffix) {
-              snapshot = applyMachineEvent(machine, snapshot, event);
-              assert.equal(snapshot.value, terminal);
-            }
+      property(array(constantFrom(...eventIds), { maxLength: 100 }), (suffix) => {
+        for (const trace of spec.traces) {
+          let snapshot = initialSnapshot(machine);
+          for (const step of trace.steps) {
+            snapshot = applyMachineEvent(machine, snapshot, step.event);
           }
-        },
-      ),
+          if (!terminalStates.has(snapshot.value)) {
+            continue;
+          }
+
+          const terminal = snapshot.value;
+          for (const event of suffix) {
+            snapshot = applyMachineEvent(machine, snapshot, event);
+            assert.equal(snapshot.value, terminal);
+          }
+        }
+      }),
       { ...propertyParameters, numRuns: 200 },
     );
   });
@@ -88,21 +71,18 @@ test("Run authority generation never decreases over arbitrary traces", () => {
   const eventIds = spec.events.map((event) => event.id);
 
   assertProperty(
-    property(
-      array(constantFrom(...eventIds), { maxLength: 100 }),
-      (events) => {
-        let snapshot = initialSnapshot(machine);
-        let generation = 1;
-        for (const event of events) {
-          snapshot = applyMachineEvent(machine, snapshot, event);
-          const nextGeneration = stateById.get(snapshot.value).coordinates[
-            "run-authority-generation"
-          ];
-          assert.ok(nextGeneration >= generation);
-          generation = nextGeneration;
-        }
-      },
-    ),
+    property(array(constantFrom(...eventIds), { maxLength: 100 }), (events) => {
+      let snapshot = initialSnapshot(machine);
+      let generation = 1;
+      for (const event of events) {
+        snapshot = applyMachineEvent(machine, snapshot, event);
+        const nextGeneration = stateById.get(snapshot.value).coordinates[
+          "run-authority-generation"
+        ];
+        assert.ok(nextGeneration >= generation);
+        generation = nextGeneration;
+      }
+    }),
     propertyParameters,
   );
 });
@@ -117,8 +97,7 @@ test("Run suspension and reauthorization strictly advance generation", () => {
   ]);
   const transitions = spec.transitions.filter(
     (transition) =>
-      transition.disposition === "accepted" &&
-      authorityAdvancingEvents.has(transition.event),
+      transition.disposition === "accepted" && authorityAdvancingEvents.has(transition.event),
   );
 
   assertProperty(
@@ -155,9 +134,7 @@ test("Run successor authorization is accepted only after suspension", () => {
 
 test("Project retirement is the only accepted identity transition and advances epoch", () => {
   const spec = specsById.get("orchestrator.orchestration-project-lifecycle");
-  const accepted = spec.transitions.filter(
-    (transition) => transition.disposition === "accepted",
-  );
+  const accepted = spec.transitions.filter((transition) => transition.disposition === "accepted");
 
   assertProjectEpochProperty(spec);
 
@@ -224,14 +201,11 @@ test("stale commands and opaque runtime evidence never grant authority", () => {
     const prohibitedEvents = new Set(
       spec.events
         .filter(
-          (event) =>
-            event.category === "stale-command" || event.category === "opaque-evidence",
+          (event) => event.category === "stale-command" || event.category === "opaque-evidence",
         )
         .map((event) => event.id),
     );
-    return spec.transitions.filter((transition) =>
-      prohibitedEvents.has(transition.event),
-    );
+    return spec.transitions.filter((transition) => prohibitedEvents.has(transition.event));
   });
 
   assertProperty(

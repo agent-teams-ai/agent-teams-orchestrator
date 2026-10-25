@@ -19,8 +19,11 @@
       "rules": {
         "complexity": ["error", 30],
         "max-depth": ["error", 5],
-        "max-lines": ["error", {"max": 800, "skipBlankLines": true, "skipComments": true}],
-        "max-lines-per-function": ["error", {"max": 250, "skipBlankLines": true, "skipComments": true}],
+        "max-lines": ["error", { "max": 800, "skipBlankLines": true, "skipComments": true }],
+        "max-lines-per-function": [
+          "error",
+          { "max": 250, "skipBlankLines": true, "skipComments": true }
+        ],
         "max-params": ["error", 6]
       }
     },
@@ -33,7 +36,16 @@
       ],
       "rules": {
         "typescript/await-thenable": "error",
-        "typescript/ban-ts-comment": ["error", {"minimumDescriptionLength": 12, "ts-check": false, "ts-expect-error": "allow-with-description", "ts-ignore": true, "ts-nocheck": true}],
+        "typescript/ban-ts-comment": [
+          "error",
+          {
+            "minimumDescriptionLength": 12,
+            "ts-check": false,
+            "ts-expect-error": "allow-with-description",
+            "ts-ignore": true,
+            "ts-nocheck": true
+          }
+        ],
         "typescript/consistent-type-imports": "error",
         "typescript/no-confusing-void-expression": "error",
         "typescript/no-deprecated": "error",
@@ -84,20 +96,51 @@
       "rules": {
         "no-restricted-globals": [
           "error",
-          {"name": "Date", "message": "Receive an exact Instant or use an outbound calendar capability."},
-          {"name": "console", "message": "Use a declared logging or observation port."},
-          {"name": "fetch", "message": "Network access belongs in an outbound adapter."},
-          {"name": "process", "message": "Process and environment access belongs in composition."},
-          {"name": "setImmediate", "message": "Scheduling belongs behind a Clock, Scheduler, or Workflow port."},
-          {"name": "setInterval", "message": "Scheduling belongs behind a Clock, Scheduler, or Workflow port."},
-          {"name": "setTimeout", "message": "Scheduling belongs behind a Clock, Scheduler, or Workflow port."}
+          {
+            "name": "Date",
+            "message": "Receive an exact Instant or use an outbound calendar capability."
+          },
+          { "name": "console", "message": "Use a declared logging or observation port." },
+          { "name": "fetch", "message": "Network access belongs in an outbound adapter." },
+          {
+            "name": "process",
+            "message": "Process and environment access belongs in composition."
+          },
+          {
+            "name": "setImmediate",
+            "message": "Scheduling belongs behind a Clock, Scheduler, or Workflow port."
+          },
+          {
+            "name": "setInterval",
+            "message": "Scheduling belongs behind a Clock, Scheduler, or Workflow port."
+          },
+          {
+            "name": "setTimeout",
+            "message": "Scheduling belongs behind a Clock, Scheduler, or Workflow port."
+          }
         ],
         "no-restricted-properties": [
           "error",
-          {"object": "Math", "property": "random", "message": "Receive randomness or identifiers through an explicit port."},
-          {"object": "crypto", "property": "getRandomValues", "message": "Receive randomness through an explicit port."},
-          {"object": "crypto", "property": "randomUUID", "message": "Receive identifiers through an IdGenerator port."},
-          {"object": "globalThis", "property": "fetch", "message": "Network access belongs in an outbound adapter."}
+          {
+            "object": "Math",
+            "property": "random",
+            "message": "Receive randomness or identifiers through an explicit port."
+          },
+          {
+            "object": "crypto",
+            "property": "getRandomValues",
+            "message": "Receive randomness through an explicit port."
+          },
+          {
+            "object": "crypto",
+            "property": "randomUUID",
+            "message": "Receive identifiers through an IdGenerator port."
+          },
+          {
+            "object": "globalThis",
+            "property": "fetch",
+            "message": "Network access belongs in an outbound adapter."
+          }
         ]
       }
     }

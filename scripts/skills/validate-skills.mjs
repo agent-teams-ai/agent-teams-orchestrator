@@ -5,20 +5,11 @@ import { fileURLToPath } from "node:url";
 import { visit } from "unist-util-visit";
 import YAML from "yaml";
 
-import {
-  parseFrontmatter,
-  parseMarkdown,
-} from "../docs/document-parser.mjs";
+import { parseFrontmatter, parseMarkdown } from "../docs/document-parser.mjs";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepositoryRoot = path.resolve(scriptDirectory, "../..");
-const allowedRootEntries = new Set([
-  "SKILL.md",
-  "agents",
-  "assets",
-  "references",
-  "scripts",
-]);
+const allowedRootEntries = new Set(["SKILL.md", "agents", "assets", "references", "scripts"]);
 const skillNamePattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const docsAuthoringRequiredRoutes = [
   { label: "pnpm docs:info", pattern: /pnpm docs:info/u },
@@ -98,16 +89,10 @@ function localMarkdownTargets(tree) {
   return targets.filter(Boolean);
 }
 
-async function validateOpenAiMetadata(
-  repositoryRoot,
-  skillDirectory,
-  errors,
-) {
+async function validateOpenAiMetadata(repositoryRoot, skillDirectory, errors) {
   const metadataPath = path.join(skillDirectory, "agents/openai.yaml");
   if (!(await exists(metadataPath))) {
-    errors.push(
-      `${relative(repositoryRoot, skillDirectory)}: missing agents/openai.yaml`,
-    );
+    errors.push(`${relative(repositoryRoot, skillDirectory)}: missing agents/openai.yaml`);
     return;
   }
 
@@ -115,17 +100,12 @@ async function validateOpenAiMetadata(
   try {
     metadata = YAML.parse(await readFile(metadataPath, "utf8"));
   } catch (error) {
-    errors.push(
-      `${relative(repositoryRoot, metadataPath)}: invalid YAML: ${error.message}`,
-    );
+    errors.push(`${relative(repositoryRoot, metadataPath)}: invalid YAML: ${error.message}`);
     return;
   }
   const interfaceMetadata = metadata?.interface;
   for (const field of ["display_name", "short_description", "default_prompt"]) {
-    if (
-      typeof interfaceMetadata?.[field] !== "string" ||
-      !interfaceMetadata[field].trim()
-    ) {
+    if (typeof interfaceMetadata?.[field] !== "string" || !interfaceMetadata[field].trim()) {
       errors.push(
         `${relative(repositoryRoot, metadataPath)}: interface.${field} must be a non-empty string`,
       );
@@ -133,12 +113,7 @@ async function validateOpenAiMetadata(
   }
 }
 
-function validateDocsAuthoringRoutes(
-  repositoryRoot,
-  skillDirectory,
-  source,
-  errors,
-) {
+function validateDocsAuthoringRoutes(repositoryRoot, skillDirectory, source, errors) {
   if (path.basename(skillDirectory) !== "docs-authoring") {
     return;
   }
@@ -214,17 +189,12 @@ async function validateSkill(repositoryRoot, skillDirectory, errors) {
   for (const rawTarget of localMarkdownTargets(tree)) {
     const targetPath = path.resolve(skillDirectory, decodeURIComponent(rawTarget));
     const relativeToSkill = path.relative(skillDirectory, targetPath);
-    if (
-      relativeToSkill === ".." ||
-      relativeToSkill.startsWith(`..${path.sep}`)
-    ) {
+    if (relativeToSkill === ".." || relativeToSkill.startsWith(`..${path.sep}`)) {
       errors.push(
         `${relative(repositoryRoot, skillPath)}: local link escapes skill root: ${rawTarget}`,
       );
     } else if (!(await exists(targetPath))) {
-      errors.push(
-        `${relative(repositoryRoot, skillPath)}: broken local link ${rawTarget}`,
-      );
+      errors.push(`${relative(repositoryRoot, skillPath)}: broken local link ${rawTarget}`);
     }
   }
 
@@ -264,9 +234,7 @@ async function main() {
     }
 
     if (errors.length === 0) {
-      console.log(
-        `Skill validation passed: ${skillDirectories.length} repository-local skill(s).`,
-      );
+      console.log(`Skill validation passed: ${skillDirectories.length} repository-local skill(s).`);
     }
   }
 

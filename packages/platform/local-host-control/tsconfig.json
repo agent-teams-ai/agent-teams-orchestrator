@@ -9,14 +9,6 @@
     "rootDir": "src",
     "tsBuildInfoFile": ".cache/tsconfig.tsbuildinfo"
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.mts",
-    "src/**/*.cts"
-  ],
-  "exclude": [
-    "src/**/*.test.*",
-    "src/**/*.spec.*"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.mts", "src/**/*.cts"],
+  "exclude": ["src/**/*.test.*", "src/**/*.spec.*"]
 }

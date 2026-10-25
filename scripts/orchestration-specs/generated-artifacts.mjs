@@ -5,10 +5,7 @@ import { getSimplePaths } from "@xstate/graph";
 
 import { deriveMachine } from "./derive-machine.mjs";
 import { loadCatalogBundle } from "./load-specs.mjs";
-import {
-  proofArtifactsDirectory,
-  repositoryRoot,
-} from "./paths.mjs";
+import { proofArtifactsDirectory, repositoryRoot } from "./paths.mjs";
 import { renderCombinedMermaid } from "./render-mermaid.mjs";
 
 const renderPathEvidence = (specs) => {
@@ -39,14 +36,8 @@ const renderPathEvidence = (specs) => {
 export const expectedGeneratedArtifacts = (specs, options) => {
   const { specification } = loadCatalogBundle(undefined, options);
   return new Map([
-    [
-      path.join(repositoryRoot, specification.stateModel.diagramPath),
-      renderCombinedMermaid(specs),
-    ],
-    [
-      path.join(repositoryRoot, specification.stateModel.tracesPath),
-      renderPathEvidence(specs),
-    ],
+    [path.join(repositoryRoot, specification.stateModel.diagramPath), renderCombinedMermaid(specs)],
+    [path.join(repositoryRoot, specification.stateModel.tracesPath), renderPathEvidence(specs)],
   ]);
 };
 
@@ -75,9 +66,7 @@ export const assertGeneratedArtifactInventory = (actualNames, expectedPaths) => 
     .map((artifactPath) => path.basename(artifactPath))
     .toSorted();
 
-  if (
-    JSON.stringify(actualGeneratedNames) !== JSON.stringify(expectedGeneratedNames)
-  ) {
+  if (JSON.stringify(actualGeneratedNames) !== JSON.stringify(expectedGeneratedNames)) {
     throw new Error(
       `Generated artifact inventory differs: expected ${expectedGeneratedNames.join(", ")}; found ${actualGeneratedNames.join(", ")}`,
     );
@@ -86,10 +75,9 @@ export const assertGeneratedArtifactInventory = (actualNames, expectedPaths) => 
 
 export const assertGeneratedArtifactsCurrent = (specs) => {
   const expectedArtifacts = expectedGeneratedArtifacts(specs);
-  assertGeneratedArtifactInventory(
-    fs.readdirSync(proofArtifactsDirectory),
-    [...expectedArtifacts.keys()],
-  );
+  assertGeneratedArtifactInventory(fs.readdirSync(proofArtifactsDirectory), [
+    ...expectedArtifacts.keys(),
+  ]);
 
   for (const [artifactPath, expected] of expectedArtifacts) {
     const actual = fs.readFileSync(artifactPath, "utf8");

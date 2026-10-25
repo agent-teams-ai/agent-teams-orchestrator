@@ -443,10 +443,10 @@ and provider-adapter evidence, including admission, custody, resources, and the
 advertised execution placement. Neither modeled traffic nor a successful RPC
 qualifies provider capacity, runtime connectivity, or a production SLO.
 
-| Deployment form | Additional qualification evidence |
-|---|---|
-| Compose server | Actual application/sidecar replica pairing, private network and selected resolver, authenticated readiness, stop order, restart, and bounded drain in the released composition |
-| Kubernetes server | Actual injected sidecars, discovery and peer identity, application and sidecar readiness, replica rollout/surge and termination, credential rotation, and bounded drain in the released cluster profile |
+| Deployment form              | Additional qualification evidence                                                                                                                                                                                              |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Compose server               | Actual application/sidecar replica pairing, private network and selected resolver, authenticated readiness, stop order, restart, and bounded drain in the released composition                                                 |
+| Kubernetes server            | Actual injected sidecars, discovery and peer identity, application and sidecar readiness, replica rollout/surge and termination, credential rotation, and bounded drain in the released cluster profile                        |
 | Native Fully Local V1 target | Installed-package role processes and sidecars under Supervisor custody, signed offline artifacts, protected endpoints, authenticated readiness, and each released OS/architecture tuple under the local lifecycle requirements |
 
 Compose and Kubernetes both require their own evidence; one does not qualify the

@@ -18,10 +18,7 @@ export type HostDiscoverySourceResult =
     }
   | {
       readonly kind: "stale";
-      readonly reason: Exclude<
-        HostDiscoveryStaleReason,
-        "observation-too-old"
-      >;
+      readonly reason: Exclude<HostDiscoveryStaleReason, "observation-too-old">;
       readonly targetId: TargetId;
     }
   | {

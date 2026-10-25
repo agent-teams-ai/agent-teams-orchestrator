@@ -389,14 +389,14 @@ rate limits, and completion evidence.
 DRY applies to stable technical mechanics, not superficially similar business
 language.
 
-| Layer | Reuse rule |
-|---|---|
-| Domain | No cross-context reuse of aggregates, entities, domain events, recipient, priority, status, delivery, or acknowledgement types |
-| Application | Context-owned use cases, commands, ports, Unit of Work, policies, process managers, and retry classification |
-| Contracts | One minimal technical envelope standard; producer-owned versioned payload schemas and manifests |
+| Layer                 | Reuse rule                                                                                                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Domain                | No cross-context reuse of aggregates, entities, domain events, recipient, priority, status, delivery, or acknowledgement types                                    |
+| Application           | Context-owned use cases, commands, ports, Unit of Work, policies, process managers, and retry classification                                                      |
+| Contracts             | One minimal technical envelope standard; producer-owned versioned payload schemas and manifests                                                                   |
 | Adapters and platform | Reusable outbox relay, inbox admission, schema validation, broker connection, scheduling algorithms, backpressure, tracing, redaction, and persistence primitives |
-| Composition | Shared process-wide connections and lifecycle resources, never shared repositories or business transactions |
-| Testing | Reusable conformance suites and deterministic failure fixtures parameterized by context-owned adapters |
+| Composition           | Shared process-wide connections and lifecycle resources, never shared repositories or business transactions                                                       |
+| Testing               | Reusable conformance suites and deterministic failure fixtures parameterized by context-owned adapters                                                            |
 
 Platform eventing code may claim and publish records only through a narrow
 context-owned dispatch port. It cannot query or mutate context tables directly.

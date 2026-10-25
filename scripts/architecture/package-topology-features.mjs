@@ -19,10 +19,7 @@ function relativeSourceTarget(sourceRoot, filePath, specifier) {
   if (!specifier.startsWith(".")) {
     return null;
   }
-  const target = relative(
-    sourceRoot,
-    path.resolve(path.dirname(filePath), specifier),
-  );
+  const target = relative(sourceRoot, path.resolve(path.dirname(filePath), specifier));
   return target.replace(/\.[cm]?[jt]sx?$/u, "");
 }
 
@@ -64,11 +61,7 @@ export function validateCrossFeatureSpecifier(context, specifier) {
     return;
   }
 
-  const edgeKey = featureDependencyEdgeKey(
-    current.entry.id,
-    source.feature,
-    providerFeature,
-  );
+  const edgeKey = featureDependencyEdgeKey(current.entry.id, source.feature, providerFeature);
   const edge = featureDependencyEdges.get(edgeKey);
   if (!edge) {
     errors.push(
