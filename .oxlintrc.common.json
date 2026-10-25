@@ -6,6 +6,7 @@
       "files": [
         "packages/**/tests/**",
         "scripts/**/*.test.mjs",
+        "scripts/**/*.test.ts",
         "scripts/**/fixtures/**",
         "tooling/architecture-conformance/**"
       ],

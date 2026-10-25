@@ -90,17 +90,30 @@ test("effective mapped budgets and normal tooling budgets retain all five ceilin
   }
   for (const [root, name, status] of [
     ["scripts/lint", "budget.test.mjs", 0],
+    ["scripts/lint", "budget.test.ts", 0],
     ["scripts/lint/fixtures", "budget.mjs", 0],
     ["tooling/architecture-conformance", "budget.mjs", 0],
     ["scripts/lint", "budget.mjs", 1],
+    ["scripts/lint", "budget.ts", 1],
   ]) {
     const result = lintMappedSource(
       root,
       name,
-      body.replaceAll(": boolean", ""),
+      name.endsWith(".ts") ? body : body.replaceAll(": boolean", ""),
       ".oxlintrc.common.json",
     );
     assert.equal(result.status, status, result.diagnostics);
+    if (status === 1) {
+      for (const rule of [
+        "complexity",
+        "max-depth",
+        "max-lines",
+        "max-lines-per-function",
+        "max-params",
+      ]) {
+        assert.ok(result.diagnostics.includes(`(${rule})`), result.diagnostics);
+      }
+    }
   }
 });
 
