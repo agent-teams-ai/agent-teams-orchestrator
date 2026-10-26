@@ -44,9 +44,12 @@ consumer-owned port and a transport adapter. Dapr/Protobuf service integration
 does not share a container, module registry, transaction, or capability object
 between processes.
 
-This rule supports the owner's service-first direction. Exact deployment roles
-and Dapr integration remain owned by the parallel topology work in
-[PR #79](https://github.com/agent-teams-ai/agent-teams-orchestrator/pull/79).
+This rule supports the owner's service-first direction. Canonical main now owns
+deployment roles and Dapr integration through its
+[backend adoption](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/94a480d004e8e6eaf79507feeae30428d372a3d3/docs/decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md).
+PR #79 is a closed historical source. This pending branch still needs integration
+with main's separate module adoption and exact pin; see the
+[branch integration status](overview.md#branch-integration-status).
 This composition decision neither requires a modular monolith nor selects a new
 service mesh or message broker. Non-TypeScript services follow the published wire
 and ownership contracts without executing Get Modular.
@@ -169,7 +172,7 @@ does not prove browser parity.
 ## Shared mechanisms and independent products
 
 Orchestrator owns Team, Work, Task, assignment, Run, project-owned Execution
-Workspace registration/materialization, and orchestration placement/binding
+Directory registration/materialization, and orchestration placement/binding
 intent. Agent Runtime owns actual execution, sandbox, and process resources
 under the [runtime boundary](runtime-boundary.md). Platform invokes Orchestrator
 capabilities through the public API/SDK and versioned managed lifecycle/authority

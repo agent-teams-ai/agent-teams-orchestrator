@@ -12,8 +12,10 @@ related:
   - ADR-0093
   - architecture.deployment-profiles
   - architecture.local-host-lifecycle
+  - OD-012
   - OD-021
   - OD-035
+  - research.iam-critical-decisions-review-2026-10-23
 ---
 
 # OD-040: Fully Local Package Materialization
@@ -40,6 +42,19 @@ would start the wrong architecture prematurely.
 - Desktop remains a bootstrap/client surface rather than the durable lifecycle
   owner;
 - the first slices must prove lifecycle and workflow boundaries before expansion.
+
+## Related identity research and current release scope
+
+Canonical main's [Fully Local V1 adoption](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/94a480d004e8e6eaf79507feeae30428d372a3d3/docs/decisions/0115-canonical-fully-local-v1-adoption.md)
+requires Fully Local in V1 while retaining materialization and qualification
+gates. This pending branch has not integrated that adoption; its older release
+wording must not be interpreted as a decision to defer the current V1 scope.
+
+The [IAM critical-decisions review](../research/iam-critical-decisions-review-2026-10-23.md#2-fully-local-identity-bootstrap-and-recovery)
+records remaining local authority, protected enrollment, stable principal,
+boot-credential rotation, and key-loss recovery choices under OD-012. Its
+recommended single-owner model remains unaccepted. This evidence neither adds
+a materialization blocker nor declares a profile implemented or qualified.
 
 ## Options
 

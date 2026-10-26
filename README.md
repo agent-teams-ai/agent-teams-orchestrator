@@ -97,5 +97,7 @@ needed by standalone and managed delivery.
 The [discussion and research coverage](docs/research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
 maps organizations, human/AI Teams, Tasks, Workspace naming, module foundation,
 and Platform integration to their owners and remaining decisions. Service
-topology and Dapr/Protobuf adoption are tracked separately in
-[PR #79](https://github.com/agent-teams-ai/agent-teams-orchestrator/pull/79).
+topology and Dapr/Protobuf now have a separate
+[canonical backend adoption](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/94a480d004e8e6eaf79507feeae30428d372a3d3/docs/decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md).
+This pending branch's remaining reconciliation with current main is recorded in
+[branch integration status](docs/architecture/overview.md#branch-integration-status).

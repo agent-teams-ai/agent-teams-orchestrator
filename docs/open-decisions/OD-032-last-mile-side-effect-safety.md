@@ -24,6 +24,7 @@ related:
   - OD-028
   - OD-031
   - OD-033
+  - research.iam-critical-decisions-review-2026-10-23
 ---
 
 # OD-032: Last-Mile Side-Effect Safety
@@ -215,7 +216,7 @@ content do not enter events, logs, or telemetry.
 
 Dangerous actions will require product approval. The detailed approver model
 and mechanism remain unresolved and are deferred for later research under this
-decision. Task assignment acceptance records responsibility for work; it does
+decision. Task assignment or claim records responsibility for work; it does
 not grant product authorization, approve a dangerous action, satisfy an AR
 technical permission request, or establish Work completion. This requirement
 does not introduce human approval for every assignment or every action.
@@ -245,6 +246,15 @@ owns detailed product authorization semantics, and
 [OD-004](OD-004-runtime-capability-ports.md) owns exact runtime permission mappings.
 This research scope accepts no new approval architecture, public contract, or
 implementation admission.
+
+The [IAM critical-decisions review](../research/iam-critical-decisions-review-2026-10-23.md#11-dangerous-actions-and-approval-minimum-contract-now)
+adds a proposed minimum feature-owned enforcement seam and an unresolved
+granularity question. A provider turn with unmediated effects cannot claim
+exact-operation approval from a UI record alone. The selected dangerous feature
+must distinguish a mediated operation from explicitly bounded whole-turn
+authority. A final check or signed permit also does not close the external
+check/send race. These are research and qualification inputs, not adoption of
+a universal approval engine or a completed runtime permission contract.
 
 ## Options
 

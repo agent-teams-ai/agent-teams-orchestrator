@@ -14,6 +14,7 @@ related:
   - OD-031
   - OD-032
   - research.identity-provider-comparison-2026-10-21
+  - research.iam-critical-decisions-review-2026-10-23
 ---
 
 # OD-012: Identity, Authorization, and Tenant Isolation
@@ -101,6 +102,41 @@ must support independent standalone and managed compositions through narrow
 consumer-owned ports; standalone operation must not depend on commercial
 Platform. Get Modular composition remains owned by ADR-0110, and service topology
 remains outside this provider decision.
+
+### Remaining IAM decisions and evidence
+
+The [critical-decisions review dated 2026-10-23](../research/iam-critical-decisions-review-2026-10-23.md)
+extends the provider comparison with the following unresolved contracts and
+qualification questions. Its recommendations, scores, and code estimates remain
+research; they do not accept an implementation or change the provisional stack.
+
+- Shared-account login, account linking, factors, and recovery need an explicit
+  trust boundary. Removing membership in A does not prove isolation from A's
+  corporate IdP or mailbox when the same person retains access in B.
+- Customer administration and SCIM need relationship-scoped lifecycle rules,
+  including global credential and recovery writes, delayed reactivation, and
+  the continuity of grants after a person is enabled again.
+- Fully Local needs a selected authority scope, protected enrollment, stable
+  principal custody, rotating boot credentials, and lost-key recovery. The
+  recommended personal single-owner model is not an accepted product choice.
+- Browser session custody and native authorization-code flows using Proof Key
+  for Code Exchange need exact Target binding, refresh concurrency, logout, and
+  stream-reconnect contracts.
+- Trusted workload, actor, subject, Agent, Run, and client bindings remain
+  distinct. Permission to act does not by itself authorize issuing or renewing
+  delegation, or replacing it with an autonomous organization grant.
+- Graph qualification must cover source changes not yet projected, stale
+  writers, revoke and replacement races, model activation, and restore. OpenFGA
+  cache bypass alone cannot prove that a source revocation reached the graph.
+  SpiceDB is a bounded consistency comparator, not a selected replacement.
+- Protected personal queues, search, exports, and realtime require current
+  disclosure rules for counts, ranking, pagination, and cursors as well as rows.
+  Policy rollout, audit, and recovery retain their owning consistency evidence.
+
+The report's qualification sequence refines the experiment below. External
+connection ownership, worker enrollment, local materialization, and dangerous
+effects remain with OD-034, OD-038, OD-040, and OD-032 respectively; this decision
+must not absorb those lifecycles into a universal IAM service.
 
 ### Proposed acceptance experiment
 

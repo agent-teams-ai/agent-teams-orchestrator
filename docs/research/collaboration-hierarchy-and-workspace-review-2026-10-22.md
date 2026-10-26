@@ -17,6 +17,7 @@ related:
   - OD-032
   - OD-048
   - architecture.composition
+  - research.iam-critical-decisions-review-2026-10-23
 ---
 
 # Collaboration, Hierarchy, and Workspace Review, 2026-10-22
@@ -403,3 +404,40 @@ documentation update adds no production TypeScript and renames no existing
 public, package, catalog, code or stored identity. The earlier naming LOC ranges
 were conditional migration estimates; they are not the cost of this terminology
 record or an admitted implementation budget.
+
+## Coverage follow-up, 2026-10-26
+
+Three independent GPT-6.1 Sol `xhigh` critics and a coordinating document review
+checked the retained discussion against Orchestrator PR #86 at
+`6564bfb21ff9e57fbbcd8d4b41eae209f813d7b8` and Platform PR #55 at
+`d8eae303fbf8b9197c415b77cb30d6616fb53cb7`. This is a documentation-coverage
+review, not new product acceptance or runtime qualification.
+
+The product relationship, mixed human/Agent work, multi-Team personal queue,
+equal Task executors, generic Task views, organizational growth, future
+cooperation, Execution Directory term, mandatory Get Modular foundation, and
+shared-mechanism ownership are present in the owners linked above. The later
+owner-decision section governs the assignment and terminology conclusions of
+this report; earlier alternatives remain dated evidence.
+
+The follow-up corrects OD-023's stale description of human multiple-Team
+membership as undecided, the old technical Workspace prose in the composition
+document, and approval prose that could imply mandatory assignment acceptance.
+It also connects the [2026-10-23 IAM critical-decisions review](iam-critical-decisions-review-2026-10-23.md)
+to OD-012, OD-032, and the relevant connector, worker-enrollment, and local
+materialization decisions. Platform's existing boundary document gains the
+fourth research link and its local implications without copying the report.
+The comparison format remains recorded in both repositories' `AGENTS.md`.
+
+Current main at `94a480d004e8e6eaf79507feeae30428d372a3d3` separately accepts
+canonical module, distributed backend/Dapr, and Fully Local V1 adoptions. The
+[branch integration note](../architecture/overview.md#branch-integration-status)
+links those exact records. PR #79 is now a closed historical source, not pending
+topology work. This branch still needs reconciliation with those canonical
+decisions, including Get Modular pin and scope; this audit neither rewrites
+accepted history nor claims the branch is ready to merge.
+
+IAM provider admission, corporate authentication and recovery, local authority
+scope, exact role/delegation/revocation contracts, detailed dangerous-action
+approvals, and future federation retain their explicit unresolved status.
+Recording every important topic does not mean every design choice is settled.

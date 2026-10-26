@@ -106,9 +106,10 @@ and base service infrastructure; exact aggregate boundaries may change the cost.
 The existing units/placements model is the lean candidate. Tactical acceptance
 still requires the scenarios below and does not follow from a view label.
 
-Mixed teams retain separate human principal and Agent identities. Whether a
-human belongs to several Teams remains OD-048's choice; the current Agent
-one-Team invariant is unchanged. Cross-organization collaboration, especially
+Mixed teams retain separate human principal and Agent identities. ADR-0111
+accepts human membership in several Teams; OD-048 retains the exact membership
+contracts and qualification. The current Agent one-Team invariant is unchanged.
+Cross-organization collaboration, especially
 across Tenants or authority realms, remains future work here: no shared aggregate,
 implicit access inheritance, or cross-tenant transfer is admitted by this direction.
 

@@ -36,6 +36,7 @@ Agents should also follow the short repository-level
 | Add events, feeds, inbox, or outbox | [Eventing and reliability](architecture/eventing-and-reliability.md) | [Public contracts](architecture/public-control-contracts.md) |
 | Add client realtime delivery | [SDK and transports](architecture/sdk-and-transports.md) | [ADR-0058](decisions/0058-centrifugo-default-replaceable-client-realtime-edge.md), [Local Host lifecycle](architecture/local-host-lifecycle.md) |
 | Classify data or cross a trust boundary | [Security architecture](architecture/security-architecture.md) | [Machine-readable security schemas](../architecture/security/data-classification.schema.json), `OD-012`, `OD-029` |
+| Decide identity, authorization, or dangerous-action boundaries | [Identity and tenant-isolation decision](open-decisions/OD-012-identity-authorization-tenant-isolation.md) | [Latest IAM review](research/iam-critical-decisions-review-2026-10-23.md), [last-mile safety](open-decisions/OD-032-last-mile-side-effect-safety.md) |
 | Add an SDK or API capability | [SDK and transports](architecture/sdk-and-transports.md) | [Public control contracts](architecture/public-control-contracts.md) |
 | Change local lifecycle | [Local Host lifecycle](architecture/local-host-lifecycle.md) | `OD-001`, `OD-021` |
 | Change deployment profiles or client targets | [Deployment profiles](architecture/deployment-profiles.md) | `ADR-0087`, `ADR-0088`, `ADR-0090`, `ADR-0091`, `OD-035`, `OD-037`, `OD-038` |

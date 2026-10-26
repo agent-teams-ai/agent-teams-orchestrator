@@ -19,6 +19,20 @@ related:
 
 # Architecture Overview
 
+## Branch integration status
+
+This pending PR #86 branch retains an older main snapshot. As reviewed on
+2026-10-26, canonical main has accepted
+[module composition](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/94a480d004e8e6eaf79507feeae30428d372a3d3/docs/decisions/0113-canonical-module-and-composition-adoption.md),
+[distributed backend roles and Dapr/Protobuf](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/94a480d004e8e6eaf79507feeae30428d372a3d3/docs/decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md),
+and [Fully Local V1 scope](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/94a480d004e8e6eaf79507feeae30428d372a3d3/docs/decisions/0115-canonical-fully-local-v1-adoption.md).
+The monolith, local SQLite, and future-local passages below retain this branch's
+earlier topology and release snapshot; they do not propose reverting those
+canonical decisions. Integration must preserve their source history and reconcile
+this branch's broader Get Modular scope and different standard pin before merge
+or production implementation from this branch. This documentation audit does not
+perform that adoption or rewrite accepted ADRs.
+
 ## Purpose
 
 Agent Teams Orchestrator is a headless control plane for coordinating people and
