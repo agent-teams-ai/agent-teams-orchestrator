@@ -16,6 +16,7 @@ not normative architecture or transcripts invented from a synthesis.
 
 ## Module, identity, and collaboration review
 
+- [IAM Critical Decisions Review 2026-10-23](iam-critical-decisions-review-2026-10-23.md)
 - [Identity Provider Comparison, 2026-10-21](identity-provider-comparison-2026-10-21.md)
 - [Get Modular Adoption and Scale Review, 2026-10-21](get-modular-adoption-and-scale-review-2026-10-21.md)
 - [Collaboration, Hierarchy, and Workspace Review, 2026-10-22](collaboration-hierarchy-and-workspace-review-2026-10-22.md)
