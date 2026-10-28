@@ -1,40 +1,95 @@
-name: External Documentation Links
+name: TEST Orchestrator native qualification
 
 on:
-  schedule:
-    - cron: "17 6 * * 1"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: docs-external-links
-  cancel-in-progress: true
+  group: test-orchestrator-981d-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  links:
-    name: Check external links
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
+  architecture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - name: Check out repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Check external links
-        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          args: >-
-            --cache
-            --max-retries 3
-            --retry-wait-time 2
-            --timeout 20
-            --no-progress
-            --scheme https
-            --scheme http
-            README.md
-            AGENTS.md
-            'docs/**/*.md'
-          fail: true
-          lycheeVersion: v0.24.2
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+        with:
+          version: 11.18.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: bash scripts/ci/check-frozen-peer-enforcement.sh
+      - run: pnpm install --frozen-lockfile --config.engine-strict=true --strict-peer-dependencies && pnpm peers check
+      - name: Prepare isolated PostgreSQL conformance binaries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16
+          echo "TEST_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
+          echo "RUN_CONTEXT_OBSERVATION_PG=1" >> "$GITHUB_ENV"
+      - run: pnpm check
+      - name: Run advisory quality diagnostics
+        continue-on-error: true
+        run: pnpm quality:diagnostic
+      - if: github.event_name == 'pull_request'
+        run: pnpm docs:impact -- --base "${{ github.event.pull_request.base.sha }}" --strict
+
+  node-24-compatibility:
+    name: Node.js 24 compatibility
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+        with:
+          version: 11.18.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.21.0"
+          cache: pnpm
+      - run: bash scripts/ci/check-frozen-peer-enforcement.sh
+      - run: pnpm install --frozen-lockfile --config.engine-strict=true --strict-peer-dependencies && pnpm peers check
+      - name: Prepare isolated PostgreSQL conformance binaries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16
+          echo "TEST_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
+          echo "RUN_CONTEXT_OBSERVATION_PG=1" >> "$GITHUB_ENV"
+      - run: pnpm check
+
+  local-host-control-cross-platform:
+    name: Local Host Control (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+        with:
+          version: 11.18.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --config.engine-strict=true --strict-peer-dependencies && pnpm peers check
+      - name: Characterize documentation authoring
+        run: pnpm docs:test
+      - run: pnpm --filter @agent-teams/local-host-control run check
+      - run: pnpm architecture:scaffolding:check

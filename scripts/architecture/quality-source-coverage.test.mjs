@@ -6,12 +6,17 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { parse } from "yaml";
-import { checkQualityTopology, QUALITY_TOPOLOGY_PATH } from "./validate-quality-topology.mjs";
+import {
+  checkQualityTopology,
+  QUALITY_TOPOLOGY_PATH,
+  readRootStackPin,
+} from "./validate-quality-topology.mjs";
 
 const repositoryRoot = fileURLToPath(new URL("../../", import.meta.url));
 const foundationRoot = dirname(
   fileURLToPath(import.meta.resolve("@agent-teams/engineering-foundation/package.json")),
 );
+const stackRoot = dirname(fileURLToPath(import.meta.resolve("stack-toolchain/package.json")));
 const foundation = JSON.parse(await readFile(join(foundationRoot, "package.json"), "utf8"));
 const cli = join(foundationRoot, foundation.bin["agent-teams-foundation"]);
 const profilePath = "architecture/foundation/quality-source-coverage.yaml";
@@ -20,6 +25,7 @@ const admittedRoots = ["packages/contexts/agent-context", "packages/platform/loc
 const ceiling = (max) => ({
   "max-lines": ["error", { max, skipBlankLines: true, skipComments: true }],
 });
+const stackManifest = (pin) => ({ devDependencies: { "stack-toolchain": pin } });
 
 async function readJson(root, name) {
   return JSON.parse(await readFile(join(root, name), "utf8"));
@@ -40,12 +46,24 @@ async function fixture(action) {
       "package.json",
       "pnpm-workspace.yaml",
       "foundation.config.yaml",
+      "toolchain.config.json",
+      "tsconfig.json",
+      "tsconfig.toolchain.json",
+      "scripts/orchestration-specs/tsconfig.json",
+      "scripts/architecture/tsconfig.cms.json",
+      "scripts/architecture/validate-consumer-module-standard.ts",
+      "scripts/architecture/validate-consumer-module-standard.test.ts",
+      "scripts/orchestration-specs/desktop-first-slice-v1.test.ts",
+      "tooling/architecture-conformance/package.json",
+      "tooling/architecture-conformance-fixtures/valid",
       "architecture/feature-module-standard-profile.json",
       "architecture/package-catalog.yaml",
       profilePath,
       QUALITY_TOPOLOGY_PATH,
       "architecture/foundation/source-dependencies.yaml",
+      "architecture/foundation/dependency-declarations.yaml",
       "architecture/foundation/suppression-governance.yaml",
+      ".oxlintrc.json",
       ".oxlintrc.base.json",
       ".oxlintrc.common.json",
       ".oxlintrc.type-aware.json",
@@ -59,9 +77,13 @@ async function fixture(action) {
         filter: (source) => !source.split(/[\\/]/u).includes("node_modules"),
       });
     }
-    const presets = "node_modules/@agent-teams/engineering-foundation/presets";
+    const presets = "node_modules/stack-toolchain/presets";
     await mkdir(join(root, dirname(presets)), { recursive: true });
-    await cp(join(foundationRoot, "presets"), join(root, presets), { recursive: true });
+    await cp(join(stackRoot, "presets"), join(root, presets), { recursive: true });
+    await cp(
+      join(stackRoot, "package.json"),
+      join(root, "node_modules/stack-toolchain/package.json"),
+    );
     await action(root);
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -84,13 +106,18 @@ test("active coverage binds exact tools, authority, scope and a single full type
   assert.equal(config.schemaVersion, 2);
   assert.deepEqual(config.capabilities["quality.source-coverage"], { configPath: profilePath });
   const profile = parse(await readFile(join(repositoryRoot, profilePath), "utf8"));
-  assert.equal(profile.schemaVersion, 1);
+  assert.equal(profile.schemaVersion, 4);
   assert.equal(profile.featureProfilePath, QUALITY_TOPOLOGY_PATH);
   assert.equal(profile.lintConfigPath, ".oxlintrc.type-aware.json");
-  assert.deepEqual(
-    profile.compilerProjects.toSorted(),
-    admittedRoots.map((root) => `${root}/tsconfig.json`).toSorted(),
-  );
+  assert.equal(Object.hasOwn(profile, "compilerProjects"), false);
+  assert.equal(profile.toolchainConfigPath, "toolchain.config.json");
+  const toolchain = await readJson(repositoryRoot, profile.toolchainConfigPath);
+  assert.deepEqual(toolchain.typecheck.projects, [
+    "tsconfig.toolchain.json",
+    ...admittedRoots.map((root) => `${root}/tsconfig.json`),
+    "scripts/orchestration-specs/tsconfig.json",
+    "scripts/architecture/tsconfig.cms.json",
+  ]);
   const pkg = await readJson(repositoryRoot, "package.json");
   assert.equal(
     pkg.scripts["quality:coverage:scope"],
@@ -118,8 +145,44 @@ test("active coverage binds exact tools, authority, scope and a single full type
 
 test("adoption pins the installed Foundation and Docs adapter", async () => {
   const pkg = await readJson(repositoryRoot, "package.json");
-  assert.equal(pkg.devDependencies["@agent-teams/engineering-foundation"], "1.7.2");
+  assert.equal(pkg.devDependencies["@agent-teams/engineering-foundation"], "3.0.0");
+  readRootStackPin(pkg);
   assert.equal(pkg.devDependencies["@agent-teams/docs-protocol-agent-teams"], "0.3.2");
+});
+
+test("root Stack binding accepts a stable update and rejects noncanonical declarations", async () => {
+  assert.throws(() => readRootStackPin({}), /canonical stable exact/u);
+  for (const pin of ["0.1.1", "0.1.2"]) {
+    assert.equal(readRootStackPin(stackManifest(pin)), pin);
+  }
+  for (const pin of [
+    undefined,
+    "^0.1.1",
+    "latest",
+    "npm:stack-toolchain@0.1.1",
+    "file:../stack",
+    "git+https://example.invalid/stack.git",
+    "workspace:*",
+    "0.1.2-rc.1",
+    "01.1.1",
+    "0.1.1+build",
+  ]) {
+    assert.throws(() => readRootStackPin(stackManifest(pin)), /canonical stable exact/u);
+  }
+  for (const section of ["dependencies", "optionalDependencies", "peerDependencies"]) {
+    assert.throws(
+      () =>
+        readRootStackPin({ ...stackManifest("0.1.2"), [section]: { "stack-toolchain": "0.1.2" } }),
+      /only in root devDependencies/u,
+    );
+  }
+  await fixture(async (root) => {
+    const pkg = await readJson(root, "package.json");
+    pkg.devDependencies["stack-toolchain"] = "0.1.2";
+    await writeJson(root, "package.json", pkg);
+    // Pure Host binding probe; no future installed package or engine is qualified.
+    await checkQualityTopology(root);
+  });
 });
 
 test("published coverage accepts the real consumer profile", async () => {
@@ -137,13 +200,23 @@ test("published coverage accepts the real consumer profile", async () => {
     );
     assert.ok(typescriptRules);
     typescriptRules.files = [...typed.overrides[1].files];
+    // The v4 fixture also carries the native TS6 workspace manifest. Isolate
+    // that known tooling metadata from this source-selector regression witness.
+    fixtureCommon.overrides[0].files = fixtureCommon.overrides[0].files.filter(
+      (selector) => selector !== "tooling/architecture-conformance/**",
+    );
     await writeJson(root, ".oxlintrc.common.json", fixtureCommon);
     // Recreate the pre-remediation test-selector closure without weakening assertions.
     await writeJson(root, ".oxlintrc.type-aware.json", {
       ...typed,
       extends: ["./.oxlintrc.common.json", ...typed.extends.slice(1)],
     });
-    assert.equal(inspect(root).status, 0, "pre-remediation disposable baseline must pass");
+    const preRemediation = inspect(root);
+    assert.equal(
+      preRemediation.status,
+      0,
+      `pre-remediation disposable baseline must pass: ${JSON.stringify(preRemediation.report)}`,
+    );
     await mkdir(join(root, "scripts/architecture"), { recursive: true });
     await writeFile(
       join(root, "scripts/architecture/benign.test.mjs"),
@@ -381,6 +454,11 @@ test("published coverage rejects missing and non-regular declared inputs", async
 
 test("installed typed gate rejects an unknown assertion bridge by default", async () => {
   await fixture(async (root) => {
+    await cp(
+      join(repositoryRoot, "scripts/orchestration-specs"),
+      join(root, "scripts/orchestration-specs"),
+      { recursive: true },
+    );
     for (const name of ["pnpm-lock.yaml", "tsconfig.json"]) {
       await cp(join(repositoryRoot, name), join(root, name));
     }
@@ -431,5 +509,133 @@ test("installed typed gate rejects an unknown assertion bridge by default", asyn
     const corrected = runTyped();
     assert.equal(corrected.error, undefined, corrected.stderr);
     assert.equal(corrected.status, 0, `${corrected.stdout}${corrected.stderr}`);
+  });
+});
+
+test("toolchain adoption rejects scope loss and native-gate substitution", async () => {
+  for (const [name, mutate] of [
+    ["ordinary root lost", (config) => config.typecheck.projects.shift()],
+    ["CMS strict owner lost", (config) => config.typecheck.projects.pop()],
+    ["typed tests lost", (config) => config.lint.paths.pop()],
+    [
+      "blanket tooling project",
+      (config) => config.typecheck.projects.push("tooling/architecture-conformance/tsconfig.json"),
+    ],
+    [
+      "executable plugin lane",
+      (config) => {
+        config.lint.syntax = { config: ".oxlintrc.json", paths: ["."] };
+      },
+    ],
+    [
+      "formatter narrowed to green",
+      (config) => {
+        config.format.paths = ["package.json"];
+      },
+    ],
+  ]) {
+    await fixture(async (root) => {
+      await checkQualityTopology(root);
+      const config = await readJson(root, "toolchain.config.json");
+      mutate(config);
+      await writeJson(root, "toolchain.config.json", config);
+      await assert.rejects(checkQualityTopology(root), /Toolchain scope/u, name);
+    });
+  }
+  await fixture(async (root) => {
+    const tooling = await readJson(root, "tooling/architecture-conformance/package.json");
+    tooling.devDependencies.typescript = "catalog:";
+    await writeJson(root, "tooling/architecture-conformance/package.json", tooling);
+    await assert.rejects(checkQualityTopology(root), /catalog:tooling-ts6/u);
+  });
+  await fixture(async (root) => {
+    const pkg = await readJson(root, "package.json");
+    pkg.scripts["lint:fast"] = "stack-toolchain lint";
+    await writeJson(root, "package.json", pkg);
+    await assert.rejects(checkQualityTopology(root), /oxlint --config/u);
+  });
+  await fixture(async (root) => {
+    const project = await readJson(root, "tsconfig.json");
+    project.references = [];
+    await writeJson(root, "tsconfig.json", project);
+    await assert.rejects(checkQualityTopology(root), /reference and output gates/u);
+  });
+});
+
+test("toolchain adoption rejects doctor bypass and build-policy weakening", async () => {
+  await fixture(async (root) => {
+    await checkQualityTopology(root);
+    const pkg = await readJson(root, "package.json");
+    for (const [name, mutate] of [
+      ["missing public doctor", (value) => delete value.scripts["toolchain:doctor"]],
+      [
+        "echoed doctor",
+        (value) => {
+          value.scripts["toolchain:doctor"] = "echo healthy";
+        },
+      ],
+      [
+        "metadata-only doctor",
+        (value) => {
+          value.scripts["toolchain:doctor"] =
+            "node -p \"require('stack-toolchain/package.json').version\"";
+        },
+      ],
+      ...["check:fast", "check"].flatMap((gate) => [
+        [
+          `${gate} doctor removed`,
+          (value) => {
+            value.scripts[gate] = value.scripts[gate].replace("pnpm toolchain:doctor && ", "");
+          },
+        ],
+        [
+          `${gate} doctor after typecheck`,
+          (value) => {
+            value.scripts[gate] = `pnpm typecheck && ${value.scripts[gate]}`;
+          },
+        ],
+      ]),
+    ]) {
+      const candidate = structuredClone(pkg);
+      mutate(candidate);
+      await writeJson(root, "package.json", candidate);
+      await assert.rejects(checkQualityTopology(root), /Toolchain doctor/u, name);
+    }
+    await writeJson(root, "package.json", pkg);
+    const workspace = parse(await readFile(join(root, "pnpm-workspace.yaml"), "utf8"));
+    for (const [name, mutate] of [
+      ["strict admission missing", (value) => delete value.strictDepBuilds],
+      [
+        "strict admission disabled",
+        (value) => {
+          value.strictDepBuilds = false;
+        },
+      ],
+      ["Bun denial missing", (value) => delete value.allowBuilds.bun],
+      [
+        "Bun build approved",
+        (value) => {
+          value.allowBuilds.bun = true;
+        },
+      ],
+      [
+        "global scripts ignored",
+        (value) => {
+          value.ignoreScripts = true;
+        },
+      ],
+      [
+        "global builds approved",
+        (value) => {
+          value.dangerouslyAllowAllBuilds = true;
+        },
+      ],
+      ["existing approval lost", (value) => delete value.allowBuilds.nx],
+    ]) {
+      const candidate = structuredClone(workspace);
+      mutate(candidate);
+      await writeJson(root, "pnpm-workspace.yaml", candidate);
+      await assert.rejects(checkQualityTopology(root), /Toolchain build policy/u, name);
+    }
   });
 });

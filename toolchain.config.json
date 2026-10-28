@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "profile": "typescript-node",
+  "typecheck": {
+    "projects": [
+      "tsconfig.toolchain.json",
+      "packages/contexts/agent-context/tsconfig.json",
+      "packages/platform/local-host-control/tsconfig.json",
+      "scripts/orchestration-specs/tsconfig.json",
+      "scripts/architecture/tsconfig.cms.json"
+    ]
+  },
+  "lint": {
+    "config": ".oxlintrc.type-aware.json",
+    "paths": [
+      "packages/contexts/agent-context/src",
+      "packages/contexts/agent-context/tests",
+      "packages/platform/local-host-control/src",
+      "packages/platform/local-host-control/tests"
+    ]
+  },
+  "format": {
+    "paths": [
+      ".",
+      "!pnpm-lock.yaml",
+      "!docs/decisions/[0-9]*.md",
+      "!docs/research/**",
+      "!architecture/decisions/accepted-decisions.json",
+      "!architecture/executable-specs/fixtures/**",
+      "!architecture/foundation/docs-*",
+      "!architecture/foundation/document-authoring.yaml",
+      "!architecture/foundation/required-quality-tests.json",
+      "!architecture/feature-module-standard-profile.json",
+      "!.agents/skills/docs-authoring/**",
+      "!.github/workflows/docs-protocol.yml",
+      "!AGENTS.md",
+      "!GEMINI.md",
+      "!.github/copilot-instructions.md",
+      "!scripts/**/fixtures/**",
+      "!tooling/architecture-conformance-fixtures/**",
+      "!tooling/lint-fixtures/**",
+      "!architecture/consumer-module-standard/guide/common-assembly-081.md"
+    ]
+  }
+}

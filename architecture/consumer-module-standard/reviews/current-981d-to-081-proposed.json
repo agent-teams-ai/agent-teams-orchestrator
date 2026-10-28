@@ -1,0 +1,27 @@
+{
+  "status": "proposed-not-accepted",
+  "currentConsumerCommit": "981dd836ca3d35b764561bdc11dc2e0544d83416",
+  "retainedPriorReviewPath": "architecture/consumer-module-standard/reviews/a3-to-081-proposed.json",
+  "retainedPriorReviewSha256": "ead73607331bbc9c67bc4258705e13a7388b5890b9d5452e5fbba2bd474d1c6a",
+  "baselineDecision": "ADR-0113",
+  "baselineDecisionSha256": "ebb66ba34de14a9285754afbd922553e65616184c6ec28617d4f4151c39de173",
+  "scopeReconciliationDecision": "ADR-0117",
+  "scopeReconciliationDecisionSha256": "98cefbd73b08e95c4107bc877668a2c3b84584c362571af19d7e2d6a63361c21",
+  "currentManualSha256": "9d8a2ba79d21ccc032000ca14d0b0f38255e213c1c198fdde0cb5fae134fe606",
+  "acceptedBaselineRetained": true,
+  "acceptedBaseline": "A3/Core0.5.0/Assembly0.5.0",
+  "candidate": "081 remains proposed",
+  "scopeReview": [
+    "ADR0117 supersedes0110 differingpin; retains ADR0113 exactbaseline and broadens actualseams across applicableTypeScriptpackagefamilies.",
+    "Existingseams requireclassification/migration; purehelpers ordinarycode. Modulefoundation pending.",
+    "Resources exactcompatibleartifact and Observation firstuse qualification remain pending; no dynamicHost/runtimeadoption."
+  ],
+  "acceptancePending": [
+    "Explicitowneracceptedcandidate081decision and currentmanualprofilemigration.",
+    "Explicitsandboxclassification and actualfirstscopeconformance.",
+    "Current-source strict/source/native/Docs checks; these metadata fixtures do not prove adoption."
+  ],
+  "productionAdopted": false,
+  "firstHost": "hold",
+  "nonAuthoritativeEvidence": true
+}

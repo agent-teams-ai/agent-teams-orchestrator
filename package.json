@@ -9,11 +9,6 @@
     "url": "git+https://github.com/agent-teams-ai/agent-teams-orchestrator.git"
   },
   "type": "module",
-  "packageManager": "pnpm@11.18.0",
-  "engines": {
-    "node": ">=24.21.0 <25 || >=26.0.0 <27",
-    "pnpm": "11.18.0"
-  },
   "scripts": {
     "architecture:check": "pnpm run architecture:feature-module-profile && pnpm run architecture:feature-module-profile:test && pnpm run specs:check && pnpm run specs:test && pnpm run architecture:topology && pnpm run architecture:topology:test && pnpm run architecture:nx:check && pnpm run architecture:model:check && pnpm run architecture:model:test && pnpm run security:check && pnpm run reliability:check && pnpm run architecture:dependencies && pnpm run lint && pnpm run architecture:conformance && pnpm run architecture:graph:advisory",
     "architecture:conformance": "pnpm --filter @agent-teams/architecture-conformance run check:conformance",
@@ -31,9 +26,9 @@
     "architecture:scaffold-package": "node scripts/architecture/scaffold-package.mjs",
     "architecture:topology": "node scripts/architecture/validate-package-topology.mjs",
     "architecture:topology:test": "node --test --test-concurrency=1 scripts/architecture/package-materialization-validation.test.mjs",
-    "check": "pnpm foundation:check && pnpm docs:repository:check && pnpm packages:check && pnpm typecheck:root && pnpm architecture:check",
+    "check": "pnpm toolchain:doctor && pnpm foundation:check && pnpm docs:repository:check && pnpm packages:check && pnpm typecheck:root && pnpm architecture:check && pnpm format:check",
     "check:changed": "agent-teams-foundation agent-workflow changed --consumer .",
-    "check:fast": "pnpm foundation:check && pnpm quality:coverage:scope && pnpm docs:repository:check && pnpm architecture:feature-module-profile && pnpm run specs:check && pnpm run specs:test && pnpm lint:fast && pnpm typecheck && pnpm architecture:model:check && pnpm architecture:nx:check",
+    "check:fast": "pnpm toolchain:doctor && pnpm foundation:check && pnpm quality:coverage:scope && pnpm docs:repository:check && pnpm architecture:feature-module-profile && pnpm run specs:check && pnpm run specs:test && pnpm lint:fast && pnpm typecheck && pnpm architecture:model:check && pnpm architecture:nx:check",
     "docs:validate": "node scripts/docs/validate-docs.mjs",
     "docs:test": "node --test --test-concurrency=1 scripts/docs/check-doc-impact.test.mjs scripts/docs/docs-protocol-parity.test.mjs scripts/docs/docs-protocol-profile.test.mjs scripts/docs/validate-docs.test.mjs scripts/docs/validate-prose.test.mjs",
     "docs:impact": "node scripts/docs/check-doc-impact.mjs",
@@ -87,16 +82,19 @@
     "skills:check": "pnpm run skills:validate && pnpm run skills:test",
     "skills:test": "node --test --test-concurrency=1 scripts/skills/validate-skills.test.mjs",
     "skills:validate": "node scripts/skills/validate-skills.mjs",
-    "typecheck": "pnpm run typecheck:root && pnpm run packages:typecheck",
-    "typecheck:root": "tsc --project tsconfig.json --noEmit --pretty false",
+    "typecheck": "stack-toolchain typecheck",
+    "typecheck:root": "stack-toolchain typecheck",
     "quality:coverage:scope": "agent-teams-foundation quality check --consumer . --scope-only",
     "lint:typed": "agent-teams-foundation quality check --consumer .",
-    "quality:coverage:test": "node scripts/architecture/run-required-quality-tests.mjs"
+    "quality:coverage:test": "node scripts/architecture/run-required-quality-tests.mjs",
+    "lint:toolchain": "stack-toolchain lint",
+    "format:check": "stack-toolchain format:check",
+    "toolchain:doctor": "stack-toolchain doctor"
   },
   "devDependencies": {
     "@agent-teams/docs-protocol": "0.6.2",
     "@agent-teams/docs-protocol-agent-teams": "0.3.2",
-    "@agent-teams/engineering-foundation": "1.7.2",
+    "@agent-teams/engineering-foundation": "3.0.0",
     "@types/node": "catalog:",
     "@xstate/graph": "catalog:",
     "ajv": "catalog:",
@@ -119,10 +117,16 @@
     "remark-frontmatter": "catalog:",
     "remark-gfm": "catalog:",
     "remark-parse": "catalog:",
+    "stack-toolchain": "0.1.1",
     "typescript": "catalog:",
     "unified": "catalog:",
     "unist-util-visit": "catalog:",
     "xstate": "catalog:",
     "yaml": "catalog:"
-  }
+  },
+  "engines": {
+    "node": ">=24.21.0 <25 || >=26.0.0 <27",
+    "pnpm": "11.18.0"
+  },
+  "packageManager": "pnpm@11.18.0"
 }

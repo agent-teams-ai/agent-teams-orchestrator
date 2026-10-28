@@ -220,21 +220,19 @@ test("maintainability profiles stay aligned with Foundation", () => {
     readFileSync(
       path.join(
         repositoryRoot,
-        "node_modules/@agent-teams/engineering-foundation/presets/oxlint/maintainability-tests.json",
+        "node_modules/stack-toolchain/presets/oxlint/maintainability-tests.json",
       ),
       "utf8",
     ),
   );
   assert.ok(
     blockingConfig.extends.includes(
-      "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/maintainability.json",
+      "./node_modules/stack-toolchain/presets/oxlint/maintainability.json",
     ),
     "production maintainability preset must stay explicit",
   );
   assert.deepEqual(
-    readConfig(
-      "node_modules/@agent-teams/engineering-foundation/presets/oxlint/maintainability.json",
-    ).rules,
+    readConfig("node_modules/stack-toolchain/presets/oxlint/maintainability.json").rules,
     {
       complexity: ["error", 20],
       "max-depth": ["error", 4],
@@ -402,9 +400,7 @@ test("common, fast and typed configs keep separate responsibilities", () => {
   assert.deepEqual(common.extends, ["./.oxlintrc.base.json"]);
   assert.deepEqual(
     typed.extends,
-    common.extends.concat(
-      "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/type-aware.json",
-    ),
+    common.extends.concat("./node_modules/stack-toolchain/presets/oxlint/type-aware.json"),
   );
   assert.deepEqual(Object.keys(typed).toSorted(), ["$schema", "extends", "options", "overrides"]);
   assert.deepEqual(Object.keys(common).toSorted(), ["$schema", "extends", "overrides"]);

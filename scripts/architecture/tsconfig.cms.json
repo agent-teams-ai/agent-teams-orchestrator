@@ -1,0 +1,11 @@
+{
+  "extends": "stack-toolchain/presets/typescript/node.json",
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": false,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": ["node"]
+  },
+  "files": ["validate-consumer-module-standard.ts", "validate-consumer-module-standard.test.ts"]
+}

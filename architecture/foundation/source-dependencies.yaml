@@ -136,6 +136,7 @@ boundaries:
         - "@agent-teams/engineering-foundation"
         - ajv
         - oxc-parser
+        - stack-toolchain
         - yaml
       builtins:
         - node:assert

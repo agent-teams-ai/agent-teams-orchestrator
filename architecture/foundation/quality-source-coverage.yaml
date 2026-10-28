@@ -1,11 +1,9 @@
-schemaVersion: 1
+schemaVersion: 4
 sourcePolicyPath: architecture/foundation/source-dependencies.yaml
 suppressionPolicyPath: architecture/foundation/suppression-governance.yaml
 featureProfilePath: architecture/foundation/quality-feature-topology.json
 lintConfigPath: .oxlintrc.type-aware.json
-compilerProjects:
-  - packages/contexts/agent-context/tsconfig.json
-  - packages/platform/local-host-control/tsconfig.json
+toolchainConfigPath: toolchain.config.json
 scripts:
   fast: check:fast
   full: check

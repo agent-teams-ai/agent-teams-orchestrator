@@ -1,0 +1,42 @@
+{
+  "status": "proposed-not-accepted",
+  "scopeDecision": "ADR-0113",
+  "predecessorCommit": "a3a079baca2c6af48c9d45bc08992825be1c2bbd",
+  "predecessorSha256": "e5cb510c5ea83e54a6833cc40b6ad31fc5cf8c70d9838e4e0c6923edc6f70919",
+  "candidateCommit": "081ae02b49123e14121e100eccfe99f2e74c3600",
+  "candidateSha256": "3c5814ebf1ab1bd17688e49955aa0baa2ee91dd3a369adcea4d38aaccd53ba86",
+  "candidateGitBlob": "df4eff7235ac781ec574903c6b2aec13bcd7bfaa",
+  "candidateBytes": 84505,
+  "fullDeltaSha256": "7706d5a5dca4cc38d37758f69a524f574852731ec16d76f6b9cac229d8476132",
+  "retainedPlanSha256": "41442e5ba5171fad75f94b9d9a2285ade4394370f742c14d67860fa689ba5aa2",
+  "handoffSha256": "badb30dc71093502a871322ac0a2349aaf61b0fc4a012879f07e65f970cfd53f",
+  "documentNormativeChange": true,
+  "consumerAuthoringRequirementsChanged": true,
+  "currentProductRuntimeBehaviorChanged": false,
+  "productionAdopted": false,
+  "firstHost": "hold",
+  "sandbox": {
+    "owner": "agent-context",
+    "classification": "proposed-test-only-public-composition",
+    "publicFactoryExports": [".", "./module"],
+    "callers": [
+      "packages/contexts/agent-context/tests/features/sandbox-manifest/manifest-postgres.test.ts",
+      "packages/contexts/agent-context/tests/features/sandbox-manifest/postgres-disconnect.test.ts"
+    ],
+    "productionHostCallerFound": false,
+    "classificationAccepted": false,
+    "custody": "Borrowed pools and authorization; operations own acquired clients and release in finally. No factory-owned process/resource lifecycle."
+  },
+  "deltaDisposition": [
+    "Subscriber-scoped signal binding, detach-before-cleanup and active-loader custody are conditional first-scope obligations; not exercised by current fixed factories.",
+    "Complete descriptor unions retain imported/private/transitive/unused contracts with separate CapabilitiesOf bases. No current descriptor map to migrate; preserve manual polymorphic maps.",
+    "Observation testing entry stays test-only when adopted. This preparation does not install Observation or claim a live enforcement/graph conformance proof.",
+    "Producer pnpm-to-Bun examples do not change consumer pnpm11.18 policy. Existing method-port/layout obligations predate081 and are not silently repaired."
+  ],
+  "acceptancePending": [
+    "Admitted Docs Work B and new owner-accepted scoped decision, preserving ADR0113/history.",
+    "Explicit sandbox disposition and current manual profile migration.",
+    "Actual strict/source/native/Docs/first-Host conformance as applicable."
+  ],
+  "nonAuthoritativeEvidence": true
+}
