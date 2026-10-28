@@ -200,10 +200,11 @@ test("published coverage accepts the real consumer profile", async () => {
     );
     assert.ok(typescriptRules);
     typescriptRules.files = [...typed.overrides[1].files];
-    // The v4 fixture also carries the native TS6 workspace manifest. Isolate
-    // that known tooling metadata from this source-selector regression witness.
+    // The v4 fixture carries excluded TypeScript test inputs and native TS6 metadata.
+    // Isolate those selectors from this legacy JavaScript test-selector witness.
     fixtureCommon.overrides[0].files = fixtureCommon.overrides[0].files.filter(
-      (selector) => selector !== "tooling/architecture-conformance/**",
+      (selector) =>
+        selector !== "tooling/architecture-conformance/**" && selector !== "scripts/**/*.test.ts",
     );
     await writeJson(root, ".oxlintrc.common.json", fixtureCommon);
     // Recreate the pre-remediation test-selector closure without weakening assertions.
