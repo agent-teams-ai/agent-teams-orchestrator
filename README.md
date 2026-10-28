@@ -3,9 +3,13 @@
 Headless control plane being designed for collaboration between people and AI
 agents, with shared Teams and Tasks and separate agent execution.
 
-The project is being designed as an event-driven modular monolith with Clean and
-Hexagonal Architecture, strategic and tactical Full DDD, broker-neutral
-messaging, provider-neutral runtime integration, and versioned public contracts.
+The design uses a headless, event-driven modular core with Clean and Hexagonal
+Architecture, strategic and tactical Full DDD, broker-neutral messaging,
+provider-neutral runtime integration, and versioned public contracts. Canonical
+main selects separate process roles from their first owning feature; this older
+branch must not be read as a proposal to restore universal single-process
+placement. See the [branch integration status](docs/architecture/overview.md#branch-integration-status)
+before using this branch as an implementation baseline.
 
 ## Project status
 
@@ -89,8 +93,9 @@ separate; their remaining choices are recorded in
 
 The commercial [Platform](https://github.com/agent-teams-ai/agent-teams-platform)
 consumes Orchestrator API/SDK capabilities. Its
-[product relationship and boundary](https://github.com/agent-teams-ai/agent-teams-platform/blob/main/docs/architecture/platform-orchestrator-boundary.md)
-owns the hosted integration direction. Orchestrator retains the independent
+[companion product relationship proposal in PR #55](https://github.com/agent-teams-ai/agent-teams-platform/blob/a4d47e1c27c3c1efc0e94f770fc9064b0bc17bfc/docs/architecture/platform-orchestrator-boundary.md)
+records the hosted integration direction. This link pins the reviewed proposal,
+not merged Platform authority. Orchestrator retains the independent
 authority adapters and [composition boundaries](docs/architecture/composition-and-dependency-injection.md#shared-mechanisms-and-independent-products)
 needed by standalone and managed delivery.
 

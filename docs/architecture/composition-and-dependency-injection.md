@@ -184,12 +184,13 @@ deployment policy. Its product authority adapter is one selected deployment
 integration. Standalone Self-Hosted selects its independent authority and must
 operate without a Platform endpoint or private package registry.
 
-The companion [Platform boundary direction](https://github.com/agent-teams-ai/agent-teams-platform/blob/main/docs/architecture/platform-orchestrator-boundary.md)
-owns the hosted product relationship and its proposed exact integration
-contracts. Each product can release independently; a managed composition binds
-compatible contract and capability versions explicitly. A shared mechanism must
-not force standalone Orchestrator to deploy Platform or update both products
-together. [The research coverage](../research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
+The [companion Platform proposal in PR #55](https://github.com/agent-teams-ai/agent-teams-platform/blob/a4d47e1c27c3c1efc0e94f770fc9064b0bc17bfc/docs/architecture/platform-orchestrator-boundary.md)
+records the hosted product relationship and proposed exact integration contracts.
+The link pins the reviewed proposal, not merged Platform authority. Each product
+can release independently; a managed composition binds compatible contract and
+capability versions explicitly. A shared mechanism must not force standalone
+Orchestrator to deploy Platform or update both products together.
+[The research coverage](../research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
 records the evidence, pending Platform adoption, and remaining product choices.
 
 Reusable libraries may own concrete mechanisms shared by real consumers: OIDC
@@ -202,6 +203,15 @@ extraction. Product permission names, role policy, membership lifecycle, domain
 aggregates, repositories, and transactions remain with their owners. Similar
 fields do not justify a shared `Tenant`, `Project`, `Principal`, or `Task` domain
 package.
+
+For a concrete mechanism already expected to serve both products, follow the
+organization's [library-first rule](https://github.com/agent-teams-ai/.github/blob/main/docs/engineering-quality-standard.md#library-first-design-and-deliberate-evolution):
+design one reusable library and contract from the start, and validate it with
+disposable consumers and at least one real consumer in the same delivery.
+Do not first duplicate the mechanism in both products while waiting for a
+second implementation. This does not authorize speculative packages, a shared
+business domain, or a universal IAM framework; the named owners and actual
+repeated need still determine the boundary.
 
 A shared provider adapter does not imply one remotely mandatory authorization
 service. Each product/process supplies its own policy through narrow ports and

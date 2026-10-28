@@ -274,7 +274,7 @@ code or excuse a missing acceptance gate.
 - [Reviewed Platform source](https://github.com/agent-teams-ai/agent-teams-platform/tree/83d761b84e23bb6d1e9c446f3666951e94fa90d8)
 - [Platform ADR-0007: strategic ownership and first Project Management slice](https://github.com/agent-teams-ai/agent-teams-platform/blob/83d761b84e23bb6d1e9c446f3666951e94fa90d8/docs/decisions/0007-platform-strategic-context-map-and-first-project-management-slice.md)
 - [Orchestrator ADR-0044: tenant-scoped Agent Organization](../decisions/0044-tenant-scoped-agent-organization.md)
-- [Current Platform relationship and boundary record][platform-boundary]
+- [Reviewed companion Platform relationship proposal in PR #55][platform-boundary]
 - [Companion Platform documentation branch][platform-draft]
 - [Orchestrator draft PR #86](https://github.com/agent-teams-ai/agent-teams-orchestrator/pull/86)
 - [Orchestrator Task lifecycle alternatives and bounds][work]
@@ -292,7 +292,7 @@ code or excuse a missing acceptance gate.
 [participation]: ../open-decisions/OD-048-mixed-human-and-ai-team-participation.md
 [identity-research]: identity-provider-comparison-2026-10-21.md
 [modular-research]: get-modular-adoption-and-scale-review-2026-10-21.md
-[platform-boundary]: https://github.com/agent-teams-ai/agent-teams-platform/blob/main/docs/architecture/platform-orchestrator-boundary.md
+[platform-boundary]: https://github.com/agent-teams-ai/agent-teams-platform/blob/a4d47e1c27c3c1efc0e94f770fc9064b0bc17bfc/docs/architecture/platform-orchestrator-boundary.md
 [platform-draft]: https://github.com/agent-teams-ai/agent-teams-platform/blob/docs/product-relationship-and-research/docs/architecture/platform-orchestrator-boundary.md
 [services-pr]: https://github.com/agent-teams-ai/agent-teams-orchestrator/pull/79
 [plugins-pr]: https://github.com/agent-teams-ai/agent-teams-orchestrator/pull/88
@@ -441,3 +441,23 @@ IAM provider admission, corporate authentication and recovery, local authority
 scope, exact role/delegation/revocation contracts, detailed dangerous-action
 approvals, and future federation retain their explicit unresolved status.
 Recording every important topic does not mean every design choice is settled.
+
+## Navigation and reuse clarification, 2026-10-28
+
+A further document audit starts from Orchestrator `d89a7ba` and Platform
+`a4d47e1`. The Platform boundary link now pins that reviewed PR #55 snapshot:
+Platform main did not yet contain the expanded relationship and research sections.
+The linked proposal must not be mistaken for merged authority. Earlier source
+baselines, recommendations, scores, and accepted decision bodies remain intact.
+
+The current composition guide clarifies the organization's library-first rule:
+a concrete mechanism expected to serve both products is designed as one library
+from the start, with an explicit owner, contract, disposable consumers and a
+real consumer in the same delivery. The earlier repeated-need language does not
+require first copying implementations into both products. This clarification
+creates no shared domain, universal IAM framework, package, or runtime admission.
+
+This follow-up is the coordinating assistant's source review, not a new launch
+of GPT-6.1 critics or an executed provider experiment. Final publication checks
+and any unavailable repository gates are recorded against exact commits in the
+companion PR descriptions rather than inferred from earlier passing runs.

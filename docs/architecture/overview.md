@@ -46,9 +46,10 @@ Standalone Self-Hosted and managed delivery share the orchestration core. The
 standalone product must support multiple organizations and independent human
 memberships without commercial Platform dependencies. The
 [deployment profiles](deployment-profiles.md) own qualification; the
-[Platform boundary direction](https://github.com/agent-teams-ai/agent-teams-platform/blob/main/docs/architecture/platform-orchestrator-boundary.md)
-owns the companion hosted relationship. Platform does not implement another
-Task engine. The [coverage review](../research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
+[companion Platform proposal in PR #55](https://github.com/agent-teams-ai/agent-teams-platform/blob/a4d47e1c27c3c1efc0e94f770fc9064b0bc17bfc/docs/architecture/platform-orchestrator-boundary.md)
+records the hosted relationship at its reviewed, unmerged revision. Platform
+does not implement another Task engine. The
+[coverage review](../research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
 links each confirmed requirement and unresolved choice to its owner.
 
 The architecture must support:
