@@ -5,7 +5,7 @@ status: accepted
 owner: architecture
 summary: Mandatory evidence gates that must pass before the first production orchestration vertical slice is implemented.
 related:
-  - ADR-0110
+  - ADR-0117
   - ADR-0103
   - contract.migration.desktop-first-slice.v1
   - ADR-0071
@@ -22,6 +22,9 @@ related:
   - ADR-0092
   - ADR-0093
   - ADR-0094
+  - ADR-0114
+  - ADR-0115
+  - architecture.deployment-profiles
   - ADR-0062
   - ADR-0063
   - ADR-0064
@@ -63,12 +66,14 @@ The first production orchestration package or vertical slice must not be
 implemented until all five gates below pass. Documentation, research, diagrams,
 contract fixtures, deterministic models, and disposable spikes remain allowed.
 
-These gates admit the first V1 orchestration slice and profile advertising. A
-future Fully Local implementation increment follows its separate OD-040
+These gates admit the first V1 orchestration slice and profile advertising. The
+required Fully Local implementation increment follows its separate OD-040
 materialization decision after the relevant lifecycle and workflow boundaries
 are accepted. Package materialization may then start before Fully Local release
 qualification, because the implementation is required to produce that evidence;
-it still grants no availability or shipping claim.
+it still grants no availability or shipping claim. ADR-0115 puts local contract
+resolution, implementation, and qualification on the V1 delivery path. A narrow
+first server slice can precede them; completed V1 cannot omit the local profile.
 
 Passing a gate does not require resolving every future feature. It requires
 enough accepted ownership, invariants, contracts, transition behavior, and
@@ -77,13 +82,13 @@ expensive architecture decision.
 
 ## Gate status
 
-| Gate | Current state | Owning authorities |
-|---|---|---|
-| Run, Work, and topology semantics | In review | Run Orchestration, Work Coordination, Team Topology |
-| Communication, Attention, and Agent Context boundary | In review | Agent Communication, Human Notification Management, Agent Attention, Agent Context, and Run Orchestration |
-| Public SDK and Desktop compatibility boundary | In review | Feature owners, Control API, SDK, Desktop integration |
-| Temporal-ready durable process boundaries | In review | Run Orchestration application and workflow scheduling adapters |
-| Deployment authority, target fencing, and runtime connectivity | In review | Access Control, composition, clients, runtime gateway |
+| Gate                                                           | Current state | Owning authorities                                                                                        |
+| -------------------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------- |
+| Run, Work, and topology semantics                              | In review     | Run Orchestration, Work Coordination, Team Topology                                                       |
+| Communication, Attention, and Agent Context boundary           | In review     | Agent Communication, Human Notification Management, Agent Attention, Agent Context, and Run Orchestration |
+| Public SDK and Desktop compatibility boundary                  | In review     | Feature owners, Control API, SDK, Desktop integration                                                     |
+| Temporal-ready durable process boundaries                      | In review     | Run Orchestration application and workflow scheduling adapters                                            |
+| Deployment authority, target fencing, and runtime connectivity | In review     | Access Control, composition, clients, runtime gateway                                                     |
 
 `In review` is blocking. A gate becomes `passed` only when its exit evidence is
 linked from this document and the owning accepted artifacts. An unresolved
@@ -108,13 +113,13 @@ direct-message slice under the owner's A-F migration mandate. The
 [scoped contract and evidence matrix](../contracts/desktop-runtime-migration-admission-v1.md#conformance-fixtures)
 provide the five exit proofs for this exact implementation start:
 
-| Gate | Scoped exit evidence | Admission |
-|---|---|---|
-| 1: Run, Work, topology | Accepted owners, immutable identity/placement contracts, cancellation and stale/unknown models | Passed for ADR-0103 scope |
-| 2: Communication and Context | Direct audience/child receipt, separate delivery observations, context evidence rejecting text authority | Passed for ADR-0103 scope |
-| 3: SDK/Desktop | Versioned Protobuf, exact DTO oracles, request/expiry/ETag/clock and target/feed fixtures | Passed for ADR-0103 scope |
-| 4: Durable processes | Feature-owned activation/dispatch/cancel state, stable identities, post-commit dispatch and unknown reconciliation model | Passed for ADR-0103 scope |
-| 5: Deployment/authority | Existing server boundary and bounded test authority, authenticated scope and target generation rejection | Passed for ADR-0103 scope |
+| Gate                         | Scoped exit evidence                                                                                                     | Admission                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| 1: Run, Work, topology       | Accepted owners, immutable identity/placement contracts, cancellation and stale/unknown models                           | Passed for ADR-0103 scope |
+| 2: Communication and Context | Direct audience/child receipt, separate delivery observations, context evidence rejecting text authority                 | Passed for ADR-0103 scope |
+| 3: SDK/Desktop               | Versioned Protobuf, exact DTO oracles, request/expiry/ETag/clock and target/feed fixtures                                | Passed for ADR-0103 scope |
+| 4: Durable processes         | Feature-owned activation/dispatch/cancel state, stable identities, post-commit dispatch and unknown reconciliation model | Passed for ADR-0103 scope |
+| 5: Deployment/authority      | Existing server boundary and bounded test authority, authenticated scope and target generation rejection                 | Passed for ADR-0103 scope |
 
 ADR-0103 covers only the six named context reservations and retains their
 strategic owner references. The broad gate table above remains in
@@ -126,7 +131,7 @@ implementation and deployment proofs follow their owning contracts.
 
 ## Module foundation before business expansion
 
-ADR-0110 makes Get Modular mandatory and adds a composition prerequisite before
+ADR-0117 makes Get Modular mandatory and adds a composition prerequisite before
 new or expanded business module assembly. It does not rewrite the five business
 gates or retract ADR-0103's exact sandbox evidence. Existing admission is not
 evidence that the new module foundation has passed.
@@ -141,7 +146,7 @@ unqualified scale claim.
 
 | Evidence | Required result | Current state |
 |---|---|---|
-| Scope and artifact reconciliation | Exact central pins, compatible released package/archive train, supported compiler, and actual composition inventory | Framework selected; package activation pending |
+| Scope and artifact reconciliation | ADR-0113 baseline, compatible additional artifacts where needed, supported compiler, and actual composition inventory | Canonical baseline retained; package activation pending |
 | Existing seam migration | Sandbox Manifest and other applicable seams use one Get Modular production path; pure helpers remain classified explicitly | Pending |
 | Nested source conformance | Deepest feature ownership, visibility, direct-parent assembly, republication, composition-only imports, type-level use cycles and load-time cycles | Production activation blocked |
 | Representative consumer | Real nested feature, two meaningful profiles, exact bindings, independent oracle, public packed imports | Pending |
@@ -155,7 +160,7 @@ framework, or generic lifecycle manager. Feature, Assembly entry, package, and
 service counts are measured separately; thousands of agent executions do not
 imply thousands of modules or dependency containers.
 
-The reviewed upstream
+The dated research on a different upstream snapshot
 [growth record](https://github.com/agent-teams-ai/get-modular/blob/ddf1e0b0053f546f12ca70190b237b4f7e78d09d/tests/qualification/consumer-fixtures/growth/README.md)
 reports an inherited-map N=500 compile reaching its 180-second limit on
 TypeScript 7.0.2. A private compiler experiment completed N=1,000, but it is not
@@ -168,8 +173,9 @@ corresponding additional evidence first. Do not hide a failed scale with wiring
 casts, weakened source maps, larger timeouts, or a claim that the private result
 already passed.
 
-The same review found finite Assembly group depth and aggregate entry/group
-limits. The selected feature tree and diagnostics must agree with the library's
+The dated review also found finite Assembly group depth and aggregate entry/group
+limits. Recheck the exact adopted artifacts; that later snapshot is not current
+consumer qualification or an implicit upgrade. The selected feature tree and diagnostics must agree with the library's
 qualified envelope; unlimited semantic nesting is not a promise of unlimited
 runtime graph depth. Resources release qualification must include the reviewed
 shutdown reentry fix. Observation needs a separate browser lane if a browser
@@ -288,16 +294,17 @@ Required evidence:
   reconciliation.
 
 The gate does not require deploying Temporal in every profile or implementing a
-Fully Local workflow engine in the first production slice. ADR-0087 defers Fully
-Local implementation from V1, while OD-035 keeps the local engine decision
-explicit for the future profile.
+Fully Local workflow engine in the first server slice. ADR-0115 requires the
+local profile for V1; OD-035 must select and qualify its durable adapter before
+the corresponding local release. The common workflow port does not select the
+same engine or lifecycle for both profiles.
 
 ## Gate 5: Deployment authority, target fencing, and runtime connectivity
 
 Required evidence:
 
 - machine-readable Managed SaaS, Standalone Self-Hosted, Connected Self-Hosted,
-  and Fully Local profile states agree with ADR-0087 and ADR-0090;
+  and Fully Local profile states agree with ADR-0115 and ADR-0093;
 - the OD-039 qualification framework has a blocking trusted-attestation verifier
   before any profile or capability becomes `qualified`;
 - profile qualification is closed over the exact mandatory capability registry
@@ -330,10 +337,55 @@ The reliability catalog separately blocks profile qualification on OD-003 and
 OD-012. The OD-003 blocker is a qualification gate, not a slice-admission
 criterion of this gate.
 
-This gate does not require implementing Fully Local or a commercial capability,
-and optional commercial capability does not block a baseline profile.
-It does require that a server profile advertise only capabilities whose
-authority and connectivity are qualified.
+For the first server slice, this gate does not require implementing Fully Local
+or an optional commercial capability. Completed V1 requires the local profile
+and its mandatory capability evidence under ADR-0115. Every profile advertises
+only capabilities whose authority and connectivity are qualified; optional
+commercial capability does not block a baseline profile.
+
+## First-materialization role gate
+
+ADR-0114 and the [service role map](deployment-profiles.md#service-role-map)
+add a scoped implementation obligation to the existing five gates. They do not
+mark any current gate passed or require empty services for undelivered features.
+The first PR implementing a selected role, and every PR extending its handler
+set, must satisfy the
+[placement record](deployment-profiles.md#first-materialization-placement-record)
+before that implementation is accepted.
+
+Required evidence is attached to the owning feature and role composition:
+
+- the semantic owner, delivered capabilities, actual consumer, transaction and
+  recovery authority, and local, private RPC, or durable semantics are explicit;
+- the role is a separately runnable OS process from the roles it must isolate;
+  static Host composition cannot register forbidden remote or worker handlers
+  in Control Host as a fallback;
+- first private S3 integration crosses Control Host to Team Topology through
+  standard gRPC and Dapr; all implemented stateful Team methods use the owned
+  role rather than duplicated application graphs;
+- both server Compose and Kubernetes mappings and required integration lanes
+  accompany the role; each advertised form has actual environment evidence;
+- owned contracts, trusted scope, scoped SQL credentials, migration authority,
+  compatible replicas, resource limits, readiness, drain, and uncertainty
+  reconciliation are recorded and exercised at the real boundary;
+- rejecting source and composition fixtures cover forbidden dependencies,
+  transport leakage, cross-context storage access, and production bypasses;
+  their exact test identities and commands are registered in the required
+  repository runner with the first implementation;
+- independent process/sidecar failure, overload, lost reply after commit, and
+  original-outcome recovery pass the applicable
+  [role qualification suite](testing-strategy.md#concurrent-execution-and-service-role-qualification).
+
+A `.proto` file, Dockerfile, manifest, source-check declaration, or in-process
+fixture alone cannot pass this gate. Production claims stay limited to actually
+qualified capabilities and environments. Native Fully Local implementation and
+shipping retain OD-040 and their existing separate gates; an undeclared local
+fallback cannot satisfy a server integration requirement.
+
+Permitted co-location must be re-evaluated before shipping a feature or raising
+its qualified workload when a role-map separation trigger applies. The owning
+change supplies a recorded placement outcome and evidence; leaving extraction
+as an untracked future task is not an admissible outcome.
 
 ## Review rule
 

@@ -13,19 +13,21 @@ related:
   - ADR-0058
   - ADR-0060
   - ADR-0087
+  - ADR-0114
+  - ADR-0115
   - architecture.local-host-lifecycle
   - OD-009
 ---
 
 # Eventing and Reliability
 
-ADR-0087 qualifies only the Managed SaaS and Standalone Self-Hosted Server
-profiles in V1; they connect to NATS JetStream operated outside the Host
-process, as the JetStream section below describes. Statements below about the
-local composition, the Local Supervisor, and the bundled `nats-server` describe
-the future Fully Local profile owned by
-[Local Host Lifecycle](local-host-lifecycle.md) and must not be read as a V1
-availability claim.
+ADR-0115 requires Managed SaaS, Standalone Self-Hosted Server, and Fully Local in
+V1. All use the shared JetStream adapter family with a broker outside the Host
+process. Server infrastructure operates the server broker; the Local Supervisor
+owns bundled `nats-server` availability under
+[Local Host Lifecycle](local-host-lifecycle.md). Shared delivery semantics do not
+replace each profile's implementation-start and operational qualification gates.
+These requirements are not an availability claim.
 
 ## Event categories
 
@@ -311,10 +313,11 @@ identity only, a redacted canonical fingerprint, or a versioned keyed digest.
 
 ## Independent cross-context fan-out
 
-The architecture is an event-driven modular monolith, not an event-sourced system.
-Context-owned SQL state remains authoritative. Integration events decouple
-bounded contexts and preserve the same boundary if a context is later extracted
-as a service.
+The architecture is an event-driven modular control plane with the accepted
+[role placement](deployment-profiles.md#service-role-map). Context-owned SQL
+state remains authoritative; the system is not event sourced. Integration
+events decouple bounded contexts across the declared roles and future
+placement changes.
 
 A producer publishes one semantic fact from its own Ubiquitous Language. It never
 constructs downstream notification, attention, context, analytics, or workflow
@@ -386,14 +389,14 @@ rate limits, and completion evidence.
 DRY applies to stable technical mechanics, not superficially similar business
 language.
 
-| Layer | Reuse rule |
-|---|---|
-| Domain | No cross-context reuse of aggregates, entities, domain events, recipient, priority, status, delivery, or acknowledgement types |
-| Application | Context-owned use cases, commands, ports, Unit of Work, policies, process managers, and retry classification |
-| Contracts | One minimal technical envelope standard; producer-owned versioned payload schemas and manifests |
+| Layer                 | Reuse rule                                                                                                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Domain                | No cross-context reuse of aggregates, entities, domain events, recipient, priority, status, delivery, or acknowledgement types                                    |
+| Application           | Context-owned use cases, commands, ports, Unit of Work, policies, process managers, and retry classification                                                      |
+| Contracts             | One minimal technical envelope standard; producer-owned versioned payload schemas and manifests                                                                   |
 | Adapters and platform | Reusable outbox relay, inbox admission, schema validation, broker connection, scheduling algorithms, backpressure, tracing, redaction, and persistence primitives |
-| Composition | Shared process-wide connections and lifecycle resources, never shared repositories or business transactions |
-| Testing | Reusable conformance suites and deterministic failure fixtures parameterized by context-owned adapters |
+| Composition           | Shared process-wide connections and lifecycle resources, never shared repositories or business transactions                                                       |
+| Testing               | Reusable conformance suites and deterministic failure fixtures parameterized by context-owned adapters                                                            |
 
 Platform eventing code may claim and publish records only through a narrow
 context-owned dispatch port. It cannot query or mutate context tables directly.
@@ -432,9 +435,9 @@ Core contracts remain broker-neutral. Responsibility is split deliberately:
   physical store path, health, restart, upgrade, and resource-limit lifecycle.
 
 Local and hosted deployments use the same JetStream adapter family and applicable
-conformance suites. The future local composition is zero-touch and connects to
+conformance suites. The required local composition is zero-touch and connects to
 Supervisor-managed NATS. The V1 server composition connects to NATS operated
-outside the Host process. In the future local profile, the user never installs,
+outside the Host process. In the qualified local profile, the user never installs,
 configures, or starts a broker for normal local use.
 
 Hosted clustered readiness verifies JetStream metadata quorum, peer placement,
@@ -499,10 +502,60 @@ manifest before leaving degraded mode. Bit-flipped or truncated stores, unexplai
 sequence gaps, and content-hash mismatches fail closed even when the broker starts.
 
 Physical disk exhaustion is not equivalent to a configured stream limit. The
-future local profile maintains warning and critical headroom thresholds plus an
+local profile maintains warning and critical headroom thresholds plus an
 emergency reserve. A critical filestore write signal stops new dispatch admission; recovery
 requires released capacity, controlled restart, integrity reconciliation, and
 outbox/inbox recovery before readiness.
+
+## Service RPC and durable delivery
+
+[ADR-0114](../decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md) selects the
+official modular JetStream SDK for durable delivery. The adapter uses shared
+durable pull consumers and the SDK's bounded consumption mechanisms;
+`@moleculer/channels` and a Channels fork are outside this profile. The SDK owns
+broker protocol mechanics. The application adapter maps the existing outbox,
+inbox, acknowledgement, topology, and failure contracts.
+
+The inbound path validates the envelope and schema, applies the consumer-owned
+ACL, and calls the owned application port within its existing inbox and Unit of
+Work boundary. It acknowledges only after owned state and required next intents
+commit durably. This direct adapter-to-port call adds no Dapr or Moleculer RPC hop.
+External effects still require their own durable intent, idempotency, and
+unknown-outcome reconciliation.
+
+Each logical subscription has one configured durable adapter and one consumer
+identity shared by its handler replicas. Distinct semantic subscribers retain
+distinct consumers and inboxes. Each semantic publication has one configured
+durable publisher and preserves its original event identity across retries.
+Failed or ambiguous publication is reported for reconciliation. Failure to store
+required quarantine evidence or publish a required dead-letter record cannot
+authorize acknowledgement of the original message.
+
+[ADR-0114](../decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md)
+selects standard gRPC through Dapr for actual private RPC boundaries. Moleculer
+is not selected for the same path. Any RPC response, timeout, retry, or in-memory
+pending request never replaces durable command acceptance, receipts, outbox,
+inbox, or reconciliation. Core NATS events may carry disposable wake-ups or
+diagnostics only when their loss is permitted. Dapr invocation does not replace
+required JetStream delivery or select
+Dapr pub/sub, state, actors, or workflows.
+
+Application policy classifies retryable work. JetStream performs redelivery.
+Any selected RPC mechanism observes one retry budget per logical operation
+across its hops, with stable identity and an end-to-end deadline; this is not a
+new platform-wide coordinator. Automatic RPC mutation retries require explicit
+qualification of the owning idempotency and unknown-outcome contract. Transport
+retries never prove idempotency of a business or external effect.
+
+Get Modular composition owns process-wide clients and adapter lifecycle; the
+Supervisor owns a bundled broker process. Shutdown stops new admission and
+pulling, drains admitted work within a deadline, and leaves unacknowledged work
+recoverable. Qualification must prove replica sharing, bounded admission,
+acknowledgement after durable handling, publication failures, safe quarantine,
+and recovery after interrupted shutdown. Each concrete client and adapter must
+satisfy the accepted dependency profile; selecting a framework is not an
+exception to it. These checks qualify a concrete adapter and version rather
+than inferring reliability from the framework name.
 
 ## Client realtime is not integration eventing
 

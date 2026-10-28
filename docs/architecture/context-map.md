@@ -20,6 +20,9 @@ related:
   - ADR-0073
   - ADR-0080
   - ADR-0084
+  - ADR-0113
+  - ADR-0114
+  - architecture.deployment-profiles
   - OD-011
   - OD-023
   - OD-024
@@ -47,35 +50,88 @@ materialize an empty package or freeze a schema.
 - A workspace package is a physical boundary created after acceptance.
 - A feature is a cohesive capability inside one bounded context, not a smaller
   context by default.
+- A nested feature is a child capability within the same context, assembled by
+  its direct parent under the feature module standard.
+- A Get Modular entry is an independently wired implementation seam; a group
+  assembles declared entries and child groups without changing domain ownership.
+- A service group declares the callable capabilities of a selected private
+  boundary. It may cover several features, but does not create a new semantic
+  owner or combine the transactions of different contexts.
+- A deployment role selects the handlers, consumers, and adapters that run
+  together with one lifecycle and resource profile. A group may have several
+  roles; a role may initially host several groups.
+- A replica set contains interchangeable instances of one routing contract.
+  Replica membership does not grant ownership of a session, partition, or data.
+- A Protobuf service declares a wire capability; its methods do not each become
+  a deployment role. Dapr routes selected private gRPC calls between roles.
+- A deployed service is an execution placement with a lifecycle and scaling
+  boundary. It may contain several features; neither a feature nor an entry
+  automatically requires its own process or RPC contract.
 
 These concepts often align, but they are not interchangeable.
 
 ## Strategic business contexts
 
-| Bounded context | Classification | Boundary status | Primary responsibility | Domain authority |
-|---|---|---|---|---|
-| Identity Registry | Generic | Proposed | Human and machine principal identity | [Dossier](../domain/contexts/identity-registry/README.md) |
-| Access Control | Supporting | Proposed | Consumer-facing authorization boundary over membership and grant facts owned by the configured product authority provider; internal mechanism open under OD-012 | [Dossier](../domain/contexts/access-control/README.md) |
-| Orchestration Scope | Supporting | Accepted by ADR-0080 | Stable Orchestrator tenant/project identity, admission, project-level runtime binding, and disposition coordination | [Dossier](../domain/contexts/orchestration-scope/README.md) |
-| Workspace Registry | Supporting | Proposed | Workspace registration, execution allocation, materialization lifecycle, and cleanup | [Dossier](../domain/contexts/workspace-registry/README.md) |
-| Team Topology | Core | Proposed | Agent-team composition, roles, capabilities, and roster rules | [Dossier](../domain/contexts/team-topology/README.md) |
-| Agent Organization | Core | Accepted by ADR-0044 | Tenant-scoped organizations, units, structures, and team placements | [Dossier](../domain/contexts/agent-organization/README.md) |
-| Work Coordination | Core | Proposed | Tasks, assignments, dependencies, handoffs, and work lifecycle | [Dossier](../domain/contexts/work-coordination/README.md) |
-| Run Orchestration | Core | Proposed | Durable Run coordination and application of accepted execution policy consequences | [Dossier](../domain/contexts/run-orchestration/README.md) |
-| Execution Observation | Supporting | Accepted by ADR-0084 | Admitted runtime evidence, protected diagnostics, deterministic user-facing activity, durable activity feeds, and authorized search | [Dossier](../domain/contexts/execution-observation/README.md) |
-| Agent Communication | Core | Proposed | Typed team communication, delivery intent, inbox policy, and receipts | [Dossier](../domain/contexts/agent-communication/README.md) |
-| Human Notification Management | Supporting | Accepted by ADR-0068 | Human inbox, presentation preference, acknowledgement, and escalation lifecycle | [Dossier](../domain/contexts/human-notification/README.md) |
-| Agent Attention | Core | Accepted by ADR-0068 | Agent relevance, orientation need, bounded disruption intent, and attention-loop control | [Dossier](../domain/contexts/agent-attention/README.md) |
-| Agent Context | Core | Accepted by ADR-0073 | Provenance-aware semantic context composition, validity, and continuity evidence | [Dossier](../domain/contexts/agent-context/README.md) |
-| Policy and Risk | Supporting | Proposed | Workspace trust, execution policy, risk classification, and controls | [Dossier](../domain/contexts/policy-risk/README.md) |
-| Approval Management | Supporting | Proposed | Product approval lifecycle, routing, decisions, and audit | [Dossier](../domain/contexts/approval-management/README.md) |
-| Usage Metering | Supporting | Accepted by ADR-0045 | Observations, normalization, corrections, meters, and quantities | [Dossier](../domain/contexts/usage-metering/README.md) |
-| Usage Accounting | Supporting | Accepted by ADR-0045 | Attribution, rating, exact cost, reconciliation, and projections | [Dossier](../domain/contexts/usage-accounting/README.md) |
-| Consumption Governance | Supporting | Accepted by ADR-0045 | Budgets, alerts, limits, reservations, and consumption decisions | [Dossier](../domain/contexts/consumption-governance/README.md) |
+| Bounded context               | Classification | Boundary status      | Primary responsibility                                                                                                                                          | Domain authority                                               |
+| ----------------------------- | -------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Identity Registry             | Generic        | Proposed             | Human and machine principal identity                                                                                                                            | [Dossier](../domain/contexts/identity-registry/README.md)      |
+| Access Control                | Supporting     | Proposed             | Consumer-facing authorization boundary over membership and grant facts owned by the configured product authority provider; internal mechanism open under OD-012 | [Dossier](../domain/contexts/access-control/README.md)         |
+| Orchestration Scope           | Supporting     | Accepted by ADR-0080 | Stable Orchestrator tenant/project identity, admission, project-level runtime binding, and disposition coordination                                             | [Dossier](../domain/contexts/orchestration-scope/README.md)    |
+| Workspace Registry            | Supporting     | Proposed             | Workspace registration, execution allocation, materialization lifecycle, and cleanup                                                                            | [Dossier](../domain/contexts/workspace-registry/README.md)     |
+| Team Topology                 | Core           | Proposed             | Agent-team composition, roles, capabilities, and roster rules                                                                                                   | [Dossier](../domain/contexts/team-topology/README.md)          |
+| Agent Organization            | Core           | Accepted by ADR-0044 | Tenant-scoped organizations, units, structures, and team placements                                                                                             | [Dossier](../domain/contexts/agent-organization/README.md)     |
+| Work Coordination             | Core           | Proposed             | Tasks, assignments, dependencies, handoffs, and work lifecycle                                                                                                  | [Dossier](../domain/contexts/work-coordination/README.md)      |
+| Run Orchestration             | Core           | Proposed             | Durable Run coordination and application of accepted execution policy consequences                                                                              | [Dossier](../domain/contexts/run-orchestration/README.md)      |
+| Execution Observation         | Supporting     | Accepted by ADR-0084 | Admitted runtime evidence, protected diagnostics, deterministic user-facing activity, durable activity feeds, and authorized search                             | [Dossier](../domain/contexts/execution-observation/README.md)  |
+| Agent Communication           | Core           | Proposed             | Typed team communication, delivery intent, inbox policy, and receipts                                                                                           | [Dossier](../domain/contexts/agent-communication/README.md)    |
+| Human Notification Management | Supporting     | Accepted by ADR-0068 | Human inbox, presentation preference, acknowledgement, and escalation lifecycle                                                                                 | [Dossier](../domain/contexts/human-notification/README.md)     |
+| Agent Attention               | Core           | Accepted by ADR-0068 | Agent relevance, orientation need, bounded disruption intent, and attention-loop control                                                                        | [Dossier](../domain/contexts/agent-attention/README.md)        |
+| Agent Context                 | Core           | Accepted by ADR-0073 | Provenance-aware semantic context composition, validity, and continuity evidence                                                                                | [Dossier](../domain/contexts/agent-context/README.md)          |
+| Policy and Risk               | Supporting     | Proposed             | Workspace trust, execution policy, risk classification, and controls                                                                                            | [Dossier](../domain/contexts/policy-risk/README.md)            |
+| Approval Management           | Supporting     | Proposed             | Product approval lifecycle, routing, decisions, and audit                                                                                                       | [Dossier](../domain/contexts/approval-management/README.md)    |
+| Usage Metering                | Supporting     | Accepted by ADR-0045 | Observations, normalization, corrections, meters, and quantities                                                                                                | [Dossier](../domain/contexts/usage-metering/README.md)         |
+| Usage Accounting              | Supporting     | Accepted by ADR-0045 | Attribution, rating, exact cost, reconciliation, and projections                                                                                                | [Dossier](../domain/contexts/usage-accounting/README.md)       |
+| Consumption Governance        | Supporting     | Accepted by ADR-0045 | Budgets, alerts, limits, reservations, and consumption decisions                                                                                                | [Dossier](../domain/contexts/consumption-governance/README.md) |
 
 Boundary status and dossier readiness are intentionally different. An ADR may
 accept a strategic split while its dossier remains proposed until Full DDD
 discovery proves exact aggregates, scenarios, and concurrency.
+
+## Capability groups and process placement
+
+The accepted [service role map](deployment-profiles.md#service-role-map) is the
+single authority for coarse role processes, their owning capabilities,
+first-materialization isolation, and further separation triggers. ADR-0114
+replaces the universal one-Host starting placement. This strategic context map
+retains its proposed status and discovery gates; placement does not accept the
+unresolved detailed models or create new bounded contexts.
+
+### Planned service groups
+
+A capability group is larger than an operation and can contain several
+feature-owned APIs. Team Topology's Agent/Team definitions and versioned roster
+form the first private product group; its first delivered subset is S3
+persistent Team create/get/list in a separate role. S1/S2 `CheckTeamDraft`
+remains a module and public-contract proof. Choosing the group does not add all
+future Agent, roster, cloning, or template methods to S3.
+
+Execution Observation, Agent Context, and Workspace Registry remain their
+existing semantic owners even when query, intake, compute, and mechanics run
+in different processes. Human notification delivery is a durable workload;
+its independent process does not automatically make it an RPC service. The
+role map covers these and the remaining strategic owners rather than treating
+four early opportunities as a complete service topology.
+
+Ordinary collaboration inside a role remains typed and local. Cross-role
+request/reply follows ADR-0114; durable handlers use direct JetStream adapters.
+Several qualified write replicas may execute operations for one semantic owner.
+State, immutable history, receipts, and required outbox intents of one atomic
+operation remain in one owned transaction, without a remote call inside it.
+
+The exact strategic relationship graph remains in LikeC4. Package identities
+and materialization policies remain in the
+[package catalog](../../architecture/package-catalog.yaml). Role labels are
+not new package identities or permission to create empty applications.
 
 ## Integration modules
 
@@ -119,11 +175,11 @@ imports.
 
 Three identities must never be aliased:
 
-| Identity | Owner | Meaning |
-|---|---|---|
+| Identity                   | Owner             | Meaning                                                                                                   |
+| -------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------- |
 | `OrchestrationPrincipalId` | Open under OD-012 | Stable tenant-scoped product actor reference; exact binding owner and provider topology remain unresolved |
-| `AgentProfileId` | Team Topology | Product-level agent definition |
-| `RuntimeSessionRef` | AR | Opaque technical runtime session reference |
+| `AgentProfileId`           | Team Topology     | Product-level agent definition                                                                            |
+| `RuntimeSessionRef`        | AR                | Opaque technical runtime session reference                                                                |
 
 Associations among them are explicit, scoped, lifecycle-aware bindings owned by
 the context that needs the relationship. Authentication does not create an agent

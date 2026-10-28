@@ -1,8 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "extends": [
-    "./.oxlintrc.common.json"
-  ],
+  "extends": ["./.oxlintrc.common.json"],
   "jsPlugins": [
     {
       "name": "boundaries",
@@ -25,79 +23,51 @@
       {
         "type": "domain",
         "pattern": "features/*/domain",
-        "capture": [
-          "feature"
-        ],
+        "capture": ["feature"],
         "basePattern": "**/src",
-        "baseCapture": [
-          "packagePath"
-        ]
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "application",
         "pattern": "features/*/application",
-        "capture": [
-          "feature"
-        ],
+        "capture": ["feature"],
         "basePattern": "**/src",
-        "baseCapture": [
-          "packagePath"
-        ]
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "contracts",
         "pattern": "features/*/contracts",
-        "capture": [
-          "feature"
-        ],
+        "capture": ["feature"],
         "basePattern": "**/src",
-        "baseCapture": [
-          "packagePath"
-        ]
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "adapter-inbound",
         "pattern": "features/*/adapters/inbound",
-        "capture": [
-          "feature"
-        ],
+        "capture": ["feature"],
         "basePattern": "**/src",
-        "baseCapture": [
-          "packagePath"
-        ]
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "adapter-outbound",
         "pattern": "features/*/adapters/outbound",
-        "capture": [
-          "feature"
-        ],
+        "capture": ["feature"],
         "basePattern": "**/src",
-        "baseCapture": [
-          "packagePath"
-        ]
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "composition",
         "pattern": "features/*/composition",
-        "capture": [
-          "feature"
-        ],
+        "capture": ["feature"],
         "basePattern": "**/src",
-        "baseCapture": [
-          "packagePath"
-        ]
+        "baseCapture": ["packagePath"]
       },
       {
         "type": "feature-other",
         "pattern": "features/*",
-        "capture": [
-          "feature"
-        ],
+        "capture": ["feature"],
         "basePattern": "**/src",
-        "baseCapture": [
-          "packagePath"
-        ]
+        "baseCapture": ["packagePath"]
       }
     ],
     "boundaries/files": [
@@ -140,10 +110,7 @@
             "allow": {
               "to": {
                 "module": {
-                  "origin": [
-                    "core",
-                    "external"
-                  ]
+                  "origin": ["core", "external"]
                 }
               }
             }
@@ -189,12 +156,7 @@
           {
             "from": {
               "element": {
-                "type": [
-                  "adapter-inbound",
-                  "adapter-outbound",
-                  "composition",
-                  "feature-other"
-                ]
+                "type": ["adapter-inbound", "adapter-outbound", "composition", "feature-other"]
               }
             },
             "allow": {
@@ -214,10 +176,7 @@
             "allow": {
               "to": {
                 "element": {
-                  "type": [
-                    "application",
-                    "domain"
-                  ],
+                  "type": ["application", "domain"],
                   "captured": {
                     "feature": "{{ from.element.captured.feature }}",
                     "packagePath": "{{ from.element.captured.packagePath }}"
@@ -235,19 +194,13 @@
             "allow": {
               "to": {
                 "element": {
-                  "type": [
-                    "domain",
-                    "application"
-                  ],
+                  "type": ["domain", "application"],
                   "captured": {
                     "packagePath": "{{ from.element.captured.packagePath }}"
                   }
                 },
                 "file": {
-                  "categories": [
-                    "domain-internal-api",
-                    "application-internal-api"
-                  ]
+                  "categories": ["domain-internal-api", "application-internal-api"]
                 }
               }
             }
@@ -305,10 +258,7 @@
             "allow": {
               "to": {
                 "element": {
-                  "type": [
-                    "application",
-                    "contracts"
-                  ],
+                  "type": ["application", "contracts"],
                   "captured": {
                     "feature": "{{ from.element.captured.feature }}",
                     "packagePath": "{{ from.element.captured.packagePath }}"
@@ -326,11 +276,7 @@
             "allow": {
               "to": {
                 "element": {
-                  "type": [
-                    "application",
-                    "contracts",
-                    "domain"
-                  ],
+                  "type": ["application", "contracts", "domain"],
                   "captured": {
                     "feature": "{{ from.element.captured.feature }}",
                     "packagePath": "{{ from.element.captured.packagePath }}"
@@ -368,12 +314,7 @@
           {
             "from": {
               "element": {
-                "type": [
-                  "adapter-inbound",
-                  "adapter-outbound",
-                  "composition",
-                  "feature-other"
-                ]
+                "type": ["adapter-inbound", "adapter-outbound", "composition", "feature-other"]
               }
             },
             "allow": {
@@ -387,11 +328,7 @@
           {
             "from": {
               "element": {
-                "type": [
-                  "domain",
-                  "application",
-                  "contracts"
-                ]
+                "type": ["domain", "application", "contracts"]
               }
             },
             "disallow": {
@@ -408,10 +345,7 @@
   },
   "overrides": [
     {
-      "files": [
-        "**/generated/**",
-        "**/vendor/**"
-      ],
+      "files": ["**/generated/**", "**/vendor/**"],
       "rules": {
         "complexity": "off",
         "max-depth": "off",
@@ -423,18 +357,13 @@
     {
       "files": [
         "scripts/**/*.test.mjs",
+        "scripts/**/*.test.ts",
         "scripts/**/fixtures/**",
         "tooling/architecture-conformance/**"
       ],
       "rules": {
-        "complexity": [
-          "error",
-          30
-        ],
-        "max-depth": [
-          "error",
-          5
-        ],
+        "complexity": ["error", 30],
+        "max-depth": ["error", 5],
         "max-lines": [
           "error",
           {
@@ -451,10 +380,7 @@
             "skipComments": true
           }
         ],
-        "max-params": [
-          "error",
-          6
-        ]
+        "max-params": ["error", 6]
       }
     },
     {

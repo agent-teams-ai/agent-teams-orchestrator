@@ -9,11 +9,7 @@ import YAML from "yaml";
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const toolRepositoryRoot = path.resolve(scriptDirectory, "../..");
 const defaultRepositoryRoot = toolRepositoryRoot;
-const requiredRelationshipMetadata = [
-  "authority",
-  "integration_style",
-  "status",
-];
+const requiredRelationshipMetadata = ["authority", "integration_style", "status"];
 const requiredSecurityRoles = [
   "agent-runtime",
   "browser-client",
@@ -52,10 +48,7 @@ function parseArguments(argv) {
     }
     throw new Error(`unexpected argument ${argument}`);
   }
-  options.modelDirectory ??= path.join(
-    options.repositoryRoot,
-    "architecture/likec4",
-  );
+  options.modelDirectory ??= path.join(options.repositoryRoot, "architecture/likec4");
   return options;
 }
 
@@ -100,9 +93,7 @@ function runLikeC4(arguments_, cwd) {
       } else {
         reject(
           new Error(
-            [stdout.trim(), stderr.trim()]
-              .filter(Boolean)
-              .join("\n") ||
+            [stdout.trim(), stderr.trim()].filter(Boolean).join("\n") ||
               `LikeC4 exited with status ${String(code)}`,
           ),
         );
@@ -141,13 +132,9 @@ function validateBoundedContexts(project, catalog, errors) {
   for (const entry of catalogContexts) {
     const element = byPackageId.get(entry.id);
     if (!element) {
-      errors.push(
-        `LikeC4 model is missing bounded context package ${entry.id}`,
-      );
+      errors.push(`LikeC4 model is missing bounded context package ${entry.id}`);
     } else if (element.metadata.document_id !== entry.owner_document) {
-      errors.push(
-        `LikeC4 element ${element.id} document_id must be ${entry.owner_document}`,
-      );
+      errors.push(`LikeC4 element ${element.id} document_id must be ${entry.owner_document}`);
     }
   }
   for (const [packageId, element] of byPackageId) {
@@ -173,19 +160,11 @@ function validateRelationships(project, errors) {
       errors.push(`LikeC4 relationship ${relation.id} is missing a title`);
     }
     for (const field of requiredRelationshipMetadata) {
-      if (
-        typeof relation.metadata?.[field] !== "string" ||
-        !relation.metadata[field].trim()
-      ) {
-        errors.push(
-          `LikeC4 relationship ${relation.id} is missing metadata.${field}`,
-        );
+      if (typeof relation.metadata?.[field] !== "string" || !relation.metadata[field].trim()) {
+        errors.push(`LikeC4 relationship ${relation.id} is missing metadata.${field}`);
       }
     }
-    if (
-      relation.metadata?.status &&
-      !["accepted", "proposed"].includes(relation.metadata.status)
-    ) {
+    if (relation.metadata?.status && !["accepted", "proposed"].includes(relation.metadata.status)) {
       errors.push(
         `LikeC4 relationship ${relation.id} has unsupported status ${relation.metadata.status}`,
       );
@@ -232,13 +211,8 @@ function validateSecurityTopology(project, errors) {
   for (const element of securityElements) {
     roles.add(element.metadata.security_role);
     for (const field of ["owner_document", "trust_zone"]) {
-      if (
-        typeof element.metadata?.[field] !== "string" ||
-        !element.metadata[field].trim()
-      ) {
-        errors.push(
-          `LikeC4 security element ${element.id} is missing metadata.${field}`,
-        );
+      if (typeof element.metadata?.[field] !== "string" || !element.metadata[field].trim()) {
+        errors.push(`LikeC4 security element ${element.id} is missing metadata.${field}`);
       }
     }
   }
@@ -249,27 +223,19 @@ function validateSecurityTopology(project, errors) {
     }
   }
 
-  const securityElementIds = new Set(
-    securityElements.map((element) => element.id),
-  );
+  const securityElementIds = new Set(securityElements.map((element) => element.id));
   const securityViewNodeIds = new Set(
-    (project.views?.securityTrustBoundaries?.nodes ?? []).map(
-      (node) => node.id,
-    ),
+    (project.views?.securityTrustBoundaries?.nodes ?? []).map((node) => node.id),
   );
   for (const element of securityElements) {
     if (!appearsInSecurityView(element, securityViewNodeIds)) {
-      errors.push(
-        `LikeC4 securityTrustBoundaries view omits security element ${element.id}`,
-      );
+      errors.push(`LikeC4 securityTrustBoundaries view omits security element ${element.id}`);
     }
   }
 
   for (const node of project.views?.strategicContextMap?.nodes ?? []) {
     if (securityElementIds.has(node.id)) {
-      errors.push(
-        `LikeC4 strategicContextMap must exclude security element ${node.id}`,
-      );
+      errors.push(`LikeC4 strategicContextMap must exclude security element ${node.id}`);
     }
   }
 }
@@ -284,39 +250,24 @@ async function main() {
     return;
   }
 
-  const temporaryDirectory = await mkdtemp(
-    path.join(tmpdir(), "agent-teams-likec4-"),
-  );
+  const temporaryDirectory = await mkdtemp(path.join(tmpdir(), "agent-teams-likec4-"));
   const exportPath = path.join(temporaryDirectory, "model.json");
   const errors = [];
-  const relativeModelDirectory = path.relative(
-    options.repositoryRoot,
-    options.modelDirectory,
-  );
+  const relativeModelDirectory = path.relative(options.repositoryRoot, options.modelDirectory);
   const modelArgument =
-    relativeModelDirectory !== ".." &&
-    !relativeModelDirectory.startsWith(`..${path.sep}`)
+    relativeModelDirectory !== ".." && !relativeModelDirectory.startsWith(`..${path.sep}`)
       ? relativeModelDirectory
       : options.modelDirectory;
 
   try {
     const config = JSON.parse(
-      await readFile(
-        path.join(options.modelDirectory, "likec4.config.json"),
-        "utf8",
-      ),
+      await readFile(path.join(options.modelDirectory, "likec4.config.json"), "utf8"),
     );
     if (typeof config.name !== "string" || !config.name) {
       throw new Error("LikeC4 configuration requires a project name");
     }
-    await runLikeC4(
-      ["format", "--check", modelArgument],
-      options.repositoryRoot,
-    );
-    await runLikeC4(
-      ["validate", "--no-layout", modelArgument],
-      options.repositoryRoot,
-    );
+    await runLikeC4(["format", "--check", modelArgument], options.repositoryRoot);
+    await runLikeC4(["validate", "--no-layout", modelArgument], options.repositoryRoot);
     await runLikeC4(
       [
         "export",
@@ -334,16 +285,11 @@ async function main() {
 
     const [exported, catalog] = await Promise.all([
       readFile(exportPath, "utf8").then(JSON.parse),
-      readFile(
-        path.join(options.repositoryRoot, "architecture/package-catalog.yaml"),
-        "utf8",
-      ).then(YAML.parse),
+      readFile(path.join(options.repositoryRoot, "architecture/package-catalog.yaml"), "utf8").then(
+        YAML.parse,
+      ),
     ]);
-    if (
-      !exported ||
-      Array.isArray(exported) ||
-      exported.projectId !== config.name
-    ) {
+    if (!exported || Array.isArray(exported) || exported.projectId !== config.name) {
       errors.push(`LikeC4 export must contain project ${config.name}`);
     } else {
       const project = exported;
@@ -367,9 +313,7 @@ async function main() {
     for (const error of errors.toSorted()) {
       console.error(`ERROR ${error}`);
     }
-    console.error(
-      `\nArchitecture model validation failed with ${errors.length} error(s).`,
-    );
+    console.error(`\nArchitecture model validation failed with ${errors.length} error(s).`);
     process.exitCode = 1;
     return;
   }

@@ -1,9 +1,7 @@
 const clone = (value) => structuredClone(value);
 
 const findTransition = (spec, source, event) =>
-  spec.transitions.find(
-    (transition) => transition.source === source && transition.event === event,
-  );
+  spec.transitions.find((transition) => transition.source === source && transition.event === event);
 
 const acceptAs = (transition, target) => {
   transition.disposition = "accepted";
@@ -18,11 +16,7 @@ export const semanticMutations = [
     apply(spec) {
       const mutated = clone(spec);
       acceptAs(
-        findTransition(
-          mutated,
-          "active-generation-1-basis-a",
-          "EXPLICIT_REAUTHORIZATION",
-        ),
+        findTransition(mutated, "active-generation-1-basis-a", "EXPLICIT_REAUTHORIZATION"),
         "active-generation-3-basis-b",
       );
       return mutated;
@@ -34,11 +28,7 @@ export const semanticMutations = [
     apply(spec) {
       const mutated = clone(spec);
       acceptAs(
-        findTransition(
-          mutated,
-          "suspended-generation-2",
-          "LATE_OPAQUE_AR_EVIDENCE",
-        ),
+        findTransition(mutated, "suspended-generation-2", "LATE_OPAQUE_AR_EVIDENCE"),
         "active-generation-3-basis-b",
       );
       return mutated;
@@ -50,11 +40,7 @@ export const semanticMutations = [
     apply(spec) {
       const mutated = clone(spec);
       acceptAs(
-        findTransition(
-          mutated,
-          "suspended-generation-2",
-          "STALE_GENERATION_COMMAND",
-        ),
+        findTransition(mutated, "suspended-generation-2", "STALE_GENERATION_COMMAND"),
         "active-generation-3-basis-b",
       );
       return mutated;
@@ -65,11 +51,8 @@ export const semanticMutations = [
     specId: "orchestrator.run-authority-state",
     apply(spec) {
       const mutated = clone(spec);
-      findTransition(
-        mutated,
-        "suspended-generation-2",
-        "BUSINESS_CANCEL",
-      ).target = "cancelled-generation-1";
+      findTransition(mutated, "suspended-generation-2", "BUSINESS_CANCEL").target =
+        "cancelled-generation-1";
       return mutated;
     },
   },
@@ -78,9 +61,7 @@ export const semanticMutations = [
     specId: "orchestrator.run-authority-state",
     apply(spec) {
       const mutated = clone(spec);
-      const successor = mutated.states.find(
-        (state) => state.id === "active-generation-3-basis-b",
-      );
+      const successor = mutated.states.find((state) => state.id === "active-generation-3-basis-b");
       successor.coordinates["run-authority-generation"] = 2;
       return mutated;
     },
@@ -171,10 +152,7 @@ export const semanticMutations = [
     specId: "orchestrator.orchestration-project-lifecycle",
     apply(spec) {
       const mutated = clone(spec);
-      acceptAs(
-        findTransition(mutated, "retired-epoch-2", "REOPEN_PROJECT"),
-        "open-epoch-1",
-      );
+      acceptAs(findTransition(mutated, "retired-epoch-2", "REOPEN_PROJECT"), "open-epoch-1");
       return mutated;
     },
   },
@@ -205,10 +183,7 @@ export const semanticMutations = [
     specId: "orchestrator.orchestration-project-lifecycle",
     apply(spec) {
       const mutated = clone(spec);
-      acceptAs(
-        findTransition(mutated, "open-epoch-1", "CANCEL_RETIREMENT"),
-        "retired-epoch-2",
-      );
+      acceptAs(findTransition(mutated, "open-epoch-1", "CANCEL_RETIREMENT"), "retired-epoch-2");
       return mutated;
     },
   },
@@ -218,11 +193,7 @@ export const semanticMutations = [
     apply(spec) {
       const mutated = clone(spec);
       acceptAs(
-        findTransition(
-          mutated,
-          "open-epoch-1",
-          "STALE_DELETION_EPOCH_COMMAND",
-        ),
+        findTransition(mutated, "open-epoch-1", "STALE_DELETION_EPOCH_COMMAND"),
         "retired-epoch-2",
       );
       return mutated;

@@ -7,11 +7,13 @@ summary: Scoped sandbox semantics and ownership for team topology.
 related:
   - ADR-0103
   - contract.migration.desktop-first-slice.v1
+  - ADR-0114
   - ADR-0100
   - ADR-0101
   - ADR-0076
   - ADR-0111
   - architecture.context-map
+  - architecture.deployment-profiles
   - OD-006
   - OD-011
   - OD-044
@@ -51,9 +53,9 @@ One Agent has at most one current Team assignment and appears once in the roster
 
 ## Aggregates and consistency boundaries
 
-| Root and identity | Protected invariants | Commands | Domain events | Transaction | Concurrency | Growth bound | External facts | Rejected boundaries |
-|---|---|---|---|---|---|---|---|---|
-| Team and Agent assignment | Invariants above | CreateTeam; GetTeam; ListTeams | TeamCreated; AgentAssigned | One owner-local Unit of Work including receipt, Operation and outbox | Unique current Agent assignment plus row/CAS protection; request replay precedes new mutation after current authorization. | One member/Run in this slice; history and receipts stored separately with finite declared horizons | Existing authorized Agent and exact profile version; clock and server-generated identity inputs. | No provider-state mirror, cross-context aggregate or shared transaction |
+| Root and identity         | Protected invariants | Commands                       | Domain events              | Transaction                                                          | Concurrency                                                                                                                | Growth bound                                                                                       | External facts                                                                                   | Rejected boundaries                                                     |
+| ------------------------- | -------------------- | ------------------------------ | -------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Team and Agent assignment | Invariants above     | CreateTeam; GetTeam; ListTeams | TeamCreated; AgentAssigned | One owner-local Unit of Work including receipt, Operation and outbox | Unique current Agent assignment plus row/CAS protection; request replay precedes new mutation after current authorization. | One member/Run in this slice; history and receipts stored separately with finite declared horizons | Existing authorized Agent and exact profile version; clock and server-generated identity inputs. | No provider-state mirror, cross-context aggregate or shared transaction |
 
 Repositories persist only the owning roots/state; read queries use authorized
 projections. Transport schemas and persistence records map to separate domain and
@@ -162,6 +164,12 @@ This direction proves one real feature-module vertical slice. It does not admit
 Team persistence, organization placement, Run creation, AR calls, provider
 readiness, agent execution, or GraphQL.
 
+[ADR-0114](../../../decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md#role-placement-from-first-materialization)
+may reuse the checker as a small private-adapter fixture. It does not make S2 a
+product service or require separate deployment. S1/S2 preserve their
+existing pure and public-API scope; the first product group begins with the
+persistent S3 subset described below.
+
 The initial checker accepts only the smallest role seam: each member may carry
 one optional opaque `roleKey`. A role key is classification input, not a product
 grant, runtime type, parent-child relation, or implicit coordinator authority.
@@ -170,16 +178,38 @@ delegation, multiple coordinators, and hierarchy remain later capabilities.
 
 ### Delivery map
 
-| Slice | Capability | Persistence or effects |
-|---|---|---|
-| S1 | Pure `CheckTeamDraft` and deterministic diagnostics | None |
-| S2 | Handwritten SDK plus Protobuf/Connect adapter for the same check | None |
-| S3 | Create, get, and list persistent Team definitions | Team Topology only |
-| S4 | Start a Run from an immutable Team version with explicit Run overrides | Run Orchestration and AR boundaries |
+| Slice | Capability                                                             | Persistence or effects              |
+| ----- | ---------------------------------------------------------------------- | ----------------------------------- |
+| S1    | Pure `CheckTeamDraft` and deterministic diagnostics                    | None                                |
+| S2    | Handwritten SDK plus Protobuf/Connect adapter for the same check       | None                                |
+| S3    | Create, get, and list persistent Team definitions                      | Team Topology only                  |
+| S4    | Start a Run from an immutable Team version with explicit Run overrides | Run Orchestration and AR boundaries |
 
 S1 and S2 are the module pilot. They must preserve extension points for S3 and
 S4 without implementing a generic profile catalog, hierarchy engine, policy DSL,
 or persistence framework in advance.
+
+### Planned product service group
+
+ADR-0114 selects the Agent/Team definitions and versioned roster as the first
+private capability group. From S3's first implementation, Control Host invokes
+the separate Team Topology process through feature-owned Protobuf and standard
+gRPC through Dapr. ADR-0114 and the
+[service role map](../../../architecture/deployment-profiles.md#service-role-map)
+require this placement for the whole implemented persistent Team create/get/list
+subset. Agent definitions, roster edits, cloning, and templates
+join through their own later slices; selecting a group does not freeze their
+contracts or add them to S3.
+
+The public Connect edge and S4 Run `team-activation` consume the group through
+their typed ports and mappings. Get Modular constructs the application once;
+the selected transport adapter invokes those capabilities without a second
+business graph or an in-process fallback inside Control Host.
+The current assignment authority, immutable versions, revisions, receipts, and
+outbox retain this context's transaction boundary. Remote placement does not
+move Run admission, active Agent occupancy, organizational placement, or provider
+execution into Team Topology. Exact private contracts and production adapter
+materialization remain subject to the owning decisions and readiness gates.
 
 The complete legacy behavior map and proposed MVP dispositions are maintained in
 the [Team creation capability inventory](../../../research/team-creation-legacy-capability-inventory-2026-08-27.md).

@@ -7,6 +7,7 @@ summary: Model boundary for orchestration tenant and Project identity, authority
 related:
   - ADR-0079
   - ADR-0080
+  - ADR-0114
   - architecture.context-map
   - OD-006
   - OD-012
@@ -127,15 +128,15 @@ runtime internals, or another bounded context's data model.
 
 ### Aggregate decision matrix
 
-| Root and identity | Protected invariants | Commands | Transaction | Concurrency and growth |
-| --- | --- | --- | --- | --- |
-| `OrchestrationTenant` | Stable identity, authority binding, admission, Project-creation epoch | Provision, bind, restrict, retire | Tenant state, receipt, audit, outbox | CAS; Project fan-out uses bounded pages and index high-water mark |
-| `OrchestrationProject` | `OPEN -> RETIRED`, lifecycle revision, deletion epoch | Provision, bind, commit retirement | Project state, receipt, process ref, outbox | CAS; no participant collection |
-| `ProjectAdmissionAuthority` | Effective gate and independent restriction ownership | Add or clear exact restriction | Restriction row, gate revision, receipt, outbox | Source revision CAS; restrictions are separate bounded records |
-| `AuthorityBinding` | External binding uniqueness and incarnation continuity | Bind, rebind, quarantine | Binding index and receipt | Unique key plus generation CAS |
-| `RuntimeScopeBinding` | One active generation and explicit deployment/scope lineage | Provision, activate, rebind, suspend | Binding desired state and outbox | Generation CAS; observations remain projections |
-| `DeploymentAuthorityCheckpoint` | Observed AR incarnation/generation continuity without changing desired binding state | Ingest observation, reconcile gap, rebuild snapshot | Checkpoint, inbox, projection revision | AR-owned generation; gap or mismatch fails dispatch closed |
-| `ProjectDispositionProcess` | Immutable plan revisions and truthful obligation outcomes | Start, supplement, reconcile | Process revision, obligation work item, outbox | Work items are paged and can be partitioned independently; no unbounded aggregate list |
+| Root and identity               | Protected invariants                                                                 | Commands                                            | Transaction                                     | Concurrency and growth                                                                 |
+| ------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `OrchestrationTenant`           | Stable identity, authority binding, admission, Project-creation epoch                | Provision, bind, restrict, retire                   | Tenant state, receipt, audit, outbox            | CAS; Project fan-out uses bounded pages and index high-water mark                      |
+| `OrchestrationProject`          | `OPEN -> RETIRED`, lifecycle revision, deletion epoch                                | Provision, bind, commit retirement                  | Project state, receipt, process ref, outbox     | CAS; no participant collection                                                         |
+| `ProjectAdmissionAuthority`     | Effective gate and independent restriction ownership                                 | Add or clear exact restriction                      | Restriction row, gate revision, receipt, outbox | Source revision CAS; restrictions are separate bounded records                         |
+| `AuthorityBinding`              | External binding uniqueness and incarnation continuity                               | Bind, rebind, quarantine                            | Binding index and receipt                       | Unique key plus generation CAS                                                         |
+| `RuntimeScopeBinding`           | One active generation and explicit deployment/scope lineage                          | Provision, activate, rebind, suspend                | Binding desired state and outbox                | Generation CAS; observations remain projections                                        |
+| `DeploymentAuthorityCheckpoint` | Observed AR incarnation/generation continuity without changing desired binding state | Ingest observation, reconcile gap, rebuild snapshot | Checkpoint, inbox, projection revision          | AR-owned generation; gap or mismatch fails dispatch closed                             |
+| `ProjectDispositionProcess`     | Immutable plan revisions and truthful obligation outcomes                            | Start, supplement, reconcile                        | Process revision, obligation work item, outbox  | Work items are paged and can be partitioned independently; no unbounded aggregate list |
 
 Provisioning, retirement, and disposition processes may share one physical
 database schema initially, but they keep explicit repositories and consistency
@@ -263,10 +264,11 @@ does not remove this dossier's open-decision blockers.
 
 ## Persistence ownership
 
-Orchestration Scope owns its schema or SQLite database, migrations, inbox,
+Orchestration Scope owns its PostgreSQL schema, migrations, inbox,
 outbox, command receipts, binding indexes, disposition work items, projections,
-and tombstones. It does not join or mutate another context's storage. Hosted
-repositories require trusted tenant predicates and RLS defense in depth.
+and tombstones. It does not join or mutate another context's storage. Both local
+and server PostgreSQL repositories require trusted tenant predicates and RLS
+defense in depth under the persistence profile.
 
 ## Security and authorization
 

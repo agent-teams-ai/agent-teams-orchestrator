@@ -3,19 +3,10 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-const toolingRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-);
+const toolingRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(toolingRoot, "../..");
-const graphConfig = path.join(
-  toolingRoot,
-  "dependency-cruiser.config.cjs",
-);
-const dependencyCruiserBin = path.join(
-  toolingRoot,
-  "node_modules/.bin/dependency-cruiser",
-);
+const graphConfig = path.join(toolingRoot, "dependency-cruiser.config.cjs");
+const dependencyCruiserBin = path.join(toolingRoot, "node_modules/.bin/dependency-cruiser");
 const sourceRoots = ["apps", "packages"]
   .map((directory) => path.join(repositoryRoot, directory))
   .filter(existsSync)
@@ -28,13 +19,7 @@ if (sourceRoots.length === 0) {
 
 const result = spawnSync(
   dependencyCruiserBin,
-  [
-    "--config",
-    graphConfig,
-    "--output-type",
-    "err",
-    ...sourceRoots,
-  ],
+  ["--config", graphConfig, "--output-type", "err", ...sourceRoots],
   {
     cwd: repositoryRoot,
     encoding: "utf8",
@@ -51,9 +36,7 @@ if (output.trim()) {
 }
 
 if (result.status !== 0) {
-  console.warn(
-    "Advisory dependency graph found violations; this does not block the build yet.",
-  );
+  console.warn("Advisory dependency graph found violations; this does not block the build yet.");
 }
 
 process.exit(0);

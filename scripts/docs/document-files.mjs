@@ -14,9 +14,7 @@ export async function walk(directory, predicate) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
 
-  for (const entry of entries.toSorted((left, right) =>
-    left.name.localeCompare(right.name),
-  )) {
+  for (const entry of entries.toSorted((left, right) => left.name.localeCompare(right.name))) {
     const entryPath = path.join(directory, entry.name);
     if (entry.isDirectory()) {
       files.push(...(await walk(entryPath, predicate)));
@@ -50,16 +48,9 @@ async function discoverColocatedMarkdown(repositoryRoot) {
 
   const governed = [];
   for (const filePath of markdownFiles) {
-    const repositoryPath = path
-      .relative(repositoryRoot, filePath)
-      .split(path.sep)
-      .join("/");
-    const isFeatureDocumentation = /\/src\/features\/.+\/README\.md$/.test(
-      repositoryPath,
-    );
-    const isPackageIndex = await exists(
-      path.join(path.dirname(filePath), "package.json"),
-    );
+    const repositoryPath = path.relative(repositoryRoot, filePath).split(path.sep).join("/");
+    const isFeatureDocumentation = /\/src\/features\/.+\/README\.md$/.test(repositoryPath);
+    const isPackageIndex = await exists(path.join(path.dirname(filePath), "package.json"));
 
     if (isFeatureDocumentation || isPackageIndex) {
       governed.push(filePath);
@@ -71,19 +62,12 @@ async function discoverColocatedMarkdown(repositoryRoot) {
 
 export async function discoverGovernedMarkdown(repositoryRoot) {
   const docsRoot = path.join(repositoryRoot, "docs");
-  const docsMarkdownFiles = await walk(
-    docsRoot,
-    (filePath) => path.extname(filePath) === ".md",
-  );
-  const colocatedMarkdownFiles =
-    await discoverColocatedMarkdown(repositoryRoot);
+  const docsMarkdownFiles = await walk(docsRoot, (filePath) => path.extname(filePath) === ".md");
+  const colocatedMarkdownFiles = await discoverColocatedMarkdown(repositoryRoot);
 
   return {
     colocatedMarkdownFiles,
     docsMarkdownFiles,
-    governedMarkdownFiles: [
-      ...docsMarkdownFiles,
-      ...colocatedMarkdownFiles,
-    ].toSorted(),
+    governedMarkdownFiles: [...docsMarkdownFiles, ...colocatedMarkdownFiles].toSorted(),
   };
 }

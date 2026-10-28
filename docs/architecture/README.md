@@ -16,7 +16,8 @@ that contributors must implement now.
 
 - [Architecture overview](overview.md)
 - [Local Host lifecycle](local-host-lifecycle.md)
-- [Deployment profiles](deployment-profiles.md)
+- [Deployment profiles](deployment-profiles.md), including the canonical
+  [service role map](deployment-profiles.md#service-role-map) and first-materialization rules
 - [Strategic context map](context-map.md)
 - [Machine-readable architecture model](architecture-model.md)
 - [Evolution and quality attributes](evolution-quality-attributes.md)
@@ -25,7 +26,7 @@ that contributors must implement now.
 
 - [Dependency rules](dependency-rules.md)
 - [Orchestrator feature module profile](feature-module-standard.md) - adopts the
-  immutable organization Feature Module Standard v1 and owns local extensions.
+  immutable organization Feature Module Standard v1.1 and owns local extensions.
 - [Composition and dependency injection](composition-and-dependency-injection.md)
 - [Repository tooling plan](repository-tooling.md)
 - [Machine-readable package catalog](../../architecture/package-catalog.yaml)

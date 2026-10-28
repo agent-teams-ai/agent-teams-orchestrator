@@ -5,15 +5,18 @@ status: accepted
 owner: architecture
 summary: Enforceable source dependency and package boundary rules.
 related:
+  - ADR-0117
   - ADR-0005
   - ADR-0079
   - ADR-0012
   - ADR-0037
   - ADR-0038
-  - ADR-0110
   - ADR-0075
   - ADR-0090
+  - ADR-0113
+  - ADR-0114
   - architecture.composition
+  - architecture.deployment-profiles
 code_anchors:
   - pattern: architecture/foundation/dependency-declarations.yaml
     enforcement: required
@@ -73,28 +76,50 @@ both roles expose separate modules and ports for each role.
 
 ## Allowed dependency matrix
 
-| From | May depend on |
-|---|---|
-| Domain | Owning context domain modules and explicitly exposed context-internal domain types |
-| Application | Owning context domain, application models, internal APIs, and consumer-owned ports |
-| Contracts | Narrow Protobuf or JSON Schema primitives allowed by the owning external surface |
-| Inbound adapters | Feature contracts and application input ports |
+| From              | May depend on                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| Domain            | Owning context domain modules and explicitly exposed context-internal domain types       |
+| Application       | Owning context domain, application models, internal APIs, and consumer-owned ports       |
+| Contracts         | Narrow Protobuf or JSON Schema primitives allowed by the owning external surface         |
+| Inbound adapters  | Feature contracts and application input ports                                            |
 | Outbound adapters | Application output ports, public event contracts when publishing, and external libraries |
-| Composition | All layers in its own package and public APIs of dependencies |
-| SDK | Published contracts and transport libraries |
+| Composition       | All layers in its own package and public APIs of dependencies                            |
+| SDK               | Published contracts and transport libraries                                              |
 
-Get Modular is mandatory for applicable TypeScript composition seams under
-ADR-0110. Its imports and descriptors belong only in composition and tests;
-domain, application, contracts, and adapters do not import `@get-modular/*`.
-SDK composition follows the same rule without exposing framework types in its
-public client API. A container, cradle, resolver, or service locator cannot be
-passed into business code. Awilix and a second handwritten production assembly
-path are prohibited. Fixed private helpers remain static dependencies.
+Get Modular is mandatory at applicable independently assembled TypeScript
+composition seams under ADR-0117, using ADR-0113's exact baseline. Its imports
+and descriptors belong in composition and tests; domain, application, external
+contracts, and adapters use ordinary APIs and consumer-owned ports. SDK clients
+must not expose framework types. A raw container, cradle, resolver, service
+locator, Awilix graph, or competing handwritten production assembly is forbidden.
+Fixed private helpers remain static dependencies.
 
 Nested visibility, direct-parent assembly, republication, and both cycle rules
-follow the [v1.1 feature profile](feature-module-standard.md). Their production
-activation remains blocked until semantic enforcement is complete; a flat
-Foundation projection does not prove nested conformance.
+follow the [v1.1 feature profile](feature-module-standard.md). Activation remains
+blocked until the required semantic enforcement exists; the flat reader does
+not prove nested conformance.
+
+Wire models and generated service types remain in their owning contract surfaces
+and permitted transport adapters or SDKs. GraphQL resolver contexts and
+selection-set structures remain in inbound adapters; neither enters domain or
+application models.
+Adapters map to the owner's application input port and narrow invocation profile;
+application models do not grow framework fields to accommodate another API style.
+
+Get Modular imports, declarations, plans, assembly, and factory bindings belong
+only in `composition/**` and tests under the accepted composition profile. A file
+named `declaration.ts` or `module.ts` outside that boundary is not an exception.
+Feature business factories expose typed dependencies and APIs without importing
+Get Modular or exposing its lifecycle and module types.
+
+The private invocation profile selected by
+[ADR-0114](../decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md)
+keeps standard gRPC and Dapr clients, servers, and transport mapping at the edge.
+Each Host role owns one Get Modular graph and its application resources. Thin
+inbound and outbound adapters map calls to declared ports; domain and application
+code never receive sidecar clients, generated messages, or framework contexts.
+Local Supervisor or the hosted platform owns process availability. An adapter or
+private DI container must not independently reconstruct or stop the same resource.
 
 ## Forbidden dependencies
 
@@ -103,6 +128,7 @@ Domain and application layers must not import:
 - public SDK, HTTP, gRPC, JSON-RPC, or integration-event schemas;
 - Electron, React, browser globals, or frontend stores;
 - NATS, Temporal, HTTP servers, gRPC servers, or broker clients;
+- Get Modular, Dapr, or Moleculer APIs, contexts, or lifecycle types;
 - `ar` implementation modules;
 - OpenCode, Claude, Codex, or other provider SDKs;
 - Node filesystem, child-process, or network implementations;
@@ -121,14 +147,33 @@ For synchronous collaboration, the consuming context declares a narrow outbound
 port. An adapter implements that port against the provider context's published
 contract. Asynchronous collaboration uses integration-event contracts.
 
+The same rule applies to GraphQL composition: the consuming query owns its narrow
+outbound query port and ACL. The provider owns its published batch-query API and
+projections; a composed projection has an explicitly declared query owner and
+consistency contract. Resolver nesting does not permit cross-context repositories
+or a shared transaction over several owners.
+
 Cycles between bounded-context packages are prohibited. When two contexts need
 bidirectional collaboration, prefer events, a process manager, or move the
 genuinely shared concept to the context that owns its lifecycle. Do not solve a
 cycle by importing both public application facades.
 
-A direct in-process adapter is permitted as a deployment optimization, but it must
-implement the same consumer-owned port and published contract used by a future
-remote adapter.
+A direct in-process adapter is permitted within one declared role and in tests.
+It cannot replace a selected production process boundary. The
+[service role map](deployment-profiles.md#service-role-map) owns placement under
+ADR-0114; real private RPC boundaries use feature-owned Protobuf and standard gRPC
+through Dapr from their first production materialization. Control Host to Team
+Topology S3 is the first such boundary, not a same-process router deployment.
+
+The private RPC contract cannot rely on shared mutable objects, closures,
+process-local identity, framework exceptions, or a database transaction crossing
+the boundary.
+A separately running capability keeps its own state and transaction owner.
+Network serialization and a new implementation language change its adapter and
+implementation, not the consuming application's domain model. The private wire
+profile does not require serializing ordinary collaboration within a role or
+creating a service per feature. Durable JetStream handlers invoke their owner's
+application ports directly; no extra RPC hop is implied by process placement.
 
 Inside one bounded context, features may use only the provider feature's curated
 `domain/internal-api.ts` or `application/internal-api.ts` and an exact directed
@@ -200,6 +245,14 @@ expected to shrink as validators are added:
 - public Protobuf outside the accepted cross-language profile;
 - context packages importing consumer-owned ports from an integration adapter;
 - broad `spi` and package-root barrel exports.
+
+The first materialization of a selected service boundary must add rejecting
+source fixtures and process/RPC conformance to the required quality runner in
+the same PR. Those checks must cover bypass imports, transport leakage, duplicate
+construction, and an in-process production replacement of the declared boundary.
+Until that implementation exists, this is a materialization obligation; the
+current import graph and documentation checks do not prove process isolation or
+Dapr conformance.
 
 TypeScript path aliases are conveniences, not boundaries. `package.json` exports,
 workspace dependencies, lint rules, and architecture tests enforce boundaries.
@@ -315,9 +368,7 @@ The consuming application declares a narrow capability:
 
 ```ts
 interface RuntimeSessionLifecyclePort {
-  readonly startSession: (
-    command: StartRuntimeSessionCommand,
-  ) => Promise<StartRuntimeSessionResult>;
+  readonly startSession: (command: StartRuntimeSessionCommand) => Promise<StartRuntimeSessionResult>;
 }
 ```
 

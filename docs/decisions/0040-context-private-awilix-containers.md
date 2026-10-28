@@ -4,6 +4,7 @@ type: adr
 status: superseded
 superseded_by:
   - ADR-0110
+  - ADR-0113
 supersedes: []
 owner: architecture/composition
 summary: Compose each bounded context through an independent private Awilix container while keeping features and public APIs container-agnostic.

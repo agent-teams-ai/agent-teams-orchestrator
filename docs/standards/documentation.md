@@ -32,15 +32,15 @@ owned, non-duplicative, and machine-verifiable as the repository grows.
 
 Organize documents by the question they answer, not by author, sprint, or frontend:
 
-| Intent | Question | Artifact |
-|---|---|---|
-| Orientation | Where should I start for this task? | Repository and directory indexes |
-| Explanation | What architecture or domain model applies now? | Architecture documents and context dossiers |
-| Decision | Why was this significant choice made? | ADR |
-| Uncertainty | What choice is still unresolved? | Open decision |
-| Reference | What is the exact contract, term, or supported surface? | Machine-readable schema, contract document, glossary |
-| Procedure | How is a real operation, migration, or recovery executed? | Runbook or migration program |
-| Evidence | What experiment or external fact informed a choice? | Time-bounded research report |
+| Intent      | Question                                                  | Artifact                                             |
+| ----------- | --------------------------------------------------------- | ---------------------------------------------------- |
+| Orientation | Where should I start for this task?                       | Repository and directory indexes                     |
+| Explanation | What architecture or domain model applies now?            | Architecture documents and context dossiers          |
+| Decision    | Why was this significant choice made?                     | ADR                                                  |
+| Uncertainty | What choice is still unresolved?                          | Open decision                                        |
+| Reference   | What is the exact contract, term, or supported surface?   | Machine-readable schema, contract document, glossary |
+| Procedure   | How is a real operation, migration, or recovery executed? | Runbook or migration program                         |
+| Evidence    | What experiment or external fact informed a choice?       | Time-bounded research report                         |
 
 One document has one primary intent and one authority. A document may link to
 other intents, but it must not redefine them.
@@ -50,16 +50,16 @@ other intents, but it must not redefine them.
 There is no global precedence order between unrelated artifact types. Authority is
 selected by the question being answered:
 
-| Question | Authoritative artifact |
-|---|---|
-| Why was a significant decision made? | Accepted ADR |
-| What system-wide architecture rule applies now? | Architecture document |
-| What does a domain term or invariant mean? | Owning bounded-context dossier and domain model |
-| What is the exact wire shape? | Owning machine-readable contract schema |
-| How is a feature implemented locally? | Colocated feature documentation and code |
-| How is the system operated or recovered? | Current runbook |
-| What practical evidence supports a decision? | Time-bounded research report |
-| What remains unresolved? | Open-decision document |
+| Question                                        | Authoritative artifact                          |
+| ----------------------------------------------- | ----------------------------------------------- |
+| Why was a significant decision made?            | Accepted ADR                                    |
+| What system-wide architecture rule applies now? | Architecture document                           |
+| What does a domain term or invariant mean?      | Owning bounded-context dossier and domain model |
+| What is the exact wire shape?                   | Owning machine-readable contract schema         |
+| How is a feature implemented locally?           | Colocated feature documentation and code        |
+| How is the system operated or recovered?        | Current runbook                                 |
+| What practical evidence supports a decision?    | Time-bounded research report                    |
+| What remains unresolved?                        | Open-decision document                          |
 
 An ADR does not override an exact contract schema, and a schema does not explain
 architecture rationale. When artifacts disagree within the same knowledge type,
@@ -148,12 +148,12 @@ Paths may change; IDs remain stable. Renaming a document does not change its ID.
 
 ## Status rules
 
-| Document type | Allowed statuses |
-|---|---|
+| Document type                                                               | Allowed statuses                                                  |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | `architecture`, `domain-standard`, `bounded-context`, `feature`, `contract` | `accepted`, `proposed`, `exploratory`, `deprecated`, `superseded` |
-| `adr` | `proposed`, `accepted`, `superseded` |
-| `open-decision` | `open`, `deferred`, `resolved` |
-| `index`, `template`, `glossary`, `runbook`, `research` | `active`, `deprecated` |
+| `adr`                                                                       | `proposed`, `accepted`, `superseded`                              |
+| `open-decision`                                                             | `open`, `deferred`, `resolved`                                    |
+| `index`, `template`, `glossary`, `runbook`, `research`                      | `active`, `deprecated`                                            |
 
 Do not combine multiple statuses in prose such as `accepted but partly open`.
 Record accepted scope in the document and link every unresolved part to an
@@ -311,14 +311,14 @@ generated pointer.
 
 Update related artifacts in one change when their authority requires it:
 
-| Change | Required documentation |
-|---|---|
-| Significant accepted design choice | New or superseding ADR plus current architecture update |
-| New unresolved architecture choice | One open-decision record and links from affected current documents |
-| New or changed context boundary | Context map, owning dossier, package catalog reservation when applicable, and ADR |
-| New public contract capability | Machine-readable schema, semantic contract documentation, fixtures, and compatibility notes |
-| New operational failure mode | Runbook, observability links, and tested recovery evidence |
-| New feature behavior | Colocated feature documentation plus root dossier links when strategically relevant |
+| Change                             | Required documentation                                                                      |
+| ---------------------------------- | ------------------------------------------------------------------------------------------- |
+| Significant accepted design choice | New or superseding ADR plus current architecture update                                     |
+| New unresolved architecture choice | One open-decision record and links from affected current documents                          |
+| New or changed context boundary    | Context map, owning dossier, package catalog reservation when applicable, and ADR           |
+| New public contract capability     | Machine-readable schema, semantic contract documentation, fixtures, and compatibility notes |
+| New operational failure mode       | Runbook, observability links, and tested recovery evidence                                  |
+| New feature behavior               | Colocated feature documentation plus root dossier links when strategically relevant         |
 
 ## Validation
 

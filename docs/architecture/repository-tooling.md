@@ -16,6 +16,10 @@ related:
   - ADR-0059
   - ADR-0078
   - ADR-0102
+  - ADR-0103
+  - ADR-0113
+  - ADR-0114
+  - architecture.deployment-profiles
   - architecture.dependency-rules
   - architecture.feature-module-standard
   - architecture.machine-readable-model
@@ -65,18 +69,18 @@ DDD boundaries, or source dependency rules.
 An accepted tooling decision is target architecture, not proof that its rollout
 is complete.
 
-| Capability | Decision state | Implementation state |
-|---|---|---|
-| Repository-local Stage 0 validators, lint, docs, security, and reliability gates | Accepted | Implemented and blocking |
-| Repository-local documentation authoring workflow | Accepted in ADR-0053 | Implemented with metadata discovery, template-backed guarded creation, code-impact routing, and blocking validation |
-| Versioned engineering foundation distribution | Accepted in ADR-0059 | Implemented with exact public npm dependency, explicit local lifecycle, consumer E2E proof, and fail-closed CI registry checks |
-| Nx package graph and affected foundation | Accepted in ADR-0039 | Implemented with pinned Nx Core and blocking pnpm-workspace discovery validation |
-| Nx task pipelines and local cache | Accepted in ADR-0039 | Planned; no task is cacheable until its complete inputs and outputs are proven |
-| Structural AST rules | Accepted in ADR-0041 | Planned for the first matching production source and invariant fixture |
-| Dead-code analysis | Accepted in ADR-0041 | Planned after the first production vertical slice |
-| Publishable API and package validation | Accepted in ADR-0041 | Planned before the first publishable package release |
-| Production package graph | Scoped sandbox admission accepted in ADR-0103 | Agent Context sandbox manifests and Local Host Control materialized; broader reservations remain deferred |
-| Federated Consistency Evidence Gate | Accepted in ADR-0078 | Planned; Phase 1 starts with the first real durable mutation and remains build-time only |
+| Capability                                                                       | Decision state                                | Implementation state                                                                                                           |
+| -------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Repository-local Stage 0 validators, lint, docs, security, and reliability gates | Accepted                                      | Implemented and blocking                                                                                                       |
+| Repository-local documentation authoring workflow                                | Accepted in ADR-0053                          | Implemented with metadata discovery, template-backed guarded creation, code-impact routing, and blocking validation            |
+| Versioned engineering foundation distribution                                    | Accepted in ADR-0059                          | Implemented with exact public npm dependency, explicit local lifecycle, consumer E2E proof, and fail-closed CI registry checks |
+| Nx package graph and affected foundation                                         | Accepted in ADR-0039                          | Implemented with pinned Nx Core and blocking pnpm-workspace discovery validation                                               |
+| Nx task pipelines and local cache                                                | Accepted in ADR-0039                          | Planned; no task is cacheable until its complete inputs and outputs are proven                                                 |
+| Structural AST rules                                                             | Accepted in ADR-0041                          | Planned for the first matching production source and invariant fixture                                                         |
+| Dead-code analysis                                                               | Accepted in ADR-0041                          | Planned after the first production vertical slice                                                                              |
+| Publishable API and package validation                                           | Accepted in ADR-0041                          | Planned before the first publishable package release                                                                           |
+| Production package graph                                                         | Scoped sandbox admission accepted in ADR-0103 | Agent Context sandbox manifests and Local Host Control materialized; broader reservations remain deferred                      |
+| Federated Consistency Evidence Gate                                              | Accepted in ADR-0078                          | Planned; Phase 1 starts with the first real durable mutation and remains build-time only                                       |
 
 The implementation state changes only with executable evidence in this
 repository. Documentation must not describe a planned dependency, wrapper, or
@@ -131,12 +135,19 @@ The consumer catalog and lockfile now pin Oxlint `1.83.0`, matching that adapter
 These source pins do not replace a fresh frozen install and native qualification.
 
 `architecture/foundation/quality-feature-topology.json` is a checked adapter for
-Foundation's flat FMS v1 reader. The accepted organization authority is the v1.1
-`architecture/feature-module-standard-profile.json` under ADR-0110. This bounded
-projection applies only while nested features and composition contracts are
-absent and their activation is blocked. It does not claim nested conformance.
-The adapter
-maps its production and excluded roots and the materialized package catalog to
+Foundation 1.7.2's flat FMS v1 reader. ADR-0113 adopts the exact v1.1 authority in
+`architecture/feature-module-standard-profile.json`. Version 1.1 preserves the
+v1 obligations when its new constructs are absent. The adapter therefore keeps
+the historical v1 reader binding without becoming another adoption authority.
+Its validator requires the exact v1.1 primary pin, empty construct inventories,
+and `blocked-until-enforced` activation. It rejects physical nested feature roots
+and conventional composition contract files at feature and Host/package `src`
+roots before permitting this
+compatibility projection. New constructs require a reader and scoped semantic
+checks that understand them; the old view cannot be silently widened.
+
+The adapter maps the same production and excluded roots and materialized
+package catalog to
 `packages/contexts/agent-context` and `packages/platform/local-host-control`, their
 `src` trees, and their `tests` trees.
 There are no materialized applications. `validate-quality-topology.mjs` rejects
@@ -144,6 +155,12 @@ projection drift, missing source or test directories, and unreviewed application
 materialization. Foundation independently rejects unclassified workspace packages,
 including packages omitted from the projection or source policy. Catalog
 reservations alone do not create production modules.
+
+The projection is a reader-format mapping with no reduction in source coverage,
+typed rules, or materialization checks. Consumer tests prove installed Foundation
+acceptance, reject primary and projected pin drift, and reject both declared and
+materialized new constructs. The profile and projection checks do not yet claim
+to parse the full v1.1 visibility, assembly, and dependency graph semantics.
 
 Shared global categories, plugins, rules, and preset references live in
 `.oxlintrc.base.json`. `.oxlintrc.common.json` extends that base and retains normal
@@ -285,16 +302,16 @@ mandatory for first-party packages.
 
 ## Sources of truth
 
-| Concern | Authoritative source |
-|---|---|
-| Workspace membership | `pnpm-workspace.yaml` and package manifests |
-| Allowed package identity and role | `architecture/package-catalog.yaml` |
-| Context acceptance and domain ownership | Owning bounded-context dossier and ADR |
-| Source dependency direction | Dependency rules and architecture conformance gates |
-| Compiler behavior | Package and root TypeScript configurations |
-| Portable task command | Package manifest script |
-| Task and project execution graph | Nx derived view |
-| Strategic relationship graph | LikeC4 source model |
+| Concern                                 | Authoritative source                                |
+| --------------------------------------- | --------------------------------------------------- |
+| Workspace membership                    | `pnpm-workspace.yaml` and package manifests         |
+| Allowed package identity and role       | `architecture/package-catalog.yaml`                 |
+| Context acceptance and domain ownership | Owning bounded-context dossier and ADR              |
+| Source dependency direction             | Dependency rules and architecture conformance gates |
+| Compiler behavior                       | Package and root TypeScript configurations          |
+| Portable task command                   | Package manifest script                             |
+| Task and project execution graph        | Nx derived view                                     |
+| Strategic relationship graph            | LikeC4 source model                                 |
 
 Nx consumes or validates the standard sources. Nx metadata never becomes a
 parallel hand-maintained architecture catalog.
@@ -346,14 +363,14 @@ remain provable.
 
 The quality lanes are deliberately different:
 
-| Lane | Command | Policy |
-|---|---|---|
-| Focused fast feedback | `pnpm lint:fast:files -- <paths>` | Blocking rules for files being edited |
+| Lane                   | Command                              | Policy                                                                         |
+| ---------------------- | ------------------------------------ | ------------------------------------------------------------------------------ |
+| Focused fast feedback  | `pnpm lint:fast:files -- <paths>`    | Blocking rules for files being edited                                          |
 | Focused typed feedback | `pnpm lint:type-aware:files <paths>` | Blocking typed safety for one or more explicit TypeScript files or directories |
-| Repository fast gate | `pnpm lint:fast` | Blocking correctness, suspicious-code, runtime, test, and boundary rules |
-| Type-aware gate | `pnpm lint:type-aware` | Blocking typed safety over production TypeScript roots |
-| Full lint gate | `pnpm lint` | Fast, type-aware, suppression-policy, and lint-configuration conformance |
-| Evaluation lane | `pnpm lint:advisory` | Non-blocking bounded complexity and modernization findings |
+| Repository fast gate   | `pnpm lint:fast`                     | Blocking correctness, suspicious-code, runtime, test, and boundary rules       |
+| Type-aware gate        | `pnpm lint:type-aware`               | Blocking typed safety over production TypeScript roots                         |
+| Full lint gate         | `pnpm lint`                          | Fast, type-aware, suppression-policy, and lint-configuration conformance       |
+| Evaluation lane        | `pnpm lint:advisory`                 | Non-blocking bounded complexity and modernization findings                     |
 
 The advisory lane runs fast repository-wide analysis first, then limits its
 type-aware pass to materialized paths from the package catalog. Invalid fixtures
@@ -369,8 +386,9 @@ valid and invalid fixtures and a clean baseline review.
 The root policy explicitly extends the Foundation Node and production
 maintainability presets. Handwritten product and repository-tooling source is
 limited to 500 effective lines per file, 150 per function, complexity 20,
-nesting depth 4, and 5 parameters. Package tests, `*.test.mjs`, intentional
-fixtures, and architecture-conformance harnesses use the Foundation test profile:
+nesting depth 4, and 5 parameters. Package tests, script `*.test.mjs` and
+`*.test.ts` files, intentional fixtures, and architecture-conformance harnesses
+use the Foundation test profile:
 800, 250, 30, 5, and 6 respectively. Generated and vendored paths disable only
 these five budgets. Agents must split responsibilities before crossing a budget;
 there is no untracked per-file maintainability exception.
@@ -682,8 +700,12 @@ Status: accepted, implementation begins with the first matching production sourc
 ast-grep owns structural code invariants that are more precise than text search and
 are not import-graph questions. The initial rule families cover:
 
-- Get Modular import, declaration, entry, group, scope, and wiring
-  containment under `composition/**`;
+- GM imports, descriptors, Assembly entries, static groups, and graph preparation
+  containment inside `composition/**` and composition tests under ADR-0113;
+- one Host-owned assembly graph and application lifecycle per declared role,
+  with gRPC/Dapr invocation mapping confined to adapters behind typed ports
+  under ADR-0114 and the [service role map](deployment-profiles.md#service-role-map);
+  framework handles must not enter application ports or public contracts;
 - prohibited direct clocks, randomness, process APIs, and infrastructure
   constructors in domain code;
 - accepted factory and public-handle shapes where TypeScript types alone cannot
@@ -694,6 +716,16 @@ blocking only after it reports the intended invalid forms, accepts supported val
 forms, has a remediation message, and produces no unexplained findings against the
 real source tree. Generic style and import direction remain with Oxlint and the
 dependency graph stack.
+
+The first materialization PR for a selected private process boundary must connect
+its source rules and process/RPC conformance to the required quality runner with
+declared test identities and rejecting fixtures. Control Host to Team Topology
+S3 must exercise separate processes through Dapr; a same-process router cannot
+satisfy that boundary. These boundary checks must block production admission;
+an advisory-only rule does not satisfy the materialization requirement. This is
+an implementation obligation, not a claim that the current structural tooling
+verifies Dapr, deployment, or active-agent
+capacity. Deployment and workload qualification retain their own evidence.
 
 ## Dead-code and dependency hygiene
 
@@ -733,21 +765,21 @@ published artifact is correct.
 
 ## Tool ownership
 
-| Failure class | Owning tool |
-|---|---|
-| Package identity | Package catalog and topology validator |
-| Package materialization | Package materialization policy, topology validator, and scaffolder |
-| Project and task impact | Nx |
-| Structural source import boundaries | Oxlint with boundary rules |
-| Exact package and feature dependency edges | Topology validator and conformance fixtures |
-| Complete dependency graph and cycles | dependency-cruiser |
-| Repository-specific structural patterns | ast-grep |
-| Unused code and dependencies | Knip |
-| TypeScript public API review | API Extractor |
-| Protobuf compatibility | Buf |
-| Packed npm runtime and type resolution | publint and Are The Types Wrong |
-| Strategic context relationship topology | LikeC4 plus repository consistency validator |
-| Documentation workflow and implementation impact | Repository-local Skill and code anchors |
+| Failure class                                    | Owning tool                                                        |
+| ------------------------------------------------ | ------------------------------------------------------------------ |
+| Package identity                                 | Package catalog and topology validator                             |
+| Package materialization                          | Package materialization policy, topology validator, and scaffolder |
+| Project and task impact                          | Nx                                                                 |
+| Structural source import boundaries              | Oxlint with boundary rules                                         |
+| Exact package and feature dependency edges       | Topology validator and conformance fixtures                        |
+| Complete dependency graph and cycles             | dependency-cruiser                                                 |
+| Repository-specific structural patterns          | ast-grep                                                           |
+| Unused code and dependencies                     | Knip                                                               |
+| TypeScript public API review                     | API Extractor                                                      |
+| Protobuf compatibility                           | Buf                                                                |
+| Packed npm runtime and type resolution           | publint and Are The Types Wrong                                    |
+| Strategic context relationship topology          | LikeC4 plus repository consistency validator                       |
+| Documentation workflow and implementation impact | Repository-local Skill and code anchors                            |
 
 Do not add overlapping task runners or multiple tools that claim the same
 architectural authority. A new tool needs a distinct failure class, deterministic

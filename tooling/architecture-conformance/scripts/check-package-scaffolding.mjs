@@ -1,14 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import {
-  copyFile,
-  mkdir,
-  mkdtemp,
-  readFile,
-  rm,
-  symlink,
-  writeFile,
-} from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -29,21 +21,18 @@ import {
 } from "./scaffolding-transaction-fixture.mjs";
 import { importFoundation, loadFoundationManifest } from "./root-foundation.mjs";
 
-const toolingRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-);
+const toolingRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(toolingRoot, "../..");
-const wrapper = path.join(
-  repositoryRoot,
-  "scripts/architecture/scaffold-package.mjs",
-);
+const wrapper = path.join(repositoryRoot, "scripts/architecture/scaffold-package.mjs");
 const catalogSchema = path.join(repositoryRoot, "architecture/package-catalog.schema.json");
 const dependencyPolicySchema = path.join(
   repositoryRoot,
   "architecture/source-dependency-policy.schema.json",
 );
-const materializationPolicySchema = path.join(repositoryRoot, "architecture/package-materialization-policy.schema.json");
+const materializationPolicySchema = path.join(
+  repositoryRoot,
+  "architecture/package-materialization-policy.schema.json",
+);
 const goldenRoot = path.join(
   repositoryRoot,
   "tooling/architecture-conformance-fixtures/scaffolding/library-boundary-golden",
@@ -57,15 +46,11 @@ function output(result) {
 }
 
 function runWrapper(root, arguments_) {
-  return spawnSync(
-    process.execPath,
-    [wrapper, ...arguments_, "--root", root],
-    {
-      cwd: repositoryRoot,
-      encoding: "utf8",
-      env: { ...process.env, NO_COLOR: "1" },
-    },
-  );
+  return spawnSync(process.execPath, [wrapper, ...arguments_, "--root", root], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+    env: { ...process.env, NO_COLOR: "1" },
+  });
 }
 
 function runPackageScript(root, arguments_) {
@@ -78,15 +63,11 @@ function runPackageScript(root, arguments_) {
   const commandArguments = packageManagerEntrypoint
     ? [packageManagerEntrypoint, "--silent", "architecture:scaffold-package"]
     : ["--silent", "architecture:scaffold-package"];
-  return spawnSync(
-    command,
-    [...commandArguments, "--", ...arguments_, "--root", root],
-    {
-      cwd: repositoryRoot,
-      encoding: "utf8",
-      env: { ...process.env, NO_COLOR: "1" },
-    },
-  );
+  return spawnSync(command, [...commandArguments, "--", ...arguments_, "--root", root], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+    env: { ...process.env, NO_COLOR: "1" },
+  });
 }
 
 function requireSuccess(label, result) {
@@ -117,9 +98,7 @@ function requireFailureReceipt(label, result, expectedOutcome, expectedRuleId) {
   const receipt = parseJsonOutput(label, result);
   assert.equal(receipt.outcome, expectedOutcome, `${label} returned the wrong outcome`);
   assert.ok(
-    receipt.diagnostics?.some(
-      (diagnostic) => diagnostic.ruleId === expectedRuleId,
-    ),
+    receipt.diagnostics?.some((diagnostic) => diagnostic.ruleId === expectedRuleId),
     `${label} did not report ${expectedRuleId}`,
   );
   return receipt;
@@ -134,9 +113,7 @@ function ownerPath(ownerDocument) {
 }
 
 async function createFixture(entries) {
-  const root = await mkdtemp(
-    path.join(os.tmpdir(), "orchestrator-scaffolding-qualification-"),
-  );
+  const root = await mkdtemp(path.join(os.tmpdir(), "orchestrator-scaffolding-qualification-"));
   temporaryRoots.push(root);
   const architectureRoot = path.join(root, "architecture");
   await Promise.all([
@@ -144,10 +121,7 @@ async function createFixture(entries) {
     mkdir(path.join(root, "docs/owners"), { recursive: true }),
   ]);
   await Promise.all([
-    copyFile(
-      catalogSchema,
-      path.join(architectureRoot, "package-catalog.schema.json"),
-    ),
+    copyFile(catalogSchema, path.join(architectureRoot, "package-catalog.schema.json")),
     copyFile(
       dependencyPolicySchema,
       path.join(architectureRoot, "source-dependency-policy.schema.json"),
@@ -193,25 +167,13 @@ function planPath(id) {
 function planTarget(root, id) {
   const result = requireSuccess(
     `plan ${id}`,
-    runWrapper(root, [
-      "plan",
-      "--id",
-      id,
-      "--plan",
-      planPath(id),
-      "--json",
-    ]),
+    runWrapper(root, ["plan", "--id", id, "--plan", planPath(id), "--json"]),
   );
   return parseJsonOutput(`plan ${id}`, result).plan;
 }
 
 function applyPlan(root, id) {
-  const result = runWrapper(root, [
-    "apply",
-    "--plan",
-    planPath(id),
-    "--json",
-  ]);
+  const result = runWrapper(root, ["apply", "--plan", planPath(id), "--json"]);
   return { result, receipt: parseJsonOutput(`apply ${id}`, result) };
 }
 
@@ -240,22 +202,15 @@ async function addAcceptedFeature(root, entry) {
   );
 }
 
-
 async function verifyDonorAndVariants() {
   const qualification = YAML.parse(
     await readFile(
-      path.join(
-        repositoryRoot,
-        "architecture/foundation/scaffolding-qualification.yaml",
-      ),
+      path.join(repositoryRoot, "architecture/foundation/scaffolding-qualification.yaml"),
       "utf8",
     ),
   );
   const canonicalCatalog = YAML.parse(
-    await readFile(
-      path.join(repositoryRoot, "architecture/package-catalog.yaml"),
-      "utf8",
-    ),
+    await readFile(path.join(repositoryRoot, "architecture/package-catalog.yaml"), "utf8"),
   );
   const donor = canonicalCatalog.packages.find(
     (candidate) => candidate.id === qualification.donorTarget,
@@ -295,19 +250,9 @@ async function verifyDonorAndVariants() {
   const root = await createFixture(entries);
   const donorPlanResult = requireSuccess(
     "donor plan through package script",
-    runPackageScript(root, [
-      "plan",
-      "--id",
-      donor.id,
-      "--plan",
-      planPath(donor.id),
-      "--json",
-    ]),
+    runPackageScript(root, ["plan", "--id", donor.id, "--plan", planPath(donor.id), "--json"]),
   );
-  const donorPlan = parseJsonOutput(
-    "donor plan through package script",
-    donorPlanResult,
-  ).plan;
+  const donorPlan = parseJsonOutput("donor plan through package script", donorPlanResult).plan;
   const donorBytes = operationBytes(donorPlan);
   for (const relativePath of ["package.json", "src/index.ts", "tsconfig.json"]) {
     const goldenName = relativePath === "package.json" ? "expected-package.json" : relativePath;
@@ -315,11 +260,7 @@ async function verifyDonorAndVariants() {
       .toString("utf8")
       .replaceAll("\r\n", "\n");
     const actual = donorBytes.get(`${donor.path}/${relativePath}`)?.toString("utf8") ?? "";
-    assert.equal(
-      actual,
-      expected,
-      `${relativePath} drifted from the qualified donor bytes`,
-    );
+    assert.equal(actual, expected, `${relativePath} drifted from the qualified donor bytes`);
   }
 
   for (const entry of entries.filter((candidate) =>
@@ -327,37 +268,20 @@ async function verifyDonorAndVariants() {
   )) {
     const plan = planTarget(root, entry.id);
     assert.equal(plan.operations.length, 3);
-    const manifest = JSON.parse(
-      operationSources(plan).get(`${entry.path}/package.json`),
-    );
+    const manifest = JSON.parse(operationSources(plan).get(`${entry.path}/package.json`));
     assert.equal(manifest.name, entry.package_name);
     assert.equal(manifest.agentTeamsArchitecture.role, entry.role);
-    assert.equal(
-      manifest.agentTeamsArchitecture.ownerDocument,
-      entry.owner_document,
-    );
+    assert.equal(manifest.agentTeamsArchitecture.ownerDocument, entry.owner_document);
   }
 
   requireFailure(
     "application target through library composition",
-    runWrapper(root, [
-      "plan",
-      "--id",
-      "app.synthetic",
-      "--plan",
-      planPath("app.synthetic"),
-    ]),
+    runWrapper(root, ["plan", "--id", "app.synthetic", "--plan", planPath("app.synthetic")]),
     /is not admitted by composition/u,
   );
   requireFailure(
     "Plan output inside target",
-    runWrapper(root, [
-      "plan",
-      "--id",
-      donor.id,
-      "--plan",
-      `${donor.path}/plan.json`,
-    ]),
+    runWrapper(root, ["plan", "--id", donor.id, "--plan", `${donor.path}/plan.json`]),
     /directly under/u,
   );
 
@@ -389,18 +313,10 @@ async function verifyDonorAndVariants() {
 
   const firstApplyResult = requireSuccess(
     "first donor apply through package script",
-    runPackageScript(root, [
-      "apply",
-      "--plan",
-      planPath(donor.id),
-      "--json",
-    ]),
+    runPackageScript(root, ["apply", "--plan", planPath(donor.id), "--json"]),
   );
   assert.equal(
-    parseJsonOutput(
-      "first donor apply through package script",
-      firstApplyResult,
-    ).outcome,
+    parseJsonOutput("first donor apply through package script", firstApplyResult).outcome,
     "applied",
   );
   const replay = applyPlan(root, donor.id);
@@ -439,10 +355,7 @@ async function verifyStaleAuthority() {
           ? "architecture/package-catalog.yaml"
           : "architecture/foundation/scaffolding.yaml";
     const absolute = path.join(root, sourcePath);
-    await writeFile(
-      absolute,
-      `${await readFile(absolute, "utf8")}# authority changed\n`,
-    );
+    await writeFile(absolute, `${await readFile(absolute, "utf8")}# authority changed\n`);
     const applied = applyPlan(root, entry.id);
     requireFailure(`stale ${authority}`, applied.result);
     assert.equal(applied.receipt.outcome, "authority-stale");
@@ -482,10 +395,7 @@ async function verifyRecoveryWithoutTopologyGate() {
     "recovery after journal finalization",
     runWrapper(root, ["recover", "--json"]),
   );
-  assert.equal(
-    parseJsonOutput("empty recovery", empty).outcome,
-    "no-pending-transaction",
-  );
+  assert.equal(parseJsonOutput("empty recovery", empty).outcome, "no-pending-transaction");
 
   const partialEntry = {
     id: "platform.partial-recovery",
@@ -537,8 +447,10 @@ async function verifyRecoveryWithoutTopologyGate() {
     "recovery-required",
   );
   await assertPendingScaffold(conflictRoot);
-  assert.equal(await readFile(path.join(conflictRoot, conflictPlan.operations[0].path), "utf8"),
-    "conflicting third-party bytes\n");
+  assert.equal(
+    await readFile(path.join(conflictRoot, conflictPlan.operations[0].path), "utf8"),
+    "conflicting third-party bytes\n",
+  );
 
   const staleEntry = {
     id: "platform.stale-recovery",
@@ -553,23 +465,14 @@ async function verifyRecoveryWithoutTopologyGate() {
   await assertPendingScaffold(staleRoot);
   await assertPublishedPrefix(staleRoot, stalePlan, 1);
   const staleOwner = path.join(staleRoot, ownerPath(staleEntry.owner_document));
-  await writeFile(
-    staleOwner,
-    `${await readFile(staleOwner, "utf8")}# changed after publication\n`,
-  );
+  await writeFile(staleOwner, `${await readFile(staleOwner, "utf8")}# changed after publication\n`);
   const staleRecovery = requireFailure(
     "stale authority after partial publication",
     runWrapper(staleRoot, ["recover", "--json"]),
   );
-  assert.equal(
-    parseJsonOutput("stale recovery", staleRecovery).outcome,
-    "recovery-required",
-  );
+  assert.equal(parseJsonOutput("stale recovery", staleRecovery).outcome, "recovery-required");
   await assertPendingScaffold(staleRoot);
-  assert.equal(
-    await pathExists(path.join(staleRoot, stalePlan.operations[1].path)),
-    false,
-  );
+  assert.equal(await pathExists(path.join(staleRoot, stalePlan.operations[1].path)), false);
 
   const pendingEntries = [
     {
@@ -629,14 +532,9 @@ async function verifyTamperingAndFilesystemBoundaries() {
   };
   const tamperRoot = await createFixture([tamperEntry]);
   const plan = planTarget(tamperRoot, tamperEntry.id);
-  plan.operations[0].after.contentBase64 = Buffer.from("tampered\n").toString(
-    "base64",
-  );
+  plan.operations[0].after.contentBase64 = Buffer.from("tampered\n").toString("base64");
   const tamperedPath = ".agent-teams-local/scaffolding-plans/tampered.json";
-  await writeFile(
-    path.join(tamperRoot, tamperedPath),
-    `${JSON.stringify(plan, null, 2)}\n`,
-  );
+  await writeFile(path.join(tamperRoot, tamperedPath), `${JSON.stringify(plan, null, 2)}\n`);
   requireFailure(
     "tampered Plan",
     runWrapper(tamperRoot, ["apply", "--plan", tamperedPath, "--json"]),
@@ -646,17 +544,11 @@ async function verifyTamperingAndFilesystemBoundaries() {
 
   const alternateConfigPath = "architecture/foundation/alternate.yaml";
   const alternateConfig = YAML.parse(
-    await readFile(
-      path.join(tamperRoot, "architecture/foundation/scaffolding.yaml"),
-      "utf8",
-    ),
+    await readFile(path.join(tamperRoot, "architecture/foundation/scaffolding.yaml"), "utf8"),
   );
   alternateConfig.projectId = "alternate-scaffolding-authority";
   alternateConfig.compositions[0].id = "alternate-library-boundary";
-  await writeFile(
-    path.join(tamperRoot, alternateConfigPath),
-    YAML.stringify(alternateConfig),
-  );
+  await writeFile(path.join(tamperRoot, alternateConfigPath), YAML.stringify(alternateConfig));
   const alternateIntentPath = ".agent-teams-local/alternate-intent.json";
   await writeFile(
     path.join(tamperRoot, alternateIntentPath),
@@ -671,20 +563,14 @@ async function verifyTamperingAndFilesystemBoundaries() {
     intentPath: alternateIntentPath,
     configPath: alternateConfigPath,
   });
-  const alternatePlanPath =
-    ".agent-teams-local/scaffolding-plans/alternate-authority.json";
+  const alternatePlanPath = ".agent-teams-local/scaffolding-plans/alternate-authority.json";
   await writeFile(
     path.join(tamperRoot, alternatePlanPath),
     `${JSON.stringify(alternatePlan, null, 2)}\n`,
   );
   requireFailure(
     "valid Plan from alternate authority",
-    runWrapper(tamperRoot, [
-      "apply",
-      "--plan",
-      alternatePlanPath,
-      "--json",
-    ]),
+    runWrapper(tamperRoot, ["apply", "--plan", alternatePlanPath, "--json"]),
     /canonical Orchestrator Composition/u,
   );
   assert.equal(await pathExists(path.join(tamperRoot, tamperEntry.path)), false);
@@ -710,12 +596,7 @@ async function verifyTamperingAndFilesystemBoundaries() {
   await mkdir(path.join(caseRoot, "packages/Platform"), { recursive: true });
   requireFailureReceipt(
     "case-folding ancestor conflict",
-    runWrapper(caseRoot, [
-      "apply",
-      "--plan",
-      planPath(caseEntry.id),
-      "--json",
-    ]),
+    runWrapper(caseRoot, ["apply", "--plan", planPath(caseEntry.id), "--json"]),
     "recovery-required",
     "scaffolding.apply.unverifiable-workspace",
   );
@@ -730,9 +611,7 @@ async function verifyTamperingAndFilesystemBoundaries() {
   };
   const symlinkRoot = await createFixture([symlinkEntry]);
   planTarget(symlinkRoot, symlinkEntry.id);
-  const external = await mkdtemp(
-    path.join(os.tmpdir(), "orchestrator-scaffolding-external-"),
-  );
+  const external = await mkdtemp(path.join(os.tmpdir(), "orchestrator-scaffolding-external-"));
   temporaryRoots.push(external);
   await symlink(
     external,
@@ -741,24 +620,18 @@ async function verifyTamperingAndFilesystemBoundaries() {
   );
   requireFailureReceipt(
     "symlinked output ancestor",
-    runWrapper(symlinkRoot, [
-      "apply",
-      "--plan",
-      planPath(symlinkEntry.id),
-      "--json",
-    ]),
+    runWrapper(symlinkRoot, ["apply", "--plan", planPath(symlinkEntry.id), "--json"]),
     "recovery-required",
     "scaffolding.apply.unverifiable-workspace",
   );
-  assert.equal(
-    await pathExists(path.join(external, "platform/symlink-probe")),
-    false,
-  );
+  assert.equal(await pathExists(path.join(external, "platform/symlink-probe")), false);
 }
 
 try {
   await verifyQualificationRecord(repositoryRoot);
-  console.log("Historical record integrity and installed pin verified; fresh candidate proofs follow.");
+  console.log(
+    "Historical record integrity and installed pin verified; fresh candidate proofs follow.",
+  );
   await verifyDonorAndVariants();
   console.log("verifyDonorAndVariants passed.");
   await verifyStaleAuthority();
@@ -767,9 +640,9 @@ try {
   console.log("verifyRecoveryWithoutTopologyGate passed.");
   await verifyTamperingAndFilesystemBoundaries();
   console.log("verifyTamperingAndFilesystemBoundaries passed.");
-  console.log(`Package scaffolding candidate qualification passed for Foundation ${foundationManifest.version}; historical release admission unchanged.`);
-} finally {
-  await Promise.all(
-    temporaryRoots.map((root) => rm(root, { recursive: true, force: true })),
+  console.log(
+    `Package scaffolding candidate qualification passed for Foundation ${foundationManifest.version}; historical release admission unchanged.`,
   );
+} finally {
+  await Promise.all(temporaryRoots.map((root) => rm(root, { recursive: true, force: true })));
 }

@@ -24,6 +24,12 @@ related:
 
 ## Scope and provenance
 
+Current integration note, 2026-10-28: [ADR-0117](../decisions/0117-reconcile-mandatory-module-composition.md)
+reconciles the parallel module history with the canonical ADR-0113 pin and
+mandatory scope. ADR-0114 and ADR-0115 govern service placement and Fully Local
+V1. Dated comparisons and earlier pending-branch notes below retain their original
+source context; they do not override these current decisions.
+
 This report reconciles the product-owner discussion retained in the 2026-10-21
 documentation work with a coverage audit on 2026-10-22. The source baselines are
 Orchestrator PR #86 at `8483949960cb783fe70090e2e7fbf526a043d362` and Platform
@@ -461,3 +467,24 @@ This follow-up is the coordinating assistant's source review, not a new launch
 of GPT-6.1 critics or an executed provider experiment. Final publication checks
 and any unavailable repository gates are recorded against exact commits in the
 companion PR descriptions rather than inferred from earlier passing runs.
+
+## Canonical reconciliation, 2026-10-28
+
+The owner requested integration of PR #86 and Platform PR #55 with their current
+main branches. [ADR-0117](../decisions/0117-reconcile-mandatory-module-composition.md)
+keeps canonical ADR-0113's exact baseline, carries the mandatory broader scope
+and bounded foundation requirements forward, and supersedes the parallel
+ADR-0110 pin without rewriting either source body. ADR-0111 collaboration,
+ADR-0114 service placement and ADR-0115 Fully Local V1 remain intact.
+
+The source comparison used Orchestrator `51052e63` against canonical `94a480d0`
+and Platform `998d757f` against `94021ffc`. Separate pin-only changes adopt the
+trusted central identity checker; they do not alter product semantics. Source
+snapshots and exact Git blobs were checked before three-way reconciliation.
+The governing documentation writer generated ADR-0117 as a proposal before its
+owner-authorized acceptance. Current checks and publication results belong to
+the exact resulting commits in the PRs, not to earlier passing runs.
+
+Earlier pending-integration statements in this archive describe their dated
+snapshots. The current architecture routes through the reconciled decisions;
+provisional IAM and remaining tactical questions are not closed by integration.

@@ -10,6 +10,8 @@ blocked_by:
 related:
   - ADR-0090
   - ADR-0093
+  - ADR-0114
+  - ADR-0115
   - architecture.deployment-profiles
   - architecture.local-host-lifecycle
   - OD-012
@@ -25,6 +27,11 @@ related:
 When may the reserved Local Supervisor, Local Orchestrator application, and Local
 Host SDK packages become real code, and which accepted lifecycle and workflow
 contracts must their first slices implement?
+
+ADR-0115 requires Fully Local in V1. This decision is now implementation-start
+work on that release path, not a question of deferring the profile beyond V1.
+It remains open until the lifecycle, workflow, and exact first-slice contracts
+below are accepted; the release-scope decision does not resolve those contracts.
 
 ## Why this remains open
 
@@ -43,18 +50,20 @@ would start the wrong architecture prematurely.
   owner;
 - the first slices must prove lifecycle and workflow boundaries before expansion.
 
-## Related identity research and current release scope
+ADR-0114 selects native bundled PostgreSQL and ADR-0114 selects its Node launcher
+approach; neither resolves this decision or qualifies a release.
+The first increment must name its PostgreSQL lifecycle and persistence scope
+under the existing owners; it cannot create a second Desktop-owned Host,
+database process, or authoritative local cache.
 
-Canonical main's [Fully Local V1 adoption](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/94a480d004e8e6eaf79507feeae30428d372a3d3/docs/decisions/0115-canonical-fully-local-v1-adoption.md)
-requires Fully Local in V1 while retaining materialization and qualification
-gates. This pending branch has not integrated that adoption; its older release
-wording must not be interpreted as a decision to defer the current V1 scope.
+## Related identity research
 
 The [IAM critical-decisions review](../research/iam-critical-decisions-review-2026-10-23.md#2-fully-local-identity-bootstrap-and-recovery)
-records remaining local authority, protected enrollment, stable principal,
+records local authority, protected enrollment, stable principal custody,
 boot-credential rotation, and key-loss recovery choices under OD-012. Its
-recommended single-owner model remains unaccepted. This evidence neither adds
-a materialization blocker nor declares a profile implemented or qualified.
+single-owner recommendation is not an accepted product choice. ADR-0115 already
+requires Fully Local in V1; this research neither defers that scope nor qualifies
+a materialized profile.
 
 ## Options
 
@@ -68,6 +77,10 @@ a materialization blocker nor declares a profile implemented or qualified.
 - accepted local durable workflow adapter boundary;
 - exact first package slices and owners;
 - explicit non-goals for the first Fully Local implementation increment;
+- the first supported native PostgreSQL composition and remaining packaging,
+  recovery, and workload qualification, without treating an engine choice as
+  release evidence; the [packaged qualification matrix](../architecture/local-host-lifecycle.md#packaged-postgresql-qualification)
+  remains mandatory for the corresponding released capability;
 - an accepted materialization ADR referenced by the package materialization
   policy.
 

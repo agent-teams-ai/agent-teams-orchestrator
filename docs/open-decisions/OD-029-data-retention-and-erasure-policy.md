@@ -8,6 +8,7 @@ related:
   - ADR-0055
   - ADR-0079
   - ADR-0080
+  - ADR-0114
   - architecture.security
   - OD-009
   - OD-012
@@ -31,8 +32,8 @@ legal hold, backup expiry, and externally retained data are represented.
   delivery from resurrecting erased payload.
 - Audit and accounting retention may differ from user-content retention while
   minimizing linkable personal data.
-- Local SQLite and hosted PostgreSQL must expose equivalent product outcomes even
-  when physical backup mechanisms differ.
+- Local and hosted PostgreSQL must expose equivalent product outcomes even when
+  their qualified backup and recovery mechanisms differ.
 
 ## Options
 

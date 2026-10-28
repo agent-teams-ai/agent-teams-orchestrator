@@ -1,8 +1,9 @@
 ---
 id: ADR-0090
 type: adr
-status: accepted
-superseded_by: []
+status: superseded
+superseded_by:
+  - ADR-0115
 supersedes: []
 owner: architecture/composition
 summary: Gate deployment qualification, fence client target generations, and defer local-runtime connectivity until its security contract is accepted.

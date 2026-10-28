@@ -13,10 +13,7 @@ import {
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "../..");
 const workflowRoot = path.join(repositoryRoot, ".github/workflows");
-const canonicalReview = await readFile(
-  path.join(workflowRoot, "reviewrouter-review.yml"),
-  "utf8",
-);
+const canonicalReview = await readFile(path.join(workflowRoot, "reviewrouter-review.yml"), "utf8");
 const canonicalInteraction = await readFile(
   path.join(workflowRoot, "reviewrouter-interaction.yml"),
   "utf8",
@@ -32,18 +29,68 @@ function replaceExactlyOnce(source, expected, replacement) {
 }
 
 const negativeCases = [
-  { name: "rejects Gateway review trigger trust-boundary drift", expected: "  workflow_dispatch:", replacement: "  pull_request_target:" },
-  { name: "rejects optional Gateway head qualification", expected: "      review_head_sha: { required: true, type: string }", replacement: "      review_head_sha: { required: false, type: string }" },
-  { name: "rejects Gateway root permission drift", expected: "permissions: {}", replacement: "permissions: { contents: write }" },
-  { name: "rejects Gateway job write permission drift", expected: "      pull-requests: read", replacement: "      pull-requests: write" },
-  { name: "rejects missing Gateway OIDC permission", expected: "      id-token: write", replacement: "      id-token: read" },
-  { name: "rejects Gateway request cancellation drift", expected: "      cancel-in-progress: false", replacement: "      cancel-in-progress: true" },
-  { name: "rejects Gateway serialization scope drift", expected: "      group: reviewrouter-request-${{ github.repository_id }}-${{ inputs.review_request_id }}", replacement: "      group: reviewrouter-request-${{ github.repository_id }}" },
-  { name: "rejects Gateway input guard drift", expected: "    if: ${{ inputs.review_request_id != '' && inputs.pr_number != '' && inputs.review_head_sha != '' }}", replacement: "    if: ${{ true }}" },
-  { name: "rejects Gateway runtime custody drift", expected: "reviewrouter-runtime.yml@workflow-v1", replacement: "reviewrouter-runtime.yml@main" },
-  { name: "rejects unbound Gateway head forwarding", expected: "      review_head_sha: ${{ inputs.review_head_sha }}", replacement: "      review_head_sha: main" },
-  { name: "rejects inherited Gateway secrets", expected: "    with:", replacement: "    secrets: inherit\n    with:" },
-].map((entry) => ({ ...entry, validate: validateReviewRouterReviewWorkflow, source: canonicalReview }));
+  {
+    name: "rejects Gateway review trigger trust-boundary drift",
+    expected: "  workflow_dispatch:",
+    replacement: "  pull_request_target:",
+  },
+  {
+    name: "rejects optional Gateway head qualification",
+    expected: "      review_head_sha: { required: true, type: string }",
+    replacement: "      review_head_sha: { required: false, type: string }",
+  },
+  {
+    name: "rejects Gateway root permission drift",
+    expected: "permissions: {}",
+    replacement: "permissions: { contents: write }",
+  },
+  {
+    name: "rejects Gateway job write permission drift",
+    expected: "      pull-requests: read",
+    replacement: "      pull-requests: write",
+  },
+  {
+    name: "rejects missing Gateway OIDC permission",
+    expected: "      id-token: write",
+    replacement: "      id-token: read",
+  },
+  {
+    name: "rejects Gateway request cancellation drift",
+    expected: "      cancel-in-progress: false",
+    replacement: "      cancel-in-progress: true",
+  },
+  {
+    name: "rejects Gateway serialization scope drift",
+    expected:
+      "      group: reviewrouter-request-${{ github.repository_id }}-${{ inputs.review_request_id }}",
+    replacement: "      group: reviewrouter-request-${{ github.repository_id }}",
+  },
+  {
+    name: "rejects Gateway input guard drift",
+    expected:
+      "    if: ${{ inputs.review_request_id != '' && inputs.pr_number != '' && inputs.review_head_sha != '' }}",
+    replacement: "    if: ${{ true }}",
+  },
+  {
+    name: "rejects Gateway runtime custody drift",
+    expected: "reviewrouter-runtime.yml@workflow-v1",
+    replacement: "reviewrouter-runtime.yml@main",
+  },
+  {
+    name: "rejects unbound Gateway head forwarding",
+    expected: "      review_head_sha: ${{ inputs.review_head_sha }}",
+    replacement: "      review_head_sha: main",
+  },
+  {
+    name: "rejects inherited Gateway secrets",
+    expected: "    with:",
+    replacement: "    secrets: inherit\n    with:",
+  },
+].map((entry) => ({
+  ...entry,
+  validate: validateReviewRouterReviewWorkflow,
+  source: canonicalReview,
+}));
 const interactionNegativeCases = [
   {
     name: "rejects interaction trigger drift",
@@ -106,19 +153,22 @@ const interactionNegativeCases = [
 test("accepts the exact ReviewRouter canonical workflows", async () => {
   assert.deepEqual(validateReviewRouterReviewWorkflow(canonicalReview), []);
   assert.deepEqual(validateReviewRouterWorkflow(canonicalInteraction), []);
-  assert.deepEqual(
-    await validateRepositoryReviewRouterWorkflow(repositoryRoot),
-    [],
-  );
+  assert.deepEqual(await validateRepositoryReviewRouterWorkflow(repositoryRoot), []);
 });
 
-for (const { name, validate, source, expected, replacement } of [...negativeCases, ...interactionNegativeCases]) {
+for (const { name, validate, source, expected, replacement } of [
+  ...negativeCases,
+  ...interactionNegativeCases,
+]) {
   test(name, () => {
     const mutated = replaceExactlyOnce(source, expected, replacement);
     assert.notEqual(mutated, source, "mutant must change the canonical fixture");
     const errors = validate(mutated);
     if (validate === validateReviewRouterReviewWorkflow) {
-      assert.ok(errors.some((error) => error.startsWith("RR-WORKFLOW-003")), "Gateway mutants must fail semantic authority checks independently of byte hashing");
+      assert.ok(
+        errors.some((error) => error.startsWith("RR-WORKFLOW-003")),
+        "Gateway mutants must fail semantic authority checks independently of byte hashing",
+      );
     } else {
       assert.equal(errors.length, 1);
     }

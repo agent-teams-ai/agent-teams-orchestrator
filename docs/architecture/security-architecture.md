@@ -40,14 +40,14 @@ This document owns cross-system security boundaries and deterministic security
 fitness rules. It does not create a Security bounded context and does not absorb
 business authorization, runtime enforcement, secret storage, or feature policy.
 
-| Concern | Authority |
-|---|---|
-| Product identity, membership, and grant facts | Configured product authority provider |
-| Operation-specific business policy | Owning bounded context |
-| Authorization-consumption semantics | Feature-owned application port |
-| Runtime permission, sandbox, and capability enforcement | `ar` |
-| Raw secret storage and retrieval | Composed secret-store adapter |
-| Cross-system classification and trust-boundary rules | This architecture standard |
+| Concern                                                 | Authority                             |
+| ------------------------------------------------------- | ------------------------------------- |
+| Product identity, membership, and grant facts           | Configured product authority provider |
+| Operation-specific business policy                      | Owning bounded context                |
+| Authorization-consumption semantics                     | Feature-owned application port        |
+| Runtime permission, sandbox, and capability enforcement | `ar`                                  |
+| Raw secret storage and retrieval                        | Composed secret-store adapter         |
+| Cross-system classification and trust-boundary rules    | This architecture standard            |
 
 The configured product authority provider answers product authorization
 questions. In managed composition this can be the Platform authority; standalone
@@ -78,7 +78,7 @@ separate from the strategic bounded-context view.
 The model distinguishes:
 
 - local user-device processes: Desktop, CLI, Supervisor, Host, local JetStream,
-  local SQLite, and local `ar`;
+  bundled native PostgreSQL, and local `ar`;
 - the browser device, whose payload and execution environment are untrusted by
   the hosted Host;
 - the hosted control plane: Host, JetStream, and PostgreSQL;
@@ -95,6 +95,31 @@ element is deliberately provider-neutral and proposed. Its identity-authority
 flow records the configured product authority provider, not an internal Access
 Control context, as the owner of product authorization, matching ADR-0080 and
 the authority table above; provider topology stays open under OD-012.
+
+### Private RPC trust
+
+The selected Dapr invocation profile qualifies three separate protections:
+authorized workload enrollment into a service identity, authenticated and
+authorized sidecar-to-sidecar invocation, and both application/sidecar hops.
+A service identity authenticates a workload; it does not establish a product
+actor, delegation, tenant, or grant. The receiving feature validates the narrow
+trusted invocation context under its owned authorization port.
+
+Self-hosted and native profiles must replace or otherwise exclude
+unauthorized enrollment through Dapr Sentry's default insecure validator before
+release. The [Dapr mTLS reference](https://docs.dapr.io/operations/security/mtls/#sentry-token-validators)
+documents that default and the JWKS validator. A selected validator must bind
+the authorized workload to the requested service identity, audience, expiry,
+and trusted issuer, with qualified rotation and failure behavior. This does not
+select a product IdP or resolve OD-012; workload enrollment is also distinct
+from OD-038 device enrollment.
+
+The caller-to-local-sidecar API and receiving-sidecar-to-application endpoint
+each need a qualified protection. Network reachability, loopback, a shared
+container network, or a caller-supplied identity header is insufficient. Direct
+backend calls and forged invocation metadata must not bypass that protection.
+Release evidence covers denial of unauthorized enrollment, both hop bypasses,
+stale credentials, and mismatched product scope, as well as successful calls.
 
 ## Authority and untrusted content
 
@@ -141,12 +166,12 @@ Each asset declares:
 
 ### Classification
 
-| Value | Meaning |
-|---|---|
-| `public` | Intentionally safe for unrestricted disclosure |
-| `internal` | Non-public operational or product data without protected payload |
-| `sensitive` | Tenant, project, user, provider, or operational data requiring scoped access |
-| `secret` | Raw credential or secret material confined to a secret adapter |
+| Value                | Meaning                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| `public`             | Intentionally safe for unrestricted disclosure                                              |
+| `internal`           | Non-public operational or product data without protected payload                            |
+| `sensitive`          | Tenant, project, user, provider, or operational data requiring scoped access                |
+| `secret`             | Raw credential or secret material confined to a secret adapter                              |
 | `authority-evidence` | Restricted evidence of a decision or authority check; never the authority credential itself |
 
 `SecretRef` is an opaque reference and is not raw secret material. A public

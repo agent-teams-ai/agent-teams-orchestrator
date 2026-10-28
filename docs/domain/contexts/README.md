@@ -20,44 +20,44 @@ dossier readiness, not boundary existence.
 
 ## Identity and scope
 
-| Context | Readiness | Primary gate | Dossier |
-|---|---|---|---|
-| Identity Registry | Proposed | `OD-011` | [Identity Registry](identity-registry/README.md) |
-| Access Control | Proposed | `OD-012` | [Access Control](access-control/README.md) |
-| Orchestration Scope | Proposed | `OD-006`, `OD-012`, `OD-019`, `OD-029` | [Orchestration Scope](orchestration-scope/README.md) |
-| Workspace Registry | Proposed | `OD-011` | [Workspace Registry](workspace-registry/README.md) |
+| Context             | Readiness | Primary gate                           | Dossier                                              |
+| ------------------- | --------- | -------------------------------------- | ---------------------------------------------------- |
+| Identity Registry   | Proposed  | `OD-011`                               | [Identity Registry](identity-registry/README.md)     |
+| Access Control      | Proposed  | `OD-012`                               | [Access Control](access-control/README.md)           |
+| Orchestration Scope | Proposed  | `OD-006`, `OD-012`, `OD-019`, `OD-029` | [Orchestration Scope](orchestration-scope/README.md) |
+| Workspace Registry  | Proposed  | `OD-011`                               | [Workspace Registry](workspace-registry/README.md)   |
 
 ## Coordination
 
-| Context | Readiness | Primary gate | Dossier |
-|---|---|---|---|
-| Team Topology | Accepted | | [Team Topology](team-topology/README.md) |
-| Agent Organization | Proposed | `OD-023` | [Agent Organization](agent-organization/README.md) |
-| Work Coordination | Accepted | | [Work Coordination](work-coordination/README.md) |
-| Run Orchestration | Accepted | | [Run Orchestration](run-orchestration/README.md) |
-| Execution Observation | Accepted | | [Execution Observation](execution-observation/README.md) |
-| Agent Communication | Accepted | | [Agent Communication](agent-communication/README.md) |
-| Human Notification Management | Proposed | `OD-026` | [Human Notification Management](human-notification/README.md) |
-| Agent Attention | Proposed | `OD-026`, `OD-033` | [Agent Attention](agent-attention/README.md) |
-| Agent Context | Accepted | | [Agent Context](agent-context/README.md) |
+| Context                       | Readiness | Primary gate       | Dossier                                                       |
+| ----------------------------- | --------- | ------------------ | ------------------------------------------------------------- |
+| Team Topology                 | Accepted  |                    | [Team Topology](team-topology/README.md)                      |
+| Agent Organization            | Proposed  | `OD-023`           | [Agent Organization](agent-organization/README.md)            |
+| Work Coordination             | Accepted  |                    | [Work Coordination](work-coordination/README.md)              |
+| Run Orchestration             | Accepted  |                    | [Run Orchestration](run-orchestration/README.md)              |
+| Execution Observation         | Accepted  |                    | [Execution Observation](execution-observation/README.md)      |
+| Agent Communication           | Accepted  |                    | [Agent Communication](agent-communication/README.md)          |
+| Human Notification Management | Proposed  | `OD-026`           | [Human Notification Management](human-notification/README.md) |
+| Agent Attention               | Proposed  | `OD-026`, `OD-033` | [Agent Attention](agent-attention/README.md)                  |
+| Agent Context                 | Accepted  |                    | [Agent Context](agent-context/README.md)                      |
 
 Accepted rows cover only [ADR-0103](../../decisions/0103-first-sandbox-runtime-migration-slice-admission.md)
 and each dossier's named sandbox feature; broader questions remain excluded.
 
 ## Governance
 
-| Context | Readiness | Primary gate | Dossier |
-|---|---|---|---|
-| Policy and Risk | Proposed | `OD-011`, `OD-012` | [Policy and Risk](policy-risk/README.md) |
-| Approval Management | Proposed | `OD-011` | [Approval Management](approval-management/README.md) |
+| Context             | Readiness | Primary gate       | Dossier                                              |
+| ------------------- | --------- | ------------------ | ---------------------------------------------------- |
+| Policy and Risk     | Proposed  | `OD-011`, `OD-012` | [Policy and Risk](policy-risk/README.md)             |
+| Approval Management | Proposed  | `OD-011`           | [Approval Management](approval-management/README.md) |
 
 ## Usage
 
-| Context | Readiness | Primary gate | Dossier |
-|---|---|---|---|
-| Usage Metering | Proposed | `OD-024` | [Usage Metering](usage-metering/README.md) |
-| Usage Accounting | Proposed | `OD-024` | [Usage Accounting](usage-accounting/README.md) |
-| Consumption Governance | Proposed | `OD-024` | [Consumption Governance](consumption-governance/README.md) |
+| Context                | Readiness | Primary gate | Dossier                                                    |
+| ---------------------- | --------- | ------------ | ---------------------------------------------------------- |
+| Usage Metering         | Proposed  | `OD-024`     | [Usage Metering](usage-metering/README.md)                 |
+| Usage Accounting       | Proposed  | `OD-024`     | [Usage Accounting](usage-accounting/README.md)             |
+| Consumption Governance | Proposed  | `OD-024`     | [Consumption Governance](consumption-governance/README.md) |
 
 ## Dossier rule
 

@@ -4,6 +4,7 @@ type: adr
 status: superseded
 superseded_by:
   - ADR-0110
+  - ADR-0113
 owner: architecture
 summary: Adopt the immutable organization Feature Module Standard v1 and retain Orchestrator-specific rules in a local profile.
 approved_by: product-owner

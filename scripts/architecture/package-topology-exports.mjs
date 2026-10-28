@@ -28,27 +28,18 @@ function isNormalizedBuiltExportTarget(target) {
 }
 
 function isDeclarationExportTarget(target) {
-  return (
-    isNormalizedBuiltExportTarget(target) &&
-    /\.d\.(?:c|m)?ts$/u.test(target)
-  );
+  return isNormalizedBuiltExportTarget(target) && /\.d\.(?:c|m)?ts$/u.test(target);
 }
 
 function isEsmExportTarget(target) {
-  return (
-    isNormalizedBuiltExportTarget(target) && /\.(?:js|mjs)$/u.test(target)
-  );
+  return isNormalizedBuiltExportTarget(target) && /\.(?:js|mjs)$/u.test(target);
 }
 
 export function validateQualifiedLibraryExports(entry, exportsField, errors) {
   const packageJson = `${entry.path}/package.json`;
-  const rootExport = isObjectRecord(exportsField)
-    ? exportsField["."]
-    : undefined;
+  const rootExport = isObjectRecord(exportsField) ? exportsField["."] : undefined;
   if (!isObjectRecord(rootExport)) {
-    errors.push(
-      `${packageJson}: library root export requires built types and import targets`,
-    );
+    errors.push(`${packageJson}: library root export requires built types and import targets`);
   }
   if (!isObjectRecord(exportsField)) {
     return;
@@ -97,9 +88,7 @@ export function normalizedRootReference(referencePath) {
   if (normalized.endsWith("/tsconfig.json")) {
     normalized = normalized.slice(0, -"/tsconfig.json".length);
   }
-  const withoutPrefix = normalized.startsWith("./")
-    ? normalized.slice(2)
-    : normalized;
+  const withoutPrefix = normalized.startsWith("./") ? normalized.slice(2) : normalized;
   if (withoutPrefix === ".." || withoutPrefix.startsWith("../")) {
     return null;
   }
@@ -155,20 +144,13 @@ export function isExportedSubpath(exportsField, requestedKey) {
     return hasExportTarget(exportsField[requestedKey]);
   }
   const matchingPatterns = subpathKeys
-    .filter(
-      (key) => key.includes("*") && exportKeyMatches(key, requestedKey),
-    )
+    .filter((key) => key.includes("*") && exportKeyMatches(key, requestedKey))
     .toSorted((left, right) => {
       const leftWildcard = left.indexOf("*");
       const rightWildcard = right.indexOf("*");
       return (
-        rightWildcard - leftWildcard ||
-        right.length - left.length ||
-        left.localeCompare(right)
+        rightWildcard - leftWildcard || right.length - left.length || left.localeCompare(right)
       );
     });
-  return (
-    matchingPatterns.length > 0 &&
-    hasExportTarget(exportsField[matchingPatterns[0]])
-  );
+  return matchingPatterns.length > 0 && hasExportTarget(exportsField[matchingPatterns[0]]);
 }

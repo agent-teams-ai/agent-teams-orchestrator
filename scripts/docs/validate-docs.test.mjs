@@ -1,14 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import {
-  cp,
-  mkdir,
-  mkdtemp,
-  readFile,
-  rm,
-  unlink,
-  writeFile,
-} from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -20,9 +12,7 @@ const validatorPath = path.join(scriptDirectory, "validate-docs.mjs");
 const validFixturePath = path.join(scriptDirectory, "fixtures/valid");
 
 async function createFixture() {
-  const fixtureRoot = await mkdtemp(
-    path.join(tmpdir(), "agent-teams-orchestrator-docs-"),
-  );
+  const fixtureRoot = await mkdtemp(path.join(tmpdir(), "agent-teams-orchestrator-docs-"));
   await cp(validFixturePath, fixtureRoot, { recursive: true });
   await cp(
     path.join(repositoryRoot, "docs/metadata.schema.json"),
@@ -89,8 +79,7 @@ test("accepts the repository documentation fixture", async () => {
 
 test("rejects a child documentation directory without an index", async () => {
   await withFixture(
-    (fixtureRoot) =>
-      unlink(path.join(fixtureRoot, "docs/templates/README.md")),
+    (fixtureRoot) => unlink(path.join(fixtureRoot, "docs/templates/README.md")),
     ({ code, output }) => {
       assert.equal(code, 1);
       assert.match(
@@ -149,10 +138,7 @@ test("rejects a resolved decision without a deciding ADR", async () => {
   await withFixture(
     (fixtureRoot) =>
       replaceInFile(
-        path.join(
-          fixtureRoot,
-          "docs/open-decisions/OD-001-fixture-decision.md",
-        ),
+        path.join(fixtureRoot, "docs/open-decisions/OD-001-fixture-decision.md"),
         "resolved_by: ADR-0001\n",
         "",
       ),
@@ -215,10 +201,7 @@ summary: First real contract used to prove deferred collection index readiness.
       );
       const indexPath = path.join(fixtureRoot, "docs/README.md");
       const index = await readFile(indexPath, "utf8");
-      await writeFile(
-        indexPath,
-        `${index}\n[Fixture Contract](contracts/fixture-contract.md)\n`,
-      );
+      await writeFile(indexPath, `${index}\n[Fixture Contract](contracts/fixture-contract.md)\n`);
     },
     ({ code, output }) => {
       assert.equal(code, 0, output);
@@ -252,10 +235,7 @@ summary: Contract fixture used to prove collection index materialization timing.
     },
     ({ code, output }) => {
       assert.equal(code, 1);
-      assert.match(
-        output,
-        /docs\/contracts: documentation directory requires README\.md/,
-      );
+      assert.match(output, /docs\/contracts: documentation directory requires README\.md/);
     },
   );
 });
@@ -264,10 +244,7 @@ test("rejects an ADR without its required semantic structure", async () => {
   await withFixture(
     (fixtureRoot) =>
       replaceInFile(
-        path.join(
-          fixtureRoot,
-          "docs/decisions/0001-fixture-decision.md",
-        ),
+        path.join(fixtureRoot, "docs/decisions/0001-fixture-decision.md"),
         "## Context",
         "## Background",
       ),

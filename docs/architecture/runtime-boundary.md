@@ -65,40 +65,40 @@ flowchart LR
 
 ## Authority matrix
 
-| Responsibility | Owner |
-|---|---|
-| Team, task, and message intent | Orchestrator |
-| Team messages, product inboxes, and coordination delivery | Agent Communication |
-| Runtime input and provider output | `ar` |
-| Admitted product evidence, protected diagnostics, normalized user-facing activity, activity feeds, and observation search | Execution Observation |
-| Assignment and completion policy | Orchestrator |
-| Orchestration tenant and Project identity, coarse admission, runtime-scope bindings, and whole-Project disposition coordination | Orchestration Scope |
-| Desired runtime state | Orchestrator |
-| Provider capability selection policy | Orchestrator using runtime facts |
-| Product approval policy, eligible approvers, and decision routing | Orchestrator |
-| Making the product approval decision | Human or machine authority selected by Orchestrator |
-| Technical runtime permission request and pending state | `ar` |
-| Technical capability grant and provider enforcement | `ar` |
-| Runtime process and worker lifecycle | `ar` |
-| Provider session custody and technical session resume/reattach | `ar` |
-| Runtime capacity allocation, provider-account leases, and credential custody | `ar` |
-| Orchestration-run continuation | Run Orchestration |
-| Business cancellation, timeout, retry, and recovery policy | Run Orchestration |
-| Runtime cancellation, timeout, and recovery mechanism | `ar` |
-| Workspace registration, materialization allocation, and cleanup | Workspace Registry |
-| Authority to use a workspace | Configured product authority provider through a feature-owned authorization port |
-| Workspace trust and required isolation properties | Policy and Risk |
-| Runtime sandbox, mounts, process isolation, network enforcement, and technical fencing | `ar` |
-| Backend-neutral execution-assurance requirement | Policy and Risk, resolved by Run Orchestration |
-| Technical containment compilation, backend capability negotiation, and attestation | `ar` |
-| Optional runtime resource admission, fairness, reservation, and placement | AR-composed runtime-capacity implementation |
-| Runtime-scope cutoff, technical disposition actions, and runtime evidence | `ar` |
-| Git worktree, clone, snapshot, or remote materialization mechanics | Workspace adapters |
-| Provider API, CLI, SSE, and protocol translation | `ar` provider driver |
-| User-facing projections | Orchestrator projections and client applications |
-| Local Orchestrator Host and managed component availability | Local Supervisor |
-| Hosted Orchestrator Host and component availability | Deployment platform |
-| AR host availability when packaged as a local managed component | Local Supervisor |
+| Responsibility                                                                                                                  | Owner                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Team, task, and message intent                                                                                                  | Orchestrator                                                                     |
+| Team messages, product inboxes, and coordination delivery                                                                       | Agent Communication                                                              |
+| Runtime input and provider output                                                                                               | `ar`                                                                             |
+| Admitted product evidence, protected diagnostics, normalized user-facing activity, activity feeds, and observation search       | Execution Observation                                                            |
+| Assignment and completion policy                                                                                                | Orchestrator                                                                     |
+| Orchestration tenant and Project identity, coarse admission, runtime-scope bindings, and whole-Project disposition coordination | Orchestration Scope                                                              |
+| Desired runtime state                                                                                                           | Orchestrator                                                                     |
+| Provider capability selection policy                                                                                            | Orchestrator using runtime facts                                                 |
+| Product approval policy, eligible approvers, and decision routing                                                               | Orchestrator                                                                     |
+| Making the product approval decision                                                                                            | Human or machine authority selected by Orchestrator                              |
+| Technical runtime permission request and pending state                                                                          | `ar`                                                                             |
+| Technical capability grant and provider enforcement                                                                             | `ar`                                                                             |
+| Runtime process and worker lifecycle                                                                                            | `ar`                                                                             |
+| Provider session custody and technical session resume/reattach                                                                  | `ar`                                                                             |
+| Runtime capacity allocation, provider-account leases, and credential custody                                                    | `ar`                                                                             |
+| Orchestration-run continuation                                                                                                  | Run Orchestration                                                                |
+| Business cancellation, timeout, retry, and recovery policy                                                                      | Run Orchestration                                                                |
+| Runtime cancellation, timeout, and recovery mechanism                                                                           | `ar`                                                                             |
+| Workspace registration, materialization allocation, and cleanup                                                                 | Workspace Registry                                                               |
+| Authority to use a workspace                                                                                                    | Configured product authority provider through a feature-owned authorization port |
+| Workspace trust and required isolation properties                                                                               | Policy and Risk                                                                  |
+| Runtime sandbox, mounts, process isolation, network enforcement, and technical fencing                                          | `ar`                                                                             |
+| Backend-neutral execution-assurance requirement                                                                                 | Policy and Risk, resolved by Run Orchestration                                   |
+| Technical containment compilation, backend capability negotiation, and attestation                                              | `ar`                                                                             |
+| Optional runtime resource admission, fairness, reservation, and placement                                                       | AR-composed runtime-capacity implementation                                      |
+| Runtime-scope cutoff, technical disposition actions, and runtime evidence                                                       | `ar`                                                                             |
+| Git worktree, clone, snapshot, or remote materialization mechanics                                                              | Workspace adapters                                                               |
+| Provider API, CLI, SSE, and protocol translation                                                                                | `ar` provider driver                                                             |
+| User-facing projections                                                                                                         | Orchestrator projections and client applications                                 |
+| Local Orchestrator Host and managed component availability                                                                      | Local Supervisor                                                                 |
+| Hosted Orchestrator Host and component availability                                                                             | Deployment platform                                                              |
+| AR host availability when packaged as a local managed component                                                                 | Local Supervisor                                                                 |
 
 There must never be two writers for one runtime mutation or two supervisors for
 one agent process.

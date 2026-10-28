@@ -40,6 +40,7 @@ not normative architecture or transcripts invented from a synthesis.
 - [Pre-implementation gate critique, 2026-07-30](pre-implementation-gate-critique-2026-07-30.md)
 - [Human Notification and Agent Attention boundary critique, 2026-07-30](human-notification-agent-attention-boundary-critique-2026-07-30.md)
 - [Pre-code expensive decision audit, 2026-08-01](pre-code-expensive-decision-audit-2026-08-01.md)
+- [Scalable profile review addendum, 2026-10-21](pre-code-expensive-decision-audit-2026-08-01.md#2026-10-21-review-addendum)
 - [Team participant model council, 2026-08-27](team-participant-model-council-2026-08-27.md)
 
 ## Domain value and persistence evidence

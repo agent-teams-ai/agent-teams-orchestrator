@@ -68,9 +68,9 @@ function minimalCatalog() {
         commercialAuthorityAdapter: "none",
         id: "fully-local",
         productAuthorityAdapter: "local-standalone",
-        qualification: "deferred",
+        qualification: "blocked",
         qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
-        releaseScope: "future",
+        releaseScope: "v1-target",
         requiredCapabilities: ["local-host-runtime-execution"],
       },
     ],
@@ -78,11 +78,7 @@ function minimalCatalog() {
       {
         blockedBy: ["OD-004"],
         id: "server-runtime-execution",
-        profiles: [
-          "connected-self-hosted",
-          "managed-saas",
-          "standalone-self-hosted",
-        ],
+        profiles: ["connected-self-hosted", "managed-saas", "standalone-self-hosted"],
         qualification: "blocked",
         qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
       },
@@ -96,11 +92,7 @@ function minimalCatalog() {
       {
         blockedBy: ["OD-038"],
         id: "local-device-execution",
-        profiles: [
-          "connected-self-hosted",
-          "managed-saas",
-          "standalone-self-hosted",
-        ],
+        profiles: ["connected-self-hosted", "managed-saas", "standalone-self-hosted"],
         qualification: "blocked",
         qualificationEvidence: { conformanceRefs: [], decisionRefs: [] },
       },
@@ -157,14 +149,8 @@ test("returns schema diagnostics without running semantic validation", async () 
     ]);
     await Promise.all([
       copyFile(
-        path.join(
-          repositoryRoot,
-          "architecture/reliability/reliability-catalog.schema.json",
-        ),
-        path.join(
-          root,
-          "architecture/reliability/reliability-catalog.schema.json",
-        ),
+        path.join(repositoryRoot, "architecture/reliability/reliability-catalog.schema.json"),
+        path.join(root, "architecture/reliability/reliability-catalog.schema.json"),
       ),
       writeFile(
         path.join(root, "architecture/reliability/reliability-catalog.yaml"),
@@ -191,10 +177,7 @@ test("rejects a high-cardinality metric attribute", () => {
     status: "candidate",
   });
 
-  assert.match(
-    validateReliabilitySemantics(catalog, owners).join("\n"),
-    /REL-CARDINALITY-001/u,
-  );
+  assert.match(validateReliabilitySemantics(catalog, owners).join("\n"), /REL-CARDINALITY-001/u);
 });
 
 test("rejects an active SLO without an approved objective", () => {
@@ -207,10 +190,7 @@ test("rejects an active SLO without an approved objective", () => {
     status: "active",
   });
 
-  assert.match(
-    validateReliabilitySemantics(catalog, owners).join("\n"),
-    /REL-SLO-001/u,
-  );
+  assert.match(validateReliabilitySemantics(catalog, owners).join("\n"), /REL-SLO-001/u);
 });
 
 test("rejects a 100 percent objective", () => {
@@ -228,20 +208,14 @@ test("rejects a 100 percent objective", () => {
     status: "active",
   });
 
-  assert.match(
-    validateReliabilitySemantics(catalog, owners).join("\n"),
-    /REL-SLO-003/u,
-  );
+  assert.match(validateReliabilitySemantics(catalog, owners).join("\n"), /REL-SLO-003/u);
 });
 
 test("rejects a qualified profile that retains blockers", () => {
   const catalog = minimalCatalog();
   catalog.profiles[0].qualification = "qualified";
 
-  assert.match(
-    validateReliabilitySemantics(catalog, owners).join("\n"),
-    /REL-PROFILE-004/u,
-  );
+  assert.match(validateReliabilitySemantics(catalog, owners).join("\n"), /REL-PROFILE-004/u);
 });
 
 test("rejects qualified state without decision and conformance evidence", () => {
@@ -249,10 +223,7 @@ test("rejects qualified state without decision and conformance evidence", () => 
   catalog.profiles[0].blockedBy = [];
   catalog.profiles[0].qualification = "qualified";
 
-  assert.match(
-    validateReliabilitySemantics(catalog, owners).join("\n"),
-    /REL-PROFILE-007/u,
-  );
+  assert.match(validateReliabilitySemantics(catalog, owners).join("\n"), /REL-PROFILE-007/u);
 });
 
 test("rejects qualification while the attestation framework is blocked", () => {
@@ -264,10 +235,7 @@ test("rejects qualification while the attestation framework is blocked", () => {
     decisionRefs: ["ADR-0093"],
   };
 
-  assert.match(
-    validateReliabilitySemantics(catalog, owners).join("\n"),
-    /REL-PROFILE-018/u,
-  );
+  assert.match(validateReliabilitySemantics(catalog, owners).join("\n"), /REL-PROFILE-018/u);
 });
 
 test("rejects enabling the qualification framework before its verifier exists", () => {
@@ -279,20 +247,14 @@ test("rejects enabling the qualification framework before its verifier exists", 
     decisionRefs: ["ADR-0093"],
   };
 
-  assert.match(
-    validateReliabilitySemantics(catalog, owners).join("\n"),
-    /REL-PROFILE-017/u,
-  );
+  assert.match(validateReliabilitySemantics(catalog, owners).join("\n"), /REL-PROFILE-017/u);
 });
 
 test("rejects rebinding the qualification framework away from OD-039", () => {
   const catalog = minimalCatalog();
   catalog.qualificationFramework.blockedBy = ["OD-003"];
 
-  assert.match(
-    validateReliabilitySemantics(catalog, owners).join("\n"),
-    /REL-PROFILE-023/u,
-  );
+  assert.match(validateReliabilitySemantics(catalog, owners).join("\n"), /REL-PROFILE-023/u);
 });
 
 test("rejects deleting or rebinding a required deployment capability", () => {
@@ -314,10 +276,7 @@ test("rejects deleting a deployment capability blocker", () => {
   );
   localHostCapability.blockedBy = ["OD-004"];
 
-  assert.match(
-    validateReliabilitySemantics(catalog, owners).join("\n"),
-    /REL-PROFILE-020/u,
-  );
+  assert.match(validateReliabilitySemantics(catalog, owners).join("\n"), /REL-PROFILE-020/u);
 });
 
 test("rejects making optional commercial work a profile blocker", () => {
@@ -327,10 +286,7 @@ test("rejects making optional commercial work a profile blocker", () => {
   );
   connectedProfile.blockedBy.push("OD-037");
 
-  assert.match(
-    validateReliabilitySemantics(catalog, owners).join("\n"),
-    /REL-PROFILE-008/u,
-  );
+  assert.match(validateReliabilitySemantics(catalog, owners).join("\n"), /REL-PROFILE-008/u);
 });
 
 test("rejects a qualified profile whose mandatory capability is not qualified", () => {
@@ -342,10 +298,7 @@ test("rejects a qualified profile whose mandatory capability is not qualified", 
     decisionRefs: ["ADR-0093"],
   };
 
-  assert.match(
-    validateReliabilitySemantics(catalog, owners).join("\n"),
-    /REL-PROFILE-022/u,
-  );
+  assert.match(validateReliabilitySemantics(catalog, owners).join("\n"), /REL-PROFILE-022/u);
 });
 
 test("rejects unknown blockers and missing conformance artifacts", async () => {
@@ -353,17 +306,12 @@ test("rejects unknown blockers and missing conformance artifacts", async () => {
   catalog.profiles[0].blockedBy = [];
   catalog.profiles[0].qualification = "qualified";
   catalog.profiles[0].qualificationEvidence = {
-    conformanceRefs: [
-      "architecture/qualification-evidence/missing-managed-saas.json",
-    ],
+    conformanceRefs: ["architecture/qualification-evidence/missing-managed-saas.json"],
     decisionRefs: ["ADR-0090"],
   };
   catalog.capabilities[0].blockedBy = ["OD-999"];
 
-  const errors = await validateQualificationReferences(
-    catalog,
-    repositoryRoot,
-  );
+  const errors = await validateQualificationReferences(catalog, repositoryRoot);
   assert.match(errors.join("\n"), /REL-PROFILE-011/u);
   assert.match(errors.join("\n"), /REL-PROFILE-016/u);
 });

@@ -22,13 +22,7 @@ const expectedProfileDefinitions = new Map([
   ],
   [
     "standalone-self-hosted",
-    [
-      "v1-target",
-      "standalone",
-      "none",
-      ["server-runtime-execution"],
-      ["OD-003", "OD-012"],
-    ],
+    ["v1-target", "standalone", "none", ["server-runtime-execution"], ["OD-003", "OD-012"]],
   ],
   [
     "connected-self-hosted",
@@ -43,7 +37,7 @@ const expectedProfileDefinitions = new Map([
   [
     "fully-local",
     [
-      "future",
+      "v1-target",
       "local-standalone",
       "none",
       ["local-host-runtime-execution"],
@@ -56,11 +50,7 @@ const expectedDeploymentCapabilities = new Map([
     "server-runtime-execution",
     {
       blockedBy: ["OD-004"],
-      profiles: [
-        "connected-self-hosted",
-        "managed-saas",
-        "standalone-self-hosted",
-      ],
+      profiles: ["connected-self-hosted", "managed-saas", "standalone-self-hosted"],
     },
   ],
   [
@@ -74,11 +64,7 @@ const expectedDeploymentCapabilities = new Map([
     "local-device-execution",
     {
       blockedBy: ["OD-038"],
-      profiles: [
-        "connected-self-hosted",
-        "managed-saas",
-        "standalone-self-hosted",
-      ],
+      profiles: ["connected-self-hosted", "managed-saas", "standalone-self-hosted"],
     },
   ],
   [
@@ -115,23 +101,17 @@ async function loadDecisionRegistry(repositoryRoot) {
 function validateQualificationState(item, kind, errors) {
   const blockers = item.blockedBy ?? [];
   const evidence = item.qualificationEvidence ?? {};
-  if (
-    new Set(["blocked", "deferred"]).has(item.qualification) &&
-    blockers.length === 0
-  ) {
+  if (new Set(["blocked", "deferred"]).has(item.qualification) && blockers.length === 0) {
     errors.push(
       `REL-PROFILE-003 ${item.id}: ${item.qualification} ${kind} requires a blocking decision`,
     );
   }
   if (item.qualification === "qualified" && blockers.length > 0) {
-    errors.push(
-      `REL-PROFILE-004 ${item.id}: qualified ${kind} cannot retain blocking decisions`,
-    );
+    errors.push(`REL-PROFILE-004 ${item.id}: qualified ${kind} cannot retain blocking decisions`);
   }
   if (
     item.qualification === "qualified" &&
-    ((evidence.decisionRefs?.length ?? 0) === 0 ||
-      (evidence.conformanceRefs?.length ?? 0) === 0)
+    ((evidence.decisionRefs?.length ?? 0) === 0 || (evidence.conformanceRefs?.length ?? 0) === 0)
   ) {
     errors.push(
       `REL-PROFILE-007 ${item.id}: qualified ${kind} requires decision and conformance evidence`,
@@ -179,13 +159,8 @@ function validateProfiles(catalog, errors) {
     }
     ids.add(profile.id);
     validateQualificationState(profile, "profile", errors);
-    if (
-      profile.releaseScope === "v1-target" &&
-      profile.qualification === "deferred"
-    ) {
-      errors.push(
-        `REL-PROFILE-005 ${profile.id}: v1 target cannot be deferred`,
-      );
+    if (profile.releaseScope === "v1-target" && profile.qualification === "deferred") {
+      errors.push(`REL-PROFILE-005 ${profile.id}: v1 target cannot be deferred`);
     }
     const expected = expectedProfileDefinitions.get(profile.id);
     if (
@@ -203,9 +178,7 @@ function validateProfiles(catalog, errors) {
   }
   for (const required of requiredDeploymentProfiles) {
     if (!ids.has(required)) {
-      errors.push(
-        `REL-PROFILE-006 ${required}: required deployment profile is missing`,
-      );
+      errors.push(`REL-PROFILE-006 ${required}: required deployment profile is missing`);
     }
   }
 }
@@ -226,9 +199,7 @@ function validateCapabilityProfiles(capability, profileIds, errors) {
   }
   for (const profile of capability.profiles ?? []) {
     if (!profileIds.has(profile)) {
-      errors.push(
-        `REL-PROFILE-010 ${capability.id}: unknown deployment profile ${profile}`,
-      );
+      errors.push(`REL-PROFILE-010 ${capability.id}: unknown deployment profile ${profile}`);
     }
   }
 }
@@ -236,9 +207,7 @@ function validateCapabilityProfiles(capability, profileIds, errors) {
 function validateRequiredCapabilities(catalog, capabilityIds, errors) {
   for (const required of expectedDeploymentCapabilities.keys()) {
     if (!capabilityIds.has(required)) {
-      errors.push(
-        `REL-PROFILE-021 ${required}: required deployment capability is missing`,
-      );
+      errors.push(`REL-PROFILE-021 ${required}: required deployment capability is missing`);
     }
   }
   const capabilityById = new Map(
@@ -259,15 +228,11 @@ function validateRequiredCapabilities(catalog, capabilityIds, errors) {
 }
 
 function validateDeploymentCapabilities(catalog, errors) {
-  const profileIds = new Set(
-    (catalog.profiles ?? []).map((profile) => profile.id),
-  );
+  const profileIds = new Set((catalog.profiles ?? []).map((profile) => profile.id));
   const capabilityIds = new Set();
   for (const capability of catalog.capabilities ?? []) {
     if (capabilityIds.has(capability.id)) {
-      errors.push(
-        `REL-PROFILE-009 ${capability.id}: duplicate deployment capability`,
-      );
+      errors.push(`REL-PROFILE-009 ${capability.id}: duplicate deployment capability`);
     }
     capabilityIds.add(capability.id);
     validateQualificationState(capability, "capability", errors);
@@ -305,9 +270,7 @@ export async function validateQualificationReferences(catalog, repositoryRoot) {
     for (const reference of item.qualificationEvidence?.decisionRefs ?? []) {
       const decision = decisions.get(reference);
       if (!decision) {
-        errors.push(
-          `REL-PROFILE-013 ${item.id}: unknown qualification decision ${reference}`,
-        );
+        errors.push(`REL-PROFILE-013 ${item.id}: unknown qualification decision ${reference}`);
       } else if (!evidenceStatuses.has(decision.status)) {
         errors.push(
           `REL-PROFILE-014 ${item.id}: qualification decision ${reference} has inadmissible status ${decision.status}`,
@@ -316,10 +279,7 @@ export async function validateQualificationReferences(catalog, repositoryRoot) {
     }
     for (const reference of item.qualificationEvidence?.conformanceRefs ?? []) {
       const absolute = path.resolve(repositoryRoot, reference);
-      const evidenceRoot = path.join(
-        repositoryRoot,
-        "architecture/qualification-evidence",
-      );
+      const evidenceRoot = path.join(repositoryRoot, "architecture/qualification-evidence");
       if (!absolute.startsWith(`${evidenceRoot}${path.sep}`)) {
         errors.push(
           `REL-PROFILE-015 ${item.id}: conformance evidence escapes the qualification directory`,
@@ -329,9 +289,7 @@ export async function validateQualificationReferences(catalog, repositoryRoot) {
       try {
         await readFile(absolute, "utf8");
       } catch {
-        errors.push(
-          `REL-PROFILE-016 ${item.id}: missing conformance evidence ${reference}`,
-        );
+        errors.push(`REL-PROFILE-016 ${item.id}: missing conformance evidence ${reference}`);
       }
     }
   }

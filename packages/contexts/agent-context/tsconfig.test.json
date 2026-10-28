@@ -4,13 +4,9 @@
     "composite": false,
     "noEmit": true,
     "rootDir": ".",
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "allowImportingTsExtensions": true
   },
-  "include": [
-    "tests/**/*.ts"
-  ],
+  "include": ["tests/**/*.ts"],
   "references": []
 }

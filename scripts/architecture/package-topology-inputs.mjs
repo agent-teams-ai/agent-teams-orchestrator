@@ -12,9 +12,7 @@ import {
 
 function appendSchemaErrors(errors, location, validationErrors) {
   for (const validationError of validationErrors ?? []) {
-    errors.push(
-      `${location}${validationError.instancePath}: ${validationError.message}`,
-    );
+    errors.push(`${location}${validationError.instancePath}: ${validationError.message}`);
   }
 }
 
@@ -25,35 +23,18 @@ function validateSchema(ajv, location, value, schemaSource, errors) {
   }
 }
 
-export async function loadPackageMaterializationInputs(
-  repositoryRoot,
-  errors,
-) {
+export async function loadPackageMaterializationInputs(repositoryRoot, errors) {
   const architectureRoot = path.join(repositoryRoot, "architecture");
-  const [
-    catalog,
-    catalogSchema,
-    documents,
-    materializationPolicy,
-    materializationPolicySchema,
-  ] = await Promise.all([
-    loadPackageCatalog(repositoryRoot),
-    readFile(path.join(architectureRoot, "package-catalog.schema.json"), "utf8"),
-    loadDocuments(repositoryRoot),
-    loadPackageMaterializationPolicy(repositoryRoot),
-    readFile(
-      path.join(architectureRoot, "package-materialization-policy.schema.json"),
-      "utf8",
-    ),
-  ]);
+  const [catalog, catalogSchema, documents, materializationPolicy, materializationPolicySchema] =
+    await Promise.all([
+      loadPackageCatalog(repositoryRoot),
+      readFile(path.join(architectureRoot, "package-catalog.schema.json"), "utf8"),
+      loadDocuments(repositoryRoot),
+      loadPackageMaterializationPolicy(repositoryRoot),
+      readFile(path.join(architectureRoot, "package-materialization-policy.schema.json"), "utf8"),
+    ]);
   const ajv = new Ajv2020({ allErrors: true, strict: true });
-  validateSchema(
-    ajv,
-    "architecture/package-catalog.yaml",
-    catalog,
-    catalogSchema,
-    errors,
-  );
+  validateSchema(ajv, "architecture/package-catalog.yaml", catalog, catalogSchema, errors);
   validateSchema(
     ajv,
     "architecture/package-materialization-policy.yaml",
@@ -66,17 +47,10 @@ export async function loadPackageMaterializationInputs(
 
 export async function loadPackageTopologyInputs(repositoryRoot, errors) {
   const architectureRoot = path.join(repositoryRoot, "architecture");
-  const [
-    materializationInputs,
-    dependencyPolicy,
-    dependencyPolicySchema,
-  ] = await Promise.all([
+  const [materializationInputs, dependencyPolicy, dependencyPolicySchema] = await Promise.all([
     loadPackageMaterializationInputs(repositoryRoot, errors),
     loadSourceDependencyPolicy(repositoryRoot),
-    readFile(
-      path.join(architectureRoot, "source-dependency-policy.schema.json"),
-      "utf8",
-    ),
+    readFile(path.join(architectureRoot, "source-dependency-policy.schema.json"), "utf8"),
   ]);
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   validateSchema(

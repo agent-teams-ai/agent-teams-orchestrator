@@ -16,6 +16,12 @@ related:
 
 ## Scope and provenance
 
+Current integration note, 2026-10-28: [ADR-0117](../decisions/0117-reconcile-mandatory-module-composition.md)
+reconciles the parallel module history with the canonical ADR-0113 pin and
+mandatory scope. ADR-0114 and ADR-0115 govern service placement and Fully Local
+V1. Dated comparisons and earlier pending-branch notes below retain their original
+source context; they do not override these current decisions.
+
 This report preserves the provider source review recorded on 2026-10-21 and
 reconciled into research on 2026-10-22 from Orchestrator PR #86 head
 `8483949960cb783fe70090e2e7fbf526a043d362`. Its method is review of the exact

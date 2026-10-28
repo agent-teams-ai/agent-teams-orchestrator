@@ -8,7 +8,9 @@ related:
   - ADR-0011
   - ADR-0047
   - ADR-0025
-  - ADR-0102
+  - ADR-0114
+  - ADR-0115
+  - architecture.deployment-profiles
   - ADR-0052
   - ADR-0046
   - ADR-0048
@@ -22,13 +24,14 @@ related:
 
 # Persistence Boundary
 
-ADR-0087 qualifies only the Managed SaaS and Standalone Self-Hosted Server
-profiles in V1; per ADR-0011 and the deployment profile matrix, both use
-PostgreSQL. The SQLite topology, `node:sqlite` driver, and local command-lane
-rules below describe the future Fully Local profile and must not be read as a
-V1 availability or implementation claim. ADR-0087 forbids placeholder SQLite
-repositories created merely to claim local support, while interface-level
-fixtures for future local adapters remain allowed.
+ADR-0114 selects native PostgreSQL for the server profiles and the Fully
+Local profile. The local deployment bundles and manages an ordinary PostgreSQL
+process; it does not use an in-process SQL emulator. ADR-0115 requires Managed
+SaaS, Standalone Self-Hosted Server, and Fully Local for V1. Native local
+persistence remains behind its existing implementation-start and qualification
+gates; selecting a release target does not authorize placeholder repositories or
+local package materialization. Interface-level fixtures and disposable spikes
+remain allowed.
 
 ## Principle
 
@@ -57,20 +60,16 @@ flowchart TB
         App --> Transaction
     end
 
-    LocalAdapter["Context Local Adapter"] -. "implements" .-> Repositories
-    LocalAdapter -. "implements" .-> Queries
-    LocalAdapter -. "implements" .-> Transaction
+    Adapter["Context PostgreSQL Adapter"] -. "implements" .-> Repositories
+    Adapter -. "implements" .-> Queries
+    Adapter -. "implements" .-> Transaction
 
-    HostedAdapter["Context Hosted Adapter"] -. "implements" .-> Repositories
-    HostedAdapter -. "implements" .-> Queries
-    HostedAdapter -. "implements" .-> Transaction
-
-    Local --> LocalAdapter
-    Hosted --> HostedAdapter
+    Local --> Adapter
+    Hosted --> Adapter
 ```
 
 The application host selects one persistence profile during composition. Use cases
-do not branch on `sqlite`, `postgres`, `desktop`, or `hosted`.
+do not branch on a database engine, `desktop`, or `hosted`.
 
 ## Port design
 
@@ -114,6 +113,7 @@ One transaction may atomically change only one bounded context:
 ```text
 aggregate state
 + aggregate revision
++ durable command receipt
 + context-local projections required by the command
 + integration-event outbox records
 + durable command-dispatch records
@@ -148,97 +148,32 @@ ownership.
 
 ## Local and hosted profiles
 
-The V1 production topology is one PostgreSQL database with one schema per
-bounded context for the Managed SaaS and Standalone Self-Hosted Server
-profiles. The complete profile set is:
+Both profiles initially use one PostgreSQL application database with one schema
+per bounded context. The server deployment supplies its database endpoint. The
+Fully Local deployment owns one bundled PostgreSQL cluster and database
+per local Target data root, shared by its contexts and clients. Component updates
+preserve that data ownership; clients, workspaces, projects, and agents do not
+create independent authoritative clusters.
 
-- one PostgreSQL database with one schema per bounded context for the V1
-  server profiles;
-- one embedded SQLite database file per bounded context for the future Fully
-  Local profile, deferred from V1 by ADR-0087;
-- separate context-owned adapters and dialect migrations;
-- shared technical test harnesses plus context-owned semantic conformance suites.
-
-Alternative profiles may be added at the application composition root without
-changing domain or application behavior.
+Context-owned PostgreSQL adapters, schema declarations, immutable SQL migrations,
+codecs, and applicable conformance suites are shared. Connection configuration,
+resource limits, process lifecycle, replication, and recovery policy remain
+deployment concerns. A supported version and capability matrix qualifies the
+engine, driver, Drizzle, extensions, encoding, and collation assumptions. The same
+SQL family does not prove equivalent operating-system or deployment behavior.
 
 Exactly one profile is authoritative for each bounded context in one running
 deployment. A Desktop connected to a hosted orchestrator uses hosted authority;
 local storage may hold explicitly disposable client cache or client-owned state
-but never a fallback aggregate repository. Local and hosted databases are not
-dual-written or synchronized table by table. Context movement uses the logical
-transfer protocol defined by ADR-0048.
+but never a fallback aggregate repository. Clients use the Host's public control
+and feed contracts, never its SQL endpoint or credentials. Local and hosted
+databases are not dual-written or synchronized table by table. Context movement
+uses the logical transfer protocol preserved by ADR-0114 from ADR-0048. SQLite
+and PGlite are not alternative authoritative profiles or automatic fallbacks.
 
-### Desktop SQLite
+### Shared PostgreSQL semantics
 
-This profile is deferred from V1 by ADR-0087. When implemented, each bounded
-context receives its own database file and connection lifecycle:
-
-```text
-data/
-  orchestration-scope.sqlite3
-  team-topology.sqlite3
-  work-coordination.sqlite3
-  run-orchestration.sqlite3
-  agent-communication.sqlite3
-```
-
-Context files are not attached for cross-context joins or transactions. Query
-Composition calls published read APIs or maintains a disposable edge projection.
-
-The local persistence runtime owns WAL configuration, busy handling, checkpointing,
-integrity checks, version compatibility, and online backup primitives. A
-multi-context product backup uses a mutation barrier and manifest; it does not
-pretend that separate files share one transaction.
-
-The production runtime baseline remains Node.js 24 LTS, selected by
-`.node-version` and the normal CI lane. Root and Local Host Control package
-engines also admit Node.js 26 for compatibility staging under proposed ADR-0102.
-The current lockfile pins published Node.js 26-compatible dependencies, and
-strict frozen installs and `pnpm check:fast` passed on Node.js 24.21 and 26.10
-at candidate `dc76b6f09bed96c95ff8d9c004072c089125116f`. The trusted Docs
-gate still fails because the central active Cohort records old package
-coordinates; Node.js 26 is not an advertised production runtime or a completed
-release qualification. The first local driver is `node:sqlite`. Application
-ports remain asynchronous even though the adapter executes a synchronous
-`DatabaseSync` transaction.
-
-Mutating use cases enter one single-writer command lane per bounded context before
-opening their Unit of Work. In every profile, no network, broker, runtime,
-filesystem, Temporal, or other externally observable effect occurs inside that
-transaction. Complete outbox or durable command-dispatch intent is committed
-first.
-
-A command lane is bounded in both admission and scheduling. It must not drain an
-unbounded burst of synchronous SQLite transactions in one event-loop turn.
-Queue depth, transaction latency, timer lag, busy time, and rejection are
-observable. The local composition applies explicit backpressure when its
-configured latency or queue budget is exceeded.
-
-The initial in-process scheduler services one durable command per turn and yields
-within a five-millisecond time budget. Admission capacity is deployment-profile
-configuration, not an unbounded library default. Command work, control-feed reads,
-and outbox claim/mark operations receive fair scheduling; batching cannot starve a
-capability behind the command queue.
-
-A separate persistence worker is not the default. If measurement proves that
-synchronous work causes unacceptable event-loop latency, the complete
-bounded-context command lane moves to a Worker Thread. Repositories do not become
-independent RPC services and a transaction token is not passed across calls.
-Worker isolation does not relax admission or fairness limits.
-
-The initial Worker-promotion benchmark runs the target workload at least three
-times after bounded admission and time slicing are enabled. Promotion is justified
-by repeated Host-responsiveness failure, such as timer or heartbeat drift p99 over
-10 ms, event-loop delay p99 over 20 ms, or event-loop delay max over 50 ms.
-Command queue latency alone first triggers backpressure or capacity changes, not
-Worker extraction. These initial thresholds must be revalidated on packaged
-desktop targets and may be tightened by product SLOs.
-
-### Hosted PostgreSQL
-
-The V1 server profiles use one PostgreSQL database with schema-qualified
-context namespaces:
+Both profiles use explicitly qualified context namespaces:
 
 ```text
 orchestration_scope.*
@@ -259,24 +194,102 @@ roles receive only the privileges required for their context schemas.
 Future tenant routing may move a context or tenant to another database or cluster
 without changing domain/application contracts.
 
-The first hosted driver is `node-postgres`. Hosted command handlers may execute
-concurrently, but repository revisions, idempotency, fencing where applicable,
-and transaction outcomes must match the local profile's application semantics.
+The TypeScript Host uses asynchronous `node-postgres` in both profiles. Every
+Unit of Work owns one checked-out client from begin through commit or rollback;
+repositories never obtain independent pool clients inside that Unit of Work.
+No external service, broker, runtime, filesystem, Temporal, or other external effect
+occurs inside the transaction. Complete outbox or durable command-dispatch
+intent is committed first.
 
-Every mutating capability declares its hosted concurrency profile before
+Every mutating capability declares its PostgreSQL concurrency profile before
 implementation. It identifies the invariant, conflicting command set, revision
 rule, constraints, lock order, isolation level, complete-Unit-of-Work retry
-policy, and unknown-commit reconciliation. Local command-lane tests do not prove
-hosted safety. Critical capabilities run real concurrent PostgreSQL conformance
-scenarios as required by ADR-0050.
+policy, and unknown-commit reconciliation. ADR-0114 applies ADR-0050's conflict
+evidence to both local and hosted PostgreSQL. Neither a local process mutex nor
+an in-memory fixture proves database concurrency safety. A synchronous SQLite
+command lane or per-repository Worker RPC is not the local default.
 
 ADR-0078 makes that obligation executable through a federated build-time evidence
 gate. Each discovered write entry point belongs to one mutation, every mutation
 owns one consistency contract, every enabled persistence profile resolves a
 compatible binding, and every selected strategy requires independent evidence.
-Standard SQLite and PostgreSQL strategy mappings are declared once per context
+Standard PostgreSQL strategy mappings are declared once per context
 adapter or profile rather than copied into every mutation. The gate does not
 provide locks, transactions, or a production handler registry.
+
+### Native local PostgreSQL
+
+This profile is required for V1 but remains unqualified. The Local Supervisor owns the PostgreSQL
+binary, process, protected data root, endpoint, and lifecycle. Host persistence
+adapters own connections, context migrations, SQL behavior, and context recovery
+validation. Desktop and the SDK own neither responsibility. The
+[Local Host lifecycle](local-host-lifecycle.md#managed-postgresql-lifecycle)
+defines bootstrap, authentication, process custody, and activation safeguards.
+
+[ADR-0114](../decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md) selects
+`embedded-postgres` behind the Node Supervisor's component adapter. It neither
+selects the Desktop shell nor replaces the TypeScript Host. Exact wrapper,
+engine, and platform artifacts remain unselected until qualification; the
+2026-10-03 and 2026-10-17 research versions are evidence pins. Only one launcher
+implementation is maintained by default. The [packaged qualification matrix](local-host-lifecycle.md#packaged-postgresql-qualification)
+binds platform, lifecycle, update, and verified-restore evidence to each released
+capability; PostgreSQL persistence semantics remain with the existing owners.
+
+Persistent data is explicit. Startup verifies the effective `fsync=on`,
+`full_page_writes=on`, and `synchronous_commit=on` configuration as well as engine
+and schema compatibility. Temporary-data defaults, runtime engine downloads,
+and a weaker durability setting cannot silently become normal local operation.
+Local crash recovery does not imply hosted high availability or protection from
+device loss. OD-003 owns the supported backup and recovery profile.
+
+### Admission and resource budgets
+
+Both profiles bound command admission, pool waits, result sizes, relay batches,
+and transaction duration. Fair scheduling preserves cancellation, health, feeds,
+inbox, outbox, and recovery under load. Database I/O being asynchronous does not
+bound JavaScript result decoding or an admission queue.
+
+Composition sets a total connection budget across context roles, Host replicas,
+background workers, and maintenance. Sum every pool allowance in each role
+instance across the maximum simultaneously live instances, then include
+maintenance reserves and declared operational headroom. Count rollout surge,
+terminating instances that still hold connections, and overlapping rollouts;
+the desired replica count plus surge alone is not a hard bound. The released
+profile bounds drain duration and rollout overlap and verifies when pools
+actually close. It also budgets server-retained connections after lost client
+connectivity until qualified detection and cleanup complete. Independent
+context defaults cannot exceed that budget.
+Connections and pools are not
+allocated per agent, and adding role replicas does not increase PostgreSQL
+capacity by itself. The [service role map](deployment-profiles.md#service-role-map)
+owns placement; one context's semantic mutation ownership does not require one
+singleton writer process. Qualified write replicas preserve the same constraints,
+revisions, receipts, claims, and fencing rather than splitting a transaction
+across RPC roles.
+
+[Kubernetes Deployment behavior](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment)
+explicitly permits resource use above desired replicas plus surge while old
+Pods terminate. Resource admission must account for that overlap instead of
+assuming removal from readiness releases connections.
+
+Queue depth, pool wait, transaction latency, lock wait, timer lag, rejection,
+backlog, and disk headroom are observable. PostgreSQL WAL and temporary files,
+NATS, blobs, logs, and backup staging share the local storage budget. Required
+receipts and dispatch intent are never discarded as an overload shortcut.
+
+The server architecture targets thousands of simultaneously running agents, not
+thousands of stored Agents, queued jobs, or idle sessions. Persistence workload
+qualification states an exact concurrent-execution target and representative
+command and event rates, bursts, payloads, fanout, data size, duration, deployment
+form, and hardware. A single SQL client or idle connection count is not evidence
+for that workload. Modeled traffic with a fake AR can qualify persistence
+behavior at the declared load; it cannot qualify actual AR/provider execution
+capacity. Compose, Kubernetes, and the native V1 profile require evidence
+for their own composition. Numerical limits remain subject to the existing
+reliability qualification and approval rules; this target is not a capacity claim
+or SLO.
+
+### Hosted PostgreSQL operations
 
 Primary-only reads are the default hosted consistency profile. Replica reads are
 an explicit query capability with declared eventual-consistency or required-LSN
@@ -344,28 +357,22 @@ application tenant predicates and forced PostgreSQL RLS.
 
 ### Adapter-local Drizzle
 
-Drizzle may provide query, schema, and migration tooling inside SQLite and
+Drizzle provides query, schema, and migration tooling inside the context-owned
 PostgreSQL persistence adapters. Drizzle types and generated models never enter
 domain, application, feature contracts, or public SDK packages.
 
-ADR-0052 selects Drizzle as the one default toolkit and direct drivers only as a
-contingency. Versions are pinned exactly and verified through import, migration,
-and conformance tests. The initial `node:sqlite` Drizzle integration is pre-GA, so
-a dependency-readiness review is required before production materialization.
-Released migrations remain immutable SQL artifacts and are not regenerated when
-tooling changes.
+ADR-0114 preserves ADR-0052's default toolkit and direct-driver contingency while
+removing the obligation to maintain SQLite repositories. Versions are pinned
+exactly after a dependency-readiness review and verified through import,
+migration, and conformance tests. Released migrations remain immutable SQL
+artifacts and are not regenerated when tooling changes.
 
-Repository ports, Unit of Work semantics, aggregate-state mapping, stable errors,
-and conformance fixtures remain shared. Physical schemas, migrations,
-transactions, locking, engine operations, and dialect error classification stay
-separate where their correctness proof differs. There is no universal repository,
-base repository hierarchy, or dialect branch outside persistence adapters.
-
-After the first two implemented repository pairs, the architecture review measures
-actual duplication. It removes domain/application duplication, extracts proven
-dialect-neutral adapter behavior inside its owning feature, and retains
-irreducible physical behavior with paired conformance tests. An estimated
-duplication percentage is not an architecture guarantee.
+Local and hosted deployments reuse the same feature-owned repository and query
+implementation where its capability matrix applies. Operational differences stay
+in their owning adapters and composition. Reuse does not require a universal
+repository, base repository hierarchy, dialect framework, or a second local
+repository tree. A measured correctness difference receives an explicit binding
+and conformance evidence rather than a deployment branch in a use case.
 
 ### Exact quantities, money, and instants
 
@@ -373,31 +380,26 @@ ADR-0046 governs authoritative counts, quantities, rates, and money.
 
 - Domain and application code use context-owned exact value objects. Decimal,
   Dinero, Drizzle, and driver types remain adapter or implementation details.
-- SQLite uses `INTEGER` only after a signed 64-bit range check and enables BigInt
-  reads before consuming any result row. Wider coefficients and decimals use
-  canonical text or coefficient-plus-scale columns. `REAL` is prohibited.
 - PostgreSQL uses bounded `bigint` and `numeric(precision, scale)`. Node-postgres
   string results remain strings until context mapping.
 - PostgreSQL exact values are cast to text before JSON construction. JSON numeric
   parsing is not a lossless codec for `bigint` or arbitrary-precision `numeric`.
-- Every database aggregate has an explicit range or overflow strategy. SQLite
-  integer `sum()` requires a proven safe bound; otherwise checked BigInt or exact
-  decimal aggregation is used.
+- Every database aggregate has an explicit range or overflow strategy; result
+  mapping uses checked exact arithmetic rather than JavaScript `number`.
 - Persistence records retain scale, unit, basis, currency, rounding policy, and
   algorithm/version references required by their owning context.
 
 The initial exact mapping profile is:
 
-| Semantic value | SQLite | PostgreSQL |
-|---|---|---|
-| Bounded whole count | `INTEGER` with BigInt reads | `BIGINT` read as string |
-| Exact quantity | canonical coefficient `TEXT` plus `INTEGER` scale | coefficient `NUMERIC(P, 0)` plus `SMALLINT` scale |
-| Money | canonical coefficient `TEXT`, scale, currency | coefficient `NUMERIC(P, 0)`, scale, currency |
-| Exact instant | signed `INTEGER` epoch microseconds | `TIMESTAMPTZ(6)` read and written as text |
+| Semantic value      | Local and hosted PostgreSQL                       |
+| ------------------- | ------------------------------------------------- |
+| Bounded whole count | `BIGINT` read as string                           |
+| Exact quantity      | coefficient `NUMERIC(P, 0)` plus `SMALLINT` scale |
+| Money               | coefficient `NUMERIC(P, 0)`, scale, currency      |
+| Exact instant       | `TIMESTAMPTZ(6)` read and written as text         |
 
-`P` comes from an explicit domain bound and overflow policy. SQLite exact
-coefficient columns use text affinity and canonical validation, never `NUMERIC`
-affinity. PostgreSQL special numeric values are rejected. A fixed-scale
+`P` comes from an explicit domain bound and overflow policy. PostgreSQL special
+numeric values are rejected. A fixed-scale
 `NUMERIC(P, S)` requires a later type-specific decision naming its insertion,
 rounding, and overflow behavior.
 
@@ -408,8 +410,9 @@ models, Published Languages, or SDK contracts. Provider timestamps with finer
 precision remain raw evidence, while sequence, cursor, revision, or fence defines
 business ordering.
 
-SQLite and PostgreSQL may use different physical representations but must
-round-trip the same canonical values and produce identical domain outcomes.
+Local and hosted profiles round-trip the same canonical values and produce
+identical domain outcomes. ADR-0049 retains the historical SQLite mapping; it
+does not require a current SQLite implementation.
 
 ### High-volume facts and projections
 
@@ -426,10 +429,11 @@ acceptable again. Corrections append new facts with stable references to the
 superseded evidence. Raw provider payloads may move behind a content-addressed
 BlobStore reference without deleting the canonical receipt or normalized fact.
 
-SQLite does not emulate PostgreSQL partitioning. Local retention uses bounded
-batch deletion, archival, and checkpointed vacuum policy behind the same context
-capability. The application observes identical receipt, correction, cursor, and
-retention semantics rather than identical physical maintenance.
+Local retention initially uses bounded batch deletion, archival, and vacuum
+policy behind the same context capability. Hosted partitioning is not enabled
+locally merely because the engine supports it. The application observes
+identical receipt, correction, cursor, and retention semantics rather than
+identical physical maintenance.
 
 Rollups are versioned, rebuildable read projections. Each records source cursor,
 watermark, projector version, and dimensional scope. Statistics may read them,
@@ -448,8 +452,8 @@ remain private to their outbound adapters; they are not a global `ArtifactStore`
 or part of the context Unit of Work. ADR-0085 owns the complete protocol.
 
 Driver errors are translated inside each adapter into stable persistence
-outcomes. Raw SQLite error names, SQLite numeric codes, PostgreSQL SQLSTATE values,
-and ORM exceptions never enter application contracts.
+outcomes. PostgreSQL SQLSTATE values and ORM exceptions never enter application
+contracts.
 
 The transaction coordinator tracks commit progress internally:
 
@@ -465,14 +469,14 @@ same command ID. Once commit has been dispatched, a lost response is
 retryable and is reconciled through the durable command receipt using the same
 command ID. Commit phase never becomes a domain concept or public transport field.
 
-SQLite corruption and `NOTADB` indicate untrusted state and enter controlled
-recovery rather than transient availability retry. PostgreSQL adapters install
+Detected corruption indicates untrusted state and enters controlled recovery
+rather than transient availability retry. PostgreSQL adapters install
 error listeners on the pool and every checked-out client because a connection
 failure may emit independently of the rejected query. Unhandled driver events
 cannot escape as process-level crashes.
 
-JSON storage representation is not semantic identity. PostgreSQL `jsonb`, SQLite
-text, Protobuf, and JavaScript objects may preserve or reorder fields
+JSON storage representation is not semantic identity. PostgreSQL `jsonb`,
+Protobuf, and JavaScript objects may preserve or reorder fields
 differently. Command fingerprints and idempotency comparisons use one versioned
 canonical application representation before persistence.
 
@@ -492,22 +496,23 @@ pre-commit disconnect, lost commit acknowledgement, timeout, deadlock,
 serialization conflict, and dependency restart. They verify both atomic state
 and stable safe error mapping.
 
-PostgreSQL deployment suites additionally exercise asynchronous data loss,
+Hosted replication and PITR suites additionally exercise asynchronous data loss,
 synchronous commit, primary death, promotion, endpoint and epoch replacement,
 old-primary fencing, replica-lag read rejection, WAL archive, physical base
 backup, selected-point restore, and too-early, too-late, missing-WAL, and
 corrupted-WAL negative controls.
 
-SQLite and PostgreSQL implementations of the same context capability must pass the
-same applicable semantic and capability suites. Tests verify behavior, not
-identical SQL or identical performance.
+Native local and hosted PostgreSQL bindings of the same context capability pass
+the same applicable semantic and capability suites. Local packaging and lifecycle
+qualification remains separate from hosted HA, replication, and PITR evidence.
+Tests verify behavior, not identical performance.
 
 Usage-capability persistence additionally verifies exact-value round trips above
 `Number.MAX_SAFE_INTEGER`, decimal scale conversion, malformed canonical strings,
-currency mismatch, allocation conservation, explicit rounding, SQLite BigInt read
-configuration, integer aggregate overflow, PostgreSQL numeric codecs, exact values
+currency mismatch, allocation conservation, explicit rounding, aggregate overflow,
+PostgreSQL numeric codecs, exact values
 inside JSON, microsecond instant preservation, negative epoch conversion, DST
-period boundaries, and SQLite/PostgreSQL semantic parity.
+period boundaries, and local/hosted semantic parity.
 
 Every supported PgBouncer profile runs the PostgreSQL semantic suite plus
 transaction-pooling hazards, physical-backend switching, tenant-state reset,
@@ -518,16 +523,16 @@ backend loss.
 
 Each feature owns the schema fragment and migration implementations for the tables
 inside its outbound persistence adapter. A feature migration contribution declares
-its semantic migration ID, dialect implementations, dependencies, and compatibility
+its semantic migration ID, PostgreSQL implementation, dependencies, and compatibility
 metadata.
 
 The bounded context assembles all feature contributions into one deterministic,
 validated migration manifest. This assembly layer owns ordering and exposes one
 context migration entry point; it does not absorb feature schemas or SQL.
 
-Migrations are immutable after release. When multiple dialects are supported, one
-semantic migration ID maps to dialect-specific implementations. The context plan
-classifies each step as transactional or online-resumable.
+Migrations are immutable after release and shared by qualified local and hosted
+bindings. The context plan classifies each step as transactional or
+online-resumable; engine-version requirements belong in compatibility metadata.
 
 Hosted zero-downtime changes use expand, migrate, and contract phases. Destructive
 desktop migrations require a verified backup or another explicit forward-recovery
@@ -538,11 +543,12 @@ cannot edit, reorder, or merge context schemas. One migration runner and lock ex
 per context deployment. Features never run migrations independently or compete for
 that lock.
 
-The migration lock covers bootstrap as well as migration execution. The PostgreSQL
-adapter acquires its context-scoped advisory lock before creating or inspecting
-migration metadata. The SQLite adapter acquires its cross-process bootstrap lock
-before configuring WAL, creating metadata, or running migrations. Database busy
-timeouts and `CREATE TABLE IF NOT EXISTS` do not replace this ownership lock.
+The migration lock covers metadata bootstrap as well as migration execution.
+The PostgreSQL adapter acquires its context-scoped advisory lock before creating
+or inspecting migration metadata. A direct maintenance connection owns that lock;
+transaction pooling cannot supply its session lifetime. Connection timeouts and
+`CREATE TABLE IF NOT EXISTS` do not replace the lock. Cluster initialization is a
+separate Supervisor lifecycle operation, never a feature migration.
 
 For a transactional step, SQL, immutable checksum history, and the completed
 watermark commit atomically. An online-resumable step first records immutable
@@ -553,19 +559,28 @@ lock; it does not reapply blindly. Incomplete, failed, or newer-than-supported
 steps reject normal application startup unless an explicit compatibility phase
 permits coexistence.
 
+Host activation, schema migration, and PostgreSQL engine upgrade are separate
+operations. A candidate Host cannot migrate the shared live database during its
+pre-activation health check. An incompatible migration or major engine change
+requires exclusive maintenance, verified recovery artifacts, staged activation,
+and the compatibility procedure in
+[Local Host lifecycle](local-host-lifecycle.md#managed-postgresql-lifecycle).
+Returning to an older binary never silently restores an older data snapshot or
+discards writes accepted after activation.
+
 ## Tenant isolation
 
 Tenant and project scope are mandatory inputs to repositories and queries for
-tenant-owned state. Database constraints and hosted row-level controls provide
+tenant-owned state. Database constraints and row-level controls provide
 defense in depth; they do not replace application authorization.
 
-The hosted PostgreSQL profile applies two independent controls:
+Both PostgreSQL profiles apply two independent controls:
 
 1. application commands and repositories derive `TenantId` from verified
    authority context and include `tenant_id` in every tenant-owned read and write
    predicate;
 2. the PostgreSQL adapter binds that verified tenant with transaction-local
-   `set_config(..., true)`, and hosted tenant tables enable and force row-level
+   `set_config(..., true)`, and tenant tables enable and force row-level
    security.
 
 Session-level `SET` is forbidden for tenant identity because pooled connections
@@ -596,33 +611,40 @@ Backup is not a raw file-copy assumption. Every profile defines:
 - restore rehearsal;
 - behavior when one context restore fails.
 
-A multi-context product backup needs a manifest with context versions and a
-coordination barrier. It does not create a cross-context transaction.
+A product backup combines an engine-supported consistent SQL artifact with a
+versioned manifest and the required immutable BlobStore artifacts. Referenced
+objects remain protected from collection for the backup's retention period.
+One PostgreSQL snapshot does not atomically capture NATS, AR, filesystem objects,
+or external effects. The declared recovery protocol coordinates those boundaries
+without creating a cross-context transaction.
 
-The live local backup protocol uses a technical product coordinator over narrow
-context-owned backup participant capabilities:
+The local backup coordinator uses narrow context-owned participant capabilities:
 
 ```text
 ProductBackupCoordinator
   -> request one generation and deadline
-  -> each context closes command admission
-  -> each context drains its current Unit of Work
-  -> each context records its local watermark and creates its artifact
+  -> each context closes mutation and dispatch admission
+  -> each context drains in-flight work and records its watermark
+  -> the storage adapter creates one consistent PostgreSQL artifact
   -> coordinator verifies and activates one versioned manifest
   -> every context resumes admission
 ```
 
 The coordinator owns generation, participant set, deadline, recovery journal,
-manifest publication, and all-participant release. It cannot access repositories,
-tables, migrations, or command lanes directly. Each bounded context owns
-admission, Unit of Work drain, artifact creation, schema/migration metadata, and
-local compatibility validation.
+manifest publication, and all-participant release. It cannot inspect business
+tables or bypass context admission. Each context closes every mutation source,
+including inbox consumers, timers, and background writers, drains its Unit of
+Work, and supplies migration metadata and compatibility validation. The storage
+adapter owns the engine backup primitive. A participant timeout aborts the
+generation without moving the active backup pointer.
 
-The manifest records a separate watermark, schema/migration identity, application
-compatibility watermark, generation, size, and integrity hash for every context.
-It explicitly declares that there is no cross-context transaction or global
-watermark. A participant timeout aborts the entire generation and cannot update
-the active backup pointer.
+The manifest records Target and backup identity, engine and artifact format,
+configuration compatibility, artifact sizes and hashes, protected blob references,
+and each context's schema, migration checksums, application compatibility, and
+watermark. An engine snapshot or WAL position is technical recovery evidence,
+not a global business transaction or ordering guarantee. OD-003 selects the
+initial local artifact and retention policy; it does not require maintaining
+multiple backup implementations.
 
 Restore acceptance requires more than a database engine integrity check. Before a
 restored context becomes active, the adapter verifies:
@@ -634,11 +656,11 @@ restored context becomes active, the adapter verifies:
 - context and backup-manifest identity;
 - capability invariants such as state, command receipt, and outbox consistency.
 
-SQLite restore swaps a verified database file only while the owning Host is
-stopped. Hosted disaster recovery restores a PostgreSQL cluster from a base backup
-and continuous WAL to one recovery point. A schema-scoped dump is a logical
-context export/import artifact with validation and reconciliation; it is not PITR
-and must not replace unrelated context schemas implicitly.
+Physical restore activates an isolated verified PostgreSQL cluster as a unit.
+Hosted PITR uses a base backup and continuous WAL to one recovery point. A local
+whole-database dump, if selected, is a logical product backup with separately
+validated role and configuration recovery, not PITR. A schema-scoped dump is a
+logical context export/import artifact and cannot replace unrelated schemas.
 
 Large provider payloads, prompts, logs, attachments, and artifacts do not live in
 hot relational tables by default. Their owning feature stores metadata, content
@@ -651,11 +673,24 @@ Local product restore supports two explicit modes:
 
 - `all-or-nothing product set` requires and validates the complete expected
   context set;
-- `explicit selective contexts` restores an operator-selected allowlist and is
-  never an automatic fallback.
+- `explicit selective contexts` uses logical import and reconciliation for an
+  operator-selected allowlist, never partial physical restore or automatic
+  fallback.
 
 Restore runs under exclusive product maintenance with a durable recovery journal,
-staging area, and rollback set. Because several SQLite files cannot be atomically
-renamed as a group, startup recovery rolls back every partial activation before
-the commit record, or completes cleanup after a committed activation. Normal
-product access never observes a partially activated set.
+staging area, and a verified recovery set. Normal access never observes partially
+activated SQL, blob, or context state. Restoring old data is distinct from
+rolling back a Host binary and cannot silently discard acknowledged later writes.
+
+A restored receipt ledger may predate external actions that already occurred.
+Dispatch therefore remains fenced until the owning participants reconcile AR,
+broker, and external receipt evidence; a missing restored receipt does not prove
+that an effect never happened. Unknown outcomes remain explicit. Current
+authorization, retirement, and deletion requirements still govern access.
+
+Restore activation establishes fresh recovery authority and retires stale
+connections, grants, and dispatch generations. An epoch restored from the same
+snapshot cannot by itself prove that authority never moved backwards. OD-003 and
+OD-021 must qualify the recovery-generation or explicit Target-rebinding mechanism
+before dispatch resumes. Database recovery never grants permission to replay
+external effects blindly.

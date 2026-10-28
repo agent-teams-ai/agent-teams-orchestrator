@@ -5,7 +5,9 @@ status: accepted
 owner: architecture/quality
 summary: Required test layers, conformance suites, architecture checks, and quality gates.
 related:
-  - ADR-0110
+  - ADR-0117
+  - ADR-0114
+  - ADR-0115
   - ADR-0028
   - ADR-0015
   - ADR-0016
@@ -30,6 +32,7 @@ related:
   - ADR-0064
   - ADR-0065
   - architecture.local-host-lifecycle
+  - architecture.deployment-profiles
   - architecture.security
 code_anchors:
   - pattern: architecture/executable-specs/**
@@ -39,6 +42,29 @@ code_anchors:
 ---
 
 # Testing Strategy
+
+## Risk-based test selection
+
+Add or extend tests only when they protect a concrete, plausible regression,
+invariant, or declared contract that existing evidence does not adequately
+cover. Use the smallest sufficient test layer that can actually expose that
+failure. Reuse existing behavioral fixtures; duplicate coverage across layers
+only when each layer detects a distinct failure.
+
+Do not add tests that copy production logic as their oracle, verify only a
+mock's configured response, assert incidental implementation details, inflate
+coverage percentages or test counts, or create snapshot churn without
+protecting a meaningful contract. Independent expected outcomes and contract
+golden fixtures remain valid.
+
+Prose-only, reversible documentation changes do not require new tests. Run the
+existing checks required for the changed surface. Broaden or repeat testing only
+for a concrete remaining risk, changed evidence inputs, or an applicable
+mandatory gate.
+
+This selection rule does not waive accepted conformance, security, concurrency,
+process-boundary, deployment, or release gates. It introduces no separate
+approval or reporting artifact.
 
 ## Test layers
 
@@ -98,7 +124,7 @@ Test use cases through ports using deterministic fakes:
 
 ### Get Modular composition qualification
 
-ADR-0110 selects Get Modular; the
+ADR-0117 selects Get Modular; the
 [module foundation gate](implementation-readiness-gates.md#module-foundation-before-business-expansion)
 owns activation evidence. Each real production root must use the central
 conformance kit with an independently written wiring oracle, failed/cancelled
@@ -121,6 +147,18 @@ Validate:
 - SDK/server compatibility;
 - runtime-adapter conformance;
 - transport error mapping.
+
+For the first application capability, behavior fixtures call its input port
+without Connect, GraphQL, Dapr, generated messages, or a DI container. The
+first wire adapter adds mapping fixtures for trusted scope, typed failures, and
+applicable deadline/cancellation behavior, plus negative architecture fixtures
+for framework leakage. The [additional API profile](sdk-and-transports.md#additional-client-api-styles)
+reuses those capability fixtures when GraphQL is introduced, adding nullability,
+error mapping, query-cost rejection, and authenticated cache isolation. An owned
+composed or batched query also proves bounded backend calls, per-key outcomes,
+and its declared consistency. Durable-work disconnect semantics are checked only
+for capabilities that accept durable work. These are first-materialization
+obligations, not a claim that unimplemented adapters are already qualified.
 
 ### Security architecture conformance
 
@@ -290,26 +328,26 @@ Exact-value conformance for Usage Metering, Usage Accounting, and Consumption
 Governance covers BigInt values above `Number.MAX_SAFE_INTEGER`, canonical decimal
 parsing, scale conversion, half-even and policy-specific rounding, currency
 mismatch, allocation conservation, malformed values, overflow, and lossless
-contract/persistence round trips. SQLite fixtures prove BigInt reads are enabled
-before result consumption and integer aggregate overflow fails safely. PostgreSQL
-fixtures prove `bigint`/`numeric` string mapping and reject exact values exposed as
+contract/persistence round trips. PostgreSQL fixtures prove bounded aggregate
+overflow, `bigint`/`numeric` string mapping, and rejection of exact values exposed as
 JSON numbers. Exact-time fixtures cover microsecond preservation, negative epoch
 conversion, explicit rounding, DST gaps and folds, period boundaries, and
 provider evidence with finer precision. The same semantic vectors run through
-both adapters.
+native local and hosted PostgreSQL bindings.
 
-Each hosted mutating capability runs its declared ADR-0050 conflict matrix against
+Each local and hosted mutating capability runs its declared conflict matrix against
 real PostgreSQL. Tests force same-revision races, write skew, deadlocks,
 serialization failures, lock-order inversions, timeout, complete-Unit-of-Work
-retry, and lost commit acknowledgement. Equivalent SQLite scenarios prove domain
-outcomes but do not substitute for hosted concurrency evidence.
+retry, and lost commit acknowledgement. ADR-0114 applies ADR-0050's concurrency
+requirements to both profiles; a single-client spike, process mutex, or
+in-memory adapter does not substitute for that evidence.
 
 Migration tests distinguish transactional and online-resumable steps. They kill
 the runner after intent persistence, external operation dispatch, ambiguous
 response, verification, and completion recording; rerun under the same generation;
 and prove that compatibility never advances before verified completion.
 
-Hosted tenant-isolation fixtures exercise application predicates and PostgreSQL
+Local and hosted tenant-isolation fixtures exercise application predicates and PostgreSQL
 RLS independently. They cover pooled connection reuse, forbidden session-level
 tenant state, transaction-local reset after commit and rollback, missing context,
 cross-tenant identifiers, prepared statements, owner and `BYPASSRLS` hazards,
@@ -322,19 +360,22 @@ session `SET`, SQL-level prepared statements, `LISTEN`, advisory locks, preserve
 temporary tables, holdable cursors, statement pooling, pool-level repository
 calls during a Unit of Work, and tenant identity in startup parameters.
 
-PostgreSQL failover and recovery suites exercise asynchronous and synchronous
+Hosted PostgreSQL failover and recovery suites exercise asynchronous and synchronous
 replication profiles separately. They verify explicit RPO outcomes, transaction
 phase classification, same-command reconciliation, replica-lag read policy,
 endpoint and deployment-epoch replacement, tenant rebinding, old-primary fencing,
 physical base backup, archived WAL, selected-point restore, context watermarks,
 and fail-closed too-early, too-late, missing-WAL, and corrupted-WAL plans.
 They treat physical cluster PITR separately from logical context export/import and
-prove that a schema dump is never accepted as disaster-recovery evidence.
+prove that a schema dump is never accepted as physical PITR evidence.
 
 Multi-context local backup tests additionally kill the coordinator after every
 barrier, manifest, staging, activation, and commit stage; time out individual
 participants; mix or tamper with generations; and prove that normal product access
-never observes a partial restore set.
+never observes a partial restore set. Native PostgreSQL fixtures additionally
+prove one verified cluster activation, required blob availability, fresh recovery
+authority, and reconciliation of restored receipts against already-performed
+external actions. Missing restored receipts never authorize blind repeat dispatch.
 
 These runtime contract suites are separate from provider-adapter conformance owned
 by `ar` and from platform or bounded-context persistence conformance. Passing one
@@ -348,12 +389,97 @@ truthful policy-retained, unsupported, unknown, and reconcile-required outcomes.
 Managed Shared fixtures additionally attempt cross-tenant substitution during
 inventory, credential detach, workspace unlink, evidence query, and restore.
 
+### Concurrent execution and service-role qualification
+
+The [service role map](deployment-profiles.md#service-role-map) owns placement
+and the first owning feature's process-isolation requirement under ADR-0114.
+The first production implementation of a selected role proves its independently
+runnable composition root, separate OS process, bounded admission, lifecycle,
+and declared resource profile. A package, Get Modular group, worker thread, or
+same-process fake cannot substitute for this evidence. Unimplemented roles do
+not justify empty production packages or framework scaffolding.
+
+Applicable conformance proves:
+
+- real consumers invoke the selected private feature-owned Protobuf/gRPC contract
+  through the paired Dapr sidecars, while public clients retain Connect;
+- role and sidecar death, stall, overload, startup delay, and restart do not
+  transfer another role's mutation authority or AR execution custody;
+- replica routing includes only interchangeable method sets, and concurrent
+  replicas preserve owned revisions, receipts, claims, and transaction semantics;
+- when the profile supports repeated application IDs across namespaces, actual
+  proxy-path fixtures distinguish a foreign namespace from the caller's local
+  application and reject unqualified routing combinations;
+- readiness verifies the selected resolver, peer trust, authorization, schema and
+  durable topology before admission; sidecar health or a listening port alone
+  cannot satisfy it;
+- drain closes admission and pulling before bounded completion, preserves
+  accepted outcomes and recoverable work, and keeps required outbound adapters
+  available until that stage ends;
+- lost responses, peer credential rotation, direct-backend bypass attempts,
+  stale discovery, and unavailable dependencies produce typed, bounded outcomes
+  with one retry budget per logical RPC operation;
+- unauthorized workload enrollment and forged service identity fail before
+  admission; protected caller-to-sidecar and sidecar-to-application hops reject
+  bypass attempts, and a valid workload identity cannot substitute for product
+  actor, delegation, tenant, or grant evidence;
+- durable-only workers run with direct official JetStream pull adapters and no
+  Dapr dependency unless an actual separately declared RPC capability requires it.
+
+AR observation subscriptions use the AR Published Language and its qualified
+adapter. They are not assumed to be JetStream consumers. The direct JetStream
+rule applies to declared internal durable publications and subscriptions.
+
+Server workload architecture targets thousands of simultaneously running agents.
+Each qualification states the exact admitted execution concurrency, command and
+event rates, bursts, payload sizes, fanout, data size, duration, hardware, replica
+limits, and deployed adapter set. Stored Agents, queued work, idle sessions, or
+open client connections do not establish that capacity. Exercise aggregate
+connection budgets across all pools in live role replicas, workers, maintenance,
+rollout surge, terminating instances, and overlapping rollouts;
+bounded admission; relay fairness; long queries and result decoding; observation
+processing; and shared disk pressure. Cancellation, health, feeds, and recovery
+remain usable under the tested saturation and failure conditions. Record queue
+and pool waits, backlog, event-loop delay, memory, and disk growth.
+
+The primary workload follows the
+[aggregate concurrent execution target](deployment-profiles.md#concurrent-execution-target):
+many independent Runs, including Runs within one team and tenant. Qualify
+per-Run limits separately and exercise the largest advertised Run and
+concentrated tenant load; thousands within one Run are not a baseline release
+requirement. Run authority gates, per-Run feed sequencing, and shared quota
+keys may serialize conflicting work even when other work scales across
+replicas. Record key contention and cancellation/revocation progress under
+these workload shapes. Preserve exclusive Agent occupancy, receipts, fences,
+and ordering; do not split one semantic Run merely to meet a throughput target.
+
+Deterministic traffic and a fake AR may qualify Orchestrator and persistence
+behavior at a modeled execution workload without launching provider agents.
+Actual simultaneous execution capacity additionally requires AR-owned runtime
+and provider-adapter evidence, including admission, custody, resources, and the
+advertised execution placement. Neither modeled traffic nor a successful RPC
+qualifies provider capacity, runtime connectivity, or a production SLO.
+
+| Deployment form              | Additional qualification evidence                                                                                                                                                                                              |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Compose server               | Actual application/sidecar replica pairing, private network and selected resolver, authenticated readiness, stop order, restart, and bounded drain in the released composition                                                 |
+| Kubernetes server            | Actual injected sidecars, discovery and peer identity, application and sidecar readiness, replica rollout/surge and termination, credential rotation, and bounded drain in the released cluster profile                        |
+| Native Fully Local V1 target | Installed-package role processes and sidecars under Supervisor custody, signed offline artifacts, protected endpoints, authenticated readiness, and each released OS/architecture tuple under the local lifecycle requirements |
+
+Compose and Kubernetes both require their own evidence; one does not qualify the
+other. ADR-0115 requires Fully Local for V1; OD-021, OD-035, and OD-040 still gate
+its implementation start, followed by the existing deployment-qualification
+gates. Native evidence cannot be inferred from
+container tests. A compact native role composition requires explicit approval
+and separate qualification, not silent co-location that removes selected process
+isolation. These obligations do not introduce production code or a checker.
+
 ### Adapter integration tests
 
 Test concrete adapters against disposable infrastructure:
 
 - NATS JetStream;
-- SQLite and PostgreSQL;
+- native local and hosted PostgreSQL;
 - Temporal test environment;
 - local Host transport and Supervisor bootstrap control;
 - Centrifugo client realtime edge;
@@ -379,8 +505,42 @@ Local lifecycle integration also verifies:
 - AR-owned provider execution is not terminated by Host replacement;
 - local NATS process ownership is separate from JetStream topology and message
   semantics;
+- local PostgreSQL process and data custody is separate from context SQL and
+  migration ownership;
 - target/profile/workspace separation, deterministic target selection, and
   rejection of project-controlled endpoint or trust overrides.
+
+Native PostgreSQL packaging and lifecycle tests follow the
+[managed PostgreSQL lifecycle](local-host-lifecycle.md#managed-postgresql-lifecycle)
+and its [release qualification matrix](local-host-lifecycle.md#packaged-postgresql-qualification).
+They cover signed offline first start and persistent reopen, concurrent ensure,
+port collision, foreign-cluster rejection, interrupted initialization,
+Supervisor death with a surviving database process, effective durability
+configuration, bootstrap credential-file permissions and crash cleanup,
+child-process errors, bounded graceful and forced shutdown, and each supported
+OS/architecture. Verify actual bundled engine identity as well as wrapper version.
+Windows and macOS require tests of the installed package; Local Host Control CI
+does not exercise the PostgreSQL component. Backup tests restore into a clean
+isolated root and validate the complete required set before activation, rather
+than accepting backup-file creation as successful recovery.
+Process-kill evidence does not qualify power-loss or filesystem durability.
+
+Retain independent lifecycle oracles when a launcher can alter its worker's
+exit status. Require fresh structured completion, the expected case inventory,
+actual owned-process state, and a separately computed verdict. Exercise stale
+control generations and losing-contender cleanup without stopping the winner.
+Helper verification rejects altered binaries, native libraries, or an untrusted
+manifest before execution; test relocation without access to the build prefix.
+Recorded hashes, version strings, a backup table of contents, and a green
+launcher exit do not individually qualify the complete released capability.
+
+Update fixtures separate Host replacement, context schema migration, and engine
+upgrade. A candidate cannot migrate the old Host's live schema during preflight;
+stale checked-out clients and dispatchers cannot commit after fencing. Interrupt
+each supported upgrade and activation stage, reject unsupported versions, and
+prove that binary rollback neither loses later acknowledged writes nor reopens
+an incompatible cluster. Restore tests qualify the recovery mechanism rather
+than treating old SQL epoch values as fresh authority.
 
 Managed JetStream store tests additionally inject active-publication process
 death, repeated crash/redelivery, configured limits, physical `ENOSPC`, store
@@ -448,6 +608,10 @@ Automated checks must reject:
 - context-owned storage or projections placed in global platform packages;
 - process-wide resources instantiated below the application composition root;
 - multiple process-owner implementations wired simultaneously;
+- selected role placement implemented only as a same-process module, shared heap,
+  or worker thread instead of the required process boundary;
+- Dapr types or routing metadata in domain/application ports, incidental Dapr
+  sidecars on durable-only workers, or public clients using private sidecar APIs;
 - bounded-context domain/application imports in Local Supervisor packages;
 - process installation, supervision, update, or termination in the ordinary SDK;
 - normal public API commands proxied through Local Supervisor adapters;

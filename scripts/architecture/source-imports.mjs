@@ -30,9 +30,7 @@ function requireCallKind(callee) {
     (!callee.computed &&
       callee.property?.type === "Identifier" &&
       callee.property.name === "require") ||
-    (callee.computed &&
-      callee.property?.type === "Literal" &&
-      callee.property.value === "require")
+    (callee.computed && callee.property?.type === "Literal" && callee.property.value === "require")
   ) {
     return "module.require";
   }

@@ -5,6 +5,7 @@ status: open
 owner: architecture/security
 summary: Define principal, authorization, service identity, and hosted tenant-isolation semantics.
 related:
+  - ADR-0117
   - architecture.context-map
   - domain.contexts.access-control
   - domain.contexts.orchestration-scope
@@ -49,6 +50,15 @@ ADR-0021 fixes the client boundary:
 This decision still selects concrete identity providers, grant flows, token
 validation, revocation propagation, service identities, and authorization
 consistency.
+
+The selected private RPC profile also needs authorized workload enrollment.
+Self-hosted Sentry's default insecure validator is not evidence that a caller
+is entitled to a service identity. Qualification under the
+[private RPC trust profile](../architecture/security-architecture.md#private-rpc-trust)
+binds workload identity, protected application/sidecar hops, credential
+rotation, and negative bypass fixtures. This service enrollment is separate
+from product membership and OD-038 device enrollment; selecting Dapr does not
+resolve any of those authority decisions.
 
 OD-031 separately owns semantic claim admission and conflict resolution. The
 configured authority provider determines whether a principal may attempt an
@@ -100,7 +110,7 @@ Neither IAM membership nor an OpenFGA tuple replaces product-owned permission,
 Team, Work, Task, grant, or lifecycle policy. The same reusable provider mechanism
 must support independent standalone and managed compositions through narrow
 consumer-owned ports; standalone operation must not depend on commercial
-Platform. Get Modular composition remains owned by ADR-0110, and service topology
+Platform. Get Modular composition remains owned by ADR-0117, and service topology
 remains outside this provider decision.
 
 ### Remaining IAM decisions and evidence

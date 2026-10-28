@@ -439,8 +439,8 @@ or later models after measured use cases prove them.
 - Event-storming proves a cohesive language, independent lifecycle, concurrency,
   security boundary, and first vertical slice before any package is created.
 - A manifest records source revisions, policy/capability snapshots, required versus
-   optional contributions, composition version, hashes, sensitivity, freshness,
-   coverage, known gaps, and expiry.
+  optional contributions, composition version, hashes, sensitivity, freshness,
+  coverage, known gaps, and expiry.
 - A manifest records a `ContextBasis` of opaque source-lineage positions rather
   than claiming a globally atomic snapshot or cross-source causal clock.
 - Contract, manifest, current validity, representation, and Run-owned activation

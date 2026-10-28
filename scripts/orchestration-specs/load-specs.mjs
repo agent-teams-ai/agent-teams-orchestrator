@@ -9,13 +9,11 @@ import { foundationConfigPath, repositoryRoot } from "./paths.mjs";
 const readJson = (filePath) => JSON.parse(fs.readFileSync(filePath, "utf8"));
 const readYaml = (filePath) => parse(fs.readFileSync(filePath, "utf8"));
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
-const resolveRepositoryPath = (repositoryPath) =>
-  path.join(repositoryRoot, repositoryPath);
+const resolveRepositoryPath = (repositoryPath) => path.join(repositoryRoot, repositoryPath);
 
 const loadCatalogDescriptor = () => {
   const foundation = readYaml(foundationConfigPath);
-  const capabilityPath =
-    foundation.capabilities["quality.executable-specifications"].configPath;
+  const capabilityPath = foundation.capabilities["quality.executable-specifications"].configPath;
   const capability = readYaml(resolveRepositoryPath(capabilityPath));
   return {
     catalog: readJson(resolveRepositoryPath(capability.catalogPath)),
@@ -53,8 +51,8 @@ export const loadCatalogBundle = (catalog = loadCatalog(), options = {}) => {
     ].filter((repositoryPath) => repositoryPath.endsWith(".json")),
   );
   const actualJsonPaths = new Set(
-    jsonFilesUnder(path.join(repositoryRoot, "architecture/executable-specs")).map(
-      (filePath) => path.relative(repositoryRoot, filePath),
+    jsonFilesUnder(path.join(repositoryRoot, "architecture/executable-specs")).map((filePath) =>
+      path.relative(repositoryRoot, filePath),
     ),
   );
   const missingJsonPaths = [...expectedJsonPaths].filter(
@@ -71,9 +69,7 @@ export const loadCatalogBundle = (catalog = loadCatalog(), options = {}) => {
   const onlyGeneratableProofIsMissing =
     options.allowMissingProofArtifacts === true &&
     extraJsonPaths.length === 0 &&
-    missingJsonPaths.every((repositoryPath) =>
-      generatableProofPaths.has(repositoryPath),
-    );
+    missingJsonPaths.every((repositoryPath) => generatableProofPaths.has(repositoryPath));
   if (
     (missingJsonPaths.length > 0 || extraJsonPaths.length > 0) &&
     !onlyGeneratableProofIsMissing
@@ -121,10 +117,7 @@ export const loadCatalogBundle = (catalog = loadCatalog(), options = {}) => {
     .flatMap((document) => document.axes.filter((axis) => axis.modeled))
     .map((axis) => axis.id)
     .toSorted();
-  if (
-    JSON.stringify(modeledAxes) !==
-    JSON.stringify(specification.stateModel.axes.toSorted())
-  ) {
+  if (JSON.stringify(modeledAxes) !== JSON.stringify(specification.stateModel.axes.toSorted())) {
     throw new Error("Catalog XState axes differ from the modeled document axes");
   }
   return { catalog, documents, schemas, specification };
@@ -138,5 +131,4 @@ export const loadSchema = () => {
   return schemas[0];
 };
 
-export const loadSpecs = (options) =>
-  loadCatalogBundle(undefined, options).documents;
+export const loadSpecs = (options) => loadCatalogBundle(undefined, options).documents;

@@ -511,6 +511,26 @@
       "id": "ADR-0111",
       "path": "docs/decisions/0111-human-collaboration-and-execution-directory-terminology.md",
       "immutableDigest": "sha256:5e0481d52ce0bec048266f425f7495ad25946dfc8f0c013ac959fb89dfe0b5a7"
+    },
+    {
+      "id": "ADR-0113",
+      "path": "docs/decisions/0113-canonical-module-and-composition-adoption.md",
+      "immutableDigest": "sha256:a5511b1e671fae8038d471c0a4cbe3ef044d83b67daef8c24816d8b01a139673"
+    },
+    {
+      "id": "ADR-0114",
+      "path": "docs/decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md",
+      "immutableDigest": "sha256:0fc250314c4b14998f759564c8f1a3ea69c7ef045dd67182c6c8416a5fcc686c"
+    },
+    {
+      "id": "ADR-0115",
+      "path": "docs/decisions/0115-canonical-fully-local-v1-adoption.md",
+      "immutableDigest": "sha256:ad92838d720dd08de10e64803bfd0b77fe3a3f3e7944ed508f61e64cba2307bc"
+    },
+    {
+      "id": "ADR-0117",
+      "path": "docs/decisions/0117-reconcile-mandatory-module-composition.md",
+      "immutableDigest": "sha256:c968f0f38ca902483dad4d2aa95f72702e20df7115f5580929b3ffce6e38712c"
     }
   ]
 }

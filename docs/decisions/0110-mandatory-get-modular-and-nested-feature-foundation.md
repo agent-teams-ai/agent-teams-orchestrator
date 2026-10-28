@@ -1,7 +1,9 @@
 ---
 id: ADR-0110
 type: adr
-status: accepted
+status: superseded
+superseded_by:
+  - ADR-0117
 owner: architecture
 summary: Require Get Modular composition and Feature Module Standard v1.1 before expanding production module implementation.
 approved_by: product-owner

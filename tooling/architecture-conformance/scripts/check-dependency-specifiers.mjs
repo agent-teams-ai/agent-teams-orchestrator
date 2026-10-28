@@ -1,26 +1,14 @@
 import { spawnSync } from "node:child_process";
-import {
-  mkdtemp,
-  mkdir,
-  readFile,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { foundationPackageRoot as resolveFoundationPackageRoot } from "./root-foundation.mjs";
 
-const toolingRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "..",
-);
+const toolingRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(toolingRoot, "../..");
-const foundationCli = path.join(
-  resolveFoundationPackageRoot(repositoryRoot),
-  "dist/cli.js",
-);
+const foundationCli = path.join(resolveFoundationPackageRoot(repositoryRoot), "dist/cli.js");
 const validator = path.join(
   repositoryRoot,
   "scripts/architecture/validate-dependency-specifiers.mjs",
@@ -59,9 +47,7 @@ function requireSuccess(label, result) {
 function requireFailure(label, result, expectedText) {
   const actual = output(result);
   if (result.status === 0 || !actual.includes(expectedText)) {
-    throw new Error(
-      `${label} did not fail with ${expectedText}:\n${actual}`,
-    );
+    throw new Error(`${label} did not fail with ${expectedText}:\n${actual}`);
   }
 }
 
@@ -85,14 +71,8 @@ function requireFoundationViolation(label, result, expectedRuleId) {
   const ruleIds = report.capabilities.flatMap((capability) =>
     capability.diagnostics.map((diagnostic) => diagnostic.ruleId),
   );
-  if (
-    result.status !== 1 ||
-    report.outcome !== "violations" ||
-    !ruleIds.includes(expectedRuleId)
-  ) {
-    throw new Error(
-      `${label} did not report ${expectedRuleId}:\n${output(result)}`,
-    );
+  if (result.status !== 1 || report.outcome !== "violations" || !ruleIds.includes(expectedRuleId)) {
+    throw new Error(`${label} did not report ${expectedRuleId}:\n${output(result)}`);
   }
 }
 
@@ -100,9 +80,7 @@ async function writeJson(filePath, value) {
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-const temporaryRoot = await mkdtemp(
-  path.join(os.tmpdir(), "agent-teams-dependencies-"),
-);
+const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), "agent-teams-dependencies-"));
 
 try {
   await mkdir(path.join(temporaryRoot, "packages/internal"), {
@@ -137,10 +115,7 @@ capabilities:
 `,
   );
   await writeFile(
-    path.join(
-      temporaryRoot,
-      "architecture/foundation/dependency-declarations.yaml",
-    ),
+    path.join(temporaryRoot, "architecture/foundation/dependency-declarations.yaml"),
     `schemaVersion: 1
 packageManager:
   kind: pnpm
@@ -166,14 +141,11 @@ policies:
       "external-one": "catalog:",
     },
   });
-  await writeJson(
-    path.join(temporaryRoot, "packages/internal/package.json"),
-    { name: "@agent-teams/internal", private: true },
-  );
-  const consumerManifestPath = path.join(
-    temporaryRoot,
-    "packages/consumer/package.json",
-  );
+  await writeJson(path.join(temporaryRoot, "packages/internal/package.json"), {
+    name: "@agent-teams/internal",
+    private: true,
+  });
+  const consumerManifestPath = path.join(temporaryRoot, "packages/consumer/package.json");
   const validConsumerManifest = {
     name: "@agent-teams/consumer",
     private: true,
@@ -189,18 +161,11 @@ policies:
   };
   await writeJson(consumerManifestPath, validConsumerManifest);
   requireSuccess("valid dependency specifiers", run(temporaryRoot));
-  requireFoundationSuccess(
-    "valid dependency specifiers",
-    runFoundation(temporaryRoot),
-  );
+  requireFoundationSuccess("valid dependency specifiers", runFoundation(temporaryRoot));
 
   validConsumerManifest.dependencies["external-one"] = "1.2.3";
   await writeJson(consumerManifestPath, validConsumerManifest);
-  requireFailure(
-    "direct external version",
-    run(temporaryRoot),
-    "external and must use catalog:",
-  );
+  requireFailure("direct external version", run(temporaryRoot), "external and must use catalog:");
   requireFoundationViolation(
     "direct external version",
     runFoundation(temporaryRoot),
@@ -236,9 +201,7 @@ policies:
   );
   delete validConsumerManifest.dependencies["external-missing"];
 
-  validConsumerManifest.dependencies[
-    "@agent-teams/engineering-foundation"
-  ] = "0.1.0";
+  validConsumerManifest.dependencies["@agent-teams/engineering-foundation"] = "0.1.0";
   await writeJson(consumerManifestPath, validConsumerManifest);
   requireFailure(
     "foundation runtime dependency",
@@ -250,13 +213,9 @@ policies:
     runFoundation(temporaryRoot),
     "workspace.dependency-declarations.development-only-package-in-runtime-section",
   );
-  delete validConsumerManifest.dependencies[
-    "@agent-teams/engineering-foundation"
-  ];
+  delete validConsumerManifest.dependencies["@agent-teams/engineering-foundation"];
 
-  validConsumerManifest.devDependencies[
-    "@agent-teams/engineering-foundation"
-  ] = "^0.1.0";
+  validConsumerManifest.devDependencies["@agent-teams/engineering-foundation"] = "^0.1.0";
   await writeJson(consumerManifestPath, validConsumerManifest);
   requireFailure(
     "inexact foundation dev dependency",
@@ -268,20 +227,12 @@ policies:
     runFoundation(temporaryRoot),
     "workspace.dependency-declarations.exact-registry-development-only-package-version-not-exact",
   );
-  validConsumerManifest.devDependencies[
-    "@agent-teams/engineering-foundation"
-  ] = "0.1.0";
+  validConsumerManifest.devDependencies["@agent-teams/engineering-foundation"] = "0.1.0";
 
-  const consumerSourceRoot = path.join(
-    temporaryRoot,
-    "packages/consumer/src/features/example",
-  );
+  const consumerSourceRoot = path.join(temporaryRoot, "packages/consumer/src/features/example");
   await mkdir(consumerSourceRoot, { recursive: true });
   const consumerSourcePath = path.join(consumerSourceRoot, "index.ts");
-  await writeFile(
-    consumerSourcePath,
-    'import "@agent-teams/engineering-foundation";\n',
-  );
+  await writeFile(consumerSourcePath, 'import "@agent-teams/engineering-foundation";\n');
   await writeJson(consumerManifestPath, validConsumerManifest);
   requireFailure(
     "foundation production import",
@@ -299,10 +250,7 @@ export const documentationExample =
   'import "@agent-teams/engineering-foundation"';
 `,
   );
-  requireSuccess(
-    "foundation text in comments and strings",
-    run(temporaryRoot),
-  );
+  requireSuccess("foundation text in comments and strings", run(temporaryRoot));
   await writeFile(
     consumerSourcePath,
     'export const foundation = import("@agent-teams/engineering-foundation/cli");\n',
@@ -316,10 +264,7 @@ export const documentationExample =
     "dynamic production import is outside declaration capability",
     runFoundation(temporaryRoot),
   );
-  await writeFile(
-    consumerSourcePath,
-    'import "@agent-teams/docs-protocol";\n',
-  );
+  await writeFile(consumerSourcePath, 'import "@agent-teams/docs-protocol";\n');
   requireFailure(
     "docs protocol production import",
     run(temporaryRoot),
@@ -332,10 +277,7 @@ export const documentationExample =
   await rm(path.join(temporaryRoot, "packages/consumer/src"), {
     recursive: true,
   });
-  requireSuccess(
-    "restored exact dev-only foundation dependency",
-    run(temporaryRoot),
-  );
+  requireSuccess("restored exact dev-only foundation dependency", run(temporaryRoot));
 
   const workspacePath = path.join(temporaryRoot, "pnpm-workspace.yaml");
   const workspaceSource = await readFile(workspacePath, "utf8");

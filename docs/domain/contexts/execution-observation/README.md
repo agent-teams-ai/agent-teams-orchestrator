@@ -17,6 +17,8 @@ related:
   - ADR-0089
   - ADR-0092
   - ADR-0094
+  - ADR-0114
+  - ADR-0115
   - architecture.context-map
   - architecture.runtime-boundary
   - architecture.security
@@ -53,9 +55,9 @@ Evidence cannot grant Run/Work authority. Foreign Run output is rejected. Missin
 
 ## Aggregates and consistency boundaries
 
-| Root and identity | Protected invariants | Commands | Domain events | Transaction | Concurrency | Growth bound | External facts | Rejected boundaries |
-|---|---|---|---|---|---|---|---|---|
-| Evidence receipt and derived Activity block/read projection | Invariants above | Admit normalized sandbox evidence; ListActivity; ReadFeed | SandboxActivityRecorded | One owner-local Unit of Work including receipt, Operation and outbox | Authenticated source coordinates and per-feed event identity deduplicate; snapshot watermark plus next cursor defines resume without global ordering. | One member/Run in this slice; history and receipts stored separately with finite declared horizons | Authenticated Run/runtime binding, source coordinates, safe normalized content and current query authorization. | No provider-state mirror, cross-context aggregate or shared transaction |
+| Root and identity                                           | Protected invariants | Commands                                                  | Domain events           | Transaction                                                          | Concurrency                                                                                                                                           | Growth bound                                                                                       | External facts                                                                                                  | Rejected boundaries                                                     |
+| ----------------------------------------------------------- | -------------------- | --------------------------------------------------------- | ----------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Evidence receipt and derived Activity block/read projection | Invariants above     | Admit normalized sandbox evidence; ListActivity; ReadFeed | SandboxActivityRecorded | One owner-local Unit of Work including receipt, Operation and outbox | Authenticated source coordinates and per-feed event identity deduplicate; snapshot watermark plus next cursor defines resume without global ordering. | One member/Run in this slice; history and receipts stored separately with finite declared horizons | Authenticated Run/runtime binding, source coordinates, safe normalized content and current query authorization. | No provider-state mirror, cross-context aggregate or shared transaction |
 
 Repositories persist only the owning roots/state; read queries use authorized
 projections. Transport schemas and persistence records map to separate domain and
@@ -141,28 +143,28 @@ materialized from this dossier alone.
 
 ### Ubiquitous Language
 
-| Term | Meaning |
-|---|---|
-| Observation Evidence | An admitted, source-addressed record of what AR published, with scope, provenance, integrity, classification, and completeness metadata. |
-| Evidence Envelope | The immutable minimum identity, source coordinates, scope, timestamps, versions, integrity metadata, and optional protected payload reference. |
-| Protected Diagnostic Payload | Encrypted provider-native content available only through stricter disclosure and lifecycle capabilities. It is not canonical evidence. |
-| Safe Preview | A bounded, redacted, render-safe subset of diagnostic content permitted in activity, feed, search, or default export. |
-| Activity Projection | A rebuildable provider-neutral interpretation supported by one or more evidence records. It is not runtime truth or an Aggregate Root. |
-| Activity View | The authorized public representation of one activity projection. |
-| Activity Effect | A typed claim about a target with its own evidence strength, such as an attempted command or causally confirmed file modification. |
-| Activity Evidence Link | A versioned many-to-many relation describing how evidence originates, progresses, terminates, supports, contradicts, or supersedes activity. |
-| Semantic Registry | The versioned registry of activity kinds, detail schemas, safe fields, correlation rules, and renderer profiles. |
-| Live Fragment | A future provisional streaming protocol excluded from V1 until its own admission, redaction, deletion, and recovery decision is accepted. |
-| Durable Activity Feed | The context-owned committed activity-change stream used for replay and recovery. |
-| Search Projection | A disposable, authorized, rebuildable index of allowlisted safe activity fields. |
-| Index Generation | A search container with immutable identity, schema, and analyzer configuration plus append-only document revisions; it is selected atomically after verification and sealed when superseded. |
-| Source Watermark | The source or context cursor through which projection or index input is known to be applied. |
-| Diagnostic Gap | Explicit evidence that expected raw, source history, or processing continuity is unavailable. |
-| Deletion Epoch | Monotonic scope-local disposition evidence preventing deleted data from returning through replay, indexing, or restore. |
-| Current Disclosure Fence | Context-local safety dispositions over Activity revision intervals that can immediately hide affected historical revisions after redaction, quarantine, retraction, or invalidation without hiding unrelated safe history. |
-| Run Attribution State | Local `pending`, `bound`, or `explicitly-unbound` evidence controlling whether and where an Activity may first be published. |
-| Index Commit Position | Monotonic generation-local position assigned only when a document revision becomes queryable; it freezes search snapshot membership independently from source watermarks. |
-| Protected Payload Disposition | Current payload-specific safety state checked for raw read, export, artifact download, and physical lifecycle. |
+| Term                          | Meaning                                                                                                                                                                                                                    |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Observation Evidence          | An admitted, source-addressed record of what AR published, with scope, provenance, integrity, classification, and completeness metadata.                                                                                   |
+| Evidence Envelope             | The immutable minimum identity, source coordinates, scope, timestamps, versions, integrity metadata, and optional protected payload reference.                                                                             |
+| Protected Diagnostic Payload  | Encrypted provider-native content available only through stricter disclosure and lifecycle capabilities. It is not canonical evidence.                                                                                     |
+| Safe Preview                  | A bounded, redacted, render-safe subset of diagnostic content permitted in activity, feed, search, or default export.                                                                                                      |
+| Activity Projection           | A rebuildable provider-neutral interpretation supported by one or more evidence records. It is not runtime truth or an Aggregate Root.                                                                                     |
+| Activity View                 | The authorized public representation of one activity projection.                                                                                                                                                           |
+| Activity Effect               | A typed claim about a target with its own evidence strength, such as an attempted command or causally confirmed file modification.                                                                                         |
+| Activity Evidence Link        | A versioned many-to-many relation describing how evidence originates, progresses, terminates, supports, contradicts, or supersedes activity.                                                                               |
+| Semantic Registry             | The versioned registry of activity kinds, detail schemas, safe fields, correlation rules, and renderer profiles.                                                                                                           |
+| Live Fragment                 | A future provisional streaming protocol excluded from V1 until its own admission, redaction, deletion, and recovery decision is accepted.                                                                                  |
+| Durable Activity Feed         | The context-owned committed activity-change stream used for replay and recovery.                                                                                                                                           |
+| Search Projection             | A disposable, authorized, rebuildable index of allowlisted safe activity fields.                                                                                                                                           |
+| Index Generation              | A search container with immutable identity, schema, and analyzer configuration plus append-only document revisions; it is selected atomically after verification and sealed when superseded.                               |
+| Source Watermark              | The source or context cursor through which projection or index input is known to be applied.                                                                                                                               |
+| Diagnostic Gap                | Explicit evidence that expected raw, source history, or processing continuity is unavailable.                                                                                                                              |
+| Deletion Epoch                | Monotonic scope-local disposition evidence preventing deleted data from returning through replay, indexing, or restore.                                                                                                    |
+| Current Disclosure Fence      | Context-local safety dispositions over Activity revision intervals that can immediately hide affected historical revisions after redaction, quarantine, retraction, or invalidation without hiding unrelated safe history. |
+| Run Attribution State         | Local `pending`, `bound`, or `explicitly-unbound` evidence controlling whether and where an Activity may first be published.                                                                                               |
+| Index Commit Position         | Monotonic generation-local position assigned only when a document revision becomes queryable; it freezes search snapshot membership independently from source watermarks.                                                  |
+| Protected Payload Disposition | Current payload-specific safety state checked for raw read, export, artifact download, and physical lifecycle.                                                                                                             |
 
 Do not use `log` as a domain synonym for all of these concepts. Operational logs,
 runtime output, Observation Evidence, Activity Projection, durable feed, and
@@ -187,17 +189,17 @@ search index have different authorities and guarantees.
 
 #### Owned elsewhere
 
-| Concern | Authority | Relationship |
-|---|---|---|
-| Runtime session, operation, provider process, technical permission, recovery, and private fence | AR | AR publishes versioned facts; Runtime ACL translates. |
-| Run and participant lifecycle, cutoff, desired state, placement, and product recovery consequence | Run Orchestration | Run publishes attribution and cutoff facts; Observation never mutates Run. |
-| Work and task lifecycle | Work Coordination | Activity may reference Work but cannot complete or reassign it. |
-| Tenant/project identity, admission, freeze, and disposition | Orchestration Scope | Supplies accepted scope and coordinates cross-context deletion. |
-| Product authorization | Access Control | Supplies authorization decisions; disclosure policy cannot grant access. |
-| Legal retention periods and legal hold | Open under OD-029 | Observation implements only accepted disposition instructions. |
-| Usage quantities and money | Usage Metering and Usage Accounting | Activity is not billable usage evidence unless a separate contract admits it. |
-| Platform traces, metrics, and operational logs | Platform Observability | Operational telemetry is not the product activity ledger. |
-| Client realtime transport | Realtime adapter under ADR-0058 | Carries bounded changes and wake-ups; owns no durable history. |
+| Concern                                                                                           | Authority                           | Relationship                                                                  |
+| ------------------------------------------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------------------- |
+| Runtime session, operation, provider process, technical permission, recovery, and private fence   | AR                                  | AR publishes versioned facts; Runtime ACL translates.                         |
+| Run and participant lifecycle, cutoff, desired state, placement, and product recovery consequence | Run Orchestration                   | Run publishes attribution and cutoff facts; Observation never mutates Run.    |
+| Work and task lifecycle                                                                           | Work Coordination                   | Activity may reference Work but cannot complete or reassign it.               |
+| Tenant/project identity, admission, freeze, and disposition                                       | Orchestration Scope                 | Supplies accepted scope and coordinates cross-context deletion.               |
+| Product authorization                                                                             | Access Control                      | Supplies authorization decisions; disclosure policy cannot grant access.      |
+| Legal retention periods and legal hold                                                            | Open under OD-029                   | Observation implements only accepted disposition instructions.                |
+| Usage quantities and money                                                                        | Usage Metering and Usage Accounting | Activity is not billable usage evidence unless a separate contract admits it. |
+| Platform traces, metrics, and operational logs                                                    | Platform Observability              | Operational telemetry is not the product activity ledger.                     |
+| Client realtime transport                                                                         | Realtime adapter under ADR-0058     | Carries bounded changes and wake-ups; owns no durable history.                |
 
 The Runtime ACL is stateless. It cannot become a shared runtime-event database,
 normalizer, search service, or authorization owner.
@@ -495,8 +497,9 @@ writers to the same generation.
   completeness but cannot admit a late index commit into an older snapshot.
 - Chronological search is a required baseline. Relevance, phrase, prefix,
   language stemming, and deep snapshot pagination are adapter capabilities.
-- SQLite FTS5 and PostgreSQL FTS are semantically conformant for the baseline,
-  not ranking-equivalent.
+- Local and hosted PostgreSQL FTS must qualify the same semantic baseline.
+  Ranking equivalence is not implied by sharing an engine; language,
+  configuration, collation, and index versions remain explicit capabilities.
 - Search generation rebuild is blue/green and cannot expose partial results.
 - A current deletion tombstone hides data even through old search generations,
   open cursors, realtime cache, and delayed indexing work.
@@ -526,49 +529,49 @@ writers to the same generation.
 
 ### Failure and edge-case matrix
 
-| Scenario | Required outcome |
-|---|---|
-| Exact duplicate source item | Return the retained admission outcome without another activity effect. |
-| Same source identity, different digest | Quarantine as integrity conflict; do not project or index. |
-| Out-of-order or late source item | Preserve source coordinates, update through a new activity revision, and never invent global causality. |
-| Source cursor gap | Record explicit gap, request replay or snapshot, and reset affected projection/feed when continuity cannot be proven. |
-| Unknown source schema | Retain restricted safe evidence and payload reference; do not render arbitrary fields or infer effects. |
-| Stale public execution epoch | Apply the AR-published stale disposition; do not infer or expose the private fence. |
-| Runtime binding mismatch | Reject or quarantine before persistence outside the evidence-conflict area. |
-| Blob write succeeds, DB transaction fails | Blob remains staged and is removed by fenced orphan collection after grace and recheck. |
-| Project freezes or deletes after blob staging | Admission transaction rejects the stale freeze revision or deletion epoch; no manifest becomes reachable. |
-| DB commit succeeds, index fails | Timeline remains available; outbox retries with the same idempotency key. |
-| Index acknowledgement is lost | Repeat the upsert for the same revision safely. |
-| Committed blob is missing or corrupt | Return typed payload-unavailable state and preserve operational evidence. |
-| Disk or quota is exhausted | Reject optional verbose payload and indexing first; never silently lose mandatory evidence. |
-| Compressed or chunked input exceeds limits | Reject or quarantine before expansion exhausts Host memory, while retaining a typed incomplete or rejected outcome. |
-| Rebuild while ingestion continues | Build a new generation from watermark, catch up, verify, then atomically switch. |
-| Permission changes between pages | Reauthorize inside the query before matching or ranking, invalidate the cursor when required, and return no now-hidden result. |
-| Redaction or security invalidation after a cursor opens | Commit the current disclosure fence first; old document revisions disappear immediately and the safe replacement appears only after indexing. |
-| Newer safe revision after a cursor opens | Keep the older revision visible to that snapshot unless an explicit safety disposition withdraws it. |
-| Old source item indexes after a cursor opens | Assign a later index commit position and exclude it from the older snapshot regardless of source watermark. |
-| Runtime evidence arrives before Run attribution | Admit it as pending evidence, publish nothing, and reconcile after a bound or explicitly-unbound source revision arrives. |
-| Authoritative Run attribution changes after publication | Retract in the original partition and append a linked successor in the destination partition without moving historical sequence values. |
-| Stale, conflicting, or gapped Run attribution arrives | Reject stale state regression, quarantine same-revision conflicts, and keep a gap pending until source reconciliation. |
-| Protected payload is quarantined after reference issuance | Current payload disposition denies raw read, export, and artifact download even when the reference remains syntactically valid. |
-| Deletion races indexing or replay | Tombstone wins immediately; delayed work cannot resurrect content. |
-| Key rotation crashes | Continue reading allowed old/new versions and resume reconciliation without plaintext fallback. |
-| Retention races export | Recheck disposition and authorization before artifact creation and download. |
-| Arbitrary old backup is restored | Keep deployment quarantined until current erasure ledger, deletion epochs, and key state reconcile. |
-| Slow realtime client | Coalesce safe projection updates, preserve reset ability, and never drop committed deletion or invalidation. |
-| Malicious Markdown, ANSI, bidi, or link | Sanitize or visibly encode it; never execute or trust it. |
-| Provider claims a file edit in prose | Represent an assertion or uncertain effect, not a confirmed file modification. |
-| Activity evidence later contradicts an effect | Append contradiction/correction, increment activity revision, and update feed/search without rewriting source evidence. |
+| Scenario                                                  | Required outcome                                                                                                                              |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exact duplicate source item                               | Return the retained admission outcome without another activity effect.                                                                        |
+| Same source identity, different digest                    | Quarantine as integrity conflict; do not project or index.                                                                                    |
+| Out-of-order or late source item                          | Preserve source coordinates, update through a new activity revision, and never invent global causality.                                       |
+| Source cursor gap                                         | Record explicit gap, request replay or snapshot, and reset affected projection/feed when continuity cannot be proven.                         |
+| Unknown source schema                                     | Retain restricted safe evidence and payload reference; do not render arbitrary fields or infer effects.                                       |
+| Stale public execution epoch                              | Apply the AR-published stale disposition; do not infer or expose the private fence.                                                           |
+| Runtime binding mismatch                                  | Reject or quarantine before persistence outside the evidence-conflict area.                                                                   |
+| Blob write succeeds, DB transaction fails                 | Blob remains staged and is removed by fenced orphan collection after grace and recheck.                                                       |
+| Project freezes or deletes after blob staging             | Admission transaction rejects the stale freeze revision or deletion epoch; no manifest becomes reachable.                                     |
+| DB commit succeeds, index fails                           | Timeline remains available; outbox retries with the same idempotency key.                                                                     |
+| Index acknowledgement is lost                             | Repeat the upsert for the same revision safely.                                                                                               |
+| Committed blob is missing or corrupt                      | Return typed payload-unavailable state and preserve operational evidence.                                                                     |
+| Disk or quota is exhausted                                | Reject optional verbose payload and indexing first; never silently lose mandatory evidence.                                                   |
+| Compressed or chunked input exceeds limits                | Reject or quarantine before expansion exhausts Host memory, while retaining a typed incomplete or rejected outcome.                           |
+| Rebuild while ingestion continues                         | Build a new generation from watermark, catch up, verify, then atomically switch.                                                              |
+| Permission changes between pages                          | Reauthorize inside the query before matching or ranking, invalidate the cursor when required, and return no now-hidden result.                |
+| Redaction or security invalidation after a cursor opens   | Commit the current disclosure fence first; old document revisions disappear immediately and the safe replacement appears only after indexing. |
+| Newer safe revision after a cursor opens                  | Keep the older revision visible to that snapshot unless an explicit safety disposition withdraws it.                                          |
+| Old source item indexes after a cursor opens              | Assign a later index commit position and exclude it from the older snapshot regardless of source watermark.                                   |
+| Runtime evidence arrives before Run attribution           | Admit it as pending evidence, publish nothing, and reconcile after a bound or explicitly-unbound source revision arrives.                     |
+| Authoritative Run attribution changes after publication   | Retract in the original partition and append a linked successor in the destination partition without moving historical sequence values.       |
+| Stale, conflicting, or gapped Run attribution arrives     | Reject stale state regression, quarantine same-revision conflicts, and keep a gap pending until source reconciliation.                        |
+| Protected payload is quarantined after reference issuance | Current payload disposition denies raw read, export, and artifact download even when the reference remains syntactically valid.               |
+| Deletion races indexing or replay                         | Tombstone wins immediately; delayed work cannot resurrect content.                                                                            |
+| Key rotation crashes                                      | Continue reading allowed old/new versions and resume reconciliation without plaintext fallback.                                               |
+| Retention races export                                    | Recheck disposition and authorization before artifact creation and download.                                                                  |
+| Arbitrary old backup is restored                          | Keep deployment quarantined until current erasure ledger, deletion epochs, and key state reconcile.                                           |
+| Slow realtime client                                      | Coalesce safe projection updates, preserve reset ability, and never drop committed deletion or invalidation.                                  |
+| Malicious Markdown, ANSI, bidi, or link                   | Sanitize or visibly encode it; never execute or trust it.                                                                                     |
+| Provider claims a file edit in prose                      | Represent an assertion or uncertain effect, not a confirmed file modification.                                                                |
+| Activity evidence later contradicts an effect             | Append contradiction/correction, increment activity revision, and update feed/search without rewriting source evidence.                       |
 
 ### Local and server adapters
 
-| Capability | Future fully local profile | Server profiles |
-|---|---|---|
-| Canonical state | Context-owned SQLite | Context-owned PostgreSQL |
-| Protected payload | Encrypted local filesystem adapter | S3-compatible encrypted object adapter |
-| Search | SQLite FTS5 | PostgreSQL `tsvector` and GIN |
-| Realtime | Replaceable local edge when profile is implemented | Hosted Centrifugo adapter |
-| Encryption keys | OS-backed or packaged local secret adapter, still open | KMS-backed adapter |
+| Capability        | Fully Local V1 target                                  | Server profiles                        |
+| ----------------- | ------------------------------------------------------ | -------------------------------------- |
+| Canonical state   | Context-owned schema in bundled native PostgreSQL      | Context-owned PostgreSQL schema        |
+| Protected payload | Encrypted local filesystem adapter                     | S3-compatible encrypted object adapter |
+| Search            | PostgreSQL `tsvector` and GIN                          | PostgreSQL `tsvector` and GIN          |
+| Realtime          | Replaceable local edge when profile is implemented     | Hosted Centrifugo adapter              |
+| Encryption keys   | OS-backed or packaged local secret adapter, still open | KMS-backed adapter                     |
 
 The application observes the same authorization, evidence, activity, deletion,
 timeline, and chronological search outcomes. Physical locking, ranking, backup,
@@ -612,7 +615,8 @@ or a fully local Desktop implementation.
 
 - Exact legal retention and hold authority remains OD-029.
 - Exact local key storage and local protected-payload backup policy remain part
-  of the future Fully Local profile.
+  of the required Fully Local V1 profile; its implementation and release gates
+  remain independent of this context's proposed feature scope.
 - The initial public semantic-registry categories and typed detail schemas need
   contract fixtures before package materialization.
 - AR exact output-feed schemas, cursor guarantees, and capability negotiation are

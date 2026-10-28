@@ -60,6 +60,20 @@
     {
       "file": "scripts/architecture/quality-source-coverage.test.mjs",
       "names": [
+        "flat reader projection remains bounded to the adopted v1.1 profile"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/quality-source-coverage.test.mjs",
+      "names": [
+        "flat reader projection rejects declared or materialized v1.1 constructs"
+      ],
+      "kind": "test"
+    },
+    {
+      "file": "scripts/architecture/quality-source-coverage.test.mjs",
+      "names": [
         "published coverage rejects an unclassified new workspace package"
       ],
       "kind": "test"

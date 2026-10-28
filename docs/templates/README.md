@@ -8,15 +8,15 @@ summary: Navigation index for governed documentation templates and their intende
 
 # Documentation Templates
 
-| Template | Use when |
-|---|---|
-| [Package index](index.md) | A declared package needs navigation to its canonical owner and actual features |
-| [ADR](adr.md) | A significant choice needs durable rationale and consequences |
-| [Open decision](open-decision.md) | An unresolved question must be addressable and blocked from implicit implementation |
-| [Bounded-context dossier](bounded-context.md) | Domain discovery proposes or evolves a strategic context |
-| [Feature documentation](feature.md) | A materialized feature needs colocated implementation guidance |
-| [Contract documentation](contract.md) | A versioned public or integration contract needs semantic documentation |
-| [Runbook](runbook.md) | A real operational failure mode needs diagnosis, recovery, and verification |
+| Template                                      | Use when                                                                            |
+| --------------------------------------------- | ----------------------------------------------------------------------------------- |
+| [Package index](index.md)                     | A declared package needs navigation to its canonical owner and actual features      |
+| [ADR](adr.md)                                 | A significant choice needs durable rationale and consequences                       |
+| [Open decision](open-decision.md)             | An unresolved question must be addressable and blocked from implicit implementation |
+| [Bounded-context dossier](bounded-context.md) | Domain discovery proposes or evolves a strategic context                            |
+| [Feature documentation](feature.md)           | A materialized feature needs colocated implementation guidance                      |
+| [Contract documentation](contract.md)         | A versioned public or integration contract needs semantic documentation             |
+| [Runbook](runbook.md)                         | A real operational failure mode needs diagnosis, recovery, and verification         |
 | [Research report](research.md) | Dated source review, discussion synthesis, comparison, or bounded experiment needs durable evidence and explicit limits |
 
 Templates define required structure, not domain answers. Remove irrelevant

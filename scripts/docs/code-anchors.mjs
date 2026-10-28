@@ -50,9 +50,7 @@ export async function listRepositoryFiles(repositoryRoot) {
 
   async function visit(directory) {
     const entries = await readdir(directory, { withFileTypes: true });
-    for (const entry of entries.toSorted((left, right) =>
-      left.name.localeCompare(right.name),
-    )) {
+    for (const entry of entries.toSorted((left, right) => left.name.localeCompare(right.name))) {
       if (entry.isDirectory() && excludedDirectoryNames.has(entry.name)) {
         continue;
       }
@@ -61,9 +59,7 @@ export async function listRepositoryFiles(repositoryRoot) {
       if (entry.isDirectory()) {
         await visit(entryPath);
       } else if (entry.isFile()) {
-        files.push(
-          normalizeRepositoryPath(path.relative(repositoryRoot, entryPath)),
-        );
+        files.push(normalizeRepositoryPath(path.relative(repositoryRoot, entryPath)));
       }
     }
   }
@@ -73,7 +69,5 @@ export async function listRepositoryFiles(repositoryRoot) {
 }
 
 export function matchingCodeAnchorFiles(pattern, repositoryFiles) {
-  return repositoryFiles.filter((filePath) =>
-    matchesCodeAnchor(filePath, pattern),
-  );
+  return repositoryFiles.filter((filePath) => matchesCodeAnchor(filePath, pattern));
 }

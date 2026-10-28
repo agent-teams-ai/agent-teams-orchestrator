@@ -3,13 +3,13 @@
 Headless control plane being designed for collaboration between people and AI
 agents, with shared Teams and Tasks and separate agent execution.
 
-The design uses a headless, event-driven modular core with Clean and Hexagonal
-Architecture, strategic and tactical Full DDD, broker-neutral messaging,
-provider-neutral runtime integration, and versioned public contracts. Canonical
-main selects separate process roles from their first owning feature; this older
-branch must not be read as a proposal to restore universal single-process
-placement. See the [branch integration status](docs/architecture/overview.md#branch-integration-status)
-before using this branch as an implementation baseline.
+The project is being designed as an event-driven modular control plane with
+coarse service and worker processes, Clean and Hexagonal Architecture, Full DDD,
+broker-neutral messaging, provider-neutral runtime integration, and versioned
+contracts. The server architecture targets one team through thousands of
+simultaneously running agents, with Docker Compose and Kubernetes deployment
+forms. These are architecture commitments, not claims of qualified capacity.
+See the [service role map](docs/architecture/deployment-profiles.md#service-role-map).
 
 ## Project status
 
@@ -104,5 +104,5 @@ maps organizations, human/AI Teams, Tasks, Workspace naming, module foundation,
 and Platform integration to their owners and remaining decisions. Service
 topology and Dapr/Protobuf now have a separate
 [canonical backend adoption](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/94a480d004e8e6eaf79507feeae30428d372a3d3/docs/decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md).
-This pending branch's remaining reconciliation with current main is recorded in
+The reconciled decisions and retained source history are recorded in
 [branch integration status](docs/architecture/overview.md#branch-integration-status).

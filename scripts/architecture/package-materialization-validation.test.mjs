@@ -46,10 +46,7 @@ test("accepts the exact deferred Fully Local materialization gate set", () => {
 test("rejects deleting a required Fully Local reservation", () => {
   const errors = [];
   validateRequiredMaterializationEntries(
-    [
-      { package_id: "app.orchestrator-local" },
-      { package_id: "sdk.orchestrator-local-host" },
-    ],
+    [{ package_id: "app.orchestrator-local" }, { package_id: "sdk.orchestrator-local-host" }],
     documents(),
     errors,
   );
@@ -58,12 +55,7 @@ test("rejects deleting a required Fully Local reservation", () => {
 
 test("rejects a materialization policy entry without a catalog package", () => {
   const errors = [];
-  validatePackageMaterializationPolicy(
-    { entries: [localEntry()] },
-    [],
-    new Map(),
-    errors,
-  );
+  validatePackageMaterializationPolicy({ entries: [localEntry()] }, [], new Map(), errors);
   assert.match(errors.join("\n"), /unknown package_id app\.local-supervisor/u);
 });
 
@@ -109,10 +101,7 @@ test("rejects a non-OD materialization gate", () => {
     decision: null,
   };
   const invalidDocuments = new Map([
-    [
-      "architecture.overview",
-      { metadata: { status: "proposed", type: "architecture" } },
-    ],
+    ["architecture.overview", { metadata: { status: "proposed", type: "architecture" } }],
   ]);
   const errors = [];
   validateMaterializationGates(entry, invalidDocuments, errors);
@@ -128,10 +117,7 @@ test("rejects an accepted non-ADR materialization decision", () => {
   };
   const invalidDocuments = new Map([
     ["OD-999", { metadata: { status: "resolved", type: "open-decision" } }],
-    [
-      "architecture.overview",
-      { metadata: { status: "accepted", type: "architecture" } },
-    ],
+    ["architecture.overview", { metadata: { status: "accepted", type: "architecture" } }],
   ]);
   const errors = [];
   validateMaterializationGates(entry, invalidDocuments, errors);
