@@ -212,6 +212,7 @@ test("published coverage accepts the real consumer profile", async () => {
       extends: ["./.oxlintrc.common.json", ...typed.extends.slice(1)],
     });
     const preRemediation = inspect(root);
+    if (preRemediation.status !== 0) console.error(JSON.stringify(preRemediation.report));
     assert.equal(
       preRemediation.status,
       0,
