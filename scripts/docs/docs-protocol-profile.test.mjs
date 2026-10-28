@@ -107,6 +107,7 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
     "feature",
     "index",
     "open-decision",
+    "research",
     "runbook",
   ]);
   for (const artifact of Object.values(artifacts)) {
@@ -117,8 +118,8 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
     profile.authoring.artifactTypes.filter(
       (artifact) => artifact.ownerSetId === "registered-owners",
     ).length,
-    7,
-    "all seven types must preserve the registered-owner authoring boundary",
+    8,
+    "all eight types must preserve the registered-owner authoring boundary",
   );
   assert.deepEqual(artifacts.index.placement, {
     kind: "qualified-leaf-index",
@@ -158,6 +159,19 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
   assert.deepEqual(artifacts.runbook.reachability, {
     kind: "manual-fixed-index",
     indexPath: "docs/README.md",
+  });
+  assert.equal(artifacts.research.initialStatus, "active");
+  assert.deepEqual(artifacts.research.identity.grammar, {
+    prefixSegments: ["research"], minSuffixSegments: 1, maxSuffixSegments: 1,
+  });
+  assert.deepEqual(artifacts.research.placement, {
+    kind: "collection", directory: "docs/research", filename: "slug",
+  });
+  assert.deepEqual(artifacts.research.template, {
+    kind: "fenced-markdown-body", path: "docs/templates/research.md",
+  });
+  assert.deepEqual(artifacts.research.reachability, {
+    kind: "manual-fixed-index", indexPath: "docs/research/README.md",
   });
 });
 

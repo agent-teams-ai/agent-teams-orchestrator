@@ -3,6 +3,7 @@ id: ADR-0040
 type: adr
 status: superseded
 superseded_by:
+  - ADR-0110
   - ADR-0113
 supersedes: []
 owner: architecture/composition

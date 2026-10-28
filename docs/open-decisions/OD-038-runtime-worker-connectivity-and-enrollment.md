@@ -13,6 +13,8 @@ related:
   - architecture.deployment-profiles
   - architecture.runtime-boundary
   - architecture.security
+  - OD-012
+  - research.iam-critical-decisions-review-2026-10-23
 ---
 
 # OD-038: Runtime Worker Connectivity and Enrollment
@@ -43,6 +45,15 @@ customer device without making Desktop the durable lifecycle owner.
   technical runtime state; Orchestrator owns business coordination.
 - Logs, diagnostic payload, workspace data, and secrets follow explicit data-flow
   and redaction contracts across the channel.
+
+## Related identity research
+
+The [IAM critical-decisions review](../research/iam-critical-decisions-review-2026-10-23.md#5-agent-identity-delegated-work-and-service-trust)
+distinguishes authenticated device/workload identity from trusted product actor,
+subject, Agent, Run, client, and delegation bindings. Use its counterexamples
+when qualifying enrollment and dispatch with OD-012. A shared worker's verified
+identity does not itself prove isolation after that worker is compromised.
+This evidence selects no new enrollment model or transport qualification.
 
 ## Qualification Evidence
 

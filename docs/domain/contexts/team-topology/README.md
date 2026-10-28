@@ -11,6 +11,7 @@ related:
   - ADR-0100
   - ADR-0101
   - ADR-0076
+  - ADR-0111
   - architecture.context-map
   - architecture.deployment-profiles
   - OD-006
@@ -19,6 +20,7 @@ related:
   - OD-045
   - OD-046
   - OD-047
+  - OD-048
   - research.team-creation-legacy-capability-inventory-2026-08-27
 ---
 
@@ -119,6 +121,24 @@ and must use its owning decision process before implementation.
 Proposed scope: project-scoped teams, members, roles, declared capabilities,
 topology versions, and roster invariants. Tasks and runtime processes remain
 outside this context.
+
+### Mixed-team product direction
+
+The owner directs support for humans and AI in the same Team. Human membership
+must reference a human principal, never an `AgentProfile` or a runtime session.
+Team membership describes collaboration and does not itself grant Project access,
+assignment, approval, or execution authority. Agent actions require authenticated
+or delegated commands under the configured authority provider.
+
+[ADR-0111](../../../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+accepts human membership in several Teams and one authorized personal-work query.
+[OD-048](../../../open-decisions/OD-048-mixed-human-and-ai-team-participation.md)
+retains the exact typed member model, successor contracts and qualification.
+ADR-0100's
+one-current-Team rule for an Agent, exact Agent definition versions, and ADR-0101's
+Run snapshot and occupancy rules remain unchanged. The current single-Agent
+ADR-0103 admission does not implement mixed membership. Organizational nesting
+uses OD-023 units and placements; it does not recursively expand this roster.
 
 Team Topology owns create-only, clone, and template-instantiation capabilities.
 It does not own organizational placement or Run activation. The Run

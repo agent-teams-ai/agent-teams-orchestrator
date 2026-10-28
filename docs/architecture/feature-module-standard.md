@@ -5,6 +5,7 @@ status: accepted
 owner: architecture
 summary: Orchestrator adoption profile and local extensions for the organization Feature Module Standard v1.1, with gated activation of new constructs.
 related:
+  - ADR-0117
   - ADR-0012
   - ADR-0037
   - ADR-0038
@@ -447,6 +448,15 @@ application ports or public contracts. An ordinary in-process dependency does
 not require serializing its values through Protobuf.
 
 ### Composition and dependency selection
+
+[ADR-0117](../decisions/0117-reconcile-mandatory-module-composition.md) reconciles
+mandatory use across applicable TypeScript package families with ADR-0113's
+unchanged exact Core/Assembly baseline and FMS v1.1 adoption. An independently
+assembled SDK or integration capability is not exempt merely because it is not
+a business context. Pure contracts and helpers need no artificial module. The
+[foundation gate](implementation-readiness-gates.md#module-foundation-before-business-expansion)
+requires actual seam inventory, migration, source checks and bounded qualification
+before broad expansion. No new construct is activated by this reconciliation.
 
 ADR-0113 selects the exact `@get-modular/core` and `@get-modular/assembly` 0.5.0
 pair for static composition. GM descriptors, `implement`, `input`, `group`,

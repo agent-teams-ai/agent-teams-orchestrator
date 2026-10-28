@@ -503,6 +503,16 @@
       "immutableDigest": "sha256:3b009d7a13893f5be7628dbf42bcaccaf5f01267064c3354e5fef237af5f84c0"
     },
     {
+      "id": "ADR-0110",
+      "path": "docs/decisions/0110-mandatory-get-modular-and-nested-feature-foundation.md",
+      "immutableDigest": "sha256:7f9df2297f1643ee385cff436ee4b923442d08be15d6f9da6f6e4a041bd0f2f5"
+    },
+    {
+      "id": "ADR-0111",
+      "path": "docs/decisions/0111-human-collaboration-and-execution-directory-terminology.md",
+      "immutableDigest": "sha256:5e0481d52ce0bec048266f425f7495ad25946dfc8f0c013ac959fb89dfe0b5a7"
+    },
+    {
       "id": "ADR-0113",
       "path": "docs/decisions/0113-canonical-module-and-composition-adoption.md",
       "immutableDigest": "sha256:a5511b1e671fae8038d471c0a4cbe3ef044d83b67daef8c24816d8b01a139673"
@@ -516,6 +526,11 @@
       "id": "ADR-0115",
       "path": "docs/decisions/0115-canonical-fully-local-v1-adoption.md",
       "immutableDigest": "sha256:ad92838d720dd08de10e64803bfd0b77fe3a3f3e7944ed508f61e64cba2307bc"
+    },
+    {
+      "id": "ADR-0117",
+      "path": "docs/decisions/0117-reconcile-mandatory-module-composition.md",
+      "immutableDigest": "sha256:c968f0f38ca902483dad4d2aa95f72702e20df7115f5580929b3ffce6e38712c"
     }
   ]
 }

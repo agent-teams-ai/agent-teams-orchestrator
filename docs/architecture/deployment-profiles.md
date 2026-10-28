@@ -363,6 +363,16 @@ Self-hosted operation does not require Agent Teams-managed APIs, private package
 registry access, or an active commercial connection unless the customer
 explicitly enables a future connected managed capability.
 
+The standalone product model supports multiple independently governed
+organizations in one installation. A human may hold separate memberships and
+roles in several organizations; ending one relationship must not erase another
+relationship or its stable identity. The exact authority, Tenant, semantic
+Organization, and public-reference mappings remain owned by
+[OD-012](../open-decisions/OD-012-identity-authorization-tenant-isolation.md),
+[OD-019](../open-decisions/OD-019-public-resource-identity-and-scope.md), and
+[OD-023](../open-decisions/OD-023-agent-organization-model.md). A smaller initial
+slice must state its admitted scope without introducing a Platform dependency.
+
 The co-deployed Web UI uses the same origin or a release-qualified reverse-proxy
 topology. Desktop can store an explicit named Target Profile for the server after
 discovery, TLS, protocol, authority, and capability validation.

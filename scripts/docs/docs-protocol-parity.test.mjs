@@ -94,6 +94,7 @@ async function makeSourceFixture() {
     mkdir(path.join(root, "docs/domain/contexts"), { recursive: true }),
     mkdir(path.join(root, "docs/contracts"), { recursive: true }),
     mkdir(path.join(root, "docs/operations"), { recursive: true }),
+    mkdir(path.join(root, "docs/research"), { recursive: true }),
     mkdir(path.join(root, "packages/platform/local-host-control/src/features/host-discovery"), {
       recursive: true,
     }),
@@ -146,6 +147,10 @@ async function makeSourceFixture() {
     writeFile(
       path.join(root, "docs/operations/README.md"),
       indexSource("docs.operations.index", "Operations"),
+    ),
+    writeFile(
+      path.join(root, "docs/research/README.md"),
+      indexSource("research.index", "Research"),
     ),
     writeFile(
       path.join(root, "packages/platform/local-host-control/README.md"),
@@ -238,6 +243,45 @@ test("shared check owns metadata, owner membership, and duplicate IDs", async ()
 const requiresStrictDirectoryDurability = process.platform === "win32" ? test.skip : test;
 const requiresUnsupportedStrictDirectoryDurability =
   process.platform === "win32" ? test : test.skip;
+
+requiresStrictDirectoryDurability("research adoption uses the shared create-only writer and research index without changing historical qualification", async () => {
+  const source = await makeSourceFixture();
+  try {
+    const request = {
+      consumerRoot: source,
+      profilePath: "architecture/foundation/docs-protocol.yaml",
+      apply: false,
+      intent: {
+        type: "research",
+        id: "research.provider-review-2026-10-21",
+        title: "Provider Review, 2026-10-21",
+        owner: "architecture/security",
+        summary: "Dated source review with explicit evidence and qualification limits.",
+        slug: "provider-review-2026-10-21",
+      },
+    };
+    const preview = await docsNewV2(request);
+    assert.equal(preview.exitCode, 0, JSON.stringify(preview.envelope));
+    assert.equal(preview.envelope.result.documentPath, "docs/research/provider-review-2026-10-21.md");
+    assert.deepEqual(preview.envelope.result.reachability, {
+      state: "manual-required",
+      indexPath: "docs/research/README.md",
+      markdownLink: "[Provider Review, 2026-10-21](provider-review-2026-10-21.md)",
+    });
+    await assert.rejects(readFile(path.join(source, preview.envelope.result.documentPath)), { code: "ENOENT" });
+    const applied = await docsNewV2({ ...request, apply: true, expectedPlanDigest: preview.envelope.result.planDigest });
+    assert.equal(applied.exitCode, 0, JSON.stringify(applied.envelope));
+    assert.equal(await readFile(path.join(source, applied.envelope.result.documentPath), "utf8"), preview.envelope.result.compiled.document.content);
+    const retained = `${preview.envelope.result.compiled.document.content}\nRetained manual evidence.\n`;
+    await writeFile(path.join(source, applied.envelope.result.documentPath), retained);
+    await assert.rejects(docsNewV2({ ...request, apply: true }), {
+      code: "DOCUMENT_PLANNING_CONFLICT",
+    });
+    assert.equal(await readFile(path.join(source, applied.envelope.result.documentPath), "utf8"), retained);
+  } finally {
+    await rm(source, { recursive: true, force: true });
+  }
+});
 
 for (const scenario of cases) {
   requiresStrictDirectoryDurability(

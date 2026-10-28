@@ -7,10 +7,12 @@ summary: Define the future ownership and lifecycle of external connector install
 related:
   - ADR-0074
   - architecture.extensions
+  - OD-012
   - OD-015
   - OD-026
   - OD-029
   - OD-031
+  - research.iam-critical-decisions-review-2026-10-23
 ---
 
 # OD-034: External Integration Management
@@ -35,6 +37,15 @@ revoke fencing, reconciliation, health evidence, and tenant deletion behavior.
   own models and admit external observations through consumer-owned ACLs.
 - Loss of source continuity creates a new source incarnation and cannot inherit
   trust, cursor, or deduplication state silently.
+
+## Related identity research
+
+The [IAM critical-decisions review](../research/iam-critical-decisions-review-2026-10-23.md#10-external-connections-and-credentials-used-by-agents)
+records proposed connection ownership, separate connect/manage/use authority,
+employee departure, credential custody, and exact webhook connection binding.
+OD-012 owns the identity and authorization contract; this decision retains
+connector lifecycle ownership. The evidence does not lift ADR-0074's exclusion,
+select a new bounded context, or authorize an integration package.
 
 ## Options
 

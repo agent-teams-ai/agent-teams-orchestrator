@@ -14,8 +14,10 @@ related:
   - ADR-0115
   - architecture.deployment-profiles
   - architecture.local-host-lifecycle
+  - OD-012
   - OD-021
   - OD-035
+  - research.iam-critical-decisions-review-2026-10-23
 ---
 
 # OD-040: Fully Local Package Materialization
@@ -53,6 +55,15 @@ approach; neither resolves this decision or qualifies a release.
 The first increment must name its PostgreSQL lifecycle and persistence scope
 under the existing owners; it cannot create a second Desktop-owned Host,
 database process, or authoritative local cache.
+
+## Related identity research
+
+The [IAM critical-decisions review](../research/iam-critical-decisions-review-2026-10-23.md#2-fully-local-identity-bootstrap-and-recovery)
+records local authority, protected enrollment, stable principal custody,
+boot-credential rotation, and key-loss recovery choices under OD-012. Its
+single-owner recommendation is not an accepted product choice. ADR-0115 already
+requires Fully Local in V1; this research neither defers that scope nor qualifies
+a materialized profile.
 
 ## Options
 

@@ -19,6 +19,7 @@ related:
   - ADR-0085
   - architecture.local-host-lifecycle
   - OD-004
+  - OD-032
 ---
 
 # Runtime Boundary
@@ -250,6 +251,13 @@ the applicable shared contract fixtures against the same Published Language
 versions.
 
 ## Runtime permissions and product approvals
+
+This section describes the bridge for an AR-originated technical permission
+request. Product approval requirements also apply to dangerous actions performed
+through other outbound capabilities; their detailed approval and dispatch
+semantics remain open under
+[OD-032](../open-decisions/OD-032-last-mile-side-effect-safety.md#deferred-dangerous-action-approval-research).
+Task assignment acceptance and Work completion are separate facts.
 
 The permission flow crosses two independently owned state machines. The labels
 below are semantic roles, not accepted AR wire command or event names:

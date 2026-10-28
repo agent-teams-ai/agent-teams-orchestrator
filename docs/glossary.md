@@ -4,6 +4,10 @@ type: glossary
 status: active
 owner: architecture/domain
 summary: Cross-system terminology shared by multiple bounded contexts and integrations.
+related:
+  - ADR-0062
+  - ADR-0111
+  - OD-019
 ---
 
 # Glossary
@@ -178,12 +182,27 @@ generations. It may change while the published runtime-session identity remains
 unchanged. It is not an `ExecutionFence`, capability token, or orchestrator
 aggregate revision.
 
+## Execution Directory
+
+The selected technical term for the project-scoped filesystem resource
+registered and materialized for agent execution. It includes shared directories,
+worktrees, clones, snapshots, and remote filesystem views. Identity is opaque;
+an arbitrary path is not authority, and a directory need not be local.
+
+[ADR-0111](decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+adopts the term while preserving ADR-0062's separate registration, allocation,
+access and consistency, and runtime-isolation concerns. Existing model names
+`WorkspaceRegistration`, `ExecutionWorkspaceAllocation`, and
+`WorkspaceAccessAndConsistency` remain unchanged. Exact public API spelling and
+any migration remain open under OD-019.
+
 ## Execution workspace allocation
 
-A durable Workspace Registry resource representing one materialized workspace
-view and its normalized sharing, access, consistency, lifecycle, and cleanup
-guarantees. A Git worktree may implement an allocation but is not a security
-sandbox.
+A durable Workspace Registry resource, named `ExecutionWorkspaceAllocation` in
+ADR-0062, representing one materialized Execution Directory view and its
+normalized sharing, access, consistency, lifecycle, and cleanup guarantees. A Git
+worktree may implement an allocation but is not a security sandbox. The selected
+Execution Directory terminology does not rename this model identity.
 
 ## Inbox
 
@@ -452,10 +471,20 @@ and enforceable error-budget policy. Often abbreviated SLO.
 An opaque identifier resolved only by a secret adapter. It is not the secret
 value and grants no authority by itself.
 
+## Workspace
+
+The frontend navigation or saved-view label over a selected Target and authorized
+Tenant/Project. It creates no additional isolation boundary, permission owner,
+Task store, or parent of Project identity. It is distinct from an Execution
+Directory. An independent Workspace lifecycle or scope would require a separate
+decision under OD-019.
+
 ## Workspace registration
 
-A project-owned record that identifies a registered workspace binding and its
-generation without exposing arbitrary paths as domain identity.
+A project-owned record, named `WorkspaceRegistration` in ADR-0062, that identifies
+a registered Execution Directory binding and its generation without exposing
+arbitrary paths as domain identity. Its identity remains distinct from an
+`ExecutionWorkspaceAllocation`.
 
 ## Sidecar
 
@@ -475,11 +504,13 @@ cursor begins strictly after that position.
 
 ## Tenant
 
-The top-level ownership and isolation identity for projects, principals, grants,
-and tenant-scoped policy. The configured product authority owns external Tenant
-lifecycle. Orchestration Scope owns stable, provider-neutral Orchestrator tenant
-and Project identities and their bindings; other contexts hold opaque local
-references.
+The top-level ownership and isolation identity for projects, scope-qualified
+access relationships, grants, and tenant-scoped policy. The configured product authority
+owns external Tenant lifecycle and principal bindings. A human identity can
+participate in several authorized organizations through independent memberships;
+Tenant scope does not itself require a separate human account per organization.
+Orchestration Scope owns stable, provider-neutral Orchestrator tenant and Project
+identities and their bindings; other contexts hold opaque local references.
 
 ## Trust boundary
 
