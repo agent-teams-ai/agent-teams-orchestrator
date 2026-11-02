@@ -61,6 +61,7 @@ The mechanism-specific alternatives and evidence are kept in focused references 
 2. [Mechanism alternatives and recommended owner fit](agent-harness-mechanism-options-2026-11-02.md): eight independently evaluated problem areas, rejected approaches, source citations, subjective reliability/confidence/complexity scores and bounded LOC ranges.
 3. [Pattern and anti-pattern reference](agent-harness-patterns-antipatterns-e2e-2026-11-02.md): 22 useful practices, 24 dangerous patterns and 36 proposed fault-injection and E2E verification cases.
 4. [Adversarial review ledger](agent-harness-adversarial-reviews-2026-11-02.md): three structured critique passes from ten distinct technical perspectives, corrections, best counterarguments and unresolved owner decisions.
+5. [Technical case studies](agent-harness-technical-case-studies-2026-11-02.md): nine focused and critical comparisons, including JavaScript-versus-Python LangGraph durability, Temporal worker host affinity and model input safe points.
 
 ## Decision status and qualification
 
