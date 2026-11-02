@@ -14,7 +14,13 @@ related:
 
 **Research reference only.** Codes `Pxx`, `Axx` and `Txx` below are local catalog identifiers, not accepted interfaces, not GitHub issue numbers and not implemented tests. They identify failure modes that an owning future slice should turn into automated contract/E2E fixtures. A positive pattern may be appropriate only in a qualified context. A test is **proposed**, not reported as passed.
 
-## Positive design patterns
+## Scope and provenance
+
+This 2026-11-02 catalog derives reusable mechanisms from the linked [first-party source inventory](agent-harness-source-catalog-2026-11-02.md). It maps possible failure modes to future owners; all T01–T36 entries are **proposed tests**, never executed results or accepted interface commitments.
+
+## Findings and design options
+
+### Positive design patterns
 
 | ID | Pattern / proven usefulness | Fit and limits | Source |
 | --- | --- | --- | --- |
@@ -41,7 +47,7 @@ related:
 | P21 | **Independent agent identity, session and work scope.** One participant definition, many run snapshots, separately authorized execution operations. | Preserve ADR-0100/0101 occupancy, don't equate agent with process. | [Team roster ADR](../decisions/0101-run-specific-rosters-coordination-and-exclusive-agent-occupancy.md) |
 | P22 | **Failure-safe local profile.** One shared logical contract with qualified local infrastructure profile and finite capacity. | Native PostgreSQL/JetStream under explicit Supervisor; do not silently introduce alternate semantics. | [Our deployment profiles](../architecture/deployment-profiles.md) |
 
-## Rejected anti-patterns
+### Rejected anti-patterns
 
 | ID | Anti-pattern / exact failure | Required countermeasure or deliberate defer |
 | --- | --- | --- |
@@ -70,7 +76,7 @@ related:
 | A23 | Historic AutoGen designs treated as actively supported Microsoft's current framework. | [AutoGen is archived](https://github.com/microsoft/autogen/blob/main/README.md); compare Microsoft Agent Framework instead. |
 | A24 | Design benchmark assumes implementation is completed, or 10k queued records equals 10k running agents. | Compare *design* equally but capacity claims only through measured admitted executing load. |
 
-## Proposed E2E/conformance scenarios for owning slices
+### Proposed E2E/conformance scenarios for owning slices
 
 A scenario records the **owner whose test must assert the invariant**. No scenario should be implemented in a generic repository-wide mega harness. Prefer end-to-end coverage of cross-boundary failure modes, with narrow unit/property tests for critical state machines and parsers.
 
@@ -113,8 +119,20 @@ A scenario records the **owner whose test must assert the invariant**. No scenar
 | T35 | Mixed-version service rollout with old event schema | Compatible readers, one mutation owner, explicit quarantine on unsupported event | Semantic owner |
 | T36 | Largest advertised actual concurrent agent workload | Measured admitted executions, fairness/latency/CPU/RAM/SQL/NATS/output/backpressure/failover | Capacity/AR + Orchestrator |
 
-## Practical initial acceptance slices
+### Practical initial acceptance slices
 
 **Slice A — source-to-existing-work continuity** (requires OD-026/031/033 plus first approved source): T01–T07 and T13. Must not build a global Router. **Slice B — native in-turn guidance** (AR decision and qualified provider): T07–T12. Must not start with blanket provider claims. **Slice C — context provenance**: T20–T22. **Slice D — advisory monitoring**: T24–T26. **Slice E — dynamic extension activation** after OD-043: T27–T30. **Slice F — durable/resilience qualification** in the relevant existing lanes: T14–T19, T31–T36.
 
 Each slice defines exact target/profile, binary releases, budget, reporting and mandatory negative fixtures **before** implementation. These are additional ideas for a future authorized program, not user-visible promises of existing features.
+
+## Decision status and qualification
+
+None of these patterns authorizes adding packages, services, plugins or domain commands. Real tests require an owner-selected target/profile, a relevant accepted contract, and implementation-start approval. The accepted [eventing](../architecture/eventing-and-reliability.md) and [extension](../architecture/extension-points.md) documents retain authority.
+
+## Evidence and sources
+
+Rows P01–P22 carry primary-source or owning-ADR links where the pattern was observed; A01–A24 and T01–T36 additionally synthesize counterexamples from the [mechanism comparison](agent-harness-mechanism-options-2026-11-02.md) and [adversarial ledger](agent-harness-adversarial-reviews-2026-11-02.md). Source observations do not assert that a third-party provider has passed our particular test.
+
+## Limitations and remaining questions
+
+No listed test has been run in this research PR. Runtime E2E, packaging, large-fleet qualification and multi-tenant security tests need actual configured targets, fixtures and acceptance gates in their owning implementation slices; selected test names may change when those contracts are approved.
