@@ -13,11 +13,15 @@ related:
 
 # Adversarial architecture reviews (2026-11-02)
 
-## Method, provenance and authority
+## Scope and provenance
 
 The critique below uses **three separately structured adversarial review passes** over the source catalog and proposed alternatives, from 10 named reviewer perspectives. They are distinct *analysis lenses*, **not claims that separate LLM agents, independent external humans, or high-effort model jobs ran**. No subagent orchestration or model/effort switch was available during this research. All objections and dispositions are authored analysis; inspect cited sources and current accepted ADRs before treating them as evidence. Claims from an external project's README remain claims, not measured production behavior.
 
 Each objection must state a possible counterexample, affected owner and the smallest correction. High-severity unresolved issues stay explicitly open. Score reliability/confidence/complexity and code estimates in [mechanism options](agent-harness-mechanism-options-2026-11-02.md) are engineering judgments, not results from trials.
+
+## Findings and design options
+
+### First-round objection inventory
 
 ## Round 1: independent mechanism critics
 
@@ -82,7 +86,9 @@ This round actively tries to overturn the preferred design.
 
 **Retain current architectural direction.** Prefer targeted improvements: source-to-owner correlation, context-only pass-through, protected typed follow-up, native-capability steering with queue fallback, source-provenance context and conditional advisory progress checks. Keep Get Modular, separate Extension Foundation, Postgres/JetStream owners, selective Temporal adapter and AR custody. Nothing in this review justifies reversing accepted ADR-0114/0115/0117 or v3 S1–S5.
 
-## Remaining unresolved questions — not falsely accepted
+## Decision status and qualification
+
+### Remaining unresolved questions — not falsely accepted
 
 | Open decision | Concrete choice still needed | Minimum evidence before approval |
 | --- | --- | --- |
@@ -101,3 +107,11 @@ This round actively tries to overturn the preferred design.
 Coverage lenses: DDD; distributed effects; security/tenant isolation; Runtime/provider; context/memory; plugin lifecycle; performance/cost; Fully Local operations; human collaboration; evidence/benchmark quality. Three argument passes are documented, with counterarguments and explicit reopen triggers. **This is not a substitute for external expert/model review or running code.** Later PR updates should append real reviewer identities, actual review comments, tested counterexamples and revisions; never retroactively label these notes as independent agent output.
 
 Before any implementation, the semantic owner must publish a narrower proposed contract, test suite and deployment/target admission plan, secure user approval for changes to accepted boundaries, and record actual evidence. The [source catalog](agent-harness-source-catalog-2026-11-02.md) and [proposed E2E cases](agent-harness-patterns-antipatterns-e2e-2026-11-02.md) are the reusable research references.
+
+## Evidence and sources
+
+Reviewers' counterexamples reference the [competitor source catalog](agent-harness-source-catalog-2026-11-02.md), [problem/options record](agent-harness-mechanism-options-2026-11-02.md), [rejection tests](agent-harness-patterns-antipatterns-e2e-2026-11-02.md), and the current accepted ADR/open-decision boundaries. These sources document implementation designs and proposals, not executed adversarial checks for our target.
+
+## Limitations and remaining questions
+
+Ten lenses across three passes reflect authored critical analysis in this session; **no separate model instances, externally independent human reviewers, or highest-effort subagents were run**. Proposals need genuine additional technical review and cross-boundary E2E when implementation is admitted. The open-decision table above lists the remaining product-owner choices.
