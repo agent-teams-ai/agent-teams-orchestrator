@@ -51,6 +51,21 @@ Independent adversarial perspectives to execute after first synthesis: domain/SO
 - Do not infer infinite or thousand-agent capacity from a number of idle sessions, queued jobs, or local worker slots.
 - An external project can be excellent in its narrow objective and still be a poor template for our distributed, multi-tenant platform.
 
-## Delivery structure
+## Research artifacts and reading order
 
-This index will link focused files for primary-source project inventory, mechanism trade-offs, decision recommendations and scope, adversarial reviews, pattern/anti-pattern registers, and a qualification matrix. Update the record as evidence changes. Do not rewrite accepted ADRs as a side effect of research. A new product-affecting policy remains proposed until explicitly approved and placed into the correct owner document.
+1. [Primary-source catalog](agent-harness-source-catalog-2026-11-02.md): 26 relevant projects across always-on gateways, coding harnesses, orchestration SDKs and durable systems, with evidence levels and explicit applicability limits.
+2. [Mechanism alternatives and recommended owner fit](agent-harness-mechanism-options-2026-11-02.md): eight independently evaluated problem areas, rejected approaches, source citations, subjective reliability/confidence/complexity scores and bounded LOC ranges.
+3. [Pattern and anti-pattern reference](agent-harness-patterns-antipatterns-e2e-2026-11-02.md): 22 useful practices, 24 dangerous patterns and 36 proposed fault-injection and E2E verification cases.
+4. [Adversarial review ledger](agent-harness-adversarial-reviews-2026-11-02.md): three structured critique passes from ten distinct technical perspectives, corrections, best counterarguments and unresolved owner decisions.
+
+## Research verdict — proposed, not approved
+
+The strongest case is **not to adopt another harness as a universal Orchestrator foundation**. Keep Agent Teams' bounded contexts, Get Modular static composition, Extension Foundation, native AR custody, context-owned PostgreSQL and JetStream, and selected durable workflow adapters. They solve different responsibilities than a single-repository super-agent.
+
+Prioritize investigating (a) deterministic authenticated source filtering and owner-local correlation, (b) permission-preserving context-only follow-up delivery, (c) capability-qualified in-turn input with durable next-turn fallback, (d) revision/provenance-scoped sparse context and (e) evidence-first bounded progress assessment. Defer generalized speculative execution, ubiquitous LLM routers/watchdogs, unbounded plugin HMR and a universal workflow-engine switch.
+
+**Do not treat the above as an approved behavioral change.** OD-026/031/032/033/034/043 and the relevant Agent Runtime successor remain decision authorities. A separate source comment is not a grant to steer privileged in-flight work; a native transport ACK is not proof that its model read the input; and a workflow checkpoint is not a proof that an external effect did not occur twice.
+
+Research was based on primary-source reading and structured adversarial *analysis lenses*; no separate critic model agents or execution benchmarks were run. Existing accepted ADRs remain untouched. Qualify each subsequent accepted feature on its own real deployment and provider profile.
+
+Update these records when evidence changes; keep the directory [research index](README.md) complete, and do not silently rewrite accepted ADRs.
