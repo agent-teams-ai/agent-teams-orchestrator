@@ -11,11 +11,15 @@ related:
 
 # Autonomous agent mechanisms: options and proposed fit (2026-11-02)
 
-## Status and decision discipline
+## Scope and provenance
 
 **Recommendations in this record are research proposals, not approved behavior.** Do not update accepted ADRs, introduce a new bounded context, package, public event, long-lived worker, agent API, automatic action or service without the owning decision and implementation-start gates. Compare target Orchestrator + Agent Runtime v3 as if complete; unresolved OD-026/031/032/033/034/043 and future greenfield/fleet slices remain genuine architectural questions, not deductions from the target design.
 
 Use a **problem → alternatives → failure-mode → owner → candidate → falsifier** decision process. Architectural quality means protecting semantic ownership, observable failure and capacity, not maximizing autonomy or counting plug-in types.
+
+## Findings and design options
+
+### Mechanism decision areas
 
 ## M1 — Event intake and new work admission
 
@@ -166,8 +170,18 @@ Expected reliability (R), evidence confidence (E) and engineering/operational co
 
 No table row authorizes immediate implementation. Product owner chooses any behavioral change through its open-decision/ADR flow.
 
-## Minimum-scope selection
+## Decision status and qualification
+
+### Minimum-scope selection
 
 Recommend **retaining the existing architecture** and refining contracts where there is a real seam: (1) owner-local source correlation and advisory assessment, (2) proven native steering or safe durable fallback, (3) source- and authority-aware context manifests, (4) evidence-first progress review, (5) extension generation/custody in OD-043, and (6) current owner-local durability. Explicitly reject generic Router/AgentManager, Cordis-for-everything, speculative writes, always-on evaluator LLMs, universal engine migration and a second scheduler.
 
 The concrete architecture change, if approved, should be **new rejecting conformance scenarios and precise owner contracts first**, not a new framework or broad runtime code sweep. Cross-link to the [review ledger](agent-harness-adversarial-reviews-2026-11-02.md) for objections and unresolved choices.
+
+## Evidence and sources
+
+Each M1–M8 mechanism section links the first-party evidence used in that comparison. The [source inventory](agent-harness-source-catalog-2026-11-02.md) separates official architecture, documented prototypes, readme claims and engineering hypotheses. The [adversarial review ledger](agent-harness-adversarial-reviews-2026-11-02.md) records counterarguments and [pattern/E2E reference](agent-harness-patterns-antipatterns-e2e-2026-11-02.md) records falsifiers.
+
+## Limitations and remaining questions
+
+Estimates are deliberately non-committal and require a scoped accepted implementation plan. In particular, multi-principal steering, external connector installation, source authorization, context activation, watchdog thresholds, dynamic plugin generations, hosted/fleet capacity and local durable workflows still require exact owner decisions and real negative-test evidence.
