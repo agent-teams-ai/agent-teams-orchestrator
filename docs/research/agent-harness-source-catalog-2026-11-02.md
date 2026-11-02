@@ -10,13 +10,15 @@ related:
 
 # Agent harness source catalog (2026-11-02)
 
-## Reading this catalog
+## Scope and provenance
 
 **Comparison unit is a mechanism, not GitHub popularity.** A chat gateway, coding harness, agent-workflow SDK, durable execution service and business control plane solve different problems. We reviewed project repositories and selected official architecture references on 2026-11-02, not an exhaustive security audit of every release. "Read" means the linked material was examined; it does not certify behavior or the entire codebase. Some codebases have moved or changed ownership. Repository default-branch links move; selected source HEADs sampled during this review are captured below.
 
 Evidence labels: **A** inspected source/design-and-test inventory (not necessarily executed); **B** official first-party design/implementation documentation; **C** README/product claim, not independently qualified; **D** our comparative hypothesis. Link source for each row; weaker evidence is intentionally not upgraded. These labels apply to each stated observation, not to the overall software.
 
-## Source snapshots
+## Findings and design options
+
+### Source snapshots
 
 | Project | Examined reference | Snapshot / limitation |
 | --- | --- | --- |
@@ -73,10 +75,20 @@ Evidence labels: **A** inspected source/design-and-test inventory (not necessari
 | [n8n](https://github.com/n8n-io/n8n) | C: [README](https://github.com/n8n-io/n8n/blob/master/README.md) | Human-visible workflow graph, connectors, retries and app integrations. | Visual automation is not the authorization model or low-level process custody; licensing/deployment shape also differs from an SDK. |
 | [Dify](https://github.com/langgenius/dify) | C: [README](https://github.com/langgenius/dify/blob/main/README.md) | Agent workflows, marketplace and RAG integration as application platform. | Marketplace listing cannot grant runtime capability or tenant authority. |
 
-## Explicit research limits
+## Decision status and qualification
+
+This catalog compares evidence and applicability; it does not select a new runtime, override Orchestrator ADR-0114/0115/0117, qualify any provider, or make any product behavior ready for implementation. Options and owned recommendations are in [mechanism alternatives](agent-harness-mechanism-options-2026-11-02.md).
+
+## Evidence and sources
+
+The project/source links within each row above identify first-party material inspected. Selected current commits are listed in the source-snapshot table; moving default-branch links must be re-pinned for a later implementation decision. No README claim is independent behavioral proof. Local primary authority is linked by the [research index](agent-harness-industry-review-2026-11-02.md).
+
+## Limitations and remaining questions
 
 - No independent star ranking, license audit or production penetration-test claim. Popularity and OSS status change; each deployment/version must be verified separately.
 - We have **not** run competitors' suites or simulated fleet failures on their released binaries. Design-doc promises are not qualification evidence.
 - The 2026-11-01 DeepSeek article is **not** evidence that article-only ideas (semantic watchdog, speculative execution, large fleet) exist in the public one-repository prototype.
 - In the conversation, “OpenCloud” is interpreted as probable **OpenClaw**, based on the surrounding harness context; no architecture conclusion relies on the spelling.
 - Prior internal Agent Runtime [industry research](https://github.com/agent-teams-ai/agent-runtime/blob/main/docs/spikes/agent-runtime-industry-architecture-research.md) and [modular alternatives](https://github.com/agent-teams-ai/agent-runtime/blob/main/docs/architecture/agent-runtime-modular-research.md) remain authoritative for their own previously inspected baselines. This study adds an Orchestrator-facing comparison, not a replacement.
+
+Further independent checks should target concrete code paths, runtime hook order, adapter compatibility and actual failure-test execution for the *selected* integration. This report intentionally avoids a popularity ranking or an unmeasured scale winner.
