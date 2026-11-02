@@ -14,6 +14,16 @@ limitations. They distinguish confirmed direction, accepted decisions,
 engineering judgments, hypotheses, and executed results. They are evidence,
 not normative architecture or transcripts invented from a synthesis.
 
+## Autonomous agent harness and orchestration review (2026-11-02)
+
+- [Study scope, evidence protocol and owning architectural decisions](agent-harness-industry-review-2026-11-02.md)
+- [External source catalog: 26 frameworks, harnesses, gateways and workflow systems](agent-harness-source-catalog-2026-11-02.md)
+- [Competing mechanisms, fit, alternatives and bounded engineering estimates](agent-harness-mechanism-options-2026-11-02.md)
+- [Reusable patterns, anti-patterns and 36 proposed E2E falsifiers](agent-harness-patterns-antipatterns-e2e-2026-11-02.md)
+- [Three adversarial architecture critique passes and unresolved decisions](agent-harness-adversarial-reviews-2026-11-02.md)
+
+These are comparative **research records**, not approved implementation contracts or completed E2E runs. Read the owning accepted ADR/open decision for current authority.
+
 ## Module, identity, and collaboration review
 
 - [IAM Critical Decisions Review 2026-10-23](iam-critical-decisions-review-2026-10-23.md)
