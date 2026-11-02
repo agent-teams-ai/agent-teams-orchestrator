@@ -21,6 +21,7 @@ not normative architecture or transcripts invented from a synthesis.
 - [Competing mechanisms, fit, alternatives and bounded engineering estimates](agent-harness-mechanism-options-2026-11-02.md)
 - [Reusable patterns, anti-patterns and 36 proposed E2E falsifiers](agent-harness-patterns-antipatterns-e2e-2026-11-02.md)
 - [Three adversarial architecture critique passes and unresolved decisions](agent-harness-adversarial-reviews-2026-11-02.md)
+- [Nine source-backed technical case studies: steering, durability, memory and plugin ABI](agent-harness-technical-case-studies-2026-11-02.md)
 
 These are comparative **research records**, not approved implementation contracts or completed E2E runs. Read the owning accepted ADR/open decision for current authority.
 
