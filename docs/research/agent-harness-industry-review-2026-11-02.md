@@ -8,7 +8,7 @@ summary: Evidence-led comparison of autonomous agent harnesses and orchestrators
 
 # Agent harness and orchestration industry review (2026-11-02)
 
-## Scope and decision authority
+## Scope and provenance
 
 This is a **research record**, not an accepted ADR, implementation admission, qualification receipt, or authorization to change accepted architectural decisions. We evaluate the **target design** of Agent Teams Orchestrator and Agent Runtime architecture program v3, including the separately scoped greenfield/fleet follow-ups, without penalizing unrealized implementation. We do **not** silently promote open decisions or greenfield proposals into accepted commitments.
 
@@ -51,14 +51,18 @@ Independent adversarial perspectives to execute after first synthesis: domain/SO
 - Do not infer infinite or thousand-agent capacity from a number of idle sessions, queued jobs, or local worker slots.
 - An external project can be excellent in its narrow objective and still be a poor template for our distributed, multi-tenant platform.
 
-## Research artifacts and reading order
+## Findings and design options
+
+The mechanism-specific alternatives and evidence are kept in focused references rather than copied into a second architecture authority.
+
+### Research artifacts and reading order
 
 1. [Primary-source catalog](agent-harness-source-catalog-2026-11-02.md): 26 relevant projects across always-on gateways, coding harnesses, orchestration SDKs and durable systems, with evidence levels and explicit applicability limits.
 2. [Mechanism alternatives and recommended owner fit](agent-harness-mechanism-options-2026-11-02.md): eight independently evaluated problem areas, rejected approaches, source citations, subjective reliability/confidence/complexity scores and bounded LOC ranges.
 3. [Pattern and anti-pattern reference](agent-harness-patterns-antipatterns-e2e-2026-11-02.md): 22 useful practices, 24 dangerous patterns and 36 proposed fault-injection and E2E verification cases.
 4. [Adversarial review ledger](agent-harness-adversarial-reviews-2026-11-02.md): three structured critique passes from ten distinct technical perspectives, corrections, best counterarguments and unresolved owner decisions.
 
-## Research verdict — proposed, not approved
+## Decision status and qualification
 
 The strongest case is **not to adopt another harness as a universal Orchestrator foundation**. Keep Agent Teams' bounded contexts, Get Modular static composition, Extension Foundation, native AR custody, context-owned PostgreSQL and JetStream, and selected durable workflow adapters. They solve different responsibilities than a single-repository super-agent.
 
@@ -69,3 +73,11 @@ Prioritize investigating (a) deterministic authenticated source filtering and ow
 Research was based on primary-source reading and structured adversarial *analysis lenses*; no separate critic model agents or execution benchmarks were run. Existing accepted ADRs remain untouched. Qualify each subsequent accepted feature on its own real deployment and provider profile.
 
 Update these records when evidence changes; keep the directory [research index](README.md) complete, and do not silently rewrite accepted ADRs.
+
+## Evidence and sources
+
+Primary sources and their evidence grades are maintained in the [source catalog](agent-harness-source-catalog-2026-11-02.md); citations for proposed adoption, counterarguments and test oracles belong to the linked [mechanism options](agent-harness-mechanism-options-2026-11-02.md), [pattern catalog](agent-harness-patterns-antipatterns-e2e-2026-11-02.md) and [critique ledger](agent-harness-adversarial-reviews-2026-11-02.md). The accepted [Orchestrator ADR-0117](../decisions/0117-reconcile-mandatory-module-composition.md) and the [Agent Runtime v3 program](https://github.com/agent-teams-ai/agent-runtime/blob/main/docs/architecture/agent-runtime-architecture-program-plan.md) remain the architectural baselines.
+
+## Limitations and remaining questions
+
+No external model critics or executable competitor load tests were invoked; three independent adversarial *reasoning lenses* were completed as authored analysis. Agent Runtime v3's ordinary-slice contracts and its separate greenfield/fleet plan have different adoption status. Any proposed behavior crossing OD-026, OD-031, OD-032, OD-033, OD-034 or OD-043 needs the named owner's concrete design, approval and qualification before implementation.
