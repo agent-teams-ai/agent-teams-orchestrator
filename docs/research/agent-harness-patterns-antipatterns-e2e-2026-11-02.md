@@ -60,7 +60,7 @@ This 2026-11-02 catalog derives reusable mechanisms from the linked [first-party
 | A07 | Treat a native `turn/steer` ACK as proof the model consumed the content. | Distinct native accepted/consumed/outcome status and uncertainty handling. |
 | A08 | Emulate live steering by blindly killing/relaunching CLI harness. | Capability negotiation and safe next-turn fallback, exact session generation. |
 | A09 | Resubmit after unknown commit, tool effect, native request or approval reply. | Original stable request ID, owner-specific readback/reconciliation and physical fence. |
-| A10 | "Exactly once" claimed from message broker, Activity completion, or checkpoint alone. | Reconcile external side effects; Temporal/Restate/LangGraph caveats apply. |
+| A10 | "Exactly once" claimed from message broker, Activity completion, or checkpoint alone; assumes JavaScript LangGraph `sync` equals Python `sync` before the next step. | Reconcile external side effects; qualify per-language Temporal/Restate/LangGraph guarantees. [JS/Python checkpoint difference](https://github.com/langchain-ai/docs/blob/main/src/oss/langgraph/checkpointers.mdx#durability-modes). |
 | A11 | Latest state watcher used as durable event history or approval receipt. | Use owner journal/feed/outbox; Observation may coalesce and lose intermediate values. |
 | A12 | Prompt/compression summary gains higher authority than underlying source. | Immutable provenance, signed/admitted scope and trust-tagged context. |
 | A13 | Memory auto-promotes external web/CI text into permanent instructions or skills without approval/gates. | Separate source class, promotion policy and reviewable audit. |
