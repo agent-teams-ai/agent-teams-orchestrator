@@ -6,7 +6,7 @@ owner: architecture
 summary: First-party mechanism case studies on steering, authorization, checkpoint guarantees, worker placement, memory provenance, and plugin ABI.
 related:
   - research.agent-harness-industry-design-review-2026-11-02
-  - research.agent-harness-source-catalog-2026-11-02
+  - research.agent-harness-industry-source-catalog-2026-11-02
   - research.agent-harness-mechanism-options-2026-11-02
   - research.agent-harness-adversarial-reviews-2026-11-02
 ---
