@@ -15,11 +15,13 @@ related:
 
 ## Scope and provenance
 
-Research integration proposal dated 2026-11-03. The planned shared evidence
-source is `agent-teams-ai/engineering-research`, `docs/competitors/paperclip.md`.
-Publication is pending. This maintained report's `active` status does not accept
-its proposed follow-through or change an existing decision. Shared competitor
-facts and methods belong in the central research record; product policy,
+Research integration proposal dated 2026-11-03. The shared
+[Paperclip source dossier](https://github.com/agent-teams-ai/engineering-research/blob/12c40892e805944719d6fbec14d2c26874803b2c/docs/competitors/paperclip.md)
+is published in [Engineering Research draft PR #1](https://github.com/agent-teams-ai/engineering-research/pull/1) at commit
+`12c40892e805944719d6fbec14d2c26874803b2c`. The [shared research index](https://github.com/agent-teams-ai/engineering-research/blob/docs/shared-research-2026-11-04/docs/README.md)
+is the maintained discovery route. Central publication remains a draft, and this
+report's `active` status does not accept its proposed follow-through or change an
+existing decision. Shared facts and methods belong centrally; product policy,
 implementation acceptance and unresolved choices remain here with their owners.
 
 The source review inspected Paperclip at
@@ -89,10 +91,12 @@ consume the whole shared allowance.
 
 ## Evidence and sources
 
-The planned central record retains Paperclip facts, exact sources, limitations
-and alternative assessments. Until publication, the source snapshot above is
-provenance only. This document proposes local acceptance refinements without
-claiming completed migration or fresh test execution.
+The published [central evaluation method](https://github.com/agent-teams-ai/engineering-research/blob/12c40892e805944719d6fbec14d2c26874803b2c/docs/methodology/evaluation-methodology.md)
+and [decision cards](https://github.com/agent-teams-ai/engineering-research/blob/12c40892e805944719d6fbec14d2c26874803b2c/docs/lessons/preimplementation-decisions.md)
+retain exact sources, limitations and alternative assessments. The
+[source inventory](https://github.com/agent-teams-ai/engineering-research/blob/12c40892e805944719d6fbec14d2c26874803b2c/data/source-inventory.json) records the original study
+identities. This document proposes local acceptance refinements without claiming
+fresh test execution or product adoption from central publication.
 
 Current owner references include [OD-024](../open-decisions/OD-024-usage-accounting-boundaries-and-exact-quantities.md),
 [Consumption Governance](../domain/contexts/consumption-governance/README.md),
@@ -103,11 +107,15 @@ The existing [research index](README.md) retains its historical source reports.
 
 ## Limitations and remaining questions
 
-Central publication is pending. Existing source comparisons can later move
-reusable facts centrally while their local decision sections and stable IDs
-remain valid. Preserve accepted ADR bodies, historical evidence, used anchors
-and exact adoption pins. Do not replace an old pinned citation with a moving
-central branch and silently imply a new observation date.
+Reusable [identity-provider evidence](https://github.com/agent-teams-ai/engineering-research/blob/12c40892e805944719d6fbec14d2c26874803b2c/docs/studies/identity-provider-evidence.md),
+[composition and scale evidence](https://github.com/agent-teams-ai/engineering-research/blob/12c40892e805944719d6fbec14d2c26874803b2c/docs/studies/composition-and-scale-evidence.md)
+and [persistence-tooling evidence](https://github.com/agent-teams-ai/engineering-research/blob/12c40892e805944719d6fbec14d2c26874803b2c/docs/studies/persistence-tooling-evidence.md)
+are published as central extracts. Notices in the three original studies provide
+reciprocal routes while their full local bodies, metadata, decision sections and
+heading anchors remain intact. Accepted ADRs, historical evidence and exact
+adoption pins remain with their owners. The pinned central snapshot identifies
+this publication; the maintained discovery route does not imply a new review
+date or replace an immutable citation.
 
 This change contains zero production implementation lines. Any implementation
 estimate must subtract already-planned consumption, feed and runtime integration

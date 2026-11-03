@@ -14,6 +14,17 @@ related:
 
 # Cross-Dialect Persistence Tooling Review, 2026-07-26
 
+<!-- shared-research-route:start -->
+**Shared evidence route, 2026-11-04:** a [reusable central extract](https://github.com/agent-teams-ai/engineering-research/blob/12c40892e805944719d6fbec14d2c26874803b2c/docs/studies/persistence-tooling-evidence.md)
+is published in [Engineering Research draft PR #1](https://github.com/agent-teams-ai/engineering-research/pull/1). The
+[source inventory](https://github.com/agent-teams-ai/engineering-research/blob/12c40892e805944719d6fbec14d2c26874803b2c/data/source-inventory.json) preserves this study's
+original identity and hash. The complete dated review, product recommendations,
+acceptance scenarios, decisions and adopted pins remain owned here. This notice
+preserves the original metadata, body and heading anchors; extraction is not a
+new upstream review and does not change current ADRs. Use the
+[shared research index](https://github.com/agent-teams-ai/engineering-research/blob/docs/shared-research-2026-11-04/docs/README.md) for maintained discovery.
+<!-- shared-research-route:end -->
+
 ## Question
 
 Can a stable TypeScript library substantially unify the selected local
