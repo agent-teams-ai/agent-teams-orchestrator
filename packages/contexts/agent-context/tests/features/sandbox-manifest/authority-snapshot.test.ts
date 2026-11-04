@@ -3,6 +3,9 @@ import test from "node:test";
 import { Client, Pool } from "pg";
 import { createManifestApi } from "../../../dist/features/sandbox-manifest/application/create-manifest-api.js";
 import { createManifestRegistration } from "../../../dist/features/sandbox-manifest/application/register-sandbox-manifest.js";
+import { SandboxManifestError } from "../../../dist/features/sandbox-manifest/application/api.js";
+import { createPostgresManifestStore } from "../../../dist/features/sandbox-manifest/adapters/outbound/persistence/postgres-manifest-store.js";
+import { createSandboxManifestFeature } from "../../../dist/features/sandbox-manifest/composition/feature-module-factory.js";
 test("manifest read and registration retain entry authority while authorization is pending", async () => {
   const scope = {
     tenantId: "TEST_tenant",
@@ -61,9 +64,6 @@ test("manifest read and registration retain entry authority while authorization 
 
 // Release-custody behavior is part of the same admitted sandbox manifest test surface.
 type ReleaseMode = "healthy" | "socket-error" | "release-throws";
-import { SandboxManifestError } from "../../../dist/features/sandbox-manifest/application/api.js";
-import { createPostgresManifestStore } from "../../../dist/features/sandbox-manifest/adapters/outbound/persistence/postgres-manifest-store.js";
-import { createSandboxManifestFeature } from "../../../dist/features/sandbox-manifest/composition/feature-module-factory.js";
 
 function checkedOut(mode: ReleaseMode) {
   const releases: (boolean | undefined)[] = [];
