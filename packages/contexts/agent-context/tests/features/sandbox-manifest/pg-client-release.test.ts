@@ -1,45 +1,34 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { Pool } from "pg";
+import { Client, Pool } from "pg";
 import { SandboxManifestError } from "../../../dist/features/sandbox-manifest/application/api.js";
 import { createPostgresManifestStore } from "../../../dist/features/sandbox-manifest/adapters/outbound/persistence/postgres-manifest-store.js";
 import { createSandboxManifestFeature } from "../../../dist/features/sandbox-manifest/composition/feature-module-factory.js";
 
-type ErrorListener = (error: Error) => void;
 type ReleaseMode = "healthy" | "socket-error" | "release-throws";
 
 function checkedOut(mode: ReleaseMode) {
-  const listeners = new Set<ErrorListener>();
   const releases: (boolean | undefined)[] = [];
   const sql: string[] = [];
-  const client = {
-    on(event: string, listener: ErrorListener) {
-      assert.equal(event, "error");
-      listeners.add(listener);
-    },
-    removeListener(event: string, listener: ErrorListener) {
-      assert.equal(event, "error");
-      listeners.delete(listener);
-    },
+  // Use real pg/EventEmitter objects; override only the network and custody
+  // seams. No type assertion bridge or real PostgreSQL connection is used.
+  const client = new Client();
+  const owned = Object.assign(client, {
     async query(command: string) {
       sql.push(command);
       return { rows: [], rowCount: 0 };
     },
     release(discard?: boolean) {
       releases.push(discard);
-      assert.equal(listeners.size, 1, "error guard must remain installed during release");
+      assert.equal(client.listenerCount("error"), 1, "error guard must remain installed during release");
       if (mode === "socket-error") {
-        for (const listener of listeners) listener(new Error("TEST socket error during release"));
+        client.emit("error", new Error("TEST socket error during release"));
       }
       if (mode === "release-throws") throw new Error("TEST private release failure");
     },
-  };
-  return {
-    pool: { connect: async () => client } as unknown as Pool,
-    listeners,
-    releases,
-    sql,
-  };
+  });
+  const pool = Object.assign(new Pool({ max: 1 }), { connect: async () => owned });
+  return { pool, client, releases, sql };
 }
 
 const context = {
@@ -69,7 +58,7 @@ for (const [name, operation] of [
     const fixture = checkedOut("healthy");
     await operation(fixture.pool);
     assert.deepEqual(fixture.releases, [false]);
-    assert.equal(fixture.listeners.size, 0, "successful release removes only its guard");
+    assert.equal(fixture.client.listenerCount("error"), 0, "successful release removes only its guard");
     assert.ok(fixture.sql.includes("COMMIT"));
   });
 
@@ -78,7 +67,7 @@ for (const [name, operation] of [
     await assert.rejects(operation(fixture.pool), (error: unknown) =>
       error instanceof SandboxManifestError && error.code === "UNAVAILABLE");
     assert.deepEqual(fixture.releases, [false]);
-    assert.equal(fixture.listeners.size, 0, "ownership transferred before listener removal");
+    assert.equal(fixture.client.listenerCount("error"), 0, "ownership transferred before listener removal");
     assert.ok(fixture.sql.includes("COMMIT"), "the post-commit outcome remains uncertain");
   });
 
@@ -87,9 +76,9 @@ for (const [name, operation] of [
     await assert.rejects(operation(fixture.pool), (error: unknown) =>
       error instanceof SandboxManifestError && error.code === "UNAVAILABLE");
     assert.deepEqual(fixture.releases, [false]);
-    assert.equal(fixture.listeners.size, 1, "unproven ownership transfer retains guard");
+    assert.equal(fixture.client.listenerCount("error"), 1, "unproven ownership transfer retains guard");
     assert.doesNotThrow(() => {
-      for (const listener of fixture.listeners) listener(new Error("TEST late socket failure"));
+      fixture.client.emit("error", new Error("TEST late socket failure"));
     });
   });
 }
