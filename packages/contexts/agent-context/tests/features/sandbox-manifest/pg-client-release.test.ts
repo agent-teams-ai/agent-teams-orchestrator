@@ -10,15 +10,17 @@ type ReleaseMode = "healthy" | "socket-error" | "release-throws";
 function checkedOut(mode: ReleaseMode) {
   const releases: (boolean | undefined)[] = [];
   const sql: string[] = [];
-  // Use real pg/EventEmitter objects; override only the network and custody
-  // seams. No type assertion bridge or real PostgreSQL connection is used.
+  // Use real pg/EventEmitter objects. Only their test network/custody methods
+  // are replaced; no unsafe type assertions or actual socket are needed.
   const client = new Client();
-  const owned = Object.assign(client, {
-    async query(command: string) {
+  Object.defineProperty(client, "query", {
+    value: async (command: string) => {
       sql.push(command);
       return { rows: [], rowCount: 0 };
     },
-    release(discard?: boolean) {
+  });
+  Object.defineProperty(client, "release", {
+    value: (discard?: boolean) => {
       releases.push(discard);
       assert.equal(client.listenerCount("error"), 1, "error guard must remain installed during release");
       if (mode === "socket-error") {
@@ -27,7 +29,8 @@ function checkedOut(mode: ReleaseMode) {
       if (mode === "release-throws") throw new Error("TEST private release failure");
     },
   });
-  const pool = Object.assign(new Pool({ max: 1 }), { connect: async () => owned });
+  const pool = new Pool({ max: 1 });
+  Object.defineProperty(pool, "connect", { value: async () => client });
   return { pool, client, releases, sql };
 }
 
