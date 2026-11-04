@@ -114,7 +114,7 @@ function read(pool: Pool) {
 for (const [name, operation] of [
   ["manifest read", read],
   ["manifest migration", migration],
-]) {
+] as const) {
   test(`${name}: checked-out release retains the error listener until custody transfers`, async () => {
     const fixture = checkedOut("healthy");
     await operation(fixture.pool);
