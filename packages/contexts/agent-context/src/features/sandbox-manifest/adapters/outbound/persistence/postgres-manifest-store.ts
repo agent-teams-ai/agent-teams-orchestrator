@@ -76,8 +76,23 @@ async function transaction<T>(
       "Manifest persistence requires same-identity reconciliation",
     );
   } finally {
+    // Keep error handling alive through the checked-out client's release.
+    // A throwing release has not proved that the pool owns the client.
+    try {
+      client.release(isBroken());
+    } catch {
+      throw new SandboxManifestError(
+        "UNAVAILABLE",
+        "Manifest persistence requires same-identity reconciliation",
+      );
+    }
     client.removeListener("error", onError);
-    client.release(isBroken());
+    if (isBroken()) {
+      throw new SandboxManifestError(
+        "UNAVAILABLE",
+        "Manifest persistence requires same-identity reconciliation",
+      );
+    }
   }
 }
 function storedManifest(value: unknown): value is ManifestFacts {

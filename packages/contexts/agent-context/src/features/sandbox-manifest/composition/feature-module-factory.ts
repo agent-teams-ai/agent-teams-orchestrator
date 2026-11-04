@@ -69,8 +69,23 @@ export function createSandboxManifestFeature(
           "Migration requires same-identity reconciliation",
         );
       } finally {
+        // Retain our error guard until pg has transferred or destroyed the client.
+        // A throwing release leaves custody uncertain, so keep that guard installed.
+        try {
+          client.release(isBroken());
+        } catch {
+          throw new SandboxManifestError(
+            "UNAVAILABLE",
+            "Migration cleanup requires same-identity reconciliation",
+          );
+        }
         client.removeListener("error", onError);
-        client.release(isBroken());
+        if (isBroken()) {
+          throw new SandboxManifestError(
+            "UNAVAILABLE",
+            "Migration cleanup requires same-identity reconciliation",
+          );
+        }
       }
     },
     seedManifest: createManifestRegistration({ store, authorization: options.authorization }),
