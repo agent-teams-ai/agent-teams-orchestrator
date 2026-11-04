@@ -380,6 +380,20 @@ test("published coverage rejects missing and non-regular declared inputs", async
 });
 
 test("installed typed gate rejects an unknown assertion bridge by default", async () => {
+  // Diagnostic only: no raw output, path, credential or fixture contents are logged.
+  // The required quality rule and each original assertion remain unchanged.
+  const phase = (name, observation, expectedStatus) => {
+    if (observation.error === undefined && observation.status === expectedStatus) return;
+    let rules = [];
+    try {
+      const parsed = JSON.parse(observation.stdout);
+      rules = (parsed.capabilities ?? []).flatMap((item) =>
+        (item.diagnostics ?? []).map((diagnostic) => diagnostic.ruleId)).slice(0, 8);
+    } catch {
+      // The command may fail before it can create a structured report.
+    }
+    process.stderr.write(`QUALITY_PHASE ${name}: status=${observation.status} spawnError=${observation.error?.code ?? "none"} ruleIds=${JSON.stringify(rules)}\n`);
+  };
   await fixture(async (root) => {
     for (const name of ["pnpm-lock.yaml", "tsconfig.json"]) {
       await cp(join(repositoryRoot, name), join(root, name));
@@ -389,6 +403,7 @@ test("installed typed gate rejects an unknown assertion bridge by default", asyn
       encoding: "utf8",
       timeout: 60_000,
     });
+    phase("store", store, 0);
     assert.equal(store.error, undefined, store.stderr);
     assert.equal(store.status, 0, `${store.stdout}${store.stderr}`);
     const storePath = store.stdout.trim();
@@ -398,6 +413,7 @@ test("installed typed gate rejects an unknown assertion bridge by default", asyn
       ["install", "--frozen-lockfile", "--offline", "--store-dir", storePath],
       { cwd: root, encoding: "utf8", timeout: 60_000 },
     );
+    phase("offline-install", installed, 0);
     assert.equal(installed.error, undefined, installed.stderr);
     assert.equal(installed.status, 0, `${installed.stdout}${installed.stderr}`);
     const source = `${moduleRoot}/src/features/host-discovery/application/model/host-discovery.ts`;
@@ -408,6 +424,7 @@ test("installed typed gate rejects an unknown assertion bridge by default", asyn
         timeout: 60_000,
       });
     const baseline = runTyped();
+    phase("typed-baseline", baseline, 0);
     assert.equal(baseline.error, undefined, baseline.stderr);
     assert.equal(baseline.status, 0, `${baseline.stdout}${baseline.stderr}`);
     await writeFile(
@@ -415,6 +432,7 @@ test("installed typed gate rejects an unknown assertion bridge by default", asyn
       `${original}\nexport const unsafeBridge = ('unchecked' as unknown) as { value: string };\n`,
     );
     const result = runTyped();
+    phase("typed-unknown-mutation", result, 1);
     assert.equal(result.error, undefined, result.stderr);
     assert.equal(result.status, 1, result.stdout);
     const report = JSON.parse(result.stdout);
@@ -429,6 +447,7 @@ test("installed typed gate rejects an unknown assertion bridge by default", asyn
       `${original}\nexport const safeBridge: { value: string } = { value: 'checked' };\n`,
     );
     const corrected = runTyped();
+    phase("typed-corrected", corrected, 0);
     assert.equal(corrected.error, undefined, corrected.stderr);
     assert.equal(corrected.status, 0, `${corrected.stdout}${corrected.stderr}`);
   });
