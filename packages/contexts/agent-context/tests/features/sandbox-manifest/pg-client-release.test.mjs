@@ -5,22 +5,20 @@ import { SandboxManifestError } from "../../../dist/features/sandbox-manifest/ap
 import { createPostgresManifestStore } from "../../../dist/features/sandbox-manifest/adapters/outbound/persistence/postgres-manifest-store.js";
 import { createSandboxManifestFeature } from "../../../dist/features/sandbox-manifest/composition/feature-module-factory.js";
 
-type ReleaseMode = "healthy" | "socket-error" | "release-throws";
-
-function checkedOut(mode: ReleaseMode) {
-  const releases: (boolean | undefined)[] = [];
-  const sql: string[] = [];
+function checkedOut(mode) {
+  const releases = [];
+  const sql = [];
   // Use real pg/EventEmitter objects. Only their test network/custody methods
   // are replaced; no unsafe type assertions or actual socket are needed.
   const client = new Client();
   Object.defineProperty(client, "query", {
-    value: async (command: string) => {
+    value: async (command) => {
       sql.push(command);
       return { rows: [], rowCount: 0 };
     },
   });
   Object.defineProperty(client, "release", {
-    value: (discard?: boolean) => {
+    value: (discard) => {
       releases.push(discard);
       assert.equal(client.listenerCount("error"), 1, "error guard must remain installed during release");
       if (mode === "socket-error") {
@@ -39,14 +37,14 @@ const context = {
   projectId: "tenants/TEST_tenant/projects/TEST_project",
   principalId: "TEST_principal",
 };
-function migration(pool: Pool) {
+function migration(pool) {
   return createSandboxManifestFeature({
     pool,
     migrationPool: pool,
     authorization: { assertAuthorized: async () => {} },
   }).migrate();
 }
-function read(pool: Pool) {
+function read(pool) {
   return createPostgresManifestStore(pool, () => "TEST_event").read(
     context,
     `${context.projectId}/contextManifests/TEST_missing`,
@@ -56,7 +54,7 @@ function read(pool: Pool) {
 for (const [name, operation] of [
   ["manifest read", read],
   ["manifest migration", migration],
-] as const) {
+]) {
   test(`${name}: checked-out release retains the error listener until custody transfers`, async () => {
     const fixture = checkedOut("healthy");
     await operation(fixture.pool);
@@ -67,7 +65,7 @@ for (const [name, operation] of [
 
   test(`${name}: socket error during release returns UNAVAILABLE rather than a false success`, async () => {
     const fixture = checkedOut("socket-error");
-    await assert.rejects(operation(fixture.pool), (error: unknown) =>
+    await assert.rejects(operation(fixture.pool), (error) =>
       error instanceof SandboxManifestError && error.code === "UNAVAILABLE");
     assert.deepEqual(fixture.releases, [false]);
     assert.equal(fixture.client.listenerCount("error"), 0, "ownership transferred before listener removal");
@@ -76,7 +74,7 @@ for (const [name, operation] of [
 
   test(`${name}: throwing release keeps a nonthrowing error guard for uncertain custody`, async () => {
     const fixture = checkedOut("release-throws");
-    await assert.rejects(operation(fixture.pool), (error: unknown) =>
+    await assert.rejects(operation(fixture.pool), (error) =>
       error instanceof SandboxManifestError && error.code === "UNAVAILABLE");
     assert.deepEqual(fixture.releases, [false]);
     assert.equal(fixture.client.listenerCount("error"), 1, "unproven ownership transfer retains guard");
