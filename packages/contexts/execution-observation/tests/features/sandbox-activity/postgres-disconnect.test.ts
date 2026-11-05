@@ -70,3 +70,23 @@ await test('pre-COMMIT Activity conflict survives a throwing PostgreSQL release'
     assert.equal(client.listenerCount('error'),1);
   } finally {await pool.end();}
 });
+
+await test('migration release-time PostgreSQL faults cannot confirm schema custody',async()=>{
+  for(const mode of ['socket-error','release-throws'] as const){
+    const pool=new Pool();const client=new Client();const queries:string[]=[];let releases=0;
+    Object.defineProperty(pool,'connect',{value:async()=>client});
+    Object.defineProperty(client,'query',{value:async(sql:string)=>{queries.push(sql);return {rows:[]};}});
+    Object.defineProperty(client,'release',{value:()=>{
+      releases++;
+      if(mode==='socket-error'){client.emit('error',new Error('TEST migration socket fault'));}
+      else {throw new Error('TEST migration release failed');}
+    }});
+    try{
+      await assert.rejects(()=>make(pool,pool).migrate(),{code:'UNAVAILABLE'});
+      assert.equal(releases,1);
+      assert.equal(queries.filter(query=>query==='COMMIT').length,1);
+      assert.equal(queries.filter(query=>query==='ROLLBACK').length,0);
+      assert.equal(client.listenerCount('error'),mode==='release-throws'?1:0);
+    }finally{await pool.end();}
+  }
+});
