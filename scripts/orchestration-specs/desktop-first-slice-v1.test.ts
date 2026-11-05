@@ -20,12 +20,13 @@ type Command = Readonly<{
 }>;
 type Authority = Readonly<{ scope: string; subject: string; writable: boolean }>;
 type Receipt = Readonly<{ operation: string; resource: string; result: "committed" }>;
-type Failure = "FORBIDDEN" | "REQUEST_CONFLICT" | "STALE_ETAG" | "NOT_FOUND";
+type Failure = "FORBIDDEN" | "INVALID_ARGUMENT" | "REQUEST_CONFLICT" | "STALE_ETAG" | "NOT_FOUND";
 type Result = Receipt | Failure;
 type LedgerEntry = Readonly<{ fingerprint: string; receipt: Receipt }>;
 type Model = {
   ledger: Map<string, LedgerEntry>;
-  resources: Map<string, { payload: Readonly<Record<string, string>>; etag: string }>;
+  resources: Map<string, { scope: string; payload: Readonly<Record<string, string>>; etag: string }>;
+  projectCommits: Map<string, bigint>;
   commits: bigint;
 };
 
@@ -39,7 +40,7 @@ const create = (requestId = "request-a"): Command => ({
   subject: authority.subject,
   payload: { subject: "Sandbox task", description: "Fixture only" },
 });
-const model = (): Model => ({ ledger: new Map(), resources: new Map(), commits: 0n });
+const model = (): Model => ({ ledger: new Map(), resources: new Map(), projectCommits: new Map(), commits: 0n });
 const fingerprint = (command: Command): string =>
   JSON.stringify({
     payload: Object.entries(command.payload).toSorted(([left], [right]) =>
@@ -61,24 +62,40 @@ function accept(state: Model, command: Command, trusted: Authority): Result {
     return prior.fingerprint === fingerprint(command) ? prior.receipt : "REQUEST_CONFLICT";
   }
   const resource = command.payload["resource"];
+  // CreateTask admits only subject/description, with a required non-blank
+  // subject. Reject malformed input before issuing a receipt or any effect.
+  if (command.descriptor === "CreateTask" &&
+      (typeof command.payload["subject"] !== "string" || !command.payload["subject"].trim() ||
+      (command.payload["description"] !== undefined && typeof command.payload["description"] !== "string") ||
+      Object.keys(command.payload).some((field) => field !== "subject" && field !== "description"))) {
+    return "INVALID_ARGUMENT";
+  }
   if (command.descriptor === "UpdateTask") {
-    const current = resource === undefined ? undefined : state.resources.get(resource);
-    if (!current) {
+    // Reject foreign resource names before looking up any stored record.
+    const current = resource === undefined || !belongsToProject(command.scope, resource, "fixture-resources")
+      ? undefined
+      : state.resources.get(resource);
+    if (!current || current.scope !== command.scope) {
       return "NOT_FOUND";
     }
     if (current.etag !== command.etag) {
       return "STALE_ETAG";
     }
   }
+  // Public operation/resource names must not disclose another Project's effect count.
+  const projectCount = (state.projectCommits.get(command.scope) ?? 0n) + 1n;
+  state.projectCommits.set(command.scope, projectCount);
   state.commits += 1n;
-  const opaqueId = state.commits.toString();
-  const resourceName = resource ?? `${command.scope}/fixture-resources/${opaqueId}`;
+  const opaqueId = projectCount.toString();
+  const resourceName = command.descriptor === "UpdateTask" && resource !== undefined
+    ? resource
+    : `${command.scope}/fixture-resources/${opaqueId}`;
   const receipt: Receipt = {
     operation: `${command.scope}/operations/change-fixture-${opaqueId}`,
     resource: resourceName,
     result: "committed",
   };
-  state.resources.set(resourceName, { payload: command.payload, etag: `opaque-${opaqueId}` });
+  state.resources.set(resourceName, { scope: command.scope, payload: command.payload, etag: `opaque-${opaqueId}` });
   state.ledger.set(key(command), { fingerprint: fingerprint(command), receipt });
   return receipt;
 }
@@ -149,6 +166,117 @@ test(`${fixtureVersion}: authentication is current even when receipt already exi
   ]) {
     assert.equal(accept(state, create(), trusted), "FORBIDDEN");
   }
+  assert.equal(state.commits, 1n);
+});
+
+test(`${fixtureVersion}: same request ID remains isolated across authenticated Projects`, () => {
+  const state = model();
+  const requestId = "550e8400-e29b-41d4-a716-446655440000";
+  const otherScope = "tenants/test/projects/other-sandbox";
+  const otherAuthority: Authority = { scope: otherScope, subject: "other-member", writable: true };
+  const first = create(requestId);
+  const second: Command = { ...first, scope: otherScope, subject: otherAuthority.subject };
+
+  const firstReceipt = committed(accept(state, first, authority));
+  assert.equal(accept(state, second, authority), "FORBIDDEN");
+  assert.equal(state.commits, 1n, "foreign-scope attempt has no effect");
+
+  const secondReceipt = committed(accept(state, second, otherAuthority));
+  assert.notEqual(secondReceipt.operation, firstReceipt.operation);
+  assert.notEqual(secondReceipt.resource, firstReceipt.resource);
+  assert.deepEqual(accept(state, first, authority), firstReceipt);
+  assert.deepEqual(accept(state, second, otherAuthority), secondReceipt);
+  assert.equal(accept(state, first, otherAuthority), "FORBIDDEN");
+  assert.equal(accept(state, second, authority), "FORBIDDEN");
+  assert.equal(
+    accept(state, { ...first, payload: { ...first.payload, subject: "Conflicting task" } }, authority),
+    "REQUEST_CONFLICT",
+    "the first Project's idempotency conflict does not alter the second Project's receipt",
+  );
+  assert.deepEqual(accept(state, second, otherAuthority), secondReceipt);
+  const foreignRecord = state.resources.get(secondReceipt.resource);
+  assert.ok(foreignRecord);
+  const foreignSnapshot = structuredClone(foreignRecord);
+  const foreignEdit: Command = {
+    ...create("550e8400-e29b-41d4-a716-446655440001"),
+    descriptor: "UpdateTask",
+    etag: foreignRecord.etag,
+    payload: { resource: secondReceipt.resource, subject: "Cross-Project overwrite" },
+  };
+  assert.equal(accept(state, foreignEdit, authority), "NOT_FOUND",
+    "an authorized Project cannot mutate another Project's known resource even with its ETag");
+  assert.deepEqual(state.resources.get(secondReceipt.resource), foreignSnapshot);
+  assert.equal(state.commits, 2n, "one effect per authorized Project");
+});
+
+test(`${fixtureVersion}: opaque receipts do not reveal commits from a foreign Project`, () => {
+  const requestId = "550e8400-e29b-41d4-a716-446655440004";
+  const otherScope = "tenants/test/projects/other-sandbox";
+  const otherAuthority: Authority = { scope: otherScope, subject: "other-member", writable: true };
+  const foreign: Command = { ...create(requestId), scope: otherScope, subject: otherAuthority.subject };
+  const baseline = committed(accept(model(), foreign, otherAuthority));
+
+  const seeded = model();
+  committed(accept(seeded, create(requestId), authority));
+  const afterAnotherProject = committed(accept(seeded, foreign, otherAuthority));
+  assert.deepEqual(afterAnotherProject, baseline,
+    "an admitted Project must not infer another Project's activity from public receipt names");
+  assert.equal(seeded.commits, 2n, "both Projects still commit independently");
+});
+
+test(`${fixtureVersion}: creation rejects a supplied foreign resource before admitting an effect`, () => {
+  const state = model();
+  const otherScope = "tenants/test/projects/other-sandbox";
+  const otherAuthority: Authority = { scope: otherScope, subject: "other-member", writable: true };
+  const foreign = committed(accept(state, {
+    ...create("550e8400-e29b-41d4-a716-446655440002"),
+    scope: otherScope,
+    subject: otherAuthority.subject,
+  }, otherAuthority));
+  const foreignRecord = state.resources.get(foreign.resource);
+  assert.ok(foreignRecord);
+  const snapshot = structuredClone(foreignRecord);
+
+  const requested = create("550e8400-e29b-41d4-a716-446655440003");
+  for (const payload of [
+    { subject: "Local new task", resource: foreign.resource },
+    { subject: "Local new task", projectId: "other-sandbox" },
+    { subject: "Local new task", unknownField: "untrusted" },
+  ]) {
+    assert.equal(accept(state, { ...requested, payload }, authority), "INVALID_ARGUMENT",
+      "CreateTask does not admit unrecognized fields before owner effects");
+    assert.equal(state.commits, 1n, "invalid command has no receipt or side effect");
+    assert.equal(state.ledger.size, 1, "invalid payload did not reserve the request ID");
+    assert.equal(state.resources.size, 1, "foreign-only state remains unchanged");
+  }
+
+  const created = committed(accept(state, {
+    ...requested,
+    payload: { subject: "Local new task" },
+  }, authority));
+  assert.notEqual(created.resource, foreign.resource, "authorized creation assigns its own resource");
+  assert.equal(belongsToProject(scope, created.resource, "fixture-resources"), true);
+  assert.deepEqual(state.resources.get(foreign.resource), snapshot, "foreign state remains unchanged");
+  assert.equal(state.commits, 2n, "one effect for each authorized creation");
+});
+
+test(`${fixtureVersion}: CreateTask requires a nonempty subject before any receipt or effect`, () => {
+  const state = model();
+  const requested = create("550e8400-e29b-41d4-a716-446655440005");
+  for (const payload of [{}, { subject: "" }, { subject: "  " }]) {
+    assert.equal(accept(state, { ...requested, payload }, authority), "INVALID_ARGUMENT");
+    assert.equal(state.commits, 0n);
+    assert.equal(state.ledger.size, 0);
+    assert.equal(state.resources.size, 0);
+  }
+  const missingSubject = { description: "Only description" };
+  assert.equal(accept(state, { ...requested, payload: missingSubject }, authority), "INVALID_ARGUMENT");
+  assert.equal(state.commits, 0n);
+  assert.equal(state.ledger.size, 0);
+  const accepted = committed(accept(state, {
+    ...requested, payload: { subject: "A valid task", description: "" },
+  }, authority));
+  assert.deepEqual(accept(state, { ...requested, payload: { description: "", subject: "A valid task" } }, authority), accepted);
   assert.equal(state.commits, 1n);
 });
 
