@@ -197,6 +197,29 @@ test(`${fixtureVersion}: same request ID remains isolated across authenticated P
   assert.equal(state.commits, 2n, "one effect per authorized Project");
 });
 
+test(`${fixtureVersion}: creation cannot overwrite another Project via a supplied resource name`, () => {
+  const state = model();
+  const otherScope = "tenants/test/projects/other-sandbox";
+  const otherAuthority: Authority = { scope: otherScope, subject: "other-member", writable: true };
+  const foreign = committed(accept(state, {
+    ...create("550e8400-e29b-41d4-a716-446655440002"),
+    scope: otherScope,
+    subject: otherAuthority.subject,
+  }, otherAuthority));
+  const foreignRecord = state.resources.get(foreign.resource);
+  assert.ok(foreignRecord);
+  const snapshot = structuredClone(foreignRecord);
+
+  const created = committed(accept(state, {
+    ...create("550e8400-e29b-41d4-a716-446655440003"),
+    payload: { subject: "Local new task", resource: foreign.resource },
+  }, authority));
+  assert.notEqual(created.resource, foreign.resource, "client payload cannot dictate an owner-assigned resource");
+  assert.equal(belongsToProject(scope, created.resource, "fixture-resources"), true);
+  assert.deepEqual(state.resources.get(foreign.resource), snapshot, "foreign state remains unchanged");
+  assert.equal(state.commits, 2n, "one effect for each authorized creation");
+});
+
 test(`${fixtureVersion}: stale task edits never overwrite concurrent commits`, () => {
   const state = model();
   const task = committed(accept(state, create(), authority));
