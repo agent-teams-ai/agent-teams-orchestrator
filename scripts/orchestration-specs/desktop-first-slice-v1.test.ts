@@ -62,7 +62,10 @@ function accept(state: Model, command: Command, trusted: Authority): Result {
   }
   const resource = command.payload["resource"];
   if (command.descriptor === "UpdateTask") {
-    const current = resource === undefined ? undefined : state.resources.get(resource);
+    // Reject foreign resource names before looking up any stored record.
+    const current = resource === undefined || !belongsToProject(command.scope, resource, "fixture-resources")
+      ? undefined
+      : state.resources.get(resource);
     if (!current || current.scope !== command.scope) {
       return "NOT_FOUND";
     }
