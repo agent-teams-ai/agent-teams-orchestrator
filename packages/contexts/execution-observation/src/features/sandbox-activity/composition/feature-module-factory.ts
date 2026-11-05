@@ -6,7 +6,7 @@ import type { ActivityAuthorization } from '../application/ports/activity-store.
 import { createActivityAdmission } from '../application/admit-sandbox-activity.js';
 import { createActivityApi } from '../application/create-activity-api.js';
 import { createPostgresActivityStore } from '../adapters/outbound/persistence/postgres-activity-store.js';
-import { activitySqlInstant } from '../adapters/outbound/persistence/postgres-transaction.js';
+import { activitySqlInstant,releaseActivityCheckout } from '../adapters/outbound/persistence/postgres-transaction.js';
 import { createActivityCursorCodec } from '../adapters/outbound/persistence/activity-cursors.js';
 import { sandboxActivityMigration } from '../adapters/outbound/persistence/migrations/0001-sandbox-activity.js';
 export interface SandboxActivityOptions {
@@ -33,15 +33,18 @@ export function createSandboxActivityFeature(options:SandboxActivityOptions):San
       const health={broken:false};let committing=false;
       const onError=()=>{health.broken=true;};client.on('error',onError);
       const isBroken=()=>health.broken;
+      let failed=false;
       try{
         await client.query('BEGIN');await client.query(sandboxActivityMigration);
         if(isBroken()){throw new SandboxActivityError('UNAVAILABLE','Migration connection was interrupted');}
         committing=true;await client.query('COMMIT');
         if(isBroken()){throw new SandboxActivityError('UNAVAILABLE','Migration commit requires reconciliation');}
       }catch{
+        failed=true;
         if(committing){health.broken=true;}else{try{await client.query('ROLLBACK');}catch{health.broken=true;}}
-        throw new SandboxActivityError('UNAVAILABLE','Migration requires same-identity reconciliation');
-      }finally{client.removeListener('error',onError);client.release(isBroken());}
+      }
+      releaseActivityCheckout(client,health,onError);
+      if(failed||isBroken()){throw new SandboxActivityError('UNAVAILABLE','Migration requires same-identity reconciliation');}
     },
     ...createActivityAdmission({store,authorization:options.authorization}),
   });
