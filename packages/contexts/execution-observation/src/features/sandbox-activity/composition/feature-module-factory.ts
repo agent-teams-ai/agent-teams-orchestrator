@@ -42,9 +42,15 @@ export function createSandboxActivityFeature(options:SandboxActivityOptions):San
         if(committing){health.broken=true;}else{try{await client.query('ROLLBACK');}catch{health.broken=true;}}
         throw new SandboxActivityError('UNAVAILABLE','Migration requires same-identity reconciliation');
       }finally{
-        client.removeListener('error',onError);
+        // Keep connection errors observable until ownership is actually released.
+        // A failure signalled during release after COMMIT must not be acknowledged.
+        let releaseFailed=false;
         try{client.release(isBroken());}
-        catch{throw new SandboxActivityError('UNAVAILABLE','Migration release requires same-identity reconciliation');}
+        catch{releaseFailed=true;}
+        finally{client.removeListener('error',onError);}
+        if(releaseFailed||isBroken()){
+          throw new SandboxActivityError('UNAVAILABLE','Migration release requires same-identity reconciliation');
+        }
       }
     },
     ...createActivityAdmission({store,authorization:options.authorization}),
