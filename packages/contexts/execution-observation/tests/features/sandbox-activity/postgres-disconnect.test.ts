@@ -38,12 +38,12 @@ await test('migration release-time connection loss after COMMIT requires reconci
         const borrowed=await target.connect();
         let handler:((error:Error)=>void)|undefined;
         return new Proxy(borrowed,{get(connection,property){
-          if(property==='on'){return (event:string,callback:(error:Error)=>void)=>{
-            if(event==='error'){handler=callback;}
+          if(property==='on'){return (event:'error',callback:(error:Error)=>void)=>{
+            handler=callback;
             return connection.on(event,callback);
           };}
-          if(property==='removeListener'){return (event:string,callback:(error:Error)=>void)=>{
-            if(event==='error'&&handler===callback){handler=undefined;}
+          if(property==='removeListener'){return (event:'error',callback:(error:Error)=>void)=>{
+            if(handler===callback){handler=undefined;}
             return connection.removeListener(event,callback);
           };}
           if(property==='release'){return (broken?:boolean)=>{
