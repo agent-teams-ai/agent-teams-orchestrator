@@ -45,3 +45,21 @@ void test('malformed serialized authority fails closed before authorization and 
   }
   assert.equal(sideEffects,0,'malformed authority cannot reach authorization or persistence');
 });
+
+void test('malformed serialized Activity payloads fail closed before authorization or persistence',async()=>{
+  const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_subject'};
+  let sideEffects=0;
+  const authorization={async assertAuthorized(){sideEffects++;return {epoch:'1',allowInternal:false};}};
+  const ingress=createActivityAdmission({authorization,store:{
+    async bind(){sideEffects++;},
+    async append(){sideEffects++;return {status:'accepted' as const,sequence:'1'};}
+  }});
+  const malformed:unknown[]=[null,undefined,[],42,'invalid',true];
+  for(const value of malformed){
+    await assert.rejects(()=>ingress.bindRuntime(context,value as Parameters<typeof ingress.bindRuntime>[1]),
+      {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
+    await assert.rejects(()=>ingress.append(context,value as Parameters<typeof ingress.append>[1]),
+      {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
+  }
+  assert.equal(sideEffects,0,'invalid serialized Activity cannot reach authorization or persistence');
+});
