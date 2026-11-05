@@ -72,8 +72,8 @@ function accept(state: Model, command: Command, trusted: Authority): Result {
   }
   state.commits += 1n;
   const opaqueId = state.commits.toString();
-  const resourceName = command.descriptor === "UpdateTask"
-    ? resource!
+  const resourceName = command.descriptor === "UpdateTask" && resource !== undefined
+    ? resource
     : `${command.scope}/fixture-resources/${opaqueId}`;
   const receipt: Receipt = {
     operation: `${command.scope}/operations/change-fixture-${opaqueId}`,
@@ -181,6 +181,7 @@ test(`${fixtureVersion}: same request ID remains isolated across authenticated P
   assert.deepEqual(accept(state, second, otherAuthority), secondReceipt);
   const foreignRecord = state.resources.get(secondReceipt.resource);
   assert.ok(foreignRecord);
+  const foreignSnapshot = structuredClone(foreignRecord);
   const foreignEdit: Command = {
     ...create("550e8400-e29b-41d4-a716-446655440001"),
     descriptor: "UpdateTask",
@@ -189,7 +190,7 @@ test(`${fixtureVersion}: same request ID remains isolated across authenticated P
   };
   assert.equal(accept(state, foreignEdit, authority), "NOT_FOUND",
     "an authorized Project cannot mutate another Project's known resource even with its ETag");
-  assert.deepEqual(state.resources.get(secondReceipt.resource), foreignRecord);
+  assert.deepEqual(state.resources.get(secondReceipt.resource), foreignSnapshot);
   assert.equal(state.commits, 2n, "one effect per authorized Project");
 });
 
