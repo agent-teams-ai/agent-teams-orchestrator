@@ -9,9 +9,8 @@ import type {
 import type { ManifestAuthorization } from "../application/ports/manifest-store.js";
 import { createManifestRegistration } from "../application/register-sandbox-manifest.js";
 import { createManifestApi } from "../application/create-manifest-api.js";
-import { createPostgresManifestStore } from "../adapters/outbound/persistence/postgres-manifest-store.js";
+import { createPostgresManifestStore, releaseManifestClient } from "../adapters/outbound/persistence/postgres-manifest-store.js";
 import { sandboxManifestMigration } from "../adapters/outbound/persistence/migrations/0001-sandbox-manifest.js";
-import { releaseManifestClient } from "../adapters/outbound/persistence/release-manifest-client.js";
 export interface SandboxManifestOptions {
   readonly pool: Pool;
   readonly migrationPool: Pool;

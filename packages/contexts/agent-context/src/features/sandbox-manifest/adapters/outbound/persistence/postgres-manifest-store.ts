@@ -4,8 +4,27 @@ import type { ManifestRequestContext } from "../../../application/api.js";
 import type { ManifestStore } from "../../../application/ports/manifest-store.js";
 import { assertManifest } from "../../../application/manifest-validation.js";
 import { manifestFingerprint } from "../../../domain/manifest.js";
-import { releaseManifestClient } from "./release-manifest-client.js";
+
 import type { ManifestFacts } from "../../../domain/manifest.js";
+/** Keep the socket error guard until PostgreSQL pool custody is transferred. */
+export function releaseManifestClient(
+  client: PoolClient,
+  onError: (error: Error) => void,
+  isBroken: () => boolean,
+  errorMessage: string,
+): void {
+  try {
+    client.release(isBroken());
+  } catch {
+    // A throwing release has not proved custody transfer; retain the guard.
+    throw new SandboxManifestError("UNAVAILABLE", errorMessage);
+  }
+  client.removeListener("error", onError);
+  if (isBroken()) {
+    // An error during release cannot be reported as a successful operation.
+    throw new SandboxManifestError("UNAVAILABLE", errorMessage);
+  }
+}
 function sqlInstant(value: string): string {
   const us = BigInt(value);
   if (us < -62135596800000000n || us > 253402300799999999n) {
