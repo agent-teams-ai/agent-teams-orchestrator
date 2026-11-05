@@ -26,6 +26,7 @@ type LedgerEntry = Readonly<{ fingerprint: string; receipt: Receipt }>;
 type Model = {
   ledger: Map<string, LedgerEntry>;
   resources: Map<string, { scope: string; payload: Readonly<Record<string, string>>; etag: string }>;
+  projectCommits: Map<string, bigint>;
   commits: bigint;
 };
 
@@ -39,7 +40,7 @@ const create = (requestId = "request-a"): Command => ({
   subject: authority.subject,
   payload: { subject: "Sandbox task", description: "Fixture only" },
 });
-const model = (): Model => ({ ledger: new Map(), resources: new Map(), commits: 0n });
+const model = (): Model => ({ ledger: new Map(), resources: new Map(), projectCommits: new Map(), commits: 0n });
 const fingerprint = (command: Command): string =>
   JSON.stringify({
     payload: Object.entries(command.payload).toSorted(([left], [right]) =>
@@ -73,8 +74,11 @@ function accept(state: Model, command: Command, trusted: Authority): Result {
       return "STALE_ETAG";
     }
   }
+  // Public operation/resource names must not disclose another Project's effect count.
+  const projectCount = (state.projectCommits.get(command.scope) ?? 0n) + 1n;
+  state.projectCommits.set(command.scope, projectCount);
   state.commits += 1n;
-  const opaqueId = state.commits.toString();
+  const opaqueId = projectCount.toString();
   const resourceName = command.descriptor === "UpdateTask" && resource !== undefined
     ? resource
     : `${command.scope}/fixture-resources/${opaqueId}`;
@@ -195,6 +199,21 @@ test(`${fixtureVersion}: same request ID remains isolated across authenticated P
     "an authorized Project cannot mutate another Project's known resource even with its ETag");
   assert.deepEqual(state.resources.get(secondReceipt.resource), foreignSnapshot);
   assert.equal(state.commits, 2n, "one effect per authorized Project");
+});
+
+test(`${fixtureVersion}: opaque receipts do not reveal commits from a foreign Project`, () => {
+  const requestId = "550e8400-e29b-41d4-a716-446655440004";
+  const otherScope = "tenants/test/projects/other-sandbox";
+  const otherAuthority: Authority = { scope: otherScope, subject: "other-member", writable: true };
+  const foreign: Command = { ...create(requestId), scope: otherScope, subject: otherAuthority.subject };
+  const baseline = committed(accept(model(), foreign, otherAuthority));
+
+  const seeded = model();
+  committed(accept(seeded, create(requestId), authority));
+  const afterAnotherProject = committed(accept(seeded, foreign, otherAuthority));
+  assert.deepEqual(afterAnotherProject, baseline,
+    "an admitted Project must not infer another Project's activity from public receipt names");
+  assert.equal(seeded.commits, 2n, "both Projects still commit independently");
 });
 
 test(`${fixtureVersion}: creation cannot overwrite another Project via a supplied resource name`, () => {
