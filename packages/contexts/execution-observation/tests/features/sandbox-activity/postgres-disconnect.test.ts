@@ -57,6 +57,42 @@ await test('real PostgreSQL keeps the committed Activity binding when release co
   }
 });
 
+await test('real PostgreSQL retains committed schema after migration release acknowledgement is lost',{skip:process.env.RUN_CONTEXT_OBSERVATION_PG!=='1',timeout:90000},async()=>{
+  const cluster=await ownedPostgres();
+  const connect=cluster.owner.connect.bind(cluster.owner);
+  let releases=0;
+  try{
+    Object.defineProperty(cluster.owner,'connect',{configurable:true,value:async()=>{
+      const client=await connect();
+      const release=client.release.bind(client);
+      Object.defineProperty(client,'release',{value:()=>{
+        releases++;
+        release(true);
+        throw new Error('TEST migration release acknowledgement lost after COMMIT');
+      }});
+      return client;
+    }});
+    await assert.rejects(()=>make(cluster.runtime,cluster.owner).migrate(),{name:'SandboxActivityError',code:'UNAVAILABLE'});
+    assert.equal(releases,1,'migration must not be automatically replayed after an uncertain outcome');
+    const committed=await cluster.owner.query<{name:string;rls:boolean;forced:boolean;policy:string}>(
+      `SELECT c.relname AS name,c.relrowsecurity AS rls,c.relforcerowsecurity AS forced,
+         coalesce(p.policyname,'') AS policy
+         FROM pg_class c
+         JOIN pg_namespace n ON n.oid=c.relnamespace
+         LEFT JOIN pg_policies p ON p.schemaname=n.nspname AND p.tablename=c.relname
+         WHERE n.nspname='execution_observation' AND c.relname IN ('partitions','outbox')
+         ORDER BY c.relname`
+    );
+    assert.deepEqual(committed.rows.map(row=>[row.name,row.rls,row.forced,row.policy]),[
+      ['outbox',true,true,'tenant_scope'],
+      ['partitions',true,true,'tenant_scope'],
+    ],'migration physically committed its two RLS-protected tables');
+  }finally{
+    Object.defineProperty(cluster.owner,'connect',{configurable:true,value:connect});
+    await cluster.stop([cluster.owner,cluster.runtime]);
+  }
+});
+
 await test('an ended actual PostgreSQL Pool returns typed unavailable for Activity reads, ingress and migration',async()=>{
   const pool=new Pool({max:1});await pool.end();const feature=make(pool,pool);
   const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_human'};
