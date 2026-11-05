@@ -25,7 +25,7 @@ type Result = Receipt | Failure;
 type LedgerEntry = Readonly<{ fingerprint: string; receipt: Receipt }>;
 type Model = {
   ledger: Map<string, LedgerEntry>;
-  resources: Map<string, { payload: Readonly<Record<string, string>>; etag: string }>;
+  resources: Map<string, { scope: string; payload: Readonly<Record<string, string>>; etag: string }>;
   commits: bigint;
 };
 
@@ -63,7 +63,7 @@ function accept(state: Model, command: Command, trusted: Authority): Result {
   const resource = command.payload["resource"];
   if (command.descriptor === "UpdateTask") {
     const current = resource === undefined ? undefined : state.resources.get(resource);
-    if (!current) {
+    if (!current || current.scope !== command.scope) {
       return "NOT_FOUND";
     }
     if (current.etag !== command.etag) {
@@ -72,13 +72,15 @@ function accept(state: Model, command: Command, trusted: Authority): Result {
   }
   state.commits += 1n;
   const opaqueId = state.commits.toString();
-  const resourceName = resource ?? `${command.scope}/fixture-resources/${opaqueId}`;
+  const resourceName = command.descriptor === "UpdateTask"
+    ? resource!
+    : `${command.scope}/fixture-resources/${opaqueId}`;
   const receipt: Receipt = {
     operation: `${command.scope}/operations/change-fixture-${opaqueId}`,
     resource: resourceName,
     result: "committed",
   };
-  state.resources.set(resourceName, { payload: command.payload, etag: `opaque-${opaqueId}` });
+  state.resources.set(resourceName, { scope: command.scope, payload: command.payload, etag: `opaque-${opaqueId}` });
   state.ledger.set(key(command), { fingerprint: fingerprint(command), receipt });
   return receipt;
 }
@@ -177,6 +179,17 @@ test(`${fixtureVersion}: same request ID remains isolated across authenticated P
     "the first Project's idempotency conflict does not alter the second Project's receipt",
   );
   assert.deepEqual(accept(state, second, otherAuthority), secondReceipt);
+  const foreignRecord = state.resources.get(secondReceipt.resource);
+  assert.ok(foreignRecord);
+  const foreignEdit: Command = {
+    ...create("550e8400-e29b-41d4-a716-446655440001"),
+    descriptor: "UpdateTask",
+    etag: foreignRecord.etag,
+    payload: { resource: secondReceipt.resource, subject: "Cross-Project overwrite" },
+  };
+  assert.equal(accept(state, foreignEdit, authority), "NOT_FOUND",
+    "an authorized Project cannot mutate another Project's known resource even with its ETag");
+  assert.deepEqual(state.resources.get(secondReceipt.resource), foreignRecord);
   assert.equal(state.commits, 2n, "one effect per authorized Project");
 });
 
