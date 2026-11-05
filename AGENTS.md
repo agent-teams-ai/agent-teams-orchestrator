@@ -5,6 +5,8 @@ copy of the architecture.
 
 ## Fast start
 
+- [Proposed shared research integration](docs/research/shared-research-integration-plan.md)
+
 Read these before making any change:
 
 1. [Documentation map](docs/README.md)
