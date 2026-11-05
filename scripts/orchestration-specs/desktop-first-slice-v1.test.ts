@@ -152,6 +152,28 @@ test(`${fixtureVersion}: authentication is current even when receipt already exi
   assert.equal(state.commits, 1n);
 });
 
+test(`${fixtureVersion}: same request ID remains isolated across authenticated Projects`, () => {
+  const state = model();
+  const requestId = "shared-request-id";
+  const otherScope = "tenants/test/projects/other-sandbox";
+  const otherAuthority: Authority = { scope: otherScope, subject: "other-member", writable: true };
+  const first = create(requestId);
+  const second: Command = { ...first, scope: otherScope, subject: otherAuthority.subject };
+
+  const firstReceipt = committed(accept(state, first, authority));
+  assert.equal(accept(state, second, authority), "FORBIDDEN");
+  assert.equal(state.commits, 1n, "foreign-scope attempt has no effect");
+
+  const secondReceipt = committed(accept(state, second, otherAuthority));
+  assert.notEqual(secondReceipt.operation, firstReceipt.operation);
+  assert.notEqual(secondReceipt.resource, firstReceipt.resource);
+  assert.deepEqual(accept(state, first, authority), firstReceipt);
+  assert.deepEqual(accept(state, second, otherAuthority), secondReceipt);
+  assert.equal(accept(state, first, otherAuthority), "FORBIDDEN");
+  assert.equal(accept(state, second, authority), "FORBIDDEN");
+  assert.equal(state.commits, 2n, "one effect per authorized Project");
+});
+
 test(`${fixtureVersion}: stale task edits never overwrite concurrent commits`, () => {
   const state = model();
   const task = committed(accept(state, create(), authority));
