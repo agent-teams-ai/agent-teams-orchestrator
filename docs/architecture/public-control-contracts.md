@@ -29,12 +29,12 @@ related:
 
 The repository has separate external contract surfaces:
 
-| Surface | Canonical source | Normal transport |
-|---|---|---|
-| Public control API | Feature-owned Protobuf | Connect; compatible gRPC where required |
-| Integration events | Feature-owned JSON Schema Draft 2020-12 | Broker-neutral publisher; JetStream adapter first |
-| `ar` Runtime Published Language | `ar`-owned Protobuf | Runtime SDK/transport owned by `ar` |
-| Handwritten SDK API | Language source plus API report | Internal SDK backend |
+| Surface                         | Canonical source                        | Normal transport                                  |
+| ------------------------------- | --------------------------------------- | ------------------------------------------------- |
+| Public control API              | Feature-owned Protobuf                  | Connect; compatible gRPC where required           |
+| Integration events              | Feature-owned JSON Schema Draft 2020-12 | Broker-neutral publisher; JetStream adapter first |
+| `ar` Runtime Published Language | `ar`-owned Protobuf                     | Runtime SDK/transport owned by `ar`               |
+| Handwritten SDK API             | Language source plus API report         | Internal SDK backend                              |
 
 Control messages, integration events, runtime messages, application models, and
 domain models never become aliases of one another. Feature-owned mappers cross

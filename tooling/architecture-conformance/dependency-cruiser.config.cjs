@@ -60,11 +60,7 @@ module.exports = {
       conditionNames: ["import", "require", "node", "default"],
       exportsFields: ["exports"],
     },
-    exclude: [
-      "(^|/)node_modules/",
-      "(^|/)dist/",
-      "(^|/)coverage/",
-    ],
+    exclude: ["(^|/)node_modules/", "(^|/)dist/", "(^|/)coverage/"],
     parser: "tsc",
     skipAnalysisNotInRules: true,
     tsConfig: {

@@ -56,8 +56,8 @@ The feature-owned consistency contract below applies
 and [ADR-0078](../../../../../../docs/decisions/0078-federated-consistency-evidence-gate.md).
 These stable identities do not claim installation of a global consistency gate.
 
-| Capability | Invariant | Strategy and conflict scope | Durable write path |
-|---|---|---|---|
+| Capability                                | Invariant                                   | Strategy and conflict scope                    | Durable write path                                                               |
+| ----------------------------------------- | ------------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------- |
 | `agent-context.register-sandbox-manifest` | `agent-context.manifest-identity-immutable` | `unique-admission`, exact scoped manifest name | Host `seedManifest` -> registration -> `ManifestStore.seed` -> owner transaction |
 
 One READ COMMITTED transaction inserts the immutable row, verifies the authoritative
@@ -82,12 +82,12 @@ after building the package. The typed tests own an isolated PostgreSQL 14 cluste
 restart it, and remove only their own state. Default tests skip the explicit
 infrastructure suite when that environment flag is absent.
 
-| Evidence | Executable assertion |
-|---|---|
-| Unique admission | Concurrent identical seeds produce one row and one outbox intent; changed facts conflict |
-| Authority | Raw-path and undeclared payload rejection; current authorization and forced RLS; held authorization preserves entry scope |
-| Durability | Actual PostgreSQL restart retains exact facts and timestamp |
-| Faults | Outbox trigger failure rolls back; applied COMMIT with lost acknowledgement reconciles without another event |
+| Evidence         | Executable assertion                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Unique admission | Concurrent identical seeds produce one row and one outbox intent; changed facts conflict                                  |
+| Authority        | Raw-path and undeclared payload rejection; current authorization and forced RLS; held authorization preserves entry scope |
+| Durability       | Actual PostgreSQL restart retains exact facts and timestamp                                                               |
+| Faults           | Outbox trigger failure rolls back; applied COMMIT with lost acknowledgement reconciles without another event              |
 
 These assertions establish the local PostgreSQL adapter behavior. Hosted deployment,
 public mutation Operations and broader context features remain unqualified.

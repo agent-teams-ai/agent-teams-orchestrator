@@ -4,13 +4,7 @@
   "title": "Agent Teams Orchestrator document metadata",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "id",
-    "type",
-    "status",
-    "owner",
-    "summary"
-  ],
+  "required": ["id", "type", "status", "owner", "summary"],
   "properties": {
     "id": {
       "$ref": "#/$defs/documentId"
@@ -95,18 +89,12 @@
             "const": "adr"
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "then": {
         "properties": {
           "status": {
-            "enum": [
-              "proposed",
-              "accepted",
-              "superseded"
-            ]
+            "enum": ["proposed", "accepted", "superseded"]
           }
         }
       }
@@ -118,18 +106,12 @@
             "const": "open-decision"
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "then": {
         "properties": {
           "status": {
-            "enum": [
-              "open",
-              "deferred",
-              "resolved"
-            ]
+            "enum": ["open", "deferred", "resolved"]
           }
         }
       }
@@ -138,26 +120,15 @@
       "if": {
         "properties": {
           "type": {
-            "enum": [
-              "index",
-              "glossary",
-              "template",
-              "runbook",
-              "research"
-            ]
+            "enum": ["index", "glossary", "template", "runbook", "research"]
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "then": {
         "properties": {
           "status": {
-            "enum": [
-              "active",
-              "deprecated"
-            ]
+            "enum": ["active", "deprecated"]
           }
         }
       }
@@ -166,29 +137,15 @@
       "if": {
         "properties": {
           "type": {
-            "enum": [
-              "architecture",
-              "domain-standard",
-              "bounded-context",
-              "feature",
-              "contract"
-            ]
+            "enum": ["architecture", "domain-standard", "bounded-context", "feature", "contract"]
           }
         },
-        "required": [
-          "type"
-        ]
+        "required": ["type"]
       },
       "then": {
         "properties": {
           "status": {
-            "enum": [
-              "accepted",
-              "proposed",
-              "exploratory",
-              "deprecated",
-              "superseded"
-            ]
+            "enum": ["accepted", "proposed", "exploratory", "deprecated", "superseded"]
           }
         }
       }
@@ -198,10 +155,7 @@
     "codeAnchor": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "pattern",
-        "enforcement"
-      ],
+      "required": ["pattern", "enforcement"],
       "properties": {
         "pattern": {
           "type": "string",
@@ -210,10 +164,7 @@
           "pattern": "^[^\\r\\n]+$"
         },
         "enforcement": {
-          "enum": [
-            "advisory",
-            "required"
-          ]
+          "enum": ["advisory", "required"]
         }
       }
     },

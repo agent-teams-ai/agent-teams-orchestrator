@@ -4,10 +4,7 @@ import remarkParse from "remark-parse";
 import { unified } from "unified";
 import YAML from "yaml";
 
-const markdownProcessor = unified()
-  .use(remarkParse)
-  .use(remarkFrontmatter)
-  .use(remarkGfm);
+const markdownProcessor = unified().use(remarkParse).use(remarkFrontmatter).use(remarkGfm);
 
 export function parseMarkdown(source) {
   return markdownProcessor.parse(source.replaceAll("\r\n", "\n"));
@@ -15,10 +12,7 @@ export function parseMarkdown(source) {
 
 export function parseFrontmatter(tree) {
   const frontmatter = tree.children[0];
-  if (
-    frontmatter?.type !== "yaml" ||
-    frontmatter.position?.start.line !== 1
-  ) {
+  if (frontmatter?.type !== "yaml" || frontmatter.position?.start.line !== 1) {
     return {
       error: "missing YAML frontmatter",
       metadata: null,

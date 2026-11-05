@@ -1,2 +1,2 @@
-export * from './features/sandbox-manifest/api.js';
-export * from './features/sandbox-manifest/index.js';
+export * from "./features/sandbox-manifest/api.js";
+export * from "./features/sandbox-manifest/index.js";

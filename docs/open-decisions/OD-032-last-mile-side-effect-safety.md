@@ -9,18 +9,22 @@ blocked_by:
   - OD-013
   - OD-031
 related:
+  - ADR-0028
   - ADR-0079
   - ADR-0080
   - architecture.eventing
   - architecture.security
   - domain.contexts.access-control
+  - domain.contexts.approval-management
   - domain.contexts.policy-risk
   - domain.contexts.run-orchestration
+  - OD-004
   - OD-012
   - OD-013
   - OD-028
   - OD-031
   - OD-033
+  - research.iam-critical-decisions-review-2026-10-23
 ---
 
 # OD-032: Last-Mile Side-Effect Safety
@@ -207,6 +211,50 @@ content do not enter events, logs, or telemetry.
 5. Audit-before-dispatch policy by risk class.
 6. Operator reconciliation and manual-resolution contracts.
 7. Which initial reversible integration proves the vertical slice.
+
+### Deferred dangerous-action approval research
+
+Dangerous actions will require product approval. The detailed approver model
+and mechanism remain unresolved and are deferred for later research under this
+decision. Task assignment or claim records responsibility for work; it does
+not grant product authorization, approve a dangerous action, satisfy an AR
+technical permission request, or establish Work completion. This requirement
+does not introduce human approval for every assignment or every action.
+
+ADR-0028 preserves a selected human or machine authority and separate product
+approval and technical runtime permission state. The later research must resolve:
+
+1. **Approver eligibility and current authority:** who may approve an action in
+   the relevant organization and Project, which role or delegation permits that
+   decision, and when current authority must be checked. Team membership,
+   coordination, assignment, and participation alone do not select an approver.
+2. **Action and argument binding:** which exact action, target, arguments,
+   actor and delegation, and relevant resource versions an approval covers;
+   which changes require another decision.
+3. **Change, revocation, and expiry:** how edits, replacement, authority removal,
+   policy changes, cancellation, and deadlines affect pending or recorded
+   approvals, including races with dispatch.
+4. **Execution and enforcement boundary:** how the owning feature checks
+   approval at dispatch admission, which technical checks the outbound capability
+   performs, what AR independently enforces for runtime actions, and how stale,
+   conflicting, or unknown outcomes are handled.
+
+[Approval Management](../domain/contexts/approval-management/README.md) retains
+product approval lifecycle and evidence; [Policy and Risk](../domain/contexts/policy-risk/README.md)
+retains risk and automation decisions. [OD-012](OD-012-identity-authorization-tenant-isolation.md)
+owns detailed product authorization semantics, and
+[OD-004](OD-004-runtime-capability-ports.md) owns exact runtime permission mappings.
+This research scope accepts no new approval architecture, public contract, or
+implementation admission.
+
+The [IAM critical-decisions review](../research/iam-critical-decisions-review-2026-10-23.md#11-dangerous-actions-and-approval-minimum-contract-now)
+adds a proposed minimum feature-owned enforcement seam and an unresolved
+granularity question. A provider turn with unmediated effects cannot claim
+exact-operation approval from a UI record alone. The selected dangerous feature
+must distinguish a mediated operation from explicitly bounded whole-turn
+authority. A final check or signed permit also does not close the external
+check/send race. These are research and qualification inputs, not adoption of
+a universal approval engine or a completed runtime permission contract.
 
 ## Options
 

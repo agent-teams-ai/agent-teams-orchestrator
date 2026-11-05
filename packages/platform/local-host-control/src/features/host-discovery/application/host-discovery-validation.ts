@@ -31,9 +31,7 @@ import {
   supervisorInstanceId,
   targetId,
 } from "./model/host-discovery.js";
-import type {
-  HostDiscoverySourceResult,
-} from "./ports/host-discovery-source.js";
+import type { HostDiscoverySourceResult } from "./ports/host-discovery-source.js";
 
 const maximumCapabilityCount = 64;
 
@@ -91,23 +89,15 @@ function snapshotTargetId(value: unknown): TargetId | undefined {
   return snapshotTextToken(value, "TargetId", targetId);
 }
 
-function snapshotSupervisorInstanceId(
-  value: unknown,
-): SupervisorInstanceId | undefined {
-  return snapshotTextToken(
-    value,
-    "SupervisorInstanceId",
-    supervisorInstanceId,
-  );
+function snapshotSupervisorInstanceId(value: unknown): SupervisorInstanceId | undefined {
+  return snapshotTextToken(value, "SupervisorInstanceId", supervisorInstanceId);
 }
 
 function snapshotHostInstanceId(value: unknown): HostInstanceId | undefined {
   return snapshotTextToken(value, "HostInstanceId", hostInstanceId);
 }
 
-function snapshotComponentVersion(
-  value: unknown,
-): ComponentVersion | undefined {
+function snapshotComponentVersion(value: unknown): ComponentVersion | undefined {
   return snapshotTextToken(value, "ComponentVersion", componentVersion);
 }
 
@@ -115,53 +105,27 @@ function snapshotCapabilityId(value: unknown): HostCapabilityId | undefined {
   return snapshotTextToken(value, "HostCapabilityId", hostCapabilityId);
 }
 
-function snapshotFreshnessEvidenceRef(
-  value: unknown,
-): HostFreshnessEvidenceRef | undefined {
-  return snapshotTextToken(
-    value,
-    "HostFreshnessEvidenceRef",
-    hostFreshnessEvidenceRef,
-  );
+function snapshotFreshnessEvidenceRef(value: unknown): HostFreshnessEvidenceRef | undefined {
+  return snapshotTextToken(value, "HostFreshnessEvidenceRef", hostFreshnessEvidenceRef);
 }
 
-function snapshotHostBootGeneration(
-  value: unknown,
-): HostBootGeneration | undefined {
-  return snapshotBigIntToken(
-    value,
-    "HostBootGeneration",
-    hostBootGeneration,
-  );
+function snapshotHostBootGeneration(value: unknown): HostBootGeneration | undefined {
+  return snapshotBigIntToken(value, "HostBootGeneration", hostBootGeneration);
 }
 
-function snapshotProtocolVersion(
-  value: unknown,
-): HostProtocolVersion | undefined {
-  return snapshotBigIntToken(
-    value,
-    "HostProtocolVersion",
-    hostProtocolVersion,
-  );
+function snapshotProtocolVersion(value: unknown): HostProtocolVersion | undefined {
+  return snapshotBigIntToken(value, "HostProtocolVersion", hostProtocolVersion);
 }
 
-export function snapshotEpochMicroseconds(
-  value: unknown,
-): EpochMicroseconds | undefined {
-  return snapshotBigIntToken(
-    value,
-    "EpochMicroseconds",
-    epochMicroseconds,
-  );
+export function snapshotEpochMicroseconds(value: unknown): EpochMicroseconds | undefined {
+  return snapshotBigIntToken(value, "EpochMicroseconds", epochMicroseconds);
 }
 
 function snapshotMicroseconds(value: unknown): Microseconds | undefined {
   return snapshotBigIntToken(value, "Microseconds", microseconds);
 }
 
-function snapshotProtocolRange(
-  value: unknown,
-): HostProtocolRange | undefined {
+function snapshotProtocolRange(value: unknown): HostProtocolRange | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
@@ -183,18 +147,12 @@ function hasUniqueCapabilities(values: readonly HostCapabilityId[]): boolean {
   return new Set(values.map(({ value }) => value)).size === values.length;
 }
 
-function snapshotCapabilities(
-  value: unknown,
-): readonly HostCapabilityId[] | undefined {
+function snapshotCapabilities(value: unknown): readonly HostCapabilityId[] | undefined {
   if (!Array.isArray(value)) {
     return undefined;
   }
   const length = value.length;
-  if (
-    !Number.isSafeInteger(length) ||
-    length < 0 ||
-    length > maximumCapabilityCount
-  ) {
+  if (!Number.isSafeInteger(length) || length < 0 || length > maximumCapabilityCount) {
     return undefined;
   }
   const capabilities: HostCapabilityId[] = [];
@@ -205,14 +163,10 @@ function snapshotCapabilities(
     }
     capabilities.push(capability);
   }
-  return hasUniqueCapabilities(capabilities)
-    ? Object.freeze(capabilities)
-    : undefined;
+  return hasUniqueCapabilities(capabilities) ? Object.freeze(capabilities) : undefined;
 }
 
-export function snapshotQuery(
-  value: unknown,
-): DiscoverLocalHostQuery | undefined {
+export function snapshotQuery(value: unknown): DiscoverLocalHostQuery | undefined {
   try {
     if (!isRecord(value)) {
       return undefined;
@@ -240,9 +194,7 @@ export function snapshotQuery(
   }
 }
 
-function snapshotFreshness(
-  value: unknown,
-): HostDiscoveryObservation["freshness"] | undefined {
+function snapshotFreshness(value: unknown): HostDiscoveryObservation["freshness"] | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
@@ -265,9 +217,7 @@ function snapshotFreshness(
   return Object.freeze({ evidenceRef, kind, observedAt, validUntil });
 }
 
-function isUnavailableReason(
-  value: unknown,
-): value is HostDiscoveryUnavailableReason {
+function isUnavailableReason(value: unknown): value is HostDiscoveryUnavailableReason {
   return (
     value === "permission-denied" ||
     value === "source-failure" ||
@@ -278,33 +228,18 @@ function isUnavailableReason(
 function isSourceStaleReason(
   value: unknown,
 ): value is Exclude<HostDiscoveryStaleReason, "observation-too-old"> {
-  return (
-    value === "liveness-unproven" ||
-    value === "ownership-unproven" ||
-    value === "superseded"
-  );
+  return value === "liveness-unproven" || value === "ownership-unproven" || value === "superseded";
 }
 
-function isSourceRejectedReason(
-  value: unknown,
-): value is HostDiscoverySourceRejectedReason {
-  return (
-    value === "foreign-identity" ||
-    value === "malformed" ||
-    value === "unsafe-state"
-  );
+function isSourceRejectedReason(value: unknown): value is HostDiscoverySourceRejectedReason {
+  return value === "foreign-identity" || value === "malformed" || value === "unsafe-state";
 }
 
-export function sameTarget(
-  left: TargetId | undefined,
-  right: TargetId,
-): boolean {
+export function sameTarget(left: TargetId | undefined, right: TargetId): boolean {
   return left?.value === right.value;
 }
 
-function snapshotObservation(
-  value: unknown,
-): HostDiscoveryObservation | undefined {
+function snapshotObservation(value: unknown): HostDiscoveryObservation | undefined {
   try {
     if (!isRecord(value)) {
       return undefined;
@@ -318,18 +253,12 @@ function snapshotObservation(
     const rawSupervisorInstanceId = value.supervisorInstanceId;
     const rawTargetId = value.targetId;
     const capabilities = snapshotCapabilities(rawCapabilities);
-    const resolvedComponentVersion = snapshotComponentVersion(
-      rawComponentVersion,
-    );
+    const resolvedComponentVersion = snapshotComponentVersion(rawComponentVersion);
     const freshness = snapshotFreshness(rawFreshness);
-    const resolvedHostBootGeneration = snapshotHostBootGeneration(
-      rawHostBootGeneration,
-    );
+    const resolvedHostBootGeneration = snapshotHostBootGeneration(rawHostBootGeneration);
     const resolvedHostInstanceId = snapshotHostInstanceId(rawHostInstanceId);
     const protocolRange = snapshotProtocolRange(rawProtocolRange);
-    const resolvedSupervisorInstanceId = snapshotSupervisorInstanceId(
-      rawSupervisorInstanceId,
-    );
+    const resolvedSupervisorInstanceId = snapshotSupervisorInstanceId(rawSupervisorInstanceId);
     const resolvedTargetId = snapshotTargetId(rawTargetId);
     if (
       capabilities === undefined ||
@@ -385,12 +314,7 @@ export function snapshotSourceResult(value: unknown): SourceResultSnapshot {
             }),
           };
     }
-    if (
-      kind !== "not-found" &&
-      kind !== "stale" &&
-      kind !== "rejected" &&
-      kind !== "unavailable"
-    ) {
+    if (kind !== "not-found" && kind !== "stale" && kind !== "rejected" && kind !== "unavailable") {
       return { kind: "invalid-source-response" };
     }
     const rawTargetId = value.targetId;
@@ -434,23 +358,17 @@ export function evaluateCompatibility(
   observation: HostDiscoveryObservation,
 ): DiscoverLocalHostResult {
   const commonMinimum =
-    query.supportedProtocolRange.minimum.value >
-    observation.protocolRange.minimum.value
+    query.supportedProtocolRange.minimum.value > observation.protocolRange.minimum.value
       ? query.supportedProtocolRange.minimum
       : observation.protocolRange.minimum;
   const commonMaximum =
-    query.supportedProtocolRange.maximum.value <
-    observation.protocolRange.maximum.value
+    query.supportedProtocolRange.maximum.value < observation.protocolRange.maximum.value
       ? query.supportedProtocolRange.maximum
       : observation.protocolRange.maximum;
   const protocolCompatible = commonMinimum.value <= commonMaximum.value;
-  const advertisedCapabilities = new Set(
-    observation.capabilities.map(({ value }) => value),
-  );
+  const advertisedCapabilities = new Set(observation.capabilities.map(({ value }) => value));
   const missingCapabilities = Object.freeze(
-    query.requiredCapabilities.filter(
-      ({ value }) => !advertisedCapabilities.has(value),
-    ),
+    query.requiredCapabilities.filter(({ value }) => !advertisedCapabilities.has(value)),
   );
 
   if (protocolCompatible && missingCapabilities.length === 0) {
@@ -472,9 +390,7 @@ export function evaluateCompatibility(
   };
 }
 
-export function snapshotFreshnessPolicy(
-  value: unknown,
-): HostDiscoveryFreshnessPolicy | undefined {
+export function snapshotFreshnessPolicy(value: unknown): HostDiscoveryFreshnessPolicy | undefined {
   try {
     if (!isRecord(value)) {
       return undefined;
@@ -482,13 +398,8 @@ export function snapshotFreshnessPolicy(
     const rawMaximumFutureSkew = value.maximumFutureSkew;
     const rawMaximumObservationAge = value.maximumObservationAge;
     const maximumFutureSkew = snapshotMicroseconds(rawMaximumFutureSkew);
-    const maximumObservationAge = snapshotMicroseconds(
-      rawMaximumObservationAge,
-    );
-    if (
-      maximumFutureSkew === undefined ||
-      maximumObservationAge === undefined
-    ) {
+    const maximumObservationAge = snapshotMicroseconds(rawMaximumObservationAge);
+    if (maximumFutureSkew === undefined || maximumObservationAge === undefined) {
       return undefined;
     }
     return Object.freeze({ maximumFutureSkew, maximumObservationAge });

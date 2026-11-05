@@ -33,11 +33,7 @@ function countUnresolvedMaterializationGates(entry, documents, errors) {
   return unresolvedGateCount;
 }
 
-export function validateRequiredMaterializationEntries(
-  entries,
-  documents,
-  errors,
-) {
+export function validateRequiredMaterializationEntries(entries, documents, errors) {
   if (!documents.has("ADR-0093")) {
     return;
   }
@@ -58,11 +54,7 @@ export function validateMaterializationGates(entry, documents, errors) {
       `architecture/package-materialization-policy.yaml: ${entry.package_id} must retain the accepted Fully Local materialization gate set`,
     );
   }
-  const unresolvedGateCount = countUnresolvedMaterializationGates(
-    entry,
-    documents,
-    errors,
-  );
+  const unresolvedGateCount = countUnresolvedMaterializationGates(entry, documents, errors);
 
   if (entry.state === "allowed" && unresolvedGateCount > 0) {
     errors.push(
@@ -101,12 +93,7 @@ export function validateMaterializationGates(entry, documents, errors) {
   }
 }
 
-export function validatePackageMaterializationPolicy(
-  policy,
-  catalogEntries,
-  documents,
-  errors,
-) {
+export function validatePackageMaterializationPolicy(policy, catalogEntries, documents, errors) {
   const catalogIds = new Set(catalogEntries.map((entry) => entry.id));
   const entriesByPackageId = new Map();
 

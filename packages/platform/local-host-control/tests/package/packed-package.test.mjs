@@ -7,10 +7,7 @@ import test from "node:test";
 
 const packageRoot = path.resolve(import.meta.dirname, "../..");
 const pnpmCli = process.env.npm_execpath;
-const typescriptCli = path.resolve(
-  packageRoot,
-  "../../../node_modules/typescript/bin/tsc",
-);
+const typescriptCli = path.resolve(packageRoot, "../../../node_modules/typescript/bin/tsc");
 
 function run(command, arguments_, cwd) {
   const result = spawnSync(command, arguments_, {
@@ -32,9 +29,7 @@ function runPnpm(arguments_, cwd) {
 }
 
 test("packed artifact is installable and exposes runtime and declarations", async () => {
-  const temporaryRoot = await mkdtemp(
-    path.join(os.tmpdir(), "local-host-control-pack-"),
-  );
+  const temporaryRoot = await mkdtemp(path.join(os.tmpdir(), "local-host-control-pack-"));
   const packRoot = path.join(temporaryRoot, "pack");
   const consumerRoot = path.join(temporaryRoot, "consumer");
 
@@ -43,10 +38,7 @@ test("packed artifact is installable and exposes runtime and declarations", asyn
       mkdir(packRoot, { recursive: true }),
       mkdir(consumerRoot, { recursive: true }),
     ]);
-    const output = runPnpm(
-      ["pack", "--json", "--pack-destination", packRoot],
-      packageRoot,
-    );
+    const output = runPnpm(["pack", "--json", "--pack-destination", packRoot], packageRoot);
     const trimmedOutput = output.trim();
     const nestedJsonStart = trimmedOutput.lastIndexOf("\n{");
     const jsonStart = trimmedOutput.startsWith("{")
@@ -59,16 +51,13 @@ test("packed artifact is installable and exposes runtime and declarations", asyn
     const packedPaths = packed.files.map(({ path: packedPath }) => packedPath);
     assert.ok(packedPaths.includes("dist/index.js"));
     assert.ok(packedPaths.includes("dist/index.d.ts"));
-    assert.equal(packedPaths.some((packedPath) => packedPath.startsWith("src/")), false);
+    assert.equal(
+      packedPaths.some((packedPath) => packedPath.startsWith("src/")),
+      false,
+    );
 
-    await writeFile(
-      path.join(temporaryRoot, "package.json"),
-      JSON.stringify({ private: true }),
-    );
-    await writeFile(
-      path.join(temporaryRoot, "pnpm-workspace.yaml"),
-      "packages:\n  - consumer\n",
-    );
+    await writeFile(path.join(temporaryRoot, "package.json"), JSON.stringify({ private: true }));
+    await writeFile(path.join(temporaryRoot, "pnpm-workspace.yaml"), "packages:\n  - consumer\n");
     const packedSpecifier = `file:${path
       .relative(consumerRoot, packed.filename)
       .replaceAll("\\", "/")}`;
@@ -115,10 +104,7 @@ test("packed artifact is installable and exposes runtime and declarations", asyn
     );
 
     const declaration = await readFile(
-      path.join(
-        consumerRoot,
-        "node_modules/@agent-teams/local-host-control/dist/index.d.ts",
-      ),
+      path.join(consumerRoot, "node_modules/@agent-teams/local-host-control/dist/index.d.ts"),
       "utf8",
     );
     assert.match(declaration, /host-discovery\/index\.js/);

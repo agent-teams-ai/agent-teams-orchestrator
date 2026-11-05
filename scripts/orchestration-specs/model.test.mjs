@@ -6,22 +6,14 @@ import test from "node:test";
 import { getSimplePaths } from "@xstate/graph";
 import { parse } from "yaml";
 
-import {
-  applyMachineEvent,
-  deriveMachine,
-} from "./derive-machine.mjs";
+import { applyMachineEvent, deriveMachine } from "./derive-machine.mjs";
 import {
   assertGeneratedArtifactInventory,
   assertGeneratedArtifactsCurrent,
   expectedGeneratedArtifacts,
   writeGeneratedArtifacts,
 } from "./generated-artifacts.mjs";
-import {
-  loadCatalog,
-  loadCatalogBundle,
-  loadSchema,
-  loadSpecs,
-} from "./load-specs.mjs";
+import { loadCatalog, loadCatalogBundle, loadSchema, loadSpecs } from "./load-specs.mjs";
 import { proofArtifactsDirectory, repositoryRoot } from "./paths.mjs";
 import { deriveIndependentStateModels } from "./state-model.mjs";
 import {
@@ -45,24 +37,15 @@ test("catalog is the only schema, document, and harness inventory", () => {
   const missingSchema = structuredClone(catalog);
   missingSchema.specifications[0].documents[0].schemaId =
     "https://agent-teams.dev/schemas/not-cataloged.json";
-  assert.throws(
-    () => loadCatalogBundle(missingSchema),
-    /Document schema is not cataloged/u,
-  );
+  assert.throws(() => loadCatalogBundle(missingSchema), /Document schema is not cataloged/u);
 
   const driftedAdapter = structuredClone(catalog);
   driftedAdapter.specifications[0].stateModel.adapterPath =
     "scripts/orchestration-specs/state-model.mjs";
-  assert.throws(
-    () => loadCatalogBundle(driftedAdapter),
-    /does not identify the active harness/u,
-  );
+  assert.throws(() => loadCatalogBundle(driftedAdapter), /does not identify the active harness/u);
 
   const driftedAxes = structuredClone(catalog);
-  driftedAxes.specifications[0].stateModel.axes = [
-    "project-identity-lifecycle",
-    "deletion-epoch",
-  ];
+  driftedAxes.specifications[0].stateModel.axes = ["project-identity-lifecycle", "deletion-epoch"];
   assert.throws(
     () => loadCatalogBundle(driftedAxes),
     /axes differ from the modeled document axes/u,
@@ -132,10 +115,7 @@ for (const spec of specs) {
 test("opaque runtime evidence and stale commands never mutate authority", () => {
   for (const spec of specs) {
     const prohibitedEvents = spec.events
-      .filter(
-        (event) =>
-          event.category === "opaque-evidence" || event.category === "stale-command",
-      )
+      .filter((event) => event.category === "opaque-evidence" || event.category === "stale-command")
       .map((event) => event.id);
     const machine = deriveMachine(spec);
 
@@ -153,10 +133,7 @@ test("combined path and diagram evidence is current", () => {
 });
 
 test("generator bootstrap rejects unexpected proof artifacts", () => {
-  const unexpectedPath = nodePath.join(
-    proofArtifactsDirectory,
-    "unexpected-proof.mmd",
-  );
+  const unexpectedPath = nodePath.join(proofArtifactsDirectory, "unexpected-proof.mmd");
   fs.writeFileSync(unexpectedPath, "stateDiagram-v2\n");
   try {
     assert.throws(
@@ -170,9 +147,7 @@ test("generator bootstrap rejects unexpected proof artifacts", () => {
 
 test("unexpected generated artifacts fail the generated inventory", () => {
   const expectedPaths = [...expectedGeneratedArtifacts(specs).keys()];
-  const expectedNames = expectedPaths.map((artifactPath) =>
-    artifactPath.split("/").at(-1),
-  );
+  const expectedNames = expectedPaths.map((artifactPath) => artifactPath.split("/").at(-1));
 
   assert.throws(() =>
     assertGeneratedArtifactInventory(
@@ -185,19 +160,14 @@ test("unexpected generated artifacts fail the generated inventory", () => {
 test("changed JSON routing reaches all executable-spec gates", () => {
   const workflow = parse(
     fs.readFileSync(
-      nodePath.join(
-        repositoryRoot,
-        "architecture/foundation/repository-agent-workflow.yaml",
-      ),
+      nodePath.join(repositoryRoot, "architecture/foundation/repository-agent-workflow.yaml"),
       "utf8",
     ),
   );
   const manifest = JSON.parse(
     fs.readFileSync(nodePath.join(repositoryRoot, "package.json"), "utf8"),
   );
-  const jsonRoute = workflow.changedChecks.find((check) =>
-    check.extensions.includes(".json"),
-  );
+  const jsonRoute = workflow.changedChecks.find((check) => check.extensions.includes(".json"));
 
   assert.equal(jsonRoute.script, "architecture:check");
   assert.match(manifest.scripts[jsonRoute.script], /pnpm run specs:check/);

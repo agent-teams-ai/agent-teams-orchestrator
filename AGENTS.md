@@ -119,6 +119,10 @@ before a high-cost boundary violation.
   Awilix graph or reconstruct a remote role's features in transport service factories.
   Follow the [composition profile](docs/architecture/composition-and-dependency-injection.md),
   including its stricter authoring budgets and first-scope conformance requirements.
+  ADR-0117 requires the same framework for applicable independently assembled
+  capabilities in other TypeScript package families; private cohesive helpers
+  stay ordinary code. Complete the bounded module foundation before broad
+  feature expansion; do not create a second handwritten assembly path.
 - Design for thousands of simultaneously running agents across independent Runs,
   including Runs within one team and tenant, under the
   [concurrent execution target](docs/architecture/deployment-profiles.md#concurrent-execution-target).

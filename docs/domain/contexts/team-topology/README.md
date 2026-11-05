@@ -11,6 +11,7 @@ related:
   - ADR-0100
   - ADR-0101
   - ADR-0076
+  - ADR-0111
   - architecture.context-map
   - architecture.deployment-profiles
   - OD-006
@@ -19,6 +20,7 @@ related:
   - OD-045
   - OD-046
   - OD-047
+  - OD-048
   - research.team-creation-legacy-capability-inventory-2026-08-27
 ---
 
@@ -51,9 +53,9 @@ One Agent has at most one current Team assignment and appears once in the roster
 
 ## Aggregates and consistency boundaries
 
-| Root and identity | Protected invariants | Commands | Domain events | Transaction | Concurrency | Growth bound | External facts | Rejected boundaries |
-|---|---|---|---|---|---|---|---|---|
-| Team and Agent assignment | Invariants above | CreateTeam; GetTeam; ListTeams | TeamCreated; AgentAssigned | One owner-local Unit of Work including receipt, Operation and outbox | Unique current Agent assignment plus row/CAS protection; request replay precedes new mutation after current authorization. | One member/Run in this slice; history and receipts stored separately with finite declared horizons | Existing authorized Agent and exact profile version; clock and server-generated identity inputs. | No provider-state mirror, cross-context aggregate or shared transaction |
+| Root and identity         | Protected invariants | Commands                       | Domain events              | Transaction                                                          | Concurrency                                                                                                                | Growth bound                                                                                       | External facts                                                                                   | Rejected boundaries                                                     |
+| ------------------------- | -------------------- | ------------------------------ | -------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Team and Agent assignment | Invariants above     | CreateTeam; GetTeam; ListTeams | TeamCreated; AgentAssigned | One owner-local Unit of Work including receipt, Operation and outbox | Unique current Agent assignment plus row/CAS protection; request replay precedes new mutation after current authorization. | One member/Run in this slice; history and receipts stored separately with finite declared horizons | Existing authorized Agent and exact profile version; clock and server-generated identity inputs. | No provider-state mirror, cross-context aggregate or shared transaction |
 
 Repositories persist only the owning roots/state; read queries use authorized
 projections. Transport schemas and persistence records map to separate domain and
@@ -120,6 +122,24 @@ Proposed scope: project-scoped teams, members, roles, declared capabilities,
 topology versions, and roster invariants. Tasks and runtime processes remain
 outside this context.
 
+### Mixed-team product direction
+
+The owner directs support for humans and AI in the same Team. Human membership
+must reference a human principal, never an `AgentProfile` or a runtime session.
+Team membership describes collaboration and does not itself grant Project access,
+assignment, approval, or execution authority. Agent actions require authenticated
+or delegated commands under the configured authority provider.
+
+[ADR-0111](../../../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+accepts human membership in several Teams and one authorized personal-work query.
+[OD-048](../../../open-decisions/OD-048-mixed-human-and-ai-team-participation.md)
+retains the exact typed member model, successor contracts and qualification.
+ADR-0100's
+one-current-Team rule for an Agent, exact Agent definition versions, and ADR-0101's
+Run snapshot and occupancy rules remain unchanged. The current single-Agent
+ADR-0103 admission does not implement mixed membership. Organizational nesting
+uses OD-023 units and placements; it does not recursively expand this roster.
+
 Team Topology owns create-only, clone, and template-instantiation capabilities.
 It does not own organizational placement or Run activation. The Run
 Orchestration `team-activation` feature may request Team creation through a
@@ -158,12 +178,12 @@ delegation, multiple coordinators, and hierarchy remain later capabilities.
 
 ### Delivery map
 
-| Slice | Capability | Persistence or effects |
-|---|---|---|
-| S1 | Pure `CheckTeamDraft` and deterministic diagnostics | None |
-| S2 | Handwritten SDK plus Protobuf/Connect adapter for the same check | None |
-| S3 | Create, get, and list persistent Team definitions | Team Topology only |
-| S4 | Start a Run from an immutable Team version with explicit Run overrides | Run Orchestration and AR boundaries |
+| Slice | Capability                                                             | Persistence or effects              |
+| ----- | ---------------------------------------------------------------------- | ----------------------------------- |
+| S1    | Pure `CheckTeamDraft` and deterministic diagnostics                    | None                                |
+| S2    | Handwritten SDK plus Protobuf/Connect adapter for the same check       | None                                |
+| S3    | Create, get, and list persistent Team definitions                      | Team Topology only                  |
+| S4    | Start a Run from an immutable Team version with explicit Run overrides | Run Orchestration and AR boundaries |
 
 S1 and S2 are the module pilot. They must preserve extension points for S3 and
 S4 without implementing a generic profile catalog, hierarchy engine, policy DSL,

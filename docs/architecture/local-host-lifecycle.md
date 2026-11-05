@@ -17,6 +17,7 @@ related:
   - ADR-0064
   - ADR-0035
   - ADR-0058
+  - ADR-0111
   - OD-001
   - OD-003
   - OD-009
@@ -114,30 +115,31 @@ select channels, or proxy live publications.
 
 ## Responsibility matrix
 
-| Responsibility | Owner |
-|---|---|
-| Domain policy, commands, queries, runs, and process managers | Owning bounded context in Orchestrator Host |
-| UoW, inbox, outbox, projections, and reconciliation | Orchestrator Host and owning feature |
-| Public control behavior and SDK capability negotiation | Orchestrator Host |
-| Local component discovery and process availability | Local Supervisor |
-| Native role Host and paired Dapr sidecar availability and process custody | Local Supervisor |
-| Version staging, activation lock, health, and bounded restart | Local Supervisor |
-| Local PostgreSQL binary, process, protected data root, endpoint, and custody | Local Supervisor |
-| PostgreSQL connections, context migrations, transaction semantics, and recovery validation | Host persistence adapters and owning context |
-| Local NATS process, binary, store path, lifetime lock, and resource lifecycle | Local Supervisor |
+| Responsibility                                                                                               | Owner                                                                        |
+| ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| Domain policy, commands, queries, runs, and process managers                                                 | Owning bounded context in Orchestrator Host                                  |
+| UoW, inbox, outbox, projections, and reconciliation                                                          | Orchestrator Host and owning feature                                         |
+| Public control behavior and SDK capability negotiation                                                       | Orchestrator Host                                                            |
+| Local component discovery and process availability                                                           | Local Supervisor                                                             |
+| Native role Host and paired Dapr sidecar availability and process custody                                    | Local Supervisor                                                             |
+| Version staging, activation lock, health, and bounded restart                                                | Local Supervisor                                                             |
+| Local PostgreSQL binary, process, protected data root, endpoint, and custody                                 | Local Supervisor                                                             |
+| PostgreSQL connections, context migrations, transaction semantics, and recovery validation                   | Host persistence adapters and owning context                                 |
+| Local NATS process, binary, store path, lifetime lock, and resource lifecycle                                | Local Supervisor                                                             |
 | Native Temporal service availability, binary activation, protected endpoints, and resource custody | Local Supervisor through the Temporal component adapter |
 | Temporal schema migrations and service configuration | Temporal adapter with separate migration authority |
 | Workflow scheduling contracts, command receipts, cancellation cutoffs, and business reconciliation | Owning feature; Temporal adapters provide execution mechanics |
-| JetStream topology, publish, consume, ACK, and transport mapping | JetStream adapters |
-| Event ordering, delivery, privacy, retention, and replay requirements | Owning feature contract |
-| Local Centrifugo binary, endpoint, process health, staged activation, and cleanup | Local Supervisor |
-| Realtime channel mapping, token encoding, publication projection, and recovery signaling | Centrifugo adapter |
-| Durable client feed, cursor, snapshot, feed-scope validation, and classification | Owning feature |
-| Product grant, delegation, revocation, and authorization decision | Configured product authority provider; feature-owned ports consume decisions |
-| AR host availability when locally managed | Local Supervisor |
-| Runtime sessions, AR execution identity and custody, provider processes, sandbox, and permission enforcement | Agent Runtime |
-| User defaults for target and scope | Client Profile |
-| Team project directory or execution workspace identity | Workspace Registry |
+| JetStream topology, publish, consume, ACK, and transport mapping                                             | JetStream adapters                                                           |
+| Event ordering, delivery, privacy, retention, and replay requirements                                        | Owning feature contract                                                      |
+| Local Centrifugo binary, endpoint, process health, staged activation, and cleanup                            | Local Supervisor                                                             |
+| Realtime channel mapping, token encoding, publication projection, and recovery signaling                     | Centrifugo adapter                                                           |
+| Durable client feed, cursor, snapshot, feed-scope validation, and classification                             | Owning feature                                                               |
+| Product grant, delegation, revocation, and authorization decision                                            | Configured product authority provider; feature-owned ports consume decisions |
+| AR host availability when locally managed                                                                    | Local Supervisor                                                             |
+| Runtime sessions, AR execution identity and custody, provider processes, sandbox, and permission enforcement | Agent Runtime                                                                |
+| User defaults for target and scope                                                                           | Client Profile                                                               |
+| Execution Directory registration, allocation, and materialization cleanup                                                       | Workspace Registry                                                           |
+| Execution Directory registration, allocation identity, and materialization cleanup | Workspace Registry |
 
 Sharing a low-level process or connection does not transfer semantic ownership.
 
@@ -283,7 +285,10 @@ OD-001 and OD-021.
 
 ## Target, profile, and workspace
 
-`Target`, `Client Profile`, and `Workspace` are independent:
+`Target`, `Client Profile`, Execution Directory, and frontend Workspace are
+independent. [ADR-0111](../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+selects Execution Directory for the technical filesystem resource and retains
+Workspace for the UI:
 
 ```text
 Client Profile
@@ -293,14 +298,23 @@ Client Profile
 Target
   -> identifies deployment endpoint and trust configuration
 
-Workspace
-  -> domain resource inside a project
+Execution Directory
+  -> project-scoped technical filesystem resource with opaque identity
   -> never controls deployment endpoint or credentials
+
+Workspace
+  -> frontend navigation or saved view over authorized scope
+  -> creates no additional permission owner or Project identity boundary
 ```
 
+Execution Directories include shared, cloned, snapshot, and remote filesystem
+views. Existing `WorkspaceRegistration` and `ExecutionWorkspaceAllocation` model
+names remain unchanged; exact public API spelling and any migration remain open
+under OD-019. The selected term changes no runtime or cleanup ownership.
+
 A local Host identity is scoped by installation and data ownership, not by the
-current directory, project, workspace, terminal, or client process. Multiple
-profiles may reference the same target.
+current directory, Project, Execution Directory, Workspace, terminal, or client
+process. Multiple profiles may reference the same target.
 
 Project-controlled files cannot replace target endpoints, lower trust, select
 credentials, or trigger installation. This prevents opening an untrusted
@@ -425,15 +439,15 @@ platform tuple must pass the applicable rows below. Windows and macOS require
 their own installed-package evidence; Linux launcher experiments and unrelated
 Local Host Control CI do not qualify PostgreSQL on those platforms.
 
-| Released capability | Required evidence | Qualification owner |
-|---|---|---|
-| Installation and offline use | Actual installable package, enforced executable/helper/native-library digests, relocatable layout, safe extraction, signing and macOS notarization, and typed rejection when OS quarantine or security software blocks launch. First start and persistent reopen require no engine download; recording hashes alone is not verification | OD-021 |
-| Bootstrap and authenticated readiness | New private root only; credential-file permissions and Windows ACLs, removal after success/failure/crash, protected endpoint, collision and foreign-cluster rejection, authenticated SQL identity, actual version, and effective durability settings before Host readiness | OD-021 and OD-003 |
-| Lifecycle and process custody | Concurrent ensure, losing-contender cleanup, stale control generations, spawn failure, startup hang, already-exited children, wrapper/global exit hooks and truthful exit outcomes, bounded graceful shutdown on each platform, classified unclean termination, and Supervisor death with a surviving database process without a second owner | OD-021 |
-| Application/Host and schema updates | Separate transition records, declared compatibility, no live-schema migration during candidate health checks, drain and fencing of old clients/dispatchers, interruption at each supported stage, and rollback only against compatible current data without losing later accepted writes | OD-021 and OD-003 |
-| Engine minor and major upgrades | Exact source/target payload and extension/collation/configuration compatibility; engine changes separate from app or wrapper version changes; recovery after interrupted supported transitions; verified backup and explicit irreversible boundary for incompatible changes; rejection of unsupported paths | OD-021 and OD-003 |
-| Backup and restore | Create the selected backup artifact and restore it into a clean isolated root. Validate manifests, integrity, required context schemas and migration checksums, receipts/outbox, blobs, and key access. Reject corrupt, incomplete, or incompatible sets; validate before activation and fence dispatch until fresh authority and reconciliation | OD-003 and owning persistence/context adapters |
-| Failure and controlled recovery | Interrupted initialization, update, and restore; disk exhaustion, damaged or unavailable files, and actionable degraded outcomes without deleting or reinitializing existing data. Test the supported recovery procedure; process-kill evidence does not replace power-loss or filesystem durability evidence | OD-021 and OD-003 |
+| Released capability                   | Required evidence                                                                                                                                                                                                                                                                                                                                | Qualification owner                            |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| Installation and offline use          | Actual installable package, enforced executable/helper/native-library digests, relocatable layout, safe extraction, signing and macOS notarization, and typed rejection when OS quarantine or security software blocks launch. First start and persistent reopen require no engine download; recording hashes alone is not verification          | OD-021                                         |
+| Bootstrap and authenticated readiness | New private root only; credential-file permissions and Windows ACLs, removal after success/failure/crash, protected endpoint, collision and foreign-cluster rejection, authenticated SQL identity, actual version, and effective durability settings before Host readiness                                                                       | OD-021 and OD-003                              |
+| Lifecycle and process custody         | Concurrent ensure, losing-contender cleanup, stale control generations, spawn failure, startup hang, already-exited children, wrapper/global exit hooks and truthful exit outcomes, bounded graceful shutdown on each platform, classified unclean termination, and Supervisor death with a surviving database process without a second owner    | OD-021                                         |
+| Application/Host and schema updates   | Separate transition records, declared compatibility, no live-schema migration during candidate health checks, drain and fencing of old clients/dispatchers, interruption at each supported stage, and rollback only against compatible current data without losing later accepted writes                                                         | OD-021 and OD-003                              |
+| Engine minor and major upgrades       | Exact source/target payload and extension/collation/configuration compatibility; engine changes separate from app or wrapper version changes; recovery after interrupted supported transitions; verified backup and explicit irreversible boundary for incompatible changes; rejection of unsupported paths                                      | OD-021 and OD-003                              |
+| Backup and restore                    | Create the selected backup artifact and restore it into a clean isolated root. Validate manifests, integrity, required context schemas and migration checksums, receipts/outbox, blobs, and key access. Reject corrupt, incomplete, or incompatible sets; validate before activation and fence dispatch until fresh authority and reconciliation | OD-003 and owning persistence/context adapters |
+| Failure and controlled recovery       | Interrupted initialization, update, and restore; disk exhaustion, damaged or unavailable files, and actionable degraded outcomes without deleting or reinitializing existing data. Test the supported recovery procedure; process-kill evidence does not replace power-loss or filesystem durability evidence                                    | OD-021 and OD-003                              |
 
 These are release requirements for the corresponding platform and capability,
 not completed qualification or a newly implemented CI checker. OD-039 and the
@@ -502,7 +516,7 @@ A staged Host activation follows this visibility protocol:
 9. keep the previous Host alive but mutation-fenced for a bounded
    stabilization/rollback window;
 10. drain remaining transport work and stop the previous Host only after the
-   selected candidate remains healthy;
+    selected candidate remains healthy;
 11. commit activation state, remove pending state durably, and reconcile with AR
     and JetStream before full readiness.
 

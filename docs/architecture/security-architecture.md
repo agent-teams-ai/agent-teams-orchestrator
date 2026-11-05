@@ -40,14 +40,14 @@ This document owns cross-system security boundaries and deterministic security
 fitness rules. It does not create a Security bounded context and does not absorb
 business authorization, runtime enforcement, secret storage, or feature policy.
 
-| Concern | Authority |
-|---|---|
-| Product identity, membership, and grant facts | Configured product authority provider |
-| Operation-specific business policy | Owning bounded context |
-| Authorization-consumption semantics | Feature-owned application port |
-| Runtime permission, sandbox, and capability enforcement | `ar` |
-| Raw secret storage and retrieval | Composed secret-store adapter |
-| Cross-system classification and trust-boundary rules | This architecture standard |
+| Concern                                                 | Authority                             |
+| ------------------------------------------------------- | ------------------------------------- |
+| Product identity, membership, and grant facts           | Configured product authority provider |
+| Operation-specific business policy                      | Owning bounded context                |
+| Authorization-consumption semantics                     | Feature-owned application port        |
+| Runtime permission, sandbox, and capability enforcement | `ar`                                  |
+| Raw secret storage and retrieval                        | Composed secret-store adapter         |
+| Cross-system classification and trust-boundary rules    | This architecture standard            |
 
 The configured product authority provider answers product authorization
 questions. In managed composition this can be the Platform authority; standalone
@@ -166,12 +166,12 @@ Each asset declares:
 
 ### Classification
 
-| Value | Meaning |
-|---|---|
-| `public` | Intentionally safe for unrestricted disclosure |
-| `internal` | Non-public operational or product data without protected payload |
-| `sensitive` | Tenant, project, user, provider, or operational data requiring scoped access |
-| `secret` | Raw credential or secret material confined to a secret adapter |
+| Value                | Meaning                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| `public`             | Intentionally safe for unrestricted disclosure                                              |
+| `internal`           | Non-public operational or product data without protected payload                            |
+| `sensitive`          | Tenant, project, user, provider, or operational data requiring scoped access                |
+| `secret`             | Raw credential or secret material confined to a secret adapter                              |
 | `authority-evidence` | Restricted evidence of a decision or authority check; never the authority credential itself |
 
 `SecretRef` is an opaque reference and is not raw secret material. A public

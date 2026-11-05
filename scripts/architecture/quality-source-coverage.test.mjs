@@ -9,13 +9,17 @@ import { parse } from "yaml";
 import { checkQualityTopology, QUALITY_TOPOLOGY_PATH } from "./validate-quality-topology.mjs";
 
 const repositoryRoot = fileURLToPath(new URL("../../", import.meta.url));
-const foundationRoot = dirname(fileURLToPath(import.meta.resolve("@agent-teams/engineering-foundation/package.json")));
+const foundationRoot = dirname(
+  fileURLToPath(import.meta.resolve("@agent-teams/engineering-foundation/package.json")),
+);
 const foundation = JSON.parse(await readFile(join(foundationRoot, "package.json"), "utf8"));
 const cli = join(foundationRoot, foundation.bin["agent-teams-foundation"]);
 const profilePath = "architecture/foundation/quality-source-coverage.yaml";
 const moduleRoot = "packages/platform/local-host-control";
 const admittedRoots = ["packages/contexts/agent-context", "packages/platform/local-host-control"];
-const ceiling = (max) => ({ "max-lines": ["error", { max, skipBlankLines: true, skipComments: true }] });
+const ceiling = (max) => ({
+  "max-lines": ["error", { max, skipBlankLines: true, skipComments: true }],
+});
 
 async function readJson(root, name) {
   return JSON.parse(await readFile(join(root, name), "utf8"));
@@ -33,17 +37,27 @@ async function fixture(action) {
     await mkdir(join(root, "tooling"));
     const topology = await readJson(repositoryRoot, QUALITY_TOPOLOGY_PATH);
     for (const name of [
-      "package.json", "pnpm-workspace.yaml", "foundation.config.yaml",
-      "architecture/feature-module-standard-profile.json", "architecture/package-catalog.yaml",
-      profilePath, QUALITY_TOPOLOGY_PATH,
+      "package.json",
+      "pnpm-workspace.yaml",
+      "foundation.config.yaml",
+      "architecture/feature-module-standard-profile.json",
+      "architecture/package-catalog.yaml",
+      profilePath,
+      QUALITY_TOPOLOGY_PATH,
       "architecture/foundation/source-dependencies.yaml",
       "architecture/foundation/suppression-governance.yaml",
-      ".oxlintrc.base.json", ".oxlintrc.common.json", ".oxlintrc.type-aware.json",
+      ".oxlintrc.base.json",
+      ".oxlintrc.common.json",
+      ".oxlintrc.type-aware.json",
       ...topology.modules.flatMap(({ root: packageRoot }) =>
-        ["src", "tests", "package.json", "tsconfig.json"].map((leaf) => `${packageRoot}/${leaf}`)),
+        ["src", "tests", "package.json", "tsconfig.json"].map((leaf) => `${packageRoot}/${leaf}`),
+      ),
     ]) {
       await mkdir(join(root, dirname(name)), { recursive: true });
-      await cp(join(repositoryRoot, name), join(root, name), { recursive: true, filter: (source) => !source.split(/[\\/]/u).includes("node_modules") });
+      await cp(join(repositoryRoot, name), join(root, name), {
+        recursive: true,
+        filter: (source) => !source.split(/[\\/]/u).includes("node_modules"),
+      });
     }
     const presets = "node_modules/@agent-teams/engineering-foundation/presets";
     await mkdir(join(root, dirname(presets)), { recursive: true });
@@ -55,8 +69,11 @@ async function fixture(action) {
 }
 
 function inspect(root) {
-  const result = spawnSync(process.execPath, [cli, "check", "quality.source-coverage",
-    "--consumer", root, "--json"], { encoding: "utf8", timeout: 60_000 });
+  const result = spawnSync(
+    process.execPath,
+    [cli, "check", "quality.source-coverage", "--consumer", root, "--json"],
+    { encoding: "utf8", timeout: 60_000 },
+  );
   assert.equal(result.error, undefined, result.stderr);
   return { status: result.status, report: JSON.parse(result.stdout) };
 }
@@ -70,15 +87,27 @@ test("active coverage binds exact tools, authority, scope and a single full type
   assert.equal(profile.schemaVersion, 1);
   assert.equal(profile.featureProfilePath, QUALITY_TOPOLOGY_PATH);
   assert.equal(profile.lintConfigPath, ".oxlintrc.type-aware.json");
-  assert.deepEqual(profile.compilerProjects.toSorted(), admittedRoots.map((root) => `${root}/tsconfig.json`).toSorted());
+  assert.deepEqual(
+    profile.compilerProjects.toSorted(),
+    admittedRoots.map((root) => `${root}/tsconfig.json`).toSorted(),
+  );
   const pkg = await readJson(repositoryRoot, "package.json");
-  assert.equal(pkg.scripts["quality:coverage:scope"], "agent-teams-foundation quality check --consumer . --scope-only");
+  assert.equal(
+    pkg.scripts["quality:coverage:scope"],
+    "agent-teams-foundation quality check --consumer . --scope-only",
+  );
   assert.equal(pkg.scripts["lint:typed"], "agent-teams-foundation quality check --consumer .");
-  assert.equal(pkg.scripts.lint, "pnpm run lint:fast && pnpm run lint:typed && pnpm run lint:suppressions && pnpm run lint:test");
+  assert.equal(
+    pkg.scripts.lint,
+    "pnpm run lint:fast && pnpm run lint:typed && pnpm run lint:suppressions && pnpm run lint:test",
+  );
   assert.equal(pkg.scripts["lint:type-aware:files"], "node scripts/lint/run-type-aware.mjs");
   assert.equal(pkg.scripts["lint:type-aware"], "pnpm run lint:typed");
   assert.deepEqual(profile.scripts, {
-    fast: "check:fast", full: "check", scope: "quality:coverage:scope", typed: "lint:typed",
+    fast: "check:fast",
+    full: "check",
+    scope: "quality:coverage:scope",
+    typed: "lint:typed",
   });
   for (const name of [".oxlintrc.json", ".oxlintrc.type-aware.json"]) {
     const lint = await readJson(repositoryRoot, name);
@@ -104,16 +133,22 @@ test("published coverage accepts the real consumer profile", async () => {
     // from common's independent global TypeScript selector.
     const fixtureCommon = await readJson(root, ".oxlintrc.common.json");
     const typescriptRules = fixtureCommon.overrides.find((entry) =>
-      entry.files.includes("**/*.{ts,tsx,mts,cts}"));
+      entry.files.includes("**/*.{ts,tsx,mts,cts}"),
+    );
     assert.ok(typescriptRules);
     typescriptRules.files = [...typed.overrides[1].files];
     await writeJson(root, ".oxlintrc.common.json", fixtureCommon);
     // Recreate the pre-remediation test-selector closure without weakening assertions.
-    await writeJson(root, ".oxlintrc.type-aware.json", { ...typed,
-      extends: ["./.oxlintrc.common.json", ...typed.extends.slice(1)] });
+    await writeJson(root, ".oxlintrc.type-aware.json", {
+      ...typed,
+      extends: ["./.oxlintrc.common.json", ...typed.extends.slice(1)],
+    });
     assert.equal(inspect(root).status, 0, "pre-remediation disposable baseline must pass");
     await mkdir(join(root, "scripts/architecture"), { recursive: true });
-    await writeFile(join(root, "scripts/architecture/benign.test.mjs"), "export const benign = true;\n");
+    await writeFile(
+      join(root, "scripts/architecture/benign.test.mjs"),
+      "export const benign = true;\n",
+    );
     let rejected = inspect(root);
     assert.equal(rejected.status, 2, JSON.stringify(rejected.report));
     assert.equal(rejected.report.capabilities[0].problem.code, "QUALITY_PROFILE_INVALID");
@@ -163,21 +198,36 @@ test("published typed closure rejects unclassified selectors and weaker protecti
       assert.equal(result.status, status, `${label}: ${JSON.stringify(result.report)}`);
       assert.equal(result.report.outcome, ["passed", "violations", "invalid-input"][status]);
       if (label === "path alias") {
-        const diagnostics = result.report.capabilities.flatMap((capability) => capability.diagnostics ?? []);
-        const ceilingViolation = diagnostics.find((diagnostic) =>
-          diagnostic.ruleId === "quality.source-coverage.protected-setting"
-          && diagnostic.subject === "max-lines:ceiling");
-        assert.ok(ceilingViolation, "Canonical production aliases must retain their protected ceiling");
-        assert.ok(ceilingViolation.evidence.some(({ kind, value }) => kind === "expected" && value === "500"));
-        assert.ok(ceilingViolation.evidence.some(({ kind, value }) => kind === "actual" && value === "800"));
+        const diagnostics = result.report.capabilities.flatMap(
+          (capability) => capability.diagnostics ?? [],
+        );
+        const ceilingViolation = diagnostics.find(
+          (diagnostic) =>
+            diagnostic.ruleId === "quality.source-coverage.protected-setting" &&
+            diagnostic.subject === "max-lines:ceiling",
+        );
+        assert.ok(
+          ceilingViolation,
+          "Canonical production aliases must retain their protected ceiling",
+        );
+        assert.ok(
+          ceilingViolation.evidence.some(
+            ({ kind, value }) => kind === "expected" && value === "500",
+          ),
+        );
+        assert.ok(
+          ceilingViolation.evidence.some(({ kind, value }) => kind === "actual" && value === "800"),
+        );
       }
     });
   }
   await fixture(async (root) => {
     const typed = await readJson(root, ".oxlintrc.type-aware.json");
     assert.equal(inspect(root).status, 0, "rule-alias baseline");
-    await writeJson(root, ".oxlintrc.type-aware.json", { ...typed, overrides: [...typed.overrides,
-      { files: [tests], rules: { "eslint/max-lines": "off" } }] });
+    await writeJson(root, ".oxlintrc.type-aware.json", {
+      ...typed,
+      overrides: [...typed.overrides, { files: [tests], rules: { "eslint/max-lines": "off" } }],
+    });
     const alias = inspect(root);
     assert.notEqual(alias.status, 0, JSON.stringify(alias.report));
     assert.ok(["violations", "invalid-input"].includes(alias.report.outcome));
@@ -197,8 +247,15 @@ test("published typed closure rejects unclassified selectors and weaker protecti
 test("published coverage rejects a test override that also selects unclassified tooling", async () => {
   await fixture(async (root) => {
     await mkdir(join(root, "scripts/architecture"), { recursive: true });
-    await writeFile(join(root, "scripts/architecture/benign.test.mjs"), "export const benign = true;\n");
-    assert.equal(inspect(root).status, 0, "excluded tooling must not invalidate the protected baseline");
+    await writeFile(
+      join(root, "scripts/architecture/benign.test.mjs"),
+      "export const benign = true;\n",
+    );
+    assert.equal(
+      inspect(root).status,
+      0,
+      "excluded tooling must not invalidate the protected baseline",
+    );
     const typed = await readJson(root, ".oxlintrc.type-aware.json");
     typed.overrides[0].files = ["**/*"];
     await writeJson(root, ".oxlintrc.type-aware.json", typed);
@@ -210,10 +267,18 @@ test("published coverage rejects a test override that also selects unclassified 
 
 test("projection rejects omission and source or standard drift", async () => {
   for (const mutate of [
-    (value) => { value.modules = []; },
-    (value) => { value.modules[0].sourceRoot = `${moduleRoot}/missing`; },
-    (value) => { value.standard.sha256 = "0".repeat(64); },
-    (value) => { value.standard.version = "v1.1"; },
+    (value) => {
+      value.modules = [];
+    },
+    (value) => {
+      value.modules[0].sourceRoot = `${moduleRoot}/missing`;
+    },
+    (value) => {
+      value.standard.sha256 = "0".repeat(64);
+    },
+    (value) => {
+      value.standard.version = "v1.1";
+    },
   ]) {
     await fixture(async (root) => {
       const topology = await readJson(root, QUALITY_TOPOLOGY_PATH);
@@ -241,7 +306,10 @@ test("flat reader projection remains bounded to the adopted v1.1 profile", async
       const changed = await readJson(root, authorityPath);
       changed.standard[key] = value;
       await writeJson(root, authorityPath, changed);
-      await assert.rejects(checkQualityTopology(root), /requires the exact accepted FMS v1\.1 authority/u);
+      await assert.rejects(
+        checkQualityTopology(root),
+        /requires the exact accepted FMS v1\.1 authority/u,
+      );
     });
   }
 });
@@ -251,13 +319,17 @@ test("flat reader projection rejects declared or materialized v1.1 constructs", 
     await fixture(async (root) => {
       const authorityPath = "architecture/feature-module-standard-profile.json";
       const authority = await readJson(root, authorityPath);
-      authority.adoption.constructs[name] = name === "activation" ? "active" : [{ feature: "parent/child" }];
+      authority.adoption.constructs[name] =
+        name === "activation" ? "active" : [{ feature: "parent/child" }];
       await writeJson(root, authorityPath, authority);
       await assert.rejects(checkQualityTopology(root), /must remain empty|remain blocked/u);
     });
   }
   for (const [source, expected] of [
-    ["features/host-discovery/features/child/application/execute.ts", /sub-feature materialization/u],
+    [
+      "features/host-discovery/features/child/application/execute.ts",
+      /sub-feature materialization/u,
+    ],
     ["features/host-discovery/composition/host-discovery.contracts.ts", /composition contracts/u],
     ["composition/host.contracts.ts", /composition contracts/u],
   ]) {
@@ -272,7 +344,10 @@ test("flat reader projection rejects declared or materialized v1.1 constructs", 
 
 test("published coverage rejects an unclassified new workspace package", async () => {
   await fixture(async (root) => {
-    await writeJson(root, "packages/unclassified/package.json", { name: "@fixture/unclassified", private: true });
+    await writeJson(root, "packages/unclassified/package.json", {
+      name: "@fixture/unclassified",
+      private: true,
+    });
     const result = inspect(root);
     assert.equal(result.status, 1, JSON.stringify(result.report));
     assert.match(JSON.stringify(result.report), /quality\.source-coverage\.source-package/u);
@@ -309,31 +384,50 @@ test("installed typed gate rejects an unknown assertion bridge by default", asyn
     for (const name of ["pnpm-lock.yaml", "tsconfig.json"]) {
       await cp(join(repositoryRoot, name), join(root, name));
     }
-    const store = spawnSync("pnpm", ["store", "path"],
-      { cwd: repositoryRoot, encoding: "utf8", timeout: 60_000 });
+    const store = spawnSync("pnpm", ["store", "path"], {
+      cwd: repositoryRoot,
+      encoding: "utf8",
+      timeout: 60_000,
+    });
     assert.equal(store.error, undefined, store.stderr);
     assert.equal(store.status, 0, `${store.stdout}${store.stderr}`);
     const storePath = store.stdout.trim();
     assert.ok(storePath, "The root install's effective pnpm store path must be nonempty.");
-    const installed = spawnSync("pnpm", ["install", "--frozen-lockfile", "--offline", "--store-dir",
-      storePath], { cwd: root, encoding: "utf8", timeout: 60_000 });
+    const installed = spawnSync(
+      "pnpm",
+      ["install", "--frozen-lockfile", "--offline", "--store-dir", storePath],
+      { cwd: root, encoding: "utf8", timeout: 60_000 },
+    );
     assert.equal(installed.error, undefined, installed.stderr);
     assert.equal(installed.status, 0, `${installed.stdout}${installed.stderr}`);
     const source = `${moduleRoot}/src/features/host-discovery/application/model/host-discovery.ts`;
     const original = await readFile(join(root, source), "utf8");
-    const runTyped = () => spawnSync(process.execPath, [cli, "quality", "check", "--consumer", root, "--json"],
-      { encoding: "utf8", timeout: 60_000 });
+    const runTyped = () =>
+      spawnSync(process.execPath, [cli, "quality", "check", "--consumer", root, "--json"], {
+        encoding: "utf8",
+        timeout: 60_000,
+      });
     const baseline = runTyped();
     assert.equal(baseline.error, undefined, baseline.stderr);
     assert.equal(baseline.status, 0, `${baseline.stdout}${baseline.stderr}`);
-    await writeFile(join(root, source), `${original}\nexport const unsafeBridge = ('unchecked' as unknown) as { value: string };\n`);
+    await writeFile(
+      join(root, source),
+      `${original}\nexport const unsafeBridge = ('unchecked' as unknown) as { value: string };\n`,
+    );
     const result = runTyped();
     assert.equal(result.error, undefined, result.stderr);
     assert.equal(result.status, 1, result.stdout);
     const report = JSON.parse(result.stdout);
-    assert.ok(report.capabilities[0].diagnostics.some(({ ruleId }) =>
-      ruleId === "quality.source-coverage.explicit-unknown"), JSON.stringify(report));
-    await writeFile(join(root, source), `${original}\nexport const safeBridge: { value: string } = { value: 'checked' };\n`);
+    assert.ok(
+      report.capabilities[0].diagnostics.some(
+        ({ ruleId }) => ruleId === "quality.source-coverage.explicit-unknown",
+      ),
+      JSON.stringify(report),
+    );
+    await writeFile(
+      join(root, source),
+      `${original}\nexport const safeBridge: { value: string } = { value: 'checked' };\n`,
+    );
     const corrected = runTyped();
     assert.equal(corrected.error, undefined, corrected.stderr);
     assert.equal(corrected.status, 0, `${corrected.stdout}${corrected.stderr}`);

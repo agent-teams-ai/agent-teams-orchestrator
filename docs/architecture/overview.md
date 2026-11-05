@@ -5,6 +5,8 @@ status: accepted
 owner: architecture
 summary: System-level architectural style, responsibilities, deployment profiles, and evolution model.
 related:
+  - ADR-0117
+  - ADR-0111
   - ADR-0001
   - ADR-0003
   - ADR-0030
@@ -21,11 +23,39 @@ related:
 
 # Architecture Overview
 
+## Branch integration status
+
+The 2026-10-28 reconciliation preserves the canonical ADR-0113 module baseline,
+ADR-0114 distributed backend and Dapr/Protobuf roles, and ADR-0115 Fully Local V1
+scope. [ADR-0117](../decisions/0117-reconcile-mandatory-module-composition.md)
+supersedes the parallel ADR-0110 composition pin while carrying its mandatory
+scope and bounded foundation requirements into the canonical baseline. No
+accepted decision body is rewritten, and no package or runtime qualification
+follows from this integration.
+
+[ADR-0111](../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+records the confirmed collaboration and terminology policy. The dated research
+retains its original baselines; earlier branch-status notes there are historical,
+not current instructions to restore a monolith, SQLite, or post-V1 local scope.
+
 ## Purpose
 
-Agent Teams Orchestrator is a headless control plane for coordinating teams of
-software agents. It owns product-level coordination and delegates agent execution
-to a provider-neutral runtime.
+Agent Teams Orchestrator is a headless control plane for coordinating people and
+AI agents through Teams and Tasks. It owns product-level coordination and
+delegates AI execution to a provider-neutral runtime. Human manual work does not
+require a runtime session or agent activation. Mixed participation is confirmed
+product direction; [OD-048](../open-decisions/OD-048-mixed-human-and-ai-team-participation.md)
+owns its remaining contracts and implementation admission.
+
+Standalone Self-Hosted and managed delivery share the orchestration core. The
+standalone product must support multiple organizations and independent human
+memberships without commercial Platform dependencies. The
+[deployment profiles](deployment-profiles.md) own qualification; the
+[companion Platform proposal in PR #55](https://github.com/agent-teams-ai/agent-teams-platform/blob/a4d47e1c27c3c1efc0e94f770fc9064b0bc17bfc/docs/architecture/platform-orchestrator-boundary.md)
+records the hosted relationship at its reviewed, unmerged revision. Platform
+does not implement another Task engine. The
+[coverage review](../research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
+links each confirmed requirement and unresolved choice to its owner.
 
 The architecture must support:
 
@@ -121,8 +151,11 @@ The orchestrator decides:
 - when to send, queue, retry, escalate, or complete work;
 - what desired runtime state should be requested.
 
-Workspace Registry owns execution-workspace allocation and materialization through
-replaceable worktree, clone, snapshot, or remote-workspace adapters.
+Workspace Registry owns Execution Directory registration, allocation,
+materialization, and cleanup through replaceable adapters for shared directories,
+worktrees, clones, snapshots, or remote filesystem views. [ADR-0111](../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+selects this technical term while preserving ADR-0062's model identities and
+separate runtime-isolation boundary.
 
 The runtime decides and enforces:
 
@@ -187,12 +220,17 @@ Client configuration distinguishes:
 
 - a `Target`, which identifies one concrete deployment and trust boundary;
 - a `Client Profile`, which selects a target and optional default scope;
-- a `Workspace`, which is a project-owned domain resource.
+- an Execution Directory, which is a project-scoped technical filesystem resource;
+- a frontend Workspace, which presents navigation or a saved view over the
+  selected Target and authorized Tenant/Project.
 
-Workspace or project configuration cannot redirect a client, choose credentials,
-or lower target trust. Durable work always survives client exit. Attached CLI
-work uses an explicit client-bound Run sponsorship whose clean exit or fenced
-expiry requests business cancellation without stopping shared infrastructure.
+Project, Workspace, or Execution Directory configuration cannot redirect a
+client, choose credentials, or lower target trust. Workspace adds no permission
+owner or Project identity boundary. Exact public resource spelling and any
+migration remain open under OD-019. Durable work always survives client exit.
+Attached CLI work uses an explicit client-bound Run sponsorship whose clean exit
+or fenced expiry requests business cancellation without stopping shared
+infrastructure.
 
 ## Persistence model
 
@@ -224,8 +262,10 @@ a bundled launcher or remove Fully Local implementation gates.
 ## Scope and access
 
 Every team, task, orchestration run, message, and runtime binding belongs to one
-project. Workspace registrations belong to Workspace Registry and are referenced
-by opaque workspace identities rather than arbitrary paths.
+project. Execution Directory registrations and allocations belong to Workspace
+Registry and use opaque identities rather than arbitrary paths. The existing
+`WorkspaceRegistration` and `ExecutionWorkspaceAllocation` model names remain
+unchanged by the terminology selection.
 
 Authentication may be delegated to an external identity provider. Inbound adapters
 authenticate and establish a principal. The configured product authority provider

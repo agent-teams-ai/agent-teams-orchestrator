@@ -4,18 +4,11 @@ import path from "node:path";
 import { exists } from "./package-catalog-lib.mjs";
 import { normalizedRootReference } from "./package-topology-exports.mjs";
 
-export async function validateRootTsconfig(
-  repositoryRoot,
-  byPath,
-  materializedPaths,
-  errors,
-) {
+export async function validateRootTsconfig(repositoryRoot, byPath, materializedPaths, errors) {
   const rootTsconfigPath = path.join(repositoryRoot, "tsconfig.json");
   if (!(await exists(rootTsconfigPath))) {
     if (materializedPaths.size > 0) {
-      errors.push(
-        "tsconfig.json: materialized packages require root project references",
-      );
+      errors.push("tsconfig.json: materialized packages require root project references");
     }
     return;
   }
@@ -34,10 +27,7 @@ export async function validateRootTsconfig(
           );
           continue;
         }
-        referenceCounts.set(
-          normalized,
-          (referenceCounts.get(normalized) ?? 0) + 1,
-        );
+        referenceCounts.set(normalized, (referenceCounts.get(normalized) ?? 0) + 1);
       }
     }
     for (const materializedPath of [...materializedPaths].toSorted()) {

@@ -66,6 +66,7 @@ ReviewRouter
 revisioned
 rollups
 RUNPATH
+SCIM
 Semble
 Sigstore
 SQLite
@@ -83,3 +84,5 @@ upcasters
 upcasting
 Vale
 worktree
+worktrees
+ZITADEL

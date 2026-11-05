@@ -3,13 +3,15 @@ id: OD-027
 type: open-decision
 status: open
 owner: work-coordination
-summary: Define configurable Work lifecycle, workflow versioning, migrations, and board projections.
+summary: Define configurable Work lifecycle, workflow versioning, migrations, and task-view projections.
 related:
   - ADR-0072
   - architecture.context-map
   - domain.contexts.work-coordination
   - OD-006
   - OD-015
+  - OD-019
+  - OD-048
 ---
 
 # OD-027: Configurable Work Lifecycle
@@ -22,7 +24,7 @@ runtime activity authoritative.
 
 The decision must cover workflow definition and binding, published-version
 identity, Task or Work pinning, transition guards and input validation,
-post-commit actions, migration, board projections, external mappings, and
+post-commit actions, migration, task-view projections, external mappings, and
 concurrent updates.
 
 ## Constraints
@@ -42,11 +44,17 @@ concurrent updates.
 
 ## Options
 
-1. Immutable published workflow revisions, deterministic bindings, declarative
-   typed rules, explicit controlled migration, and CQRS board projections.
-2. Mutable workflow definitions with stable state IDs and lazy reconciliation of
-   active Work.
-3. Event-source workflow definitions and every Work lifecycle.
+| Alternative | Confidence /10 | Complexity /10 | Reliability /10 | Estimated production TS LOC |
+|---|---|---|---|---|
+| Immutable published revisions, declarative typed rules, controlled migration, and task-view projections | 8 | 8 | 9 | 3,500–9,000 |
+| Mutable definitions, stable state IDs, and lazy reconciliation of active Work | 5 | 7 | 5 | 2,000–6,000 |
+| Event-source workflow definitions and every Work lifecycle | 4 | 9 | 7 | 7,000–16,000 |
+
+These planning judgments cover one bounded lifecycle publication, transition,
+binding, and migration implementation over existing persistence and authority
+ports. They exclude UI, tests, generated code, and a general automation platform;
+the unresolved semantic kernel and migration rules make the ranges uncertain.
+They are not measured capacity or reliability. This document changes no code.
 
 The decision must also compare a fixed phase/category enum with orthogonal,
 registered semantic traits. Fully arbitrary states without a small machine-readable
@@ -65,7 +73,7 @@ WorkflowAlias               stable | preview | current
 WorkflowBinding             scope and Work kind -> alias or exact revision
 WorkLifecycle               exact revision, state ID, and Work revision
 WorkflowMigrationPlan       source-to-target mappings and compatibility evidence
-BoardView                   saved query, grouping, and layout projection
+TaskView                    saved query, grouping, and layout projection
 ```
 
 An alias resolves to an exact revision when new Work is created. Existing Work
@@ -78,16 +86,24 @@ Active orchestration execution cannot migrate implicitly with Work. It remains
 pinned or first passes through quiesce, checkpoint, and replan. Exact rules for
 migration while an active Run exists remain open.
 
-Candidate binding precedence is deliberately small:
+`TaskView` is a candidate name for board, list, calendar, timeline, or review-queue
+layout over the same Work. A view owns query and presentation preferences, never
+Task lifecycle, assignment, or access grants. Human manual work and AI-assisted
+work use the same Work authority; OD-048 owns their remaining participation and
+assignment choices. No view or workflow requires an AR session for a human Task.
+
+Candidate binding precedence is deliberately small and remains unaccepted:
 
 ```text
-workspace default <- project override <- Work-kind override
+project default <- Work-kind override
 ```
 
-Ambiguous matches prevent publication. A team selector is not added until a real
-case proves that it does not create overlapping workspace, project, team, and kind
-precedence. Binding changes affect new Work; existing Work requires explicit
-rebind or migration.
+The earlier workspace-default draft is removed: frontend Workspace navigation
+and technical execution materialization are not defined policy scopes. OD-019
+must resolve any additional scope before it enters binding precedence. Ambiguous
+matches prevent publication. A Team selector needs a concrete non-overlapping
+policy. Binding changes affect new Work; existing Work requires explicit rebind
+or migration. A binding selects lifecycle semantics, not permission authority.
 
 ## State semantics under evaluation
 

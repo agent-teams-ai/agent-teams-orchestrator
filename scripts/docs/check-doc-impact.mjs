@@ -100,11 +100,7 @@ function run(command, arguments_, cwd) {
       if (code === 0) {
         resolve(stdout);
       } else {
-        reject(
-          new Error(
-            stderr.trim() || `${command} exited with status ${String(code)}`,
-          ),
-        );
+        reject(new Error(stderr.trim() || `${command} exited with status ${String(code)}`));
       }
     });
   });
@@ -122,10 +118,7 @@ function normalizeChangedPath(repositoryRoot, value) {
     ? path.resolve(value)
     : path.resolve(repositoryRoot, value);
   const repositoryPath = path.relative(repositoryRoot, absolute);
-  if (
-    repositoryPath === ".." ||
-    repositoryPath.startsWith(`..${path.sep}`)
-  ) {
+  if (repositoryPath === ".." || repositoryPath.startsWith(`..${path.sep}`)) {
     throw new Error(`changed path escapes repository root: ${value}`);
   }
   return normalizeRepositoryPath(repositoryPath);
@@ -142,37 +135,21 @@ async function discoverChangedPaths(options) {
     return splitPaths(
       await run(
         "git",
-        [
-          "diff",
-          "--name-only",
-          "--diff-filter=ACMRTUXB",
-          `${options.base}...HEAD`,
-        ],
+        ["diff", "--name-only", "--diff-filter=ACMRTUXB", `${options.base}...HEAD`],
         options.repositoryRoot,
       ),
     ).map(normalizeRepositoryPath);
   }
 
   const [tracked, untracked] = await Promise.all([
-    run(
-      "git",
-      ["diff", "--name-only", "--diff-filter=ACMRTUXB", "HEAD"],
-      options.repositoryRoot,
-    ),
-    run(
-      "git",
-      ["ls-files", "--others", "--exclude-standard"],
-      options.repositoryRoot,
-    ),
+    run("git", ["diff", "--name-only", "--diff-filter=ACMRTUXB", "HEAD"], options.repositoryRoot),
+    run("git", ["ls-files", "--others", "--exclude-standard"], options.repositoryRoot),
   ]);
-  return [...splitPaths(tracked), ...splitPaths(untracked)].map(
-    normalizeRepositoryPath,
-  );
+  return [...splitPaths(tracked), ...splitPaths(untracked)].map(normalizeRepositoryPath);
 }
 
 async function loadAnchoredDocuments(repositoryRoot) {
-  const { governedMarkdownFiles } =
-    await discoverGovernedMarkdown(repositoryRoot);
+  const { governedMarkdownFiles } = await discoverGovernedMarkdown(repositoryRoot);
   const documents = [];
 
   for (const filePath of governedMarkdownFiles) {
@@ -218,9 +195,7 @@ function calculateImpacts(documents, changedPaths) {
 
     impacts.push({
       documentChanged: changed.has(document.path),
-      enforcement: matchedAnchors.some(
-        (anchor) => anchor.enforcement === "required",
-      )
+      enforcement: matchedAnchors.some((anchor) => anchor.enforcement === "required")
         ? "required"
         : "advisory",
       id: document.id,
@@ -248,9 +223,7 @@ async function main() {
   }
 
   try {
-    const changedPaths = [
-      ...new Set(await discoverChangedPaths(options)),
-    ].toSorted();
+    const changedPaths = [...new Set(await discoverChangedPaths(options))].toSorted();
     const documents = await loadAnchoredDocuments(options.repositoryRoot);
     const impacts = calculateImpacts(documents, changedPaths);
     const missingRequired = impacts.filter(
@@ -265,9 +238,7 @@ async function main() {
     } else {
       for (const impact of impacts) {
         const matchedPaths = [
-          ...new Set(
-            impact.matchedAnchors.flatMap((anchor) => anchor.matchedPaths),
-          ),
+          ...new Set(impact.matchedAnchors.flatMap((anchor) => anchor.matchedPaths)),
         ].toSorted();
         console.log(
           `${impact.enforcement.toUpperCase()} ${impact.id} ${impact.path} <- ${matchedPaths.join(", ")}${impact.documentChanged ? " (document updated)" : ""}`,

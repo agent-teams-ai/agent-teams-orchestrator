@@ -214,6 +214,30 @@ authoring:
         pathPrefix: before-required-segments
         indexBasename: README.md
 
+    - type: research
+      initialStatus: active
+      ownerSetId: registered-owners
+      identity:
+        kind: explicit
+        format: qualified
+        grammar:
+          prefixSegments:
+            - research
+          minSuffixSegments: 1
+          maxSuffixSegments: 1
+      placement:
+        kind: collection
+        directory: docs/research
+        filename: slug
+      template:
+        kind: fenced-markdown-body
+        path: docs/templates/research.md
+      heading:
+        kind: title
+      reachability:
+        kind: manual-fixed-index
+        indexPath: docs/research/README.md
+
     - type: runbook
       initialStatus: active
       ownerSetId: registered-owners

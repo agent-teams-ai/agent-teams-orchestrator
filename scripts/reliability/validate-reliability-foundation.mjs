@@ -52,11 +52,9 @@ async function readYaml(filePath) {
   return YAML.parse(await readFile(filePath, "utf8"));
 }
 
-
 function schemaErrors(validate) {
   return (validate.errors ?? []).map(
-    (error) =>
-      `REL-SCHEMA-001 ${error.instancePath || "/"} ${error.message ?? "is invalid"}`,
+    (error) => `REL-SCHEMA-001 ${error.instancePath || "/"} ${error.message ?? "is invalid"}`,
   );
 }
 
@@ -67,9 +65,7 @@ function addUniqueIds(items, kind, ids, errors) {
     }
     ids.add(item.id);
     if (!item.id.startsWith("orchestrator.")) {
-      errors.push(
-        `REL-ID-002 ${item.id}: ${kind} id must use the orchestrator namespace`,
-      );
+      errors.push(`REL-ID-002 ${item.id}: ${kind} id must use the orchestrator namespace`);
     }
   }
 }
@@ -90,16 +86,12 @@ function validateAttributes(
   let combinations = 1;
   for (const attribute of allowedAttributes ?? []) {
     if (prohibitedAttributes.has(attribute)) {
-      errors.push(
-        `REL-CARDINALITY-001 ${subject}: prohibited metric attribute ${attribute}`,
-      );
+      errors.push(`REL-CARDINALITY-001 ${subject}: prohibited metric attribute ${attribute}`);
       continue;
     }
     const registered = attributeById.get(attribute);
     if (!registered) {
-      errors.push(
-        `REL-CARDINALITY-002 ${subject}: unregistered metric attribute ${attribute}`,
-      );
+      errors.push(`REL-CARDINALITY-002 ${subject}: unregistered metric attribute ${attribute}`);
       continue;
     }
     combinations *= registered.maxDistinct;
@@ -115,14 +107,10 @@ function validateAttributes(
 function validateObjective(item, errors) {
   const objectiveStatuses = new Set(["active", "aspirational"]);
   if (objectiveStatuses.has(item.status) && !item.objective) {
-    errors.push(
-      `REL-SLO-001 ${item.id}: ${item.status} indicator requires an approved objective`,
-    );
+    errors.push(`REL-SLO-001 ${item.id}: ${item.status} indicator requires an approved objective`);
   }
   if (!objectiveStatuses.has(item.status) && item.objective) {
-    errors.push(
-      `REL-SLO-002 ${item.id}: ${item.status} indicator cannot publish an objective`,
-    );
+    errors.push(`REL-SLO-002 ${item.id}: ${item.status} indicator cannot publish an objective`);
   }
   if (item.objective) {
     const target = Number(item.objective.targetRatio);
@@ -131,28 +119,19 @@ function validateObjective(item, errors) {
         `REL-SLO-003 ${item.id}: target ratio must be greater than zero and lower than one`,
       );
     }
-    if (
-      Date.parse(item.objective.reviewAfter) <=
-      Date.parse(item.objective.approvedAt)
-    ) {
-      errors.push(
-        `REL-SLO-004 ${item.id}: review date must follow approval date`,
-      );
+    if (Date.parse(item.objective.reviewAfter) <= Date.parse(item.objective.approvedAt)) {
+      errors.push(`REL-SLO-004 ${item.id}: review date must follow approval date`);
     }
   }
 }
 
 function buildAttributeRegistry(catalog, errors) {
-  const prohibitedAttributes = new Set(
-    catalog.prohibitedMetricAttributes ?? [],
-  );
+  const prohibitedAttributes = new Set(catalog.prohibitedMetricAttributes ?? []);
   const attributeById = new Map();
 
   for (const attribute of catalog.metricAttributes ?? []) {
     if (attributeById.has(attribute.id)) {
-      errors.push(
-        `REL-CARDINALITY-004 ${attribute.id}: duplicate metric attribute`,
-      );
+      errors.push(`REL-CARDINALITY-004 ${attribute.id}: duplicate metric attribute`);
     }
     attributeById.set(attribute.id, attribute);
     if (prohibitedAttributes.has(attribute.id)) {
@@ -190,24 +169,12 @@ function validateOwnedItems(catalog, ownerIds, errors) {
   }
 }
 
-function validateMetricSubjects(
-  catalog,
-  attributeById,
-  prohibitedAttributes,
-  errors,
-) {
-  const profileIds = new Set(
-    (catalog.profiles ?? []).map((profile) => profile.id),
-  );
-  for (const item of [
-    ...(catalog.indicators ?? []),
-    ...(catalog.resourceBudgets ?? []),
-  ]) {
+function validateMetricSubjects(catalog, attributeById, prohibitedAttributes, errors) {
+  const profileIds = new Set((catalog.profiles ?? []).map((profile) => profile.id));
+  for (const item of [...(catalog.indicators ?? []), ...(catalog.resourceBudgets ?? [])]) {
     for (const profile of item.profiles ?? []) {
       if (!profileIds.has(profile)) {
-        errors.push(
-          `REL-PROFILE-001 ${item.id}: unknown deployment profile ${profile}`,
-        );
+        errors.push(`REL-PROFILE-001 ${item.id}: unknown deployment profile ${profile}`);
       }
     }
     validateAttributes(
@@ -229,9 +196,7 @@ function validateIndicatorPolicies(catalog, errors) {
 function validateResourceBudgetPolicies(catalog, errors) {
   for (const budget of catalog.resourceBudgets ?? []) {
     if (budget.status === "active" && budget.limit === undefined) {
-      errors.push(
-        `REL-BUDGET-001 ${budget.id}: active resource budget requires a limit`,
-      );
+      errors.push(`REL-BUDGET-001 ${budget.id}: active resource budget requires a limit`);
     }
     if (budget.status !== "active" && budget.limit !== undefined) {
       errors.push(
@@ -244,18 +209,10 @@ function validateResourceBudgetPolicies(catalog, errors) {
 export function validateReliabilitySemantics(catalog, ownerIds) {
   const errors = [];
   validateQualificationSemantics(catalog, errors);
-  const { attributeById, prohibitedAttributes } = buildAttributeRegistry(
-    catalog,
-    errors,
-  );
+  const { attributeById, prohibitedAttributes } = buildAttributeRegistry(catalog, errors);
 
   validateOwnedItems(catalog, ownerIds, errors);
-  validateMetricSubjects(
-    catalog,
-    attributeById,
-    prohibitedAttributes,
-    errors,
-  );
+  validateMetricSubjects(catalog, attributeById, prohibitedAttributes, errors);
   validateIndicatorPolicies(catalog, errors);
   validateResourceBudgetPolicies(catalog, errors);
 
@@ -264,16 +221,10 @@ export function validateReliabilitySemantics(catalog, ownerIds) {
 
 export async function validateReliabilityFoundation(repositoryRoot) {
   const schema = await readJson(
-    path.join(
-      repositoryRoot,
-      "architecture/reliability/reliability-catalog.schema.json",
-    ),
+    path.join(repositoryRoot, "architecture/reliability/reliability-catalog.schema.json"),
   );
   const catalog = await readYaml(
-    path.join(
-      repositoryRoot,
-      "architecture/reliability/reliability-catalog.yaml",
-    ),
+    path.join(repositoryRoot, "architecture/reliability/reliability-catalog.yaml"),
   );
   const owners = await readYaml(path.join(repositoryRoot, "docs/owners.yaml"));
 
@@ -291,15 +242,8 @@ export async function validateReliabilityFoundation(repositoryRoot) {
       errors: errors.toSorted(),
     };
   }
-  errors.push(
-    ...validateReliabilitySemantics(
-      catalog,
-      new Set(Object.keys(owners.owners ?? {})),
-    ),
-  );
-  errors.push(
-    ...(await validateQualificationReferences(catalog, repositoryRoot)),
-  );
+  errors.push(...validateReliabilitySemantics(catalog, new Set(Object.keys(owners.owners ?? {}))));
+  errors.push(...(await validateQualificationReferences(catalog, repositoryRoot)));
 
   return {
     catalog,

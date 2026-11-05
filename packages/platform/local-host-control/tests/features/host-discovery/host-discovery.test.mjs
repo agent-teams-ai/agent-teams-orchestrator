@@ -30,10 +30,7 @@ function observation(overrides = {}) {
     },
     hostBootGeneration: hostBootGeneration(7n),
     hostInstanceId: hostInstanceId("host-instance-7"),
-    protocolRange: hostProtocolRange(
-      hostProtocolVersion(1n),
-      hostProtocolVersion(3n),
-    ),
+    protocolRange: hostProtocolRange(hostProtocolVersion(1n), hostProtocolVersion(3n)),
     supervisorInstanceId: supervisorInstanceId("supervisor-instance-2"),
     targetId: requestedTarget,
     ...overrides,
@@ -43,10 +40,7 @@ function observation(overrides = {}) {
 function query(overrides = {}) {
   return {
     requiredCapabilities: [requiredCapability],
-    supportedProtocolRange: hostProtocolRange(
-      hostProtocolVersion(2n),
-      hostProtocolVersion(4n),
-    ),
+    supportedProtocolRange: hostProtocolRange(hostProtocolVersion(2n), hostProtocolVersion(4n)),
     targetId: requestedTarget,
     ...overrides,
   };
@@ -91,16 +85,8 @@ test("returns one candidate without claiming readiness or authentication", async
 
 test("keeps not-found, stale, rejected, and unavailable distinct", async (context) => {
   const cases = [
-    [
-      { kind: "not-found", targetId: requestedTarget },
-      "not-found",
-      undefined,
-    ],
-    [
-      { kind: "stale", reason: "superseded", targetId: requestedTarget },
-      "stale",
-      "superseded",
-    ],
+    [{ kind: "not-found", targetId: requestedTarget }, "not-found", undefined],
+    [{ kind: "stale", reason: "superseded", targetId: requestedTarget }, "stale", "superseded"],
     [
       { kind: "rejected", reason: "unsafe-state", targetId: requestedTarget },
       "source-rejected",
@@ -191,10 +177,7 @@ test("reports protocol and capability incompatibility without a handle", async (
   const result = await fixture.discovery.discover(
     query({
       requiredCapabilities: [requiredCapability, missingCapability],
-      supportedProtocolRange: hostProtocolRange(
-        hostProtocolVersion(4n),
-        hostProtocolVersion(5n),
-      ),
+      supportedProtocolRange: hostProtocolRange(hostProtocolVersion(4n), hostProtocolVersion(5n)),
     }),
   );
 
@@ -281,11 +264,7 @@ test("validated constructors reject malformed exact values", () => {
   assert.throws(() => hostBootGeneration(-1n), TypeError);
   assert.throws(() => microseconds(-1n), TypeError);
   assert.throws(
-    () =>
-      hostProtocolRange(
-        hostProtocolVersion(2n),
-        hostProtocolVersion(1n),
-      ),
+    () => hostProtocolRange(hostProtocolVersion(2n), hostProtocolVersion(1n)),
     TypeError,
   );
 });
@@ -497,8 +476,7 @@ test("redacts dependency accessor failures during construction", () => {
   assert.throws(
     () => createHostDiscovery(dependencies),
     (error) =>
-      error instanceof TypeError &&
-      error.message === "Host discovery dependencies are invalid",
+      error instanceof TypeError && error.message === "Host discovery dependencies are invalid",
   );
 });
 
@@ -556,10 +534,7 @@ test("snapshots mutable policy and query before asynchronous source work", async
   });
   const mutableQuery = query({
     requiredCapabilities: [hostCapabilityId("missing.v1")],
-    supportedProtocolRange: hostProtocolRange(
-      hostProtocolVersion(4n),
-      hostProtocolVersion(5n),
-    ),
+    supportedProtocolRange: hostProtocolRange(hostProtocolVersion(4n), hostProtocolVersion(5n)),
   });
   const pendingResult = discovery.discover(mutableQuery);
 
@@ -638,9 +613,7 @@ test("rejects forged exact values outside signed and unsigned 64-bit bounds", as
       },
     }),
   });
-  const invalidObservation = await invalidObservationFixture.discovery.discover(
-    query(),
-  );
+  const invalidObservation = await invalidObservationFixture.discovery.discover(query());
   assert.equal(invalidObservation.kind, "rejected");
   assert.equal(invalidObservation.reason, "invalid-observation");
 
@@ -672,8 +645,7 @@ test("rejects forged exact values outside signed and unsigned 64-bit bounds", as
         },
       }),
     (error) =>
-      error instanceof TypeError &&
-      error.message === "Host discovery freshness policy is invalid",
+      error instanceof TypeError && error.message === "Host discovery freshness policy is invalid",
   );
 });
 

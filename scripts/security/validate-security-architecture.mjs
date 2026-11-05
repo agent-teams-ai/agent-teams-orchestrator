@@ -39,9 +39,7 @@ async function findSecurityManifests(repositoryRoot) {
       throw error;
     }
 
-    for (const entry of entries.toSorted((left, right) =>
-      left.name.localeCompare(right.name),
-    )) {
+    for (const entry of entries.toSorted((left, right) => left.name.localeCompare(right.name))) {
       const entryPath = path.join(directory, entry.name);
       if (entry.isDirectory()) {
         await walk(entryPath);
@@ -63,8 +61,7 @@ function sorted(values) {
 
 function schemaErrors(validate) {
   return (validate.errors ?? []).map(
-    (error) =>
-      `SEC-SCHEMA-001 ${error.instancePath || "/"} ${error.message ?? "is invalid"}`,
+    (error) => `SEC-SCHEMA-001 ${error.instancePath || "/"} ${error.message ?? "is invalid"}`,
   );
 }
 
@@ -98,10 +95,7 @@ export function validateClassificationSemantics(manifest) {
       );
     }
 
-    if (
-      asset.containsAuthorityEvidence !==
-      (asset.classification === "authority-evidence")
-    ) {
+    if (asset.containsAuthorityEvidence !== (asset.classification === "authority-evidence")) {
       errors.push(
         `SEC-DATA-004 ${asset.id}: authority-evidence classification and flag must agree`,
       );
@@ -110,9 +104,7 @@ export function validateClassificationSemantics(manifest) {
     if (
       asset.classification === "authority-evidence" &&
       (!["restricted", "prohibited"].includes(asset.exportPolicy) ||
-        !["authority-evidence", "metadata-only"].includes(
-          asset.redactionProfile,
-        ))
+        !["authority-evidence", "metadata-only"].includes(asset.redactionProfile))
     ) {
       errors.push(
         `SEC-DATA-005 ${asset.id}: authority evidence requires restricted export and dedicated redaction`,
@@ -131,14 +123,10 @@ export function validateClassificationSemantics(manifest) {
     }
 
     if (
-      ["sensitive", "secret", "authority-evidence"].includes(
-        asset.classification,
-      ) &&
+      ["sensitive", "secret", "authority-evidence"].includes(asset.classification) &&
       asset.redactionProfile === "none"
     ) {
-      errors.push(
-        `SEC-DATA-007 ${asset.id}: protected data cannot use the no-redaction profile`,
-      );
+      errors.push(`SEC-DATA-007 ${asset.id}: protected data cannot use the no-redaction profile`);
     }
   }
 
@@ -180,10 +168,7 @@ function evaluatePromptAuthorityConfusion(input) {
   if (executesControlCommand && input.sourceChannel !== "control-api") {
     ruleIds.push("SEC-AUTHORITY-001");
   }
-  if (
-    executesControlCommand &&
-    (!input.typedCommandEnvelope || !input.authenticatedAuthority)
-  ) {
+  if (executesControlCommand && (!input.typedCommandEnvelope || !input.authenticatedAuthority)) {
     ruleIds.push("SEC-AUTHORITY-002");
   }
   return ruleIds;
@@ -197,11 +182,7 @@ function evaluateSsrfEgressPolicy(input) {
   if (!["http", "https"].includes(input.scheme)) {
     ruleIds.push("SEC-EGRESS-002");
   }
-  if (
-    ["loopback", "link-local", "metadata-service"].includes(
-      input.destinationClass,
-    )
-  ) {
+  if (["loopback", "link-local", "metadata-service"].includes(input.destinationClass)) {
     ruleIds.push("SEC-EGRESS-003");
   }
   if (!input.policyAllowsDestination || !input.resolvedAddressesPinned) {
@@ -235,9 +216,7 @@ function evaluateCredentialLeakage(input) {
   }
   if (
     containsRawSecret &&
-    ["integration-event", "log", "public-contract", "telemetry"].includes(
-      input.location,
-    )
+    ["integration-event", "log", "public-contract", "telemetry"].includes(input.location)
   ) {
     ruleIds.push("SEC-SECRET-002");
   }
@@ -291,16 +270,10 @@ function validateThreatCoverage(allowedThreats, deniedThreats) {
   const errors = [];
   const requiredThreats = threatEvaluators.keys();
   for (const threat of requiredThreats) {
-    const hasAllowed = allowedThreats.some(
-      (scenario) => scenario.threat === threat,
-    );
-    const hasDenied = deniedThreats.some(
-      (scenario) => scenario.threat === threat,
-    );
+    const hasAllowed = allowedThreats.some((scenario) => scenario.threat === threat);
+    const hasDenied = deniedThreats.some((scenario) => scenario.threat === threat);
     if (!hasAllowed || !hasDenied) {
-      errors.push(
-        `SEC-FIXTURE-005 ${threat} requires both allow and deny fixtures`,
-      );
+      errors.push(`SEC-FIXTURE-005 ${threat} requires both allow and deny fixtures`);
     }
   }
   return errors;
@@ -308,10 +281,7 @@ function validateThreatCoverage(allowedThreats, deniedThreats) {
 
 export async function validateSecurityFoundation(repositoryRoot) {
   const securityRoot = path.join(repositoryRoot, "architecture/security");
-  const fixturesRoot = path.join(
-    repositoryRoot,
-    "scripts/security/fixtures",
-  );
+  const fixturesRoot = path.join(repositoryRoot, "scripts/security/fixtures");
   const [
     classificationSchema,
     threatSchema,
@@ -327,9 +297,7 @@ export async function validateSecurityFoundation(repositoryRoot) {
     readJson(path.join(fixturesRoot, "data-classification.invalid.json")),
     readJson(path.join(fixturesRoot, "threats.allowed.json")),
     readJson(path.join(fixturesRoot, "threats.denied.json")),
-    readFile(path.join(repositoryRoot, "docs/owners.yaml"), "utf8").then(
-      YAML.parse,
-    ),
+    readFile(path.join(repositoryRoot, "docs/owners.yaml"), "utf8").then(YAML.parse),
   ]);
 
   const ajv = new Ajv2020({
@@ -347,22 +315,16 @@ export async function validateSecurityFoundation(repositoryRoot) {
     errors.push(...validateClassificationSemantics(validManifest));
   }
 
-  const materializedManifestPaths =
-    await findSecurityManifests(repositoryRoot);
+  const materializedManifestPaths = await findSecurityManifests(repositoryRoot);
   const materializedAssetIds = new Map();
   let materializedAssets = 0;
   for (const manifestPath of materializedManifestPaths) {
-    const repositoryPath = path
-      .relative(repositoryRoot, manifestPath)
-      .split(path.sep)
-      .join("/");
+    const repositoryPath = path.relative(repositoryRoot, manifestPath).split(path.sep).join("/");
     const manifest = await readJson(manifestPath);
 
     if (!validateClassification(manifest)) {
       errors.push(
-        ...schemaErrors(validateClassification).map(
-          (error) => `${repositoryPath}: ${error}`,
-        ),
+        ...schemaErrors(validateClassification).map((error) => `${repositoryPath}: ${error}`),
       );
       continue;
     }
@@ -372,9 +334,7 @@ export async function validateSecurityFoundation(repositoryRoot) {
       );
     }
     errors.push(
-      ...validateClassificationSemantics(manifest).map(
-        (error) => `${repositoryPath}: ${error}`,
-      ),
+      ...validateClassificationSemantics(manifest).map((error) => `${repositoryPath}: ${error}`),
     );
 
     for (const asset of manifest.assets) {
@@ -419,11 +379,7 @@ export async function validateSecurityFoundation(repositoryRoot) {
     scenarioIds.add(scenario.id);
 
     if (!validateThreat(scenario)) {
-      errors.push(
-        ...schemaErrors(validateThreat).map(
-          (error) => `${scenario.id}: ${error}`,
-        ),
-      );
+      errors.push(...schemaErrors(validateThreat).map((error) => `${scenario.id}: ${error}`));
       continue;
     }
 
@@ -478,9 +434,6 @@ async function main() {
   }
 }
 
-if (
-  process.argv[1] &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
-) {
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   await main();
 }

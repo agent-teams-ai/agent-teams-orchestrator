@@ -1,12 +1,5 @@
 import assert from "node:assert/strict";
-import {
-  cp,
-  mkdir,
-  mkdtemp,
-  readFile,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -51,10 +44,7 @@ test("discovers and validates feature-local security manifests", async () => {
       path.join(root, "scripts/security/fixtures"),
       { recursive: true },
     );
-    await cp(
-      path.join(repositoryRoot, "docs/owners.yaml"),
-      path.join(root, "docs/owners.yaml"),
-    );
+    await cp(path.join(repositoryRoot, "docs/owners.yaml"), path.join(root, "docs/owners.yaml"));
 
     const featureRoot = path.join(
       root,

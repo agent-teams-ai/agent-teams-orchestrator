@@ -5,6 +5,7 @@ status: accepted
 owner: clients/sdk
 summary: SDK responsibility, contract generation, transport adapters, and compatibility rules.
 related:
+  - ADR-0111
   - ADR-0015
   - ADR-0016
   - ADR-0019
@@ -222,12 +223,12 @@ for real private RPC boundaries. ADR-0114 selects coarse service roles; the
 placement. These are accepted architecture choices, not qualification of an
 exact runtime version or another public SDK backend.
 
-| Boundary | Selected implementation | Contract preserved across deployment or language changes |
-|---|---|---|
-| Ordinary collaboration within a role | Curated internal APIs and typed local calls | Owning application models and explicit feature dependency |
-| Private RPC between declared roles | Feature-owned Protobuf and standard gRPC through Dapr | Versioned schema, trusted scope, errors, deadlines, acceptance, and retry semantics |
-| Durable integration delivery | Official JetStream SDK adapter directly invoking the owned application port | Event or command contract, inbox, outbox, acknowledgement, and reconciliation semantics |
-| Public client control | Connect edge and handwritten SDK | Accepted public control and SDK contracts |
+| Boundary                             | Selected implementation                                                     | Contract preserved across deployment or language changes                                |
+| ------------------------------------ | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Ordinary collaboration within a role | Curated internal APIs and typed local calls                                 | Owning application models and explicit feature dependency                               |
+| Private RPC between declared roles   | Feature-owned Protobuf and standard gRPC through Dapr                       | Versioned schema, trusted scope, errors, deadlines, acceptance, and retry semantics     |
+| Durable integration delivery         | Official JetStream SDK adapter directly invoking the owned application port | Event or command contract, inbox, outbox, acknowledgement, and reconciliation semantics |
+| Public client control                | Connect edge and handwritten SDK                                            | Accepted public control and SDK contracts                                               |
 
 The first real private boundary is Control Host to Team Topology's S3 persistent
 Team create/get/list capability in a separate process through Dapr. Its first
@@ -390,10 +391,19 @@ Target resolution is deterministic:
 
 - `Target` identifies a concrete local or remote deployment and trust boundary;
 - `Client Profile` selects a target and optional default scope;
-- `Workspace` is an orchestrator resource, not connection configuration;
+- an Execution Directory is a project-scoped technical filesystem resource;
+- a frontend Workspace presents navigation or a saved view over the selected
+  Target and authorized Tenant/Project;
 - no failed target silently falls back to another local or remote target;
 - project and workspace files cannot select endpoints, credentials, installation
   channels, or trust policy.
+
+[ADR-0111](../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
+selects Execution Directory while preserving `WorkspaceRegistration` and
+`ExecutionWorkspaceAllocation`. Neither the filesystem resource nor the frontend
+Workspace controls connection configuration or grants authorization. The term
+includes remote filesystem views; exact public API spelling and any migration
+remain open under OD-019.
 
 The default local target is zero-touch. Foreground and ephemeral modes are
 explicit target modes for development and CI and cannot accidentally adopt the

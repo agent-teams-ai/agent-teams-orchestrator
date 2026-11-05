@@ -2,12 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import {
-  acceptedOwnerStatuses,
-  exists,
-  relative,
-  walk,
-} from "./package-catalog-lib.mjs";
+import { acceptedOwnerStatuses, exists, relative, walk } from "./package-catalog-lib.mjs";
 import { validatePackageMaterializationPolicy } from "./package-materialization-validation.mjs";
 import { loadPackageTopologyInputs } from "./package-topology-inputs.mjs";
 import {
@@ -81,9 +76,7 @@ function validateCatalogSemantics(catalog, documents, errors) {
       ["package_name", entry.package_name, byPackageName],
     ]) {
       if (index.has(value)) {
-        errors.push(
-          `architecture/package-catalog.yaml: duplicate ${field} ${value}`,
-        );
+        errors.push(`architecture/package-catalog.yaml: duplicate ${field} ${value}`);
       } else {
         index.set(value, entry);
       }
@@ -104,24 +97,16 @@ function validateCatalogSemantics(catalog, documents, errors) {
       continue;
     }
 
-    if (
-      entry.role === "bounded-context" &&
-      owner.metadata.type !== "bounded-context"
-    ) {
+    if (entry.role === "bounded-context" && owner.metadata.type !== "bounded-context") {
       errors.push(
         `architecture/package-catalog.yaml: ${entry.id} must be owned by a bounded-context dossier`,
       );
     }
-
   }
 
   const catalogPaths = [...byPath.keys()].toSorted();
   for (let leftIndex = 0; leftIndex < catalogPaths.length; leftIndex += 1) {
-    for (
-      let rightIndex = leftIndex + 1;
-      rightIndex < catalogPaths.length;
-      rightIndex += 1
-    ) {
+    for (let rightIndex = leftIndex + 1; rightIndex < catalogPaths.length; rightIndex += 1) {
       const left = catalogPaths[leftIndex];
       const right = catalogPaths[rightIndex];
       if (right.startsWith(`${left}/`)) {
@@ -146,15 +131,11 @@ function validateLibraryManifest(entry, manifest, errors) {
     errors.push(`${entry.path}/package.json: library package requires exports`);
   }
   if (manifest.type !== "module") {
-    errors.push(
-      `${entry.path}/package.json: materialized library requires type module`,
-    );
+    errors.push(`${entry.path}/package.json: materialized library requires type module`);
   }
   for (const script of ["build", "check", "test", "typecheck"]) {
     if (typeof manifest.scripts?.[script] !== "string") {
-      errors.push(
-        `${entry.path}/package.json: materialized library requires a ${script} script`,
-      );
+      errors.push(`${entry.path}/package.json: materialized library requires a ${script} script`);
     }
   }
   validateQualifiedLibraryExports(entry, manifest.exports, errors);
@@ -166,9 +147,7 @@ function validateLibraryManifest(entry, manifest, errors) {
     }
   }
   if (!Array.isArray(manifest.files) || !manifest.files.includes("dist")) {
-    errors.push(
-      `${entry.path}/package.json: materialized library files must include dist`,
-    );
+    errors.push(`${entry.path}/package.json: materialized library files must include dist`);
   }
 }
 
@@ -218,8 +197,7 @@ function validateManifestDependencies(context) {
           `${entry.path}/package.json: internal dependency ${dependencyName} must use the workspace: protocol`,
         );
       }
-      const isTestingDependency =
-        section === "devDependencies" && dependency.role === "testing";
+      const isTestingDependency = section === "devDependencies" && dependency.role === "testing";
       if (
         !isTestingDependency &&
         !allowedInternalDependencyRoles[entry.role].has(dependency.role)
@@ -275,10 +253,7 @@ function validateSourceLayout(repositoryRoot, sourceRoot, sourceFiles, errors) {
 function validateTestLayout(repositoryRoot, packageRoot, testFiles, errors) {
   for (const filePath of testFiles) {
     const packageRelative = relative(packageRoot, filePath);
-    if (
-      packageRelative === "tests/unit" ||
-      packageRelative.startsWith("tests/unit/")
-    ) {
+    if (packageRelative === "tests/unit" || packageRelative.startsWith("tests/unit/")) {
       errors.push(
         `${relative(repositoryRoot, filePath)}: detached tests/unit is prohibited; colocate focused unit tests with source and place feature-owned integration tests under tests/features/<feature>`,
       );
@@ -287,23 +262,14 @@ function validateTestLayout(repositoryRoot, packageRoot, testFiles, errors) {
 }
 
 async function validateMaterializedPackage(context) {
-  const {
-    byPackageName,
-    dependencyEdges,
-    entry,
-    errors,
-    owner,
-    materialization,
-    repositoryRoot,
-  } = context;
+  const { byPackageName, dependencyEdges, entry, errors, owner, materialization, repositoryRoot } =
+    context;
   const packageRoot = path.join(repositoryRoot, entry.path);
   const packageJsonPath = path.join(packageRoot, "package.json");
   const tsconfigPath = path.join(packageRoot, "tsconfig.json");
 
   if (materialization?.state === "deferred") {
-    errors.push(
-      `${entry.path}: package materialization is deferred by the materialization policy`,
-    );
+    errors.push(`${entry.path}: package materialization is deferred by the materialization policy`);
   }
 
   if (!acceptedOwnerStatuses.has(owner.metadata.status)) {
@@ -326,9 +292,7 @@ async function validateMaterializedPackage(context) {
   }
 
   if (manifest.name !== entry.package_name) {
-    errors.push(
-      `${entry.path}/package.json: name must be ${entry.package_name}`,
-    );
+    errors.push(`${entry.path}/package.json: name must be ${entry.package_name}`);
   }
 
   if (manifest.private !== true) {
@@ -338,10 +302,7 @@ async function validateMaterializedPackage(context) {
   }
 
   const architecture = manifest.agentTeamsArchitecture;
-  if (
-    architecture?.role !== entry.role ||
-    architecture?.ownerDocument !== entry.owner_document
-  ) {
+  if (architecture?.role !== entry.role || architecture?.ownerDocument !== entry.owner_document) {
     errors.push(
       `${entry.path}/package.json: agentTeamsArchitecture must declare role ${entry.role} and ownerDocument ${entry.owner_document}`,
     );
@@ -368,9 +329,7 @@ async function validateMaterializedPackage(context) {
 
   const sourceRoot = path.join(packageRoot, "src");
   const sourceFiles = await walk(sourceRoot, () => true, {
-    skipDirectories: [
-      "node_modules", "dist", "coverage", ignoredFoundationEvidenceDirectory,
-    ],
+    skipDirectories: ["node_modules", "dist", "coverage", ignoredFoundationEvidenceDirectory],
   });
   await validateFeatureDocumentation({
     entry,
@@ -393,17 +352,11 @@ async function validateMaterializedPackage(context) {
 async function main() {
   const repositoryRoot = parseArguments(process.argv.slice(2));
   const errors = [];
-  const {
-    catalog,
-    dependencyPolicy,
-    documents,
-    materializationPolicy,
-  } = await loadPackageTopologyInputs(repositoryRoot, errors);
+  const { catalog, dependencyPolicy, documents, materializationPolicy } =
+    await loadPackageTopologyInputs(repositoryRoot, errors);
 
   const { byPackageName, byPath } = validateCatalogSemantics(
-    catalog && Array.isArray(catalog.packages)
-      ? catalog
-      : { packages: [] },
+    catalog && Array.isArray(catalog.packages) ? catalog : { packages: [] },
     documents,
     errors,
   );
@@ -416,19 +369,11 @@ async function main() {
     errors,
   );
   const dependencyEdges = validateSourceDependencyPolicy(
-    dependencyPolicy && Array.isArray(dependencyPolicy.edges)
-      ? dependencyPolicy
-      : { edges: [] },
-    catalog && Array.isArray(catalog.packages)
-      ? catalog
-      : { packages: [] },
+    dependencyPolicy && Array.isArray(dependencyPolicy.edges) ? dependencyPolicy : { edges: [] },
+    catalog && Array.isArray(catalog.packages) ? catalog : { packages: [] },
     errors,
   );
-  const featureDependencyEdges = validateFeatureDependencyPolicy(
-    dependencyPolicy,
-    catalog,
-    errors,
-  );
+  const featureDependencyEdges = validateFeatureDependencyPolicy(dependencyPolicy, catalog, errors);
   const productionFiles = (
     await Promise.all(
       ["apps", "packages"].map((directory) =>
@@ -437,7 +382,10 @@ async function main() {
           (filePath) => !ignoredProductionFileNames.has(path.basename(filePath)),
           {
             skipDirectories: [
-              "node_modules", "dist", "coverage", ignoredFoundationEvidenceDirectory,
+              "node_modules",
+              "dist",
+              "coverage",
+              ignoredFoundationEvidenceDirectory,
             ],
           },
         ),
@@ -450,14 +398,10 @@ async function main() {
   for (const filePath of productionFiles) {
     const fileRelative = relative(repositoryRoot, filePath);
     const owner = [...byPath.entries()].find(
-      ([catalogPath]) =>
-        fileRelative === catalogPath ||
-        fileRelative.startsWith(`${catalogPath}/`),
+      ([catalogPath]) => fileRelative === catalogPath || fileRelative.startsWith(`${catalogPath}/`),
     );
     if (!owner) {
-      errors.push(
-        `${fileRelative}: production file is outside the package catalog`,
-      );
+      errors.push(`${fileRelative}: production file is outside the package catalog`);
       continue;
     }
     materializedPaths.add(owner[0]);
@@ -482,12 +426,7 @@ async function main() {
     }
   }
 
-  await validateRootTsconfig(
-    repositoryRoot,
-    byPath,
-    materializedPaths,
-    errors,
-  );
+  await validateRootTsconfig(repositoryRoot, byPath, materializedPaths, errors);
   await validateInternalPackageImports({
     byPackageName,
     dependencyEdges,
@@ -501,9 +440,7 @@ async function main() {
     for (const error of [...new Set(errors)].toSorted()) {
       console.error(`ERROR ${error}`);
     }
-    console.error(
-      `\nPackage topology validation failed with ${new Set(errors).size} error(s).`,
-    );
+    console.error(`\nPackage topology validation failed with ${new Set(errors).size} error(s).`);
     process.exitCode = 1;
     return;
   }

@@ -3,8 +3,9 @@ id: architecture.composition
 type: architecture
 status: accepted
 owner: architecture/composition
-summary: Normative composition, dependency injection, scope, and lifecycle rules for Hosts, bounded contexts, and feature modules.
+summary: Mandatory Get Modular composition, scope, and lifecycle rules for independently assembled TypeScript capabilities.
 related:
+  - ADR-0117
   - ADR-0042
   - ADR-0030
   - ADR-0113
@@ -12,6 +13,7 @@ related:
   - architecture.dependency-rules
   - architecture.deployment-profiles
   - architecture.feature-module-standard
+  - architecture.implementation-readiness-gates
 ---
 
 # Composition and Dependency Injection
@@ -25,7 +27,10 @@ are distinct boundaries. Their sizes do not have to match.
 
 ## Get Modular adoption profile
 
-ADR-0113 selects static Get Modular composition and replaces the Awilix default.
+ADR-0113 selects the exact static Get Modular baseline. ADR-0117 reconciles the
+broader mandatory scope and foundation requirement from the parallel owner
+work without changing that baseline. The historical ADR-0110 pin is superseded;
+Awilix and competing handwritten production assembly remain prohibited.
 The following is the local Consumer Module Standard adoption profile; the
 [feature profile](feature-module-standard.md) separately owns FMS v1.1.
 
@@ -36,8 +41,8 @@ The following is the local Consumer Module Standard adoption profile; the
 | Immutable commit | `a3a079baca2c6af48c9d45bc08992825be1c2bbd` |
 | SHA-256 of complete document | `e5cb510c5ea83e54a6833cc40b6ad31fc5cf8c70d9838e4e0c6923edc6f70919` |
 | Core and Assembly | `@get-modular/core@0.5.0`, `@get-modular/assembly@0.5.0`, exact pair |
-| Accepting decision | `ADR-0113` |
-| Production scope | Orchestrator Host composition under `apps/**/src/composition/` and its owned context capability composition under `packages/contexts/**/src/features/**/composition/` |
+| Accepting decision | `ADR-0113` for the exact baseline; `ADR-0117` for reconciled scope and foundation |
+| Production scope | Applicable independently assembled TypeScript capabilities under `apps/**` and `packages/**`; each actual composition surface is inventoried before activation |
 | Composition owner | One selected Host process role, with context-owned entries and curated context handles |
 | Lifecycle owner | Each Host for its application resources; Local Supervisor or hosted platform for component availability |
 | Legacy boundary | Historical Awilix ADR only; no parallel production container or direct assembly fallback |
@@ -45,13 +50,20 @@ The following is the local Consumer Module Standard adoption profile; the
 | Current implementation status | Selected architecture; production materialization and first-scope conformance remain gated |
 
 The immutable [upstream standard](https://github.com/agent-teams-ai/get-modular/blob/a3a079baca2c6af48c9d45bc08992825be1c2bbd/docs/architecture/common-assembly.md#consumer-module-standard)
-owns the exact authoring rules. Other package kinds use typed factories unless a
-real independently assembled capability is included in a declared Host scope.
-Private helpers, parsers, DTOs, and fixed library calls do not receive entries
-merely because they exist.
+owns the exact authoring rules. Every applicable production composition seam
+uses Get Modular, including meaningful platform, integration, SDK, contract,
+and testing-package assembly, not only Host/context package families. Pure
+contracts, private helpers, parsers, mappers, and fixed library dependencies
+remain ordinary typed code. Owner-local factories implement capabilities; they
+are not an alternative production graph. Library composition exposes a narrow
+API without leaking framework descriptors into consumer business code.
 
-Optional resources and dynamic lifecycle packages require their own concrete
-integration need and exact dependency qualification. The upstream conformance
+Use the existing Resources capability when an adopted module acquires resources,
+after selecting and qualifying an exact compatible artifact with this baseline.
+The requirement does not install an unreviewed Resources or Observation version.
+Pure and borrow-only modules do not require resource scopes. Any additional
+package requires concrete integration need and exact dependency qualification;
+a competing resource or lifecycle framework is not the fallback. The upstream conformance
 kit is required development tooling for the first activated production scope;
 it is not another runtime subsystem. Core and Assembly adoption does not activate
 runtime plugin discovery or hot replacement.
@@ -293,3 +305,112 @@ complete `pnpm check` before a pull request. Passing document checks or installi
 Replacing Core/Assembly changes composition and its conformance evidence. It
 must not require changes to domain behavior, application ports, public contracts,
 or persistence authority.
+
+## Commands, hooks, state, and durable events
+
+Choose communication by the guarantee the consumer needs:
+
+| Need | Mechanism and owner |
+|---|---|
+| Request an operation and receive a typed result | Consumer-owned command/query port, selected through a slot |
+| Select a policy or contribute ordered behavior | Explicit required/optional/many capability contracts, with owner-defined order and failure semantics |
+| Observe replaceable latest state | Get Modular Observation, with one writer and subscriber-owned lifetime |
+| Call a remote service | Published Protobuf contract and selected transport adapter |
+| Preserve every committed occurrence | Feature-owned durable event or operation contract, outbox/inbox and reliable adapter |
+| Recover a long-lived business process | Owning process manager and selected durable scheduling adapter |
+
+A hook is an explicit capability with a purpose, owner, order, failure result,
+and permission boundary. It is not an unrestricted global callback registry.
+Authorization and business invariants cannot be delegated to optional notification
+hooks.
+
+Observation `watch` and `load` may coalesce changes and operate on latest state.
+They are appropriate for replaceable state or an invalidation hint that causes a
+read of authoritative state. They cannot be the sole source for incremental
+durable projections, Work dispatch, billing, audit, or access revocation.
+A durable subscriber may publish its resulting current state into Observation
+after its durable checkpoint commits.
+
+This is a deliberate semantic distinction, not a requirement to add durable
+delivery to Observation. Browser use needs its own qualification; Node behavior
+does not prove browser parity.
+
+## Shared mechanisms and independent products
+
+Orchestrator owns Team, Work, Task, assignment, Run, project-owned Execution
+Directory registration/materialization, and orchestration placement/binding
+intent. Agent Runtime owns actual execution, sandbox, and process resources
+under the [runtime boundary](runtime-boundary.md). Platform invokes Orchestrator
+capabilities through the public API/SDK and versioned managed lifecycle/authority
+contracts. It does not implement a second task engine or write Orchestrator
+storage.
+
+Platform retains its own customer, commercial, product-project, admission, and
+deployment policy. Its product authority adapter is one selected deployment
+integration. Standalone Self-Hosted selects its independent authority and must
+operate without a Platform endpoint or private package registry.
+
+The [companion Platform proposal in PR #55](https://github.com/agent-teams-ai/agent-teams-platform/blob/a4d47e1c27c3c1efc0e94f770fc9064b0bc17bfc/docs/architecture/platform-orchestrator-boundary.md)
+records the hosted product relationship and proposed exact integration contracts.
+The link pins the reviewed proposal, not merged Platform authority. Each product
+can release independently; a managed composition binds compatible contract and
+capability versions explicitly. A shared mechanism must not force standalone
+Orchestrator to deploy Platform or update both products together.
+[The research coverage](../research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
+records the evidence, pending Platform adoption, and remaining product choices.
+
+Reusable libraries may own concrete mechanisms shared by real consumers: OIDC
+validation, provider administration adapters, the selected relationship-
+authorization client and its conformance suite, transport primitives, and Get
+Modular itself. OpenFGA remains the candidate described in
+[OD-012](../open-decisions/OD-012-identity-authorization-tenant-isolation.md); this composition
+contract neither selects the IAM stack nor requires speculative package
+extraction. Product permission names, role policy, membership lifecycle, domain
+aggregates, repositories, and transactions remain with their owners. Similar
+fields do not justify a shared `Tenant`, `Project`, `Principal`, or `Task` domain
+package.
+
+For a concrete mechanism already expected to serve both products, follow the
+organization's [library-first rule](https://github.com/agent-teams-ai/.github/blob/main/docs/engineering-quality-standard.md#library-first-design-and-deliberate-evolution):
+design one reusable library and contract from the start, and validate it with
+disposable consumers and at least one real consumer in the same delivery.
+Do not first duplicate the mechanism in both products while waiting for a
+second implementation. This does not authorize speculative packages, a shared
+business domain, or a universal IAM framework; the named owners and actual
+repeated need still determine the boundary.
+
+A shared provider adapter does not imply one remotely mandatory authorization
+service. Each product/process supplies its own policy through narrow ports and
+uses explicitly versioned contracts. This avoids both copied provider plumbing
+and a distributed application that can only change all services together.
+
+## Activation and existing implementation
+
+ADR-0117 preserves the mandatory framework choice. Production activation is pending
+the [module foundation gate](implementation-readiness-gates.md#module-foundation-before-business-expansion).
+The exact Core/Assembly baseline is selected by ADR-0113, but not installed by this reconciliation; no
+runtime, scale, browser, or complete source conformance is claimed.
+
+At reviewed main `98f653172215e2a2c73cc484db3fa4fe72ed21ba`, the materialized
+`agent-context/sandbox-manifest/composition/feature-module-factory.ts` remains a
+known migration seam. `packages/platform/local-host-control` also requires
+classification of actual independently assembled seams; pure utilities do not
+automatically need entries. New source from concurrent materialization must be
+included in the same inventory before activation. Neither package receives an
+implicit permanent exemption.
+
+Required consumer evidence includes:
+
+- source inventory and exact adoption scope with no second production resolver;
+- complete nested visibility, direct-parent assembly, republication, and cycle
+  checks from the existing source classifier;
+- `isolate`, per-root `smoke`, an independent `checkWiring` oracle,
+  `checkNamespaces`, and `checkModuleLayout` integration;
+- contract suites for alternative implementations, including fakes;
+- preparation failure with zero factory calls, attempt isolation, cancellation,
+  startup failure, and resource handoff/cleanup;
+- supported-toolchain growth and exact packed-artifact tests.
+
+`checkModuleLayout` validates supplied source facts; it is not an import parser.
+Foundation remains the source/dependency policy engine. A second handwritten
+parser or module framework is not the migration plan.

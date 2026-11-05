@@ -5,12 +5,12 @@ status: accepted
 owner: architecture
 summary: Enforceable source dependency and package boundary rules.
 related:
+  - ADR-0117
   - ADR-0005
   - ADR-0079
   - ADR-0012
   - ADR-0037
   - ADR-0038
-  - ADR-0040
   - ADR-0075
   - ADR-0090
   - ADR-0113
@@ -76,20 +76,28 @@ both roles expose separate modules and ports for each role.
 
 ## Allowed dependency matrix
 
-| From | May depend on |
-|---|---|
-| Domain | Owning context domain modules and explicitly exposed context-internal domain types |
-| Application | Owning context domain, application models, internal APIs, and consumer-owned ports |
-| Contracts | Narrow Protobuf or JSON Schema primitives allowed by the owning external surface |
-| Inbound adapters | Feature contracts and application input ports |
+| From              | May depend on                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| Domain            | Owning context domain modules and explicitly exposed context-internal domain types       |
+| Application       | Owning context domain, application models, internal APIs, and consumer-owned ports       |
+| Contracts         | Narrow Protobuf or JSON Schema primitives allowed by the owning external surface         |
+| Inbound adapters  | Feature contracts and application input ports                                            |
 | Outbound adapters | Application output ports, public event contracts when publishing, and external libraries |
-| Composition | All layers in its own package and public APIs of dependencies |
-| SDK | Published contracts and transport libraries |
+| Composition       | All layers in its own package and public APIs of dependencies                            |
+| SDK               | Published contracts and transport libraries                                              |
 
-Dependency container implementations are composition dependencies, not
-application ports. They may be imported only below `composition/**`. Contexts,
-features, adapters, and SDKs cannot receive a raw container, cradle, resolver, or
-service locator.
+Get Modular is mandatory at applicable independently assembled TypeScript
+composition seams under ADR-0117, using ADR-0113's exact baseline. Its imports
+and descriptors belong in composition and tests; domain, application, external
+contracts, and adapters use ordinary APIs and consumer-owned ports. SDK clients
+must not expose framework types. A raw container, cradle, resolver, service
+locator, Awilix graph, or competing handwritten production assembly is forbidden.
+Fixed private helpers remain static dependencies.
+
+Nested visibility, direct-parent assembly, republication, and both cycle rules
+follow the [v1.1 feature profile](feature-module-standard.md). Activation remains
+blocked until the required semantic enforcement exists; the flat reader does
+not prove nested conformance.
 
 Wire models and generated service types remain in their owning contract surfaces
 and permitted transport adapters or SDKs. GraphQL resolver contexts and
@@ -360,9 +368,7 @@ The consuming application declares a narrow capability:
 
 ```ts
 interface RuntimeSessionLifecyclePort {
-  startSession(
-    command: StartRuntimeSessionCommand,
-  ): Promise<StartRuntimeSessionResult>;
+  readonly startSession: (command: StartRuntimeSessionCommand) => Promise<StartRuntimeSessionResult>;
 }
 ```
 

@@ -1,6 +1,7 @@
 # Agent Teams Orchestrator
 
-Headless control plane for coordinating multi-agent teams.
+Headless control plane being designed for collaboration between people and AI
+agents, with shared Teams and Tasks and separate agent execution.
 
 The project is being designed as an event-driven modular control plane with
 coarse service and worker processes, Clean and Hexagonal Architecture, Full DDD,
@@ -82,3 +83,26 @@ The orchestrator is headless. Desktop, web, CLI, automation, and third-party
 applications use versioned APIs and SDKs. Local and hosted compositions share the
 same business core and contracts. Client applications do not own orchestration or
 agent-runtime state.
+
+Standalone Self-Hosted is an independent product direction: one installation can
+serve multiple separately governed organizations, and one human can have
+independent memberships in several of them. People perform manual Tasks without
+an agent process. Team participation, permissions, and AI activation remain
+separate; their remaining choices are recorded in
+[mixed collaboration](docs/open-decisions/OD-048-mixed-human-and-ai-team-participation.md).
+
+The commercial [Platform](https://github.com/agent-teams-ai/agent-teams-platform)
+consumes Orchestrator API/SDK capabilities. Its
+[companion product relationship proposal in PR #55](https://github.com/agent-teams-ai/agent-teams-platform/blob/a4d47e1c27c3c1efc0e94f770fc9064b0bc17bfc/docs/architecture/platform-orchestrator-boundary.md)
+records the hosted integration direction. This link pins the reviewed proposal,
+not merged Platform authority. Orchestrator retains the independent
+authority adapters and [composition boundaries](docs/architecture/composition-and-dependency-injection.md#shared-mechanisms-and-independent-products)
+needed by standalone and managed delivery.
+
+The [discussion and research coverage](docs/research/collaboration-hierarchy-and-workspace-review-2026-10-22.md)
+maps organizations, human/AI Teams, Tasks, Workspace naming, module foundation,
+and Platform integration to their owners and remaining decisions. Service
+topology and Dapr/Protobuf now have a separate
+[canonical backend adoption](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/94a480d004e8e6eaf79507feeae30428d372a3d3/docs/decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md).
+The reconciled decisions and retained source history are recorded in
+[branch integration status](docs/architecture/overview.md#branch-integration-status).

@@ -23,10 +23,7 @@ export async function consumeLocalHostDiscovery(source) {
 
   const result = await discovery.discover({
     requiredCapabilities: [hostCapabilityId("host.control.v1")],
-    supportedProtocolRange: hostProtocolRange(
-      hostProtocolVersion(1n),
-      hostProtocolVersion(2n),
-    ),
+    supportedProtocolRange: hostProtocolRange(hostProtocolVersion(1n), hostProtocolVersion(2n)),
     targetId: targetId("local-default"),
   });
 

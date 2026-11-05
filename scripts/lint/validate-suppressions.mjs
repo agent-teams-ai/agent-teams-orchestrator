@@ -4,16 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(scriptDirectory, "../..");
-const sourceExtensions = new Set([
-  ".cjs",
-  ".cts",
-  ".js",
-  ".jsx",
-  ".mjs",
-  ".mts",
-  ".ts",
-  ".tsx",
-]);
+const sourceExtensions = new Set([".cjs", ".cts", ".js", ".jsx", ".mjs", ".mts", ".ts", ".tsx"]);
 const excludedDirectories = new Set([
   ".git",
   ".nx",
@@ -34,14 +25,8 @@ const directivePattern = new RegExp(
   `^\\s*//\\s*${directiveName}\\s+([a-z0-9@/_-]+(?:\\s*,\\s*[a-z0-9@/_-]+)*)\\s*$`,
   "u",
 );
-const eslintDirectivePattern = new RegExp(
-  `\\b${["eslint", "(?:disable|enable)"].join("-")}`,
-  "u",
-);
-const oxlintDirectivePattern = new RegExp(
-  `\\b${["oxlint", "(?:disable|enable)"].join("-")}`,
-  "u",
-);
+const eslintDirectivePattern = new RegExp(`\\b${["eslint", "(?:disable|enable)"].join("-")}`, "u");
+const oxlintDirectivePattern = new RegExp(`\\b${["oxlint", "(?:disable|enable)"].join("-")}`, "u");
 const explanationPattern = /^\s*\/\/\s+(?!oxlint-|eslint-)(.{20,})$/u;
 
 async function exists(filePath) {
@@ -76,10 +61,7 @@ async function collectSourceFiles(target, files) {
     const entryPath = path.join(target, entry.name);
     if (entry.isDirectory()) {
       await collectSourceFiles(entryPath, files);
-    } else if (
-      entry.isFile() &&
-      sourceExtensions.has(path.extname(entry.name))
-    ) {
+    } else if (entry.isFile() && sourceExtensions.has(path.extname(entry.name))) {
       files.push(entryPath);
     }
   }
@@ -153,10 +135,7 @@ async function main() {
     left < right ? -1 : left > right ? 1 : 0,
   )) {
     errors.push(
-      ...validateFile(
-        path.relative(repositoryRoot, filePath),
-        await readFile(filePath, "utf8"),
-      ),
+      ...validateFile(path.relative(repositoryRoot, filePath), await readFile(filePath, "utf8")),
     );
   }
 
@@ -164,16 +143,12 @@ async function main() {
     for (const error of errors) {
       console.error(`ERROR ${error}`);
     }
-    console.error(
-      `\nSuppression validation failed with ${errors.length} error(s).`,
-    );
+    console.error(`\nSuppression validation failed with ${errors.length} error(s).`);
     process.exitCode = 1;
     return;
   }
 
-  console.log(
-    `Suppression validation passed: ${files.length} source file(s) inspected.`,
-  );
+  console.log(`Suppression validation passed: ${files.length} source file(s) inspected.`);
 }
 
 await main();

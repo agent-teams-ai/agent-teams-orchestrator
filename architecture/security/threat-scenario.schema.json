@@ -4,12 +4,7 @@
   "title": "Agent Teams security threat scenario v1",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "id",
-    "threat",
-    "expected",
-    "input"
-  ],
+  "required": ["id", "threat", "expected", "input"],
   "properties": {
     "id": {
       "type": "string",
@@ -29,16 +24,10 @@
     "expected": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "decision",
-        "ruleIds"
-      ],
+      "required": ["decision", "ruleIds"],
       "properties": {
         "decision": {
-          "enum": [
-            "allow",
-            "deny"
-          ]
+          "enum": ["allow", "deny"]
         },
         "ruleIds": {
           "type": "array",
@@ -193,16 +182,10 @@
           "minLength": 1
         },
         "operationKind": {
-          "enum": [
-            "tenant-operation",
-            "cross-tenant-administration"
-          ]
+          "enum": ["tenant-operation", "cross-tenant-administration"]
         },
         "authenticatedAuthorityScope": {
-          "enum": [
-            "tenant",
-            "cross-tenant-administrator"
-          ]
+          "enum": ["tenant", "cross-tenant-administrator"]
         }
       }
     },
@@ -233,26 +216,13 @@
     "promptInput": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "sourceChannel",
-        "action",
-        "typedCommandEnvelope",
-        "authenticatedAuthority"
-      ],
+      "required": ["sourceChannel", "action", "typedCommandEnvelope", "authenticatedAuthority"],
       "properties": {
         "sourceChannel": {
-          "enum": [
-            "control-api",
-            "user-content",
-            "agent-output",
-            "external-content"
-          ]
+          "enum": ["control-api", "user-content", "agent-output", "external-content"]
         },
         "action": {
-          "enum": [
-            "store-as-content",
-            "execute-control-command"
-          ]
+          "enum": ["store-as-content", "execute-control-command"]
         },
         "typedCommandEnvelope": {
           "type": "boolean"
@@ -277,21 +247,10 @@
           "type": "boolean"
         },
         "scheme": {
-          "enum": [
-            "http",
-            "https",
-            "file",
-            "ftp"
-          ]
+          "enum": ["http", "https", "file", "ftp"]
         },
         "destinationClass": {
-          "enum": [
-            "public",
-            "private",
-            "loopback",
-            "link-local",
-            "metadata-service"
-          ]
+          "enum": ["public", "private", "loopback", "link-local", "metadata-service"]
         },
         "policyAllowsDestination": {
           "type": "boolean"
@@ -346,17 +305,10 @@
     "credentialInput": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "valueKind",
-        "location",
-        "redacted"
-      ],
+      "required": ["valueKind", "location", "redacted"],
       "properties": {
         "valueKind": {
-          "enum": [
-            "secret-ref",
-            "raw-secret"
-          ]
+          "enum": ["secret-ref", "raw-secret"]
         },
         "location": {
           "enum": [
@@ -386,21 +338,10 @@
       ],
       "properties": {
         "surface": {
-          "enum": [
-            "integration-event",
-            "feed",
-            "log",
-            "telemetry"
-          ]
+          "enum": ["integration-event", "feed", "log", "telemetry"]
         },
         "classification": {
-          "enum": [
-            "public",
-            "internal",
-            "sensitive",
-            "secret",
-            "authority-evidence"
-          ]
+          "enum": ["public", "internal", "sensitive", "secret", "authority-evidence"]
         },
         "containsUserContent": {
           "type": "boolean"

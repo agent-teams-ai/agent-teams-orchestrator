@@ -90,10 +90,7 @@ test("rejects broken skill-local links", async () => {
 test("rejects a docs-authoring skill that drops a required workflow route", async () => {
   const fixture = await createFixture();
   try {
-    const docsSkillDirectory = path.join(
-      fixture.root,
-      ".agents/skills/docs-authoring",
-    );
+    const docsSkillDirectory = path.join(fixture.root, ".agents/skills/docs-authoring");
     await rename(fixture.skillDirectory, docsSkillDirectory);
     await writeFile(
       path.join(docsSkillDirectory, "SKILL.md"),
@@ -101,10 +98,7 @@ test("rejects a docs-authoring skill that drops a required workflow route", asyn
     );
     const result = await runValidator(fixture.root);
     assert.equal(result.code, 1, result.output);
-    assert.match(
-      result.output,
-      /canonical documentation workflow must route pnpm docs:recover/,
-    );
+    assert.match(result.output, /canonical documentation workflow must route pnpm docs:recover/);
   } finally {
     await rm(fixture.root, { force: true, recursive: true });
   }

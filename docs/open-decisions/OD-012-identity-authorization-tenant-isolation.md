@@ -5,6 +5,7 @@ status: open
 owner: architecture/security
 summary: Define principal, authorization, service identity, and hosted tenant-isolation semantics.
 related:
+  - ADR-0117
   - architecture.context-map
   - domain.contexts.access-control
   - domain.contexts.orchestration-scope
@@ -13,6 +14,8 @@ related:
   - ADR-0080
   - OD-031
   - OD-032
+  - research.identity-provider-comparison-2026-10-21
+  - research.iam-critical-decisions-review-2026-10-23
 ---
 
 # OD-012: Identity, Authorization, and Tenant Isolation
@@ -89,6 +92,89 @@ so this decision remains open.
 
 The retained `PostgreSQL tenant isolation` fingerprint is in the
 [foundation evidence manifest](../research/foundation-spike-evidence-manifest-2026-07-26.md).
+
+## Provider direction and qualification
+
+The owner's provisional direction is **Keycloak plus OpenFGA**, with ZITADEL plus
+OpenFGA retained as the strongest alternative. The dated findings, complete
+primary references, comparison scores, and bounded estimates are preserved in
+the [provider research report](../research/identity-provider-comparison-2026-10-21.md).
+This is not an accepted provider ADR or an implemented integration. OD-012
+remains open until the selected slice, identity lifecycle, administrative
+boundary, and failure behavior are qualified.
+
+The confirmed baseline permits one human to hold independent memberships in
+customers A and B; ending A must preserve B and stable identity. Organization-
+specific mandatory SSO and SCIM are separate enterprise growth qualifications.
+Neither IAM membership nor an OpenFGA tuple replaces product-owned permission,
+Team, Work, Task, grant, or lifecycle policy. The same reusable provider mechanism
+must support independent standalone and managed compositions through narrow
+consumer-owned ports; standalone operation must not depend on commercial
+Platform. Get Modular composition remains owned by ADR-0117, and service topology
+remains outside this provider decision.
+
+### Remaining IAM decisions and evidence
+
+The [critical-decisions review dated 2026-10-23](../research/iam-critical-decisions-review-2026-10-23.md)
+extends the provider comparison with the following unresolved contracts and
+qualification questions. Its recommendations, scores, and code estimates remain
+research; they do not accept an implementation or change the provisional stack.
+
+- Shared-account login, account linking, factors, and recovery need an explicit
+  trust boundary. Removing membership in A does not prove isolation from A's
+  corporate IdP or mailbox when the same person retains access in B.
+- Customer administration and SCIM need relationship-scoped lifecycle rules,
+  including global credential and recovery writes, delayed reactivation, and
+  the continuity of grants after a person is enabled again.
+- Fully Local needs a selected authority scope, protected enrollment, stable
+  principal custody, rotating boot credentials, and lost-key recovery. The
+  recommended personal single-owner model is not an accepted product choice.
+- Browser session custody and native authorization-code flows using Proof Key
+  for Code Exchange need exact Target binding, refresh concurrency, logout, and
+  stream-reconnect contracts.
+- Trusted workload, actor, subject, Agent, Run, and client bindings remain
+  distinct. Permission to act does not by itself authorize issuing or renewing
+  delegation, or replacing it with an autonomous organization grant.
+- Graph qualification must cover source changes not yet projected, stale
+  writers, revoke and replacement races, model activation, and restore. OpenFGA
+  cache bypass alone cannot prove that a source revocation reached the graph.
+  SpiceDB is a bounded consistency comparator, not a selected replacement.
+- Protected personal queues, search, exports, and realtime require current
+  disclosure rules for counts, ranking, pagination, and cursors as well as rows.
+  Policy rollout, audit, and recovery retain their owning consistency evidence.
+
+The report's qualification sequence refines the experiment below. External
+connection ownership, worker enrollment, local materialization, and dangerous
+effects remain with OD-034, OD-038, OD-040, and OD-032 respectively; this decision
+must not absorb those lifecycles into a universal IAM service.
+
+### Proposed acceptance experiment
+
+Use disposable installations and A/B/neutral organizations, one shared human,
+customer admins, and a service actor. No IAM fork is allowed. The first slice
+runs relevant baseline cases; enterprise cases qualify growth separately.
+
+1. **Stable identity:** join A and B, remove A, and retain B plus the same
+   provider-neutral principal; reject silent managed-lifecycle conversion.
+2. **SSO growth:** require A's IdP and then B's IdP; test local credentials,
+   an existing session, IdP hints, linking, and wrong-organization provenance.
+3. **Safe administration:** admin A manages only A's allowed relationships and
+   roles; deny B changes, global user deletion, credentials, and escalation.
+4. **SCIM growth:** create, update, suspend, and delete A's relationship through
+   the selected provisioning path while B and shared identity remain usable.
+5. **Revoke and grant again:** revoke an exact proof during admission and dispatch;
+   delayed revocation cannot invalidate an unrelated successor proof.
+6. **Projection failure:** interrupt IAM/FGA delivery, restart consumers, inject
+   duplicates and reordered facts, then prove convergence and gap handling.
+7. **Agent authority:** bind subject, actor, client, scope, expiry, and delegation;
+   deny widening and prove owner-local Run cutoff without false stop receipts.
+8. **Independent operation and load:** run standalone without Platform, then
+   managed through the same mechanism; ramp measured agent/SSO traffic and record
+   tail latency, saturation, token renewal, failures, and recovery.
+
+The owning ADR must record which cases passed, source/configuration revisions,
+custom code and operator work, accepted scope, and remaining gaps. A source
+review or passing token exchange alone is not acceptance evidence.
 
 ## Resolution
 

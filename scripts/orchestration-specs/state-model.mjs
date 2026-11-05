@@ -6,8 +6,7 @@ const transitionConfiguration = (spec, stateId) => {
       continue;
     }
 
-    on[item.event] =
-      item.disposition === "accepted" ? { target: item.target } : {};
+    on[item.event] = item.disposition === "accepted" ? { target: item.target } : {};
   }
 
   return on;
@@ -30,5 +29,4 @@ export const deriveStateModel = (spec) => ({
   ),
 });
 
-export const deriveIndependentStateModels = (specs) =>
-  specs.map(deriveStateModel);
+export const deriveIndependentStateModels = (specs) => specs.map(deriveStateModel);

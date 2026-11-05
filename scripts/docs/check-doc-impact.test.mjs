@@ -11,9 +11,7 @@ const impactCheckerPath = path.join(scriptDirectory, "check-doc-impact.mjs");
 const validFixturePath = path.join(scriptDirectory, "fixtures/valid");
 
 async function createFixture(enforcement) {
-  const fixtureRoot = await mkdtemp(
-    path.join(tmpdir(), "agent-teams-doc-impact-"),
-  );
+  const fixtureRoot = await mkdtemp(path.join(tmpdir(), "agent-teams-doc-impact-"));
   await cp(validFixturePath, fixtureRoot, { recursive: true });
   await mkdir(path.join(fixtureRoot, "src"), { recursive: true });
   await writeFile(path.join(fixtureRoot, "src/example.ts"), "export {};\n");
@@ -89,11 +87,7 @@ async function runGit(fixtureRoot, arguments_) {
 test("reports advisory documentation impact without blocking", async () => {
   const fixtureRoot = await createFixture("advisory");
   try {
-    const result = await runChecker(fixtureRoot, [
-      "--path",
-      "src/example.ts",
-      "--strict",
-    ]);
+    const result = await runChecker(fixtureRoot, ["--path", "src/example.ts", "--strict"]);
     assert.equal(result.code, 0, result.output);
     assert.match(result.output, /ADVISORY fixture\.glossary/);
   } finally {
@@ -104,11 +98,7 @@ test("reports advisory documentation impact without blocking", async () => {
 test("blocks a missing required documentation update", async () => {
   const fixtureRoot = await createFixture("required");
   try {
-    const result = await runChecker(fixtureRoot, [
-      "--path",
-      "src/example.ts",
-      "--strict",
-    ]);
+    const result = await runChecker(fixtureRoot, ["--path", "src/example.ts", "--strict"]);
     assert.equal(result.code, 1);
     assert.match(result.output, /1 required document\(s\) were not updated/);
   } finally {
@@ -142,18 +132,11 @@ test("detects required impact from a Git merge-base range", async () => {
     await runGit(fixtureRoot, ["add", "."]);
     await runGit(fixtureRoot, ["commit", "--quiet", "-m", "test: add fixture baseline"]);
     const base = await runGit(fixtureRoot, ["rev-parse", "HEAD"]);
-    await writeFile(
-      path.join(fixtureRoot, "src/example.ts"),
-      "export const changed = true;\n",
-    );
+    await writeFile(path.join(fixtureRoot, "src/example.ts"), "export const changed = true;\n");
     await runGit(fixtureRoot, ["add", "src/example.ts"]);
     await runGit(fixtureRoot, ["commit", "--quiet", "-m", "test: change fixture source"]);
 
-    const result = await runChecker(fixtureRoot, [
-      "--base",
-      base,
-      "--strict",
-    ]);
+    const result = await runChecker(fixtureRoot, ["--base", base, "--strict"]);
     assert.equal(result.code, 1);
     assert.match(result.output, /1 required document\(s\) were not updated/);
   } finally {

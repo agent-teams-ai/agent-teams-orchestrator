@@ -10,49 +10,50 @@ import YAML from "yaml";
 import { loadFoundationManifest } from "./root-foundation.mjs";
 
 function requireSuccess(label, result) {
-  assert.equal(result.status, 0, `${label} failed:\n${result.stdout ?? ""}\n${result.stderr ?? ""}`);
+  assert.equal(
+    result.status,
+    0,
+    `${label} failed:\n${result.stdout ?? ""}\n${result.stderr ?? ""}`,
+  );
   return result;
 }
 
 export async function verifyQualificationRecord(repositoryRoot) {
   const schema = JSON.parse(
     await readFile(
-      path.join(
-        repositoryRoot,
-        "architecture/foundation/scaffolding-qualification.schema.json",
-      ),
+      path.join(repositoryRoot, "architecture/foundation/scaffolding-qualification.schema.json"),
       "utf8",
     ),
   );
   const record = YAML.parse(
     await readFile(
-      path.join(
-        repositoryRoot,
-        "architecture/foundation/scaffolding-qualification.yaml",
-      ),
+      path.join(repositoryRoot, "architecture/foundation/scaffolding-qualification.yaml"),
       "utf8",
     ),
   );
   const config = YAML.parse(
-    await readFile(
-      path.join(repositoryRoot, "architecture/foundation/scaffolding.yaml"),
-      "utf8",
-    ),
+    await readFile(path.join(repositoryRoot, "architecture/foundation/scaffolding.yaml"), "utf8"),
   );
   const validate = new Ajv2020({ allErrors: true, strict: true }).compile(schema);
   assert.equal(validate(record), true, JSON.stringify(validate.errors, null, 2));
   const versionCases = [
-    ["0.16.0-rc.0+consumer.1", true], ["0.16.0+consumer.1", true],
-    ["0.16", false], ["01.16.0", false], ["0.16.0-01", false],
-    ["0.16.0-", false], ["0.16.0+", false], ["0.16.0_rc.0", false],
+    ["0.16.0-rc.0+consumer.1", true],
+    ["0.16.0+consumer.1", true],
+    ["0.16", false],
+    ["01.16.0", false],
+    ["0.16.0-01", false],
+    ["0.16.0-", false],
+    ["0.16.0+", false],
+    ["0.16.0_rc.0", false],
   ];
   for (const [foundationVersion, expected] of versionCases) {
-    assert.equal(validate({ ...record, foundationVersion }), expected,
-      `${foundationVersion} has an unexpected SemVer result`);
+    assert.equal(
+      validate({ ...record, foundationVersion }),
+      expected,
+      `${foundationVersion} has an unexpected SemVer result`,
+    );
   }
-  const manifest = JSON.parse(
-    await readFile(path.join(repositoryRoot, "package.json"), "utf8"),
-  );
+  const manifest = JSON.parse(await readFile(path.join(repositoryRoot, "package.json"), "utf8"));
   const foundationManifest = loadFoundationManifest(repositoryRoot);
   assert.equal(
     foundationManifest.version,
@@ -61,9 +62,19 @@ export async function verifyQualificationRecord(repositoryRoot) {
   // This record is historical 1.1.1 evidence, not admission for today's pin.
   // Freeze its content across Git checkout line endings; the remaining checks
   // execute fresh candidate proof without changing this historical record.
-  assert.equal(createHash("sha256").update((await readFile(path.join(
-    repositoryRoot, "architecture/foundation/scaffolding-qualification.yaml",
-  ), "utf8")).replaceAll("\r\n", "\n")).digest("hex"), "a7fc88e26fb59afbef7e92897e94a2957525700d05c2fc6e76fa0e9785ea4f1c");
+  assert.equal(
+    createHash("sha256")
+      .update(
+        (
+          await readFile(
+            path.join(repositoryRoot, "architecture/foundation/scaffolding-qualification.yaml"),
+            "utf8",
+          )
+        ).replaceAll("\r\n", "\n"),
+      )
+      .digest("hex"),
+    "a7fc88e26fb59afbef7e92897e94a2957525700d05c2fc6e76fa0e9785ea4f1c",
+  );
   const composition = config.compositions.find(
     (candidate) => candidate.id === record.composition.id,
   );
@@ -71,17 +82,13 @@ export async function verifyQualificationRecord(repositoryRoot) {
   assert.equal(record.consumer, config.projectId);
   assert.equal(record.composition.targetCatalogPath, config.targetCatalogPath);
   assert.equal(record.recipe.id, composition.recipe.ref.id);
-  assert.equal(
-    record.recipe.contractVersion,
-    composition.recipe.ref.contractVersion,
-  );
+  assert.equal(record.recipe.contractVersion, composition.recipe.ref.contractVersion);
   requireSuccess(
     "ignored local scaffolding state",
-    spawnSync(
-      "git",
-      ["check-ignore", "-q", ".agent-teams-local/scaffolding-transaction.json"],
-      { cwd: repositoryRoot, encoding: "utf8" },
-    ),
+    spawnSync("git", ["check-ignore", "-q", ".agent-teams-local/scaffolding-transaction.json"], {
+      cwd: repositoryRoot,
+      encoding: "utf8",
+    }),
   );
   const trackedLocalState = requireSuccess(
     "tracked local scaffolding state query",

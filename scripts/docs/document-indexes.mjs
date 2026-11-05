@@ -6,10 +6,7 @@ import { visit } from "unist-util-visit";
 
 import { markdownLinks, resolveMarkdownTarget } from "./document-links.mjs";
 
-const deferredCollectionIndexes = new Set([
-  "docs/contracts",
-  "docs/operations",
-]);
+const deferredCollectionIndexes = new Set(["docs/contracts", "docs/operations"]);
 
 function isDeferredSingleDocumentCollection(context, directory) {
   const repositoryPath = context.relative(directory);
@@ -19,9 +16,7 @@ function isDeferredSingleDocumentCollection(context, directory) {
   const descendants = context.markdownFiles.filter((filePath) =>
     filePath.startsWith(`${directory}${path.sep}`),
   );
-  return (
-    descendants.length === 1 && path.dirname(descendants[0]) === directory
-  );
+  return descendants.length === 1 && path.dirname(descendants[0]) === directory;
 }
 
 function childNavigationTarget(context, childDirectory) {
@@ -41,11 +36,7 @@ function linkedLocalMarkdownPaths(context, indexDocument) {
   return new Set(
     markdownLinks(indexDocument.tree)
       .map((target) =>
-        resolveMarkdownTarget(
-          context.repositoryRoot,
-          indexDocument.filePath,
-          target,
-        ),
+        resolveMarkdownTarget(context.repositoryRoot, indexDocument.filePath, target),
       )
       .filter((target) => target && !target.escapedRepository)
       .map(({ targetPath }) => path.normalize(targetPath)),
@@ -57,10 +48,7 @@ async function validateDirectoryIndexes(context) {
   const directories = new Set([docsRoot]);
   for (const filePath of markdownFiles) {
     let directory = path.dirname(filePath);
-    while (
-      directory === docsRoot ||
-      directory.startsWith(`${docsRoot}${path.sep}`)
-    ) {
+    while (directory === docsRoot || directory.startsWith(`${docsRoot}${path.sep}`)) {
       directories.add(directory);
       if (directory === docsRoot) {
         break;
@@ -74,53 +62,38 @@ async function validateDirectoryIndexes(context) {
     const directDocuments = entries
       .filter(
         (entry) =>
-          entry.isFile() &&
-          path.extname(entry.name) === ".md" &&
-          entry.name !== "README.md",
+          entry.isFile() && path.extname(entry.name) === ".md" && entry.name !== "README.md",
       )
       .map((entry) => path.join(directory, entry.name));
     const childIndexes = entries
       .filter((entry) => entry.isDirectory())
       .map((entry) => path.join(directory, entry.name))
       .filter((childDirectory) =>
-        markdownFiles.some((filePath) =>
-          filePath.startsWith(`${childDirectory}${path.sep}`),
-        ),
+        markdownFiles.some((filePath) => filePath.startsWith(`${childDirectory}${path.sep}`)),
       )
       .map((childDirectory) => childNavigationTarget(context, childDirectory));
     const requiredTargets = [...directDocuments, ...childIndexes];
     const indexPath = path.join(directory, "README.md");
     const indexDocument = documentsByPath.get(indexPath);
-    if (
-      !indexDocument &&
-      isDeferredSingleDocumentCollection(context, directory)
-    ) {
+    if (!indexDocument && isDeferredSingleDocumentCollection(context, directory)) {
       continue;
     }
     if (requiredTargets.length > 0 && !indexDocument) {
-      errors.push(
-        `${relative(directory)}: documentation directory requires README.md`,
-      );
+      errors.push(`${relative(directory)}: documentation directory requires README.md`);
       continue;
     }
     if (!indexDocument) {
       continue;
     }
     if (requiredTargets.length > 0 && indexDocument.metadata?.type !== "index") {
-      errors.push(
-        `${relative(indexPath)}: collection README.md must have type index`,
-      );
+      errors.push(`${relative(indexPath)}: collection README.md must have type index`);
     }
     const linked = linkedLocalMarkdownPaths(context, indexDocument);
     for (const targetPath of requiredTargets) {
       if (!documentsByPath.has(targetPath)) {
-        errors.push(
-          `${relative(targetPath)}: child documentation directory requires README.md`,
-        );
+        errors.push(`${relative(targetPath)}: child documentation directory requires README.md`);
       } else if (!linked.has(path.normalize(targetPath))) {
-        errors.push(
-          `${relative(targetPath)}: not directly listed in ${relative(indexPath)}`,
-        );
+        errors.push(`${relative(targetPath)}: not directly listed in ${relative(indexPath)}`);
       }
     }
   }
@@ -128,9 +101,7 @@ async function validateDirectoryIndexes(context) {
 
 function tableColumns(table) {
   const [headerRow] = table.children;
-  const headers = (headerRow?.children ?? []).map((cell) =>
-    toString(cell).trim().toLowerCase(),
-  );
+  const headers = (headerRow?.children ?? []).map((cell) => toString(cell).trim().toLowerCase());
   return {
     blocker: headers.indexOf("primary gate"),
     id: headers.indexOf("id"),
@@ -140,8 +111,7 @@ function tableColumns(table) {
 }
 
 function expectedDocumentStatus(target) {
-  return target.metadata.type === "open-decision" &&
-    target.metadata.status === "resolved"
+  return target.metadata.type === "open-decision" && target.metadata.status === "resolved"
     ? `resolved by ${target.metadata.resolved_by}`.toLowerCase()
     : target.metadata.status;
 }
@@ -153,10 +123,7 @@ function validateTableTarget(context, document, cells, columns, target) {
       `${relative(document.filePath)}: table id for ${relative(target.filePath)} must be ${target.metadata.id}`,
     );
   }
-  if (
-    columns.owner >= 0 &&
-    toString(cells[columns.owner]).trim() !== target.metadata.owner
-  ) {
+  if (columns.owner >= 0 && toString(cells[columns.owner]).trim() !== target.metadata.owner) {
     errors.push(
       `${relative(document.filePath)}: table owner for ${target.metadata.id} must be ${target.metadata.owner}`,
     );
@@ -197,11 +164,7 @@ function validateIndexTables(context) {
       for (const row of rows) {
         const cells = row.children ?? [];
         for (const rawTarget of cells.flatMap((cell) => markdownLinks(cell))) {
-          const resolved = resolveMarkdownTarget(
-            repositoryRoot,
-            document.filePath,
-            rawTarget,
-          );
+          const resolved = resolveMarkdownTarget(repositoryRoot, document.filePath, rawTarget);
           if (!resolved || resolved.escapedRepository) {
             continue;
           }

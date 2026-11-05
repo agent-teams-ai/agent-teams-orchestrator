@@ -11,7 +11,10 @@ const foundationManifestPath = fileURLToPath(
   import.meta.resolve("@agent-teams/engineering-foundation/package.json"),
 );
 const foundationManifest = JSON.parse(await readFile(foundationManifestPath, "utf8"));
-const foundationCli = join(dirname(foundationManifestPath), foundationManifest.bin["agent-teams-foundation"]);
+const foundationCli = join(
+  dirname(foundationManifestPath),
+  foundationManifest.bin["agent-teams-foundation"],
+);
 const repositoryRoot = fileURLToPath(new URL("../../", import.meta.url));
 const configPath = "architecture/foundation/source-dependencies.yaml";
 const policy = parse(await readFile(join(repositoryRoot, configPath), "utf8"));
@@ -40,21 +43,32 @@ test("source v3 rejects includeRootPackage as an unknown public field", async ()
   const root = await mkdtemp(join(tmpdir(), "orch-foundation-include-root-"));
   try {
     await mkdir(join(root, dirname(configPath)), { recursive: true });
-    await writeFile(join(root, "package.json"), JSON.stringify({
-      name: "@agent-teams/orchestrator-repository",
-      private: true,
-      type: "module",
-    }));
+    await writeFile(
+      join(root, "package.json"),
+      JSON.stringify({
+        name: "@agent-teams/orchestrator-repository",
+        private: true,
+        type: "module",
+      }),
+    );
     await writeFile(join(root, "pnpm-workspace.yaml"), "packages: []\n");
-    await writeFile(join(root, configPath), `${await readFile(join(repositoryRoot, configPath), "utf8")}\nincludeRootPackage: true\n`);
-    await writeFile(join(root, "foundation.config.yaml"), JSON.stringify({
-      schemaVersion: 1,
-      project: { id: "foundation-include-root-fixture" },
-      capabilities: { "architecture.source-dependencies": { configPath } },
-    }));
-    const result = spawnSync(process.execPath, [foundationCli, "check",
-      "architecture.source-dependencies", "--consumer", root, "--json"],
-    { encoding: "utf8", timeout: 60_000, maxBuffer: 8 * 1024 * 1024 });
+    await writeFile(
+      join(root, configPath),
+      `${await readFile(join(repositoryRoot, configPath), "utf8")}\nincludeRootPackage: true\n`,
+    );
+    await writeFile(
+      join(root, "foundation.config.yaml"),
+      JSON.stringify({
+        schemaVersion: 1,
+        project: { id: "foundation-include-root-fixture" },
+        capabilities: { "architecture.source-dependencies": { configPath } },
+      }),
+    );
+    const result = spawnSync(
+      process.execPath,
+      [foundationCli, "check", "architecture.source-dependencies", "--consumer", root, "--json"],
+      { encoding: "utf8", timeout: 60_000, maxBuffer: 8 * 1024 * 1024 },
+    );
     assert.equal(result.error, undefined, result.stderr);
     const envelope = JSON.parse(result.stdout);
     assert.notEqual(envelope.outcome, "passed", JSON.stringify(envelope));
@@ -69,20 +83,51 @@ test("source v3 rejects missing declared roots and unowned governed dist source"
     const root = await mkdtemp(join(tmpdir(), "orchestrator-source-census-"));
     try {
       await mkdir(join(root, "dist"));
-      await writeFile(join(root, "package.json"), JSON.stringify({ name: "@fixture/source-census", private: true, type: "module" }));
+      await writeFile(
+        join(root, "package.json"),
+        JSON.stringify({ name: "@fixture/source-census", private: true, type: "module" }),
+      );
       await writeFile(join(root, "pnpm-workspace.yaml"), "packages: []\n");
       await writeFile(join(root, "dist/known.ts"), "export const known = 1;\n");
-      const sourcePolicy = { schemaVersion: 3, workspace: { kind: "pnpm", manifest: "pnpm-workspace.yaml" },
-        rootPackage: true, packageRoots: [], governedRoots: ["dist"], boundaries: [{
-          id: "fixture.known", roots: ["dist/known.ts"], entrypoints: ["dist/known.ts"],
-          allow: { boundaries: [], packages: [], builtins: [], runtimeReferences: [] },
-        }] };
+      const sourcePolicy = {
+        schemaVersion: 3,
+        workspace: { kind: "pnpm", manifest: "pnpm-workspace.yaml" },
+        rootPackage: true,
+        packageRoots: [],
+        governedRoots: ["dist"],
+        boundaries: [
+          {
+            id: "fixture.known",
+            roots: ["dist/known.ts"],
+            entrypoints: ["dist/known.ts"],
+            allow: { boundaries: [], packages: [], builtins: [], runtimeReferences: [] },
+          },
+        ],
+      };
       await writeFile(join(root, "source-policy.yaml"), JSON.stringify(sourcePolicy));
-      await writeFile(join(root, "foundation.config.yaml"), JSON.stringify({ schemaVersion: 2,
-        project: { id: "orchestrator-source-census-fixture" },
-        capabilities: { "architecture.source-dependencies": { configPath: "source-policy.yaml" } } }));
-      const inspect = () => spawnSync(process.execPath, [foundationCli, "check", "architecture.source-dependencies",
-        "--consumer", root, "--json"], { encoding: "utf8", timeout: 60_000 });
+      await writeFile(
+        join(root, "foundation.config.yaml"),
+        JSON.stringify({
+          schemaVersion: 2,
+          project: { id: "orchestrator-source-census-fixture" },
+          capabilities: {
+            "architecture.source-dependencies": { configPath: "source-policy.yaml" },
+          },
+        }),
+      );
+      const inspect = () =>
+        spawnSync(
+          process.execPath,
+          [
+            foundationCli,
+            "check",
+            "architecture.source-dependencies",
+            "--consumer",
+            root,
+            "--json",
+          ],
+          { encoding: "utf8", timeout: 60_000 },
+        );
       const baseline = inspect();
       assert.equal(baseline.error, undefined, baseline.stderr);
       assert.equal(baseline.status, 0, baseline.stdout);
@@ -94,7 +139,10 @@ test("source v3 rejects missing declared roots and unowned governed dist source"
       const rejected = inspect();
       assert.equal(rejected.error, undefined, rejected.stderr);
       assert.notEqual(rejected.status, 0, rejected.stdout);
-      assert.match(rejected.stdout, mutation === "missing-root" ? /SOURCE_DIRECTORY_UNAVAILABLE/u : /dist\/uncovered\.ts/u);
+      assert.match(
+        rejected.stdout,
+        mutation === "missing-root" ? /SOURCE_DIRECTORY_UNAVAILABLE/u : /dist\/uncovered\.ts/u,
+      );
     } finally {
       await rm(root, { recursive: true, force: true });
     }

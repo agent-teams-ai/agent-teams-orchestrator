@@ -179,11 +179,11 @@ business priority or proves that execution started.
 
 The initial classification candidate is:
 
-| Class | Meaning | Required treatment |
-| --- | --- | --- |
+| Class       | Meaning                                            | Required treatment                                                              |
+| ----------- | -------------------------------------------------- | ------------------------------------------------------------------------------- |
 | Interactive | Work needed to complete a current user interaction | Bounded preference within quota, with a fairness escape for other eligible work |
-| Scheduled | Planned autonomous execution | Explicit eligibility and deadline; a schedule does not imply low importance |
-| Maintenance | Deferrable work outside an active response | Eventual service under declared load and resource assumptions |
+| Scheduled   | Planned autonomous execution                       | Explicit eligibility and deadline; a schedule does not imply low importance     |
+| Maintenance | Deferrable work outside an active response         | Eventual service under declared load and resource assumptions                   |
 
 Classify by authorized purpose, not trigger name. A manual request is not an
 unlimited priority grant. A dependency-ready child or continuation may be on an

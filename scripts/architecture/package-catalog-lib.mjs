@@ -25,13 +25,8 @@ export async function walk(directory, predicate, options = {}) {
 
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
-  for (const entry of entries.toSorted((left, right) =>
-    left.name.localeCompare(right.name),
-  )) {
-    if (
-      entry.isDirectory() &&
-      (options.skipDirectories ?? []).includes(entry.name)
-    ) {
+  for (const entry of entries.toSorted((left, right) => left.name.localeCompare(right.name))) {
+    if (entry.isDirectory() && (options.skipDirectories ?? []).includes(entry.name)) {
       continue;
     }
 
@@ -55,10 +50,7 @@ export function parseFrontmatter(source, filePath) {
 
 export async function loadDocuments(repositoryRoot) {
   const docsRoot = path.join(repositoryRoot, "docs");
-  const markdownFiles = await walk(
-    docsRoot,
-    (filePath) => path.extname(filePath) === ".md",
-  );
+  const markdownFiles = await walk(docsRoot, (filePath) => path.extname(filePath) === ".md");
   const documents = new Map();
 
   for (const filePath of markdownFiles) {
@@ -76,25 +68,16 @@ export async function loadDocuments(repositoryRoot) {
 }
 
 export async function loadPackageCatalog(repositoryRoot) {
-  const catalogPath = path.join(
-    repositoryRoot,
-    "architecture/package-catalog.yaml",
-  );
+  const catalogPath = path.join(repositoryRoot, "architecture/package-catalog.yaml");
   return YAML.parse(await readFile(catalogPath, "utf8"));
 }
 
 export async function loadPackageMaterializationPolicy(repositoryRoot) {
-  const policyPath = path.join(
-    repositoryRoot,
-    "architecture/package-materialization-policy.yaml",
-  );
+  const policyPath = path.join(repositoryRoot, "architecture/package-materialization-policy.yaml");
   return YAML.parse(await readFile(policyPath, "utf8"));
 }
 
 export async function loadSourceDependencyPolicy(repositoryRoot) {
-  const policyPath = path.join(
-    repositoryRoot,
-    "architecture/source-dependency-policy.yaml",
-  );
+  const policyPath = path.join(repositoryRoot, "architecture/source-dependency-policy.yaml");
   return YAML.parse(await readFile(policyPath, "utf8"));
 }

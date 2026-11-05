@@ -5,6 +5,7 @@ status: accepted
 owner: architecture/quality
 summary: Required test layers, conformance suites, architecture checks, and quality gates.
 related:
+  - ADR-0117
   - ADR-0114
   - ADR-0115
   - ADR-0028
@@ -120,6 +121,22 @@ Test use cases through ports using deterministic fakes:
 - optimistic concurrency;
 - outbox creation;
 - failure mapping.
+
+### Get Modular composition qualification
+
+ADR-0117 selects Get Modular; the
+[module foundation gate](implementation-readiness-gates.md#module-foundation-before-business-expansion)
+owns activation evidence. Each real production root must use the central
+conformance kit with an independently written wiring oracle, failed/cancelled
+construction cases, and resource ownership evidence. Pure domain tests remain
+framework-free. Packed-artifact tests and supported-toolchain growth complement
+runtime smoke tests; none substitutes for actual nested source conformance.
+
+The current profile and Foundation compatibility tests prove only immutable
+binding, preserved flat coverage, and rejection of premature construct activation.
+They do not prove that existing features already use Get Modular or qualify its
+runtime, browser behavior, or scale. Add those claims only with their bounded
+consumer evidence, not by renaming an existing test.
 
 ### Contract tests
 
@@ -443,10 +460,10 @@ and provider-adapter evidence, including admission, custody, resources, and the
 advertised execution placement. Neither modeled traffic nor a successful RPC
 qualifies provider capacity, runtime connectivity, or a production SLO.
 
-| Deployment form | Additional qualification evidence |
-|---|---|
-| Compose server | Actual application/sidecar replica pairing, private network and selected resolver, authenticated readiness, stop order, restart, and bounded drain in the released composition |
-| Kubernetes server | Actual injected sidecars, discovery and peer identity, application and sidecar readiness, replica rollout/surge and termination, credential rotation, and bounded drain in the released cluster profile |
+| Deployment form              | Additional qualification evidence                                                                                                                                                                                              |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Compose server               | Actual application/sidecar replica pairing, private network and selected resolver, authenticated readiness, stop order, restart, and bounded drain in the released composition                                                 |
+| Kubernetes server            | Actual injected sidecars, discovery and peer identity, application and sidecar readiness, replica rollout/surge and termination, credential rotation, and bounded drain in the released cluster profile                        |
 | Native Fully Local V1 target | Installed-package role processes and sidecars under Supervisor custody, signed offline artifacts, protected endpoints, authenticated readiness, and each released OS/architecture tuple under the local lifecycle requirements |
 
 Compose and Kubernetes both require their own evidence; one does not qualify the

@@ -84,21 +84,19 @@ test("keeps the portable v3 profile thin and routes one Authoring v3 authority",
 });
 
 test("declares explicit reachability for every Orchestrator authoring type", async () => {
-  const profile = await readYaml(
-    "architecture/foundation/document-authoring.yaml",
-  );
+  const profile = await readYaml("architecture/foundation/document-authoring.yaml");
   const artifacts = Object.fromEntries(
     profile.authoring.artifactTypes.map((artifact) => [artifact.type, artifact]),
   );
-  const owners = Object.keys((await readYaml("docs/owners.yaml")).owners).toSorted(
-    (left, right) => Buffer.compare(Buffer.from(left), Buffer.from(right)),
+  const owners = Object.keys((await readYaml("docs/owners.yaml")).owners).toSorted((left, right) =>
+    Buffer.compare(Buffer.from(left), Buffer.from(right)),
   );
 
   assert.equal(profile.schemaVersion, 3);
   assert.equal(profile.authoring.ownerSets.schemaVersion, 1);
   assert.deepEqual(
-    profile.authoring.ownerSets.sets["registered-owners"].toSorted(
-      (left, right) => Buffer.compare(Buffer.from(left), Buffer.from(right)),
+    profile.authoring.ownerSets.sets["registered-owners"].toSorted((left, right) =>
+      Buffer.compare(Buffer.from(left), Buffer.from(right)),
     ),
     owners,
   );
@@ -109,6 +107,7 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
     "feature",
     "index",
     "open-decision",
+    "research",
     "runbook",
   ]);
   for (const artifact of Object.values(artifacts)) {
@@ -116,15 +115,26 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
     assert.equal(artifact.allowedOwnerIds, undefined);
   }
   assert.equal(
-    profile.authoring.artifactTypes.filter((artifact) =>
-      artifact.ownerSetId === "registered-owners",
+    profile.authoring.artifactTypes.filter(
+      (artifact) => artifact.ownerSetId === "registered-owners",
     ).length,
-    7,
-    "all seven types must preserve the registered-owner authoring boundary",
+    8,
+    "all eight types must preserve the registered-owner authoring boundary",
   );
-  assert.deepEqual(artifacts.index.placement, { kind: "qualified-leaf-index", root: "packages", requiredBasename: "README.md" });
-  assert.deepEqual(artifacts.index.identity.grammar, { prefixSegments: ["package"], minSuffixSegments: 1, maxSuffixSegments: 4 });
-  assert.deepEqual(artifacts.index.reachability, { kind: "manual-fixed-index", indexPath: "docs/README.md" });
+  assert.deepEqual(artifacts.index.placement, {
+    kind: "qualified-leaf-index",
+    root: "packages",
+    requiredBasename: "README.md",
+  });
+  assert.deepEqual(artifacts.index.identity.grammar, {
+    prefixSegments: ["package"],
+    minSuffixSegments: 1,
+    maxSuffixSegments: 4,
+  });
+  assert.deepEqual(artifacts.index.reachability, {
+    kind: "manual-fixed-index",
+    indexPath: "docs/README.md",
+  });
   assert.deepEqual(artifacts.adr.reachability, {
     kind: "manual-fixed-index",
     indexPath: "docs/decisions/README.md",
@@ -149,6 +159,19 @@ test("declares explicit reachability for every Orchestrator authoring type", asy
   assert.deepEqual(artifacts.runbook.reachability, {
     kind: "manual-fixed-index",
     indexPath: "docs/README.md",
+  });
+  assert.equal(artifacts.research.initialStatus, "active");
+  assert.deepEqual(artifacts.research.identity.grammar, {
+    prefixSegments: ["research"], minSuffixSegments: 1, maxSuffixSegments: 1,
+  });
+  assert.deepEqual(artifacts.research.placement, {
+    kind: "collection", directory: "docs/research", filename: "slug",
+  });
+  assert.deepEqual(artifacts.research.template, {
+    kind: "fenced-markdown-body", path: "docs/templates/research.md",
+  });
+  assert.deepEqual(artifacts.research.reachability, {
+    kind: "manual-fixed-index", indexPath: "docs/research/README.md",
   });
 });
 
@@ -196,7 +219,9 @@ test("pins current direct roots while package release-age waiting stays disabled
     "@agent-teams/engineering-foundation": "1.7.2",
   };
   assert.deepEqual(
-    Object.fromEntries(Object.entries(devDependencies).filter(([name]) => name.startsWith("@agent-teams/"))),
+    Object.fromEntries(
+      Object.entries(devDependencies).filter(([name]) => name.startsWith("@agent-teams/")),
+    ),
     roots,
   );
   assert.equal(workspace.minimumReleaseAge, 0);

@@ -5,6 +5,7 @@ status: accepted
 owner: architecture
 summary: Orchestrator adoption profile and local extensions for the organization Feature Module Standard v1.1, with gated activation of new constructs.
 related:
+  - ADR-0117
   - ADR-0012
   - ADR-0037
   - ADR-0038
@@ -448,6 +449,15 @@ not require serializing its values through Protobuf.
 
 ### Composition and dependency selection
 
+[ADR-0117](../decisions/0117-reconcile-mandatory-module-composition.md) reconciles
+mandatory use across applicable TypeScript package families with ADR-0113's
+unchanged exact Core/Assembly baseline and FMS v1.1 adoption. An independently
+assembled SDK or integration capability is not exempt merely because it is not
+a business context. Pure contracts and helpers need no artificial module. The
+[foundation gate](implementation-readiness-gates.md#module-foundation-before-business-expansion)
+requires actual seam inventory, migration, source checks and bounded qualification
+before broad expansion. No new construct is activated by this reconciliation.
+
 ADR-0113 selects the exact `@get-modular/core` and `@get-modular/assembly` 0.5.0
 pair for static composition. GM descriptors, `implement`, `input`, `group`,
 `entriesOf`, and `prepare({ modules })` belong to `composition/**` and composition
@@ -612,6 +622,18 @@ negative identity, digest, scope, authority, deviation, command, and construct
 activation cases. The profile check runs in `check:fast`; the check and its tests
 run in the complete
 `architecture:check` and root `pnpm check` gates.
+
+The conformance harness in
+`tooling/architecture-conformance/scripts/check-package-topology.mjs` invokes
+the root topology validator against disposable rejecting package fixtures.
+`architecture:topology` separately validates the checked-in repository.
+
+Mechanical normalization retains the pinned standard identity, source-policy
+scope, construct-activation inventory, and maintainability caps. Its review
+binds before/after source hashes and finite AST/comment comparison for code;
+JSON values and Markdown receive separate semantic review. A formatter pass
+confirms layout, while the profile, topology, rejecting conformance, and full
+native repository gates remain required.
 
 Orchestrator claims adoption of Feature Module Standard `v1.1`, not universal
 product correctness. Domain acceptance, security, reliability, deployment, and

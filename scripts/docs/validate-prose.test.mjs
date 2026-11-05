@@ -39,9 +39,7 @@ function run(command, args, input) {
 }
 
 async function withMarkdownFixture(content, assertion) {
-  const directory = await mkdtemp(
-    path.join(tmpdir(), "agent-teams-orchestrator-prose-"),
-  );
+  const directory = await mkdtemp(path.join(tmpdir(), "agent-teams-orchestrator-prose-"));
   const filePath = path.join(directory, "fixture.md");
   try {
     await writeFile(filePath, content);
@@ -81,14 +79,8 @@ test("CSpell rejects an unknown spelling error", async () => {
 });
 
 test("the project dictionary is sorted and unique", async () => {
-  const dictionaryPath = path.join(
-    repositoryRoot,
-    ".cspell",
-    "project-words.txt",
-  );
-  const words = (await readFile(dictionaryPath, "utf8"))
-    .split(/\r?\n/u)
-    .filter(Boolean);
+  const dictionaryPath = path.join(repositoryRoot, ".cspell", "project-words.txt");
+  const words = (await readFile(dictionaryPath, "utf8")).split(/\r?\n/u).filter(Boolean);
   const normalizedWords = words.map((word) => word.toLocaleLowerCase("en"));
 
   assert.deepEqual(
@@ -118,11 +110,22 @@ test("prose defaults include both governed Agent Context documents", async () =>
     await readFile(path.join(repositoryRoot, document), "utf8");
   }
   const cspell = JSON.parse(await readFile(path.join(repositoryRoot, ".cspell.json"), "utf8"));
-  const markdown = await readFile(path.join(repositoryRoot, "scripts/lint/markdownlint-cli2.mjs"), "utf8");
+  const markdown = await readFile(
+    path.join(repositoryRoot, "scripts/lint/markdownlint-cli2.mjs"),
+    "utf8",
+  );
   const vale = await readFile(valeRunnerPath, "utf8");
   assert.deepEqual(cspell.files, ["README.md", "AGENTS.md", "docs/**/*.md", ...governedDocuments]);
-  assert.deepEqual(literalTargetArray(markdown, /globs:\s*(\[[^\]]+\])/u),
-    ["README.md", "AGENTS.md", "docs/**/*.md", ...governedDocuments]);
-  assert.deepEqual(literalTargetArray(vale, /:\s*(\[[^\]]+\]);\s*const code = await run/u),
-    ["README.md", "AGENTS.md", "docs", ...governedDocuments]);
+  assert.deepEqual(literalTargetArray(markdown, /globs:\s*(\[[^\]]+\])/u), [
+    "README.md",
+    "AGENTS.md",
+    "docs/**/*.md",
+    ...governedDocuments,
+  ]);
+  assert.deepEqual(literalTargetArray(vale, /:\s*(\[[^\]]+\]);\s*const code = await run/u), [
+    "README.md",
+    "AGENTS.md",
+    "docs",
+    ...governedDocuments,
+  ]);
 });

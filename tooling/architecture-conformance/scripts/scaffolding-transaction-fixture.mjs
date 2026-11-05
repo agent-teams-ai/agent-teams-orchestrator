@@ -43,7 +43,12 @@ export function interruptScaffold(root, plan, phase = "after-journal-prepared", 
   const qualificationUrl = pathToFileURL(
     path.join(foundationPackageRoot(repositoryRoot), "dist/scaffolding/qualification.js"),
   ).href;
-  const result = spawnSync(process.execPath, ["--input-type=module", "--eval", `
+  const result = spawnSync(
+    process.execPath,
+    [
+      "--input-type=module",
+      "--eval",
+      `
     import { runScaffoldCrashQualification } from ${JSON.stringify(qualificationUrl)};
     let source = "";
     for await (const chunk of process.stdin) source += chunk;
@@ -53,12 +58,15 @@ export function interruptScaffold(root, plan, phase = "after-journal-prepared", 
       if (point.phase === phase && ++seen === occurrence) process.exit(73);
     });
     throw new Error("Requested scaffold crash cut was not reached");
-  `], {
-    cwd: repositoryRoot,
-    input: JSON.stringify({ root, plan, phase, occurrence }),
-    encoding: "utf8",
-    timeout: 60000,
-  });
+  `,
+    ],
+    {
+      cwd: repositoryRoot,
+      input: JSON.stringify({ root, plan, phase, occurrence }),
+      encoding: "utf8",
+      timeout: 60000,
+    },
+  );
   assert.equal(result.signal, null, `Scaffold crash cut signaled: ${result.error}`);
   assert.equal(result.status, 73, `Scaffold crash cut failed: ${result.stderr}`);
   console.log(`Scaffold crash cut: ${phase} occurrence=${occurrence} exit=73`);
@@ -66,10 +74,7 @@ export function interruptScaffold(root, plan, phase = "after-journal-prepared", 
 
 export async function assertPendingScaffold(root) {
   const repositoryRoot = fileURLToPath(new URL("../../..", import.meta.url));
-  const { inspectFoundationTransactionAwareMode } = await importFoundation(
-    repositoryRoot,
-    ".",
-  );
+  const { inspectFoundationTransactionAwareMode } = await importFoundation(repositoryRoot, ".");
   const { transaction } = await inspectFoundationTransactionAwareMode(root);
   assert.equal(transaction?.state, "pending");
   assert.equal(transaction.operationKind, "scaffolding");
@@ -80,9 +85,16 @@ export async function assertPublishedPrefix(root, plan, count) {
   for (const [index, operation] of plan.operations.entries()) {
     const pathname = path.join(root, operation.path);
     if (index < count) {
-      assert.deepEqual(await readFile(pathname), Buffer.from(operation.after.contentBase64, "base64"));
+      assert.deepEqual(
+        await readFile(pathname),
+        Buffer.from(operation.after.contentBase64, "base64"),
+      );
     } else {
-      assert.equal(await pathExists(pathname), false, `${operation.path} published before its crash cut`);
+      assert.equal(
+        await pathExists(pathname),
+        false,
+        `${operation.path} published before its crash cut`,
+      );
     }
   }
 }
@@ -90,8 +102,5 @@ export async function assertPublishedPrefix(root, plan, count) {
 export async function writeOperationPostimage(root, operation, source) {
   const pathname = path.join(root, operation.path);
   await mkdir(path.dirname(pathname), { recursive: true });
-  await writeFile(
-    pathname,
-    source ?? Buffer.from(operation.after.contentBase64, "base64"),
-  );
+  await writeFile(pathname, source ?? Buffer.from(operation.after.contentBase64, "base64"));
 }

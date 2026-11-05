@@ -4,10 +4,7 @@ const aliasFor = (modelIndex, stateId) =>
 
 const classifiedEvents = (spec, stateId, disposition) =>
   spec.transitions
-    .filter(
-      (transition) =>
-        transition.source === stateId && transition.disposition === disposition,
-    )
+    .filter((transition) => transition.source === stateId && transition.disposition === disposition)
     .map((transition) => transition.event)
     .toSorted();
 
@@ -18,9 +15,7 @@ const renderModel = (spec, modelIndex) => {
   ];
 
   for (const state of spec.states) {
-    lines.push(
-      `        state "${quote(state.label)}" as ${aliasFor(modelIndex, state.id)}`,
-    );
+    lines.push(`        state "${quote(state.label)}" as ${aliasFor(modelIndex, state.id)}`);
   }
 
   for (const item of spec.transitions.filter(

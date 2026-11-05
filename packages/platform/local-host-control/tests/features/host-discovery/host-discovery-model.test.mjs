@@ -24,10 +24,7 @@ test("rejects forged protocol range values at the JavaScript boundary", () => {
   ];
 
   for (const rangeArguments of invalidRanges) {
-    assert.throws(
-      () => Reflect.apply(hostProtocolRange, undefined, rangeArguments),
-      TypeError,
-    );
+    assert.throws(() => Reflect.apply(hostProtocolRange, undefined, rangeArguments), TypeError);
   }
 
   assert.throws(
@@ -42,17 +39,13 @@ test("rejects forged protocol range values at the JavaScript boundary", () => {
       ),
     (error) =>
       error instanceof TypeError &&
-      error.message ===
-        "HostProtocolRange minimum must be a HostProtocolVersion",
+      error.message === "HostProtocolRange minimum must be a HostProtocolVersion",
   );
 });
 
 test("snapshots validated protocol range values", () => {
   const minimum = { type: "HostProtocolVersion", value: 1n };
-  const range = Reflect.apply(hostProtocolRange, undefined, [
-    minimum,
-    hostProtocolVersion(2n),
-  ]);
+  const range = Reflect.apply(hostProtocolRange, undefined, [minimum, hostProtocolVersion(2n)]);
 
   minimum.value = 2n;
 
@@ -66,16 +59,10 @@ test("rejects oversized text values", () => {
 
 test("enforces signed and unsigned 64-bit exact-value bounds", () => {
   assert.equal(epochMicroseconds(-int64Magnitude).value, -int64Magnitude);
-  assert.equal(
-    epochMicroseconds(int64Magnitude - 1n).value,
-    int64Magnitude - 1n,
-  );
+  assert.equal(epochMicroseconds(int64Magnitude - 1n).value, int64Magnitude - 1n);
   assert.throws(() => epochMicroseconds(-int64Magnitude - 1n), TypeError);
   assert.throws(() => epochMicroseconds(int64Magnitude), TypeError);
-  assert.throws(
-    () => Reflect.apply(epochMicroseconds, undefined, [0]),
-    TypeError,
-  );
+  assert.throws(() => Reflect.apply(epochMicroseconds, undefined, [0]), TypeError);
 
   const uint64Maximum = uint64Modulus - 1n;
   for (const createToken of [hostBootGeneration, microseconds]) {

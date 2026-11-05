@@ -25,14 +25,14 @@ discovery or current architecture documentation.
 
 ## Authority split
 
-| Concern | Authority |
-|---|---|
-| Exact elements and directed relationships | `architecture/likec4/` |
-| Bounded-context package identity | `architecture/package-catalog.yaml` |
-| Boundary rationale and acceptance | ADRs and open decisions |
-| Ubiquitous Language, invariants, aggregates, and concurrency | Owning context dossier |
-| Wire shape and compatibility | Owning machine-readable contract |
-| Cross-context relationship rules | [Strategic context map](context-map.md) |
+| Concern                                                      | Authority                               |
+| ------------------------------------------------------------ | --------------------------------------- |
+| Exact elements and directed relationships                    | `architecture/likec4/`                  |
+| Bounded-context package identity                             | `architecture/package-catalog.yaml`     |
+| Boundary rationale and acceptance                            | ADRs and open decisions                 |
+| Ubiquitous Language, invariants, aggregates, and concurrency | Owning context dossier                  |
+| Wire shape and compatibility                                 | Owning machine-readable contract        |
+| Cross-context relationship rules                             | [Strategic context map](context-map.md) |
 
 The validator cross-checks sources where exact identity must agree. It does not
 copy domain semantics into the model.

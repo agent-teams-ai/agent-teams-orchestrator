@@ -37,17 +37,17 @@ Connect adapters. All invoke the same feature-owned application commands.
 The [package catalog](../../architecture/package-catalog.yaml) reserves these
 owners; reservation alone does not permit production materialization.
 
-| Owner | Reserved package | First feature responsibility |
-|---|---|---|
-| `team-topology` | `packages/contexts/team-topology` | Agent identity, immutable Team version and exclusive current assignment |
-| `run-orchestration` | `packages/contexts/run-orchestration` | `team-activation`, Run admission, occupancy, context activation, dispatch and cancellation processes |
-| `work-coordination` | `packages/contexts/work-coordination` | Task creation and metadata edits; sole Work lifecycle writer |
-| `agent-communication` | `packages/contexts/agent-communication` | Direct Conversation message commit and per-recipient delivery intent |
-| `agent-context` | `packages/contexts/agent-context` | Immutable minimal role/instruction/Work context manifest |
-| `execution-observation` | `packages/contexts/execution-observation` | Authorized normalized activity and protected diagnostics |
-| `integration/runtime` | `packages/integrations/runtime-gateway` | Stateless, separate command and event ACL adapters |
-| `clients/sdk` | `packages/sdk/orchestrator` | Connection-free handles, typed reads, waits and bounded subscriptions |
-| `architecture/composition` | `apps/orchestrator-server` | Accepted server composition; no business policy |
+| Owner                      | Reserved package                          | First feature responsibility                                                                         |
+| -------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `team-topology`            | `packages/contexts/team-topology`         | Agent identity, immutable Team version and exclusive current assignment                              |
+| `run-orchestration`        | `packages/contexts/run-orchestration`     | `team-activation`, Run admission, occupancy, context activation, dispatch and cancellation processes |
+| `work-coordination`        | `packages/contexts/work-coordination`     | Task creation and metadata edits; sole Work lifecycle writer                                         |
+| `agent-communication`      | `packages/contexts/agent-communication`   | Direct Conversation message commit and per-recipient delivery intent                                 |
+| `agent-context`            | `packages/contexts/agent-context`         | Immutable minimal role/instruction/Work context manifest                                             |
+| `execution-observation`    | `packages/contexts/execution-observation` | Authorized normalized activity and protected diagnostics                                             |
+| `integration/runtime`      | `packages/integrations/runtime-gateway`   | Stateless, separate command and event ACL adapters                                                   |
+| `clients/sdk`              | `packages/sdk/orchestrator`               | Connection-free handles, typed reads, waits and bounded subscriptions                                |
+| `architecture/composition` | `apps/orchestrator-server`                | Accepted server composition; no business policy                                                      |
 
 Scope, workspace, identity and access remain with the existing reserved owning
 contexts. Use one new explicitly test-only Project and registered sandbox Workspace;
@@ -106,15 +106,15 @@ the idempotency identity. Target and client generation fence facade state and
 handles; they never become runtime execution authority. Actor/member, grants and
 delegation come from authenticated context, not tool arguments.
 
-| Command descriptor | Feature payload | Durable result |
-|---|---|---|
-| `CreateTeam` | Bounded display name; one canonical Agent/profile-version reference; optional role key and default-coordinator reference | Team resource, immutable version, feature Operation |
-| `CreateRun` | Exact Team version, registered Workspace reference, explicit immutable Run policy and context requirements | Run resource and feature Operation; readiness remains separate |
-| `CreateTask` | Subject, description, project scope derived from context | Task resource and feature Operation, opaque ETag |
-| `UpdateTask` | Task resource, subject/description field mask, explicit present values, expected opaque ETag | Same Task resource, successor ETag and feature Operation |
-| `SendMessage` | Conversation reference, explicit direct recipient, bounded text, optional authorized Task reference and reply-to message | Immutable message resource, recipient delivery reference and feature Operation |
-| `PlanWork` | Run resource, Task resource and expected Task ETag, exact Run participant | Run-owned planned WorkPlacement and feature Operation returning Run reference |
-| `CancelRun` | Run resource and independently authorized cancellation reason | Run-owned cancellation Operation; technical stop remains runtime evidence |
+| Command descriptor | Feature payload                                                                                                          | Durable result                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `CreateTeam`       | Bounded display name; one canonical Agent/profile-version reference; optional role key and default-coordinator reference | Team resource, immutable version, feature Operation                            |
+| `CreateRun`        | Exact Team version, registered Workspace reference, explicit immutable Run policy and context requirements               | Run resource and feature Operation; readiness remains separate                 |
+| `CreateTask`       | Subject, description, project scope derived from context                                                                 | Task resource and feature Operation, opaque ETag                               |
+| `UpdateTask`       | Task resource, subject/description field mask, explicit present values, expected opaque ETag                             | Same Task resource, successor ETag and feature Operation                       |
+| `SendMessage`      | Conversation reference, explicit direct recipient, bounded text, optional authorized Task reference and reply-to message | Immutable message resource, recipient delivery reference and feature Operation |
+| `PlanWork`         | Run resource, Task resource and expected Task ETag, exact Run participant                                                | Run-owned planned WorkPlacement and feature Operation returning Run reference  |
+| `CancelRun`        | Run resource and independently authorized cancellation reason                                                            | Run-owned cancellation Operation; technical stop remains runtime evidence      |
 
 MCP exposes `task_create`, `task_get`, `task_list`, `task_update`, `message_send`
 and `message_list` for the bound Project/Run participant. Tool arguments never
@@ -144,15 +144,15 @@ objects; dirty worktree bytes are not admitted. Shared API SHA256 is
 shared Team DTO SHA256 is
 `2df382683684850399e7581e32945d315c7b93943812cf505df096ed8ff0eef9`.
 
-| Desktop IPC/DTO behavior oracle | New read/command owner and facade obligation |
-|---|---|
-| `TeamsAPI.createTeam`, `launchTeam`, `TeamCreateRequest` | Persist request/route before separate Team creation and Run activation; map `runId` to full saved Operation/Run identities |
-| `getProvisioningStatus`, `onProvisioningProgress`, `TeamProvisioningProgress` | Operation plus readiness snapshot/feed; facade stores cursor separately from cursor-less callback |
-| `cancelProvisioning`, `stop` | Authorized `CancelRun`; waiting cancellation never cancels business work |
-| `createTask`, `getTask`, `updateTaskFields` | Work commands/query with ETag; no TeamTaskWriter for new Team |
-| `sendMessage`, `getMessagesPage` | Conversation command and paginated read; preserve structured Task references and internal-message presentation |
-| `getData`, `list`, `getTeamAgentRuntime`, `TeamAgentRuntimeSnapshot` | Team/Run projections with freshness and readiness evidence; process liveness is insufficient |
-| `getMemberLogs`, task log/activity APIs, `onTeamChange` | Authorized Observation projection/feed, preserving chunks, `isMeta`, task/subagent filters; no transcript reader |
+| Desktop IPC/DTO behavior oracle                                               | New read/command owner and facade obligation                                                                               |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `TeamsAPI.createTeam`, `launchTeam`, `TeamCreateRequest`                      | Persist request/route before separate Team creation and Run activation; map `runId` to full saved Operation/Run identities |
+| `getProvisioningStatus`, `onProvisioningProgress`, `TeamProvisioningProgress` | Operation plus readiness snapshot/feed; facade stores cursor separately from cursor-less callback                          |
+| `cancelProvisioning`, `stop`                                                  | Authorized `CancelRun`; waiting cancellation never cancels business work                                                   |
+| `createTask`, `getTask`, `updateTaskFields`                                   | Work commands/query with ETag; no TeamTaskWriter for new Team                                                              |
+| `sendMessage`, `getMessagesPage`                                              | Conversation command and paginated read; preserve structured Task references and internal-message presentation             |
+| `getData`, `list`, `getTeamAgentRuntime`, `TeamAgentRuntimeSnapshot`          | Team/Run projections with freshness and readiness evidence; process liveness is insufficient                               |
+| `getMemberLogs`, task log/activity APIs, `onTeamChange`                       | Authorized Observation projection/feed, preserving chunks, `isMeta`, task/subagent filters; no transcript reader           |
 
 These are migration mappings, not a claim of byte-for-byte DTO qualification.
 Raw `cwd`, `extraCliArgs`, `skipPermissions`, PIDs and pane IDs have no public
@@ -354,17 +354,17 @@ because Project scope is shared. Observation always requires an authorized Run.
 
 ### Run process and cancellation table
 
-| Durable state and input | Next state and authority |
-|---|---|
-| Admitted plus activation intent | Activating; store child identities before dispatch |
-| Activating plus current context/runtime/tool evidence | Active; readiness projection advances independently |
-| Admitted/activating/active plus authorized cancellation | Cancelling; fence new product dispatch; commit runtime cutoff intent |
-| Cancelling plus confirmed target stop | Cancelled; release occupancy only after runtime containment evidence |
-| Cancelling plus unknown stop | Failed-unknown; retain occupancy, target references and cleanup obligation |
-| Cancelling/cancelled plus late ready/output | Record safe evidence only; no reactivation or Work completion |
-| Task created but planned placement fails | Keep Task and its receipt; report partial outcome; retry only same PlanWork identity after resolving its outcome |
-| Team created but Run admission fails | Preserve Team; failed child Operation; no implicit deletion |
-| Runtime acceptance response lost | Reconcile same command identity; no replacement session or replay |
+| Durable state and input                                 | Next state and authority                                                                                         |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Admitted plus activation intent                         | Activating; store child identities before dispatch                                                               |
+| Activating plus current context/runtime/tool evidence   | Active; readiness projection advances independently                                                              |
+| Admitted/activating/active plus authorized cancellation | Cancelling; fence new product dispatch; commit runtime cutoff intent                                             |
+| Cancelling plus confirmed target stop                   | Cancelled; release occupancy only after runtime containment evidence                                             |
+| Cancelling plus unknown stop                            | Failed-unknown; retain occupancy, target references and cleanup obligation                                       |
+| Cancelling/cancelled plus late ready/output             | Record safe evidence only; no reactivation or Work completion                                                    |
+| Task created but planned placement fails                | Keep Task and its receipt; report partial outcome; retry only same PlanWork identity after resolving its outcome |
+| Team created but Run admission fails                    | Preserve Team; failed child Operation; no implicit deletion                                                      |
+| Runtime acceptance response lost                        | Reconcile same command identity; no replacement session or replay                                                |
 
 Activation, dispatch/delivery and cancellation process state is feature-owned.
 The in-process scheduler retries only its committed intent with stable identity.
@@ -403,13 +403,13 @@ a real MCP handler, Connect parity, SDK binary encoding, desktop UI or provider
 execution. Later adapters must pass the same scenarios with actual transactions
 and crash injection at pre-commit, post-commit and response-loss boundaries.
 
-| Required readiness gate | Evidence contributed | Exact remaining production admission |
-|---|---|---|
-| 1: Run, Work, topology | Proposed single-member ownership, metadata-only Work and duplicate/stale/unknown fixtures | Root acceptance of scoped S3/S4 and metadata-only Task model under OD-006; cancellation/partial outcomes now specified below, real adapter conformance follows admission |
-| 2: Communication and Context | Direct message authority/evidence separation; minimum immutable manifest | Record direct Conversation audience/delivery bounds under OD-026; explicit exclusion of Attention automation, group routing and external notifications |
-| 3: SDK/Desktop | Exact oracle revisions, DTO mapping, route and replay model | Accept OD-010 slice; proposed feature Protobuf/resource/presence/expiry and minimal Observation sources now versioned; real direct SDK/Connect/facade conformance follows admission |
-| 4: Durable processes | Stable activation/dispatch/cancellation identities; unknown reconciliation | Persist process checkpoints/outbox and prove crash matrix through in-process scheduler; future Temporal map retains those identities |
-| 5: Deployment/authority | Existing server target, current authorization and target-generation fixture | Bind server authority and runtime test adapter under OD-012/OD-004; no profile qualification or local-device claim |
+| Required readiness gate      | Evidence contributed                                                                      | Exact remaining production admission                                                                                                                                                |
+| ---------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1: Run, Work, topology       | Proposed single-member ownership, metadata-only Work and duplicate/stale/unknown fixtures | Root acceptance of scoped S3/S4 and metadata-only Task model under OD-006; cancellation/partial outcomes now specified below, real adapter conformance follows admission            |
+| 2: Communication and Context | Direct message authority/evidence separation; minimum immutable manifest                  | Record direct Conversation audience/delivery bounds under OD-026; explicit exclusion of Attention automation, group routing and external notifications                              |
+| 3: SDK/Desktop               | Exact oracle revisions, DTO mapping, route and replay model                               | Accept OD-010 slice; proposed feature Protobuf/resource/presence/expiry and minimal Observation sources now versioned; real direct SDK/Connect/facade conformance follows admission |
+| 4: Durable processes         | Stable activation/dispatch/cancellation identities; unknown reconciliation                | Persist process checkpoints/outbox and prove crash matrix through in-process scheduler; future Temporal map retains those identities                                                |
+| 5: Deployment/authority      | Existing server target, current authorization and target-generation fixture               | Bind server authority and runtime test adapter under OD-012/OD-004; no profile qualification or local-device claim                                                                  |
 
 ADR-0103 accepts this exact scoped implementation contract under the owner's
 A-F mandate after root technical review. The readiness document links scoped
