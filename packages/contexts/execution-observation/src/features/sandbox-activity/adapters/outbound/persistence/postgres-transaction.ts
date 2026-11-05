@@ -26,12 +26,16 @@ export async function activityTransaction<T>(pool: Pool, context: ActivityReques
   }
   // Keep the checkout error listener until release transfers custody to the pool.
   // A release-time fault after COMMIT is uncertain, never a confirmed receipt.
-  let released=false;
-  try {client.release(isBroken());released=true;}catch{health.broken=true;}
-  if(released){client.removeListener('error',onError);}
+  releaseActivityCheckout(client,health,onError);
   if(outcome.kind==='failure'){throw outcome.error;}
   if(isBroken()){throw new SandboxActivityError('UNAVAILABLE','Observation release requires same-source reconciliation');}
   return outcome.value;
+}
+/** Release with the checkout listener still attached; keep it if transfer throws. */
+export function releaseActivityCheckout(client:PoolClient,health:{broken:boolean},onError:()=>void):void {
+  let released=false;
+  try {client.release(health.broken);released=true;}catch{health.broken=true;}
+  if(released){client.removeListener('error',onError);}
 }
 export function activitySqlInstant(value:string):string {
   if(!/^-?(?:0|[1-9][0-9]*)$/u.test(value) || value==='-0') {throw new SandboxActivityError('INVALID_ARGUMENT','Invalid exact instant');}
