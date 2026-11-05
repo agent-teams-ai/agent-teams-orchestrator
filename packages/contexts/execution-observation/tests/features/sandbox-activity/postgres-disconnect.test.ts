@@ -22,6 +22,41 @@ await test('Activity transactions and migrations survive termination of their ch
   }finally{await cluster.stop([cluster.owner,cluster.runtime]);}
 });
 
+await test('real PostgreSQL keeps the committed Activity binding when release confirmation is lost',{skip:process.env.RUN_CONTEXT_OBSERVATION_PG!=='1',timeout:90000},async()=>{
+  const cluster=await ownedPostgres();
+  const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_human'};
+  const binding={run:`${context.projectId}/runs/lost-release`,participant:`${context.projectId}/participants/member`,runtimeSessionRef:'runtime:lost-release'};
+  const feature=make(cluster.runtime,cluster.owner);
+  const connect=cluster.runtime.connect.bind(cluster.runtime);
+  let releases=0;
+  try{
+    await feature.migrate();
+    await cluster.owner.query('GRANT USAGE ON SCHEMA execution_observation TO test_runtime');
+    await cluster.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');
+    Object.defineProperty(cluster.runtime,'connect',{configurable:true,value:async()=>{
+      const client=await connect();
+      const release=client.release.bind(client);
+      Object.defineProperty(client,'release',{value:()=>{
+        releases++;
+        release(true);
+        throw new Error('TEST release acknowledgement lost after COMMIT');
+      }});
+      return client;
+    }});
+    await assert.rejects(()=>feature.bindRuntime(context,binding),{name:'SandboxActivityError',code:'UNAVAILABLE'});
+    assert.equal(releases,1,'the uncertain write must not be attempted again');
+    const persisted=await cluster.owner.query<{count:string;session:string}>(
+      "SELECT count(*)::text AS count,max(state->'binding'->>'runtimeSessionRef') AS session FROM execution_observation.partitions WHERE run=$1",
+      [binding.run]
+    );
+    assert.equal(persisted.rows[0]?.count,'1','the original write physically committed');
+    assert.equal(persisted.rows[0]?.session,binding.runtimeSessionRef);
+  }finally{
+    Object.defineProperty(cluster.runtime,'connect',{configurable:true,value:connect});
+    await cluster.stop([cluster.owner,cluster.runtime]);
+  }
+});
+
 await test('an ended actual PostgreSQL Pool returns typed unavailable for Activity reads, ingress and migration',async()=>{
   const pool=new Pool({max:1});await pool.end();const feature=make(pool,pool);
   const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_human'};
