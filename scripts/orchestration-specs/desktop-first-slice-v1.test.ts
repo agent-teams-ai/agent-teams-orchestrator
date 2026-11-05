@@ -154,7 +154,7 @@ test(`${fixtureVersion}: authentication is current even when receipt already exi
 
 test(`${fixtureVersion}: same request ID remains isolated across authenticated Projects`, () => {
   const state = model();
-  const requestId = "shared-request-id";
+  const requestId = "550e8400-e29b-41d4-a716-446655440000";
   const otherScope = "tenants/test/projects/other-sandbox";
   const otherAuthority: Authority = { scope: otherScope, subject: "other-member", writable: true };
   const first = create(requestId);
@@ -171,6 +171,12 @@ test(`${fixtureVersion}: same request ID remains isolated across authenticated P
   assert.deepEqual(accept(state, second, otherAuthority), secondReceipt);
   assert.equal(accept(state, first, otherAuthority), "FORBIDDEN");
   assert.equal(accept(state, second, authority), "FORBIDDEN");
+  assert.equal(
+    accept(state, { ...first, payload: { ...first.payload, subject: "Conflicting task" } }, authority),
+    "REQUEST_CONFLICT",
+    "the first Project's idempotency conflict does not alter the second Project's receipt",
+  );
+  assert.deepEqual(accept(state, second, otherAuthority), secondReceipt);
   assert.equal(state.commits, 2n, "one effect per authorized Project");
 });
 
