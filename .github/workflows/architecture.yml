@@ -38,10 +38,6 @@ jobs:
           echo "TEST_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
           echo "RUN_CONTEXT_OBSERVATION_PG=1" >> "$GITHUB_ENV"
       - run: pnpm check
-      # Temporary failure-only witness: remove before final qualification.
-      - name: Diagnose installed typed quality fixture on failure
-        if: failure()
-        run: node --test --test-name-pattern "installed typed gate rejects an unknown assertion bridge by default" scripts/architecture/quality-source-coverage.test.mjs
       - name: Run advisory quality diagnostics
         continue-on-error: true
         run: pnpm quality:diagnostic
