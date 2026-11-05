@@ -23,10 +23,12 @@ across many runtimes, local and hosted deployments, multiple clients and languag
 multi-tenancy, and future bounded-context extraction.
 
 The [service role map](deployment-profiles.md#service-role-map) commits the
-coarse process boundaries and server target of thousands of concurrently running
-agents now. Their first owning features establish those boundaries rather than
-leaving extraction to a later reminder. This horizon changes the required
-evidence; it does not permit speculative abstractions without an owner.
+coarse process boundaries, while the
+[concurrent execution target](deployment-profiles.md#concurrent-execution-target)
+owns the minimum useful and enterprise deployment goals. First owning features
+establish those boundaries rather than leaving extraction to a later reminder.
+This horizon changes the required evidence; it does not permit speculative
+abstractions without an owner.
 
 ## Priority quality attributes
 
