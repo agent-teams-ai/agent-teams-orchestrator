@@ -123,9 +123,9 @@ before a high-cost boundary violation.
   capabilities in other TypeScript package families; private cohesive helpers
   stay ordinary code. Complete the bounded module foundation before broad
   feature expansion; do not create a second handwritten assembly path.
-- Design for thousands of simultaneously running agents across independent Runs,
-  including Runs within one team and tenant, under the
+- Keep both convenient one-agent operation and enterprise execution within the
   [concurrent execution target](docs/architecture/deployment-profiles.md#concurrent-execution-target).
+  Exercise independent Runs including concentrated load within one team and tenant.
   Qualify per-Run capacity separately. Follow the accepted
   [service role map](docs/architecture/deployment-profiles.md#service-role-map)
   and its Compose, Kubernetes, and native-local V1 mappings. A semantic
