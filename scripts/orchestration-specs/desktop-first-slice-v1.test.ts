@@ -62,9 +62,10 @@ function accept(state: Model, command: Command, trusted: Authority): Result {
     return prior.fingerprint === fingerprint(command) ? prior.receipt : "REQUEST_CONFLICT";
   }
   const resource = command.payload["resource"];
-  // CreateTask has no caller-selected resource in the admitted public payload.
-  // Reject a foreign reference rather than persisting it as Task metadata.
-  if (command.descriptor === "CreateTask" && resource !== undefined) {
+  // The accepted CreateTask payload has only subject/description. Reject every
+  // extra field before receipt lookup/effect; not just the known "resource" key.
+  if (command.descriptor === "CreateTask" &&
+      Object.keys(command.payload).some((field) => field !== "subject" && field !== "description")) {
     return "INVALID_ARGUMENT";
   }
   if (command.descriptor === "UpdateTask") {
@@ -235,12 +236,17 @@ test(`${fixtureVersion}: creation rejects a supplied foreign resource before adm
   const snapshot = structuredClone(foreignRecord);
 
   const requested = create("550e8400-e29b-41d4-a716-446655440003");
-  assert.equal(accept(state, {
-    ...requested,
-    payload: { subject: "Local new task", resource: foreign.resource },
-  }, authority), "INVALID_ARGUMENT", "CreateTask cannot admit an unowned resource reference");
-  assert.equal(state.commits, 1n, "invalid command has no receipt or side effect");
-  assert.equal(state.resources.size, 1, "foreign-only state remains unchanged");
+  for (const payload of [
+    { subject: "Local new task", resource: foreign.resource },
+    { subject: "Local new task", projectId: "other-sandbox" },
+    { subject: "Local new task", unknownField: "untrusted" },
+  ]) {
+    assert.equal(accept(state, { ...requested, payload }, authority), "INVALID_ARGUMENT",
+      "CreateTask does not admit unrecognized fields before owner effects");
+    assert.equal(state.commits, 1n, "invalid command has no receipt or side effect");
+    assert.equal(state.ledger.size, 1, "invalid payload did not reserve the request ID");
+    assert.equal(state.resources.size, 1, "foreign-only state remains unchanged");
+  }
 
   const created = committed(accept(state, {
     ...requested,
