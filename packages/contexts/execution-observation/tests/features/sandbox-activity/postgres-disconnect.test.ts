@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {Pool} from 'pg';
+import {Client,Pool} from 'pg';
+import {ActivityAdmissionError} from '../../../dist/features/sandbox-activity/domain/activity-admission.js';
+import {activityTransaction} from '../../../dist/features/sandbox-activity/adapters/outbound/persistence/postgres-transaction.js';
 import {createSandboxActivityFeature} from '../../../dist/index.js';
 import {ownedPostgres} from './pg-fixture.ts';
 import {terminateOwnedCheckout} from './terminate-backend.ts';
@@ -27,4 +29,44 @@ await test('an ended actual PostgreSQL Pool returns typed unavailable for Activi
   await assert.rejects(()=>feature.bindRuntime(context,binding),{name:'SandboxActivityError',code:'UNAVAILABLE',message:'Observation connection is unavailable'});
   await assert.rejects(()=>feature.api.listActivity(context,{run:binding.run,pageSize:1}),{name:'SandboxActivityError',code:'UNAVAILABLE',message:'Observation connection is unavailable'});
   await assert.rejects(()=>feature.migrate(),{name:'SandboxActivityError',code:'UNAVAILABLE',message:'Migration connection is unavailable'});
+});
+
+await test('release-time PostgreSQL checkout faults cannot confirm Activity reads or writes',async()=>{
+  const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_human'};
+  for(const readOnly of [false,true] as const){
+    for(const mode of ['socket-error','release-throws'] as const){
+      const pool=new Pool();const client=new Client();const queries:string[]=[];let releases=0;
+      Object.defineProperty(pool,'connect',{value:async()=>client});
+      Object.defineProperty(client,'query',{value:async(sql:string)=>{queries.push(sql);return {rows:[]};}});
+      Object.defineProperty(client,'release',{value:()=>{
+        releases++;
+        if(mode==='socket-error'){client.emit('error',new Error('TEST socket fault at release'));}
+        else {throw new Error('TEST release transfer failed');}
+      }});
+      try {
+        await assert.rejects(()=>activityTransaction(pool,context,async()=> 'TEST committed result',readOnly),{code:'UNAVAILABLE'});
+        assert.equal(releases,1);
+        assert.equal(queries.filter(query=>query==='COMMIT').length,1);
+        assert.equal(queries.filter(query=>query==='ROLLBACK').length,0);
+        assert.equal(client.listenerCount('error'),mode==='release-throws'?1:0,'keep the checkout listener if custody transfer failed');
+      } finally {await pool.end();}
+    }
+  }
+});
+
+await test('pre-COMMIT Activity conflict survives a throwing PostgreSQL release',async()=>{
+  const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_human'};
+  const pool=new Pool();const client=new Client();const queries:string[]=[];let releases=0;
+  Object.defineProperty(pool,'connect',{value:async()=>client});
+  Object.defineProperty(client,'query',{value:async(sql:string)=>{queries.push(sql);return {rows:[]};}});
+  Object.defineProperty(client,'release',{value:()=>{releases++;throw new Error('TEST release failed');}});
+  try {
+    await assert.rejects(()=>activityTransaction(pool,context,async()=>{
+      throw new ActivityAdmissionError('CONFLICT','TEST source identity conflict');
+    }),{code:'CONFLICT',message:'TEST source identity conflict'});
+    assert.equal(releases,1);
+    assert.equal(queries.filter(query=>query==='COMMIT').length,0);
+    assert.equal(queries.filter(query=>query==='ROLLBACK').length,1);
+    assert.equal(client.listenerCount('error'),1);
+  } finally {await pool.end();}
 });
