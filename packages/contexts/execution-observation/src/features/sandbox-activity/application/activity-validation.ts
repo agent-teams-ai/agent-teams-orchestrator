@@ -4,9 +4,11 @@ const segment = /^[A-Za-z0-9_-]+$/u;
 export function activityScope(context: ActivityRequestContext): void {
   // An inbound serialized authority snapshot can be structurally malformed at runtime.
   // Reject it before dereferencing or consulting authorization/storage.
-  if (context === null || typeof context !== 'object' ||
-      typeof context.tenantId !== 'string' || typeof context.projectId !== 'string' ||
-      typeof context.principalId !== 'string') {
+  const serialized: unknown = context;
+  if (serialized === null || typeof serialized !== 'object' ||
+      !('tenantId' in serialized) || typeof serialized.tenantId !== 'string' ||
+      !('projectId' in serialized) || typeof serialized.projectId !== 'string' ||
+      !('principalId' in serialized) || typeof serialized.principalId !== 'string') {
     throw new SandboxActivityError('PERMISSION_DENIED', 'Activity scope does not match authenticated authority');
   }
   const parts = context.projectId.split('/');
@@ -22,7 +24,8 @@ export function activityResource(context: ActivityRequestContext, value: string,
 export function activityBinding(context: ActivityRequestContext, binding: ActivityRuntimeBinding): void {
   // Inbound serialized bodies are not guaranteed to match their TypeScript type.
   // Reject null/arrays before dereferencing, without invoking authorization or storage.
-  if (binding === null || typeof binding !== 'object' || Array.isArray(binding)) {
+  const serialized: unknown = binding;
+  if (serialized === null || typeof serialized !== 'object' || Array.isArray(serialized)) {
     throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity runtime binding');
   }
   activityResource(context,binding.run,'runs'); activityResource(context,binding.participant,'participants');
