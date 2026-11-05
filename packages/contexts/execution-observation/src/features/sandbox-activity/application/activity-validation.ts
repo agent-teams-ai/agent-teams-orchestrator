@@ -2,6 +2,13 @@ import { SandboxActivityError } from './api.js';
 import type { ActivityEvidence, ActivityRequestContext, ActivityRuntimeBinding } from './api.js';
 const segment = /^[A-Za-z0-9_-]+$/u;
 export function activityScope(context: ActivityRequestContext): void {
+  // An inbound serialized authority snapshot can be structurally malformed at runtime.
+  // Reject it before dereferencing or consulting authorization/storage.
+  if (context === null || typeof context !== 'object' ||
+      typeof context.tenantId !== 'string' || typeof context.projectId !== 'string' ||
+      typeof context.principalId !== 'string') {
+    throw new SandboxActivityError('PERMISSION_DENIED', 'Activity scope does not match authenticated authority');
+  }
   const parts = context.projectId.split('/');
   if (parts.length !== 4 || parts[0] !== 'tenants' || parts[2] !== 'projects' || parts[1] !== context.tenantId ||
       !segment.test(parts[1]) || !segment.test(parts[3] ?? '') || !context.principalId.trim()) {
