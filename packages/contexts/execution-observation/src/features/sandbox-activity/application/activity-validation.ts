@@ -20,6 +20,11 @@ export function activityResource(context: ActivityRequestContext, value: string,
   if (typeof value !== 'string' || !value.startsWith(prefix) || !segment.test(value.slice(prefix.length))) {throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity resource scope');}
 }
 export function activityBinding(context: ActivityRequestContext, binding: ActivityRuntimeBinding): void {
+  // Inbound serialized bodies are not guaranteed to match their TypeScript type.
+  // Reject null/arrays before dereferencing, without invoking authorization or storage.
+  if (binding === null || typeof binding !== 'object' || Array.isArray(binding)) {
+    throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity runtime binding');
+  }
   activityResource(context,binding.run,'runs'); activityResource(context,binding.participant,'participants');
   if (binding.task !== undefined) {activityResource(context,binding.task,'tasks');}
   if (typeof binding.runtimeSessionRef !== 'string' || !/^[A-Za-z0-9:._/-]{1,512}$/u.test(binding.runtimeSessionRef)) {throw new SandboxActivityError('INVALID_ARGUMENT','Invalid opaque runtime reference');}
