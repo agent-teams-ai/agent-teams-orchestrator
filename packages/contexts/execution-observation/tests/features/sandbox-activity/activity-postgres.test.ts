@@ -68,7 +68,20 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
     await assert.rejects(()=>loss.append(context,committed),{code:'UNAVAILABLE'});
     assert.equal((await feature.append(context,committed)).status,'duplicate');
     assert.equal((await pools.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.outbox')).rows[0]?.count,'10');
+    // Release can fail after COMMIT; no false success or new-source retry on uncertain ACK.
+    let loseRelease=true;
+    const lostReleasePool=new Proxy(pools.runtime,{get(target,key){
+      if(key!=='connect'){return Reflect.get(target,key);}
+      return async()=>{const borrowed=await target.connect();return new Proxy(borrowed,{get(connection,property){
+        if(property==='release'){return (broken?:boolean)=>{connection.release(broken);if(loseRelease){loseRelease=false;throw new Error('TEST release ACK lost');}};}
+        return Reflect.get(connection,property);
+      }});};
+    }});
+    const released=evidence('12','release response lost',{blockId:'release-response'});
+    await assert.rejects(()=>make(lostReleasePool).append(context,released),{code:'UNAVAILABLE',message:'Observation release requires same-source reconciliation'});
+    assert.equal((await feature.append(context,released)).status,'duplicate');
+    assert.equal((await pools.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.outbox')).rows[0]?.count,'11');
     await pools.owner.query("CREATE FUNCTION execution_observation.test_reject() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'TEST rollback'; END $$");await pools.owner.query('CREATE TRIGGER test_rollback BEFORE INSERT ON execution_observation.outbox FOR EACH ROW EXECUTE FUNCTION execution_observation.test_reject()');
-    await assert.rejects(()=>feature.append(context,evidence('12','must rollback',{blockId:'failure'})),{code:'UNAVAILABLE'});assert.equal((await feature.api.listActivity(context,{run,pageSize:10})).watermark,'10');
+    await assert.rejects(()=>feature.append(context,evidence('13','must rollback',{blockId:'failure'})),{code:'UNAVAILABLE'});assert.equal((await feature.api.listActivity(context,{run,pageSize:10})).watermark,'11');
   }finally{await cluster.stop([pools.owner,pools.runtime]);}
 });

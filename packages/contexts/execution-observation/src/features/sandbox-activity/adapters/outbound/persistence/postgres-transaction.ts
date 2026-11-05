@@ -22,7 +22,11 @@ export async function activityTransaction<T>(pool: Pool, context: ActivityReques
     if(!isBroken() && error instanceof ActivityAdmissionError){throw new SandboxActivityError(error.code,error.message);}
     if(!isBroken() && error instanceof SandboxActivityError) {throw error;}
     throw new SandboxActivityError('UNAVAILABLE','Observation persistence requires same-source reconciliation');
-  } finally {client.removeListener('error',onError);client.release(isBroken());}
+  } finally {
+    client.removeListener('error',onError);
+    try {client.release(isBroken());}
+    catch {throw new SandboxActivityError('UNAVAILABLE','Observation release requires same-source reconciliation');}
+  }
 }
 export function activitySqlInstant(value:string):string {
   if(!/^-?(?:0|[1-9][0-9]*)$/u.test(value) || value==='-0') {throw new SandboxActivityError('INVALID_ARGUMENT','Invalid exact instant');}
