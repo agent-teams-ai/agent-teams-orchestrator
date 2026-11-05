@@ -84,7 +84,9 @@ function checkedOut(mode: ReleaseMode) {
       if (mode === "socket-error") {
         client.emit("error", new Error("TEST socket error during release"));
       }
-      if (mode === "release-throws") throw new Error("TEST private release failure");
+      if (mode === "release-throws") {
+        throw new Error("TEST private release failure");
+      }
     },
   });
   const pool = new Pool({ max: 1 });
