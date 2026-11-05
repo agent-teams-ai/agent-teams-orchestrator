@@ -83,7 +83,7 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
     assert.equal((await pools.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.outbox')).rows[0]?.count,'11');
     // PostgreSQL BEFORE UPDATE triggers may silently suppress a write (rowCount=0).
     // This must not acknowledge the source event or commit an unmatched outbox row.
-    await pools.owner.query("CREATE FUNCTION execution_observation.test_skip_state_update() RETURNS trigger LANGUAGE plpgsql AS $ BEGIN RETURN NULL; END $");
+    await pools.owner.query("CREATE FUNCTION execution_observation.test_skip_state_update() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NULL; END $$");
     await pools.owner.query('CREATE TRIGGER test_skip_state_update BEFORE UPDATE ON execution_observation.partitions FOR EACH ROW EXECUTE FUNCTION execution_observation.test_skip_state_update()');
     await assert.rejects(()=>feature.append(context,evidence('13','silently skipped state',{blockId:'suppressed-update'})),
       {code:'UNAVAILABLE',message:'Observation state update requires same-source reconciliation'});
@@ -91,7 +91,7 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
     assert.equal((await feature.api.listActivity(context,{run,pageSize:10})).watermark,'11');
     await pools.owner.query('DROP TRIGGER test_skip_state_update ON execution_observation.partitions');
     await pools.owner.query('DROP FUNCTION execution_observation.test_skip_state_update()');
-    await pools.owner.query("CREATE FUNCTION execution_observation.test_reject() RETURNS trigger LANGUAGE plpgsql AS $ BEGIN RAISE EXCEPTION 'TEST rollback'; END $");await pools.owner.query('CREATE TRIGGER test_rollback BEFORE INSERT ON execution_observation.outbox FOR EACH ROW EXECUTE FUNCTION execution_observation.test_reject()');
+    await pools.owner.query("CREATE FUNCTION execution_observation.test_reject() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'TEST rollback'; END $$");await pools.owner.query('CREATE TRIGGER test_rollback BEFORE INSERT ON execution_observation.outbox FOR EACH ROW EXECUTE FUNCTION execution_observation.test_reject()');
     await assert.rejects(()=>feature.append(context,evidence('13','must rollback',{blockId:'failure'})),{code:'UNAVAILABLE'});assert.equal((await feature.api.listActivity(context,{run,pageSize:10})).watermark,'11');
   }finally{await cluster.stop([pools.owner,pools.runtime]);}
 });
