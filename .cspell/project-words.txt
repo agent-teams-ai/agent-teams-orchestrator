@@ -1,5 +1,6 @@
 AgentRuntime
 AgentTeams
+Agno
 Awilix
 backpressure
 bootstrapper
@@ -7,6 +8,7 @@ boundedness
 carryforward
 Centrifugo
 checkpointed
+checkpointer
 checkpointing
 CloudEvents
 Codex
@@ -16,11 +18,14 @@ Cordis
 custodied
 Dapr
 DBOS
+dedup
+Dify
 Dinero
 Drizzle
 effectful
 forgeable
 frontmatter
+HITL
 idempotency
 idempotent
 idempotently
@@ -32,6 +37,7 @@ Kratos
 Kysely
 Lage
 LangGraph
+Letta
 libpq
 likec
 livelock
@@ -46,6 +52,7 @@ OpenCode
 OpenTelemetry
 ORAS
 outbox
+overengineering
 Oxlint
 oxlintrc
 Pagefind
@@ -53,7 +60,9 @@ PITR
 ponyfill
 ponyfills
 PostgreSQL
+preauthorized
 preflights
+Pydantic
 readback
 reauthentication
 reindexing
@@ -78,6 +87,7 @@ Ubiquitous
 undispatched
 unredacted
 unrepresentable
+unstarted
 upcaster
 upcasters
 upcasting
