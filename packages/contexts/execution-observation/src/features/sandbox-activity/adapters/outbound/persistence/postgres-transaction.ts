@@ -23,9 +23,14 @@ export async function activityTransaction<T>(pool: Pool, context: ActivityReques
     if(!isBroken() && error instanceof SandboxActivityError) {throw error;}
     throw new SandboxActivityError('UNAVAILABLE','Observation persistence requires same-source reconciliation');
   } finally {
-    client.removeListener('error',onError);
-    try {client.release(isBroken());}
-    catch {throw new SandboxActivityError('UNAVAILABLE','Observation release requires same-source reconciliation');}
+    // The checkout remains under error observation through release itself:
+    // a synchronous fault during custody transfer cannot confirm a COMMIT.
+    let releaseFailed=false;
+    try {client.release(isBroken());} catch {releaseFailed=true;}
+    finally {client.removeListener('error',onError);}
+    if(releaseFailed || isBroken()) {
+      throw new SandboxActivityError('UNAVAILABLE','Observation release requires same-source reconciliation');
+    }
   }
 }
 export function activitySqlInstant(value:string):string {
