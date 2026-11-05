@@ -93,7 +93,7 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
     await pools.owner.query('DROP FUNCTION execution_observation.test_skip_state_update()');
     // BEFORE INSERT can also silently suppress the durable outbox row. Both
     // the state update and receipt must be rolled back if no row was inserted.
-    await pools.owner.query("CREATE FUNCTION execution_observation.test_skip_outbox_insert() RETURNS trigger LANGUAGE plpgsql AS $ BEGIN RETURN NULL; END $");
+    await pools.owner.query("CREATE FUNCTION execution_observation.test_skip_outbox_insert() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NULL; END $$");
     await pools.owner.query('CREATE TRIGGER test_skip_outbox_insert BEFORE INSERT ON execution_observation.outbox FOR EACH ROW EXECUTE FUNCTION execution_observation.test_skip_outbox_insert()');
     await assert.rejects(()=>feature.append(context,evidence('13','silently skipped outbox',{blockId:'suppressed-outbox'})),
       {code:'UNAVAILABLE',message:'Observation outbox insert requires same-source reconciliation'});
@@ -101,7 +101,7 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
     assert.equal((await pools.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.outbox')).rows[0]?.count,'11');
     await pools.owner.query('DROP TRIGGER test_skip_outbox_insert ON execution_observation.outbox');
     await pools.owner.query('DROP FUNCTION execution_observation.test_skip_outbox_insert()');
-    await pools.owner.query("CREATE FUNCTION execution_observation.test_reject()" RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'TEST rollback'; END $$");await pools.owner.query('CREATE TRIGGER test_rollback BEFORE INSERT ON execution_observation.outbox FOR EACH ROW EXECUTE FUNCTION execution_observation.test_reject()');
+    await pools.owner.query("CREATE FUNCTION execution_observation.test_reject() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'TEST rollback'; END $$");await pools.owner.query('CREATE TRIGGER test_rollback BEFORE INSERT ON execution_observation.outbox FOR EACH ROW EXECUTE FUNCTION execution_observation.test_reject()');
     await assert.rejects(()=>feature.append(context,evidence('13','must rollback',{blockId:'failure'})),{code:'UNAVAILABLE'});assert.equal((await feature.api.listActivity(context,{run,pageSize:10})).watermark,'11');
     await pools.owner.query('DROP TRIGGER test_rollback ON execution_observation.outbox');
     await pools.owner.query('DROP FUNCTION execution_observation.test_reject()');
