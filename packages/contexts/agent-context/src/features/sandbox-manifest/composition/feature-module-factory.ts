@@ -9,7 +9,7 @@ import type {
 import type { ManifestAuthorization } from "../application/ports/manifest-store.js";
 import { createManifestRegistration } from "../application/register-sandbox-manifest.js";
 import { createManifestApi } from "../application/create-manifest-api.js";
-import { createPostgresManifestStore } from "../adapters/outbound/persistence/postgres-manifest-store.js";
+import { createPostgresManifestStore, releaseManifestClient } from "../adapters/outbound/persistence/postgres-manifest-store.js";
 import { sandboxManifestMigration } from "../adapters/outbound/persistence/migrations/0001-sandbox-manifest.js";
 export interface SandboxManifestOptions {
   readonly pool: Pool;
@@ -69,8 +69,7 @@ export function createSandboxManifestFeature(
           "Migration requires same-identity reconciliation",
         );
       } finally {
-        client.removeListener("error", onError);
-        client.release(isBroken());
+        releaseManifestClient(client, onError, isBroken, "Migration cleanup requires same-identity reconciliation");
       }
     },
     seedManifest: createManifestRegistration({ store, authorization: options.authorization }),
