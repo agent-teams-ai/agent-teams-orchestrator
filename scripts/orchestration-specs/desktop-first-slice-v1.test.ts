@@ -62,10 +62,12 @@ function accept(state: Model, command: Command, trusted: Authority): Result {
     return prior.fingerprint === fingerprint(command) ? prior.receipt : "REQUEST_CONFLICT";
   }
   const resource = command.payload["resource"];
-  // The accepted CreateTask payload has only subject/description. Reject every
-  // extra field before receipt lookup/effect; not just the known "resource" key.
+  // CreateTask admits only subject/description, with a required non-blank
+  // subject. Reject malformed input before issuing a receipt or any effect.
   if (command.descriptor === "CreateTask" &&
-      Object.keys(command.payload).some((field) => field !== "subject" && field !== "description")) {
+      (typeof command.payload["subject"] !== "string" || !command.payload["subject"].trim() ||
+      (command.payload["description"] !== undefined && typeof command.payload["description"] !== "string") ||
+      Object.keys(command.payload).some((field) => field !== "subject" && field !== "description"))) {
     return "INVALID_ARGUMENT";
   }
   if (command.descriptor === "UpdateTask") {
@@ -256,6 +258,26 @@ test(`${fixtureVersion}: creation rejects a supplied foreign resource before adm
   assert.equal(belongsToProject(scope, created.resource, "fixture-resources"), true);
   assert.deepEqual(state.resources.get(foreign.resource), snapshot, "foreign state remains unchanged");
   assert.equal(state.commits, 2n, "one effect for each authorized creation");
+});
+
+test(`${fixtureVersion}: CreateTask requires a nonempty subject before any receipt or effect`, () => {
+  const state = model();
+  const requested = create("550e8400-e29b-41d4-a716-446655440005");
+  for (const payload of [{}, { subject: "" }, { subject: "  " }]) {
+    assert.equal(accept(state, { ...requested, payload }, authority), "INVALID_ARGUMENT");
+    assert.equal(state.commits, 0n);
+    assert.equal(state.ledger.size, 0);
+    assert.equal(state.resources.size, 0);
+  }
+  const missingSubject = { description: "Only description" };
+  assert.equal(accept(state, { ...requested, payload: missingSubject }, authority), "INVALID_ARGUMENT");
+  assert.equal(state.commits, 0n);
+  assert.equal(state.ledger.size, 0);
+  const accepted = committed(accept(state, {
+    ...requested, payload: { subject: "A valid task", description: "" },
+  }, authority));
+  assert.deepEqual(accept(state, { ...requested, payload: { description: "", subject: "A valid task" } }, authority), accepted);
+  assert.equal(state.commits, 1n);
 });
 
 test(`${fixtureVersion}: stale task edits never overwrite concurrent commits`, () => {
