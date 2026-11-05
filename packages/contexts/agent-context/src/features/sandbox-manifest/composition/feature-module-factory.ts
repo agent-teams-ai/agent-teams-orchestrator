@@ -11,6 +11,7 @@ import { createManifestRegistration } from "../application/register-sandbox-mani
 import { createManifestApi } from "../application/create-manifest-api.js";
 import { createPostgresManifestStore } from "../adapters/outbound/persistence/postgres-manifest-store.js";
 import { sandboxManifestMigration } from "../adapters/outbound/persistence/migrations/0001-sandbox-manifest.js";
+import { releaseManifestClient } from "../adapters/outbound/persistence/release-manifest-client.js";
 export interface SandboxManifestOptions {
   readonly pool: Pool;
   readonly migrationPool: Pool;
@@ -69,23 +70,7 @@ export function createSandboxManifestFeature(
           "Migration requires same-identity reconciliation",
         );
       } finally {
-        // Retain our error guard until pg has transferred or destroyed the client.
-        // A throwing release leaves custody uncertain, so keep that guard installed.
-        try {
-          client.release(isBroken());
-        } catch {
-          throw new SandboxManifestError(
-            "UNAVAILABLE",
-            "Migration cleanup requires same-identity reconciliation",
-          );
-        }
-        client.removeListener("error", onError);
-        if (isBroken()) {
-          throw new SandboxManifestError(
-            "UNAVAILABLE",
-            "Migration cleanup requires same-identity reconciliation",
-          );
-        }
+        releaseManifestClient(client, onError, isBroken, "Migration cleanup requires same-identity reconciliation");
       }
     },
     seedManifest: createManifestRegistration({ store, authorization: options.authorization }),

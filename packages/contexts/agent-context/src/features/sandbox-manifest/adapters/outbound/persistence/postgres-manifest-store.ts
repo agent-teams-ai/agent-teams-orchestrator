@@ -4,6 +4,7 @@ import type { ManifestRequestContext } from "../../../application/api.js";
 import type { ManifestStore } from "../../../application/ports/manifest-store.js";
 import { assertManifest } from "../../../application/manifest-validation.js";
 import { manifestFingerprint } from "../../../domain/manifest.js";
+import { releaseManifestClient } from "./release-manifest-client.js";
 import type { ManifestFacts } from "../../../domain/manifest.js";
 function sqlInstant(value: string): string {
   const us = BigInt(value);
@@ -76,23 +77,7 @@ async function transaction<T>(
       "Manifest persistence requires same-identity reconciliation",
     );
   } finally {
-    // Keep error handling alive through the checked-out client's release.
-    // A throwing release has not proved that the pool owns the client.
-    try {
-      client.release(isBroken());
-    } catch {
-      throw new SandboxManifestError(
-        "UNAVAILABLE",
-        "Manifest persistence requires same-identity reconciliation",
-      );
-    }
-    client.removeListener("error", onError);
-    if (isBroken()) {
-      throw new SandboxManifestError(
-        "UNAVAILABLE",
-        "Manifest persistence requires same-identity reconciliation",
-      );
-    }
+    releaseManifestClient(client, onError, isBroken, "Manifest persistence requires same-identity reconciliation");
   }
 }
 function storedManifest(value: unknown): value is ManifestFacts {
