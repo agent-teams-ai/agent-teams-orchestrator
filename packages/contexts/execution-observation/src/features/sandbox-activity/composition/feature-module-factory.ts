@@ -43,7 +43,9 @@ export function createSandboxActivityFeature(options:SandboxActivityOptions):San
         failed=true;
         if(committing){health.broken=true;}else{try{await client.query('ROLLBACK');}catch{health.broken=true;}}
       }
+      const brokenBeforeRelease=isBroken();
       releaseActivityCheckout(client,health,onError);
+      if(!brokenBeforeRelease&&isBroken()) {throw new SandboxActivityError('UNAVAILABLE','Migration release requires same-identity reconciliation');}
       if(failed||isBroken()){throw new SandboxActivityError('UNAVAILABLE','Migration requires same-identity reconciliation');}
     },
     ...createActivityAdmission({store,authorization:options.authorization}),
