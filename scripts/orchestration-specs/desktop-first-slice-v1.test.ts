@@ -20,7 +20,7 @@ type Command = Readonly<{
 }>;
 type Authority = Readonly<{ scope: string; subject: string; writable: boolean }>;
 type Receipt = Readonly<{ operation: string; resource: string; result: "committed" }>;
-type Failure = "FORBIDDEN" | "REQUEST_CONFLICT" | "STALE_ETAG" | "NOT_FOUND";
+type Failure = "FORBIDDEN" | "INVALID_ARGUMENT" | "REQUEST_CONFLICT" | "STALE_ETAG" | "NOT_FOUND";
 type Result = Receipt | Failure;
 type LedgerEntry = Readonly<{ fingerprint: string; receipt: Receipt }>;
 type Model = {
@@ -62,6 +62,11 @@ function accept(state: Model, command: Command, trusted: Authority): Result {
     return prior.fingerprint === fingerprint(command) ? prior.receipt : "REQUEST_CONFLICT";
   }
   const resource = command.payload["resource"];
+  // CreateTask has no caller-selected resource in the admitted public payload.
+  // Reject a foreign reference rather than persisting it as Task metadata.
+  if (command.descriptor === "CreateTask" && resource !== undefined) {
+    return "INVALID_ARGUMENT";
+  }
   if (command.descriptor === "UpdateTask") {
     // Reject foreign resource names before looking up any stored record.
     const current = resource === undefined || !belongsToProject(command.scope, resource, "fixture-resources")
@@ -216,7 +221,7 @@ test(`${fixtureVersion}: opaque receipts do not reveal commits from a foreign Pr
   assert.equal(seeded.commits, 2n, "both Projects still commit independently");
 });
 
-test(`${fixtureVersion}: creation cannot overwrite another Project via a supplied resource name`, () => {
+test(`${fixtureVersion}: creation rejects a supplied foreign resource before admitting an effect`, () => {
   const state = model();
   const otherScope = "tenants/test/projects/other-sandbox";
   const otherAuthority: Authority = { scope: otherScope, subject: "other-member", writable: true };
@@ -229,11 +234,19 @@ test(`${fixtureVersion}: creation cannot overwrite another Project via a supplie
   assert.ok(foreignRecord);
   const snapshot = structuredClone(foreignRecord);
 
-  const created = committed(accept(state, {
-    ...create("550e8400-e29b-41d4-a716-446655440003"),
+  const requested = create("550e8400-e29b-41d4-a716-446655440003");
+  assert.equal(accept(state, {
+    ...requested,
     payload: { subject: "Local new task", resource: foreign.resource },
+  }, authority), "INVALID_ARGUMENT", "CreateTask cannot admit an unowned resource reference");
+  assert.equal(state.commits, 1n, "invalid command has no receipt or side effect");
+  assert.equal(state.resources.size, 1, "foreign-only state remains unchanged");
+
+  const created = committed(accept(state, {
+    ...requested,
+    payload: { subject: "Local new task" },
   }, authority));
-  assert.notEqual(created.resource, foreign.resource, "client payload cannot dictate an owner-assigned resource");
+  assert.notEqual(created.resource, foreign.resource, "authorized creation assigns its own resource");
   assert.equal(belongsToProject(scope, created.resource, "fixture-resources"), true);
   assert.deepEqual(state.resources.get(foreign.resource), snapshot, "foreign state remains unchanged");
   assert.equal(state.commits, 2n, "one effect for each authorized creation");
