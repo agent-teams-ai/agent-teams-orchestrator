@@ -11,5 +11,8 @@ export async function readActivityState(client:PoolClient,context:ActivityReques
   return state;
 }
 export async function saveActivityState(client:PoolClient,context:ActivityRequestContext,state:ActivityState):Promise<void> {
-  await client.query('UPDATE execution_observation.partitions SET state=$4::jsonb WHERE tenant_id=$1 AND project_id=$2 AND run=$3',[context.tenantId,context.projectId,state.binding.run,JSON.stringify(state)]);
+  const updated=await client.query('UPDATE execution_observation.partitions SET state=$4::jsonb WHERE tenant_id=$1 AND project_id=$2 AND run=$3',[context.tenantId,context.projectId,state.binding.run,JSON.stringify(state)]);
+  // A policy or trigger may suppress UPDATE without an SQL error. Never emit an
+  // outbox event or acknowledge ingestion unless exactly one partition persisted.
+  if(updated.rowCount!==1) {throw new SandboxActivityError('UNAVAILABLE','Observation state update requires same-source reconciliation');}
 }
