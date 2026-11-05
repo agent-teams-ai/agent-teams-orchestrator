@@ -103,11 +103,11 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
       return async()=>{
         const borrowed=await target.connect();let errorHandler:(()=>void)|undefined;
         return new Proxy(borrowed,{get(connection,property){
-          if(property==='on'){return (event:string,handler:(...args:unknown[])=>void)=>{
+          if(property==='on'){return (event:'error',handler:(error:Error)=>void)=>{
             if(event==='error'){errorHandler=()=>handler(new Error('TEST release-time socket failure'));}
             return connection.on(event,handler);
           };}
-          if(property==='removeListener'){return (event:string,handler:(...args:unknown[])=>void)=>{
+          if(property==='removeListener'){return (event:'error',handler:(error:Error)=>void)=>{
             if(event==='error'){errorHandler=undefined;}
             return connection.removeListener(event,handler);
           };}
