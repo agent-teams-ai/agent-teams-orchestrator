@@ -1,0 +1,67 @@
+name: Execution Observation native PostgreSQL (TEST only)
+
+on:
+  push:
+    branches: [feat/e2-execution-observation]
+    paths:
+      - 'packages/contexts/execution-observation/**'
+      - '.github/workflows/execution-observation-native-pg.yml'
+  pull_request:
+    paths:
+      - 'packages/contexts/execution-observation/**'
+      - '.github/workflows/execution-observation-native-pg.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: execution-observation-native-pg-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-pg:
+    name: Native PostgreSQL 16 / Node ${{ matrix.node }} (disposable TEST)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['24.21.0', '26.11.1']
+    env:
+      TEST_POSTGRES_BIN: /usr/lib/postgresql/16/bin
+      RUN_CONTEXT_OBSERVATION_PG: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+        with:
+          version: 11.18.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      - name: Install isolated PostgreSQL binaries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-16
+          "$TEST_POSTGRES_BIN/postgres" --version
+      - name: Install locked workspace dependencies
+        run: |
+          bash scripts/ci/check-frozen-peer-enforcement.sh
+          pnpm install --frozen-lockfile --config.engine-strict=true --strict-peer-dependencies
+          pnpm peers check
+      - name: Execute real owned PostgreSQL Activity regression suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "TEST_HEAD=${GITHUB_SHA} TEST_NODE=$(node --version)" | tee native-pg-check.log
+          pnpm --filter @agent-teams/execution-observation check 2>&1 | tee -a native-pg-check.log
+      - name: Retain exact-head TEST log even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: execution-observation-pg16-node-${{ matrix.node }}
+          if-no-files-found: warn
+          retention-days: 7
+          path: native-pg-check.log

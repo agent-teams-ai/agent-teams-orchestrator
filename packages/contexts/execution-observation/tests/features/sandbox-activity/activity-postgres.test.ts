@@ -93,5 +93,37 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
     await pools.owner.query('DROP FUNCTION execution_observation.test_skip_state_update()');
     await pools.owner.query("CREATE FUNCTION execution_observation.test_reject() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'TEST rollback'; END $$");await pools.owner.query('CREATE TRIGGER test_rollback BEFORE INSERT ON execution_observation.outbox FOR EACH ROW EXECUTE FUNCTION execution_observation.test_reject()');
     await assert.rejects(()=>feature.append(context,evidence('13','must rollback',{blockId:'failure'})),{code:'UNAVAILABLE'});assert.equal((await feature.api.listActivity(context,{run,pageSize:10})).watermark,'11');
+    await pools.owner.query('DROP TRIGGER test_rollback ON execution_observation.outbox');
+    await pools.owner.query('DROP FUNCTION execution_observation.test_reject()');
+    // A socket error signalled synchronously during client.release(), after a
+    // durable COMMIT, must never escape as a successful Activity receipt.
+    let releaseFaultInjected=false;
+    const releaseFaultPool=new Proxy(pools.runtime,{get(target,key){
+      if(key!=='connect'){return Reflect.get(target,key);}
+      return async()=>{
+        const borrowed=await target.connect();let errorHandler:(()=>void)|undefined;
+        return new Proxy(borrowed,{get(connection,property){
+          if(property==='on'){return (event:'error',handler:(error:Error)=>void)=>{
+            if(event==='error'){errorHandler=()=>handler(new Error('TEST release-time socket failure'));}
+            return connection.on(event,handler);
+          };}
+          if(property==='removeListener'){return (event:'error',handler:(error:Error)=>void)=>{
+            if(event==='error'){errorHandler=undefined;}
+            return connection.removeListener(event,handler);
+          };}
+          if(property==='release'){return ()=>{
+            if(!releaseFaultInjected){releaseFaultInjected=true;errorHandler?.();}
+            connection.release(true);
+          };}
+          return Reflect.get(connection,property);
+        }});
+      };
+    }});
+    const releaseFault=evidence('13','release emitted socket failure',{blockId:'release-event'});
+    await assert.rejects(()=>make(releaseFaultPool).append(context,releaseFault),
+      {code:'UNAVAILABLE',message:'Observation release requires same-source reconciliation'});
+    assert.equal(releaseFaultInjected,true);
+    assert.equal((await feature.append(context,releaseFault)).status,'duplicate');
+    assert.equal((await pools.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.outbox')).rows[0]?.count,'12');
   }finally{await cluster.stop([pools.owner,pools.runtime]);}
 });
