@@ -16,3 +16,50 @@ void test('Activity query and ingress retain entry authority and data across pen
     assert.deepEqual(observed,action==='list'||action==='feed'?{context:scope,input:{run,pageSize:1}}:{context:scope,value:expectedValue});
   }
 });
+
+void test('malformed serialized authority fails closed before authorization and Activity side effects', async () => {
+  const scope={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_subject'};
+  const binding={run:`${scope.projectId}/runs/one`,participant:`${scope.projectId}/participants/one`,runtimeSessionRef:'runtime:one'};
+  const evidence={...binding,sourceEventId:'source:one',sourceSequence:'1',kind:'TEXT_SNAPSHOT' as const,text:'one',internal:false,blockId:'one'};
+  let sideEffects=0;
+  const authorization={async assertAuthorized(){sideEffects++;return {epoch:'1',allowInternal:false};}};
+  const ingress=createActivityAdmission({authorization,store:{
+    async bind(){sideEffects++;},
+    async append(){sideEffects++;return {status:'accepted' as const,sequence:'1'};}
+  }});
+  const api=createActivityApi({authorization,store:{
+    async list(){sideEffects++;return {items:[],watermark:'0',cursor:'cursor',freshness:'current' as const,gap:false};},
+    async feed(){sideEffects++;return {events:[],nextCursor:'cursor',gap:false};}
+  }});
+  // Each value is legal to deserialize, but not a trusted ActivityRequestContext.
+  const malformed: unknown[]=[
+    null, {}, { ...scope,tenantId:123 }, { ...scope,projectId:123 },
+    { ...scope,principalId:[] }, { ...scope,principalId:null },
+  ];
+  for(const value of malformed){
+    const context=value as typeof scope;
+    await assert.rejects(()=>ingress.bindRuntime(context,binding),{name:'SandboxActivityError',code:'PERMISSION_DENIED'});
+    await assert.rejects(()=>ingress.append(context,evidence),{name:'SandboxActivityError',code:'PERMISSION_DENIED'});
+    await assert.rejects(()=>api.listActivity(context,{run:binding.run,pageSize:1}),{name:'SandboxActivityError',code:'PERMISSION_DENIED'});
+    await assert.rejects(()=>api.readFeed(context,{run:binding.run,pageSize:1}),{name:'SandboxActivityError',code:'PERMISSION_DENIED'});
+  }
+  assert.equal(sideEffects,0,'malformed authority cannot reach authorization or persistence');
+});
+
+void test('malformed serialized Activity payloads fail closed before authorization or persistence',async()=>{
+  const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_subject'};
+  let sideEffects=0;
+  const authorization={async assertAuthorized(){sideEffects++;return {epoch:'1',allowInternal:false};}};
+  const ingress=createActivityAdmission({authorization,store:{
+    async bind(){sideEffects++;},
+    async append(){sideEffects++;return {status:'accepted' as const,sequence:'1'};}
+  }});
+  const malformed:unknown[]=[null,undefined,[],42,'invalid',true];
+  for(const value of malformed){
+    await assert.rejects(()=>ingress.bindRuntime(context,value as Parameters<typeof ingress.bindRuntime>[1]),
+      {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
+    await assert.rejects(()=>ingress.append(context,value as Parameters<typeof ingress.append>[1]),
+      {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
+  }
+  assert.equal(sideEffects,0,'invalid serialized Activity cannot reach authorization or persistence');
+});

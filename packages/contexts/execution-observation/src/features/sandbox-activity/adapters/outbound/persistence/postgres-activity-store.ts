@@ -1,3 +1,4 @@
+import { SandboxActivityError } from '../../../application/api.js';
 import type { Pool } from 'pg';
 import type { ActivityStore } from '../../../application/ports/activity-store.js';
 import { assertRuntimeBinding,admitActivity } from '../../../domain/activity-admission.js';
@@ -20,8 +21,11 @@ export function createPostgresActivityStore(options:ActivityStoreOptions):Activi
       const next=admitActivity(state,value,{eventId:clock.nextId(),recordedAt:clock.now()},options);
       if(next.status==='duplicate'){return next;}
       await saveActivityState(client,context,next.state);
-      await client.query('INSERT INTO execution_observation.outbox (tenant_id,project_id,event_id,run,sequence,kind,recorded_at) VALUES ($1,$2,$3,$4,$5::bigint,$6,$7::timestamptz)',
+      const outboxWrite=await client.query('INSERT INTO execution_observation.outbox (tenant_id,project_id,event_id,run,sequence,kind,recorded_at) VALUES ($1,$2,$3,$4,$5::bigint,$6,$7::timestamptz)',
         [context.tenantId,context.projectId,next.activity.eventId,value.run,next.state.sequence,'SandboxActivityRecorded',activitySqlInstant(next.activity.recordedAt)]);
+      // A BEFORE INSERT trigger can suppress the outbox row without raising SQL.
+      // Roll back the state update rather than acknowledge an unobservable event.
+      if(outboxWrite.rowCount!==1){throw new SandboxActivityError('UNAVAILABLE','Observation outbox insert requires same-source reconciliation');}
       return {status:'accepted' as const,sequence:next.state.sequence};
     }),
     list:(context,input,grant)=>activityTransaction(pool,context,client=>activitySnapshot(client,context,input,grant,{clock,cursors:options.cursors}),true),

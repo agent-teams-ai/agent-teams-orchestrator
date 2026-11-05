@@ -2,6 +2,15 @@ import { SandboxActivityError } from './api.js';
 import type { ActivityEvidence, ActivityRequestContext, ActivityRuntimeBinding } from './api.js';
 const segment = /^[A-Za-z0-9_-]+$/u;
 export function activityScope(context: ActivityRequestContext): void {
+  // An inbound serialized authority snapshot can be structurally malformed at runtime.
+  // Reject it before dereferencing or consulting authorization/storage.
+  const serialized: unknown = context;
+  if (serialized === null || typeof serialized !== 'object' ||
+      !('tenantId' in serialized) || typeof serialized.tenantId !== 'string' ||
+      !('projectId' in serialized) || typeof serialized.projectId !== 'string' ||
+      !('principalId' in serialized) || typeof serialized.principalId !== 'string') {
+    throw new SandboxActivityError('PERMISSION_DENIED', 'Activity scope does not match authenticated authority');
+  }
   const parts = context.projectId.split('/');
   if (parts.length !== 4 || parts[0] !== 'tenants' || parts[2] !== 'projects' || parts[1] !== context.tenantId ||
       !segment.test(parts[1]) || !segment.test(parts[3] ?? '') || !context.principalId.trim()) {
@@ -13,6 +22,12 @@ export function activityResource(context: ActivityRequestContext, value: string,
   if (typeof value !== 'string' || !value.startsWith(prefix) || !segment.test(value.slice(prefix.length))) {throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity resource scope');}
 }
 export function activityBinding(context: ActivityRequestContext, binding: ActivityRuntimeBinding): void {
+  // Inbound serialized bodies are not guaranteed to match their TypeScript type.
+  // Reject null/arrays before dereferencing, without invoking authorization or storage.
+  const serialized: unknown = binding;
+  if (serialized === null || typeof serialized !== 'object' || Array.isArray(serialized)) {
+    throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity runtime binding');
+  }
   activityResource(context,binding.run,'runs'); activityResource(context,binding.participant,'participants');
   if (binding.task !== undefined) {activityResource(context,binding.task,'tasks');}
   if (typeof binding.runtimeSessionRef !== 'string' || !/^[A-Za-z0-9:._/-]{1,512}$/u.test(binding.runtimeSessionRef)) {throw new SandboxActivityError('INVALID_ARGUMENT','Invalid opaque runtime reference');}
