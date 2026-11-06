@@ -125,21 +125,25 @@ await test('release-time PostgreSQL checkout faults cannot confirm Activity read
   }
 });
 
-await test('pre-COMMIT Activity conflict survives a throwing PostgreSQL release',async()=>{
+await test('pre-COMMIT Activity conflict is definite only after healthy PostgreSQL release',async()=>{
   const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_human'};
-  const pool=new Pool();const client=new Client();const queries:string[]=[];let releases=0;
-  Object.defineProperty(pool,'connect',{value:async()=>client});
-  Object.defineProperty(client,'query',{value:async(sql:string)=>{queries.push(sql);return {rows:[]};}});
-  Object.defineProperty(client,'release',{value:()=>{releases++;throw new Error('TEST release failed');}});
-  try {
-    await assert.rejects(()=>activityTransaction(pool,context,async()=>{
-      throw new ActivityAdmissionError('CONFLICT','TEST source identity conflict');
-    }),{code:'CONFLICT',message:'TEST source identity conflict'});
-    assert.equal(releases,1);
-    assert.equal(queries.filter(query=>query==='COMMIT').length,0);
-    assert.equal(queries.filter(query=>query==='ROLLBACK').length,1);
-    assert.equal(client.listenerCount('error'),1);
-  } finally {await pool.end();}
+  for(const releaseFault of [false,true] as const){
+    const pool=new Pool();const client=new Client();const queries:string[]=[];let releases=0;
+    Object.defineProperty(pool,'connect',{value:async()=>client});
+    Object.defineProperty(client,'query',{value:async(sql:string)=>{queries.push(sql);return {rows:[]};}});
+    Object.defineProperty(client,'release',{value:()=>{releases++;if(releaseFault){throw new Error('TEST release failed');}}});
+    try {
+      await assert.rejects(()=>activityTransaction(pool,context,async()=>{
+        throw new ActivityAdmissionError('CONFLICT','TEST source identity conflict');
+      }),releaseFault
+        ? {code:'UNAVAILABLE',message:'Observation release requires same-source reconciliation'}
+        : {code:'CONFLICT',message:'TEST source identity conflict'});
+      assert.equal(releases,1);
+      assert.equal(queries.filter(query=>query==='COMMIT').length,0);
+      assert.equal(queries.filter(query=>query==='ROLLBACK').length,1);
+      assert.equal(client.listenerCount('error'),releaseFault?1:0);
+    } finally {await pool.end();}
+  }
 });
 
 await test('migration release-time PostgreSQL faults cannot confirm schema custody',async()=>{
