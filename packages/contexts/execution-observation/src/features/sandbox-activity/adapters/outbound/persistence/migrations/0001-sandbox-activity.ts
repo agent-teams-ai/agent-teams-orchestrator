@@ -14,9 +14,10 @@ DO $policy$ DECLARE item text; BEGIN
   -- Tenant tenancy alone is insufficient: the pooled runtime role must be unable
   -- to read or mutate a different Project under the same tenant if SQL regresses.
   -- RESTRICTIVE policies are AND-ed with the existing permissive tenant policy.
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='execution_observation' AND tablename=item AND policyname='project_scope') THEN
-   EXECUTE format('CREATE POLICY project_scope ON execution_observation.%I AS RESTRICTIVE USING (project_id=current_setting(''app.project_id'',true)) WITH CHECK (project_id=current_setting(''app.project_id'',true))',item);
-  END IF;
+  -- An existing policy with the same name may have a permissive or weakened
+  -- expression. Rebuild atomically rather than trusting name-only existence.
+  EXECUTE format('DROP POLICY IF EXISTS project_scope ON execution_observation.%I',item);
+  EXECUTE format('CREATE POLICY project_scope ON execution_observation.%I AS RESTRICTIVE USING (project_id=current_setting(''app.project_id'',true)) WITH CHECK (project_id=current_setting(''app.project_id'',true))',item);
  END LOOP;
 END $policy$;
 `;

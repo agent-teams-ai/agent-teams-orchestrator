@@ -27,6 +27,13 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
     await cluster.owner.query('DROP POLICY project_scope ON execution_observation.partitions');
     await cluster.owner.query('DROP POLICY project_scope ON execution_observation.outbox');
     await feature.migrate();
+    // A pre-existing same-name policy can be permissive or restrict nothing.
+    // Re-migration must replace both weakened definitions, not trust names.
+    await cluster.owner.query('DROP POLICY project_scope ON execution_observation.partitions');
+    await cluster.owner.query('CREATE POLICY project_scope ON execution_observation.partitions AS RESTRICTIVE USING (true) WITH CHECK (true)');
+    await cluster.owner.query('DROP POLICY project_scope ON execution_observation.outbox');
+    await cluster.owner.query('CREATE POLICY project_scope ON execution_observation.outbox USING (true) WITH CHECK (true)');
+    await feature.migrate();
     const policyRows=await cluster.owner.query<{tablename:string;permissive:string}>(
       "SELECT tablename,permissive FROM pg_policies WHERE schemaname='execution_observation' AND policyname='project_scope' ORDER BY tablename");
     assert.deepEqual(policyRows.rows,[
