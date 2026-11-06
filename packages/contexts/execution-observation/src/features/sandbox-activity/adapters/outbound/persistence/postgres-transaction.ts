@@ -27,8 +27,10 @@ export async function activityTransaction<T>(pool: Pool, context: ActivityReques
   // Keep the checkout error listener until release transfers custody to the pool.
   // A release-time fault after COMMIT is uncertain, never a confirmed receipt.
   releaseActivityCheckout(client,health,onError);
-  if(outcome.kind==='failure'){throw outcome.error;}
+  // A failed custody transfer invalidates even an earlier typed outcome:
+  // never report a definite admission/read failure once release is uncertain.
   if(isBroken()){throw new SandboxActivityError('UNAVAILABLE','Observation release requires same-source reconciliation');}
+  if(outcome.kind==='failure'){throw outcome.error;}
   return outcome.value;
 }
 /** Release with the checkout listener still attached; keep it if transfer throws. */
