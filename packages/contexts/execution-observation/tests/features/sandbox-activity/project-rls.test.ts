@@ -54,6 +54,14 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
       assert.deepEqual(outbox.rows.map(row=>row.project_id),[projectA]);
       const wrongProjectWrite=await checkout.query('UPDATE execution_observation.partitions SET state=state WHERE project_id=$1',[projectB]);
       assert.equal(wrongProjectWrite.rowCount,0,'same-tenant neighboring Project cannot be updated');
+      // Verify both DELETE and UPDATE for both tables: SELECT-only isolation
+      // cannot substitute for write custody under the pooled runtime role.
+      const wrongOutboxUpdate=await checkout.query('UPDATE execution_observation.outbox SET kind=kind WHERE project_id=$1',[projectB]);
+      assert.equal(wrongOutboxUpdate.rowCount,0,'neighboring Project outbox cannot be updated');
+      const wrongPartitionDelete=await checkout.query('DELETE FROM execution_observation.partitions WHERE project_id=$1',[projectB]);
+      assert.equal(wrongPartitionDelete.rowCount,0,'neighboring Project partition cannot be deleted');
+      const wrongOutboxDelete=await checkout.query('DELETE FROM execution_observation.outbox WHERE project_id=$1',[projectB]);
+      assert.equal(wrongOutboxDelete.rowCount,0,'neighboring Project outbox cannot be deleted');
       await checkout.query('ROLLBACK');
 
       await checkout.query('BEGIN');
