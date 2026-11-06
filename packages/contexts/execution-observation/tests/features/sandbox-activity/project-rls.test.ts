@@ -19,6 +19,18 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
   });
   try{
     await feature.migrate();
+    // Reproduce an already-initialized database with only the original tenant
+    // policy, then re-run the idempotent migration. Existing installations must
+    // acquire the restrictive project policy without wiping Activity data.
+    await cluster.owner.query('DROP POLICY project_scope ON execution_observation.partitions');
+    await cluster.owner.query('DROP POLICY project_scope ON execution_observation.outbox');
+    await feature.migrate();
+    const policyRows=await cluster.owner.query<{tablename:string;permissive:string}>(
+      "SELECT tablename,permissive FROM pg_policies WHERE schemaname='execution_observation' AND policyname='project_scope' ORDER BY tablename");
+    assert.deepEqual(policyRows.rows,[
+      {tablename:'outbox',permissive:'RESTRICTIVE'},
+      {tablename:'partitions',permissive:'RESTRICTIVE'},
+    ],'re-migration restores restrictive project policies for preexisting tables');
     await cluster.owner.query('GRANT USAGE ON SCHEMA execution_observation TO test_runtime');
     await cluster.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');
     for(const context of [contextA,contextB]){
