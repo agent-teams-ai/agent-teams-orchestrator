@@ -528,6 +528,11 @@
       "immutableDigest": "sha256:ad92838d720dd08de10e64803bfd0b77fe3a3f3e7944ed508f61e64cba2307bc"
     },
     {
+      "id": "ADR-0116",
+      "path": "docs/decisions/0116-native-temporal-for-fully-local-durable-workflows.md",
+      "immutableDigest": "sha256:cc66ce84836fa56684cdfea8b334730404efa0bcc995aa7f1fe984ddd2ab5068"
+    },
+    {
       "id": "ADR-0117",
       "path": "docs/decisions/0117-reconcile-mandatory-module-composition.md",
       "immutableDigest": "sha256:c968f0f38ca902483dad4d2aa95f72702e20df7115f5580929b3ffce6e38712c"

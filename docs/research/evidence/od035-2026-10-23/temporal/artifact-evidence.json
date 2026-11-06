@@ -1,0 +1,88 @@
+{
+  "server": {
+    "version": "v1.32.1",
+    "publishedAt": "2026-10-08T21:56:07Z",
+    "releaseAssets": [
+      {
+        "name": "checksums.txt",
+        "size": 606,
+        "url": "https://github.com/temporalio/temporal/releases/download/v1.32.1/checksums.txt"
+      },
+      {
+        "name": "temporal_1.32.1_darwin_amd64.tar.gz",
+        "size": 102742923,
+        "url": "https://github.com/temporalio/temporal/releases/download/v1.32.1/temporal_1.32.1_darwin_amd64.tar.gz"
+      },
+      {
+        "name": "temporal_1.32.1_darwin_arm64.tar.gz",
+        "size": 96308648,
+        "url": "https://github.com/temporalio/temporal/releases/download/v1.32.1/temporal_1.32.1_darwin_arm64.tar.gz"
+      },
+      {
+        "name": "temporal_1.32.1_linux_amd64.tar.gz",
+        "size": 100242778,
+        "url": "https://github.com/temporalio/temporal/releases/download/v1.32.1/temporal_1.32.1_linux_amd64.tar.gz"
+      },
+      {
+        "name": "temporal_1.32.1_linux_arm64.tar.gz",
+        "size": 91335861,
+        "url": "https://github.com/temporalio/temporal/releases/download/v1.32.1/temporal_1.32.1_linux_arm64.tar.gz"
+      },
+      {
+        "name": "temporal_1.32.1_windows_amd64.zip",
+        "size": 102848764,
+        "url": "https://github.com/temporalio/temporal/releases/download/v1.32.1/temporal_1.32.1_windows_amd64.zip"
+      },
+      {
+        "name": "temporal_1.32.1_windows_arm64.zip",
+        "size": 91781055,
+        "url": "https://github.com/temporalio/temporal/releases/download/v1.32.1/temporal_1.32.1_windows_arm64.zip"
+      }
+    ]
+  },
+  "linuxArchiveSHA256": "4260448d650c1ba7ee7683ff0c93d5c6a1709260e3a7ef543bfa34e06cff6051",
+  "windowsArchiveSHA256": "bf630fbe2666bd951f22f2625ee18c3b2062d809a1ff4b6adbc74f5ca9a56202",
+  "windowsExecutables": [
+    {
+      "name": "temporal-cassandra-tool.exe",
+      "size": 32931328
+    },
+    {
+      "name": "temporal-sql-tool.exe",
+      "size": 41263616
+    },
+    {
+      "name": "temporal-elasticsearch-tool.exe",
+      "size": 36682240
+    },
+    {
+      "name": "tdbg.exe",
+      "size": 78589952
+    },
+    {
+      "name": "temporal-server.exe",
+      "size": 152035328
+    }
+  ],
+  "sdk": {
+    "version": "1.24.0",
+    "nativePrebuildDirectories": [
+      "aarch64-unknown-linux-gnu",
+      "x86_64-apple-darwin",
+      "aarch64-apple-darwin",
+      "x86_64-pc-windows-msvc",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "observedLinuxTcpLoopbackPorts": [
+    16933,
+    16934,
+    16935,
+    16939,
+    27233,
+    27234,
+    27235,
+    27239
+  ],
+  "noUiOrCliDevServer": true
+}

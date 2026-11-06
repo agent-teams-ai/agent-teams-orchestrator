@@ -8,7 +8,8 @@
         "scripts/**/*.test.mjs",
         "scripts/**/*.test.ts",
         "scripts/**/fixtures/**",
-        "tooling/architecture-conformance/**"
+        "tooling/architecture-conformance/**",
+        "scripts/research/od035/**"
       ],
       "rules": {
         "complexity": ["error", 30],

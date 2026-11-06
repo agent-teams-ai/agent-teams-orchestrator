@@ -1,0 +1,359 @@
+{
+  "candidate": "DBOS OSS",
+  "sdk": "5.3.0",
+  "sourceCommit": "8643d389db64351f2acfce45e96e9747b4be8465",
+  "node": "v24.21.0",
+  "platform": "win32-x64",
+  "postgres": "18.4",
+  "cloudAndConductor": false,
+  "startedAt": "2026-10-23T16:41:22.944Z",
+  "finishedAt": "2026-10-23T16:41:51.102Z",
+  "summary": {
+    "passed": 13,
+    "failed": 0,
+    "skipped": 2
+  },
+  "scenarios": [
+    {
+      "name": "early-and-duplicate-approval",
+      "outcome": "pass",
+      "durationMs": 1637,
+      "evidence": {
+        "runID": "dbos-1792773682943-early",
+        "earlySendBeforeWait": true,
+        "status": "SUCCESS",
+        "output": {
+          "result": {
+            "activated": true,
+            "commandID": "dbos-1792773682943-early:activate"
+          },
+          "duplicate": null
+        },
+        "business": {
+          "id": "dbos-1792773682943-early",
+          "approved": true,
+          "counter": 1,
+          "generation": 1,
+          "attempts": [
+            {
+              "generation": 1,
+              "accepted": true
+            }
+          ],
+          "receipts": [
+            {
+              "command_id": "dbos-1792773682943-early:activate"
+            },
+            {
+              "command_id": "dbos-1792773682943-early:approve"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "feature-approval-commit-before-send-requires-durable-outbox-dispatch",
+      "outcome": "pass",
+      "durationMs": 2734,
+      "evidence": {
+        "runID": "dbos-1792773682943-approval-outbox-gap",
+        "beforeDispatch": "PENDING",
+        "beforeBusiness": {
+          "id": "dbos-1792773682943-approval-outbox-gap",
+          "approved": true,
+          "counter": 0,
+          "generation": 1,
+          "attempts": [],
+          "receipts": [
+            {
+              "command_id": "dbos-1792773682943-approval-outbox-gap:approve"
+            }
+          ]
+        },
+        "pendingOutbox": [
+          {
+            "id": "dbos-1792773682943-approval-outbox-gap:approval-wakeup",
+            "published": false
+          }
+        ],
+        "afterDispatch": "SUCCESS",
+        "business": {
+          "id": "dbos-1792773682943-approval-outbox-gap",
+          "approved": true,
+          "counter": 1,
+          "generation": 1,
+          "attempts": [
+            {
+              "generation": 1,
+              "accepted": true
+            }
+          ],
+          "receipts": [
+            {
+              "command_id": "dbos-1792773682943-approval-outbox-gap:activate"
+            },
+            {
+              "command_id": "dbos-1792773682943-approval-outbox-gap:approve"
+            }
+          ]
+        },
+        "guarantee": "Feature transaction durably recorded approval and dispatch identity; DBOS durability begins only after send succeeds; harness explicitly replayed the feature-owned outbox port"
+      }
+    },
+    {
+      "name": "sigkill-after-business-commit-before-engine-checkpoint",
+      "outcome": "pass",
+      "durationMs": 2492,
+      "evidence": {
+        "runID": "dbos-1792773682943-commit-gap",
+        "checkpointMissingAtKill": true,
+        "status": "SUCCESS",
+        "business": {
+          "id": "dbos-1792773682943-commit-gap",
+          "approved": true,
+          "counter": 1,
+          "generation": 1,
+          "attempts": [
+            {
+              "generation": 1,
+              "accepted": true
+            },
+            {
+              "generation": 1,
+              "accepted": true
+            }
+          ],
+          "receipts": [
+            {
+              "command_id": "dbos-1792773682943-commit-gap:activate"
+            },
+            {
+              "command_id": "dbos-1792773682943-commit-gap:approve"
+            }
+          ]
+        },
+        "guarantee": "DBOS re-ran the uncheckpointed step; feature receipt alone prevented duplicate mutation"
+      }
+    },
+    {
+      "name": "durable-timer-sigkill-restart",
+      "outcome": "pass",
+      "durationMs": 3102,
+      "evidence": {
+        "runID": "dbos-1792773682943-timer",
+        "status": "SUCCESS",
+        "elapsedMs": 2615,
+        "stepsBeforeKill": [
+          {
+            "name": "spikeCheckpoint",
+            "output": "started"
+          },
+          {
+            "name": "DBOS.sleep",
+            "output": 1792773692987
+          }
+        ]
+      }
+    },
+    {
+      "name": "default-hash-compatible-code-update-does-not-auto-recover",
+      "outcome": "pass",
+      "durationMs": 3832,
+      "evidence": {
+        "runID": "dbos-1792773682943-default-upgrade",
+        "oldVersion": "27f74f711bdc2946d0ac4f65e9dfd5a2",
+        "newVersion": "c66aaff8316183ac2cf3b43a8db138b9",
+        "afterUpdate": "PENDING",
+        "afterOldCodeRestored": "SUCCESS",
+        "limitation": "Default update leaves old workflow pending until an executor with the old application version returns"
+      }
+    },
+    {
+      "name": "explicit-compatible-version-code-update-recovers-pending-approval",
+      "outcome": "pass",
+      "durationMs": 2437,
+      "evidence": {
+        "runID": "dbos-1792773682943-compatible-upgrade",
+        "status": "SUCCESS",
+        "output": {
+          "result": {
+            "activated": true,
+            "commandID": "dbos-1792773682943-compatible-upgrade:activate"
+          },
+          "duplicate": null,
+          "compatibleCodeRevision": 2
+        },
+        "business": {
+          "id": "dbos-1792773682943-compatible-upgrade",
+          "approved": true,
+          "counter": 1,
+          "generation": 1,
+          "attempts": [
+            {
+              "generation": 1,
+              "accepted": true
+            }
+          ],
+          "receipts": [
+            {
+              "command_id": "dbos-1792773682943-compatible-upgrade:activate"
+            },
+            {
+              "command_id": "dbos-1792773682943-compatible-upgrade:approve"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "unpatched-incompatible-change-rejected",
+      "outcome": "pass",
+      "durationMs": 2600,
+      "evidence": {
+        "runID": "dbos-1792773682943-broken-upgrade",
+        "status": "ERROR",
+        "error": {
+          "dbosErrorCode": 26,
+          "workflowID": "dbos-1792773682943-broken-upgrade",
+          "stepID": 0,
+          "expectedName": "newIncompatibleStep"
+        },
+        "business": {
+          "id": "dbos-1792773682943-broken-upgrade",
+          "approved": false,
+          "counter": 0,
+          "generation": 1,
+          "attempts": [],
+          "receipts": []
+        }
+      }
+    },
+    {
+      "name": "supported-patch-incompatible-change-recovers-old-and-runs-new",
+      "outcome": "pass",
+      "durationMs": 2521,
+      "evidence": {
+        "runIDs": [
+          "dbos-1792773682943-patched-old",
+          "dbos-1792773682943-patched-new"
+        ],
+        "applicationVersion": "PATCHING_ENABLED",
+        "oldSteps": [
+          "spikeCheckpoint",
+          "spikeCheckpoint",
+          "DBOS.recv",
+          "DBOS.sleep",
+          "featureActivation"
+        ],
+        "newSteps": [
+          "DBOS.patch-insert-new-step",
+          "newIncompatibleStep",
+          "spikeCheckpoint",
+          "spikeCheckpoint",
+          "DBOS.recv",
+          "DBOS.sleep",
+          "featureActivation"
+        ]
+      }
+    },
+    {
+      "name": "cancel-durable-wait-then-late-approval-and-restart",
+      "outcome": "pass",
+      "durationMs": 1543,
+      "evidence": {
+        "runID": "dbos-1792773682943-cancel",
+        "status": "CANCELLED",
+        "business": {
+          "id": "dbos-1792773682943-cancel",
+          "approved": true,
+          "counter": 0,
+          "generation": 1,
+          "attempts": [],
+          "receipts": [
+            {
+              "command_id": "dbos-1792773682943-cancel:approve"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "paused-predecessor-replacement-resume-same-receipt",
+      "outcome": "skipped",
+      "reason": "SIGSTOP/SIGCONT unavailable through native Node process signals on Windows; requires a Windows-specific suspension/custody probe"
+    },
+    {
+      "name": "paused-predecessor-replacement-resume-feature-generation-fence",
+      "outcome": "skipped",
+      "reason": "SIGSTOP/SIGCONT unavailable through native Node process signals on Windows; requires a Windows-specific suspension/custody probe"
+    },
+    {
+      "name": "least-privilege-runtime-denies-ddl",
+      "outcome": "pass",
+      "durationMs": 622,
+      "evidence": {
+        "runID": "dbos-1792773682943-leastpriv",
+        "runMigrations": false,
+        "runtimeDDLDenied": true,
+        "status": "SUCCESS"
+      }
+    },
+    {
+      "name": "bounded-pool-under-many-durable-waits-control-remains-responsive",
+      "outcome": "pass",
+      "durationMs": 1522,
+      "evidence": {
+        "waitingWorkflows": 80,
+        "systemPoolSize": 4,
+        "pollingConcurrency": 2,
+        "businessPoolSize": 3,
+        "observedConnections": 5,
+        "cancelLatencyMs": 3,
+        "controlCompletionMs": 96
+      }
+    },
+    {
+      "name": "waiting-queue-saturation-and-reserved-control-queue",
+      "outcome": "pass",
+      "durationMs": 1783,
+      "evidence": {
+        "saturatedQueueConcurrency": 2,
+        "thirdWorkflowStatus": "ENQUEUED",
+        "reservedControlStatus": "SUCCESS",
+        "controlLatencyMs": 80,
+        "limitation": "Waiting workflows consume queue workflow-concurrency slots; reserve an independent control queue or invoke control ports directly"
+      }
+    },
+    {
+      "name": "supported-history-delete-keeps-feature-state-and-receipts",
+      "outcome": "pass",
+      "durationMs": 614,
+      "evidence": {
+        "runID": "dbos-1792773682943-retention",
+        "historyStepsBefore": 5,
+        "engineStatusAfter": null,
+        "business": {
+          "id": "dbos-1792773682943-retention",
+          "approved": true,
+          "counter": 1,
+          "generation": 1,
+          "attempts": [
+            {
+              "generation": 1,
+              "accepted": true
+            }
+          ],
+          "receipts": [
+            {
+              "command_id": "dbos-1792773682943-retention:activate"
+            },
+            {
+              "command_id": "dbos-1792773682943-retention:approve"
+            }
+          ]
+        },
+        "limitation": "OSS supports explicit deletion; automatic retention service is not configured and Conductor capabilities are excluded"
+      }
+    }
+  ]
+}

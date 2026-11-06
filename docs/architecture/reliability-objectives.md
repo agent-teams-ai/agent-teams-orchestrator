@@ -14,6 +14,7 @@ related:
   - ADR-0091
   - ADR-0093
   - ADR-0114
+  - ADR-0116
   - OD-014
   - OD-030
   - architecture.eventing
@@ -94,6 +95,13 @@ attestation schema and executable verifier. After that gate is implemented, a
 qualified subject requires evidence bound to its exact identity, adapter set,
 source revision, required suites, environment, result, and trusted issuer. An
 accepted ADR or existing file alone cannot qualify anything.
+
+ADR-0116 resolves OD-035's local engine selection with full native Temporal.
+The live Fully Local and local-host runtime blocker lists therefore no longer
+include OD-035. Both subjects remain `blocked`, with their other prerequisites
+and the global OD-039 verifier gate unchanged. Native installation, upgrades,
+restore, history maintenance, and workload evidence remain mandatory under the
+accepted decision and profile qualification rules.
 
 The [service role map](deployment-profiles.md#service-role-map) owns selected
 process placement. Compose and Kubernetes are both server target forms, with

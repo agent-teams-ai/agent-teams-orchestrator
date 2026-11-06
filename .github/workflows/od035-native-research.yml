@@ -1,0 +1,59 @@
+name: OD-035 native workflow research
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/od035-native-research.yml
+      - .oxlintrc.research.json
+      - scripts/research/od035/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: od035-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: ${{ matrix.engine }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-latest, windows-latest]
+        engine: [openworkflow, dbos, temporal]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+        with:
+          version: 11.18.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.21.0"
+          cache: pnpm
+      - name: Install the frozen research toolchain
+        run: pnpm install --frozen-lockfile --config.engine-strict=true --strict-peer-dependencies
+      - name: Check spike types and typed lint
+        run: pnpm research:od035:check
+      - name: Reject a false-green bootstrap failure
+        run: node --import tsx scripts/research/od035/bootstrap/verify-failure-exit.ts
+      - name: Run the native PostgreSQL engine fixture
+        run: pnpm research:od035 ${{ matrix.engine }}
+      - name: Preserve public research evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: od035-${{ matrix.engine }}-${{ matrix.os }}
+          path: |
+            scripts/research/od035/native-results/**/results.json
+            scripts/research/od035/native-results/**/native-summary.json
+          if-no-files-found: warn
+          retention-days: 21

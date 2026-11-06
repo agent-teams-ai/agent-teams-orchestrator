@@ -19,6 +19,123 @@ governedRoots:
   - tooling/architecture-conformance-fixtures/valid
   - tooling/lint-fixtures
 boundaries:
+  - id: research.od035.bootstrap
+    dependencyMode: development
+    roots:
+      - scripts/research/od035/bootstrap/run-native.ts
+      - scripts/research/od035/bootstrap/verify-failure-exit.ts
+    entrypoints:
+      - scripts/research/od035/bootstrap/run-native.ts
+      - scripts/research/od035/bootstrap/verify-failure-exit.ts
+    allow:
+      boundaries:
+        - research.od035.postgres-binaries
+      packages:
+        - embedded-postgres
+      builtins:
+        - node:assert/strict
+        - node:child_process
+        - node:crypto
+        - node:fs/promises
+        - node:net
+        - node:os
+        - node:path
+        - node:url
+      runtimeReferences: []
+  - id: research.od035.postgres-binaries
+    dependencyMode: development
+    roots:
+      - scripts/research/od035/bootstrap/postgres-binaries.ts
+    entrypoints:
+      - scripts/research/od035/bootstrap/postgres-binaries.ts
+    allow:
+      boundaries: []
+      packages:
+        - embedded-postgres
+        - "@embedded-postgres/windows-x64"
+        - "@embedded-postgres/darwin-arm64"
+        - "@embedded-postgres/darwin-x64"
+        - "@embedded-postgres/linux-arm64"
+        - "@embedded-postgres/linux-x64"
+      builtins:
+        - node:module
+        - node:os
+      # Fixed public optional packages are resolved from the wrapper's manifest.
+      # The adapter accepts no arbitrary module name or path.
+      runtimeReferences:
+        - commonjs
+  - id: research.od035.openworkflow
+    dependencyMode: development
+    roots:
+      - scripts/research/od035/openworkflow
+    entrypoints:
+      - scripts/research/od035/openworkflow/harness.ts
+      - scripts/research/od035/openworkflow/worker.ts
+    allow:
+      boundaries: []
+      packages:
+        - openworkflow
+        - pg
+        - postgres
+      builtins:
+        - node:assert/strict
+        - node:child_process
+        - node:fs
+        - node:fs/promises
+        - node:path
+        - node:url
+      runtimeReferences: []
+  - id: research.od035.dbos
+    dependencyMode: development
+    roots:
+      - scripts/research/od035/dbos
+    entrypoints:
+      - scripts/research/od035/dbos/harness.ts
+      - scripts/research/od035/dbos/worker.ts
+    allow:
+      boundaries: []
+      packages:
+        - "@dbos-inc/dbos-sdk"
+        - pg
+      builtins:
+        - node:assert/strict
+        - node:child_process
+        - node:crypto
+        - node:events
+        - node:fs
+        - node:path
+        - node:url
+      runtimeReferences: []
+  - id: research.od035.temporal
+    dependencyMode: development
+    roots:
+      - scripts/research/od035/temporal
+    entrypoints:
+      - scripts/research/od035/temporal/run.ts
+      - scripts/research/od035/temporal/worker.ts
+      - scripts/research/od035/temporal/workflows-v1.ts
+      - scripts/research/od035/temporal/workflows-v2.ts
+      - scripts/research/od035/temporal/workflows-incompatible.ts
+    allow:
+      boundaries: []
+      packages:
+        - "@temporalio/client"
+        - "@temporalio/worker"
+        - "@temporalio/workflow"
+        - long
+        - pg
+      builtins:
+        - node:assert/strict
+        - node:child_process
+        - node:crypto
+        - node:fs
+        - node:fs/promises
+        - node:os
+        - node:path
+        - node:timers/promises
+        - node:url
+        - node:util
+      runtimeReferences: []
   - id: tooling.orchestration-specs
     dependencyMode: development
     roots:

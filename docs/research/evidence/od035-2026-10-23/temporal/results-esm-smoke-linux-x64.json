@@ -1,0 +1,80 @@
+{
+  "engine": "Temporal full server",
+  "serverVersion": "1.32.1",
+  "sdkVersion": "1.24.0",
+  "node": "v24.19.0",
+  "platform": "linux",
+  "arch": "x64",
+  "startedAt": "2026-10-23T15:41:33.916Z",
+  "scenarios": {
+    "leastPrivilegeRuntime": {
+      "pass": true,
+      "role": "temporal_spike_runtime",
+      "createTableDenied": true,
+      "migrationAuthority": "Separate driver/admin invoked matching temporal-sql-tool before service/Worker startup; runtime has DML and schema USAGE only."
+    },
+    "resourceSnapshot": {
+      "coldStartToGrpcMs": 1069,
+      "serverPid": 136248,
+      "workerPid": 136304,
+      "serverRssKb": 145732,
+      "workerRssKb": 339868,
+      "databaseExcluded": true,
+      "methodology": "One cold process launch after schemas were migrated and PostgreSQL was already running; /proc/PID/status VmRSS immediately after Worker ready. No benchmark claim."
+    },
+    "earlyAndDuplicateApproval": {
+      "pass": true,
+      "result": "active",
+      "state": {
+        "approved": true,
+        "status": "active",
+        "effects": 1
+      },
+      "receipts": [
+        {
+          "command_id": "activate:t1792770093916-early",
+          "kind": "activate"
+        },
+        {
+          "command_id": "approval:t1792770093916-early",
+          "kind": "approve"
+        }
+      ],
+      "attempts": [
+        {
+          "worker_pid": 136304,
+          "observed_at": "2026-10-23T15:41:40.519Z"
+        }
+      ]
+    },
+    "approvalCommitWithoutSignal": {
+      "pass": true,
+      "result": "active",
+      "mechanism": "The adapter has a supported durable two-second Temporal timer around authoritative feature-state rereads. A production outbox remains the normal reliable wake delivery path.",
+      "state": {
+        "approved": true,
+        "status": "active",
+        "effects": 1
+      },
+      "receipts": [
+        {
+          "command_id": "activate:t1792770093916-approval-no-wake",
+          "kind": "activate"
+        },
+        {
+          "command_id": "approval:t1792770093916-approval-no-wake",
+          "kind": "approve"
+        }
+      ],
+      "attempts": [
+        {
+          "worker_pid": 136304,
+          "observed_at": "2026-10-23T15:41:42.916Z"
+        }
+      ]
+    }
+  },
+  "smokeOnly": true,
+  "completedAt": "2026-10-23T15:41:42.951Z",
+  "allExecutedScenariosPassed": true
+}

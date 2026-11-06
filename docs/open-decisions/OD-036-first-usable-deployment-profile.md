@@ -81,3 +81,7 @@ Originally resolved by ADR-0087. Its release deferral is superseded by ADR-0115,
 which requires Managed SaaS, Standalone Self-Hosted Server, and Fully Local in V1.
 The new scope does not itself resolve OD-021, OD-035, or OD-040, or qualify any
 profile for release.
+
+The later [ADR-0116](../decisions/0116-native-temporal-for-fully-local-durable-workflows.md)
+resolves OD-035's engine selection. The remaining local implementation-start
+and release qualification obligations retain their separate authority.

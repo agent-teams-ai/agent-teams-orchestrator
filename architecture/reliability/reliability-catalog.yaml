@@ -46,7 +46,7 @@ profiles:
     description: User-device Host with local authority, persistence, and supervised components.
     releaseScope: v1-target
     qualification: blocked
-    blockedBy: [OD-001, OD-003, OD-009, OD-021, OD-035]
+    blockedBy: [OD-001, OD-003, OD-009, OD-021]
     productAuthorityAdapter: local-standalone
     commercialAuthorityAdapter: none
     requiredCapabilities: [local-host-runtime-execution]
@@ -67,7 +67,7 @@ capabilities:
     description: Fully Local Orchestrator Host controls qualified AR capacity on the same user device.
     qualification: blocked
     profiles: [fully-local]
-    blockedBy: [OD-004, OD-021, OD-035]
+    blockedBy: [OD-004, OD-021]
     qualificationEvidence:
       decisionRefs: []
       conformanceRefs: []
