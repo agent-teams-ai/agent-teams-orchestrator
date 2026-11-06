@@ -34,6 +34,20 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # Test the actual PR branch revision, not GitHub's synthetic merge ref.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact tested Git revision
+        shell: bash
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          tested_sha="$(git rev-parse HEAD)"
+          if [[ "$tested_sha" != "$EXPECTED_SOURCE_SHA" ]]; then
+            echo "Checked-out revision $tested_sha does not match expected $EXPECTED_SOURCE_SHA" >&2
+            exit 1
+          fi
+          printf 'Verified test source=%s trigger=%s\n' "$tested_sha" "$GITHUB_SHA"
       - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
         with:
           version: 11.18.0
@@ -55,7 +69,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "TEST_HEAD=${GITHUB_SHA} TEST_NODE=$(node --version)" | tee native-pg-check.log
+          echo "TEST_HEAD=$(git rev-parse HEAD) TRIGGER_SHA=${GITHUB_SHA} TEST_NODE=$(node --version)" | tee native-pg-check.log
           pnpm --filter @agent-teams/execution-observation check 2>&1 | tee -a native-pg-check.log
       - name: Retain exact-head TEST log even on failure
         if: always()
