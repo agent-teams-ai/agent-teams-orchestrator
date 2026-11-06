@@ -16,7 +16,7 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
     await feature.migrate();await pools.owner.query('GRANT USAGE ON SCHEMA execution_observation TO test_runtime');await pools.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');
     // A BEFORE INSERT trigger can report success while discarding the binding.
     // Fail as reconcilable UNAVAILABLE, never a definitive NOT_FOUND or success.
-    await pools.owner.query("CREATE FUNCTION execution_observation.test_skip_bind_insert() RETURNS trigger LANGUAGE plpgsql AS $ BEGIN RETURN NULL; END $");
+    await pools.owner.query("CREATE FUNCTION execution_observation.test_skip_bind_insert() RETURNS trigger LANGUAGE plpgsql AS $bind$ BEGIN RETURN NULL; END $bind$");
     await pools.owner.query('CREATE TRIGGER test_skip_bind_insert BEFORE INSERT ON execution_observation.partitions FOR EACH ROW EXECUTE FUNCTION execution_observation.test_skip_bind_insert()');
     await assert.rejects(()=>feature.bindRuntime(context,binding),
       {code:'UNAVAILABLE',message:'Observation binding insert requires same-source reconciliation'});
