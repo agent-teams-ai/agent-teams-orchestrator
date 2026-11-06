@@ -62,7 +62,8 @@ It does not claim a global consistency gate or hosted adapter qualification.
 | `execution-observation.append-sandbox-activity` | `execution-observation.source-receipt-unique`, `execution-observation.block-projection-exact` | `serialized-by-key`, exact Run | Host `append` -> admission -> `ActivityStore.append` -> owner transaction |
 
 The feature borrows the Host pool and owns the `execution_observation` schema,
-forced tenant RLS, READ COMMITTED mutations and row lock for each Run. Receipt,
+forced tenant-and-Project RLS (tenant policy plus restrictive Project policy),
+transaction-local tenant/Project scope, READ COMMITTED mutations and row lock for each Run. Receipt,
 projection, exact local sequence and `SandboxActivityRecorded` outbox intent commit
 together. Migration affects both capabilities and remains separately governed.
 The adapter uses the raw PostgreSQL contingency in
@@ -92,7 +93,7 @@ production deployment remain outside this slice.
 
 After building, run
 `RUN_CONTEXT_OBSERVATION_PG=1 pnpm --filter @agent-teams/execution-observation test`.
-The typed tests own an isolated PostgreSQL 14 cluster and actual restart. Without
+The typed tests own an isolated PostgreSQL 16 cluster and actual restart. Without
 that explicit flag the infrastructure suite is skipped.
 
 | Evidence | Executable assertion |
@@ -100,7 +101,7 @@ that explicit flag the infrastructure suite is skipped.
 | Admission | Concurrent duplicate receipt emits once; conflicting fingerprint, foreign runtime/Task and stale source reject |
 | Projection | Snapshot/delta/completion, distinct equal-text blocks and completed-block fence |
 | Reads | Pinned pagination, internal filtering, retained-feed gap, source gap, expiry/epoch invalidation and fresh snapshot resume |
-| Authority | Current authorization, forced RLS and held authorization preserving original request/scope |
+| Authority | Current authorization; forced same-tenant cross-Project RLS for direct SQL reads/writes and missing Project scope; held authorization preserving original request/scope |
 | Durability | Actual restart preserves projection and dedupe; corrupted foreign history and receipt coordinates reject |
 | Faults | Applied COMMIT with lost acknowledgement reconciles once; outbox trigger failure leaves the head unchanged |
 

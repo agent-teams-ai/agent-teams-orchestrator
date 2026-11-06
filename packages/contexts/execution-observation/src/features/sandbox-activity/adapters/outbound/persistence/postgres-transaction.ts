@@ -11,7 +11,7 @@ export async function activityTransaction<T>(pool: Pool, context: ActivityReques
   let outcome:{kind:'success';value:T}|{kind:'failure';error:SandboxActivityError};
   try {
     await client.query(readOnly?'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY':'BEGIN ISOLATION LEVEL READ COMMITTED');
-    await client.query("SELECT set_config('app.tenant_id',$1,true),set_config('statement_timeout','5000',true),set_config('lock_timeout','3000',true)",[context.tenantId]);
+    await client.query("SELECT set_config('app.tenant_id',$1,true),set_config('app.project_id',$2,true),set_config('statement_timeout','5000',true),set_config('lock_timeout','3000',true)",[context.tenantId,context.projectId]);
     const result=await work(client);
     if(isBroken()){throw new SandboxActivityError('UNAVAILABLE','Observation connection was interrupted');}
     committing=true;await client.query('COMMIT');
