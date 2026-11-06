@@ -14,7 +14,16 @@ export function createPostgresActivityStore(options:ActivityStoreOptions):Activi
     bind:(context,binding)=>activityTransaction(pool,context,async client=>{
       const empty:ActivityState={binding:structuredClone(binding),sequence:'0',sourceSequence:'0',gap:false,gapSequence:'0',items:[],history:[],events:[],receipts:[]};
       await client.query('INSERT INTO execution_observation.partitions (tenant_id,project_id,run,state) VALUES ($1,$2,$3,$4::jsonb) ON CONFLICT DO NOTHING',[context.tenantId,context.projectId,binding.run,JSON.stringify(empty)]);
-      assertRuntimeBinding(await readActivityState(client,context,binding.run,true),binding);
+      // An INSERT may be silently suppressed by a trigger or a visibility policy.
+      // A bind cannot return NOT_FOUND after attempting to establish its own row:
+      // custody is uncertain and must be reconciled before retrying admission.
+      try {assertRuntimeBinding(await readActivityState(client,context,binding.run,true),binding);}
+      catch(error) {
+        if(error instanceof SandboxActivityError && error.code==='NOT_FOUND') {
+          throw new SandboxActivityError('UNAVAILABLE','Observation binding insert requires same-source reconciliation');
+        }
+        throw error;
+      }
     }),
     append:(context,value)=>activityTransaction(pool,context,async client=>{
       const state=await readActivityState(client,context,value.run,true);

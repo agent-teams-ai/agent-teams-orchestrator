@@ -13,7 +13,17 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
   let feature=make();
   const evidence=(sequence:string,text:string,extra:Partial<ActivityEvidence>={}):ActivityEvidence=>({...binding,sourceEventId:`source-${sequence}`,sourceSequence:sequence,kind:'TEXT_SNAPSHOT',text,internal:false,blockId:'message-1-block-0',runtimeOperationRef:'operation:one',...extra});
   try{
-    await feature.migrate();await pools.owner.query('GRANT USAGE ON SCHEMA execution_observation TO test_runtime');await pools.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');await feature.bindRuntime(context,binding);
+    await feature.migrate();await pools.owner.query('GRANT USAGE ON SCHEMA execution_observation TO test_runtime');await pools.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');
+    // A BEFORE INSERT trigger can report success while discarding the binding.
+    // Fail as reconcilable UNAVAILABLE, never a definitive NOT_FOUND or success.
+    await pools.owner.query("CREATE FUNCTION execution_observation.test_skip_bind_insert() RETURNS trigger LANGUAGE plpgsql AS $bind$ BEGIN RETURN NULL; END $bind$");
+    await pools.owner.query('CREATE TRIGGER test_skip_bind_insert BEFORE INSERT ON execution_observation.partitions FOR EACH ROW EXECUTE FUNCTION execution_observation.test_skip_bind_insert()');
+    await assert.rejects(()=>feature.bindRuntime(context,binding),
+      {code:'UNAVAILABLE',message:'Observation binding insert requires same-source reconciliation'});
+    assert.equal((await pools.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.partitions')).rows[0]?.count,'0');
+    await pools.owner.query('DROP TRIGGER test_skip_bind_insert ON execution_observation.partitions');
+    await pools.owner.query('DROP FUNCTION execution_observation.test_skip_bind_insert()');
+    await feature.bindRuntime(context,binding);
     const invalid=evidence('1','bad exact');assert.equal(Reflect.set(invalid,'sourceSequence',1),true);
     await assert.rejects(()=>feature.append(context,invalid),{code:'INVALID_ARGUMENT'});
     const initial=await feature.api.listActivity(context,{run,pageSize:2});assert.equal(initial.watermark,'0');
