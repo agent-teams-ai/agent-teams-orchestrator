@@ -38,6 +38,11 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
     for(const table of ['partitions','outbox']){
       await cluster.owner.query(`DROP POLICY tenant_scope ON execution_observation.${table}`);
       await cluster.owner.query(`CREATE POLICY tenant_scope ON execution_observation.${table} USING (true) WITH CHECK (true)`);
+      // A second permissive policy ORs with tenant_scope and can otherwise
+      // bypass tenancy for an actual foreign row with the same project_id.
+      await cluster.owner.query(`DROP POLICY IF EXISTS tenant_guard ON execution_observation.${table}`);
+      await cluster.owner.query(`CREATE POLICY tenant_guard ON execution_observation.${table} AS RESTRICTIVE USING (true) WITH CHECK (true)`);
+      await cluster.owner.query(`CREATE POLICY alternate_permit ON execution_observation.${table} USING (true) WITH CHECK (true)`);
     }
     await feature.migrate();
     const policyRows=await cluster.owner.query<{tablename:string;permissive:string}>(
@@ -54,6 +59,16 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
         'tenant RLS SELECT predicate restored');
       assert.ok(policy.with_check.includes('tenant_id') && policy.with_check.includes('app.tenant_id'),
         'tenant RLS write predicate restored');
+    }
+    const tenantGuards=await cluster.owner.query<{tablename:string;permissive:string;qual:string;with_check:string}>(
+      "SELECT tablename,permissive,qual,with_check FROM pg_policies WHERE schemaname='execution_observation' AND policyname='tenant_guard' ORDER BY tablename");
+    assert.deepEqual(tenantGuards.rows.map(row=>row.tablename),['outbox','partitions']);
+    for(const policy of tenantGuards.rows){
+      assert.equal(policy.permissive,'RESTRICTIVE','tenant isolation cannot be OR-bypassed by alternate policies');
+      assert.ok(policy.qual.includes('tenant_id') && policy.qual.includes('app.tenant_id'),
+        'tenant guard restores read predicate');
+      assert.ok(policy.with_check.includes('tenant_id') && policy.with_check.includes('app.tenant_id'),
+        'tenant guard restores write predicate');
     }
     await cluster.owner.query('GRANT USAGE ON SCHEMA execution_observation TO test_runtime');
     await cluster.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');

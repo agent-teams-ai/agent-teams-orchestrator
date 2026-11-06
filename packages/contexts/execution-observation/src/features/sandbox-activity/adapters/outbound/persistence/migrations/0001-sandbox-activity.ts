@@ -13,6 +13,10 @@ DO $policy$ DECLARE item text; BEGIN
   -- never survive re-migration; a colliding Project ID alone is not authority.
   EXECUTE format('DROP POLICY IF EXISTS tenant_scope ON execution_observation.%I',item);
   EXECUTE format('CREATE POLICY tenant_scope ON execution_observation.%I USING (tenant_id=current_setting(''app.tenant_id'',true)) WITH CHECK (tenant_id=current_setting(''app.tenant_id'',true))',item);
+  -- Permissive policies are OR-ed. Another named permissive policy must never
+  -- bypass tenant isolation for a colliding Project ID: enforce an AND guard.
+  EXECUTE format('DROP POLICY IF EXISTS tenant_guard ON execution_observation.%I',item);
+  EXECUTE format('CREATE POLICY tenant_guard ON execution_observation.%I AS RESTRICTIVE USING (tenant_id=current_setting(''app.tenant_id'',true)) WITH CHECK (tenant_id=current_setting(''app.tenant_id'',true))',item);
   -- Tenant tenancy alone is insufficient: the pooled runtime role must be unable
   -- to read or mutate a different Project under the same tenant if SQL regresses.
   -- RESTRICTIVE policies are AND-ed with the existing permissive tenant policy.
