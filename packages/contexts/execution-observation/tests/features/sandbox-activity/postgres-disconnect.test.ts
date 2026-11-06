@@ -81,12 +81,16 @@ await test('real PostgreSQL retains committed schema after migration release ack
          JOIN pg_namespace n ON n.oid=c.relnamespace
          LEFT JOIN pg_policies p ON p.schemaname=n.nspname AND p.tablename=c.relname
          WHERE n.nspname='execution_observation' AND c.relname IN ('partitions','outbox')
-         ORDER BY c.relname`
+         ORDER BY c.relname,p.policyname`
     );
     assert.deepEqual(committed.rows.map(row=>[row.name,row.rls,row.forced,row.policy]),[
+      ['outbox',true,true,'project_scope'],
+      ['outbox',true,true,'tenant_guard'],
       ['outbox',true,true,'tenant_scope'],
+      ['partitions',true,true,'project_scope'],
+      ['partitions',true,true,'tenant_guard'],
       ['partitions',true,true,'tenant_scope'],
-    ],'migration physically committed its two RLS-protected tables');
+    ],'migration physically committed both tables and all three RLS policies');
   }finally{
     Object.defineProperty(cluster.owner,'connect',{configurable:true,value:connect});
     await cluster.stop([cluster.owner,cluster.runtime]);
