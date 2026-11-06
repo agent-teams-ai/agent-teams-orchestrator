@@ -27,12 +27,49 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
     await cluster.owner.query('DROP POLICY project_scope ON execution_observation.partitions');
     await cluster.owner.query('DROP POLICY project_scope ON execution_observation.outbox');
     await feature.migrate();
+    // A pre-existing same-name policy can be permissive or restrict nothing.
+    // Re-migration must replace both weakened definitions, not trust names.
+    await cluster.owner.query('DROP POLICY project_scope ON execution_observation.partitions');
+    await cluster.owner.query('CREATE POLICY project_scope ON execution_observation.partitions AS RESTRICTIVE USING (true) WITH CHECK (true)');
+    await cluster.owner.query('DROP POLICY project_scope ON execution_observation.outbox');
+    await cluster.owner.query('CREATE POLICY project_scope ON execution_observation.outbox USING (true) WITH CHECK (true)');
+    // A same-name weakened tenant policy is equally unsafe. A matching
+    // project_id must not grant another tenant SQL access or write authority.
+    for(const table of ['partitions','outbox']){
+      await cluster.owner.query(`DROP POLICY tenant_scope ON execution_observation.${table}`);
+      await cluster.owner.query(`CREATE POLICY tenant_scope ON execution_observation.${table} USING (true) WITH CHECK (true)`);
+      // A second permissive policy ORs with tenant_scope and can otherwise
+      // bypass tenancy for an actual foreign row with the same project_id.
+      await cluster.owner.query(`DROP POLICY IF EXISTS tenant_guard ON execution_observation.${table}`);
+      await cluster.owner.query(`CREATE POLICY tenant_guard ON execution_observation.${table} AS RESTRICTIVE USING (true) WITH CHECK (true)`);
+      await cluster.owner.query(`CREATE POLICY alternate_permit ON execution_observation.${table} USING (true) WITH CHECK (true)`);
+    }
+    await feature.migrate();
     const policyRows=await cluster.owner.query<{tablename:string;permissive:string}>(
       "SELECT tablename,permissive FROM pg_policies WHERE schemaname='execution_observation' AND policyname='project_scope' ORDER BY tablename");
     assert.deepEqual(policyRows.rows,[
       {tablename:'outbox',permissive:'RESTRICTIVE'},
       {tablename:'partitions',permissive:'RESTRICTIVE'},
     ],'re-migration restores restrictive project policies for preexisting tables');
+    const tenantPolicies=await cluster.owner.query<{tablename:string;qual:string;with_check:string}>(
+      "SELECT tablename,qual,with_check FROM pg_policies WHERE schemaname='execution_observation' AND policyname='tenant_scope' ORDER BY tablename");
+    assert.deepEqual(tenantPolicies.rows.map(row=>row.tablename),['outbox','partitions']);
+    for(const policy of tenantPolicies.rows){
+      assert.ok(policy.qual.includes('tenant_id') && policy.qual.includes('app.tenant_id'),
+        'tenant RLS SELECT predicate restored');
+      assert.ok(policy.with_check.includes('tenant_id') && policy.with_check.includes('app.tenant_id'),
+        'tenant RLS write predicate restored');
+    }
+    const tenantGuards=await cluster.owner.query<{tablename:string;permissive:string;qual:string;with_check:string}>(
+      "SELECT tablename,permissive,qual,with_check FROM pg_policies WHERE schemaname='execution_observation' AND policyname='tenant_guard' ORDER BY tablename");
+    assert.deepEqual(tenantGuards.rows.map(row=>row.tablename),['outbox','partitions']);
+    for(const policy of tenantGuards.rows){
+      assert.equal(policy.permissive,'RESTRICTIVE','tenant isolation cannot be OR-bypassed by alternate policies');
+      assert.ok(policy.qual.includes('tenant_id') && policy.qual.includes('app.tenant_id'),
+        'tenant guard restores read predicate');
+      assert.ok(policy.with_check.includes('tenant_id') && policy.with_check.includes('app.tenant_id'),
+        'tenant guard restores write predicate');
+    }
     await cluster.owner.query('GRANT USAGE ON SCHEMA execution_observation TO test_runtime');
     await cluster.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');
     for(const context of [contextA,contextB]){
@@ -44,6 +81,22 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
     // role must not leak neighboring Projects even when the tenant is the same.
     assert.equal((await cluster.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.partitions')).rows[0]?.count,'2');
     assert.equal((await cluster.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.outbox')).rows[0]?.count,'2');
+    // A colliding project_id must not mask a weakened tenant predicate.
+    // Seed real foreign-tenant rows through the TEST owner, so the negative
+    // SELECT/UPDATE/DELETE checks below cannot pass just because data is absent.
+    const foreignTenant='TEST_other_tenant';
+    const foreignRun=`${projectA}/runs/TEST_foreign_tenant`;
+    const foreignEvent='TEST_foreign_tenant_event';
+    await cluster.owner.query(
+      'INSERT INTO execution_observation.partitions (tenant_id,project_id,run,state) VALUES ($1,$2,$3,$4::jsonb)',
+      [foreignTenant,projectA,foreignRun,'{}'],
+    );
+    await cluster.owner.query(
+      'INSERT INTO execution_observation.outbox (tenant_id,project_id,event_id,run,sequence,kind,recorded_at) VALUES ($1,$2,$3,$4,1,$5,now())',
+      [foreignTenant,projectA,foreignEvent,foreignRun,'SandboxActivityRecorded'],
+    );
+    assert.equal((await cluster.owner.query('SELECT run FROM execution_observation.partitions WHERE run=$1',[foreignRun])).rowCount,1);
+    assert.equal((await cluster.owner.query('SELECT event_id FROM execution_observation.outbox WHERE event_id=$1',[foreignEvent])).rowCount,1);
     const checkout=await cluster.runtime.connect();
     try{
       await checkout.query('BEGIN');
@@ -52,6 +105,14 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
       const outbox=await checkout.query<{project_id:string}>('SELECT project_id FROM execution_observation.outbox ORDER BY project_id');
       assert.deepEqual(partitions.rows.map(row=>row.project_id),[projectA]);
       assert.deepEqual(outbox.rows.map(row=>row.project_id),[projectA]);
+      assert.equal((await checkout.query('SELECT run FROM execution_observation.partitions WHERE run=$1',[foreignRun])).rowCount,0,
+        'foreign tenant partition is invisible even with matching project_id');
+      assert.equal((await checkout.query('SELECT event_id FROM execution_observation.outbox WHERE event_id=$1',[foreignEvent])).rowCount,0,
+        'foreign tenant outbox is invisible even with matching project_id');
+      assert.equal((await checkout.query('UPDATE execution_observation.partitions SET state=state WHERE run=$1',[foreignRun])).rowCount,0,
+        'foreign tenant partition is not writable even with matching project_id');
+      assert.equal((await checkout.query('DELETE FROM execution_observation.outbox WHERE event_id=$1',[foreignEvent])).rowCount,0,
+        'foreign tenant outbox is not deletable even with matching project_id');
       const wrongProjectWrite=await checkout.query('UPDATE execution_observation.partitions SET state=state WHERE project_id=$1',[projectB]);
       assert.equal(wrongProjectWrite.rowCount,0,'same-tenant neighboring Project cannot be updated');
       // Verify both DELETE and UPDATE for both tables: SELECT-only isolation
@@ -63,6 +124,18 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
       const wrongOutboxDelete=await checkout.query('DELETE FROM execution_observation.outbox WHERE project_id=$1',[projectB]);
       assert.equal(wrongOutboxDelete.rowCount,0,'neighboring Project outbox cannot be deleted');
       await checkout.query('ROLLBACK');
+
+      // Matching Project scope cannot authorize a cross-tenant rewrite.
+      for(const table of ['partitions','outbox']){
+        await checkout.query('BEGIN');
+        await checkout.query("SELECT set_config('app.tenant_id',$1,true),set_config('app.project_id',$2,true)",[tenantId,projectA]);
+        await assert.rejects(
+          checkout.query(`UPDATE execution_observation.${table} SET tenant_id=$1 WHERE project_id=$2`,
+            ['TEST_other_tenant',projectA]),
+          {code:'42501'},`tenant RLS rejects cross-tenant writes on ${table}`,
+        );
+        await checkout.query('ROLLBACK');
+      }
 
       await checkout.query('BEGIN');
       await checkout.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
