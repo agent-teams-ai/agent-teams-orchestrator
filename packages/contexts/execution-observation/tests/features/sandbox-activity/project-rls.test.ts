@@ -3,6 +3,9 @@ import test from 'node:test';
 import {createSandboxActivityFeature} from '../../../dist/index.js';
 import {ownedPostgres} from './pg-fixture.ts';
 
+// Shared TEST fixture does not capture the active PostgreSQL scope.
+const binding=(projectId:string)=>({run:`${projectId}/runs/run`,participant:`${projectId}/participants/member`,runtimeSessionRef:'TEST:session'});
+
 void test('Activity runtime PostgreSQL RLS isolates Projects within the same tenant, including direct SQL',{skip:process.env.RUN_CONTEXT_OBSERVATION_PG!=='1',timeout:90000},async()=>{
   const cluster=await ownedPostgres();
   const tenantId='TEST_tenant';
@@ -10,7 +13,6 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
   const projectB='tenants/TEST_tenant/projects/TEST_B';
   const contextA={tenantId,projectId:projectA,principalId:'TEST_runtime'};
   const contextB={tenantId,projectId:projectB,principalId:'TEST_runtime'};
-  const binding=(projectId:string)=>({run:`${projectId}/runs/run`,participant:`${projectId}/participants/member`,runtimeSessionRef:'TEST:session'});
   const feature=createSandboxActivityFeature({
     pool:cluster.runtime,migrationPool:cluster.owner,
     authorization:{async assertAuthorized(){return {epoch:'1',allowInternal:false};}},
