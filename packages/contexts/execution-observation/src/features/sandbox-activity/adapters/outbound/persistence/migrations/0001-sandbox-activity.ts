@@ -8,9 +8,11 @@ ALTER TABLE execution_observation.outbox ENABLE ROW LEVEL SECURITY;
 ALTER TABLE execution_observation.outbox FORCE ROW LEVEL SECURITY;
 DO $policy$ DECLARE item text; BEGIN
  FOREACH item IN ARRAY ARRAY['partitions','outbox'] LOOP
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='execution_observation' AND tablename=item AND policyname='tenant_scope') THEN
-   EXECUTE format('CREATE POLICY tenant_scope ON execution_observation.%I USING (tenant_id=current_setting(''app.tenant_id'',true)) WITH CHECK (tenant_id=current_setting(''app.tenant_id'',true))',item);
-  END IF;
+  -- Recheck the full effective tenant predicate as well as Project custody.
+  -- A same-name weakened tenant policy (USING true / WITH CHECK true) must
+  -- never survive re-migration; a colliding Project ID alone is not authority.
+  EXECUTE format('DROP POLICY IF EXISTS tenant_scope ON execution_observation.%I',item);
+  EXECUTE format('CREATE POLICY tenant_scope ON execution_observation.%I USING (tenant_id=current_setting(''app.tenant_id'',true)) WITH CHECK (tenant_id=current_setting(''app.tenant_id'',true))',item);
   -- Tenant tenancy alone is insufficient: the pooled runtime role must be unable
   -- to read or mutate a different Project under the same tenant if SQL regresses.
   -- RESTRICTIVE policies are AND-ed with the existing permissive tenant policy.
