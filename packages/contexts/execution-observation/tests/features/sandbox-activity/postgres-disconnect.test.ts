@@ -62,3 +62,31 @@ await test('migration release-time connection loss after COMMIT requires reconci
     await make(cluster.runtime,cluster.owner).migrate();
   }finally{await cluster.stop([cluster.owner,cluster.runtime]);}
 });
+
+await test('Activity read release-time loss supersedes an earlier typed NOT_FOUND',{skip:process.env.RUN_CONTEXT_OBSERVATION_PG!=='1',timeout:90000},async()=>{
+  const cluster=await ownedPostgres();
+  const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_human'};
+  let releaseFault=false;
+  try{
+    await make(cluster.runtime,cluster.owner).migrate();
+    await cluster.owner.query('GRANT USAGE ON SCHEMA execution_observation TO test_runtime');
+    await cluster.owner.query('GRANT SELECT ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');
+    const uncertainPool=new Proxy(cluster.runtime,{get(target,key){
+      if(key!=='connect'){return Reflect.get(target,key);}
+      return async()=>{
+        const borrowed=await target.connect();
+        return new Proxy(borrowed,{get(connection,property){
+          if(property==='release'){return (broken?:boolean)=>{
+            connection.release(broken);
+            releaseFault=true;
+            throw new Error('TEST lost release ACK after NOT_FOUND');
+          };}
+          return Reflect.get(connection,property);
+        }});
+      };
+    }});
+    await assert.rejects(()=>make(uncertainPool,cluster.owner).api.listActivity(context,{run:`${context.projectId}/runs/missing`,pageSize:1}),
+      {name:'SandboxActivityError',code:'UNAVAILABLE',message:'Observation release requires same-source reconciliation'});
+    assert.equal(releaseFault,true,'native PostgreSQL checkout must reach the release fault');
+  }finally{await cluster.stop([cluster.owner,cluster.runtime]);}
+});
