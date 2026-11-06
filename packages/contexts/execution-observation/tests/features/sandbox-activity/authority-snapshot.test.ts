@@ -72,7 +72,9 @@ void test('malformed serialized Activity read requests reject before authorizati
     async list(){effects++;return {items:[],watermark:'0',cursor:'cursor',freshness:'current' as const,gap:false};},
     async feed(){effects++;return {events:[],nextCursor:'cursor',gap:false};}
   }});
-  const malformed:unknown[]=[null,undefined,[],42,'invalid',true];
+  // Direct callers can supply top-level values that structuredClone cannot copy.
+  // Even then, rejection must remain typed and happen before authorization/storage.
+  const malformed:unknown[]=[null,undefined,[],42,'invalid',true,Symbol('invalid'),()=>null];
   for(const value of malformed){
     const input=value as Parameters<typeof api.listActivity>[1];
     await assert.rejects(()=>api.listActivity(context,input),{name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
