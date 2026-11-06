@@ -74,6 +74,8 @@ await test('real PostgreSQL retains committed schema after migration release ack
     }});
     await assert.rejects(()=>make(cluster.runtime,cluster.owner).migrate(),{name:'SandboxActivityError',code:'UNAVAILABLE'});
     assert.equal(releases,1,'migration must not be automatically replayed after an uncertain outcome');
+    // Read back through the unmodified pool: the fault must affect only the original checkout.
+    Object.defineProperty(cluster.owner,'connect',{configurable:true,value:connect});
     const committed=await cluster.owner.query<{name:string;rls:boolean;forced:boolean;policy:string}>(
       `SELECT c.relname AS name,c.relrowsecurity AS rls,c.relforcerowsecurity AS forced,
          coalesce(p.policyname,'') AS policy
