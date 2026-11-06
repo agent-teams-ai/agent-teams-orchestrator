@@ -7,18 +7,28 @@ function assertActivityReadInput(value: unknown): void {
     throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity read request');
   }
 }
+function cloneActivityReadInput<T>(input: T): T {
+  try {
+    return structuredClone(input);
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'DataCloneError') {
+      throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity read request');
+    }
+    throw error;
+  }
+}
 export function createActivityApi(dependencies: { readonly store: Pick<ActivityStore,'list'|'feed'>; readonly authorization: ActivityAuthorization }): SandboxActivityApi {
   return {
     async listActivity(context,input) {
       assertActivityReadInput(input);
-      context=structuredClone(context);input=structuredClone(input);
+      context=structuredClone(context);input=cloneActivityReadInput(input);
       activityResource(context,input.run,'runs'); activityPageSize(input.pageSize);
       const grant = await dependencies.authorization.assertAuthorized(context,'activity.read',input.run);
       return dependencies.store.list(context,input,{...grant});
     },
     async readFeed(context,input) {
       assertActivityReadInput(input);
-      context=structuredClone(context);input=structuredClone(input);
+      context=structuredClone(context);input=cloneActivityReadInput(input);
       activityResource(context,input.run,'runs'); activityPageSize(input.pageSize);
       const grant = await dependencies.authorization.assertAuthorized(context,'activity.read',input.run);
       return dependencies.store.feed(context,input,{...grant});
