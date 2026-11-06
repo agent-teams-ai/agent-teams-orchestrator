@@ -33,6 +33,12 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
     await cluster.owner.query('CREATE POLICY project_scope ON execution_observation.partitions AS RESTRICTIVE USING (true) WITH CHECK (true)');
     await cluster.owner.query('DROP POLICY project_scope ON execution_observation.outbox');
     await cluster.owner.query('CREATE POLICY project_scope ON execution_observation.outbox USING (true) WITH CHECK (true)');
+    // A same-name weakened tenant policy is equally unsafe. A matching
+    // project_id must not grant another tenant SQL access or write authority.
+    for(const table of ['partitions','outbox']){
+      await cluster.owner.query(`DROP POLICY tenant_scope ON execution_observation.${table}`);
+      await cluster.owner.query(`CREATE POLICY tenant_scope ON execution_observation.${table} USING (true) WITH CHECK (true)`);
+    }
     await feature.migrate();
     const policyRows=await cluster.owner.query<{tablename:string;permissive:string}>(
       "SELECT tablename,permissive FROM pg_policies WHERE schemaname='execution_observation' AND policyname='project_scope' ORDER BY tablename");
@@ -40,6 +46,13 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
       {tablename:'outbox',permissive:'RESTRICTIVE'},
       {tablename:'partitions',permissive:'RESTRICTIVE'},
     ],'re-migration restores restrictive project policies for preexisting tables');
+    const tenantPolicies=await cluster.owner.query<{tablename:string;qual:string;with_check:string}>(
+      "SELECT tablename,qual,with_check FROM pg_policies WHERE schemaname='execution_observation' AND policyname='tenant_scope' ORDER BY tablename");
+    assert.deepEqual(tenantPolicies.rows.map(row=>row.tablename),['outbox','partitions']);
+    for(const policy of tenantPolicies.rows){
+      assert.match(policy.qual,/tenant_id.*app\\.tenant_id/u,'tenant RLS SELECT predicate restored');
+      assert.match(policy.with_check,/tenant_id.*app\\.tenant_id/u,'tenant RLS write predicate restored');
+    }
     await cluster.owner.query('GRANT USAGE ON SCHEMA execution_observation TO test_runtime');
     await cluster.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');
     for(const context of [contextA,contextB]){
@@ -70,6 +83,18 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
       const wrongOutboxDelete=await checkout.query('DELETE FROM execution_observation.outbox WHERE project_id=$1',[projectB]);
       assert.equal(wrongOutboxDelete.rowCount,0,'neighboring Project outbox cannot be deleted');
       await checkout.query('ROLLBACK');
+
+      // Matching Project scope cannot authorize a cross-tenant rewrite.
+      for(const table of ['partitions','outbox']){
+        await checkout.query('BEGIN');
+        await checkout.query("SELECT set_config('app.tenant_id',$1,true),set_config('app.project_id',$2,true)",[tenantId,projectA]);
+        await assert.rejects(
+          checkout.query(`UPDATE execution_observation.${table} SET tenant_id=$1 WHERE project_id=$2`,
+            ['TEST_other_tenant',projectA]),
+          {code:'42501'},`tenant RLS rejects cross-tenant writes on ${table}`,
+        );
+        await checkout.query('ROLLBACK');
+      }
 
       await checkout.query('BEGIN');
       await checkout.query("SELECT set_config('app.tenant_id',$1,true)",[tenantId]);
