@@ -66,6 +66,22 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
     // role must not leak neighboring Projects even when the tenant is the same.
     assert.equal((await cluster.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.partitions')).rows[0]?.count,'2');
     assert.equal((await cluster.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.outbox')).rows[0]?.count,'2');
+    // A colliding project_id must not mask a weakened tenant predicate.
+    // Seed real foreign-tenant rows through the TEST owner, so the negative
+    // SELECT/UPDATE/DELETE checks below cannot pass just because data is absent.
+    const foreignTenant='TEST_other_tenant';
+    const foreignRun=`${projectA}/runs/TEST_foreign_tenant`;
+    const foreignEvent='TEST_foreign_tenant_event';
+    await cluster.owner.query(
+      'INSERT INTO execution_observation.partitions (tenant_id,project_id,run,state) VALUES ($1,$2,$3,$4::jsonb)',
+      [foreignTenant,projectA,foreignRun,'{}'],
+    );
+    await cluster.owner.query(
+      'INSERT INTO execution_observation.outbox (tenant_id,project_id,event_id,run,sequence,kind,recorded_at) VALUES ($1,$2,$3,$4,1,$5,now())',
+      [foreignTenant,projectA,foreignEvent,foreignRun,'SandboxActivityRecorded'],
+    );
+    assert.equal((await cluster.owner.query('SELECT run FROM execution_observation.partitions WHERE run=$1',[foreignRun])).rowCount,1);
+    assert.equal((await cluster.owner.query('SELECT event_id FROM execution_observation.outbox WHERE event_id=$1',[foreignEvent])).rowCount,1);
     const checkout=await cluster.runtime.connect();
     try{
       await checkout.query('BEGIN');
@@ -74,6 +90,14 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
       const outbox=await checkout.query<{project_id:string}>('SELECT project_id FROM execution_observation.outbox ORDER BY project_id');
       assert.deepEqual(partitions.rows.map(row=>row.project_id),[projectA]);
       assert.deepEqual(outbox.rows.map(row=>row.project_id),[projectA]);
+      assert.equal((await checkout.query('SELECT run FROM execution_observation.partitions WHERE run=$1',[foreignRun])).rowCount,0,
+        'foreign tenant partition is invisible even with matching project_id');
+      assert.equal((await checkout.query('SELECT event_id FROM execution_observation.outbox WHERE event_id=$1',[foreignEvent])).rowCount,0,
+        'foreign tenant outbox is invisible even with matching project_id');
+      assert.equal((await checkout.query('UPDATE execution_observation.partitions SET state=state WHERE run=$1',[foreignRun])).rowCount,0,
+        'foreign tenant partition is not writable even with matching project_id');
+      assert.equal((await checkout.query('DELETE FROM execution_observation.outbox WHERE event_id=$1',[foreignEvent])).rowCount,0,
+        'foreign tenant outbox is not deletable even with matching project_id');
       const wrongProjectWrite=await checkout.query('UPDATE execution_observation.partitions SET state=state WHERE project_id=$1',[projectB]);
       assert.equal(wrongProjectWrite.rowCount,0,'same-tenant neighboring Project cannot be updated');
       // Verify both DELETE and UPDATE for both tables: SELECT-only isolation
