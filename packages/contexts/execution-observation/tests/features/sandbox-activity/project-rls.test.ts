@@ -50,8 +50,10 @@ void test('Activity runtime PostgreSQL RLS isolates Projects within the same ten
       "SELECT tablename,qual,with_check FROM pg_policies WHERE schemaname='execution_observation' AND policyname='tenant_scope' ORDER BY tablename");
     assert.deepEqual(tenantPolicies.rows.map(row=>row.tablename),['outbox','partitions']);
     for(const policy of tenantPolicies.rows){
-      assert.match(policy.qual,/tenant_id.*app\\.tenant_id/u,'tenant RLS SELECT predicate restored');
-      assert.match(policy.with_check,/tenant_id.*app\\.tenant_id/u,'tenant RLS write predicate restored');
+      assert.ok(policy.qual.includes('tenant_id') && policy.qual.includes('app.tenant_id'),
+        'tenant RLS SELECT predicate restored');
+      assert.ok(policy.with_check.includes('tenant_id') && policy.with_check.includes('app.tenant_id'),
+        'tenant RLS write predicate restored');
     }
     await cluster.owner.query('GRANT USAGE ON SCHEMA execution_observation TO test_runtime');
     await cluster.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');
