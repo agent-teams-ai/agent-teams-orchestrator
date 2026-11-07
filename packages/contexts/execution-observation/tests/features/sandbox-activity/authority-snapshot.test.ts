@@ -43,6 +43,20 @@ void test('malformed serialized authority fails closed before authorization and 
     await assert.rejects(()=>api.listActivity(context,{run:binding.run,pageSize:1}),{name:'SandboxActivityError',code:'PERMISSION_DENIED'});
     await assert.rejects(()=>api.readFeed(context,{run:binding.run,pageSize:1}),{name:'SandboxActivityError',code:'PERMISSION_DENIED'});
   }
+  // Cloning can throw before scope validation: errors must remain typed and fail closed.
+  const throwingContext=Object.defineProperty({...scope},'extra',{
+    enumerable:true,get(){throw new Error('TEST ingress context getter failure');}
+  });
+  for (const unsafe of [
+    {...scope,extra:()=>null},
+    {...scope,extra:Symbol('uncloneable')},
+    throwingContext,
+  ]) {
+    await assert.rejects(()=>ingress.bindRuntime(unsafe,binding),
+      {name:'SandboxActivityError',code:'PERMISSION_DENIED'});
+    await assert.rejects(()=>ingress.append(unsafe,evidence),
+      {name:'SandboxActivityError',code:'PERMISSION_DENIED'});
+  }
   assert.equal(sideEffects,0,'malformed authority cannot reach authorization or persistence');
 });
 
@@ -54,11 +68,42 @@ void test('malformed serialized Activity payloads fail closed before authorizati
     async bind(){sideEffects++;},
     async append(){sideEffects++;return {status:'accepted' as const,sequence:'1'};}
   }});
-  const malformed:unknown[]=[null,undefined,[],42,'invalid',true];
+  const binding={
+    run:`${context.projectId}/runs/one`,
+    participant:`${context.projectId}/participants/one`,
+    runtimeSessionRef:'runtime:one',
+  };
+  const throwingPayload=Object.defineProperty({...binding},'extra',{
+    enumerable:true,get(){throw new Error('TEST ingress payload getter failure');}
+  });
+  const malformed:unknown[]=[
+    null,undefined,[],42,'invalid',true,Symbol('uncloneable'),()=>null,
+    {...binding,extra:()=>null},
+    {...binding,extra:Symbol('uncloneable')},
+    throwingPayload,
+  ];
   for(const value of malformed){
     await assert.rejects(()=>ingress.bindRuntime(context,value as Parameters<typeof ingress.bindRuntime>[1]),
       {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
     await assert.rejects(()=>ingress.append(context,value as Parameters<typeof ingress.append>[1]),
+      {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
+  }
+  // These are otherwise valid ActivityEvidence records. Failed cloning alone
+  // must deny append before authorization/storage; missing required fields must
+  // not be the reason this negative fixture passes.
+  const validEvidence={
+    ...binding,sourceEventId:'source:one',sourceSequence:'1',
+    kind:'TEXT_SNAPSHOT' as const,text:'one',internal:false,blockId:'one',
+  };
+  const throwingEvidence=Object.defineProperty({...validEvidence},'extra',{
+    enumerable:true,get(){throw new Error('TEST ingress evidence getter failure');}
+  });
+  for(const evidence of [
+    {...validEvidence,extra:()=>null},
+    {...validEvidence,extra:Symbol('uncloneable')},
+    throwingEvidence,
+  ]){
+    await assert.rejects(()=>ingress.append(context,evidence),
       {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
   }
   assert.equal(sideEffects,0,'invalid serialized Activity cannot reach authorization or persistence');
