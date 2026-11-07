@@ -63,3 +63,44 @@ void test('malformed serialized Activity payloads fail closed before authorizati
   }
   assert.equal(sideEffects,0,'invalid serialized Activity cannot reach authorization or persistence');
 });
+
+void test('malformed serialized Activity read requests reject before authorization or persistence',async()=>{
+  const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_subject'};
+  let effects=0;
+  const authorization={async assertAuthorized(){effects++;return {epoch:'1',allowInternal:false};}};
+  const api=createActivityApi({authorization,store:{
+    async list(){effects++;return {items:[],watermark:'0',cursor:'cursor',freshness:'current' as const,gap:false};},
+    async feed(){effects++;return {events:[],nextCursor:'cursor',gap:false};}
+  }});
+  // Direct callers can supply uncloneable top-level or nested values.
+  // Both reject as INVALID_ARGUMENT before authorization or persistence.
+  const run=`${context.projectId}/runs/one`;
+  const throwingReadInput=Object.defineProperty({run,pageSize:1},'extra',{
+    enumerable:true,get(){throw new Error('TEST input accessor failure');}
+  });
+  const malformed:unknown[]=[
+    null,undefined,[],42,'invalid',true,Symbol('invalid'),()=>null,
+    {run,pageSize:1,extra:()=>null},
+    {run,pageSize:1,extra:Symbol('invalid')},
+    throwingReadInput,
+  ];
+  for(const value of malformed){
+    const input=value as Parameters<typeof api.listActivity>[1];
+    await assert.rejects(()=>api.listActivity(context,input),{name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
+    await assert.rejects(()=>api.readFeed(context,input),{name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
+  }
+  const throwingContext=Object.defineProperty({...context},'extra',{
+    enumerable:true,get(){throw new Error('TEST context accessor failure');}
+  });
+  for (const uncloneableContext of [
+    {...context,extra:()=>null},
+    {...context,extra:Symbol('uncloneable')},
+    throwingContext,
+  ]) {
+    await assert.rejects(() => api.listActivity(uncloneableContext,{run,pageSize:1}),
+      {name:'SandboxActivityError',code:'PERMISSION_DENIED'});
+    await assert.rejects(() => api.readFeed(uncloneableContext,{run,pageSize:1}),
+      {name:'SandboxActivityError',code:'PERMISSION_DENIED'});
+  }
+  assert.equal(effects,0,'malformed read payload cannot authorize or touch storage');
+});
