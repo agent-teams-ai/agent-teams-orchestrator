@@ -10,13 +10,12 @@ function assertActivityReadInput(value: unknown): void {
 function cloneActivityReadValue<T>(value: T, code: 'INVALID_ARGUMENT' | 'PERMISSION_DENIED'): T {
   try {
     return structuredClone(value);
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'DataCloneError') {
-      throw new SandboxActivityError(code, code === 'PERMISSION_DENIED'
-        ? 'Activity scope does not match authenticated authority'
-        : 'Invalid Activity read request');
-    }
-    throw error;
+  } catch {
+    // Accessors can throw arbitrary errors during cloning, not only DataCloneError.
+    // Untrusted input must never leak an untyped exception to the caller.
+    throw new SandboxActivityError(code, code === 'PERMISSION_DENIED'
+      ? 'Activity scope does not match authenticated authority'
+      : 'Invalid Activity read request');
   }
 }
 export function createActivityApi(dependencies: { readonly store: Pick<ActivityStore,'list'|'feed'>; readonly authorization: ActivityAuthorization }): SandboxActivityApi {
