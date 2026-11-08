@@ -14,9 +14,9 @@ limitations. They distinguish confirmed direction, accepted decisions,
 engineering judgments, hypotheses, and executed results. They are evidence,
 not normative architecture or transcripts invented from a synthesis.
 
-## Orchestration product collaboration
+## Orchestration collaboration and research
 
-- [Orchestrator Product Implementation and Collaboration Plan, 2026-11-08](orchestrator-mvp-research-and-collaboration-2026-11-08.md)
+- [Orchestrator Collaboration and Research Brief, 2026-11-08](orchestrator-mvp-research-and-collaboration-2026-11-08.md)
 
 ## Module, identity, and collaboration review
 

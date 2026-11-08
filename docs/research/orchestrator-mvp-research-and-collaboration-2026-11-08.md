@@ -3,7 +3,7 @@ id: research.orchestrator-mvp-research-and-collaboration-2026-11-08
 type: research
 status: active
 owner: architecture
-summary: Dated proposal for incremental product implementation, shared-foundation readiness, and orchestration research.
+summary: Collaboration brief explaining the product vision, current research choices, and preparation for later implementation phases.
 related:
   - ADR-0027
   - ADR-0051
@@ -36,20 +36,37 @@ related:
   - domain.modeling-standard
 ---
 
-# Orchestrator Product Implementation and Collaboration Plan, 2026-11-08
+# Orchestrator Collaboration and Research Brief, 2026-11-08
 
 ## Scope and provenance
 
-**Draft proposal for incremental product implementation in the accepted
-architecture.** The product owner's 2026-11-09 clarification makes the first
-implementation the intended foundation of the product. No later Orchestrator
-rewrite is assumed. Each delivered capability uses its real owner, contracts,
-state and composition from the outset. The first usable release can still be
-an MVP; that describes its feature scope, not a temporary architecture.
+**Current collaboration stage: discussion, focused research and separately
+agreed isolated spikes. Main Orchestrator implementation is paused while the
+product owner completes the plugin/extension groundwork and prepares the
+detailed implementation phases.** The owner will build the initial product
+foundation after that preparation and the applicable readiness requirements;
+Hassan can then take clear tasks that extend it.
+
+The owner initially considered a minimal proof of concept to validate the
+orchestration mechanisms quickly. The intended approach is now to build the
+actual product incrementally on its planned architecture. Much of the design,
+ownership and technical direction is already documented, and the first working
+version may become the long-term product. A temporary foundation could create
+avoidable migration and rewriting work. Each retained capability will therefore
+use its real owner, contracts, state and composition from the beginning.
+No later complete Orchestrator rewrite is assumed. The first usable release
+can still be an MVP; that describes its feature scope, not a temporary architecture.
 
 Bounded research remains useful where evidence can change a decision. Such
 candidate probes and their test data are explicitly disposable. They do not
 create a parallel product implementation or implicitly admit new behavior.
+
+Completing the plugin/extension system for the initial phase should provide a
+consistent way for maintainers and users to extend the product. Its actual
+scope and qualification remain explicit below. The owner is preparing that
+foundation; the current request to Hassan is for research and feedback rather
+than immediate Orchestrator integration work. His findings can shape the
+implementation phases before the detailed phases are agreed.
 
 The product owner's discussion with Hassan identified an AI Product Blueprint,
 autonomous task planning, and an evidence-based feedback loop as useful first
@@ -60,6 +77,9 @@ Initial research: **2026-11-08**. Architecture alignment review:
 **2026-11-09**, against [the initial proposal d1c62d9](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/d1c62d9c82ff26f0aa000769204f62cbd91f6071/docs/research/orchestrator-mvp-research-and-collaboration-2026-11-08.md).
 The product-direction review extends [the retained-MVP revision 389e084](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/389e084fc8819c74dc6454f8281363aa26be1d43/docs/research/orchestrator-mvp-research-and-collaboration-2026-11-08.md)
 with organization governance, Extension Foundation, and current Runtime reuse.
+The subsequent collaboration update on **2026-11-09** makes the current pause,
+research menu and owner-led foundation sequence explicit. It preserves the
+technical findings from [revision 31dc85e](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/31dc85e6be697403fb9323fb7a50df3ce07f597e/docs/research/orchestrator-mvp-research-and-collaboration-2026-11-08.md).
 Method: repository and upstream source review; the proposed experiments below
 have not been executed. Reviewed baselines:
 
@@ -78,11 +98,24 @@ provide current navigation; these commits fix the reviewed baseline.
 
 ## Findings and design options
 
+### What this brief does
+
+| Document | Purpose and current state |
+| --- | --- |
+| Canonical architecture documentation | Existing source of truth for accepted owners, contracts, rules and open decisions. Much of the direction is defined; not every implementation choice is resolved. |
+| This collaboration and research brief | Explains the vision, current stage, research choices and sequence of collaboration. The technical sections retain supporting findings and reference links. |
+| Detailed implementation phases | The owner will prepare these from the canonical architecture and research findings, covering dependencies, concrete steps, failure cases, checks and acceptance criteria before implementation. They are not already supplied by this brief. |
+
+For an initial discussion, read the product direction, research menu, and
+collaboration sequence. Use the later technical sections for the selected
+question. This document does not duplicate or replace the architecture, and
+its research identity and existing path remain stable for earlier references.
+
 ### Product direction and delivery scope
 
-Build the smallest environment in which a user gives work to a team, agents
-coordinate and review results, new information can change ongoing work, and
-interrupted work continues without losing recorded progress. The first
+The future product increment supports users assigning work to teams, agents
+coordinating and reviewing results, updates changing ongoing work, and
+interrupted work continuing without losing recorded progress. The first
 integrated acceptance target uses two teams, three or four agents, and one
 project with disposable test data, delivered through separately admitted
 increments. It is broader than the existing first-sandbox admission. This
@@ -108,10 +141,11 @@ features: ADR-0103's Work scope excludes assignment, dependencies, completion,
 and review. These remain proposed product increments under the
 [readiness gates](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/implementation-readiness-gates.md).
 
-Hassan can choose any workstream by interest and experience. The product owner
-maintains the overall architecture and has substantial runtime and input
-delivery experience; that direction is not automatically assigned to Hassan.
-Both can contribute across boundaries.
+Hassan can choose one research question by interest and experience. His stated
+strengths in backend architecture, APIs, workflow orchestration, Docker and
+runtime integrations are useful here. The owner maintains the overall
+architecture and has substantial runtime/input experience, so runtime work is
+an optional joint direction. Both can propose improvements throughout planning.
 
 ### Applicable organization and foundation rules
 
@@ -137,31 +171,61 @@ turn open decisions, draft libraries, or passing research fixtures into any of
 those qualifications. Use the owning sources below instead of copying their
 rules into a second normative standard.
 
-### Workstreams to choose from
+### Research topics to choose from now
 
-| Workstream | Question and smallest useful result |
-| --- | --- |
-| Module foundation and domain model | Qualify a small Get Modular composition scope and the selected slice's DDD boundaries before expanded business assembly. Reuse the existing Sandbox Manifest seam and required conformance tooling. |
-| Extension integration | Define the first concrete extension journey, product-owned port, artifact/lifecycle scope, and applicable admission. Connect real consumers to the shared foundation without creating another plugin manager. |
-| Configurable workflows and authoring | Research existing libraries, formats, and industry approaches. Compare two different team processes and recommend a definition model and editor strategy before implementation. |
-| Tasks and continuous execution | Authorized users and agents create, inspect, update, and coordinate Tasks. Dispatch eligible work until completion, blocking, pause, or an explicit budget. Recover a missed wake without a busy loop. |
-| Runtime integration | Assess and qualify the existing ADR-0091 interactive path for the first retained integration. Complete its canonical provider adaptation and Runtime ACL; keep OpenCode as a separately scoped harness comparison. |
-| Durable processes and recovery | Use Temporal and PostgreSQL to recover waits and progress after a crash. Exercise JetStream redelivery and reconcile uncertain external operations. |
-| Feedback, priority, and attention | Accept user and teammate messages, requirement changes, and service events durably. Apply routine updates at safe points; preserve progress before an urgent switch. |
-| Task continuity and collaboration | Resume with the same executor, hand work to another, and let two authorized executors contribute to one Task. Compare a bounded LangGraphJS adapter with the simpler baseline. |
-| Agent and team communication | Test direct and group conversations, configurable cross-team routing, and leader-oriented user interaction. Research protocol reuse. |
-| Evidence and next-phase loop | Inspect artifacts, compare results with acceptance criteria, request rework, and plan the next eligible step. Use Hassan's product-development example as a configurable fixture. |
+The first four topics closely match Hassan's backend, API and orchestration
+experience. Choose one useful question together; this is a menu, not a request
+to investigate or implement everything at once.
 
-These are product implementation directions with bounded research questions.
-Comparing libraries does not commit us to building every candidate. The
-integrated delivery uses jointly agreed options and records deferred or
-unsupported capabilities explicitly. Unrelated work can proceed while a
-dependent extension or provider capability is being completed.
+| Research topic | Question and bounded result | Relevant experience |
+| --- | --- | --- |
+| Configurable workflows and authoring | Compare definition formats and existing tools such as React Flow and FlowGram on two different processes. Recommend validation, role/delegation rules and mapping to owned commands; use a small editor/definition demo only if it changes the choice. | Workflow orchestration; willing to explore TypeScript. |
+| Durable coordination and failure recovery | On the selected Temporal/PostgreSQL/JetStream stack, use an isolated Docker/Compose fixture to test commit-before-ack, redelivery, restart, missed wake and unknown external outcomes. Return reproducible results and remaining gaps. | Backend architecture, orchestration and Docker. |
+| Backend API and long-running operations | Review the selected Connect/Protobuf boundary for user and agent task operations. Probe request identity, conflicting retries, concurrent updates, cancellation and progress after disconnect with contract fixtures. Recommend precise outcomes rather than another API framework. | APIs and backend architecture. |
+| Evidence-based feedback and rework | Model Hassan's implementation/report/review/next-phase loop with missing criteria, stale evidence, correction and bounded rework. Propose inputs and transitions while Work Coordination retains task completion authority. | His own product-development workflow and orchestration experience. |
+| Task progress, handoff and LangGraphJS | Compare the same small scenario using Temporal plus owned progress records, with and without a bounded LangGraphJS adapter. Include interruption after an effect, later feedback and handoff; report what state is actually restored. | Durable workflows and backend state. |
+| Direct/group communication and incoming feedback | Assess A2A, SLIM and MCP at their distinct boundaries. A three-participant fixture can test offline recovery, membership changes and delayed input without waking every agent. Recommend what to reuse and what remains product policy. | APIs, events and integrations. |
+| Runtime integration feasibility, optional joint research | Map the current ADR-0091 contract, actual provider artifacts and hosting limits for one selected scenario. Probe input, interrupt, restore and cleanup separately where needed. Return readiness/compatibility findings; production provider adaptation remains a later task. | Runtime integration and Docker, with the owner's runtime experience. |
+
+These questions build on the accepted stack and ownership. They do not reopen
+PostgreSQL, Temporal, JetStream or the selected AR interactive contract by
+default. A contrary result can justify a reviewed architectural proposal.
+Research is useful even when its conclusion is to keep the existing approach.
+
+### What an isolated spike should deliver
+
+A spike is a small, separate experiment that answers one concrete uncertainty
+about a library, contract or mechanism. Agree the question, candidates,
+expected observations and stopping condition before coding. A source or
+contract review is enough when executing code would not change the decision.
+
+Use a disposable test project or the owning repository's governed research
+area, outside production roots and with isolated test state. No production
+imports from the spike, parallel Task engine, new public package or automatic
+integration follows from a successful demo. Preserve the applicable TypeScript,
+dependency and testing rules. A stubbed provider or synthetic authority proves
+only its stated boundary. Provider effects require the appropriate TEST setup.
+
+Return a short Markdown report containing the question and canonical references,
+exact versions, tested cases, reproduction commands if applicable, actual
+results and limitations, and a recommendation. Include rejected options,
+remaining questions and implications for the future implementation phase.
+For meaningful alternatives, include scoped reliability/confidence/complexity
+scores and integration/test effort estimates under the existing engineering
+rules. Review the findings together before selecting production work.
+
+### How to use the technical notes below
+
+The following sections preserve research findings, accepted constraints and
+future acceptance criteria. Their implementation instructions describe how
+later phases must behave. They are not current assignments or permission to
+start retained Orchestrator code before the agreed preparation sequence.
 
 ### Baseline and responsibility boundaries
 
-Start with TypeScript/Node, the adopted Get Modular composition, context-owned
-PostgreSQL, Temporal, and direct NATS JetStream integration. Include JetStream
+The future implementation uses TypeScript/Node, the adopted Get Modular
+composition, context-owned PostgreSQL, Temporal, and direct NATS JetStream
+integration. Include JetStream
 in the first integrated product delivery.
 [ADR-0114](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md)
 owns backend adoption;
@@ -258,7 +322,8 @@ and tests. Private helpers, parsers, and fixed library calls remain ordinary
 typed code. No container per Agent/Task, service locator, parallel handwritten
 production graph, or additional DI abstraction is needed.
 
-Use a **bounded module-foundation step before business expansion**. Inventory
+The owner's later foundation phase includes a **bounded module-foundation
+step before business expansion**. Inventory
 the real seams, migrate the existing Sandbox Manifest composition, and choose a
 small explicit envelope of feature depth, entries/groups, profiles, and
 compile/runtime budgets. Qualify compatible artifacts on the supported compiler
@@ -317,9 +382,10 @@ unknown effects and cleanup retain explicit owners.
 
 The reviewed [Extension Foundation main](https://github.com/agent-teams-ai/extension-foundation/blob/29ae5b0269d9d83f071344e3e18761ded04ff53d/README.md)
 is architecture-only: no public runtime SPI or production package is materialized.
-Its research is useful evidence, not a finished plugin platform. Therefore
-replace an indefinite wait for "plugins finished" with one selected journey,
-its exact consumer contract, failure cases, artifacts and measurable exit.
+Its research is useful evidence, not a finished plugin platform. Define the
+plugin/extension groundwork needed for the initial phase through selected
+consumer journeys, exact contracts, failure cases, artifacts and measurable
+exit criteria.
 The accepted AR interactive Claude/session path is a concrete consumer to
 investigate alongside its owner; this does not reopen that provider choice or
 turn an ordinary provider library into an installed OCI plugin automatically.
@@ -336,11 +402,13 @@ still owns unresolved lifecycle/catalog/hot-update semantics;
 [OD-042](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/open-decisions/OD-042-frontend-extension-contribution-model.md)
 owns frontend contributions. This plan does not resolve either implicitly.
 
-The product owner can complete the necessary module/extension mechanisms while
-Hassan researches workflows, reviews domain contracts, or prepares scoped
-fixtures. Qualify the shared mechanism with its real consumer in the same
-delivery. Dependent production activation waits for its actual prerequisites;
-independent admitted work need not wait for all possible plugins and Hosts.
+The product owner completes the planned module/extension groundwork while
+Hassan researches workflows, reviews domain contracts, or prepares agreed
+isolated fixtures. The later phase plan must schedule qualification of each
+shared mechanism with its real consumer; a research fixture does not replace
+that requirement. Retained Orchestrator implementation follows the owner's
+preparation and initial-foundation sequence below. This timing does not change
+the existing admission or qualification requirements of any repository.
 
 ### Workflow research: more than drawing boxes
 
@@ -602,41 +670,43 @@ change. Group delivery must not automatically launch every recipient's LLM.
 
 ### Collaboration and implementation sequence
 
-1. **Choose a workstream.** Hassan selects what interests him; agree its
-   question, scope, dependencies, and smallest useful result together.
-2. **Review before each implementation experiment or increment.** The
-   contributor writes a short approach: ownership, ports, state, pinned
-   dependencies, failure cases, alternatives, and expected evidence. The
-   product owner reviews and discusses it before implementation begins.
-   Classify the deliverable as a candidate probe or a retained slice. For a
-   retained slice, include its DDD decision matrix, existing admission or
-   proposed extension, package/materialization eligibility, and required role
-   placement. Changed ownership or failure semantics require a revised approach.
-3. **Qualify the bounded foundation before expansion.** Start from the current
-   admitted composition seams, exact package artifacts, and a small actual
-   consumer. Name the selected extension journey separately; a ready module
-   graph does not qualify artifact distribution or product activation. Candidate
-   probes and independent admitted work may proceed in parallel. This step does
-   not admit new business behavior or complete the whole plugin ecosystem.
-4. **Build the agreed experiment or admitted slice.** Keep it bounded and
-   replaceable, retaining the canonical domain/application implementation where
-   applicable. AI-assisted implementation is welcome; record actual observations.
-5. **Review evidence.** Decide adopt, revise, or defer. Update the owning open
-   decision or ADR normally when the result changes architectural direction.
-6. **Integrate selected mechanisms through admitted increments.** Use
-   PostgreSQL, JetStream, Temporal, and one AR-owned runtime path with their
-   accepted process boundaries. Extend real features rather than copying a
-   standalone prototype engine into product packages. Each added behavior
-   retains its required owner, contract, and failure evidence.
+1. **Prepare and research now.** The owner finishes the plugin/extension
+   groundwork and prepares the detailed phase plan. Main Orchestrator
+   implementation, including its initial product foundation, waits. Hassan can
+   choose a research question suited to his interests and experience.
+2. **Agree the research approach.** Discuss the question, existing owners,
+   candidates, scope, expected evidence and stopping condition before a spike.
+   Run any agreed experiment separately from production, then review what
+   worked, what failed and what remains uncertain. Suggestions can change the
+   planned phase through its owning decision process.
+3. **Write the detailed phases.** The owner incorporates useful findings into
+   an ordered plan grounded in the canonical documentation. Each phase states
+   its capability, prerequisites, owner and DDD model, contracts, actual package
+   and process placement, migrations, failure cases, architecture checks,
+   acceptance criteria and handoff boundaries. Name the existing admission or
+   the precise extension needed. This brief is input to that work, not proof
+   that those detailed phases already exist.
+4. **Discuss the first implementation phase together.** Review its scope and
+   remaining decisions, the required module/extension readiness, and the
+   acceptance evidence. Close its applicable prerequisites. Completion of
+   unrelated future facilities is not implied, and existing gates stay binding.
+5. **The owner builds the initial product foundation.** Follow the agreed
+   phase, real owners and one canonical composition. Qualify the selected Get
+   Modular envelope, required extension consumer and actual role boundaries.
+   Preserve all required checks; do not copy a research engine into production.
+6. **Agree concrete implementation tasks on that foundation.** Hassan chooses
+   suitable tasks with clear contracts, dependencies, examples and acceptance
+   criteria. Discuss each approach before implementation. Both contributors
+   review results and improve the next phases; the owner keeps architectural
+   coordination without excluding Hassan's design input.
 
-Foundation work and corrections to already admitted behavior can start under
-the existing readiness rules. Broad business admission remains in review;
+Canonical permission to implement a scoped capability does not override this
+collaboration timing. Broad business admission remains in review;
 ADR-0103 covers a test-only server slice with one Agent/profile, one Team/Run,
 Task metadata, planned placement, direct messages and minimum context/observation.
 It does not qualify real providers or admit assignments, dependency scheduling,
-completion/review, groups or cross-team behavior. Close the precise next
-admission while working on the foundation, instead of waiting for every future
-architecture question or silently widening that existing scope.
+completion/review, groups or cross-team behavior. The phase plan must identify
+and resolve the precise next admission before its affected implementation.
 
 The stopping point for pre-implementation design is a reviewed owner and
 contract for the next capability, its invariants and failure behavior, and the
@@ -648,9 +718,10 @@ This supports asynchronous contributions without a full-time commitment. The
 plan allocates technical work only; ownership and commercial terms remain a
 separate agreement. No token or revenue promise is implied.
 
-### Acceptance evidence across admitted product increments
+### Future acceptance reference for implementation phases
 
-This matrix describes the integrated target. Each increment takes only its
+This matrix is input to the later phase plan and describes the integrated
+target. It is not a current implementation assignment. Each increment takes only its
 applicable rows and existing mandatory gates; the complete table is not a claim
 that all capabilities are currently admitted or implemented.
 
@@ -685,7 +756,7 @@ candidate/artifact revision. Work Coordination validates the applicable
 completion plan and commits completion. A reviewer, graph, or successful
 runtime exit cannot independently complete the product Task.
 
-### Preliminary comparison effort
+### Preliminary comparison effort reference
 
 Engineering judgments below cover **one bounded comparison fixture**, not
 measured reliability, product estimates, or delivery commitments. Reliability
@@ -783,7 +854,7 @@ Additional primary references for the proposed comparisons:
 
 ## Limitations and remaining questions
 
-Before implementing the relevant workstream, agree:
+During research and phase planning, agree:
 
 1. What is the first retained slice and its current admission, and what exact
    small Get Modular envelope and compatible artifact set must be qualified?
