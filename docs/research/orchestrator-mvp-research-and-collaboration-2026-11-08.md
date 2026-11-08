@@ -6,10 +6,13 @@ owner: architecture
 summary: Dated collaboration proposal and research plan for a configurable, recoverable multi-agent orchestration prototype.
 related:
   - ADR-0027
+  - ADR-0051
   - ADR-0072
   - ADR-0079
+  - ADR-0113
   - ADR-0114
   - ADR-0116
+  - ADR-0117
   - OD-004
   - OD-005
   - OD-013
@@ -18,28 +21,38 @@ related:
   - OD-028
   - OD-033
   - OD-048
+  - architecture.composition
+  - architecture.dependency-rules
+  - architecture.feature-module-standard
+  - architecture.implementation-readiness-gates
   - architecture.overview
+  - domain.modeling-standard
 ---
 
 # Orchestrator MVP Research and Collaboration Plan, 2026-11-08
 
 ## Scope and provenance
 
-**Draft collaboration proposal: an orchestration proof of concept, followed by
-a small integrated MVP.** Test the difficult mechanisms before committing to
-the complete platform architecture.
+**Draft collaboration proposal: bounded mechanism experiments and a small MVP
+built in the accepted architecture.** The integrated implementation is intended
+to be retained and extended. Candidate probes and test data can be disposable;
+retained business behavior follows its canonical ownership from the first slice.
 
 The product owner's discussion with Hassan identified an AI Product Blueprint,
 autonomous task planning, and an evidence-based feedback loop as useful first
 applications of a general orchestration system. They do not fix the product to
 software development, particular roles, or a Claude-to-Codex sequence.
 
-Research date: **2026-11-08**. Method: repository and upstream source review;
-the proposed experiments below have not been executed. Reviewed baselines:
+Initial research: **2026-11-08**. Architecture alignment review:
+**2026-11-09**, against [the initial proposal d1c62d9](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/d1c62d9c82ff26f0aa000769204f62cbd91f6071/docs/research/orchestrator-mvp-research-and-collaboration-2026-11-08.md).
+Method: repository and upstream source review; the proposed experiments below
+have not been executed. Reviewed baselines:
 
 - [Orchestrator at a34587b](https://github.com/agent-teams-ai/agent-teams-orchestrator/tree/a34587b313e656eeb43d755b4a4f08c40dff2116).
 - [Agent Runtime at f990acc](https://github.com/agent-teams-ai/agent-runtime/tree/f990acc26e1b8071ae22d0b87a2ddd3672be8e2e).
 - [OpenCode 2.2.6 at dc2ffcf](https://github.com/anomalyco/opencode/tree/dc2ffcf8bf26f9e669b6aa22b95f50e12be15e06).
+- [Get Modular source at 5fb8347](https://github.com/agent-teams-ai/get-modular/tree/5fb83478dd7b95216be92c4d3077eddf2774eef8),
+  reviewed for context, not an upgrade of the adopted 0.5.0 pair or its standard.
 
 The document's `active` metadata means active research. It grants no production
 implementation admission and changes no accepted ADR. Links to `main` below
@@ -52,14 +65,25 @@ provide current navigation; these commits fix the reviewed baseline.
 Build the smallest environment in which a user gives work to a team, agents
 coordinate and review results, new information can change ongoing work, and
 interrupted work continues without losing recorded progress. Start with two
-teams, three or four agents, and one disposable project. This tests mechanisms,
-not the eventual 10,000-agent capacity target.
+teams, three or four agents, and one project with disposable test data. This
+tests mechanisms, not the eventual 10,000-agent capacity target.
 
-Keep TypeScript, Clean Architecture, SOLID, and explicit ownership. External
-dependencies sit behind narrow consumer-owned ports. Implement only operations
-needed by the selected experiment. Completing the module/plugin ecosystem,
-every planned context, a cloud control plane, or a polished desktop integration
-is outside this proof of concept.
+Use TypeScript at the supported baseline (at least 7.0.2), Clean Architecture,
+SOLID, strategic/tactical/evolutionary DDD, and semantic DRY. Keep the functional
+scope small while following the accepted feature, state, and composition model.
+Replaceable and effectful integrations use narrow consumer-owned ports. Scaffold only
+features that implement real behavior; empty future contexts, dynamic plugin
+discovery, and a polished desktop integration are not initial prerequisites.
+
+Distinguish two deliverables. A candidate probe answers a bounded question in
+the governed research lane and cannot become a product execution path by simply
+changing its label. A retained slice uses the real owner/application code,
+contracts, migrations, and accepted feature layout. Each slice identifies its
+current implementation admission or the exact extension needing review before
+implementation. A context dossier marked accepted does not admit all future
+features: ADR-0103's Work scope excludes assignment, dependencies, completion,
+and review. These remain proposed MVP increments under the
+[readiness gates](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/implementation-readiness-gates.md).
 
 Hassan can choose any workstream by interest and experience. The product owner
 maintains the overall architecture and has substantial runtime and input
@@ -70,6 +94,7 @@ Both can contribute across boundaries.
 
 | Workstream | Question and smallest useful result |
 | --- | --- |
+| Module foundation and domain model | Qualify a small Get Modular composition scope and the selected slice's DDD boundaries before expanded business assembly. Reuse the existing Sandbox Manifest seam and required conformance tooling. |
 | Configurable workflows and authoring | Research existing libraries, formats, and industry approaches. Compare two different team processes and recommend a definition model and editor strategy before implementation. |
 | Tasks and continuous execution | Authorized users and agents create, inspect, update, and coordinate Tasks. Dispatch eligible work until completion, blocking, pause, or an explicit budget. Recover a missed wake without a busy loop. |
 | Runtime integration | Qualify OpenCode as one initial harness behind a replaceable adapter: actual providers, authentication, input, cancellation, and recovery. |
@@ -85,8 +110,9 @@ records deferred or unsupported capabilities explicitly.
 
 ### Baseline and responsibility boundaries
 
-Start with TypeScript/Node, context-owned PostgreSQL, Temporal, and direct NATS
-JetStream integration. Include JetStream in the first integrated prototype.
+Start with TypeScript/Node, the adopted Get Modular composition, context-owned
+PostgreSQL, Temporal, and direct NATS JetStream integration. Include JetStream
+in the first integrated prototype.
 [ADR-0114](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md)
 owns backend adoption;
 [ADR-0116](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/decisions/0116-native-temporal-for-fully-local-durable-workflows.md)
@@ -102,15 +128,115 @@ also selects full native Temporal with PostgreSQL for Fully Local workflows.
 | Public API | UI/CLI/SDK to Protobuf/Connect to the owning application port. Fastify and the Connect adapter share one HTTP server. |
 
 Connect belongs at that public API boundary. In-process collaboration stays
-typed calls; JetStream does not become the SDK's task API. Private gRPC/Dapr
-applies where a separately deployed service needs it, not to every function.
-See [SDK and transports](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/sdk-and-transports.md).
+typed calls within a permitted role; JetStream does not become the SDK's task
+API. Follow the accepted service-role map from first materialization. For
+example, Control Host to Team Topology is a real separate-process gRPC/Dapr
+boundary; it is not deferred until high load. Create no empty future services.
+Use the [role map](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/deployment-profiles.md#service-role-map)
+and its [first-materialization gate](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/implementation-readiness-gates.md#first-materialization-role-gate),
+including required deployment mappings and integration lanes for the selected
+role. A test-only in-process composition does not satisfy that production
+placement. Public API details remain in
+[SDK and transports](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/sdk-and-transports.md).
 
 Use a deterministic fake runtime for failure fixtures and a selected real
 runtime for a small end-to-end demonstration. A passing fake does not qualify
-the real provider. An initial direct OpenCode adapter may be a disposable
-execution substitute behind the runtime port; it does not establish a new
-production owner or require completing all of AR first.
+the real provider. Both adapters exercise the same owner/application behavior
+and applicable port contract suite. Fakes provide external outcomes rather than
+substituting another business state machine. Unsupported or unknown outcomes
+stay explicit. Retained execution crosses the Runtime ACL into a minimal
+AR-owned host/provider adapter; it preserves process custody, technical
+continuation, and runtime receipts there. Direct OpenCode SDK characterization
+can remain an isolated provider probe. It cannot turn an Orchestrator launcher
+into a second runtime owner, and the retained path need not implement all of AR.
+
+### Architecture required for the retained slice
+
+The [DDD standard](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/domain/modeling-standard.md),
+[tactical patterns](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/domain/tactical-modeling-patterns.md),
+[feature profile](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/feature-module-standard.md),
+and [dependency rules](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/dependency-rules.md)
+are binding references. The following maps them to this small delivery; it does
+not create a second standard.
+
+| Boundary | Requirement from the first retained implementation |
+| --- | --- |
+| Domain ownership | Use the existing context map and language. Name the owner, aggregate or process, invariants, accepted commands, transaction boundary, and concurrency rule before coding. Do not introduce a parallel prototype Task/Run model. |
+| Domain behavior | Aggregate roots protect legal transitions and invariants. Use entities, value objects, policies, and repositories when their domain role is established. Queries use separate read ports/projections. Technical adapters and Hosts do not need artificial aggregates. |
+| Application and SOLID | Each use case coordinates one owned capability through the ports it needs. Provider calls, clocks, identifiers, persistence, and scheduling enter through explicit boundaries. Avoid one universal runtime/engine interface with unused methods. |
+| Feature layout | Put actual files in the existing cataloged feature's domain, application, adapters, contracts, and composition surfaces. Curated exports and dependency checks enforce visibility. Feature, package, context, module entry, and service are distinct boundaries. |
+| Durable state | Each context owns its PostgreSQL state, migrations, revisions, receipts, inbox/outbox, and transactions. Commit publication/dispatch intent with the owning state change; do not hold a transaction across model calls or durable waits. |
+| Contract mapping | Domain events, application values, persistence rows, integration events, public API messages, and provider types stay separate. An adapter maps contracts; a shared DTO does not become every context's domain model. |
+| Authority and lifecycle | Work commits completion; Run decides activation; AR controls technical execution; each Host owns its declared resources. Module registration and workflow nodes confer no execution or access rights. |
+| Evolution | Pin definitions for active work. Evolve persisted state and boundary contracts deliberately, retaining operation identities and unresolved outcomes. Change a boundary through an explicit decision and migration, not a second indefinite implementation. |
+
+For an aggregate candidate, the reviewed decision matrix also records emitted
+domain events, external facts, growth bounds, and rejected smaller/larger
+boundaries. For a long-running process, name durable state, timers, correlation,
+retry/compensation, cancellation, and late-arrival behavior. Reuse the owning
+dossier and tactical standard rather than inventing a parallel MVP template.
+
+DRY means one authoritative implementation of each business rule within its
+owner. Similar shapes across contexts can retain small mapping code. Do not
+introduce generic base aggregates/repositories or a shared product Task package.
+A concrete mechanism already expected to serve multiple products follows the
+existing library-first policy with a real consumer; speculative package
+extraction is not required.
+
+Boilerplate can be generated from the accepted patterns. Ownership, aggregate
+consistency, cancellation, and effect semantics still need scenario review.
+The first slice should prove those decisions with executable behavior. It is
+not enough to generate the intended folder tree. Architecture can evolve after
+experiments; this plan reduces avoidable structural rework rather than promising
+that no future refactoring will be necessary.
+
+### Get Modular from the first retained composition
+
+This is already selected architecture under
+[ADR-0113](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/decisions/0113-canonical-module-and-composition-adoption.md)
+and [ADR-0117](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/decisions/0117-reconcile-mandatory-module-composition.md),
+not a new optional framework choice. Follow the
+[composition profile](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/composition-and-dependency-injection.md):
+the exact Core/Assembly **0.5.0** pair and its pinned
+[Consumer Module Standard](https://github.com/agent-teams-ai/get-modular/blob/a3a079baca2c6af48c9d45bc08992825be1c2bbd/docs/architecture/common-assembly.md#consumer-module-standard).
+Newer upstream source or package versions do not silently replace that baseline.
+
+One selected Host process assembles its meaningful capabilities once through
+typed declarations, entries, and static groups. Business factories receive
+narrow dependencies; Get Modular imports and descriptors remain in composition
+and tests. Private helpers, parsers, and fixed library calls remain ordinary
+typed code. No container per Agent/Task, service locator, parallel handwritten
+production graph, or additional DI abstraction is needed.
+
+Use a **bounded module-foundation step before business expansion**. Inventory
+the real seams, migrate the existing Sandbox Manifest composition, and choose a
+small explicit envelope of feature depth, entries/groups, profiles, and
+compile/runtime budgets. Qualify compatible artifacts on the supported compiler
+using the required conformance kit and source checks. Cover an actual nested
+feature, two meaningful profiles, direct-parent visibility/republication,
+independent wiring expectations, invalid wiring before factories, failed
+construction, cancellation, and cleanup. Connect those checks to the existing
+runner. This foundation is currently pending; a flat layout check or dependency
+installation does not pass it.
+Module wiring checks do not replace source-boundary or domain-invariant checks.
+
+The [foundation gate](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/implementation-readiness-gates.md#module-foundation-before-business-expansion)
+allows the smaller qualified envelope to proceed without waiting for every
+100/500/1,000-entry research target. Wider composition needs additional evidence.
+Select compatible Resources and conformance artifacts explicitly; equal package
+family names or latest versions do not establish compatibility. Modules that
+acquire resources use the qualified Resources capability; pure or borrow-only
+modules need no resource scope. Preserve Host-owned readiness, admission, drain,
+and cleanup responsibility. If a required behavior cannot be qualified on the
+adopted artifacts, review a bounded upgrade instead of introducing a fallback
+assembly or bypassing the gate.
+
+Static assembly does not require hot replacement, a dynamic lifecycle kernel,
+plugin discovery, or Get Modular Observation. Observation is not a replacement
+for JetStream or durable inbox/outbox history. Existing source-enforcement and
+first-materialization gates still apply; nested constructs activate only with
+their inventory and semantic enforcement. The source currently contains a
+pending foundation, not an already qualified module platform.
 
 ### Workflow research: more than drawing boxes
 
@@ -124,6 +250,12 @@ these layers separately:
 | Execution | Active step, accepted events, timers, retries, cancellation, and recovery. |
 | Product state | Current Tasks, assignments, messages, context, artifacts, and authority. |
 | Persistence | How each owner stores its definitions, state, and history. |
+
+Before implementing an interpreter, map the authoring representation to owned
+operations: Work lifecycle belongs to Work Coordination, Run plan/activation to
+Run Orchestration, and provider execution to AR. An editor node or graph step
+can invoke an owned command or return evidence; it cannot become an independent
+authority over those states.
 
 [React Flow](https://reactflow.dev/learn/advanced-use/computing-flows) supplies
 interactive nodes and edges, node data, connection utilities, and hooks for
@@ -180,8 +312,9 @@ Sources: pinned
 [ChatGPT provider](https://github.com/anomalyco/opencode/blob/dc2ffcf8bf26f9e669b6aa22b95f50e12be15e06/packages/core/src/plugin/provider/chatgpt.ts),
 and [OpenAI provider](https://github.com/anomalyco/opencode/blob/dc2ffcf8bf26f9e669b6aa22b95f50e12be15e06/packages/core/src/plugin/provider/openai.ts).
 
-Choose one hosting form after a compatibility check: client/server or embedded
-SDK. The [embedded SDK](https://github.com/anomalyco/opencode/blob/dc2ffcf8bf26f9e669b6aa22b95f50e12be15e06/packages/sdk/README.md)
+Choose one AR-owned hosting form after a compatibility check: client/server or
+embedded SDK. Isolated provider probes can compare those forms without becoming
+the retained execution path. The [embedded SDK](https://github.com/anomalyco/opencode/blob/dc2ffcf8bf26f9e669b6aa22b95f50e12be15e06/packages/sdk/README.md)
 needs an explicit persistent database for restart tests. Qualify selected
 authentication routes in the intended deployment profile; local subscription
 support does not qualify a shared hosted service. See
@@ -205,7 +338,8 @@ uncertain effects. Distinguish native provider resume from reconstruction using
 saved semantic context: record Orchestrator recovery, OpenCode session recovery,
 and native Claude continuation or context rebuild as separate observations.
 A rebuild must not be reported as native resume. If native Codex behavior is
-necessary, compare a direct adapter without changing the application contract. Existing
+necessary, compare a native provider adapter behind AR without changing the
+consuming application's contract. Existing
 [AR OpenCode ACP evidence](https://github.com/agent-teams-ai/agent-runtime/blob/f990acc26e1b8071ae22d0b87a2ddd3672be8e2e/docs/spikes/opencode-acp-1-18-25-contract-validation.md)
 targets older versions and does not qualify this v2 route. This proposal does
 not migrate existing desktop integrations.
@@ -252,6 +386,10 @@ each transition, retry, and external effect. Current
 [extension points](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/extension-points.md)
 describe optional agent-local graphs. A graph shared across Task executors is
 a research proposal, not an existing accepted contract.
+
+An adapter experiment cannot transfer Work, Run, or AR authority to LangGraph.
+Any proposed ownership change requires its own architecture decision. The
+initial comparison preserves current owners and compares execution mechanics.
 
 For the graph comparison, record the exact JS/checkpointer versions and crash
 between a completed node or external effect and persisted checkpoint. A
@@ -306,14 +444,24 @@ change. Group delivery must not automatically launch every recipient's LLM.
    contributor writes a short approach: ownership, ports, state, pinned
    dependencies, failure cases, alternatives, and expected evidence. The
    product owner reviews and discusses it before implementation begins.
-   Changed ownership or failure semantics require a revised approach.
-3. **Build the agreed experiment.** Keep it bounded and replaceable.
-   AI-assisted implementation is welcome; record actual observations.
-4. **Review evidence.** Decide adopt, revise, or defer. Update the owning open
+   Classify the deliverable as a candidate probe or a retained slice. For a
+   retained slice, include its DDD decision matrix, existing admission or
+   proposed extension, package/materialization eligibility, and required role
+   placement. Changed ownership or failure semantics require a revised approach.
+3. **Qualify the bounded foundation before expansion.** Start from the current
+   admitted composition seams, exact package artifacts, and a small actual
+   consumer. Candidate probes may proceed independently. This step does not
+   admit new business behavior or complete the whole plugin ecosystem.
+4. **Build the agreed experiment or admitted slice.** Keep it bounded and
+   replaceable, retaining the canonical domain/application implementation where
+   applicable. AI-assisted implementation is welcome; record actual observations.
+5. **Review evidence.** Decide adopt, revise, or defer. Update the owning open
    decision or ADR normally when the result changes architectural direction.
-5. **Integrate selected mechanisms.** Start with durable Tasks/processes,
-   PostgreSQL, JetStream, and one runtime. Add agreed communication, attention,
-   continuity, and feedback fixtures through small reviewed increments.
+6. **Integrate selected mechanisms through admitted increments.** Use
+   PostgreSQL, JetStream, Temporal, and one AR-owned runtime path with their
+   accepted process boundaries. Extend real features rather than copying a
+   standalone prototype engine into product packages. Each added behavior
+   retains its required owner, contract, and failure evidence.
 
 This supports asynchronous contributions without a full-time commitment. The
 plan allocates technical work only; ownership and commercial terms remain a
@@ -331,12 +479,19 @@ separate agreement. No token or revenue promise is implied.
 | Handoff and shared work | B receives current context, including feedback arriving during handoff. Obsolete executor writes are rejected. Two current authorized executors can also contribute without losing work. |
 | Conversations and cross-team policy | DM and group history survives interruption; only eligible recipients wake. Removed participants cannot receive new restricted messages. Delegation follows configured rules. |
 | Redelivery and late results | Duplicate JetStream delivery, missed wake, and late result after cancellation do not create duplicate product transitions or complete the wrong attempt. |
+| Domain and source boundaries | The same domain/application implementation serves API, workflow, event, and applicable fake/live fixtures. Negative checks reject framework/provider leakage, cross-context repository access, and a competing production assembly. Invalid domain transitions and stale revisions are rejected. |
+| Module composition | The selected small profile passes independent binding and lifecycle checks, including its required nested feature. Fake/live implementations pass the same applicable port contract suite. Additional capabilities remain inside the qualified envelope or qualify its extension first. |
+| Durable evolution | Work started under definition revision A survives a revision-B update and restart using pinned A semantics or a reviewed migration. IDs, pending messages, receipts, artifact references, and unknown outcomes are preserved. No general migration framework is required. |
+| Real role placement | Each implemented capability meets its accepted process placement and first-materialization tests. A same-process fixture does not stand in for a required remote boundary. |
 
 Capture definition versions, transitions, operation IDs, message cursors,
 artifact digests, restart points, and actual results. Distinguish transport
 receipt, application acceptance, context application, and Task completion.
 An engine cannot make an arbitrary external operation exactly once; unknown
 outcomes remain visible until reconciled.
+
+These checks demonstrate the selected extension and recovery seams. They do not
+prove that every future feature will fit without revisiting the domain model.
 
 Review findings are advisory inputs or typed evidence bound to an immutable
 candidate/artifact revision. Work Coordination validates the applicable
@@ -355,6 +510,7 @@ experiment; rows are not additive project totals.
 
 | Candidate and scope | Reliability | Confidence | Complexity | Integration / tests / configuration lines |
 | --- | --- | --- | --- | --- |
+| Adopted Get Modular, bounded initial consumer and source/conformance integration | 8 | 5 | 7 | 600–1,400 / 900–2,000 / 100–300 |
 | OpenCode input/recovery adapter | 6 | 5 | 5 | 400–900 / 500–1,000 / 50–150 |
 | Direct native adapters for the same fixture | 7 | 6 | 7 | 800–1,800 / 800–1,600 / 50–200 |
 | Temporal with owned progress records | 8 | 7 | 5 | 400–900 / 500–1,000 / 50–150 |
@@ -377,6 +533,9 @@ is a navigation and experiment plan, not a replacement architecture authority.
 | Topic | Absolute GitHub reference |
 | --- | --- |
 | Overall control plane | [Orchestrator architecture](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/overview.md) |
+| DDD and domain evolution | [Full DDD standard](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/domain/modeling-standard.md), [Tactical patterns](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/domain/tactical-modeling-patterns.md), [Context map](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/context-map.md) |
+| Feature boundaries and assembly | [Feature profile](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/feature-module-standard.md), [Composition profile](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/composition-and-dependency-injection.md), [ADR-0113](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/decisions/0113-canonical-module-and-composition-adoption.md), [ADR-0117](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/decisions/0117-reconcile-mandatory-module-composition.md) |
+| Source, placement, and implementation admission | [Dependency rules](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/dependency-rules.md), [Package catalog](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/architecture/package-catalog.yaml), [Deployment profiles](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/deployment-profiles.md), [Readiness gates](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/implementation-readiness-gates.md) |
 | Shared stack and practices | [Backend stack](https://github.com/agent-teams-ai/.github/blob/main/docs/backend-stack.md), [Engineering Quality Standard](https://github.com/agent-teams-ai/.github/blob/main/docs/engineering-quality-standard.md) |
 | Task ownership and collaboration | [Work Coordination](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/domain/contexts/work-coordination/README.md), [OD-048 participation](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/open-decisions/OD-048-mixed-human-and-ai-team-participation.md) |
 | Process ownership and Temporal | [Run Orchestration](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/domain/contexts/run-orchestration/README.md), [ADR-0027](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/decisions/0027-temporal-as-run-orchestration-adapter.md), [OD-005 boundaries](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/open-decisions/OD-005-temporal-workflow-boundary.md) |
@@ -391,6 +550,15 @@ is a navigation and experiment plan, not a replacement architecture authority.
 | Reusable foundations | [Get Modular](https://github.com/agent-teams-ai/get-modular), [Extension Foundation](https://github.com/agent-teams-ai/extension-foundation), [Engineering Foundation](https://github.com/agent-teams-ai/engineering-foundation) |
 
 ### Existing evidence and upstream references
+
+For module adoption, begin with the existing
+[Sandbox Manifest composition seam](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/a34587b313e656eeb43d755b4a4f08c40dff2116/packages/contexts/agent-context/src/features/sandbox-manifest/composition/feature-module-factory.ts)
+and the [current activation inventory](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/composition-and-dependency-injection.md#activation-and-existing-implementation).
+The [dated Get Modular review](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/research/get-modular-adoption-and-scale-review-2026-10-21.md)
+is supporting evidence; ADR-0113/0117 and the current profile own the adoption.
+The source review of a newer upstream tree does not qualify its published
+archives or a mixed Core/Assembly/Resources/conformance set. Verify the actual
+compatible artifacts before the foundation implementation.
 
 Reuse scenarios and bounded mechanics from the retained
 [Temporal research source](https://github.com/agent-teams-ai/agent-teams-orchestrator/tree/a34587b313e656eeb43d755b4a4f08c40dff2116/scripts/research/od035/temporal)
@@ -418,17 +586,19 @@ Additional primary references for the proposed comparisons:
 
 Before implementing the relevant workstream, agree:
 
-1. Which two process definitions test flexibility, and which editor/definition
+1. What is the first retained slice and its current admission, and what exact
+   small Get Modular envelope and compatible artifact set must be qualified?
+2. Which two process definitions test flexibility, and which editor/definition
    format deserves a small demo?
-2. Is native Codex behavior required, or is OpenCode's harness with the selected
+3. Is native Codex behavior required, or is OpenCode's harness with the selected
    models sufficient? Which hosting and authentication profile?
-3. What is the smallest transferable progress record, and does LangGraph add
+4. What is the smallest transferable progress record, and does LangGraph add
    useful state beyond Temporal and owned records?
-4. Which operations are safe interruption points, how long can interruption
+5. Which operations are safe interruption points, how long can interruption
    wait, and how do we handle an unknown external result?
-5. Which permissions, workspace consistency, and completion rules govern
+6. Which permissions, workspace consistency, and completion rules govern
    handoff and simultaneous contributors to one Task?
-6. Does SLIM add enough value over the initial transport? Which external A2A
+7. Does SLIM add enough value over the initial transport? Which external A2A
    capability is needed by the first application?
 
 Multi-tenant production hardening, deployment lifecycle, 10,000-agent
