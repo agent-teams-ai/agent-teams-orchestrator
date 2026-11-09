@@ -38,6 +38,11 @@ void test('malformed serialized authority fails closed before authorization and 
     // structuredClone retains enumerable array properties: the original scope
     // fields must not make an array into an admitted authority context.
     Object.assign([],scope),
+    Object.defineProperty({...scope},'extra',{
+      enumerable:true,get(){throw new Error('TEST authority accessor failure');}
+    }),
+    {...scope,extra:()=>null},
+    (()=>{const revoked=Proxy.revocable({...scope},{});revoked.revoke();return revoked.proxy;})(),
   ];
   for(const value of malformed){
     const context=value as typeof scope;
@@ -57,7 +62,19 @@ void test('malformed serialized Activity payloads fail closed before authorizati
     async bind(){sideEffects++;},
     async append(){sideEffects++;return {status:'accepted' as const,sequence:'1'};}
   }});
-  const malformed:unknown[]=[null,undefined,[],42,'invalid',true];
+  const binding={run:`${context.projectId}/runs/one`,participant:`${context.projectId}/participants/one`,runtimeSessionRef:'runtime:one'};
+  const throwingPayload=Object.defineProperty({...binding},'extra',{
+    enumerable:true,get(){throw new Error('TEST ingress accessor failure');}
+  });
+  const revoked=Proxy.revocable({...binding},{});
+  revoked.revoke();
+  const malformed:unknown[]=[
+    null,undefined,[],42,'invalid',true,
+    {...binding,extra:()=>null},
+    {...binding,extra:Symbol('invalid')},
+    throwingPayload,
+    revoked.proxy,
+  ];
   for(const value of malformed){
     await assert.rejects(()=>ingress.bindRuntime(context,value as Parameters<typeof ingress.bindRuntime>[1]),
       {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});

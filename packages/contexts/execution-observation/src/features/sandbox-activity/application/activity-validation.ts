@@ -1,6 +1,16 @@
 import { SandboxActivityError } from './api.js';
 import type { ActivityEvidence, ActivityRequestContext, ActivityRuntimeBinding } from './api.js';
 const segment = /^[A-Za-z0-9_-]+$/u;
+/** Snapshot untrusted calls before authorization, rejecting any clone failure. */
+export function cloneActivityInput<T>(value: T, code: 'INVALID_ARGUMENT' | 'PERMISSION_DENIED'): T {
+  try {
+    return structuredClone(value);
+  } catch {
+    throw new SandboxActivityError(code, code === 'PERMISSION_DENIED'
+      ? 'Activity scope does not match authenticated authority'
+      : 'Invalid Activity request');
+  }
+}
 export function activityScope(context: ActivityRequestContext): void {
   // An inbound serialized authority snapshot can be structurally malformed at runtime.
   // Reject it before dereferencing or consulting authorization/storage.
