@@ -78,8 +78,11 @@ void test('malformed serialized Activity read requests reject before authorizati
   const throwingReadInput=Object.defineProperty({run,pageSize:1},'extra',{
     enumerable:true,get(){throw new Error('TEST input accessor failure');}
   });
+  const revokedRequest=Proxy.revocable({run,pageSize:1},{});
+  revokedRequest.revoke();
   const malformed:unknown[]=[
     null,undefined,[],42,'invalid',true,Symbol('invalid'),()=>null,
+    revokedRequest.proxy,
     {run,pageSize:1,extra:()=>null},
     {run,pageSize:1,extra:Symbol('invalid')},
     throwingReadInput,

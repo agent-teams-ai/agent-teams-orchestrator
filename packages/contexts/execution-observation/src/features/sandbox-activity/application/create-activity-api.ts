@@ -3,7 +3,12 @@ import type { SandboxActivityApi } from './api.js';
 import type { ActivityAuthorization, ActivityStore } from './ports/activity-store.js';
 import { activityPageSize, activityResource } from './activity-validation.js';
 function assertActivityReadInput(value: unknown): void {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+  // Array.isArray itself throws for a revoked Proxy from a direct JS caller.
+  // Normalize that failure before touching authorization or persistence.
+  let isArray: boolean;
+  try { isArray = Array.isArray(value); }
+  catch { throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity read request'); }
+  if (value === null || typeof value !== 'object' || isArray) {
     throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity read request');
   }
 }
