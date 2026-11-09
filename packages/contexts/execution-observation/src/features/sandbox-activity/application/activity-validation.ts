@@ -5,7 +5,7 @@ export function activityScope(context: ActivityRequestContext): void {
   // An inbound serialized authority snapshot can be structurally malformed at runtime.
   // Reject it before dereferencing or consulting authorization/storage.
   const serialized: unknown = context;
-  if (serialized === null || typeof serialized !== 'object' ||
+  if (serialized === null || typeof serialized !== 'object' || Array.isArray(serialized) ||
       !('tenantId' in serialized) || typeof serialized.tenantId !== 'string' ||
       !('projectId' in serialized) || typeof serialized.projectId !== 'string' ||
       !('principalId' in serialized) || typeof serialized.principalId !== 'string') {

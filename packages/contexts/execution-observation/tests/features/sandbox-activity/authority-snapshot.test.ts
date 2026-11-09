@@ -35,6 +35,9 @@ void test('malformed serialized authority fails closed before authorization and 
   const malformed: unknown[]=[
     null, {}, { ...scope,tenantId:123 }, { ...scope,projectId:123 },
     { ...scope,principalId:[] }, { ...scope,principalId:null },
+    // structuredClone retains enumerable array properties: the original scope
+    // fields must not make an array into an admitted authority context.
+    Object.assign([],scope),
   ];
   for(const value of malformed){
     const context=value as typeof scope;
