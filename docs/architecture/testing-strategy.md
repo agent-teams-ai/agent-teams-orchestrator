@@ -430,8 +430,19 @@ AR observation subscriptions use the AR Published Language and its qualified
 adapter. They are not assumed to be JetStream consumers. The direct JetStream
 rule applies to declared internal durable publications and subscriptions.
 
-Server workload architecture targets thousands of simultaneously running agents.
-Each qualification states the exact admitted execution concurrency, command and
+Qualification covers both ends of the
+[concurrent execution target](deployment-profiles.md#concurrent-execution-target).
+The minimum supported native and small-server compositions record cold installed
+start, readiness, ready idle, idle with a durable future obligation, first actual
+execution, and sustained one-agent execution. Measure the complete selected
+process tree, including role processes, sidecars, native dependencies, AR, and
+provider execution. Record component and aggregate CPU, memory, disk growth,
+connections and handles, startup and first-use latency, exact hardware,
+configuration, artifact versions, and observation duration. A two-role Topology
+slice does not qualify a complete useful agent composition. Numerical budgets
+remain subject to OD-030 calibration and approval.
+
+At the loaded end, each qualification states the exact admitted execution concurrency, command and
 event rates, bursts, payload sizes, fanout, data size, duration, hardware, replica
 limits, and deployed adapter set. Stored Agents, queued work, idle sessions, or
 open client connections do not establish that capacity. Exercise aggregate
@@ -459,6 +470,20 @@ Actual simultaneous execution capacity additionally requires AR-owned runtime
 and provider-adapter evidence, including admission, custody, resources, and the
 advertised execution placement. Neither modeled traffic nor a successful RPC
 qualifies provider capacity, runtime connectivity, or a production SLO.
+
+Actual execution-capacity claims also use the AR-owned
+[fleet qualification charter](https://github.com/agent-teams-ai/agent-runtime/blob/main/docs/architecture/agent-runtime-greenfield-foundation-plan.md#111-fleet-qualification-charter):
+record offered load and useful completions through execution turnover, enforce
+its bounded pending, output, and cleanup debt and cancellation/settlement
+criteria, and demonstrate the declared recovery or drain after overload. A
+sustained concurrency count alone is insufficient.
+
+Local lifecycle cases retain a pending timer or approval and an active or
+unknown operation through supported restart, sleep/wake, and update. Verify
+receipts, stale-predecessor rejection, and bounded overdue-work recovery;
+idle optimization must not drop those obligations. Reuse the existing lifecycle
+and workload fixtures for the affected capability instead of adding a parallel
+qualification framework.
 
 | Deployment form              | Additional qualification evidence                                                                                                                                                                                              |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

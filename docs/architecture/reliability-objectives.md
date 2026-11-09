@@ -127,9 +127,10 @@ Calibration includes processing results of asynchronous persistence calls and
 concurrent command or event load. A separate PostgreSQL process does not remove
 that Host work; numerical limits still require evidence and owner approval.
 
-The server architecture targets thousands of simultaneously running agents
-across independent Runs, including Runs within one team and tenant, under the
-[concurrent execution target](deployment-profiles.md#concurrent-execution-target).
+Reliability qualification covers the minimum useful deployment and loaded
+server workload in the
+[concurrent execution target](deployment-profiles.md#concurrent-execution-target),
+across independent Runs, including Runs within one team and tenant.
 Per-Run capacity is qualified separately. This target is not an approved SLO,
 a measured capacity, or an instruction to run one process per agent.
 Qualification records the exact admitted execution concurrency
@@ -140,6 +141,8 @@ capacity evidence remain distinct, as specified by the
 [workload qualification rules](testing-strategy.md#concurrent-execution-and-service-role-qualification).
 
 Resource calibration covers the complete selected role set, including sidecars,
+native infrastructure, AR and provider execution, cold start, ready idle,
+durable-wait idle, and first useful execution, as well as
 maximum replicas, rollout surge, database connections, handler queues, broker
 backlog, memory, event-loop delay, and disk headroom. Dapr routing does not start
 or autoscale replicas, allocate AR execution capacity, or establish product
