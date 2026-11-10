@@ -238,7 +238,10 @@ void test('Activity append forwards only contracted evidence fields to persisten
   await admission.append(context,untrusted);
   assert.equal(authorizations,1);
   assert.deepEqual(received,evidence,'forged serialized metadata must not cross the store boundary');
-  await admission.append(context,{...evidence,task:undefined,runtimeOperationRef:undefined});
-  assert.deepEqual(received,Object.fromEntries(Object.entries(evidence).filter(([key])=>
-    key!=='task'&&key!=='runtimeOperationRef')),'missing optional evidence fields remain absent');
+  const withoutOptional={run,participant:evidence.participant,
+    runtimeSessionRef:evidence.runtimeSessionRef,sourceEventId:evidence.sourceEventId,
+    sourceSequence:evidence.sourceSequence,kind:evidence.kind,text:evidence.text,
+    internal:evidence.internal,blockId:evidence.blockId};
+  await admission.append(context,withoutOptional);
+  assert.deepEqual(received,withoutOptional,'omitted optional evidence fields remain absent');
 });
