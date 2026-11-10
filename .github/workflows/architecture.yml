@@ -38,6 +38,10 @@ jobs:
           echo "TEST_POSTGRES_BIN=/usr/lib/postgresql/16/bin" >> "$GITHUB_ENV"
           echo "RUN_CONTEXT_OBSERVATION_PG=1" >> "$GITHUB_ENV"
       - run: pnpm check
+      - name: TEMP expose failed required typed baseline (remove before final review)
+        if: failure()
+        continue-on-error: true
+        run: pnpm exec agent-teams-foundation quality check --consumer . --json || true
       - name: Run advisory quality diagnostics
         continue-on-error: true
         run: pnpm quality:diagnostic
