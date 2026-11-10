@@ -282,7 +282,7 @@ test("installed typed gate rejects an unknown assertion bridge by default", asyn
       { encoding: "utf8", timeout: 60_000 });
     const baseline = runTyped();
     // TEMP diagnostic: expose the installed source baseline without changing gates.
-    if (baseline.status !== 0) { process.stdout.write("STAGE2_TEMP_TYPED_BASELINE " + baseline.stdout + "\n"); }
+    if (baseline.status !== 0) { process.stderr.write("STAGE2_TEMP_TYPED_BASELINE " + baseline.stdout + "\n"); }
     assert.equal(baseline.error, undefined, baseline.stderr);
     assert.equal(baseline.status, 0, `${baseline.stdout}${baseline.stderr}`);
     await writeFile(join(root, source), `${original}\nexport const unsafeBridge = ('unchecked' as unknown) as { value: string };\n`);
