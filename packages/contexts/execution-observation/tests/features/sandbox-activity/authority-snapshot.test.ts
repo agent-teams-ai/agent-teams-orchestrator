@@ -84,7 +84,7 @@ void test('malformed serialized Activity payloads fail closed before authorizati
   assert.equal(sideEffects,0,'invalid serialized Activity cannot reach authorization or persistence');
 });
 
-void test('Activity evidence rejects lone UTF-16 surrogates without corrupting valid astral text',async()=>{
+void test('Activity evidence rejects malformed UTF-16 and C1 controls while preserving astral text',async()=>{
   const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_subject'};
   const binding={run:`${context.projectId}/runs/one`,participant:`${context.projectId}/participants/one`,runtimeSessionRef:'runtime:one'};
   const evidence={...binding,sourceEventId:'source:one',sourceSequence:'1',kind:'TEXT_SNAPSHOT' as const,
@@ -95,12 +95,12 @@ void test('Activity evidence rejects lone UTF-16 surrogates without corrupting v
     store:{async bind(){storeCalls++;},async append(_context,received){storeCalls++;saved.push(received.text);
       return {status:'accepted' as const,sequence:'1'};}}
   });
-  for(const text of ['\uD800','\uDC00','prefix\uD800suffix','prefix\uDC00suffix']) {
+  for(const text of ['\uD800','\uDC00','prefix\uD800suffix','prefix\uDC00suffix','\u0085','prefix\u009B[31m']) {
     await assert.rejects(()=>ingress.append(context,{...evidence,text}),
       {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
   }
-  assert.equal(authorizationCalls,0,'ill-formed UTF-16 evidence must not authorize');
-  assert.equal(storeCalls,0,'ill-formed UTF-16 evidence must not persist replacement characters');
+  assert.equal(authorizationCalls,0,'unsafe Unicode evidence must not authorize');
+  assert.equal(storeCalls,0,'unsafe Unicode evidence must not persist controls or replacement characters');
   const validAstral='prefix\uD83D\uDE00suffix';
   await ingress.append(context,{...evidence,text:validAstral});
   assert.equal(authorizationCalls,1);

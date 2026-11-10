@@ -149,7 +149,7 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
 });
 
 
-void test('Activity astral Unicode round-trips through real PostgreSQL without replacement',{skip:!enabled,timeout:90000},async()=>{
+void test('Activity Unicode and C1 controls validate before PostgreSQL without replacement',{skip:!enabled,timeout:90000},async()=>{
   const cluster=await ownedPostgres();
   const context={tenantId:'TEST_unicode',projectId:'tenants/TEST_unicode/projects/TEST_project',principalId:'TEST_human'};
   const run=context.projectId+'/runs/unicode';
@@ -168,7 +168,7 @@ void test('Activity astral Unicode round-trips through real PostgreSQL without r
     await cluster.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');
     await feature.bindRuntime(context,binding);
     const before=authorizationCalls;
-    for(const malformed of ['\uD800','\uDC00','prefix\uD800suffix','prefix\uDC00suffix']){
+    for(const malformed of ['\uD800','\uDC00','prefix\uD800suffix','prefix\uDC00suffix','\u0085','prefix\u009B[31m']){
       await assert.rejects(()=>feature.append(context,evidence(malformed)),{code:'INVALID_ARGUMENT'});
     }
     assert.equal(authorizationCalls,before,'invalid Unicode must fail before authorization');
