@@ -31,9 +31,9 @@ export function isActivityState(value:unknown):value is ActivityState {
       const ordinal=BigInt(event.sequence);
       // Retained feed visibility is a projection of the same immutable fact.
       // A corrupt internal flag or event identity must never become a read grant.
-      const fact=ordinal>=1n && ordinal<=BigInt(history.length)?history[Number(ordinal)-1]:undefined;
+      const fact=ordinal>=1n && ordinal<=BigInt(history.length)?history.at(Number(ordinal)-1):undefined;
       return event.resourceName===run && BigInt(event.sequence)<=BigInt(sequence) &&
-        fact?.eventId===event.eventId && fact?.internal===event.internal &&
+        fact !== undefined && fact.eventId===event.eventId && fact.internal===event.internal &&
         (index===0 || BigInt(event.sequence)===BigInt(events[index-1]?.sequence??'0')+1n);
     }) &&
     new Set(receipts.map(item=>item.sourceEventId)).size===receipts.length &&
