@@ -1,3 +1,4 @@
+import { blockKey } from './activity-state.js';
 import type { ActivityFact, ActivityState, FeedFact, RuntimeBinding } from './activity-state.js';
 const object=(value:unknown):value is Record<string,unknown>=>value!==null && typeof value==='object' && !Array.isArray(value);
 const exact=(value:unknown):value is string=>typeof value==='string' && /^(?:0|[1-9][0-9]*)$/u.test(value) && BigInt(value)<=9223372036854775807n;
@@ -20,15 +21,33 @@ function receipt(value:unknown):value is ActivityState['receipts'][number] {
 function stateHead(value:Record<string,unknown>):value is Record<string,unknown>&Pick<ActivityState,'sequence'|'sourceSequence'|'gapSequence'|'gap'> {
   return exact(value.sequence)&&exact(value.sourceSequence)&&exact(value.gapSequence)&&typeof value.gap==='boolean';
 }
+/** A damaged public projection cannot override the last immutable block fact. */
+function consistentProjection(items: readonly ActivityFact[],history: readonly ActivityFact[],bound: RuntimeBinding):boolean {
+  const latestByBlock=new Map(history.map(fact=>[blockKey(fact),fact] as const));
+  const itemBlocks=new Set(items.map(blockKey));
+  return itemBlocks.size===items.length && itemBlocks.size===latestByBlock.size &&
+    items.every(item=>{
+      const latest=latestByBlock.get(blockKey(item));
+      return item.run===bound.run && item.participant===bound.participant && item.task===bound.task &&
+        latest!==undefined && latest.eventId===item.eventId && latest.internal===item.internal && latest.recordedAt===item.recordedAt;
+    });
+}
 export function isActivityState(value:unknown):value is ActivityState {
   if(!object(value) || !binding(value.binding) || !stateHead(value) ||
       !Array.isArray(value.items) || !value.items.every(isActivityFact) || !Array.isArray(value.history) || !value.history.every(isActivityFact) || !Array.isArray(value.events) || !value.events.every(feed) ||
       !Array.isArray(value.receipts) || !value.receipts.every(receipt)) {return false;}
   const bound=value.binding; const run=bound.run; const sequence=value.sequence; const events=value.events; const receipts=value.receipts; const history=value.history;
-  return BigInt(sequence)===BigInt(receipts.length) && BigInt(value.sourceSequence)>=BigInt(sequence) && history.length===receipts.length && BigInt(value.gapSequence)<=BigInt(sequence) && value.items.every(item=>item.run===run && item.participant===bound.participant && item.task===bound.task) &&
+  return BigInt(sequence)===BigInt(receipts.length) && BigInt(value.sourceSequence)>=BigInt(sequence) && history.length===receipts.length && BigInt(value.gapSequence)<=BigInt(sequence) && consistentProjection(value.items,history,bound) &&
     history.every(item=>item.run===run && item.participant===bound.participant && item.task===bound.task) &&
-    value.events.every((event,index)=>event.resourceName===run && BigInt(event.sequence)<=BigInt(sequence) &&
-      (index===0 || BigInt(event.sequence)===BigInt(events[index-1]?.sequence??'0')+1n)) &&
+    value.events.every((event,index)=>{
+      const ordinal=BigInt(event.sequence);
+      // Retained feed visibility is a projection of the same immutable fact.
+      // A corrupt internal flag or event identity must never become a read grant.
+      const fact=ordinal>=1n && ordinal<=BigInt(history.length)?history.at(Number(ordinal)-1):undefined;
+      return event.resourceName===run && BigInt(event.sequence)<=BigInt(sequence) &&
+        fact !== undefined && fact.eventId===event.eventId && fact.internal===event.internal &&
+        (index===0 || BigInt(event.sequence)===BigInt(events[index-1]?.sequence??'0')+1n);
+    }) &&
     new Set(receipts.map(item=>item.sourceEventId)).size===receipts.length &&
     receipts.every((item,index)=>BigInt(item.sequence)===BigInt(index)+1n);
 }

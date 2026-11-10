@@ -1,11 +1,25 @@
 import { SandboxActivityError } from './api.js';
 import type { ActivityEvidence, ActivityRequestContext, ActivityRuntimeBinding } from './api.js';
 const segment = /^[A-Za-z0-9_-]+$/u;
+/** Snapshot untrusted calls before authorization, rejecting any clone failure. */
+export function cloneActivityInput<T>(value: T, code: 'INVALID_ARGUMENT' | 'PERMISSION_DENIED'): T {
+  try {
+    return structuredClone(value);
+  } catch {
+    throw new SandboxActivityError(code, code === 'PERMISSION_DENIED'
+      ? 'Activity scope does not match authenticated authority'
+      : 'Invalid Activity request');
+  }
+}
+/** Do not forward uncontracted serialized authority metadata across ports. */
+export function contractedActivityContext(context: ActivityRequestContext): ActivityRequestContext {
+  return {tenantId:context.tenantId,projectId:context.projectId,principalId:context.principalId};
+}
 export function activityScope(context: ActivityRequestContext): void {
   // An inbound serialized authority snapshot can be structurally malformed at runtime.
   // Reject it before dereferencing or consulting authorization/storage.
   const serialized: unknown = context;
-  if (serialized === null || typeof serialized !== 'object' ||
+  if (serialized === null || typeof serialized !== 'object' || Array.isArray(serialized) ||
       !('tenantId' in serialized) || typeof serialized.tenantId !== 'string' ||
       !('projectId' in serialized) || typeof serialized.projectId !== 'string' ||
       !('principalId' in serialized) || typeof serialized.principalId !== 'string') {
@@ -35,7 +49,11 @@ export function activityBinding(context: ActivityRequestContext, binding: Activi
 function unsafeActivityText(text: string): boolean {
   return Array.from(text).some(character => {
     const code=character.charCodeAt(0);
-    return (code<32 && ![9,10,13].includes(code)) || code===127 || (code>=0x202a && code<=0x202e) || (code>=0x2066 && code<=0x2069);
+    return (character.length === 1 && code >= 0xd800 && code <= 0xdfff) ||
+      (code<32 && ![9,10,13].includes(code)) || code===127 ||
+      (code>=0x80 && code<=0x9f) ||
+      code===0x061c || code===0x200e || code===0x200f ||
+      (code>=0x202a && code<=0x202e) || (code>=0x2066 && code<=0x2069);
   });
 }
 export function activityEvidence(context: ActivityRequestContext, value: ActivityEvidence): void {
@@ -50,4 +68,15 @@ export function activityEvidence(context: ActivityRequestContext, value: Activit
 }
 export function activityPageSize(value: number): void {
   if (!Number.isInteger(value) || value < 1 || value > 100) {throw new SandboxActivityError('INVALID_ARGUMENT','Page size must be between 1 and 100');}
+}
+
+export function activityReadTokenInput(value: unknown): void {
+  // The authenticated cursor codec accepts only unpadded base64url text.
+  // Reject malformed serialized input before authorization or a database read.
+  // Unpadded base64url cannot have length mod 4 = 1; the private codec
+  // remains responsible for ciphertext size and authentication.
+  if (value !== undefined && (typeof value !== 'string' || value.length > 8192 ||
+      value.length % 4 === 1 || !/^[A-Za-z0-9_-]+$/u.test(value))) {
+    throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity cursor input');
+  }
 }

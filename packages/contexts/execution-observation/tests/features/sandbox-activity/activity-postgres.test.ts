@@ -53,8 +53,32 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
     await feature.append(context,evidence('9','source gap',{blockId:'message-4-block-0'}));snapshot=await feature.api.listActivity(context,{run,pageSize:10});assert.equal(snapshot.gap,true);assert.equal(snapshot.freshness,'incomplete');
     assert.equal((await feature.api.readFeed(context,{run,cursor:sourceGapCursor,pageSize:10})).gap,true);
     assert.equal((await feature.api.readFeed(context,{run,cursor:snapshot.cursor,pageSize:10})).gap,false,'fresh incomplete snapshot resumes without an infinite gap loop');
-    await feature.append(context,evidence('10','hidden',{blockId:'internal-block',internal:true}));internal=false;assert.equal((await feature.api.listActivity(context,{run,pageSize:10})).items.some(item=>item.internal),false);
+    internal=false;
+    const publicFeedCursor=(await feature.api.listActivity(context,{run,pageSize:10})).cursor;
+    await feature.append(context,evidence('10','hidden',{blockId:'internal-block',internal:true}));
+    assert.equal((await feature.api.readFeed(context,{run,cursor:publicFeedCursor,pageSize:10})).events.length,0,
+      'internal event is hidden from the retained external feed');
+    assert.equal((await feature.api.listActivity(context,{run,pageSize:10})).items.some(item=>item.internal),false);
     const savedState=(await pools.owner.query<{state:unknown}>('SELECT state FROM execution_observation.partitions WHERE run=$1',[run])).rows[0]?.state;assert.notEqual(savedState,undefined);
+    // A damaged snapshot projection must not turn a private history fact into
+    // a public list item. The retained history is the authority for visibility.
+    assert.equal((await pools.owner.query<{last_internal:boolean}>(
+      "SELECT (state->'items'->-1->>'internal')::boolean AS last_internal FROM execution_observation.partitions WHERE run=$1",[run])).rows[0]?.last_internal,true);
+    await pools.owner.query(
+      "UPDATE execution_observation.partitions SET state=jsonb_set(state,ARRAY['items',(jsonb_array_length(state->'items')-1)::text,'internal'],'false'::jsonb) WHERE run=$1",
+      [run]);
+    await assert.rejects(()=>feature.api.listActivity(context,{run,pageSize:10}),{code:'UNAVAILABLE'});
+    await pools.owner.query('UPDATE execution_observation.partitions SET state=$1::jsonb WHERE run=$2',[JSON.stringify(savedState),run]);
+    // Simulate a damaged retained feed flag: without state cross-checking, an
+    // old authorized cursor would disclose the private event's metadata.
+    const persisted=await pools.owner.query<{last_internal:boolean}>(
+      "SELECT (state->'events'->-1->>'internal')::boolean AS last_internal FROM execution_observation.partitions WHERE run=$1",[run]);
+    assert.equal(persisted.rows[0]?.last_internal,true);
+    await pools.owner.query(
+      "UPDATE execution_observation.partitions SET state=jsonb_set(state,ARRAY['events',(jsonb_array_length(state->'events')-1)::text,'internal'],'false'::jsonb) WHERE run=$1",
+      [run]);
+    await assert.rejects(()=>feature.api.readFeed(context,{run,cursor:publicFeedCursor,pageSize:10}),{code:'UNAVAILABLE'});
+    await pools.owner.query('UPDATE execution_observation.partitions SET state=$1::jsonb WHERE run=$2',[JSON.stringify(savedState),run]);
     await pools.owner.query("UPDATE execution_observation.partitions SET state=jsonb_set(state,'{history,0,run}',to_jsonb($1::text)) WHERE run=$2",[`${context.projectId}/runs/foreign`,run]);
     await assert.rejects(()=>feature.api.listActivity(context,{run,pageSize:10}),{code:'UNAVAILABLE'});
     await pools.owner.query('UPDATE execution_observation.partitions SET state=$1::jsonb WHERE run=$2',[JSON.stringify(savedState),run]);
@@ -146,4 +170,40 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
     assert.equal((await feature.append(context,releaseFault)).status,'duplicate');
     assert.equal((await pools.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.outbox')).rows[0]?.count,'12');
   }finally{await cluster.stop([pools.owner,pools.runtime]);}
+});
+
+
+void test('Activity Unicode and C1 controls validate before PostgreSQL without replacement',{skip:!enabled,timeout:90000},async()=>{
+  const cluster=await ownedPostgres();
+  const context={tenantId:'TEST_unicode',projectId:'tenants/TEST_unicode/projects/TEST_project',principalId:'TEST_human'};
+  const run=context.projectId+'/runs/unicode';
+  const binding={run,participant:context.projectId+'/participants/member',runtimeSessionRef:'runtime:unicode'};
+  let authorizationCalls=0;
+  const authorization={async assertAuthorized(){authorizationCalls++;return {epoch:'1',allowInternal:false};}};
+  const options={pool:cluster.runtime,migrationPool:cluster.owner,authorization,
+    clock:{now:()=> '1770000000123456'},cursorKey:new Uint8Array(32).fill(7),
+    readTokenLifetimeMicroseconds:'1000000',maxSourceEvents:30,retainedFeedEvents:3};
+  const evidence=(value:string):ActivityEvidence=>({...binding,sourceEventId:'source-unicode',
+    sourceSequence:'1',kind:'TEXT_SNAPSHOT',text:value,internal:false,blockId:'unicode-block'});
+  try{
+    const feature=createSandboxActivityFeature(options);
+    await feature.migrate();
+    await cluster.owner.query('GRANT USAGE ON SCHEMA execution_observation TO test_runtime');
+    await cluster.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');
+    await feature.bindRuntime(context,binding);
+    const before=authorizationCalls;
+    for(const malformed of ['\uD800','\uDC00','prefix\uD800suffix','prefix\uDC00suffix','\u061C','\u200E','\u200F','\u007F','\u0080','\u0085','\u009F','prefix\u009B[31m']){
+      await assert.rejects(()=>feature.append(context,evidence(malformed)),{code:'INVALID_ARGUMENT'});
+    }
+    assert.equal(authorizationCalls,before,'invalid Unicode must fail before authorization');
+    assert.equal((await cluster.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.outbox')).rows[0]?.count,'0');
+    const valid='prefix\u00A0\uD83D\uDE00suffix';
+    assert.equal((await feature.append(context,evidence(valid))).status,'accepted');
+    // This is a new feature reader, not the ingress instance or a fake in-memory store.
+    const reader=createSandboxActivityFeature(options);
+    const page=await reader.api.listActivity(context,{run,pageSize:5});
+    assert.equal(page.items.length,1);
+    assert.equal(page.items[0]?.text,valid);
+    assert.equal(page.items[0]?.text.includes('\uFFFD'),false);
+  }finally{await cluster.stop([cluster.owner,cluster.runtime]);}
 });
