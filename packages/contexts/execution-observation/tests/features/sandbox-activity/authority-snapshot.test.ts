@@ -217,3 +217,28 @@ void test('Activity reads do not forward uncontracted caller metadata into stora
     {run,pageSize:1,cursor:'REVG'}
   ],'only public read-contract fields may reach the owning store');
 });
+
+void test('Activity append forwards only contracted evidence fields to persistence',async()=>{
+  const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_subject'};
+  const run=context.projectId+'/runs/one';
+  const evidence={run,participant:context.projectId+'/participants/one',runtimeSessionRef:'runtime:one',
+    task:context.projectId+'/tasks/one',sourceEventId:'source:one',sourceSequence:'1',
+    kind:'TEXT_SNAPSHOT' as const,text:'original',internal:false,blockId:'one',
+    runtimeOperationRef:'operation:one'};
+  let received:unknown;let authorizations=0;
+  const admission=createActivityAdmission({
+    authorization:{async assertAuthorized(){authorizations++;return {epoch:'1',allowInternal:false};}},
+    store:{
+      async bind(){throw new Error('TEST unexpected binding');},
+      async append(_context,value){received=value;return {status:'accepted' as const,sequence:'1'};}
+    }
+  });
+  const untrusted={...evidence,tenantId:'foreign',grantEpoch:'forged',
+    allowInternal:true,uncontractedCredential:'TEST_secret'};
+  await admission.append(context,untrusted);
+  assert.equal(authorizations,1);
+  assert.deepEqual(received,evidence,'forged serialized metadata must not cross the store boundary');
+  await admission.append(context,{...evidence,task:undefined,runtimeOperationRef:undefined});
+  assert.deepEqual(received,Object.fromEntries(Object.entries(evidence).filter(([key])=>
+    key!=='task'&&key!=='runtimeOperationRef')),'missing optional evidence fields remain absent');
+});

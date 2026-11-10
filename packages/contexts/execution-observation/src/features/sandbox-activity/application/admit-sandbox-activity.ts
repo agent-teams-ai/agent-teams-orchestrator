@@ -14,7 +14,15 @@ export function createActivityAdmission(dependencies:{store:Pick<ActivityStore,'
       context=cloneActivityInput(context,'PERMISSION_DENIED');evidence=cloneActivityInput(evidence,'INVALID_ARGUMENT');
       activityEvidence(context,evidence);
       await dependencies.authorization.assertAuthorized(context,'activity.append',evidence.run);
-      return dependencies.store.append(context,structuredClone(evidence));
+      // Only declared evidence fields may pass from untrusted ingress to storage.
+      const accepted: ActivityEvidence = {
+        run:evidence.run,participant:evidence.participant,runtimeSessionRef:evidence.runtimeSessionRef,
+        ...(evidence.task===undefined?{}:{task:evidence.task}),
+        sourceEventId:evidence.sourceEventId,sourceSequence:evidence.sourceSequence,
+        kind:evidence.kind,text:evidence.text,internal:evidence.internal,blockId:evidence.blockId,
+        ...(evidence.runtimeOperationRef===undefined?{}:{runtimeOperationRef:evidence.runtimeOperationRef})
+      };
+      return dependencies.store.append(context,accepted);
     },
   };
 }
