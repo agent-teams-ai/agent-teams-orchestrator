@@ -147,3 +147,39 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
     assert.equal((await pools.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.outbox')).rows[0]?.count,'12');
   }finally{await cluster.stop([pools.owner,pools.runtime]);}
 });
+
+
+void test('Activity astral Unicode round-trips through real PostgreSQL without replacement',{skip:!enabled,timeout:90000},async()=>{
+  const cluster=await ownedPostgres();
+  const context={tenantId:'TEST_unicode',projectId:'tenants/TEST_unicode/projects/TEST_project',principalId:'TEST_human'};
+  const run=context.projectId+'/runs/unicode';
+  const binding={run,participant:context.projectId+'/participants/member',runtimeSessionRef:'runtime:unicode'};
+  let authorizationCalls=0;
+  const authorization={async assertAuthorized(){authorizationCalls++;return {epoch:'1',allowInternal:false};}};
+  const options={pool:cluster.runtime,migrationPool:cluster.owner,authorization,
+    clock:{now:()=> '1770000000123456'},cursorKey:new Uint8Array(32).fill(7),
+    readTokenLifetimeMicroseconds:'1000000',maxSourceEvents:30,retainedFeedEvents:3};
+  const evidence=(value:string):ActivityEvidence=>({...binding,sourceEventId:'source-unicode',
+    sourceSequence:'1',kind:'TEXT_SNAPSHOT',text:value,internal:false,blockId:'unicode-block'});
+  try{
+    const feature=createSandboxActivityFeature(options);
+    await feature.migrate();
+    await cluster.owner.query('GRANT USAGE ON SCHEMA execution_observation TO test_runtime');
+    await cluster.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');
+    await feature.bindRuntime(context,binding);
+    const before=authorizationCalls;
+    for(const malformed of ['\uD800','\uDC00','prefix\uD800suffix','prefix\uDC00suffix']){
+      await assert.rejects(()=>feature.append(context,evidence(malformed)),{code:'INVALID_ARGUMENT'});
+    }
+    assert.equal(authorizationCalls,before,'invalid Unicode must fail before authorization');
+    assert.equal((await cluster.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.outbox')).rows[0]?.count,'0');
+    const valid='prefix\uD83D\uDE00suffix';
+    assert.equal((await feature.append(context,evidence(valid))).status,'accepted');
+    // This is a new feature reader, not the ingress instance or a fake in-memory store.
+    const reader=createSandboxActivityFeature(options);
+    const page=await reader.api.listActivity(context,{run,pageSize:5});
+    assert.equal(page.items.length,1);
+    assert.equal(page.items[0]?.text,valid);
+    assert.equal(page.items[0]?.text.includes('\uFFFD'),false);
+  }finally{await cluster.stop([cluster.owner,cluster.runtime]);}
+});
