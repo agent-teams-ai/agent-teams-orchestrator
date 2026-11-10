@@ -165,8 +165,11 @@ void test('malformed Activity read cursors fail closed before authorization or S
   });
   // These are serializable but not valid opaque cursor arguments. The prior
   // implementation only checked their shape after authorization and SQL.
+  const oversizedMultibyte='\u00E9'.repeat(4097);
+  assert.ok(oversizedMultibyte.length < 8192 && Buffer.byteLength(oversizedMultibyte,'utf8') > 8192,
+    'multibyte token exceeds the codec byte bound but not the UTF-16 length bound');
   const invalid:unknown[]=[
-    null,0,42,true,{},[],['token'],'', 'x'.repeat(8193),
+    null,0,42,true,{},[],['token'],'', 'x'.repeat(8193),oversizedMultibyte,
     'abc+def','abc/def','abc=','abc def','abc\ndef','abc%20','abc\u00A0def','abc\uD800def',
   ];
   for(const cursor of invalid){
