@@ -62,11 +62,12 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
     const savedState=(await pools.owner.query<{state:unknown}>('SELECT state FROM execution_observation.partitions WHERE run=$1',[run])).rows[0]?.state;assert.notEqual(savedState,undefined);
     // Simulate a damaged retained feed flag: without state cross-checking, an
     // old authorized cursor would disclose the private event's metadata.
-    const retainedEvents=(savedState as {events?:Array<{internal:boolean}>}).events;
-    assert.ok(retainedEvents && retainedEvents.length>0);
-    assert.equal(retainedEvents.at(-1)?.internal,true);
-    await pools.owner.query("UPDATE execution_observation.partitions SET state=jsonb_set(state,$1::text[],'false'::jsonb) WHERE run=$2",
-      [['events',String(retainedEvents.length-1),'internal'],run]);
+    const persisted=await pools.owner.query<{last_internal:boolean}>(
+      "SELECT (state->'events'->-1->>'internal')::boolean AS last_internal FROM execution_observation.partitions WHERE run=$1",[run]);
+    assert.equal(persisted.rows[0]?.last_internal,true);
+    await pools.owner.query(
+      "UPDATE execution_observation.partitions SET state=jsonb_set(state,ARRAY['events',(jsonb_array_length(state->'events')-1)::text,'internal'],'false'::jsonb) WHERE run=$1",
+      [run]);
     await assert.rejects(()=>feature.api.readFeed(context,{run,cursor:publicFeedCursor,pageSize:10}),{code:'UNAVAILABLE'});
     await pools.owner.query('UPDATE execution_observation.partitions SET state=$1::jsonb WHERE run=$2',[JSON.stringify(savedState),run]);
     await pools.owner.query("UPDATE execution_observation.partitions SET state=jsonb_set(state,'{history,0,run}',to_jsonb($1::text)) WHERE run=$2",[`${context.projectId}/runs/foreign`,run]);
