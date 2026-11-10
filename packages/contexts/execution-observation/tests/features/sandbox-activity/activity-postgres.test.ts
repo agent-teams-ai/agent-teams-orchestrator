@@ -60,6 +60,15 @@ void test('authorized Activity transactions retain block identity, dedupe, snaps
       'internal event is hidden from the retained external feed');
     assert.equal((await feature.api.listActivity(context,{run,pageSize:10})).items.some(item=>item.internal),false);
     const savedState=(await pools.owner.query<{state:unknown}>('SELECT state FROM execution_observation.partitions WHERE run=$1',[run])).rows[0]?.state;assert.notEqual(savedState,undefined);
+    // A damaged snapshot projection must not turn a private history fact into
+    // a public list item. The retained history is the authority for visibility.
+    assert.equal((await pools.owner.query<{last_internal:boolean}>(
+      "SELECT (state->'items'->-1->>'internal')::boolean AS last_internal FROM execution_observation.partitions WHERE run=$1",[run])).rows[0]?.last_internal,true);
+    await pools.owner.query(
+      "UPDATE execution_observation.partitions SET state=jsonb_set(state,ARRAY['items',(jsonb_array_length(state->'items')-1)::text,'internal'],'false'::jsonb) WHERE run=$1",
+      [run]);
+    await assert.rejects(()=>feature.api.listActivity(context,{run,pageSize:10}),{code:'UNAVAILABLE'});
+    await pools.owner.query('UPDATE execution_observation.partitions SET state=$1::jsonb WHERE run=$2',[JSON.stringify(savedState),run]);
     // Simulate a damaged retained feed flag: without state cross-checking, an
     // old authorized cursor would disclose the private event's metadata.
     const persisted=await pools.owner.query<{last_internal:boolean}>(

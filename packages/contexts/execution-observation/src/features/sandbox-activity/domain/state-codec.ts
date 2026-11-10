@@ -1,3 +1,4 @@
+import { blockKey } from './activity-state.js';
 import type { ActivityFact, ActivityState, FeedFact, RuntimeBinding } from './activity-state.js';
 const object=(value:unknown):value is Record<string,unknown>=>value!==null && typeof value==='object' && !Array.isArray(value);
 const exact=(value:unknown):value is string=>typeof value==='string' && /^(?:0|[1-9][0-9]*)$/u.test(value) && BigInt(value)<=9223372036854775807n;
@@ -25,7 +26,15 @@ export function isActivityState(value:unknown):value is ActivityState {
       !Array.isArray(value.items) || !value.items.every(isActivityFact) || !Array.isArray(value.history) || !value.history.every(isActivityFact) || !Array.isArray(value.events) || !value.events.every(feed) ||
       !Array.isArray(value.receipts) || !value.receipts.every(receipt)) {return false;}
   const bound=value.binding; const run=bound.run; const sequence=value.sequence; const events=value.events; const receipts=value.receipts; const history=value.history;
-  return BigInt(sequence)===BigInt(receipts.length) && BigInt(value.sourceSequence)>=BigInt(sequence) && history.length===receipts.length && BigInt(value.gapSequence)<=BigInt(sequence) && value.items.every(item=>item.run===run && item.participant===bound.participant && item.task===bound.task) &&
+  // A retained public item must retain the immutable visibility and identity
+  // of its latest source fact. A damaged projection cannot grant read access.
+  const latestByBlock=new Map(history.map(fact=>[blockKey(fact),fact] as const));
+  const itemBlocks=new Set(value.items.map(blockKey));
+  return itemBlocks.size===value.items.length && itemBlocks.size===latestByBlock.size &&
+    value.items.every(item=>{
+      const latest=latestByBlock.get(blockKey(item));
+      return latest!==undefined && latest.eventId===item.eventId && latest.internal===item.internal && latest.recordedAt===item.recordedAt;
+    }) && BigInt(sequence)===BigInt(receipts.length) && BigInt(value.sourceSequence)>=BigInt(sequence) && history.length===receipts.length && BigInt(value.gapSequence)<=BigInt(sequence) && value.items.every(item=>item.run===run && item.participant===bound.participant && item.task===bound.task) &&
     history.every(item=>item.run===run && item.participant===bound.participant && item.task===bound.task) &&
     value.events.every((event,index)=>{
       const ordinal=BigInt(event.sequence);

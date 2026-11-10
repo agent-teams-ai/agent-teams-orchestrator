@@ -20,7 +20,7 @@ export function evidenceFingerprint(value: Evidence): string {
     value.sourceSequence,value.kind,value.text,value.internal,value.blockId,value.runtimeOperationRef ?? null]);
 }
 export function bindingFingerprint(value: RuntimeBinding): string { return JSON.stringify([value.run,value.participant,value.runtimeSessionRef,value.task ?? null]); }
-const blockKey = (value: ActivityFact): string => JSON.stringify([value.participant,value.blockId,value.runtimeOperationRef ?? null]);
+export const blockKey = (value: ActivityFact): string => JSON.stringify([value.participant,value.blockId,value.runtimeOperationRef ?? null]);
 /** Snapshot replaces, true delta appends, completion never appends cumulative text twice. */
 export function projectActivity(items: readonly ActivityFact[], next: ActivityFact): readonly ActivityFact[] {
   const projected:ActivityFact=next.kind==='TEXT_DELTA'?{...next,kind:'TEXT_SNAPSHOT'}:next;
