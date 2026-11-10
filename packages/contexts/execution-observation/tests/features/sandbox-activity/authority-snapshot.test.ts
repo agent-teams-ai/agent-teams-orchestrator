@@ -84,6 +84,30 @@ void test('malformed serialized Activity payloads fail closed before authorizati
   assert.equal(sideEffects,0,'invalid serialized Activity cannot reach authorization or persistence');
 });
 
+void test('Activity evidence rejects lone UTF-16 surrogates without corrupting valid astral text',async()=>{
+  const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_subject'};
+  const binding={run:`${context.projectId}/runs/one`,participant:`${context.projectId}/participants/one`,runtimeSessionRef:'runtime:one'};
+  const evidence={...binding,sourceEventId:'source:one',sourceSequence:'1',kind:'TEXT_SNAPSHOT' as const,
+    text:'valid',internal:false,blockId:'one'};
+  let authorizationCalls=0;let storeCalls=0;const saved:string[]=[];
+  const ingress=createActivityAdmission({
+    authorization:{async assertAuthorized(){authorizationCalls++;return {epoch:'1',allowInternal:false};}},
+    store:{async bind(){storeCalls++;},async append(_context,received){storeCalls++;saved.push(received.text);
+      return {status:'accepted' as const,sequence:'1'};}}
+  });
+  for(const text of ['\\uD800','\\uDC00','prefix\\uD800suffix','prefix\\uDC00suffix']) {
+    await assert.rejects(()=>ingress.append(context,{...evidence,text}),
+      {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
+  }
+  assert.equal(authorizationCalls,0,'ill-formed UTF-16 evidence must not authorize');
+  assert.equal(storeCalls,0,'ill-formed UTF-16 evidence must not persist replacement characters');
+  const validAstral='prefix\\uD83D\\uDE00suffix';
+  await ingress.append(context,{...evidence,text:validAstral});
+  assert.equal(authorizationCalls,1);
+  assert.equal(storeCalls,1);
+  assert.deepEqual(saved,[validAstral],'valid surrogate pairs retain their original text');
+});
+
 void test('malformed serialized Activity read requests reject before authorization or persistence',async()=>{
   const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_subject'};
   let effects=0;
