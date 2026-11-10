@@ -21,20 +21,23 @@ function receipt(value:unknown):value is ActivityState['receipts'][number] {
 function stateHead(value:Record<string,unknown>):value is Record<string,unknown>&Pick<ActivityState,'sequence'|'sourceSequence'|'gapSequence'|'gap'> {
   return exact(value.sequence)&&exact(value.sourceSequence)&&exact(value.gapSequence)&&typeof value.gap==='boolean';
 }
+/** A damaged public projection cannot override the last immutable block fact. */
+function consistentProjection(items: readonly ActivityFact[],history: readonly ActivityFact[],bound: RuntimeBinding):boolean {
+  const latestByBlock=new Map(history.map(fact=>[blockKey(fact),fact] as const));
+  const itemBlocks=new Set(items.map(blockKey));
+  return itemBlocks.size===items.length && itemBlocks.size===latestByBlock.size &&
+    items.every(item=>{
+      const latest=latestByBlock.get(blockKey(item));
+      return item.run===bound.run && item.participant===bound.participant && item.task===bound.task &&
+        latest!==undefined && latest.eventId===item.eventId && latest.internal===item.internal && latest.recordedAt===item.recordedAt;
+    });
+}
 export function isActivityState(value:unknown):value is ActivityState {
   if(!object(value) || !binding(value.binding) || !stateHead(value) ||
       !Array.isArray(value.items) || !value.items.every(isActivityFact) || !Array.isArray(value.history) || !value.history.every(isActivityFact) || !Array.isArray(value.events) || !value.events.every(feed) ||
       !Array.isArray(value.receipts) || !value.receipts.every(receipt)) {return false;}
   const bound=value.binding; const run=bound.run; const sequence=value.sequence; const events=value.events; const receipts=value.receipts; const history=value.history;
-  // A retained public item must retain the immutable visibility and identity
-  // of its latest source fact. A damaged projection cannot grant read access.
-  const latestByBlock=new Map(history.map(fact=>[blockKey(fact),fact] as const));
-  const itemBlocks=new Set(value.items.map(blockKey));
-  return itemBlocks.size===value.items.length && itemBlocks.size===latestByBlock.size &&
-    value.items.every(item=>{
-      const latest=latestByBlock.get(blockKey(item));
-      return latest!==undefined && latest.eventId===item.eventId && latest.internal===item.internal && latest.recordedAt===item.recordedAt;
-    }) && BigInt(sequence)===BigInt(receipts.length) && BigInt(value.sourceSequence)>=BigInt(sequence) && history.length===receipts.length && BigInt(value.gapSequence)<=BigInt(sequence) && value.items.every(item=>item.run===run && item.participant===bound.participant && item.task===bound.task) &&
+  return BigInt(sequence)===BigInt(receipts.length) && BigInt(value.sourceSequence)>=BigInt(sequence) && history.length===receipts.length && BigInt(value.gapSequence)<=BigInt(sequence) && consistentProjection(value.items,history,bound) &&
     history.every(item=>item.run===run && item.participant===bound.participant && item.task===bound.task) &&
     value.events.every((event,index)=>{
       const ordinal=BigInt(event.sequence);
