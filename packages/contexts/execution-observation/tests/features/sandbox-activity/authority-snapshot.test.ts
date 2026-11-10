@@ -245,3 +245,34 @@ void test('Activity append forwards only contracted evidence fields to persisten
   await admission.append(context,withoutOptional);
   assert.deepEqual(received,withoutOptional,'omitted optional evidence fields remain absent');
 });
+
+void test('Activity authorization and persistence receive only declared context fields',async()=>{
+  const scope={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_subject'};
+  const caller={...scope,grantEpoch:'forged',allowInternal:true,uncontractedCredential:'TEST_secret'};
+  const run=scope.projectId+'/runs/one';
+  const binding={run,participant:scope.projectId+'/participants/one',runtimeSessionRef:'runtime:one'};
+  const evidence={...binding,sourceEventId:'source:one',sourceSequence:'1',kind:'TEXT_SNAPSHOT' as const,
+    text:'one',internal:false,blockId:'one'};
+  const received:Array<{layer:string;context:unknown}>=[];
+  const authorization={async assertAuthorized(context:typeof scope){
+    received.push({layer:'authorization',context});
+    return {epoch:'1',allowInternal:false};
+  }};
+  const api=createActivityApi({authorization,store:{
+    async list(context){received.push({layer:'storage',context});return {items:[],watermark:'0',cursor:'cursor',freshness:'current' as const,gap:false};},
+    async feed(context){received.push({layer:'storage',context});return {events:[],nextCursor:'cursor',gap:false};}
+  }});
+  const ingress=createActivityAdmission({authorization,store:{
+    async bind(context){received.push({layer:'storage',context});},
+    async append(context){received.push({layer:'storage',context});return {status:'accepted' as const,sequence:'1'};}
+  }});
+  await api.listActivity(caller,{run,pageSize:1});
+  await api.readFeed(caller,{run,pageSize:1});
+  await ingress.bindRuntime(caller,binding);
+  await ingress.append(caller,evidence);
+  assert.equal(received.length,8,'each public operation must authorize once and reach storage once');
+  for(const observation of received){
+    assert.deepEqual(observation.context,scope,
+      observation.layer+' must not receive caller-forged grant or credential metadata');
+  }
+});

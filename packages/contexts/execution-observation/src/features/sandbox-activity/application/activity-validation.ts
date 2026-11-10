@@ -11,6 +11,10 @@ export function cloneActivityInput<T>(value: T, code: 'INVALID_ARGUMENT' | 'PERM
       : 'Invalid Activity request');
   }
 }
+/** Do not forward uncontracted serialized authority metadata across ports. */
+export function contractedActivityContext(context: ActivityRequestContext): ActivityRequestContext {
+  return {tenantId:context.tenantId,projectId:context.projectId,principalId:context.principalId};
+}
 export function activityScope(context: ActivityRequestContext): void {
   // An inbound serialized authority snapshot can be structurally malformed at runtime.
   // Reject it before dereferencing or consulting authorization/storage.
