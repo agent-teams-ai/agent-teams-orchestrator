@@ -168,12 +168,12 @@ void test('Activity Unicode and C1 controls validate before PostgreSQL without r
     await cluster.owner.query('GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA execution_observation TO test_runtime');
     await feature.bindRuntime(context,binding);
     const before=authorizationCalls;
-    for(const malformed of ['\uD800','\uDC00','prefix\uD800suffix','prefix\uDC00suffix','\u0085','prefix\u009B[31m']){
+    for(const malformed of ['\uD800','\uDC00','prefix\uD800suffix','prefix\uDC00suffix','\u007F','\u0080','\u0085','\u009F','prefix\u009B[31m']){
       await assert.rejects(()=>feature.append(context,evidence(malformed)),{code:'INVALID_ARGUMENT'});
     }
     assert.equal(authorizationCalls,before,'invalid Unicode must fail before authorization');
     assert.equal((await cluster.owner.query<{count:string}>('SELECT count(*)::text AS count FROM execution_observation.outbox')).rows[0]?.count,'0');
-    const valid='prefix\uD83D\uDE00suffix';
+    const valid='prefix\u00A0\uD83D\uDE00suffix';
     assert.equal((await feature.append(context,evidence(valid))).status,'accepted');
     // This is a new feature reader, not the ingress instance or a fake in-memory store.
     const reader=createSandboxActivityFeature(options);

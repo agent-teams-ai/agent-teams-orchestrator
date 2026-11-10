@@ -95,13 +95,13 @@ void test('Activity evidence rejects malformed UTF-16 and C1 controls while pres
     store:{async bind(){storeCalls++;},async append(_context,received){storeCalls++;saved.push(received.text);
       return {status:'accepted' as const,sequence:'1'};}}
   });
-  for(const text of ['\uD800','\uDC00','prefix\uD800suffix','prefix\uDC00suffix','\u0085','prefix\u009B[31m']) {
+  for(const text of ['\uD800','\uDC00','prefix\uD800suffix','prefix\uDC00suffix','\u007F','\u0080','\u0085','\u009F','prefix\u009B[31m']) {
     await assert.rejects(()=>ingress.append(context,{...evidence,text}),
       {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
   }
   assert.equal(authorizationCalls,0,'unsafe Unicode evidence must not authorize');
   assert.equal(storeCalls,0,'unsafe Unicode evidence must not persist controls or replacement characters');
-  const validAstral='prefix\uD83D\uDE00suffix';
+  const validAstral='prefix\u00A0\uD83D\uDE00suffix';
   await ingress.append(context,{...evidence,text:validAstral});
   assert.equal(authorizationCalls,1);
   assert.equal(storeCalls,1);
