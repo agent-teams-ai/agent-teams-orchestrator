@@ -95,13 +95,13 @@ void test('Activity evidence rejects lone UTF-16 surrogates without corrupting v
     store:{async bind(){storeCalls++;},async append(_context,received){storeCalls++;saved.push(received.text);
       return {status:'accepted' as const,sequence:'1'};}}
   });
-  for(const text of ['\\uD800','\\uDC00','prefix\\uD800suffix','prefix\\uDC00suffix']) {
+  for(const text of ['\uD800','\uDC00','prefix\uD800suffix','prefix\uDC00suffix']) {
     await assert.rejects(()=>ingress.append(context,{...evidence,text}),
       {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
   }
   assert.equal(authorizationCalls,0,'ill-formed UTF-16 evidence must not authorize');
   assert.equal(storeCalls,0,'ill-formed UTF-16 evidence must not persist replacement characters');
-  const validAstral='prefix\\uD83D\\uDE00suffix';
+  const validAstral='prefix\uD83D\uDE00suffix';
   await ingress.append(context,{...evidence,text:validAstral});
   assert.equal(authorizationCalls,1);
   assert.equal(storeCalls,1);
