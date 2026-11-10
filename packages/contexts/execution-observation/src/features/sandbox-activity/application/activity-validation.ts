@@ -66,9 +66,9 @@ export function activityPageSize(value: number): void {
 }
 
 export function activityReadTokenInput(value: unknown): void {
-  // The authenticated cursor codec admits only bounded opaque strings. Reject
-  // malformed serialized input before authorization or a database read.
-  if (value !== undefined && (typeof value !== 'string' || value.length === 0 || value.length > 8192)) {
+  // The authenticated cursor codec accepts only unpadded base64url text.
+  // Reject malformed serialized input before authorization or a database read.
+  if (value !== undefined && (typeof value !== 'string' || value.length > 8192 || !/^[A-Za-z0-9_-]+$/u.test(value))) {
     throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity cursor input');
   }
 }

@@ -165,7 +165,10 @@ void test('malformed Activity read cursors fail closed before authorization or S
   });
   // These are serializable but not valid opaque cursor arguments. The prior
   // implementation only checked their shape after authorization and SQL.
-  const invalid:unknown[]=[null,0,42,true,{},[],['token'],'', 'x'.repeat(8193)];
+  const invalid:unknown[]=[
+    null,0,42,true,{},[],['token'],'', 'x'.repeat(8193),
+    'abc+def','abc/def','abc=','abc def','abc\ndef','abc%20','abc\u00A0def','abc\uD800def',
+  ];
   for(const cursor of invalid){
     await assert.rejects(()=>api.listActivity(context,{run,pageSize:1,pageToken:cursor} as Parameters<typeof api.listActivity>[1]),
       {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
