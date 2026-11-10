@@ -64,3 +64,11 @@ export function activityEvidence(context: ActivityRequestContext, value: Activit
 export function activityPageSize(value: number): void {
   if (!Number.isInteger(value) || value < 1 || value > 100) {throw new SandboxActivityError('INVALID_ARGUMENT','Page size must be between 1 and 100');}
 }
+
+export function activityReadTokenInput(value: unknown): void {
+  // The authenticated cursor codec admits only bounded opaque strings. Reject
+  // malformed serialized input before authorization or a database read.
+  if (value !== undefined && (typeof value !== 'string' || value.length === 0 || value.length > 8192)) {
+    throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity cursor input');
+  }
+}

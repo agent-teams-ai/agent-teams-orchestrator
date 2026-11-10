@@ -1,7 +1,7 @@
 import { SandboxActivityError } from './api.js';
 import type { SandboxActivityApi } from './api.js';
 import type { ActivityAuthorization, ActivityStore } from './ports/activity-store.js';
-import { activityPageSize, activityResource, cloneActivityInput } from './activity-validation.js';
+import { activityPageSize, activityReadTokenInput, activityResource, cloneActivityInput } from './activity-validation.js';
 function assertActivityReadInput(value: unknown): void {
   // Array.isArray itself throws for a revoked Proxy from a direct JS caller.
   // Normalize that failure before touching authorization or persistence.
@@ -17,14 +17,14 @@ export function createActivityApi(dependencies: { readonly store: Pick<ActivityS
     async listActivity(context,input) {
       assertActivityReadInput(input);
       context=cloneActivityInput(context,'PERMISSION_DENIED');input=cloneActivityInput(input,'INVALID_ARGUMENT');
-      activityResource(context,input.run,'runs'); activityPageSize(input.pageSize);
+      activityResource(context,input.run,'runs'); activityPageSize(input.pageSize); activityReadTokenInput(input.pageToken);
       const grant = await dependencies.authorization.assertAuthorized(context,'activity.read',input.run);
       return dependencies.store.list(context,input,{...grant});
     },
     async readFeed(context,input) {
       assertActivityReadInput(input);
       context=cloneActivityInput(context,'PERMISSION_DENIED');input=cloneActivityInput(input,'INVALID_ARGUMENT');
-      activityResource(context,input.run,'runs'); activityPageSize(input.pageSize);
+      activityResource(context,input.run,'runs'); activityPageSize(input.pageSize); activityReadTokenInput(input.cursor);
       const grant = await dependencies.authorization.assertAuthorized(context,'activity.read',input.run);
       return dependencies.store.feed(context,input,{...grant});
     },

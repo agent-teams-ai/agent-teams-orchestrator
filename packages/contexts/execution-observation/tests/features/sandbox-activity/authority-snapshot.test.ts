@@ -151,3 +151,31 @@ void test('malformed serialized Activity read requests reject before authorizati
   }
   assert.equal(effects,0,'malformed read payload cannot authorize or touch storage');
 });
+
+void test('malformed Activity read cursors fail closed before authorization or SQL', async () => {
+  const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_subject'};
+  const run=`${context.projectId}/runs/one`;
+  let authorizations=0;let databaseReads=0;
+  const api=createActivityApi({
+    authorization:{async assertAuthorized(){authorizations++;return {epoch:'1',allowInternal:false};}},
+    store:{
+      async list(){databaseReads++;return {items:[],watermark:'0',cursor:'cursor',freshness:'current' as const,gap:false};},
+      async feed(){databaseReads++;return {events:[],nextCursor:'cursor',gap:false};}
+    }
+  });
+  // These are serializable but not valid opaque cursor arguments. The prior
+  // implementation only checked their shape after authorization and SQL.
+  const invalid:unknown[]=[null,0,42,true,{},[],['token'],'', 'x'.repeat(8193)];
+  for(const cursor of invalid){
+    await assert.rejects(()=>api.listActivity(context,{run,pageSize:1,pageToken:cursor} as Parameters<typeof api.listActivity>[1]),
+      {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
+    await assert.rejects(()=>api.readFeed(context,{run,pageSize:1,cursor} as Parameters<typeof api.readFeed>[1]),
+      {name:'SandboxActivityError',code:'INVALID_ARGUMENT'});
+  }
+  assert.equal(authorizations,0,'invalid cursor cannot reach authorization');
+  assert.equal(databaseReads,0,'invalid cursor cannot open a database read');
+  await api.listActivity(context,{run,pageSize:1});
+  await api.readFeed(context,{run,pageSize:1});
+  assert.equal(authorizations,2,'cursor omission still permits normal authorization');
+  assert.equal(databaseReads,2,'cursor omission still permits both read operations');
+});
