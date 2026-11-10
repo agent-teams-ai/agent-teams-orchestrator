@@ -18,15 +18,19 @@ export function createActivityApi(dependencies: { readonly store: Pick<ActivityS
       assertActivityReadInput(input);
       context=cloneActivityInput(context,'PERMISSION_DENIED');input=cloneActivityInput(input,'INVALID_ARGUMENT');
       activityResource(context,input.run,'runs'); activityPageSize(input.pageSize); activityReadTokenInput(input.pageToken);
+      // Only contracted read fields cross into persistence. Untrusted
+      // serialized metadata must not become an implicit downstream option.
+      const request = {run:input.run,pageSize:input.pageSize,...(input.pageToken===undefined?{}:{pageToken:input.pageToken})};
       const grant = await dependencies.authorization.assertAuthorized(context,'activity.read',input.run);
-      return dependencies.store.list(context,input,{...grant});
+      return dependencies.store.list(context,request,{...grant});
     },
     async readFeed(context,input) {
       assertActivityReadInput(input);
       context=cloneActivityInput(context,'PERMISSION_DENIED');input=cloneActivityInput(input,'INVALID_ARGUMENT');
       activityResource(context,input.run,'runs'); activityPageSize(input.pageSize); activityReadTokenInput(input.cursor);
+      const request = {run:input.run,pageSize:input.pageSize,...(input.cursor===undefined?{}:{cursor:input.cursor})};
       const grant = await dependencies.authorization.assertAuthorized(context,'activity.read',input.run);
-      return dependencies.store.feed(context,input,{...grant});
+      return dependencies.store.feed(context,request,{...grant});
     },
   };
 }

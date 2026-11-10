@@ -196,3 +196,24 @@ void test('malformed Activity read cursors fail closed before authorization or S
   assert.equal(authorizations,2,'cursor omission still permits normal authorization');
   assert.equal(databaseReads,2,'cursor omission still permits both read operations');
 });
+
+
+void test('Activity reads do not forward uncontracted caller metadata into storage',async()=>{
+  const context={tenantId:'TEST_tenant',projectId:'tenants/TEST_tenant/projects/TEST_project',principalId:'TEST_subject'};
+  const run=context.projectId+'/runs/one';
+  const forwarded:unknown[]=[];
+  const api=createActivityApi({
+    authorization:{async assertAuthorized(){return {epoch:'1',allowInternal:false};}},
+    store:{
+      async list(_context,request){forwarded.push(request);return {items:[],watermark:'0',cursor:'cursor',freshness:'current' as const,gap:false};},
+      async feed(_context,request){forwarded.push(request);return {events:[],nextCursor:'cursor',gap:false};}
+    }
+  });
+  const untrusted={grantEpoch:'forged',tenantId:'foreign',internal:true};
+  await api.listActivity(context,{run,pageSize:1,pageToken:'QUJD',...untrusted});
+  await api.readFeed(context,{run,pageSize:1,cursor:'REVG',...untrusted});
+  assert.deepEqual(forwarded,[
+    {run,pageSize:1,pageToken:'QUJD'},
+    {run,pageSize:1,cursor:'REVG'}
+  ],'only public read-contract fields may reach the owning store');
+});
