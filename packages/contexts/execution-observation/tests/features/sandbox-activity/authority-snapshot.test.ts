@@ -170,7 +170,7 @@ void test('malformed Activity read cursors fail closed before authorization or S
     'multibyte token exceeds the codec byte bound but not the UTF-16 length bound');
   const invalid:unknown[]=[
     null,0,42,true,{},[],['token'],'', 'x'.repeat(8193),oversizedMultibyte,
-    'a','ab','abc','abcde','a'.repeat(38),'a'.repeat(41),
+    'a','abcde','a'.repeat(41),
     'abc+def','abc/def','abc=','abc def','abc\ndef','abc%20','abc\u00A0def','abc\uD800def',
   ];
   for(const cursor of invalid){

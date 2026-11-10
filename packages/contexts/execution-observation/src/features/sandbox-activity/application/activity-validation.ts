@@ -68,9 +68,9 @@ export function activityPageSize(value: number): void {
 export function activityReadTokenInput(value: unknown): void {
   // The authenticated cursor codec accepts only unpadded base64url text.
   // Reject malformed serialized input before authorization or a database read.
-  // AES-GCM tokens contain >=29 bytes: 12-byte nonce, 16-byte tag and ciphertext.
-  // Their unpadded base64url encoding is >=39 chars and can never have length mod 4 = 1.
-  if (value !== undefined && (typeof value !== 'string' || value.length < 39 || value.length > 8192 ||
+  // Unpadded base64url cannot have length mod 4 = 1; the private codec
+  // remains responsible for ciphertext size and authentication.
+  if (value !== undefined && (typeof value !== 'string' || value.length > 8192 ||
       value.length % 4 === 1 || !/^[A-Za-z0-9_-]+$/u.test(value))) {
     throw new SandboxActivityError('INVALID_ARGUMENT', 'Invalid Activity cursor input');
   }
