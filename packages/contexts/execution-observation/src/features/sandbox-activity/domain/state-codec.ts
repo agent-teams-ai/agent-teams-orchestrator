@@ -27,8 +27,15 @@ export function isActivityState(value:unknown):value is ActivityState {
   const bound=value.binding; const run=bound.run; const sequence=value.sequence; const events=value.events; const receipts=value.receipts; const history=value.history;
   return BigInt(sequence)===BigInt(receipts.length) && BigInt(value.sourceSequence)>=BigInt(sequence) && history.length===receipts.length && BigInt(value.gapSequence)<=BigInt(sequence) && value.items.every(item=>item.run===run && item.participant===bound.participant && item.task===bound.task) &&
     history.every(item=>item.run===run && item.participant===bound.participant && item.task===bound.task) &&
-    value.events.every((event,index)=>event.resourceName===run && BigInt(event.sequence)<=BigInt(sequence) &&
-      (index===0 || BigInt(event.sequence)===BigInt(events[index-1]?.sequence??'0')+1n)) &&
+    value.events.every((event,index)=>{
+      const ordinal=BigInt(event.sequence);
+      // Retained feed visibility is a projection of the same immutable fact.
+      // A corrupt internal flag or event identity must never become a read grant.
+      const fact=ordinal>=1n && ordinal<=BigInt(history.length)?history[Number(ordinal)-1]:undefined;
+      return event.resourceName===run && BigInt(event.sequence)<=BigInt(sequence) &&
+        fact?.eventId===event.eventId && fact?.internal===event.internal &&
+        (index===0 || BigInt(event.sequence)===BigInt(events[index-1]?.sequence??'0')+1n);
+    }) &&
     new Set(receipts.map(item=>item.sourceEventId)).size===receipts.length &&
     receipts.every((item,index)=>BigInt(item.sequence)===BigInt(index)+1n);
 }
