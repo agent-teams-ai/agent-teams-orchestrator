@@ -8,6 +8,8 @@ summary: Canonical task-oriented map and authority index for all technical docum
 
 # Technical Documentation
 
+- [Shared Research Integration Plan](research/shared-research-integration-plan.md)
+
 This directory is the canonical architecture knowledge base for Agent Teams
 Orchestrator. Navigate by the question you need to answer; do not read the whole
 repository by default.

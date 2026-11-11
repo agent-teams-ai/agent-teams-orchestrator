@@ -8,6 +8,8 @@ summary: Navigation index for time-bounded practical evidence that supports but 
 
 # Research Evidence
 
+- [Shared Research Integration Plan](shared-research-integration-plan.md)
+
 Research reports preserve dated source reviews, reconciled comparisons, and
 reproducible experiments with exact inputs, methods, evidence locations, and
 limitations. They distinguish confirmed direction, accepted decisions,
