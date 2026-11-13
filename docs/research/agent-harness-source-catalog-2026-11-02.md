@@ -1,0 +1,94 @@
+---
+id: research.agent-harness-industry-source-catalog-2026-11-02
+type: research
+status: active
+owner: architecture
+summary: Primary-source inventory for external agent harness, event-driven gateway, coordination, context, and durable workflow designs.
+related:
+  - research.agent-harness-industry-design-review-2026-11-02
+---
+
+# Agent harness source catalog (2026-11-02)
+
+## Scope and provenance
+
+**Comparison unit is a mechanism, not GitHub popularity.** A chat gateway, coding harness, agent-workflow SDK, durable execution service and business control plane solve different problems. We reviewed project repositories and selected official architecture references on 2026-11-02, not an exhaustive security audit of every release. "Read" means the linked material was examined; it does not certify behavior or the entire codebase. Some codebases have moved or changed ownership. Repository default-branch links move; selected source HEADs sampled during this review are captured below.
+
+Evidence labels: **A** inspected source/design-and-test inventory (not necessarily executed); **B** official first-party design/implementation documentation; **C** README/product claim, not independently qualified; **D** our comparative hypothesis. Link source for each row; weaker evidence is intentionally not upgraded. These labels apply to each stated observation, not to the overall software.
+
+## Findings and design options
+
+### Source snapshots
+
+| Project | Examined reference | Snapshot / limitation |
+| --- | --- | --- |
+| OpenClaw | [multi-agent trust](https://github.com/openclaw/openclaw/blob/main/docs/concepts/multi-agent.md), [steering](https://github.com/openclaw/openclaw/blob/main/docs/concepts/queue-steering.md), [memory provenance](https://github.com/openclaw/openclaw/blob/main/docs/concepts/memory-architecture.md), [security](https://github.com/openclaw/openclaw/blob/main/docs/gateway/security/index.md) | Sampled `75be4d0f93324db4b2e9ed81e5e2c5f433cf33d0`; docs examined; not multi-tenant production qualification |
+| Hermes Agent | [README](https://github.com/NousResearch/hermes-agent/blob/main/README.md), [security](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/security.md), [SQLite recovery](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/session-storage-recovery.md) | Sampled `2b31d7b283191b8069311fd3514ee89419f76516`; docs and claims, no workload benchmark |
+| OpenCode | [plugin V2 API](https://github.com/anomalyco/opencode/blob/dev/packages/plugin/README.md), [README](https://github.com/anomalyco/opencode/blob/dev/README.md) | Sampled `67139d6827af3a337c80472c33f9cb7c6c2ce500` on moving `dev`; plugin API may change |
+| Codex | [app-server protocol](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md), [app-server engineering](https://openai.com/index/unlocking-the-codex-harness/) | Sampled `ba0d0e1f74ee0f41c27ef24b37ed5fc030b487e7`; JSON-RPC and native runtime boundaries require version-specific qualification |
+| LangGraph | [README](https://github.com/langchain-ai/langgraph/blob/main/README.md), [checkpoint and replay](https://docs.langchain.com/oss/python/langgraph/durable-execution) | Sampled `ee3c043bddcc514012885167dd5916b15d6e4731`; documentation distinguishes checkpoint guarantees |
+| DeepSeek Harness | [architecture](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/architecture.md) and [Super-agent prototype](https://github.com/deepseek-ai/dsh-superagent-prototype/blob/main/docs/007-architecture.md) | Harness architecture and prototype implementation are separate; article contains future proposals not implemented in reference prototype |
+
+## Always-on assistants and event gateways
+
+| Project | Evidence | Problem addressed / specific mechanism | Transfer risk |
+| --- | --- | --- | --- |
+| [DeepSeek Super-agent prototype](https://github.com/deepseek-ai/dsh-superagent-prototype) | A/B: [domain](https://github.com/deepseek-ai/dsh-superagent-prototype/blob/main/docs/001-domain.md), [authorization](https://github.com/deepseek-ai/dsh-superagent-prototype/blob/main/docs/002-authorization.md), [execution/recovery](https://github.com/deepseek-ai/dsh-superagent-prototype/blob/main/docs/003-execution.md), [implementation map](https://github.com/deepseek-ai/dsh-superagent-prototype/blob/main/docs/007-architecture.md) | One GitHub repository: Source/Trigger/Thread/Eval/Ticket/Assignment/Mandate; atomic Engine writes; local SQLite; persisted effect queue and outbox; subscription-based follow-up routing; restart recovery. | An efficient **single-host/reference** pattern is not a distributed tenant authorization model; a model-runner's Mandate is not our domain grant or physical execution fence. Authors explicitly disclaim production readiness and equivalence to the article. |
+| [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) | B: [Cordis plugin tree and event classes](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/architecture.md) | Configurable model, tool, session and agent-loop services; runtime-loaded scoped plugins and reversible registrations. | Mutable dynamic topology is not a durable authority or guaranteed isolated plugin execution. Hook ordering and unload must be tested under concurrent calls. |
+| [OpenClaw](https://github.com/openclaw/openclaw) | B: [Gateway](https://github.com/openclaw/openclaw/blob/main/docs/concepts/architecture.md), [steering](https://github.com/openclaw/openclaw/blob/main/docs/concepts/queue-steering.md), [security model](https://github.com/openclaw/openclaw/blob/main/docs/gateway/security/index.md) | Long-lived multi-channel gateway, routing, queue/steer/followup/interrupt semantics; pre-model injection and tool safe-points; configurable trust-aware memory tiers. | Security docs explicitly state **one trust boundary per gateway**, not mutually hostile multi-tenancy. Default collaborative steering can let a second actor influence a run under its first actor's permissions. Our default must not inherit that behavior. |
+| [Hermes Agent](https://github.com/NousResearch/hermes-agent) | B/C: [README](https://github.com/NousResearch/hermes-agent/blob/main/README.md), [security defaults](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/security.md), [storage repair](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/session-storage-recovery.md) | Messaging gateway, persistent skills/memory, multiple execution backends, subagents and scheduled work. | Self-improving memory/skills require source provenance and explicit promotion authority. SQLite WAL repair guidance and multi-process caution are not distributed fleet guarantees. Session-level YOLO is not a safe enterprise default. |
+| [Letta / Letta Code](https://github.com/letta-ai/letta-code) | C: [repository pointer](https://github.com/letta-ai/letta/blob/main/README.md) and [current Letta Code](https://github.com/letta-ai/letta-code) | Stateful agent memory and context management as a first-class product. | Persistent memory is neither authorized workflow state nor proof that external instruction content is safe; current implementation moved to a different repository. |
+
+## Coding harnesses / execution loops
+
+| Project | Evidence | Mechanism and useful boundary | Transfer risk |
+| --- | --- | --- | --- |
+| [Codex](https://github.com/openai/codex) | B: [app-server](https://github.com/openai/codex/blob/main/codex-rs/app-server/README.md), [engineering article](https://openai.com/index/unlocking-the-codex-harness/) | Durable Thread/Turn/Item surfaces, bidirectional JSON-RPC, explicit `thread/resume` and `turn/steer`, approval handshake; app-server projects internal events to stable client notifications. | A `turn/steer` acceptance is not proof a tool was preempted or external effect stopped. Keep provider-native capability negotiation rather than universal fake support. |
+| [OpenCode](https://github.com/anomalyco/opencode) | B: [V2 plugin API](https://github.com/anomalyco/opencode/blob/dev/packages/plugin/README.md) | Hosted plugin runtime surfaces and explicit V2 `effect` singleton/runtime package compatibility. | Mixing Effect major versions or bundling runtime internals breaks plugin instance identity. Treat V1/V2 as distinct qualified targets, never silently migrate sessions. |
+| [Pi](https://github.com/badlogic/pi-mono) | C: [project](https://github.com/badlogic/pi-mono) and [coding-agent package](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent) | Minimal TS harness and extension-first agent customization; useful counterweight to oversized universal runtimes. | Small loop does not solve multi-tenant admission, durable orchestration or process custody; verify each extension's security boundary independently. |
+| [Goose](https://github.com/block/goose) | C: [repository](https://github.com/block/goose) and [official docs](https://block.github.io/goose/) | Desktop/CLI general agent with provider substitution and MCP extension integrations. | MCP tools are capability surfaces, not a replacement for product-owned operation authority or durable dispatch. |
+| [OpenHands](https://github.com/All-Hands-AI/OpenHands) | C: [repository](https://github.com/All-Hands-AI/OpenHands), [agent SDK](https://docs.openhands.dev/sdk) | Agent SDK/server/workspaces with sandbox-oriented coding execution and replaceable agents. | Workspace/container isolation ≠ tenant auth, durable business state, external-effect exactly-once or safe custody transfer. |
+| [Gemini CLI](https://github.com/google-gemini/gemini-cli) | C: [repository README](https://github.com/google-gemini/gemini-cli/blob/main/README.md) | Open terminal agent for enterprise and scripted workflows; useful client/runtime qualification target. | Product support and model provider coupling vary by distribution; do not infer universal provider neutrality. |
+| [Cline](https://github.com/cline/cline) | C: [README](https://github.com/cline/cline/blob/main/README.md) | Shared coding-agent SDK across IDE/CLI/desktop, hooks/tools and multi-agent UX. | Extension hooks remain separate from authoritative admission and cross-tenant isolation. |
+
+## Agent composition / workflow frameworks
+
+| Project | Evidence | Mechanism and useful boundary | Transfer risk |
+| --- | --- | --- | --- |
+| [LangGraph](https://github.com/langchain-ai/langgraph) | B: [durability modes/replay](https://docs.langchain.com/oss/python/langgraph/durable-execution), [official checkpoint docs](https://docs.langchain.com/oss/python/langgraph/persistence) | Graph-based stateful orchestration, checkpointed progress, human interrupts, memory stores. | Replay may rerun incomplete nodes/tasks and side effects; durability mode affects crash window. Not a substitute for owning external-effect identity, original acceptance and fencing. |
+| [Deep Agents](https://github.com/langchain-ai/deepagents) | C: [README](https://github.com/langchain-ai/deepagents/blob/main/README.md) | Harness layer on LangGraph: isolated subagent context, filesystem offload, memory, skills, HITL. | Framework explicitly trusts the model within allowed tools: enforce security in tool/sandbox adapters. Do not promote autonomous plan content to authorization. |
+| [Microsoft Agent Framework](https://github.com/microsoft/agent-framework) | C: [README/workflow samples](https://github.com/microsoft/agent-framework/blob/main/README.md) | Multi-language graph workflows, handoff, HITL, checkpointing, streaming and agent composition. | Workflow graph is not a product Team/Run model. Version, compatibility and cross-language ports need qualification. |
+| [Google ADK](https://github.com/google/adk-python) | C: [ADK 2.0 README](https://github.com/google/adk-python/blob/main/README.md) | Graph workflow runtime with nested agent/task nodes and evaluators. | Cloud/device and provider assumptions may diverge from our Fully Local/provider-neutral profiles. |
+| [CrewAI](https://github.com/crewAIInc/crewAI) | C: [README](https://github.com/crewAIInc/crewAI/blob/main/README.md) | High-level Crews/roles plus explicit event-driven Flows. | Prompt roles and Crew membership do not grant authority, prove deterministic routing or guarantee durable ownership. |
+| [OpenAI Agents SDK](https://github.com/openai/openai-agents-python) | B: [handoffs](https://openai.github.io/openai-agents-python/handoffs/), [HITL](https://openai.github.io/openai-agents-python/human_in_the_loop/), [tools](https://openai.github.io/openai-agents-python/tools/) | Agents as tools, explicit handoff, run-state approvals, tool guardrails and sessions. | SDK docs clarify that top-level input/output guardrails do not automatically cover every handoff. Authorization belongs inside consuming operations, not only on the initial agent. |
+| [Mastra](https://github.com/mastra-ai/mastra) | C: [README](https://github.com/mastra-ai/mastra/blob/main/README.md) | TS-oriented graph workflows, suspend/resume, memory and MCP tool integrations. | Workflow resume/persistence does not eliminate external-effect ambiguity or local-embedding resource requirements. |
+| [PydanticAI](https://github.com/pydantic/pydantic-ai) | C: [README durable adapters](https://github.com/pydantic/pydantic-ai/blob/main/README.md) | Typed agent capabilities, removable durability adapters for Temporal/DBOS and step-persistence. | Adaptors are not interchangeable if business effect, replay and clock contracts differ. Prefer concrete semantic ports over one universal engine interface. |
+| [Agno](https://github.com/agno-agi/agno) | C: [README](https://github.com/agno-agi/agno/blob/main/README.md) | AgentOS service/platform with workflows, auth, HITL and durable execution plus tasks. | Commercial/platform scope and deployment promises cannot be assumed for all OSS components or all trust profiles. |
+| [AutoGen](https://github.com/microsoft/autogen) | B: [archived README](https://github.com/microsoft/autogen/blob/main/README.md) | Historical event-driven distributed actors and multi-agent group chats. | Microsoft marks AutoGen archived and directs readers to Agent Framework. Avoid founding new product contracts on a superseded framework. |
+
+## Durable systems, integration and workflow automation
+
+| Project | Evidence | Mechanism and useful boundary | Transfer risk |
+| --- | --- | --- | --- |
+| [Temporal](https://github.com/temporalio/sdk-typescript) | B: [workflow replay](https://docs.temporal.io/workflows), [activity idempotency](https://docs.temporal.io/encyclopedia/activities) | Durable orchestration history, deterministic workflow replay, signals, timers and explicit Activities for I/O. | Activity retries may repeat externally visible effects if completion was not recorded. Adds operational infrastructure; keep it as a chosen adapter for Run orchestration, not a second Agent Runtime claim authority. |
+| [Restate](https://github.com/restatedev/restate) | B: [durable execution](https://docs.restate.dev/concepts/durable_execution), [side-effect caveat](https://restate.dev/blog/why-we-built-restate) | Durable invocations, journalled steps, keyed actors and promises without forcing every effect into a workflow class. | External calls may execute again when completion isn't durably recorded; scheduler/state semantics would overlap our selected JetStream/PostgreSQL owners if adopted wholesale. |
+| [n8n](https://github.com/n8n-io/n8n) | C: [README](https://github.com/n8n-io/n8n/blob/master/README.md) | Human-visible workflow graph, connectors, retries and app integrations. | Visual automation is not the authorization model or low-level process custody; licensing/deployment shape also differs from an SDK. |
+| [Dify](https://github.com/langgenius/dify) | C: [README](https://github.com/langgenius/dify/blob/main/README.md) | Agent workflows, marketplace and RAG integration as application platform. | Marketplace listing cannot grant runtime capability or tenant authority. |
+
+## Decision status and qualification
+
+This catalog compares evidence and applicability; it does not select a new runtime, override Orchestrator ADR-0114/0115/0117, qualify any provider, or make any product behavior ready for implementation. Options and owned recommendations are in [mechanism alternatives](agent-harness-mechanism-options-2026-11-02.md).
+
+## Evidence and sources
+
+The project/source links within each row above identify first-party material inspected. Selected current commits are listed in the source-snapshot table; moving default-branch links must be re-pinned for a later implementation decision. No README claim is independent behavioral proof. Local primary authority is linked by the [research index](agent-harness-industry-review-2026-11-02.md).
+
+## Limitations and remaining questions
+
+- No independent star ranking, license audit or production penetration-test claim. Popularity and OSS status change; each deployment/version must be verified separately.
+- We have **not** run competitors' suites or simulated fleet failures on their released binaries. Design-doc promises are not qualification evidence.
+- The 2026-11-01 DeepSeek article is **not** evidence that article-only ideas (semantic watchdog, speculative execution, large fleet) exist in the public one-repository prototype.
+- In the conversation, “OpenCloud” is interpreted as probable **OpenClaw**, based on the surrounding harness context; no architecture conclusion relies on the spelling.
+- Prior internal Agent Runtime [industry research](https://github.com/agent-teams-ai/agent-runtime/blob/main/docs/spikes/agent-runtime-industry-architecture-research.md) and [modular alternatives](https://github.com/agent-teams-ai/agent-runtime/blob/main/docs/architecture/agent-runtime-modular-research.md) remain authoritative for their own previously inspected baselines. This study adds an Orchestrator-facing comparison, not a replacement.
+
+Further independent checks should target concrete code paths, runtime hook order, adapter compatibility and actual failure-test execution for the *selected* integration. This report intentionally avoids a popularity ranking or an unmeasured scale winner.
