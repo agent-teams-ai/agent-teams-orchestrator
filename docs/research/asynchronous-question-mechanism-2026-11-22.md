@@ -179,7 +179,7 @@ that narrow path without globally bypassing approvals.
 
 The inspected [Runtime owner][runtime-owner] permits an independent `reply`, but
 only one active technical input through `dispatch`. Its result and restore paths
-invalidate pending interactions; reply application can become uncertain. Thus:
+invalidate pending interactions; reply application can become uncertain.
 
 A later product answer is not necessarily a Runtime interaction reply. If the
 publication call completed and no genuine pending interaction exists, `reply` is
@@ -336,7 +336,7 @@ framework or a claim that any scenario has been executed here.
 | --- | --- |
 | Registration succeeds but delivery is delayed | Receipt is durable registration; deadline semantics say whether delivery delay consumes the window. |
 | Registration races a dependent tool call | The existing required action precondition remains closed; ordering in the model transcript is insufficient. |
-| Valid answer and timer race | One owner outcome for the revision; each command checks the same defined cutoff. |
+| Optional answer and fallback timer race | One owner outcome for the revision; each command checks the same defined cutoff. |
 | Required answer arrives after escalation | It can still resolve the current request; the escalation target was not an answer cutoff. |
 | Optional fallback becomes invalid before expiry | No default effect or false resolution; explicit owning replan/escalation and a defined path for subsequent input. |
 | Timely ingress is processed after cutoff | Follow the selected policy; do not promise receipt fairness without complete receipt reconciliation. |
@@ -379,7 +379,7 @@ Codex's distinct publication and answer paths; Claude's blocking and deferred
 paths; connection-local steering; Temporal message/rollover constraints; Azure
 buffering and its historical worker defect; AWS parallel joins; and the released
 A2A specification's inconsistent blocking defaults. These are scoped evidence and
-counterevidence, not provider qualification or reasons to add another engine.
+limitations, not provider qualification or reasons to add another engine.
 
 Authority references below are local governed documents. Runtime source is pinned.
 Accepted ADRs remain unchanged; this report adds research under open decisions.
