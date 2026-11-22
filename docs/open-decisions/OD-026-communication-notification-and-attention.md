@@ -198,7 +198,7 @@ another agent, or an external service. This refines the existing incoming feedba
 communication, attention, and context model. Exact policy, schemas, and
 implementation remain open; this section accepts no new production behavior.
 
-The [dated source study](https://github.com/agent-teams-ai/engineering-research/blob/365a57621f3fd68cdb277f89999f0ba4336a5736/docs/studies/asynchronous-questions-and-independent-progress-2026-11-21.md)
+The [dated source study](https://github.com/agent-teams-ai/engineering-research/blob/818cfb9b06728ff7365a5f5e82e98963a16a0913/docs/studies/asynchronous-questions-and-independent-progress-2026-11-21.md)
 preserves external evidence, its limits, and critical review. It does not
 qualify provider support or select the remaining product policies.
 
@@ -275,7 +275,8 @@ late or duplicate answer, and durable waiting with no eligible work. These are
 research scenarios, not additional release gates.
 
 Keep the design within existing owners and consumer-owned ports. Reuse technical
-correlation and delivery where concrete duplication exists. Current evidence does
+correlation and delivery for a concrete repeated need, including known use across
+projects through the organization's library-first route. Current evidence does
 not justify a generic question service, new dependency engine, or second scheduler.
 Related choices remain with [OD-027](OD-027-configurable-work-lifecycle.md),
 [OD-032](OD-032-last-mile-side-effect-safety.md), and

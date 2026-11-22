@@ -82,8 +82,10 @@ Apply Clean Architecture and SOLID concretely:
   client input into those commands. A workflow schedules commands, not domain rules.
 - **DRY:** reuse existing receipts, canonical fingerprints, outbox, persistence,
   authorization and workflow adapters. Compare suitable libraries before adding a
-  repeated technical mechanism. Extract shared technical code after concrete
-  repeated use; do not merge advice, evidence and approvals into one domain model.
+  repeated technical mechanism. A concrete repeated need establishes its contract
+  and owner; concerns expected to serve several projects follow the organization's
+  library-first route from the start. Advice, evidence and approvals retain their
+  own domain models.
 
 The [Runtime ACL boundary][runtime-acl] stays stateless. Any durable association
 between a product request and a technical interaction belongs in the responsible
@@ -407,7 +409,7 @@ requires multiple independently pending questions or a guaranteed pre-cutoff
 submission window, reconsider those choices before implementation. There is no
 accepted ADR, public API or production implementation commitment here.
 
-[shared-study]: https://github.com/agent-teams-ai/engineering-research/blob/365a57621f3fd68cdb277f89999f0ba4336a5736/docs/studies/asynchronous-questions-and-independent-progress-2026-11-21.md#follow-up-evidence--2026-11-22
+[shared-study]: https://github.com/agent-teams-ai/engineering-research/blob/818cfb9b06728ff7365a5f5e82e98963a16a0913/docs/studies/asynchronous-questions-and-independent-progress-2026-11-21.md#follow-up-evidence--2026-11-22
 [admission]: ../decisions/0103-first-sandbox-runtime-migration-slice-admission.md
 [od026]: ../open-decisions/OD-026-communication-notification-and-attention.md
 [od032]: ../open-decisions/OD-032-last-mile-side-effect-safety.md
