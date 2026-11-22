@@ -118,9 +118,15 @@ async function extractArchive(asset, archivePath, destination) {
       "-NoProfile",
       "-NonInteractive",
       "-Command",
-      `Expand-Archive -LiteralPath '${escapedArchive}' -DestinationPath '${escapedDestination}' -Force`,
+      `$ErrorActionPreference = 'Stop'; Expand-Archive -LiteralPath '${escapedArchive}' -DestinationPath '${escapedDestination}' -Force`,
     ],
-    { cwd: repositoryRoot },
+    {
+      cwd: repositoryRoot,
+      // Windows PowerShell must construct its own paths when Node inherited PS7 paths.
+      env: Object.fromEntries(
+        Object.entries(process.env).filter(([name]) => name.toLowerCase() !== "psmodulepath"),
+      ),
+    },
   );
   if (code !== 0) {
     throw new Error(`PowerShell Expand-Archive exited with code ${code}`);

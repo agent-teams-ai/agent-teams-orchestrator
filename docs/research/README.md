@@ -47,6 +47,7 @@ full dated comparison and reproduction instructions.
 
 ## Implementation readiness
 
+- [Asynchronous Question Mechanism, 2026-11-22](asynchronous-question-mechanism-2026-11-22.md)
 - [Pre-implementation gate critique, 2026-07-30](pre-implementation-gate-critique-2026-07-30.md)
 - [Human Notification and Agent Attention boundary critique, 2026-07-30](human-notification-agent-attention-boundary-critique-2026-07-30.md)
 - [Pre-code expensive decision audit, 2026-08-01](pre-code-expensive-decision-audit-2026-08-01.md)
