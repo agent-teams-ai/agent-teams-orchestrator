@@ -19,6 +19,7 @@ related:
   - OD-034
   - research.human-notification-agent-attention-boundary-critique-2026-07-30
   - research.pre-implementation-gate-critique-2026-07-30
+  - research.asynchronous-question-mechanism-2026-11-22
 ---
 
 # OD-026: Communication, Notification, and Attention
@@ -197,9 +198,23 @@ another agent, or an external service. This refines the existing incoming feedba
 communication, attention, and context model. Exact policy, schemas, and
 implementation remain open; this section accepts no new production behavior.
 
-The [dated source study](https://github.com/agent-teams-ai/engineering-research/blob/62c910bd7dda021fdfa8dfd33cc9bbea0062680b/docs/studies/asynchronous-questions-and-independent-progress-2026-11-21.md)
+The [dated source study](https://github.com/agent-teams-ai/engineering-research/blob/365a57621f3fd68cdb277f89999f0ba4336a5736/docs/studies/asynchronous-questions-and-independent-progress-2026-11-21.md)
 preserves external evidence, its limits, and critical review. It does not
 qualify provider support or select the remaining product policies.
+
+The [mechanism proposal of 2026-11-22](../research/asynchronous-question-mechanism-2026-11-22.md)
+develops a durable registration followed by separate answer admission, compares
+bounded owner state with a separate same-owner aggregate, and identifies the
+deadline, fallback and provider choices for a later ADR. Its first-slice preference
+is deliberately limited; the broader Work/Run prerequisites are not all admitted
+or implemented today. This OD remains open and the product owner has not accepted
+the proposed mechanism.
+
+Two distinctions constrain that discussion. Closing a question, including by
+refusal, does not necessarily satisfy its dependency. A product registration
+receipt cannot substitute for a native provider tool's actual answer or permission.
+Likewise, a durable product request may outlive the Runtime interaction that first
+presented it; stale callbacks require reconciliation or a qualified new input path.
 
 Candidate behavior for the next design discussion:
 
