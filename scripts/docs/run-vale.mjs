@@ -110,20 +110,14 @@ async function extractArchive(asset, archivePath, destination) {
     return;
   }
 
-  const escapedArchive = archivePath.replaceAll("'", "''");
-  const escapedDestination = destination.replaceAll("'", "''");
-  const code = await run(
-    "powershell.exe",
-    [
-      "-NoProfile",
-      "-NonInteractive",
-      "-Command",
-      `Expand-Archive -LiteralPath '${escapedArchive}' -DestinationPath '${escapedDestination}' -Force`,
-    ],
-    { cwd: repositoryRoot },
-  );
+  // Windows runners ship bsdtar, which reads ZIP without PowerShell's
+  // brittle Expand-Archive/.NET ExtractToDirectory overload dependency.
+  // The release archive is already SHA-256 verified before extraction.
+  const code = await run("tar.exe", ["-xf", archivePath, "-C", destination], {
+    cwd: repositoryRoot,
+  });
   if (code !== 0) {
-    throw new Error(`PowerShell Expand-Archive exited with code ${code}`);
+    throw new Error(`tar.exe ZIP extraction exited with code ${code}`);
   }
 }
 
