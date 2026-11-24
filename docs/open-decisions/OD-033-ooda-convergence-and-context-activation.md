@@ -245,7 +245,7 @@ cannot launder taint or authority.
 
 ## Foundation-first design follow-through, 2026-11-24
 
-The [organization ecosystem vision](https://github.com/agent-teams-ai/.github/blob/bb7b1c00f18a8c532681f286afa51dda954469b4/docs/architecture/ecosystem-vision.md) requires the global placement, budget and feedback contracts to be agreed before dependent product implementation. This section records candidate deltas, not an adopted scheduling algorithm, multi-cell deployment or wire schema.
+The [organization ecosystem vision](https://github.com/agent-teams-ai/.github/blob/main/docs/architecture/ecosystem-vision.md) requires the global placement, budget and feedback contracts to be agreed before dependent product implementation. This section records candidate deltas, not an adopted scheduling algorithm, multi-cell deployment or wire schema.
 
 - Causation depth alone is not a workload bound. Define owner-scoped maximum outstanding descendants, fan-out width, cumulative admitted work and bytes, retry/activation budgets and deadlines. Reserve admission before spawning children, carry the original causal budget across delivery retries, and prevent delegated work from minting new quota. Independently authorized work is not implicitly the same cause. Preserve current safety-lane progress under saturation.
 - Keep stable business resource identity separate from routing, deployment stamp and placement generation. Coordinate with Platform Deployment Management and AR: each semantic authority partition has one current writer; transfer fences old dispatch and output before admitting a successor. A large tenant may need more than one eligible placement without splitting a single atomic invariant or semantic Run. Start with a bounded deployment, not a global scheduler.
