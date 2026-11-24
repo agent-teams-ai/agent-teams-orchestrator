@@ -243,6 +243,17 @@ instructions, and source-to-notification-to-context feedback are detected and
 reported. Summaries, memory, compaction, and translations preserve provenance and
 cannot launder taint or authority.
 
+## Foundation-first design follow-through, 2026-11-24
+
+The [organization ecosystem vision](https://github.com/agent-teams-ai/.github/blob/bb7b1c00f18a8c532681f286afa51dda954469b4/docs/architecture/ecosystem-vision.md) requires the global placement, budget and feedback contracts to be agreed before dependent product implementation. This section records candidate deltas, not an adopted scheduling algorithm, multi-cell deployment or wire schema.
+
+- Causation depth alone is not a workload bound. Define owner-scoped maximum outstanding descendants, fan-out width, cumulative admitted work and bytes, retry/activation budgets and deadlines. Reserve admission before spawning children, carry the original causal budget across delivery retries, and prevent delegated work from minting new quota. Independently authorized work is not implicitly the same cause. Preserve current safety-lane progress under saturation.
+- Keep stable business resource identity separate from routing, deployment stamp and placement generation. Coordinate with Platform Deployment Management and AR: each semantic authority partition has one current writer; transfer fences old dispatch and output before admitting a successor. A large tenant may need more than one eligible placement without splitting a single atomic invariant or semantic Run. Start with a bounded deployment, not a global scheduler.
+- Compare central owner reservations with hierarchical bounded grants and fixed partition quotas. Delegation, expiry, reconciliation, unknown outcomes and receiver enforcement must preserve the global hard bound; expiry alone cannot prove physical release. Usage, provider limits and technical capacity retain different semantic owners.
+- Qualify overload with burst fan-out, a concentrated tenant, a waiting parent and child, delayed revocation, slow storage, duplicate delivery, restart and cross-placement stale output. Record offered load, useful completions, debt and control progress, not only simultaneous identity count.
+
+Cross-link the relevant OD-024, OD-032, persistence and runtime-capacity decisions rather than inventing a second ledger, universal workflow or new broker. Review the alternatives against existing ADR-0114/0115/0117 and selected foundation scope; change accepted decisions only through their owners.
+
 ## Evolution and operator evidence
 
 The design must version independently:
