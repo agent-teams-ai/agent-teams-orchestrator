@@ -67,8 +67,8 @@ The architecture must support:
 - future Temporal workflows without coupling the domain to Temporal;
 - coarse service roles from their first delivered workloads, with contracts
   portable across implementation languages;
-- one team through thousands of simultaneously running agents as the server
-  architecture target, with explicit capacity qualification;
+- the [one-agent through enterprise execution target](deployment-profiles.md#concurrent-execution-target),
+  with explicit low-end and loaded capacity qualification;
 - Docker Compose and Kubernetes server deployment forms.
 
 ## Architectural style
@@ -315,8 +315,9 @@ It preserves versioned consumer contracts and context-owned persistence. A
 language rewrite still requires implementing and qualifying the replacement;
 standard protocols do not promise zero migration work.
 
-The server target is thousands of simultaneously running agents with concurrent
-users. Stored definitions and idle sessions are not capacity evidence.
+The [concurrent execution target](deployment-profiles.md#concurrent-execution-target)
+owns the minimum useful and enterprise deployment goals with concurrent users.
+Stored definitions and idle sessions are not capacity evidence.
 Qualification declares actual command/event/output rates, bursts, fanout,
 dataset, duration, hardware, role replicas, and aggregate budgets and proves
 bounded overload, cancellation, tenant isolation, and recovery. Compose and

@@ -1,5 +1,6 @@
 AgentRuntime
 AgentTeams
+AGNTCY
 Awilix
 backpressure
 bootstrapper
@@ -7,6 +8,7 @@ boundedness
 carryforward
 Centrifugo
 checkpointed
+checkpointer
 checkpointing
 CloudEvents
 Codex
@@ -31,6 +33,7 @@ Kitex
 Kratos
 Kysely
 Lage
+Langflow
 LangGraph
 libpq
 likec
@@ -61,6 +64,7 @@ reindexing
 replaceability
 replayable
 replayers
+rerunnable
 retryability
 ReviewRouter
 revisioned
@@ -83,6 +87,8 @@ upcaster
 upcasters
 upcasting
 Vale
+workstream
+workstreams
 worktree
 worktrees
 ZITADEL
