@@ -5,7 +5,7 @@ copy of the architecture.
 
 ## Fast start
 
-- [Organization Foundation-first vision](https://github.com/agent-teams-ai/.github/blob/bb7b1c00f18a8c532681f286afa51dda954469b4/docs/architecture/ecosystem-vision.md) — global product and shared foundation boundaries; plan the whole system before expanding main greenfield implementation, preserve the existing module foundation and admission gates.
+- [Organization Foundation-first vision](https://github.com/agent-teams-ai/.github/blob/029f9ca0d719646d826f388c32f0571ff0d3270c/docs/architecture/ecosystem-vision.md) — global product and shared foundation boundaries; plan the whole system before expanding main greenfield implementation, preserve the existing module foundation and admission gates.
 
 - [Proposed shared research integration](docs/research/shared-research-integration-plan.md)
 

@@ -327,11 +327,15 @@ Frontend contribution semantics remain under
 Neither research navigation nor a static composition qualification selects an
 extension trust tier, publishes a public SPI, or qualifies hot replacement.
 
-The cross-product [application foundation guide](https://github.com/agent-teams-ai/live-module-updates/blob/fddfd82290a751e0890bce570bd3c4506743676d/docs/architecture/application-foundation.md),
-[headless plugin and UI proposal](https://github.com/agent-teams-ai/live-module-updates/blob/fddfd82290a751e0890bce570bd3c4506743676d/docs/architecture/headless-plugins-and-ui.md)
-and [delivery plan](https://github.com/agent-teams-ai/live-module-updates/blob/fddfd82290a751e0890bce570bd3c4506743676d/docs/plans/foundation-delivery-plan.md)
-provide the reviewed authoring and research sequence in
-[Live Module Updates PR #1](https://github.com/agent-teams-ai/live-module-updates/pull/1).
+The cross-product [application foundation guide](https://github.com/agent-teams-ai/live-module-updates/blob/9c9952ad1edac0c773921e6aa3db73777ce04c10/docs/architecture/application-foundation.md),
+[headless plugin and UI proposal](https://github.com/agent-teams-ai/live-module-updates/blob/9c9952ad1edac0c773921e6aa3db73777ce04c10/docs/architecture/headless-plugins-and-ui.md)
+and [delivery plan](https://github.com/agent-teams-ai/live-module-updates/blob/9c9952ad1edac0c773921e6aa3db73777ce04c10/docs/plans/foundation-delivery-plan.md)
+provide the current fixture-first authoring and research sequence through
+[Live Module Updates PR #2](https://github.com/agent-teams-ai/live-module-updates/pull/2),
+continuing the original [PR #1 proposal](https://github.com/agent-teams-ai/live-module-updates/pull/1).
+Qualify the shared foundation with realistic fixtures and independent test Hosts
+before dependent applications are ready. Keep this evidence separate from
+Orchestrator's later product adoption.
 These links pin a published proposal. The local adopted versions, capability
 owners and admission gates above remain authoritative.
 
