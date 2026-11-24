@@ -8,11 +8,17 @@ summary: Navigation index for time-bounded practical evidence that supports but 
 
 # Research Evidence
 
+- [Shared Research Integration Plan](shared-research-integration-plan.md)
+
 Research reports preserve dated source reviews, reconciled comparisons, and
 reproducible experiments with exact inputs, methods, evidence locations, and
 limitations. They distinguish confirmed direction, accepted decisions,
 engineering judgments, hypotheses, and executed results. They are evidence,
 not normative architecture or transcripts invented from a synthesis.
+
+## Orchestration collaboration and research
+
+- [Orchestrator Collaboration and Research Brief, 2026-11-08](orchestrator-mvp-research-and-collaboration-2026-11-08.md)
 
 ## Module, identity, and collaboration review
 

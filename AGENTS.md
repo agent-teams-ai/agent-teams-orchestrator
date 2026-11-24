@@ -5,6 +5,8 @@ copy of the architecture.
 
 ## Fast start
 
+- [Proposed shared research integration](docs/research/shared-research-integration-plan.md)
+
 Read these before making any change:
 
 1. [Documentation map](docs/README.md)
@@ -18,6 +20,10 @@ Use [.agents/skills/docs-authoring/SKILL.md](.agents/skills/docs-authoring/SKILL
 <!-- agent-teams-docs:route/v1 end -->
 
 Use the single task router in [the documentation map](docs/README.md#navigate-by-task).
+For plugin lifecycle and hot replacement, follow OD-043 and its reviewed
+cross-repository research reference before proposing mechanisms. Read the
+relevant source-backed patterns and critic dispositions; do not treat research
+as runtime adoption or silently rewrite an approved ADR.
 Do not preload every architecture document when a change touches one boundary.
 Search stable IDs such as `ADR-0051`, `OD-004`, or
 `domain.contexts.run-orchestration`, not only filenames.
@@ -123,9 +129,9 @@ before a high-cost boundary violation.
   capabilities in other TypeScript package families; private cohesive helpers
   stay ordinary code. Complete the bounded module foundation before broad
   feature expansion; do not create a second handwritten assembly path.
-- Design for thousands of simultaneously running agents across independent Runs,
-  including Runs within one team and tenant, under the
+- Keep both convenient one-agent operation and enterprise execution within the
   [concurrent execution target](docs/architecture/deployment-profiles.md#concurrent-execution-target).
+  Exercise independent Runs including concentrated load within one team and tenant.
   Qualify per-Run capacity separately. Follow the accepted
   [service role map](docs/architecture/deployment-profiles.md#service-role-map)
   and its Compose, Kubernetes, and native-local V1 mappings. A semantic

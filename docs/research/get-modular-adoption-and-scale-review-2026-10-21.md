@@ -13,6 +13,17 @@ related:
 
 # Get Modular Adoption and Scale Review, 2026-10-21
 
+<!-- shared-research-route:start -->
+**Shared evidence route, 2026-11-04; publication status checked 2026-11-24:** a [reusable central extract](https://github.com/agent-teams-ai/engineering-research/blob/12c40892e805944719d6fbec14d2c26874803b2c/docs/studies/composition-and-scale-evidence.md)
+was published in [Engineering Research PR #1](https://github.com/agent-teams-ai/engineering-research/pull/1), merged on 2026-11-05. The
+[source inventory](https://github.com/agent-teams-ai/engineering-research/blob/12c40892e805944719d6fbec14d2c26874803b2c/data/source-inventory.json) preserves this study's
+original identity and hash. The complete dated review, product recommendations,
+acceptance scenarios, decisions and adopted pins remain owned here. This notice
+preserves the original metadata, body and heading anchors; extraction is not a
+new upstream review and does not change current ADRs. Use the
+[shared research index](https://github.com/agent-teams-ai/engineering-research/blob/main/docs/README.md) for maintained discovery.
+<!-- shared-research-route:end -->
+
 ## Scope and provenance
 
 Current integration note, 2026-10-28: [ADR-0117](../decisions/0117-reconcile-mandatory-module-composition.md)

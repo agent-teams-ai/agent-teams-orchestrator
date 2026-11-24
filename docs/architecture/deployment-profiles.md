@@ -95,10 +95,17 @@ accepted ADR plus an arbitrary file is not evidence.
 
 ## Concurrent execution target
 
-The server architecture targets one agent team through enterprise workloads
-with thousands of simultaneously running agents and several concurrent users
-and clients. Running means current admitted execution evidenced by AR's
-Published Language. Stored Agent definitions, idle sessions, registered workers,
+Owner direction recorded on 2026-11-05: Agent Teams must make one actually
+executing agent convenient on a supported native Fully Local or small-server
+profile, while the same product semantics and owned contracts can grow to tens
+of thousands of concurrently executing agents on suitably provisioned server
+deployments, with concurrent users and clients. Domain and application behavior
+stays shared; composition, infrastructure capacity, and operational policy vary
+through their owners. This is an architectural and qualification target, not
+measured capacity or an approved numerical SLO.
+
+Running means current admitted execution evidenced by AR's Published Language.
+Stored Agent definitions, parked workflows, idle sessions, registered workers,
 queued work, and open browser connections do not establish that concurrency.
 
 The primary scaling and release-qualification target is aggregate admitted
@@ -125,6 +132,22 @@ execution capacity. Do not allocate an Orchestrator process, sidecar, SQL pool,
 database cluster, or logical durable subscription per agent. Low-end profiles
 declare their own smaller resource envelope; a desktop device is not required
 to execute the enterprise workload.
+
+The minimum supported composition includes every process and dependency needed
+by its advertised capabilities and outstanding durable obligations. Qualify that
+complete composition with one actual executing agent as well as with its loaded
+workload. Capability selection cannot remove an accepted process boundary or
+silently disable required authority, timers, recovery, observation intake,
+cancellation, or cleanup. No profile requires an unused enterprise capability
+merely because it exists elsewhere in the product.
+
+On-demand activation is a profile-specific lifecycle qualification. Its owner
+must establish bounded wake, readiness, drain, and recovery before stopping a
+component that still owns required work. A parked workflow or durable timer
+does not prove that its owning process can stop or that a sleeping device will
+execute an action on time. Hosted-target Desktop starts no unused local
+infrastructure. AR/provider processes, sandboxes, and workspaces may still be
+required per actual execution and count toward the measured resource budget.
 
 ## Service role map
 

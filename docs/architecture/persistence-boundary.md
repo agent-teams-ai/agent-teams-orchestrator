@@ -277,9 +277,11 @@ backlog, and disk headroom are observable. PostgreSQL WAL and temporary files,
 NATS, blobs, logs, and backup staging share the local storage budget. Required
 receipts and dispatch intent are never discarded as an overload shortcut.
 
-The server architecture targets thousands of simultaneously running agents, not
-thousands of stored Agents, queued jobs, or idle sessions. Persistence workload
-qualification states an exact concurrent-execution target and representative
+Persistence qualification covers both ends of the canonical
+[concurrent execution target](deployment-profiles.md#concurrent-execution-target),
+including the complete minimum deployment's idle and first-execution cost.
+Stored Agents, queued jobs, or idle sessions do not prove execution capacity.
+Loaded qualification states an exact concurrent-execution target and representative
 command and event rates, bursts, payloads, fanout, data size, duration, deployment
 form, and hardware. A single SQL client or idle connection count is not evidence
 for that workload. Modeled traffic with a fake AR can qualify persistence

@@ -306,6 +306,35 @@ Replacing Core/Assembly changes composition and its conformance evidence. It
 must not require changes to domain behavior, application ports, public contracts,
 or persistence authority.
 
+### Static foundation and extension evolution
+
+The [module foundation gate](implementation-readiness-gates.md#module-foundation-before-business-expansion)
+is the first adoption boundary. Its bounded initial envelope, exact public
+artifacts, actual consumer composition, required profiles, independent binding
+oracle, and lifecycle evidence remain necessary before new business assembly.
+A broader live-update platform is not a prerequisite for that bounded gate.
+
+A reusable capability keeps its contracts independent from one product's UI,
+composition root, and persistence authority. Distinct Host integrations are
+required to claim portability across those Hosts; two configurations of one
+consumer graph establish only their declared profile coverage. This distinction
+does not enlarge the accepted static gate into a universal two-product gate.
+
+Plugin lifecycle and replacement mechanisms remain under
+[OD-043](../open-decisions/OD-043-extension-lifecycle-catalog-and-hot-update.md).
+Frontend contribution semantics remain under
+[OD-042](../open-decisions/OD-042-frontend-extension-contribution-model.md).
+Neither research navigation nor a static composition qualification selects an
+extension trust tier, publishes a public SPI, or qualifies hot replacement.
+
+The cross-product [application foundation guide](https://github.com/agent-teams-ai/live-module-updates/blob/fddfd82290a751e0890bce570bd3c4506743676d/docs/architecture/application-foundation.md),
+[headless plugin and UI proposal](https://github.com/agent-teams-ai/live-module-updates/blob/fddfd82290a751e0890bce570bd3c4506743676d/docs/architecture/headless-plugins-and-ui.md)
+and [delivery plan](https://github.com/agent-teams-ai/live-module-updates/blob/fddfd82290a751e0890bce570bd3c4506743676d/docs/plans/foundation-delivery-plan.md)
+provide the reviewed authoring and research sequence in
+[Live Module Updates PR #1](https://github.com/agent-teams-ai/live-module-updates/pull/1).
+These links pin a published proposal. The local adopted versions, capability
+owners and admission gates above remain authoritative.
+
 ## Commands, hooks, state, and durable events
 
 Choose communication by the guarantee the consumer needs:
