@@ -113,7 +113,6 @@ consumer-owned ports; standalone operation must not depend on commercial
 Platform. Get Modular composition remains owned by ADR-0117, and service topology
 remains outside this provider decision.
 
-
 ### Owner-selected directions — 2026-11-26
 
 The owner endorsed the recommended answers in the [18-question follow-up](https://github.com/agent-teams-ai/engineering-research/blob/578b166650b916efa51f011598a42fabadaeff2f/evidence/imports/iam/iam-open-decisions-review-2026-10-28.md)
