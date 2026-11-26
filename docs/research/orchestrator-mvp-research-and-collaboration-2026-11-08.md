@@ -40,12 +40,12 @@ related:
 
 ## Scope and provenance
 
-**Current collaboration stage: discussion, focused research and separately
-agreed isolated spikes. Main Orchestrator implementation is paused while the
-product owner completes the plugin/extension groundwork and prepares the
-detailed implementation phases.** The owner will build the initial product
-foundation after that preparation and the applicable readiness requirements;
-Hassan can then take clear tasks that extend it.
+**Historical collaboration checkpoint, 8–9 November: discussion, focused research
+and separately agreed isolated spikes. Main Orchestrator implementation was
+paused while the product owner prepared the initial plugin/extension groundwork
+and detailed implementation phases.** The owner-led foundation sequence and
+applicable readiness requirements remain. The dated delivery partition below
+records the later preparation assignment without admitting new runtime behavior.
 
 The owner initially considered a minimal proof of concept to validate the
 orchestration mechanisms quickly. The intended approach is now to build the
@@ -63,10 +63,10 @@ create a parallel product implementation or implicitly admit new behavior.
 
 Completing the plugin/extension system for the initial phase should provide a
 consistent way for maintainers and users to extend the product. Its actual
-scope and qualification remain explicit below. The owner is preparing that
-foundation; the current request to Hassan is for research and feedback rather
-than immediate Orchestrator integration work. His findings can shape the
-implementation phases before the detailed phases are agreed.
+scope and qualification remain explicit below. At that checkpoint, the request
+to Hassan was for research and feedback rather than immediate Orchestrator
+integration work. Those findings can shape the implementation phases before
+their agreement.
 
 The product owner's discussion with Hassan identified an AI Product Blueprint,
 autonomous task planning, and an evidence-based feedback loop as useful first
@@ -77,8 +77,8 @@ Initial research: **2026-11-08**. Architecture alignment review:
 **2026-11-09**, against [the initial proposal d1c62d9](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/d1c62d9c82ff26f0aa000769204f62cbd91f6071/docs/research/orchestrator-mvp-research-and-collaboration-2026-11-08.md).
 The product-direction review extends [the retained-MVP revision 389e084](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/389e084fc8819c74dc6454f8281363aa26be1d43/docs/research/orchestrator-mvp-research-and-collaboration-2026-11-08.md)
 with organization governance, Extension Foundation, and current Runtime reuse.
-The subsequent collaboration update on **2026-11-09** makes the current pause,
-research menu and owner-led foundation sequence explicit. It preserves the
+The subsequent collaboration update on **2026-11-09** recorded the then-current
+pause, research menu and owner-led foundation sequence. It preserves the
 technical findings from [revision 31dc85e](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/31dc85e6be697403fb9323fb7a50df3ce07f597e/docs/research/orchestrator-mvp-research-and-collaboration-2026-11-08.md).
 Method: repository and upstream source review; the proposed experiments below
 have not been executed. Reviewed baselines:
@@ -104,12 +104,50 @@ provide current navigation; these commits fix the reviewed baseline.
 | --- | --- |
 | Canonical architecture documentation | Existing source of truth for accepted owners, contracts, rules and open decisions. Much of the direction is defined; not every implementation choice is resolved. |
 | This collaboration and research brief | Explains the vision, current stage, research choices and sequence of collaboration. The technical sections retain supporting findings and reference links. |
-| Detailed implementation phases | The owner will prepare these from the canonical architecture and research findings, covering dependencies, concrete steps, failure cases, checks and acceptance criteria before implementation. They are not already supplied by this brief. |
+| Detailed implementation phases | The delivery partition below identifies the initial sequence and owning readiness records. Exact feature steps, failure cases and acceptance evidence remain with their canonical owners. |
 
 For an initial discussion, read the product direction, research menu, and
 collaboration sequence. Use the later technical sections for the selected
 question. This document does not duplicate or replace the architecture, and
 its research identity and existing path remain stable for earlier references.
+
+### Delivery partition and agent handoff — 2026-11-26
+
+The owner now requests the minimum concrete preparation for agents to start
+implementation, using this existing MVP brief and retaining optional growth work
+outside the first increment. This is a documentation and handoff assignment;
+it does not mark pending gates passed or qualify a runtime, provider or profile.
+The [incremental implementation route](../architecture/implementation-readiness-gates.md#incremental-implementation-route)
+owns task entrance, exit evidence and the point where retained code may start.
+Use the existing feature dossiers and scope contract for details, not a second
+backlog or a general IAM framework.
+
+| Delivery boundary | Minimum retained scope | Admission and evidence |
+| --- | --- | --- |
+| Initial foundation | Migrate actual composition seams and qualify a bounded Get Modular envelope with meaningful profiles. | Module foundation remains pending; resolve its existing evidence rows before new business assembly. No wait for every future plugin or larger scale row. |
+| First server increment | ADR-0103's one test-only Project, seeded principal, canonical Agent, Team version and Run; Task creation/metadata, planned Work and direct human/member messages. | Existing scoped admission, synthetic authority/runtime adapters and actual owner handlers; applicable role placement still required. This is not the complete MVP. |
+| Real IAM and subsequent execution features | One real authority profile and the required Work execution, assignment, completion/review and wider communication progress through separately admitted increments. | OD-012 and the owning Work/Run/Communication decisions provide exact contracts and evidence; synthetic success does not admit production authentication or those extra commands. |
+| Integrated MVP target | Two teams, three or four agents and one Project with updates, review and restart recovery; JetStream and a selected real Runtime path. | Separately admitted increments and actual integration evidence. A fake Runtime proves only its stated contract boundary. |
+| Completed V1 | Managed SaaS, Standalone Self-Hosted and native Fully Local with their mandatory capabilities. | ADR-0115 and each profile's qualification gates. A first server increment may precede local implementation; V1 cannot omit Fully Local. |
+
+The first authority adapter covers every admitted command and protected read,
+feed and receipt replay in the [scoped contract](../contracts/desktop-runtime-migration-admission-v1.md).
+Its small test scope does not permit unrestricted access on other handlers.
+Task metadata edit does not change lifecycle; planned placement does not assign,
+execute or complete Work. Assignment, dependencies, completion/review and wider
+communication remain in their owned delivery and migration backlog. The
+integrated target must qualify the capabilities its journey uses; the first
+usable increment does not require every future migration-parity row. Task views
+remain generic; no Kanban-only model is selected.
+
+Corporate SSO/SCIM, custom roles, account merge/split, delegation templates,
+support impersonation, graph-store fleets and arbitrary installed plugins are
+outside this first server increment. Real shared Identity and browser-session
+adoption follow their selected profile's gates; required security cannot be
+deferred if that surface is exposed. Native local enrollment and recovery remain
+on the V1 path under OD-012/OD-040. Use narrow owned ports, versioned contracts
+and explicit capability limits so later increments extend the retained model;
+this reduces avoidable rework without promising zero future refactoring.
 
 ### Product direction and delivery scope
 

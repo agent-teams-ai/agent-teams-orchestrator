@@ -56,6 +56,10 @@ Agents should also follow the short repository-level
 | Decide identity, authorization, or dangerous-action boundaries | [Identity and tenant-isolation decision](open-decisions/OD-012-identity-authorization-tenant-isolation.md)                             | [IAM choices and shared Identity review](https://github.com/agent-teams-ai/engineering-research/blob/896812ea0f25b6f23f48f8c770c378775610ad53/docs/studies/identity-provider-evidence.md), [last-mile safety](open-decisions/OD-032-last-mile-side-effect-safety.md)                                                                                                                                                                                                                               |
 
 - [Desktop Runtime Migration Admission v1](contracts/desktop-runtime-migration-admission-v1.md)
+- [Incremental delivery and agent handoff](research/orchestrator-mvp-research-and-collaboration-2026-11-08.md#delivery-partition-and-agent-handoff--2026-11-26)
+  — MVP scope and deferrals; [implementation entrance/exit](architecture/implementation-readiness-gates.md#incremental-implementation-route)
+  and [first IAM contract](open-decisions/OD-012-identity-authorization-tenant-isolation.md#first-iam-implementation-increments)
+  remain with their existing owners.
 
 ## Knowledge map
 

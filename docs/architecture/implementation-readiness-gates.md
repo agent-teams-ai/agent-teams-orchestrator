@@ -130,6 +130,33 @@ Connect/MCP/Desktop conformance, real provider execution, qualified server
 availability, Fully Local materialization or any release qualification. Those
 implementation and deployment proofs follow their owning contracts.
 
+## Incremental implementation route
+
+The owner's 26 November preparation request uses the
+[existing MVP delivery partition](../research/orchestrator-mvp-research-and-collaboration-2026-11-08.md#delivery-partition-and-agent-handoff--2026-11-26).
+This route assigns the next bounded work to existing owners and evidence gates;
+it does not replace their decisions, create another backlog or change gate status.
+
+| Next task and owner | Entrance | Exit evidence and limit |
+| --- | --- | --- |
+| Scope and authority fixtures — architecture/security, feature owners and migration/desktop | Existing ADR-0103 sandbox contract. Documentation, deterministic fixtures and isolated probes may proceed now. | Every admitted command, protected read/feed and receipt replay has trusted context, exact scope and rejecting revoke/expiry/foreign-target cases in the existing contract fixtures; no implicit permission on remaining handlers. |
+| Initial composition foundation — architecture/composition | ADR-0113/0117 and actual existing composition seams. Foundation work may proceed while this gate is pending. | The bounded module-foundation evidence below passes for its selected initial envelope. Larger scale, optional plugin placements and live updates do not block that smaller qualified envelope. |
+| Retained sandbox handlers — the six ADR-0103 context owners and server/role composition | Scoped ADR-0103 admission plus the completed initial module envelope; record the selected role placement and owned contracts. | Actual owning transactions, receipts/outbox, MCP handlers and synthetic adapters pass restart, lost-response, authority and Target-generation cases. The first role implementation meets its process/transport and source-check gate before acceptance; runtime/provider and deployment qualification remain separate. |
+| First real IAM profile — configured authority, identity-binding and consuming-feature owners | An owning scoped decision from the [OD-012 first IAM increments](../open-decisions/OD-012-identity-authorization-tenant-isolation.md#first-iam-implementation-increments) accepts the exact profile and production contracts before dependent code. | Real principal/grant/session and provider-adapter evidence replaces only the declared synthetic boundary; no blanket closure of OD-012, mandatory cloud dependency or second grant ledger. |
+| Subsequent MVP and V1 increments — owning Work, Run, Communication, Runtime and profile owners | Separate admission for capabilities outside ADR-0103 and their applicable gates. | The integrated target and three required V1 profiles have their own actual evidence; assignment/completion/review and native Fully Local remain tracked requirements. |
+
+An agent handoff names the owning feature, allowed files, exact admitted behavior,
+dependencies, failure cases and check commands. Link its result from the existing
+owner/evidence row. Do not create an empty package, widen a dossier's acceptance,
+or turn a synthetic adapter into a production default merely to finish a task.
+
+The immediate executable work is documentation/contract fixtures, foundation
+seam migration and its qualification. New or expanded business module assembly
+still waits for the module foundation below; retained role implementations also
+satisfy the [first-materialization role gate](#first-materialization-role-gate).
+The complete Keycloak/OpenFGA/shared Identity rollout is not a prerequisite for
+ADR-0103's bounded test authority, and that exception grants no real IAM claim.
+
 ## Module foundation before business expansion
 
 ADR-0117 makes Get Modular mandatory and adds a composition prerequisite before
