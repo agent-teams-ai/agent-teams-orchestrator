@@ -113,12 +113,68 @@ consumer-owned ports; standalone operation must not depend on commercial
 Platform. Get Modular composition remains owned by ADR-0117, and service topology
 remains outside this provider decision.
 
+
+### Owner-selected directions — 2026-11-26
+
+The owner endorsed the recommended answers in the [18-question follow-up](https://github.com/agent-teams-ai/engineering-research/blob/578b166650b916efa51f011598a42fabadaeff2f/evidence/imports/iam/iam-open-decisions-review-2026-10-28.md)
+and requested preservation of the alternatives. The table records the selected
+directions with their original first-scope and future-growth conditions; the
+archive preserves all options, /10 scores, estimates and historical status.
+These selections are product planning input, not an implementation instruction,
+provider qualification or retroactive acceptance of every research statement.
+OD-012 remains open for its exact contracts and evidence. A subsequent owning
+ADR records the selected boundary before dependent production implementation;
+it must not silently reopen these choices or rewrite accepted ADR history.
+
+| Question | Selected direction | Remaining owner/evidence boundary |
+| --- | --- | --- |
+| 01 | Configured product authority stores memberships and rich grants in its PostgreSQL; Keycloak authenticates; OpenFGA projects needed relations. | One writer per fact; no shared business DB or second ACL grant ledger. |
+| 02 | Independent common account first; scoped corporate authentication/recovery is the enterprise target. | A-controlled login/recovery must not open B. Identity's ongoing social-root custody mechanism remains open. |
+| 03 | One owner for personal Fully Local, with protected Desktop/CLI enrollment; server self-hosted profile for collaboration. | Stable principal, first-owner claim, rotation and lost-key recovery still need qualification; no allow-all/cloud prerequisite. |
+| 04 | Versioned fixed roles and bounded explicit permissions/grantable sets first. | Exact capability catalog and later custom-role need remain product-owned. |
+| 05 | Separate Agent-version edit, activation and authority binding. | Agent and Access owners qualify every authority-changing configuration path. |
+| 06 | Finite human delegation; administrator-issued organization autonomy first. | Bounded templates are a later growth option, not transitive delegation or automatic renewal. |
+| 07 | Authoritative sensitive checks, declared bounded freshness for eligible reads, fail-closed uncertainty. | No numerical SLO or the Identity plan's candidate 60 seconds accepted here. |
+| 08 | Atomic single-use approval/budget consumption at the owning operation. | OpenFGA eligibility is not reservation; unknown external outcomes retain reconciliation. |
+| 09 | Close affected disclosure and rebuild authorized context after access narrows; isolated sensitive contexts. | Context owner handles lineage; no claim to erase already disclosed knowledge. |
+| 10 | Exact-action approvals and execution recheck, starting with one dangerous effect. | OD-032 retains detailed approver, expiry and execution policy; no universal approval engine. |
+| 11 | Redacted diagnostics and reducing emergency authority by default. | Temporary customer-authorized support access is future need; recovery remains separately owned. |
+| 12 | Product-owned BFF, server-held tokens, protected cookies and exact Target binding. | Browser/CSRF, two-replica refresh and session-scope contracts remain evidence gates. |
+| 13 | Verified workload identity plus audience-bound product context at actual service boundaries. | Preserve Dapr trust/enrollment requirements and feature authorization; mTLS alone is insufficient. |
+| 14 | Distinct personal/organization connections and separate connect/configure/use rights; one provider first. | OD-034 owns connection and secret custody; no implicit secret disclosure. |
+| 15 | Shared FGA store for the first measured authority/environment envelope, with explicit scope and limits. | A narrow routing boundary permits later measured separation; no speculative fleet manager. |
+| 16 | Restore with admission closed, reconcile continuity and projections before reopening. | Unprovable continuity needs explicit recovery/new Target; local full rollback cannot be detected from rolled-back evidence alone. |
+| 17 | Offboard-to-rehire starts a new membership period with baseline roles only; sensitive grants need fresh decisions. | Access and Authority owns policy; provisioning applies it. Principal lifecycle remains with Identity. Temporary suspension differs. |
+| 18 | Bounded personal queue with current authorization before disclosure/counts/pagination and Task deduplication. | Work/query owner qualifies search/cursor semantics; no authorization filter after disclosure. |
+
+The [expanded Identity plan](https://github.com/agent-teams-ai/identity/blob/aa07b44435339777e3d2b45f9e6b2115732aad6d/docs/plans/identity-service-implementation-plan.md) is compatible with these directions:
+central AccountId, authentication bindings and global lifecycle remain separate
+from product principals, memberships, grants, Task/Run authority and SCM secrets.
+The service is not an unconditional dependency of Standalone or Fully Local.
+Managed Platform and standalone authority may use the same narrow mechanisms
+under independently configured trust; neither imports the other's domain/DB.
+
+Before a future Identity integration is admitted, the product owner maps global
+logout, account suspend/close and consumer detach separately from local principal
+disable, membership end, exact grant/delegation revoke, API-key compromise and
+Run sponsorship. Preserve ADR-0079: subject-bound authority and tenant-autonomous
+authority have different causes of suspension, and AR owns actual containment.
+An account-status lease is not proof of a current resource grant or a stopped
+runtime effect.
+
+Two November mechanism choices remain explicit at Identity D3/D8: proof of
+ongoing social-root independence (including corporate custody acquired later),
+and the finite scope/bound of native per-session logout with lost delivery.
+The owner endorsed the independent-account goal, not an unqualified claim that
+a public GitHub/GitLab hostname or an optional factor already proves it.
+
 ### Remaining IAM decisions and evidence
 
 The [critical-decisions review dated 2026-10-23](../research/iam-critical-decisions-review-2026-10-23.md)
 extends the provider comparison with the following unresolved contracts and
-qualification questions. Its recommendations, scores, and code estimates remain
-research; they do not accept an implementation or change the provisional stack.
+qualification questions. Its dated scores, estimates and unselected alternatives
+remain research. The owner-selected direction table above records the later
+endorsement; it does not accept an implementation or qualify the preferred stack.
 
 - Shared-account login, account linking, factors, and recovery need an explicit
   trust boundary. Removing membership in A does not prove isolation from A's
@@ -128,7 +184,8 @@ research; they do not accept an implementation or change the provisional stack.
   the continuity of grants after a person is enabled again.
 - Fully Local needs a selected authority scope, protected enrollment, stable
   principal custody, rotating boot credentials, and lost-key recovery. The
-  recommended personal single-owner model is not an accepted product choice.
+  personal single-owner direction is now selected above; its precise protocol
+  and qualification remain open.
 - Browser session custody and native authorization-code flows using Proof Key
   for Code Exchange need exact Target binding, refresh concurrency, logout, and
   stream-reconnect contracts.
