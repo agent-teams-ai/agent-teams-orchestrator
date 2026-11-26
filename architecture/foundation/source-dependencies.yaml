@@ -251,6 +251,7 @@ boundaries:
       boundaries: []
       packages:
         - "@agent-teams/engineering-foundation"
+        - "@agent-teams/feature-module-standard"
         - ajv
         - oxc-parser
         - yaml
@@ -399,7 +400,6 @@ boundaries:
     dependencyMode: development
     roots:
       - tooling/architecture-conformance/scripts
-      - tooling/architecture-conformance/dependency-cruiser.config.cjs
     entrypoints: []
     allow:
       boundaries:
@@ -418,6 +418,7 @@ boundaries:
         - node:module
         - node:os
         - node:path
+        - node:test
         - node:url
         - node:util
       runtimeReferences:

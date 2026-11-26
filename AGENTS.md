@@ -227,13 +227,14 @@ installation and engine strictness enabled.
 to the installed Foundation execution runner. `pnpm lint:typed` includes the
 default unknown-assertion bridge gate; never bypass a reported shared defect.
 
-The [current compiler-closure blocker](docs/architecture/repository-tooling.md#full-foundation-tooling-adoption)
-must be resolved before executing the old Foundation CLI or dependency-cruiser
-route: their installed closures initialize TypeScript 5.9.3 or 6.0.3 despite the
-root TS 7 pin. The current organization floor covers embedded compilers too.
-Use the portable Docs route for this documentation work, report aggregate checks
-as blocked, and complete the coherent tooling migration rather than disabling
-the required checks or treating an isolated old compiler as an exception.
+The [compiler-closure migration](docs/architecture/repository-tooling.md#current-validation-limits)
+selects Foundation `4.0.2`, Stack `0.3.1` and TS `7.0.2`; the retired TS 5.9/6
+closure must never be executed. Inspect installed compiler owners before running
+new or updated tooling, including embedded parsers. Run the ordinary required
+gates on the corrected candidate. Its previous stable31 managed Docs records do
+not match the new Foundation tuple: report the central admission dependency and
+keep the candidate unmergeable as a completed managed upgrade until the actual
+successor transition and receipts qualify. Never rewrite old evidence to fit pins.
 
 Foundation `architecture.source-dependencies` is schema v3: `rootPackage: true`
 and `packageRoots` for every workspace package. Required CI runs

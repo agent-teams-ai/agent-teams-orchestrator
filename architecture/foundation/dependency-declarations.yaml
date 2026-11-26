@@ -10,7 +10,6 @@ policies:
     - "@agent-teams/"
   developmentOnlyPackages:
     - "@xstate/graph"
-    - dependency-cruiser
     - fast-check
     - nx
     - oxlint
@@ -21,3 +20,5 @@ policies:
     - "@agent-teams/docs-protocol"
     - "@agent-teams/docs-protocol-agent-teams"
     - "@agent-teams/engineering-foundation"
+    - "@agent-teams/feature-module-standard"
+    - stack-toolchain

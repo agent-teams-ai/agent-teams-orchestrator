@@ -30,9 +30,10 @@ evaluated immediately.
 
 ADR-0113 currently pins Core/Assembly 0.5.0 and an older Consumer Module Standard.
 ADR-0117 extends mandatory composition across applicable TypeScript families.
-Neither accepted body is rewritten by this proposal. Current package pins,
-machine profiles and activation evidence remain unchanged until the coherent
-adoption migration below passes. The owner's full-coverage direction is recorded
+Neither accepted body is rewritten by this proposal. The accepted Get Modular
+runtime pins, CMS profile and product activation evidence remain unchanged until
+their coherent adoption migration passes. The separately authorized compiler
+and repository-tooling candidate is described below. The owner's full-coverage direction is recorded
 in the current [composition plan](../architecture/composition-and-dependency-injection.md#full-foundation-implementation-plan);
 this proposed record specifies its next artifact and qualification transition.
 
@@ -133,6 +134,17 @@ boundaries; local calls stay local. Deployment variants reuse owning business
 implementations rather than reconstructing a remote service in a factory.
 Platform invokes Orchestrator through its API/SDK and versioned authority
 contracts; this adoption creates no shared product database or second Task engine.
+
+### Scoped tooling implementation authority
+
+On 27 November the product owner explicitly instructed correction of the old
+embedded compiler paths. That authorizes the Foundation/Stack quality-v5 and
+source-graph tooling candidate described in the
+[tooling record](../architecture/repository-tooling.md#source-coverage-adoption).
+Its required consumer checks and centrally admitted managed Docs transition
+remain separate completion conditions. This scoped instruction does not turn
+this whole proposed foundation ADR into accepted product/runtime adoption.
+Preserve all other accepted pins, old receipts and outstanding target gates.
 
 ### Activation and completion
 

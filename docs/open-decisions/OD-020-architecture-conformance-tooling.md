@@ -14,6 +14,19 @@ related:
 
 # OD-020: Architecture Conformance Tooling
 
+## Current toolchain follow-up
+
+The resolution below is historical. The current organization compiler floor and
+the owner's 27 November 2026 correction instruction retire the isolated TS 6
+exception. The [tooling migration](../architecture/repository-tooling.md#current-validation-limits)
+uses the public Foundation source graph and TS 7-compatible installed tooling,
+retains blocking Oxlint/source-policy enforcement and the actual conformance
+corpus, and keeps graph findings advisory. It does not claim raw graph aliases
+are resolved package edges. ADR-0032's accepted bytes stay unchanged; the scoped
+successor is recorded in
+[ADR-0118](../decisions/0118-full-foundation-capability-adoption.md#scoped-tooling-implementation-authority).
+The candidate's managed admission is still a separate completion gate.
+
 ## Decision required
 
 Select the tools and execution tiers that enforce package roles, feature

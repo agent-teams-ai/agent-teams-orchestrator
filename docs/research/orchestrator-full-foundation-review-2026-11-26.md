@@ -375,6 +375,31 @@ Do not sum alternatives. A few hundred integration lines cannot plausibly prove
 this full scope; unexpectedly large integration code should trigger a search
 for duplicated upstream machinery or product features outside the admitted scope.
 
+### Owner refinement and implementation follow-up, 2026-11-27
+
+The owner authorized the compiler/tooling correction and reaffirmed full plugin
+and live-update use while asking for proportional tests. The previous test-line
+ranges remain historical sizing hypotheses, not quotas or acceptance criteria.
+The implementation handoff must first reuse existing shared suites and local
+fixtures, then add only independent controls for a new guarantee or failure.
+Revise estimates from the first actual diff rather than reproducing library tests to
+fill the earlier allowance.
+
+The active candidate uses published Foundation `4.0.2`, Stack `0.3.1` and FMS
+`0.4.3`, removes the eager TS 5.9/6 paths, migrates quality to v5 and replaces the
+advisory graph parser with the public shared source graph. The [tooling
+record](../architecture/repository-tooling.md#current-validation-limits) separates
+installed checks from the still-required managed Cohort transition. This is an
+implementation candidate, not a claim that all F0–F9 capabilities are qualified.
+
+The [first actual extension journey](../open-decisions/OD-043-extension-lifecycle-catalog-and-hot-update.md#first-orchestrator-adoption-journey)
+now names a proposed read-only Agent Context inspection contribution, useful
+invocation, update, disable/remove and durable restart reconciliation. Shared
+EF/LMU progress is a dated successor observation in that owner record; its Node
+fixtures do not replace Orchestrator authority, installation or target evidence.
+Central's existing new-repository bootstrap is the canonical transfer destination;
+this research is not a second organization onboarding guide.
+
 ### Review findings
 
 1. A comprehensive ADR alone cannot repair mutable text that still advertises a

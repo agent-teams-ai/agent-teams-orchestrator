@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { chmod, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
+import { homedir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -159,8 +160,9 @@ async function main() {
   }
 
   const installDirectory = path.join(
-    repositoryRoot,
+    homedir(),
     ".cache",
+    "agent-teams-orchestrator",
     "docs-tools",
     "vale",
     VALE_VERSION,

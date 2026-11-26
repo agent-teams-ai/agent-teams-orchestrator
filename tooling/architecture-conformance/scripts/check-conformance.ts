@@ -1,19 +1,29 @@
-import { spawnSync } from "node:child_process";
+import assert from "node:assert/strict";
+import { spawnSync, type SpawnSyncReturns } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
+import { observeAdvisoryGraph, requireCompleteAcyclicGraph } from "./run-advisory-graph.ts";
 
+interface ConformanceConfigFactory {
+  createConformanceOxlintConfig(root: string): { readonly filePath: string; readonly dispose: () => void };
+}
+function conformanceConfigFactory(value: unknown): value is ConformanceConfigFactory {
+  return typeof value === "object" && value !== null &&
+    "createConformanceOxlintConfig" in value && typeof value.createConformanceOxlintConfig === "function";
+}
 const toolingRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(toolingRoot, "../..");
-const { createConformanceOxlintConfig } = await import(
+const configFactory: unknown = await import(
   pathToFileURL(path.join(repositoryRoot, "scripts/lint/create-conformance-config.mjs")).href
 );
-const generatedOxlintConfig = createConformanceOxlintConfig(repositoryRoot);
+if (!conformanceConfigFactory(configFactory)) {
+  throw new Error("Root conformance Oxlint configuration factory is missing.");
+}
+const generatedOxlintConfig = configFactory.createConformanceOxlintConfig(repositoryRoot);
 const conformanceOxlintConfig = generatedOxlintConfig.filePath;
 process.once("exit", generatedOxlintConfig.dispose);
-const graphConfig = path.join(toolingRoot, "dependency-cruiser.config.cjs");
-const dependencyCruiserBin = path.join(toolingRoot, "node_modules/.bin/dependency-cruiser");
 
-function run(command, args, cwd) {
+function run(command: string, args: string[], cwd: string): SpawnSyncReturns<string> {
   return spawnSync(command, args, {
     cwd,
     encoding: "utf8",
@@ -24,29 +34,20 @@ function run(command, args, cwd) {
   });
 }
 
-function combinedOutput(result) {
-  return `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
+function combinedOutput(result: SpawnSyncReturns<string>): string {
+  return `${result.stdout}\n${result.stderr}`;
 }
 
-function requireSuccess(label, result) {
+function requireSuccess(label: string, result: SpawnSyncReturns<string>): void {
   if (result.status !== 0) {
     throw new Error(`${label} failed:\n${combinedOutput(result)}`);
   }
 }
 
-function requireFailure(label, result, expectedText) {
+function requireFailure(label: string, result: SpawnSyncReturns<string>, expectedText: string): void {
   const output = combinedOutput(result);
   if (result.status === 0 || !output.includes(expectedText)) {
     throw new Error(`${label} did not fail with ${expectedText}:\n${output}`);
-  }
-}
-
-const info = run(dependencyCruiserBin, ["--info"], repositoryRoot);
-requireSuccess("dependency-cruiser environment check", info);
-const infoOutput = combinedOutput(info);
-for (const expected of ["typescript@6.0.3"]) {
-  if (!infoOutput.includes(expected)) {
-    throw new Error(`dependency-cruiser environment is missing ${expected}:\n${infoOutput}`);
   }
 }
 
@@ -98,29 +99,12 @@ for (const fileName of invalidBoundaryFiles) {
   }
 }
 
-const validGraph = run(
-  dependencyCruiserBin,
-  ["--config", graphConfig, "--output-type", "err", path.relative(repositoryRoot, validRoot)],
-  repositoryRoot,
-);
-requireSuccess("valid dependency graph fixture", validGraph);
-
-const invalidGraph = run(
-  dependencyCruiserBin,
-  [
-    "--config",
-    graphConfig,
-    "--output-type",
-    "err",
-    path.relative(repositoryRoot, invalidRoot),
-    path.relative(repositoryRoot, path.join(fixtureRoot, "cycles")),
-  ],
-  repositoryRoot,
-);
-
-for (const expectedRule of ["domain-must-not-depend-on-outer-layers", "no-circular-dependencies"]) {
-  requireFailure("invalid dependency graph fixtures", invalidGraph, expectedRule);
-}
+const validGraph = await observeAdvisoryGraph(repositoryRoot, [path.relative(repositoryRoot, validRoot)]);
+requireCompleteAcyclicGraph(validGraph);
+const cyclicGraph = await observeAdvisoryGraph(repositoryRoot, [
+  path.relative(repositoryRoot, path.join(fixtureRoot, "cycles")),
+]);
+assert.throws(() => { requireCompleteAcyclicGraph(cyclicGraph); }, /no-circular-dependencies/u);
 
 console.log("Architecture tooling conformance passed.");
 generatedOxlintConfig.dispose();

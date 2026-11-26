@@ -60,14 +60,14 @@
     {
       "file": "scripts/architecture/quality-source-coverage.test.mjs",
       "names": [
-        "flat reader projection remains bounded to the adopted v1.1 profile"
+        "neutral quality topology remains bound to the adopted v1.1 authority"
       ],
       "kind": "test"
     },
     {
       "file": "scripts/architecture/quality-source-coverage.test.mjs",
       "names": [
-        "flat reader projection rejects declared or materialized v1.1 constructs"
+        "neutral quality topology retains declared and materialized construct guards"
       ],
       "kind": "test"
     },

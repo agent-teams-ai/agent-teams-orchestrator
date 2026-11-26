@@ -86,6 +86,78 @@ The [shared assignment](https://github.com/agent-teams-ai/live-module-updates/bl
 retains sequencing. Its trusted Node EF-verified-artifact join does not supply
 durable installation, a production Host or Orchestrator's stricter adoption gate.
 
+#### Successor source inspection
+
+Later on 2026-11-26, [LMU #9](https://github.com/agent-teams-ai/live-module-updates/pull/9)
+advanced to [`2f7392f3b1a9541e84ece0a910a14c49cbacb62f`](https://github.com/agent-teams-ai/live-module-updates/tree/2f7392f3b1a9541e84ece0a910a14c49cbacb62f).
+It contains the B0 installed dependent-consumer implementation and
+[L1 invocation/native-authority TEST probes](https://github.com/agent-teams-ai/live-module-updates/blob/2f7392f3b1a9541e84ece0a910a14c49cbacb62f/tests/qualification/update-operation/invocation-profile.md).
+The [selected cooperative fixture](https://github.com/agent-teams-ai/live-module-updates/blob/2f7392f3b1a9541e84ece0a910a14c49cbacb62f/docs/decisions/0001-cooperative-update-profile.md)
+does not yet supply the complete production operation or product adoption.
+Keep the earlier four-Markdown-file checkpoint above as history; current source
+and executed receipts belong to their exact owning PR/run, not its title.
+
+EF #70 now records owner-authorized implementation in its PR assignment, while
+its published source head remains the two-document `d1830b35` checkpoint above.
+The assigned first artifact profile is trusted finite Node with one signed
+self-contained ESM bundle and declared data assets. It supplies no arbitrary
+graph loader, durable installation or hostile containment. Neither shared PR is
+treated as a completed product delivery by this successor observation.
+
+### First Orchestrator adoption journey
+
+The proposed first contribution is a **read-only sandbox-manifest inspection
+summary**, a projection builder for operator inspection of already authorized
+immutable metadata. Its semantic owner is the existing
+[Agent Context sandbox-manifest feature](../../packages/contexts/agent-context/src/features/sandbox-manifest/README.md)
+in `packages/contexts/agent-context`, package `@agent-teams/agent-context`.
+The current `SandboxManifestApi.getManifest` remains the authorized source.
+Placement is the selected
+[Control Host interactive composition](../architecture/deployment-profiles.md#service-role-map)
+in the catalogued server or local application; this introduces no Agent Context
+assembly worker or provider-formatting responsibility.
+
+This is an **implementation reservation for OD-043**, not an existing port,
+implemented plugin or extension of ADR-0103 admission. A narrow owning decision
+must admit the summary use case, contribution contract and lifecycle profile
+before production code. Put its port and adapter beside sandbox-manifest; do
+not materialize another package solely for this example. The adapter receives
+only reduced immutable metadata disclosed by the owning use case after current
+scope checks and returns bounded plain data. The use case validates the result
+and current disclosure authority before exposing it. It receives no SQL,
+seed/migrate method, source
+resolver, credentials, grant authority or aggregate-policy replacement. It
+cannot compile provider prompts or turn manifest text into runtime authority.
+
+Architecture/composition owns the selected Host's O3/O4 installation/publication
+implementation within the existing catalogued app reservations and materialization
+gates. Before code, record its exact source paths, durable repository/schema owner,
+scope and CAS
+transaction. Consume the configured Access Control authority through the owning
+port; do not create another grant ledger. Agent Context keeps its manifest
+schema and canonical data. An absent Host installation/head/attempt store is
+substantive prerequisite work, not an assumed adapter or part of A/B's delivery.
+The role gate places recovery/drain handlers; an interactive handler cannot
+absorb background work that requires a separate coordination or execution role.
+
+The required product acceptance journey is: verify/install contribution A;
+activate and obtain a useful authorized summary; retain one admitted A operation
+while qualified B serves new requests; disable and remove; restart and reconcile
+without resurrecting the disabled contribution or deleting the source manifest.
+The Host fences stale projection publication and revoked disclosure at the real
+receiver. A pure summary contribution need not invent private durable state;
+where a later contribution owns state, its actual custody/migration owner and
+compatibility evidence are additionally required.
+
+This journey joins O2-O5 and O9 using actual shared artifacts. It is not passed
+by the library's Document fixture or by two configurations of one O Host.
+OD-041's GHCR/Harbor and independent-product floor and the Browser/Desktop/
+isolation exits below remain required at their applicable production claims.
+Eligible built-ins follow the same supported operation and retirement rules
+without fabricated OCI artifacts or artifact installations. A package is not
+automatically an installed plugin; unsupported change profiles refuse or use an
+explicitly qualified controlled-restart path.
+
 ### Product seams to establish before dependent implementation
 
 Feature-owned application ports remain independent of GM, EF, LMU, transport,
@@ -113,6 +185,15 @@ Seal new ingress before cancellation callbacks; distinguish cancellation,
 settlement, cleanup and actual physical termination. Preserve borrowed pools and
 canonical state, the original Resources/native close flight, and visible debt.
 
+The inspected LMU L1 profile uses explicit operation-bound continuations: a
+fresh facade call is a new admission; bound nested and post-`await` calls retain
+the admitted generation. Roots and explicitly registered descendants retain
+work, and an escaped settled continuation refuses new work. Unregistered detached
+work and streams are outside that first profile. Ordinary calls within a static
+feature stay ordinary calls; no ambient service bag or wrapper for every helper
+is introduced. Its Node Map and browser session-storage authority are session
+fixtures, not Orchestrator's durable or multi-replica publication implementation.
+
 Publication uses the real authority's expected revision and original
 attempt/payload binding. Relevant current head, schema/state basis and grants
 are enforced at the protected transition; a preliminary check is insufficient.
@@ -132,6 +213,13 @@ Runtime, borrower, artifact, history, old-client and private-state holds retain
 their own owners and budgets; reader zero or a timeout cannot authorize deletion.
 Normal upgrade and emergency revocation, overlap-safe preparation and exclusive
 resource transfer, and drain versus forced interruption need explicit policies.
+
+The coordinator and shared foundation have their own outer upgrade boundary.
+The selected deployment owner or native Supervisor must qualify replacement of
+that closure, using controlled restart where required, while preserving pending
+attempts, installation records, state and recovery journals. A new coordinator
+reconciles the original authority before replay or reclamation. It cannot claim
+self-update safety from an ordinary feature cutover while old work is unresolved.
 
 ### Orchestrator-dependent implementation cards
 
@@ -248,6 +336,24 @@ The same built artifact is required when one-artifact portability is claimed;
 different native target builds each need their own artifact and contract evidence.
 Use disposable fixtures and independent state/effect/work oracles; deliberately
 breaking the relevant fence or cleanup must fail after successful setup.
+
+### Focused acceptance evidence
+
+Use the smallest risk-based fixture family that distinguishes these new joins:
+
+| Scenario | Concrete independent witness |
+| --- | --- |
+| Actual artifact and live adoption | The authorized source manifest is unchanged; useful B summary is observed while held A stays coherent; denied/stale output and late A cleanup cannot replace B's exact registration |
+| Durable publication and removal | A small fault schedule around commit/acknowledgement and disable/removal reconciles the same attempt, causes no duplicate effect or resurrection, and preserves owner data after restart |
+| Required target or trust boundary | Actual browser, selected native IPC or isolated executor exercises the new denial, privilege or physical-stop guarantee; an ordinary Node run cannot stand in for it |
+
+Reuse A/B's mechanism suites, package/source conformance and unchanged role
+fixtures; do not copy L1 invocation/authority cases into every O handler.
+Add deliberate defects only for new receiver/fence/cleanup joins needing an
+independent sensitivity witness. Select actual fault boundaries before adding
+cases, count reused evidence once, and stop optional expansion when those risks
+are covered. Documentation-only corrections require no new runtime suite. The
+LOC ranges below are uncertain planning estimates, never test-volume mandates.
 
 ### Product-owned cost and uncertainty
 
