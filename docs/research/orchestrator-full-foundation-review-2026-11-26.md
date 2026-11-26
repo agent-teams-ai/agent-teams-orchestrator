@@ -397,6 +397,9 @@ now names a proposed read-only Agent Context inspection contribution, useful
 invocation, update, disable/remove and durable restart reconciliation. Shared
 EF/LMU progress is a dated successor observation in that owner record; its Node
 fixtures do not replace Orchestrator authority, installation or target evidence.
+The later LMU `97e051b7` checkpoint contains the private production coordinator
+and optional Resources integration; B6 packed Node/Chromium and B7 EF integration
+qualification remain open. The earlier plan-only observation above is history.
 Central's existing new-repository bootstrap is the canonical transfer destination;
 this research is not a second organization onboarding guide.
 

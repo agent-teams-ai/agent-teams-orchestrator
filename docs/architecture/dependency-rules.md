@@ -96,8 +96,8 @@ Fixed private helpers remain static dependencies.
 
 Nested visibility, direct-parent assembly, republication, and both cycle rules
 follow the [v1.1 feature profile](feature-module-standard.md). Activation remains
-blocked until the required semantic enforcement exists; the flat reader does
-not prove nested conformance.
+blocked until the required semantic enforcement exists; the neutral quality
+topology projection does not prove nested conformance.
 
 Wire models and generated service types remain in their owning contract surfaces
 and permitted transport adapters or SDKs. GraphQL resolver contexts and
@@ -304,11 +304,18 @@ packages are the explicit exception to runtime role direction.
 
 The `exactRegistryDevelopmentOnlyPackages` list in
 `architecture/foundation/dependency-declarations.yaml` is the single authority
-for external engineering tooling allowed in the reserved scope. It currently
-contains `@agent-teams/engineering-foundation` for repository engineering gates,
-`@agent-teams/docs-protocol` for portable documentation tooling, and
-`@agent-teams/docs-protocol-agent-teams` for managed documentation integration.
-These packages are root-only exact registry development dependencies;
+for external engineering tooling allowed as root-only exact registry development
+dependencies instead of catalog declarations, including exceptions to the
+reserved `@agent-teams/` scope. The current compiler/tooling candidate uses
+`@agent-teams/engineering-foundation` `4.0.2` for repository engineering gates,
+`@agent-teams/feature-module-standard` `0.4.3` for the shared neutral quality
+topology mapper, and `stack-toolchain` `0.3.1` for technical compiler,
+lint, and format tooling and presets. Stack is an explicit unscoped tooling
+exception; it does not become a production dependency or a catalog entry.
+The list also retains `@agent-teams/docs-protocol` for portable documentation
+tooling and `@agent-teams/docs-protocol-agent-teams` for managed documentation
+integration. The [tooling adoption record](repository-tooling.md#source-coverage-adoption)
+owns the candidate's validation and separate pending managed admission;
 `@agent-teams/document-authoring` and `@agent-teams/repository-mutation` remain
 transitive tooling dependencies. Nested workspace packages must not redeclare
 them: they load the root install. Catalog entries for reusable externals must

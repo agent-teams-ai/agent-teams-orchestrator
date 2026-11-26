@@ -347,14 +347,18 @@ has stable33 generation 3 VERIFIED/QUALIFIED at event 189, while stable31 remain
 RECOMMENDED at event 186. Only the declared Extension Foundation canary may take
 the narrower candidate route; Orchestrator is not that canary.
 
-PR #111's [trusted Docs run](https://github.com/agent-teams-ai/agent-teams-orchestrator/actions/runs/45875732149)
+PR #111's [trusted Docs run](https://github.com/agent-teams-ai/agent-teams-orchestrator/actions/runs/45908886931)
 loads validator `b30455e32cf5d54ade6d8301637701347e4ce57c` and rejects the
 current registry's generation 3 row at `/cohorts/44` before consumer execution.
 This controller/schema incompatibility is an upstream operational blocker, not
 failed IAM or module behavior. Its repair must retain authenticated workflow,
 current controller and managed adoption boundaries; a new package pin alone
-cannot repair it. Central #434/#441 and their source qualification remain owned
-upstream and do not constitute Orchestrator migration evidence.
+cannot repair it. Central [#434](https://github.com/agent-teams-ai/.github/pull/434)
+selects the Extension Foundation canary; [#441](https://github.com/agent-teams-ai/.github/pull/441)
+handles finite Runtime retirement recovery. Neither implements Orchestrator's
+eligible controller/Cohort transition. The central governance owner must qualify
+that transition and its consumer-specific desired selection; these existing PRs
+and their source qualification do not constitute Orchestrator migration evidence.
 
 ### Complete capability disposition
 

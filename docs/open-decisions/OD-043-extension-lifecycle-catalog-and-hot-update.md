@@ -97,6 +97,27 @@ does not yet supply the complete production operation or product adoption.
 Keep the earlier four-Markdown-file checkpoint above as history; current source
 and executed receipts belong to their exact owning PR/run, not its title.
 
+A further source inspection found [LMU #9](https://github.com/agent-teams-ai/live-module-updates/pull/9)
+at [`97e051b73f42e485ca5479ecb06444edd548097c`](https://github.com/agent-teams-ai/live-module-updates/tree/97e051b73f42e485ca5479ecb06444edd548097c).
+This unmerged private source contains the portable invocation and update
+coordinator, preparation/publication/reconciliation/retirement, installed
+public-root consumers and an optional native Resources adapter. The
+[usage and ownership contract](https://github.com/agent-teams-ai/live-module-updates/blob/97e051b73f42e485ca5479ecb06444edd548097c/docs/architecture/cooperative-operation-usage.md)
+keeps the ordinary library independent of GM/EF; `live-module-updates/resources`
+is a separate optional peer integration. Consume these shared mechanisms through
+O2/O5 rather than implement another coordinator or cleanup stack.
+
+Complete B6 qualification of the same packed operation through independently
+wired Node and Chromium Hosts, ordinary delivery and actual-main checks, and
+the B7 EF-verified-artifact join remain pending under the
+[owning phase plan](https://github.com/agent-teams-ai/live-module-updates/blob/97e051b73f42e485ca5479ecb06444edd548097c/docs/plans/first-operation-implementation-plan.md#workstream-b-complete-module-updates-2026-11-26).
+Earlier L1 target evidence does not establish those complete-operation exits.
+The finite cooperative profile requires synchronous inert canonical-head reads;
+it does not qualify O3 durable/multi-replica authority, O4 restart recovery,
+streams or hostile containment. A local cached head cannot stand in for the
+unqualified distributed authority. Those capabilities retain their actual owner
+and profile-specific evidence.
+
 EF #70 now records owner-authorized implementation in its PR assignment, while
 its published source head remains the two-document `d1830b35` checkpoint above.
 The assigned first artifact profile is trusted finite Node with one signed
