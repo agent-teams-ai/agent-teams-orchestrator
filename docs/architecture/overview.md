@@ -33,6 +33,13 @@ scope and bounded foundation requirements into the canonical baseline. No
 accepted decision body is rewritten, and no package or runtime qualification
 follows from this integration.
 
+The 26 November owner clarification requires the
+[complete module and engineering foundation](composition-and-dependency-injection.md#full-foundation-implementation-plan)
+before broad business expansion. [ADR-0118](../decisions/0118-full-foundation-capability-adoption.md)
+proposes migration to the reviewed latest contracts and source artifacts. Current
+0.5.0 pins are retained until that coherent transition qualifies; a small MVP
+does not restrict the foundation to a minimal static composition skeleton.
+
 [ADR-0111](../decisions/0111-human-collaboration-and-execution-directory-terminology.md)
 records the confirmed collaboration and terminology policy. The dated research
 retains its original baselines; earlier branch-status notes there are historical,

@@ -96,6 +96,7 @@ test("mandatory contract rejects removing a critical identity while all protecte
     const path = join(root, "contract.json");
     await writeFile(path, original);
     const contract = await readReviewedContract(path);
+    assert.equal(contract.required.length, 18);
     const files = [...new Set(contract.required.map(({ file }) => file))];
     assert.equal(files.length, 3);
     requireCompleteSelection(contract, files);

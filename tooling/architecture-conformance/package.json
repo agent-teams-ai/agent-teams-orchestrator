@@ -4,13 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check:conformance": "node scripts/check-conformance.mjs && node scripts/check-package-scaffolding.mjs && node scripts/check-package-scaffolding-policy.mjs && node scripts/check-package-topology.mjs && node scripts/check-dependency-specifiers.mjs",
-    "check:graph": "node scripts/run-advisory-graph.mjs"
+    "check:conformance": "node scripts/check-conformance.ts && node scripts/check-package-scaffolding.mjs && node scripts/check-package-scaffolding-policy.mjs && node scripts/check-package-topology.mjs && node scripts/check-dependency-specifiers.mjs",
+    "check:graph": "node scripts/run-advisory-graph.ts && node --test scripts/run-advisory-graph.test.ts"
   },
   "devDependencies": {
     "ajv": "catalog:",
-    "dependency-cruiser": "catalog:tooling-ts6",
-    "typescript": "catalog:tooling-ts6",
     "yaml": "catalog:"
   }
 }

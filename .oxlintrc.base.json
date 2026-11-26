@@ -1,8 +1,8 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "extends": [
-    "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/node.json",
-    "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/maintainability.json"
+    "./node_modules/stack-toolchain/presets/oxlint/node.json",
+    "./node_modules/stack-toolchain/presets/oxlint/maintainability.json"
   ],
   "categories": {
     "correctness": "error",

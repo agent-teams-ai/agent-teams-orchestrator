@@ -23,7 +23,7 @@ const typeAwareRunner = path.join(scriptDirectory, "run-type-aware.mjs");
 const suppressionValidator = path.join(scriptDirectory, "validate-suppressions.mjs");
 const conformanceConfig = createConformanceOxlintConfig(repositoryRoot);
 const readConfig = (name) => JSON.parse(readFileSync(path.join(repositoryRoot, name), "utf8"));
-const topology = readConfig("architecture/foundation/quality-feature-topology.json");
+const topology = readConfig("architecture/foundation/quality-source-topology.json");
 
 after(() => {
   conformanceConfig.dispose();
@@ -32,7 +32,7 @@ after(() => {
 function runOxlint(config, fixture) {
   if (config === "type-aware") {
     return lintMappedSource(
-      topology.modules[0].sourceRoot,
+      topology.sourceRoots[0],
       fixture,
       readFileSync(path.join(repositoryRoot, "tooling/lint-fixtures", fixture), "utf8"),
     );
@@ -71,8 +71,8 @@ test("effective mapped budgets and normal tooling budgets retain all five ceilin
     "}",
     ...Array.from({ length: 320 }, (_, index) => `export const value${index} = ${index};`),
   ].join("\n");
-  for (const module of topology.modules) {
-    const production = lintMappedSource(module.sourceRoot, "budget.test.ts", body);
+  for (const sourceRoot of topology.sourceRoots) {
+    const production = lintMappedSource(sourceRoot, "budget.test.ts", body);
     assert.equal(production.status, 1, production.diagnostics);
     for (const rule of [
       "complexity",
@@ -83,10 +83,10 @@ test("effective mapped budgets and normal tooling budgets retain all five ceilin
     ]) {
       assert.ok(production.diagnostics.includes(`(${rule})`), production.diagnostics);
     }
-    for (const root of module.testRoots) {
-      const tests = lintMappedSource(root, "budget.test.ts", body);
-      assert.equal(tests.status, 0, tests.diagnostics);
-    }
+  }
+  for (const root of topology.testRoots) {
+    const tests = lintMappedSource(root, "budget.test.ts", body);
+    assert.equal(tests.status, 0, tests.diagnostics);
   }
   for (const [root, name, status] of [
     ["scripts/lint", "budget.test.mjs", 0],
@@ -118,10 +118,10 @@ test("effective mapped budgets and normal tooling budgets retain all five ceilin
 });
 
 test("typed mapped core layers retain ambient effect protection", () => {
-  for (const module of topology.modules) {
+  for (const sourceRoot of topology.sourceRoots) {
     for (const layer of ["application", "domain", "contracts", "projections"]) {
       const result = lintMappedSource(
-        `${module.sourceRoot}/features/probe/${layer}`,
+        `${sourceRoot}/features/probe/${layer}`,
         "impure.ts",
         "export const now = Date.now();\nexport const random = Math.random();\n",
       );
@@ -220,20 +220,20 @@ test("maintainability profiles stay aligned with Foundation", () => {
     readFileSync(
       path.join(
         repositoryRoot,
-        "node_modules/@agent-teams/engineering-foundation/presets/oxlint/maintainability-tests.json",
+        "node_modules/stack-toolchain/presets/oxlint/maintainability-tests.json",
       ),
       "utf8",
     ),
   );
   assert.ok(
     blockingConfig.extends.includes(
-      "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/maintainability.json",
+      "./node_modules/stack-toolchain/presets/oxlint/maintainability.json",
     ),
     "production maintainability preset must stay explicit",
   );
   assert.deepEqual(
     readConfig(
-      "node_modules/@agent-teams/engineering-foundation/presets/oxlint/maintainability.json",
+      "node_modules/stack-toolchain/presets/oxlint/maintainability.json",
     ).rules,
     {
       complexity: ["error", 20],
@@ -403,7 +403,7 @@ test("common, fast and typed configs keep separate responsibilities", () => {
   assert.deepEqual(
     typed.extends,
     common.extends.concat(
-      "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/type-aware.json",
+      "./node_modules/stack-toolchain/presets/oxlint/type-aware.json",
     ),
   );
   assert.deepEqual(Object.keys(typed).toSorted(), ["$schema", "extends", "options", "overrides"]);
@@ -413,8 +413,8 @@ test("common, fast and typed configs keep separate responsibilities", () => {
     typed.overrides.map(({ rules }) => rules),
     common.overrides.map(({ rules }) => rules),
   );
-  const sourceRoots = topology.modules.map(({ sourceRoot }) => sourceRoot);
-  const testRoots = topology.modules.flatMap(({ testRoots: moduleTestRoots }) => moduleTestRoots);
+  const sourceRoots = topology.sourceRoots;
+  const testRoots = topology.testRoots;
   assert.deepEqual(
     typed.overrides.map(({ files }) => files),
     [

@@ -62,10 +62,12 @@ database process, or authoritative local cache.
 
 The [IAM critical-decisions review](../research/iam-critical-decisions-review-2026-10-23.md#2-fully-local-identity-bootstrap-and-recovery)
 records local authority, protected enrollment, stable principal custody,
-boot-credential rotation, and key-loss recovery choices under OD-012. Its
-single-owner recommendation is not an accepted product choice. ADR-0115 already
-requires Fully Local in V1; this research neither defers that scope nor qualifies
-a materialized profile.
+boot-credential rotation, and key-loss recovery choices under OD-012. The owner's
+26 November endorsement in [OD-012](OD-012-identity-authorization-tenant-isolation.md)
+selects the personal single-owner direction. Exact enrollment, credential,
+recovery and package-materialization contracts remain open. ADR-0115 already
+requires Fully Local in V1; selecting that direction neither defers the profile
+nor qualifies its implementation or resolves this materialization decision.
 
 ## Options
 

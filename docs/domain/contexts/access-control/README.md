@@ -26,6 +26,12 @@ under OD-012, and ADR-0080 names this responsibility a logical provider
 responsibility rather than an accepted mandatory bounded context. Authentication
 and domain business invariants remain outside this context.
 
+The bounded [first IAM implementation increments](../../../open-decisions/OD-012-identity-authorization-tenant-isolation.md#first-iam-implementation-increments)
+start with existing sandbox authority and one Work-owned Task-read contract.
+Their source/projection and lifecycle candidate does not materialize this
+logical responsibility as another grant service. Admit only the owning slice
+needed by the real provider; later capabilities do not block contract fixtures.
+
 Discovery artifacts are not yet complete. Use the
 [bounded-context template](../../../templates/bounded-context.md) before changing
 this dossier to accepted.

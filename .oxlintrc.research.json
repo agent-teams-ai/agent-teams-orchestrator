@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "extends": [
-    "./node_modules/@agent-teams/engineering-foundation/presets/oxlint/type-aware.json",
+    "./node_modules/stack-toolchain/presets/oxlint/type-aware.json",
     "./.oxlintrc.common.json"
   ],
   "options": {

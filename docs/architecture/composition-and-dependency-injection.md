@@ -27,6 +27,14 @@ are distinct boundaries. Their sizes do not have to match.
 
 ## Get Modular adoption profile
 
+The owner clarified on 26 November 2026 that the complete module and engineering
+foundation must be designed and prepared before broad business expansion. The
+[full foundation implementation plan](#full-foundation-implementation-plan)
+replaces the earlier interpretation of a Core/Assembly-only starter. The current
+accepted artifact table below remains truthful until the proposed
+[ADR-0118 adoption transition](../decisions/0118-full-foundation-capability-adoption.md)
+is qualified and recorded; full capability coverage is required now.
+
 ADR-0113 selects the exact static Get Modular baseline. ADR-0117 reconciles the
 broader mandatory scope and foundation requirement from the parallel owner
 work without changing that baseline. The historical ADR-0110 pin is superseded;
@@ -58,14 +66,14 @@ remain ordinary typed code. Owner-local factories implement capabilities; they
 are not an alternative production graph. Library composition exposes a narrow
 API without leaking framework descriptors into consumer business code.
 
-Use the existing Resources capability when an adopted module acquires resources,
-after selecting and qualifying an exact compatible artifact with this baseline.
-The requirement does not install an unreviewed Resources or Observation version.
-Pure and borrow-only modules do not require resource scopes. Any additional
-package requires concrete integration need and exact dependency qualification;
-a competing resource or lifecycle framework is not the fallback. The upstream conformance
-kit is required development tooling for the first activated production scope;
-it is not another runtime subsystem. Core and Assembly adoption does not activate
+The complete successor foundation positively includes Resources, Observation,
+development Conformance and a native Effect qualification profile, together with
+the lifecycle candidate's owned integration decision. Their uses and exact
+candidate artifacts are listed below; none is silently omitted because the MVP
+is small. Existing production pins do not yet activate these candidates. Pure
+and borrow-only modules do not acquire artificial scopes; state-free modules do
+not acquire stores. A competing resource, composition or lifecycle framework is
+not the fallback. Core and Assembly adoption alone does not activate
 runtime plugin discovery or hot replacement.
 The existing extension safety and artifact-admission contracts still apply.
 
@@ -302,6 +310,11 @@ Use `pnpm check:changed` during iteration, `pnpm check:fast` for handoff, and th
 complete `pnpm check` before a pull request. Passing document checks or installing
 0.5.0 does not qualify a running Host or distributed deployment.
 
+The [current compiler-closure blocker](repository-tooling.md#current-validation-limits)
+prevents executing those old Foundation-based aggregates until their qualified
+migration. Portable documentation checks remain available; they do not replace
+the blocked required gates.
+
 Replacing Core/Assembly changes composition and its conformance evidence. It
 must not require changes to domain behavior, application ports, public contracts,
 or persistence authority.
@@ -309,16 +322,17 @@ or persistence authority.
 ### Static foundation and extension evolution
 
 The [module foundation gate](implementation-readiness-gates.md#module-foundation-before-business-expansion)
-is the first adoption boundary. Its bounded initial envelope, exact public
-artifacts, actual consumer composition, required profiles, independent binding
-oracle, and lifecycle evidence remain necessary before new business assembly.
-A broader live-update platform is not a prerequisite for that bounded gate.
+requires full capability design and the common foundation evidence below before
+broad business expansion. Exact artifacts, real consumer composition, independent
+binding oracles, nested source rules, lifetime and representative growth evidence
+are part of that foundation. Dynamic installation and update work has concrete
+owners and acceptance rows; a static pass is not full foundation completion.
 
 A reusable capability keeps its contracts independent from one product's UI,
 composition root, and persistence authority. Distinct Host integrations are
 required to claim portability across those Hosts; two configurations of one
 consumer graph establish only their declared profile coverage. This distinction
-does not enlarge the accepted static gate into a universal two-product gate.
+does not satisfy the separate two-product adoption floor in OD-041.
 
 Plugin lifecycle and replacement mechanisms remain under
 [OD-043](../open-decisions/OD-043-extension-lifecycle-catalog-and-hot-update.md).
@@ -327,17 +341,145 @@ Frontend contribution semantics remain under
 Neither research navigation nor a static composition qualification selects an
 extension trust tier, publishes a public SPI, or qualifies hot replacement.
 
-The cross-product [application foundation guide](https://github.com/agent-teams-ai/live-module-updates/blob/9c9952ad1edac0c773921e6aa3db73777ce04c10/docs/architecture/application-foundation.md),
-[headless plugin and UI proposal](https://github.com/agent-teams-ai/live-module-updates/blob/9c9952ad1edac0c773921e6aa3db73777ce04c10/docs/architecture/headless-plugins-and-ui.md)
-and [delivery plan](https://github.com/agent-teams-ai/live-module-updates/blob/9c9952ad1edac0c773921e6aa3db73777ce04c10/docs/plans/foundation-delivery-plan.md)
-provide the current fixture-first authoring and research sequence through
-[Live Module Updates PR #2](https://github.com/agent-teams-ai/live-module-updates/pull/2),
-continuing the original [PR #1 proposal](https://github.com/agent-teams-ai/live-module-updates/pull/1).
-Qualify the shared foundation with realistic fixtures and independent test Hosts
-before dependent applications are ready. Keep this evidence separate from
-Orchestrator's later product adoption.
-These links pin a published proposal. The local adopted versions, capability
-owners and admission gates above remain authoritative.
+The [current cross-repository handoff](../open-decisions/OD-043-extension-lifecycle-catalog-and-hot-update.md#full-foundation-integration-handoff)
+tracks Extension Foundation A and Live Module Updates B with exact reviewed
+revisions and per-stage evidence. Reuse their shared implementation; Orchestrator
+supplies its product authority, state, effect receivers and Host integration.
+Realistic independent fixtures can qualify the shared mechanisms before products
+are ready, but product adoption still needs its own evidence.
+
+## Full foundation implementation plan
+
+This is the current preparation route for the owner's full-foundation request.
+The [dated source review](../research/orchestrator-full-foundation-review-2026-11-26.md)
+owns observations, comparisons and estimate uncertainty. ADR-0118 proposes the
+coherent artifact transition; the existing readiness document owns gate status.
+No runtime dependency or machine activation changes through this documentation.
+
+### Complete capability coverage
+
+Every row is required design coverage. The common rows are implemented and
+qualified before broad business assembly; target-dependent rows have mandatory
+exits before their use and before any release claiming them. Unsupported
+operations refuse before evaluation/effect. An empty interface, a link to future
+work or a success stub is not an implementation of a row.
+
+| Capability | Concrete Orchestrator use and owner | Required mechanism and evidence |
+| --- | --- | --- |
+| Core validation and diagnostics | Composition owner validates role/deployment inventories and externally carried inert declarations | Object and UTF-8 byte compilation, invalid duplicate/size/revision/cycle cases, deterministic plan and bounded structured diagnostics; zero factories after rejection |
+| Typed authoring and complete maps | Feature owners publish owned descriptors and curated composition exports | Full descriptor unions and separate imported `CapabilitiesOf` interface bases; used and unused ID conflicts plus union/map parity reject; no global service bag |
+| Entries, groups and profiles | Direct parents assemble child groups; each Host selects its own local graph | Explicit required/optional/many choices, ordered hooks, completed static profiles and independent compiled-profile conformance; wrong provider/order fails an independent wiring oracle |
+| Repeated instance templates | Host-owned session/operation/worker lifetimes when independent construction is useful | One immutable prepared template, declared borrowed inputs and isolated concurrent runs; reserve ownership before await; plan digest plus factory-set identity for any cache |
+| Resource ownership | Resource-owning adapters and Host lifecycle | Resources setup/use/scoped, nested close, cancellation, escalation, abandonment, retry and retained debt; borrowed resources survive, late acquisition remains owned, original close is retained |
+| Current-state observation | Owning projection publishes health, execution status or provider availability to local consumers | Single writer, frozen snapshots, read-only facets, watch/load, error reporting, subscription ownership and load settlement; authorization-filtered projections prepared before disclosure |
+| Typed commands and hooks | Each consuming feature owns its input port or ordered policy contribution | GM slots supply capabilities; owner defines invocation, order, result, deadlines, cancellation, concurrency, failure and compensation; optional hooks never own mandatory authorization |
+| Durable occurrences and processes | Context-owned Work, Run, audit and integration event handlers | Common proof uses owned port contracts and realistic outbox/inbox, JetStream and workflow fixtures; actual business transitions stay in admitted feature increments; duplicates, replay, gaps and ambiguous effects remain separate from Observation |
+| Module and architecture conformance | Architecture/tooling plus contract owners | Conformance isolation/smoke/contract suites/namespaces/wiring/layout and handle diagnostics; actual shared source facts and FMS checks, not a second parser |
+| Native Effect | A representative resource-owning asynchronous execution/integration profile | Native GM Effect construction with exact errors/requirements, interruption, provider sharing and borrowed inputs; private Layer details stay inside modules; no parallel inter-module resolver |
+| Executable generation lifecycle | Host adapter and LMU, with the actual executor owning physical execution | Stable facade, operation affinity, admission, current receiver fence, original-attempt outcome and retained-work/cleanup custody; private lifecycle candidate only through its reviewed owner contract |
+| Extension trust and typed contribution | Extension Foundation plus owning product contract | Verified immutable artifact/closure, owner-defined namespaced contribution revisions, required/optional outcomes and rejecting evidence before evaluation |
+| Installation, update and state | Product installation/publication/state owners plus LMU algorithm | Durable enablement/head/attempt records, current-grant checks, CAS/unknown reconciliation, schema/retention policy, exact retirement and safe rollback |
+| Browser, Desktop and isolated execution | Frontend, Local Host/Runtime and protected product receivers | Actual environment, privilege, crash, reconnect, old-client asset and physical containment evidence; presentation stays outside domain/application |
+| Engineering and agent tools | Repository tooling, shared Engineering Foundation/FMS/Stack/Docs | Full source census, strict compiler/lint, quality/format, contract/release checks, guarded authoring/scaffolding, required-runner and provenance routes from the tooling plan |
+
+Get Modular groups are labels, not tenant authorization trees or runtime
+namespaces. Product organization/department/team hierarchies remain domain data;
+thousands of agents reuse a finite module graph and independent execution state.
+Features, source files, groups, instances, packages and OS processes are separate
+inventories. A module is not automatically a package, service or plugin.
+
+### Common foundation task cards
+
+Cards below name proposed implementation work, not executed evidence. New source
+uses ordinary strictly checked `.ts`. No production path is created in this
+planning change. Each implementation PR binds exact files, test identities and
+an evidence location to its owner before materialization.
+
+F0–F7 form the common gate, using existing admitted seams and substantive test
+consumers. The role and dynamic cards F8/F9 below are separate dependent gates;
+their design is required now, but they are not common entrance rows. This avoids
+requiring a new role feature to exist before its own foundation can qualify.
+
+| Card and owner | Concrete work and source boundary | Entrance and independently observable exit |
+| --- | --- | --- |
+| F0 — architecture/composition | Inventory actual composition seams, capability owners, process profiles, borrowed/owned resources, contribution/update boundaries and exact source/artifact states in the adoption record | Full table above and OD-043 target rows have owners, failure contracts and evidence; proposed ADR-0118 transition contains no invented public API or implicitly upgraded pin |
+| F1 — engineering/tooling | Execute the [coherent tooling migration](repository-tooling.md#full-foundation-tooling-adoption), including old embedded compilers, quality v5, FMS/Stack and managed Docs dependencies | Exact installed closure respects TS >=7.0.2; frozen/strict-peer profiles and original rejecting quality gates pass; rollout and rollback preserve recovery state |
+| F2 — architecture/tooling | Extend `architecture/feature-module-standard-profile.json`, existing source/topology profiles and `tooling/architecture-conformance` through shared source facts and FMS/CMS kernels; register tests in `architecture/foundation/required-quality-tests.json` | A real nested consumer and source-derived forbidden child access, indirect parent assembly, skipped republication, type/load cycles and composition-import failures run in required gates; activate constructs only with this proof |
+| F3 — feature and Host composition | Migrate the existing Sandbox Manifest seam in `packages/contexts/agent-context/src/features/sandbox-manifest/composition/feature-module-factory.ts`; classify Local Host discovery without turning pure code into artificial modules; add curated entries/groups/roots in the owning package | Same portable behavior through two independently wired test Hosts with their own drivers, adapters and lifetime owners; installed public roots, meaningful profiles, exact optional/many rows and wrong-wiring oracle; keep application semantics |
+| F4 — Host and resource owners | Integrate Resources around actual acquisition, inbound subscription/session and repeated-instance boundaries; original factory remains implementation code | Failed/aborted partial startup closes owned resources, late setup is retained, raw unsettled work cannot release borrowed dependencies, close reentry/debt/retry are witnessed independently |
+| F5 — projection and hook owners | Connect one real latest-state projection, one ordered policy capability collection and existing command/durable-event ports | Coalescing is observed without losing durable work; hook order/failure/denial is explicit; latest-only load settles before release; disclosure and revocation use current owning authority |
+| F6 — integration and composition | Qualify a native Effect version of a representative resource-owning integration graph, using installed GM/Effect roots and shared source/typed diagnostics | Native success, typed failure, defect, interruption, private Layer finalization, sharing and borrowed lifetime pass; Promise `isolate`/`smoke` is not claimed as native evidence |
+| F7 — architecture/tooling | Retain an Orchestrator-shaped nested descriptor-map and module fixture at 100/500/1,000 entries, with actual source enforcement and complete map parity | Common foundation requires the 500-entry difficult shape on the supported toolchain; report compiler, construction/runtime and source-check measurements separately; 1,000 remains a distinct growth row |
+
+Two configurations under one generic Host do not establish the F3 portability
+claim. These independent test integrations also do not satisfy OD-041's separate
+two-product acceptance floor. The following are dependent implementation cards:
+
+| Card and owner | Concrete work and source boundary | Entrance and independently observable exit |
+| --- | --- | --- |
+| F8 — selected role owner | Compose the first actual Control Host and Team Topology S3 boundary under the existing placement record, using separate processes and gRPC/Protobuf through Dapr | Real local and remote contract suites, dropped reply, wrong target, sidecar/role failure, readiness and drain; no in-process production fallback or reconstruction of remote features |
+| F9 — lifecycle, Runtime and product owners | Join the real shared EF/LMU mechanisms through the [owned dependent cards](../open-decisions/OD-043-extension-lifecycle-catalog-and-hot-update.md#full-foundation-integration-handoff) | Useful installed contribution, current authorization and state authority, real facade/CAS/unknown/retirement evidence; actual Browser/Desktop/isolation and distribution/product floors remain explicit |
+
+F0 and exact-source qualification can proceed immediately. F1 prepares the
+tooling closure for F2; F2 and F3 evolve together so enforcement precedes each
+new construct. F4–F6 qualify real uses of that graph. F7 measures the same
+authoring shape, rather than an easier substitute. F8 progresses with the first
+owning role feature, preserving its existing placement gate. F9 progresses with
+the shared owner workstreams; a replaceable boundary needs its working invocation
+facade before dependent business code. It must not be backfilled with an
+Orchestrator-local update engine while waiting for the upstream implementation.
+
+Use existing `scripts/architecture`, package tests and conformance owners for the
+required witnesses. The implementation adds explicit named fixture identities to
+the installed required runner; merely adding a file beside tests is insufficient.
+Packed consumers use built public exports and installed declarations. Runtime
+and type identity, absence of deep imports and deliberate rejecting mutations
+must be tested from the installed artifacts, not inferred from workspace tests.
+
+### State, lifetime and upgrade boundaries designed now
+
+Stable operation ports hide replaceable instances. Supported continuations,
+callbacks, streams and raw external work belong to the complete operation, not
+merely its returned Promise. A single selected generation remains coherent
+through nested/reentrant calls and awaits. Stop ingress, request cancellation,
+settle work, revoke write authority, close resources and observe physical exit
+are distinct transitions with different owners.
+
+Canonical domain state, grants and durable operation receipts outlive transient
+instances. Product records distinguish contract revision, package version,
+artifact digest, installation, contribution, generation, attempt, head revision
+and state baseline. An old generation retaining a resource lease has no implied
+permission to perform a new protected effect. The real receiver rechecks its
+current scope and fence. Cross-context state uses owned ports and events, never
+a joint database transaction.
+
+Publication returns committed, rejected/conflict or unknown. Unknown retains
+the original candidate/attempt until authoritative reconciliation; a current
+head alone cannot prove an earlier operation's result. Retirement addresses an
+exact registration instance, so a late A disposer cannot delete B by name.
+Rollback selects a new compatible authorized generation and preserves committed
+effects and schema/grant history. Existing workflow, persistence and Runtime
+owners retain their machinery; this foundation does not create copies.
+
+### Source artifacts and rollout
+
+Unpublished source is an allowed evaluation and qualification input. Build and
+pack an immutable reviewed cohort, retain its build and archive identities, and
+exercise separate frozen installed consumers. The
+[tooling adoption route](repository-tooling.md#full-foundation-tooling-adoption)
+specifies how those candidates reach a truthful production distribution and
+managed profile. No dependency waits merely because research used newer source;
+no current registry assertion is claimed to pass for different local bytes.
+
+Change package pins, lock, source profiles, required gates and qualified evidence
+together. Keep a coherent rollback pair and preserve incomplete operations and
+authoring recovery journals. Leave the old accepted ADR bodies as provenance;
+the accepting successor identifies exactly which adoption fields change.
+
+Complete design and common foundation qualification enable dependent increments
+within their qualified transitive closure. They do not complete the whole
+extension/update/target programme. Its pending rows stay visible until actual
+implementations and independent evidence satisfy the promised profiles.
 
 ## Commands, hooks, state, and durable events
 

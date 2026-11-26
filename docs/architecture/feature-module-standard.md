@@ -64,6 +64,18 @@ sub-features, republication edges, and composition contracts. Their current
 inventories are empty and their materialization is blocked as described below.
 Adoption does not declare an unimplemented semantic checker complete.
 
+The owner's full-foundation direction now requires implementation of these
+enforcement capabilities before broad feature expansion, rather than keeping
+nesting absent indefinitely. The [common foundation cards F1–F3](composition-and-dependency-injection.md#common-foundation-task-cards)
+join the current shared FMS kernel/runner, existing source inventory and Get
+Modular layout/conformance checks. Activate the first real nested constructs in
+the same change as their source-derived rejecting fixtures and required-runner
+identities. Shared FMS rules own visibility, direct-parent assembly and one-level
+republication; a local parallel parser or alternate feature standard is not the
+implementation. The GM/CMS runtime transition remains proposed in ADR-0118.
+Its separately authorized compiler/tooling candidate is implemented with its own
+validation and still-pending managed admission; it does not activate nesting.
+
 ## Scope mapping
 
 The standard's abstract hierarchy maps to Orchestrator as follows:
@@ -323,16 +335,17 @@ assembly, republication, and both cycle policies. Only then may it replace the
 blocked activation state and declare actual constructs. Existing package,
 dependency, readiness, and materialization gates remain required.
 
-Foundation `1.7.2` still reads the flat v1 topology format. The unchanged
-`architecture/foundation/quality-feature-topology.json` is a bounded reader
-compatibility projection, not another adoption authority. Its validator
-requires the exact v1.1 primary pin and empty, blocked construct inventories,
-checks the same physical activation restrictions, and preserves all production
-roots, excluded roots, materialized packages, and source/test trees. Activation
-of new constructs requires replacing that compatibility projection with a
-reader and checks that understand them. The
+The owner-authorized Foundation `4.0.2` tooling candidate replaces the historical
+flat v1 quality reader with neutral
+`architecture/foundation/quality-source-topology.json`, generated through the
+public FMS `0.4.3` mapper from this exact v1.1 primary authority and the
+materialized catalog. Its input hashes and required adapter preserve the same
+production, excluded, source and test scope. Empty construct inventories,
+blocked activation and physical source restrictions remain until full nested
+semantic enforcement is implemented; a newer quality reader does not implement
+that separate gate. The
 [repository-tooling architecture](repository-tooling.md#source-coverage-adoption)
-owns the Foundation integration and source coverage evidence.
+owns the migration, installed evidence and pending managed admission.
 
 ## Local extensions
 

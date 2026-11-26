@@ -255,13 +255,33 @@ free-form booleans hidden in prompts.
 
 ## Plugin system
 
-A future plugin system may register:
+Plugins and live replacement are required foundation delivery tracks in the
+[full foundation plan](composition-and-dependency-injection.md#full-foundation-implementation-plan).
+Their [concrete adoption journey and current source handoff](../open-decisions/OD-043-extension-lifecycle-catalog-and-hot-update.md#first-orchestrator-adoption-journey)
+remain under OD-043; the runtime and public SPI are not yet qualified. Eligible
+feature-owned extension points include:
 
 - inbound adapters;
 - outbound adapters;
 - explicitly extensible application strategies and external policy-engine adapters;
 - projection builders;
 - SDK middleware.
+
+The first proposed Orchestrator integration is a read-only inspection summary of
+an authorized sandbox manifest, using the projection-builder category. The
+existing Agent Context feature supplies the immutable source; a narrow proposed
+contribution port returns a bounded plain summary. OD-043 names the existing
+package, Control Host placement, implementation reservation and acceptance
+journey. This proposal does not expand ADR-0103's admitted behavior or transfer
+provider prompt formatting from AR.
+
+For an independently distributed contribution, delivery includes verified
+installation, activation, useful invocation, update, disable/removal and restart
+reconciliation with retained user data. A replaceable built-in uses the same
+applicable invocation/state/retirement seams without a fictional artifact or
+installation. Pure helpers remain ordinary dependencies. Each supported change
+has an explicit live-update, controlled-restart or refusal outcome; a module's
+existence alone does not promise arbitrary hot replacement.
 
 Plugins cannot deep-import context internals, replace an aggregate, write context
 tables directly, or acquire runtime process ownership. Plugin manifests declare
@@ -318,6 +338,12 @@ ADR-0096. Exact catalog governance, lifecycle, isolation, hot update, and
 rollback remain open in OD-043. The Web and Desktop contribution model remains
 an unapproved proposal in OD-042. Neither open decision authorizes publication
 of a public SPI.
+
+Upgrading the shared foundation or its coordinator also needs an outer owner.
+The selected deployment Host or native Supervisor qualifies restart/recovery of
+that complete closure, preserving installed state and original-attempt journals.
+A coordinator cannot certify its own replacement while it still owns unresolved
+work; ordinary feature cutover does not supply that outer recovery evidence.
 
 Before resolving lifecycle or hot replacement, use the reviewed
 [plugin system research reference](https://github.com/agent-teams-ai/extension-foundation/blob/10deea1a11748df1fcbfc2766033c462fce3acd0/docs/research/plugin-system-research-reference.md)

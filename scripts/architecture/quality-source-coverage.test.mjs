@@ -2,11 +2,12 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
+import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { parse } from "yaml";
-import { checkQualityTopology, QUALITY_TOPOLOGY_PATH } from "./validate-quality-topology.mjs";
+import { checkQualityTopology, QUALITY_TOPOLOGY_PATH } from "./validate-quality-topology.ts";
 
 const repositoryRoot = fileURLToPath(new URL("../../", import.meta.url));
 const foundationRoot = dirname(
@@ -14,6 +15,7 @@ const foundationRoot = dirname(
 );
 const foundation = JSON.parse(await readFile(join(foundationRoot, "package.json"), "utf8"));
 const cli = join(foundationRoot, foundation.bin["agent-teams-foundation"]);
+const stackRoot = dirname(fileURLToPath(import.meta.resolve("stack-toolchain/package.json")));
 const profilePath = "architecture/foundation/quality-source-coverage.yaml";
 const moduleRoot = "packages/platform/local-host-control";
 const admittedRoots = ["packages/contexts/agent-context", "packages/platform/local-host-control"];
@@ -42,26 +44,34 @@ async function fixture(action) {
       "foundation.config.yaml",
       "architecture/feature-module-standard-profile.json",
       "architecture/package-catalog.yaml",
+      "toolchain.config.json",
       profilePath,
       QUALITY_TOPOLOGY_PATH,
+      ...topology.derivedFrom.map(({ path }) => path),
       "architecture/foundation/source-dependencies.yaml",
       "architecture/foundation/suppression-governance.yaml",
       ".oxlintrc.base.json",
       ".oxlintrc.common.json",
       ".oxlintrc.type-aware.json",
-      ...topology.modules.flatMap(({ root: packageRoot }) =>
-        ["src", "tests", "package.json", "tsconfig.json"].map((leaf) => `${packageRoot}/${leaf}`),
-      ),
-    ]) {
+      ...topology.packageRoots
+        .filter((packageRoot) => packageRoot !== ".")
+        .flatMap((packageRoot) =>
+          ["src", "tests", "package.json", "tsconfig.json"].map((leaf) => `${packageRoot}/${leaf}`),
+        ),
+    ].filter((candidate, index, names) => names.indexOf(candidate) === index)) {
       await mkdir(join(root, dirname(name)), { recursive: true });
       await cp(join(repositoryRoot, name), join(root, name), {
         recursive: true,
         filter: (source) => !source.split(/[\\/]/u).includes("node_modules"),
       });
     }
-    const presets = "node_modules/@agent-teams/engineering-foundation/presets";
-    await mkdir(join(root, dirname(presets)), { recursive: true });
-    await cp(join(foundationRoot, "presets"), join(root, presets), { recursive: true });
+    // Static scope checks read the consumer's installed Stack preset metadata.
+    // The typed execution witness below still performs its own frozen install.
+    for (const leaf of ["package.json", "toolchain-manifest.json", "presets"]) {
+      const destination = join(root, "node_modules/stack-toolchain", leaf);
+      await mkdir(dirname(destination), { recursive: true });
+      await cp(join(stackRoot, leaf), destination, { recursive: true });
+    }
     await action(root);
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -84,11 +94,16 @@ test("active coverage binds exact tools, authority, scope and a single full type
   assert.equal(config.schemaVersion, 2);
   assert.deepEqual(config.capabilities["quality.source-coverage"], { configPath: profilePath });
   const profile = parse(await readFile(join(repositoryRoot, profilePath), "utf8"));
-  assert.equal(profile.schemaVersion, 1);
-  assert.equal(profile.featureProfilePath, QUALITY_TOPOLOGY_PATH);
+  assert.equal(profile.schemaVersion, 5);
+  assert.equal(profile.budgetMs, 120000);
+  assert.equal(profile.topologyPath, QUALITY_TOPOLOGY_PATH);
+  assert.equal(profile.toolchainConfigPath, "toolchain.config.json");
+  assert.equal(Object.hasOwn(profile, "featureProfilePath"), false);
+  assert.equal(Object.hasOwn(profile, "compilerProjects"), false);
   assert.equal(profile.lintConfigPath, ".oxlintrc.type-aware.json");
+  const toolchain = await readJson(repositoryRoot, profile.toolchainConfigPath);
   assert.deepEqual(
-    profile.compilerProjects.toSorted(),
+    toolchain.typecheck.projects.toSorted(),
     admittedRoots.map((root) => `${root}/tsconfig.json`).toSorted(),
   );
   const pkg = await readJson(repositoryRoot, "package.json");
@@ -118,8 +133,36 @@ test("active coverage binds exact tools, authority, scope and a single full type
 
 test("adoption pins the installed Foundation and Docs adapter", async () => {
   const pkg = await readJson(repositoryRoot, "package.json");
-  assert.equal(pkg.devDependencies["@agent-teams/engineering-foundation"], "1.7.2");
+  assert.equal(pkg.devDependencies["@agent-teams/engineering-foundation"], "4.0.2");
+  assert.equal(pkg.devDependencies["@agent-teams/feature-module-standard"], "0.4.3");
+  assert.equal(pkg.devDependencies["stack-toolchain"], "0.3.1");
+  assert.equal(foundation.version, pkg.devDependencies["@agent-teams/engineering-foundation"]);
+  const stack = await readJson(stackRoot, "package.json");
+  assert.equal(stack.version, pkg.devDependencies["stack-toolchain"]);
+  for (const owner of [foundationRoot, stackRoot]) {
+    const require = createRequire(join(owner, "package.json"));
+    const compiler = JSON.parse(await readFile(require.resolve("typescript/package.json"), "utf8"));
+    assert.equal(
+      compiler.version,
+      "7.0.2",
+      `${owner}: real compiler resolution must retain the floor`,
+    );
+  }
+  const foundationRequire = createRequire(join(foundationRoot, "package.json"));
+  assert.equal(Object.hasOwn(foundation.dependencies, "@microsoft/api-extractor"), false);
+  assert.throws(() => foundationRequire.resolve("@microsoft/api-extractor/package.json"), {
+    code: "MODULE_NOT_FOUND",
+  });
   assert.equal(pkg.devDependencies["@agent-teams/docs-protocol-agent-teams"], "0.3.2");
+  const managed = await readJson(
+    repositoryRoot,
+    "architecture/foundation/docs-protocol-managed-state.json",
+  );
+  assert.equal(managed.cohortId, "docs-2026-10-03-stable31");
+  assert.equal(managed.packages.engineeringFoundation.version, "1.7.2");
+  assert.equal(managed.packages.docsProtocolAgentTeams.version, "0.3.2");
+  // Compiler/tooling migration does not rewrite a historical managed-admission receipt.
+  assert.notEqual(managed.packages.engineeringFoundation.version, foundation.version);
 });
 
 test("published coverage accepts the real consumer profile", async () => {
@@ -268,16 +311,16 @@ test("published coverage rejects a test override that also selects unclassified 
 test("projection rejects omission and source or standard drift", async () => {
   for (const mutate of [
     (value) => {
-      value.modules = [];
+      value.packageRoots = [];
     },
     (value) => {
-      value.modules[0].sourceRoot = `${moduleRoot}/missing`;
+      value.sourceRoots[0] = `${moduleRoot}/missing`;
     },
     (value) => {
-      value.standard.sha256 = "0".repeat(64);
+      value.derivedFrom[0].sha256 = "0".repeat(64);
     },
     (value) => {
-      value.standard.version = "v1.1";
+      value.censusRoots = ["packages"];
     },
   ]) {
     await fixture(async (root) => {
@@ -289,14 +332,27 @@ test("projection rejects omission and source or standard drift", async () => {
   }
 });
 
-test("flat reader projection remains bounded to the adopted v1.1 profile", async () => {
+test("neutral quality topology remains bound to the adopted v1.1 authority", async () => {
   const authorityPath = "architecture/feature-module-standard-profile.json";
   const authority = await readJson(repositoryRoot, authorityPath);
   const projection = await readJson(repositoryRoot, QUALITY_TOPOLOGY_PATH);
   assert.equal(authority.standard.version, "v1.1");
-  assert.equal(projection.standard.version, "v1");
-  assert.deepEqual(projection.productionRoots, authority.adoption.scope.production_roots);
+  assert.equal(Object.hasOwn(projection, "standard"), false);
+  assert.deepEqual(projection.censusRoots, authority.adoption.scope.production_roots);
+  assert.deepEqual(projection.packageRoots, [".", ...admittedRoots]);
+  assert.deepEqual(
+    projection.sourceRoots,
+    admittedRoots.map((root) => `${root}/src`),
+  );
+  assert.deepEqual(
+    projection.testRoots,
+    admittedRoots.map((root) => `${root}/tests`),
+  );
   assert.deepEqual(projection.excludedRoots, authority.adoption.scope.excluded_roots);
+  assert.equal(
+    projection.derivedFrom.some(({ path }) => path === authorityPath),
+    true,
+  );
   for (const [key, value] of [
     ["version", "v1"],
     ["path", "docs/architecture/feature-module-standard/unknown.md"],
@@ -314,7 +370,7 @@ test("flat reader projection remains bounded to the adopted v1.1 profile", async
   }
 });
 
-test("flat reader projection rejects declared or materialized v1.1 constructs", async () => {
+test("neutral quality topology retains declared and materialized construct guards", async () => {
   for (const name of ["sub_features", "republications", "composition_contracts", "activation"]) {
     await fixture(async (root) => {
       const authorityPath = "architecture/feature-module-standard-profile.json";

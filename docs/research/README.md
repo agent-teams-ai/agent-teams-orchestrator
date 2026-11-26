@@ -29,6 +29,7 @@ not normative architecture or transcripts invented from a synthesis.
 
 ## Foundation
 
+- [Orchestrator Full Foundation Review 2026-11-26](orchestrator-full-foundation-review-2026-11-26.md)
 - [Foundation spike evidence, 2026-07-25](foundation-spike-evidence-2026-07-25.md)
 - [Foundation evidence audit manifest, 2026-07-26](foundation-spike-evidence-manifest-2026-07-26.md)
 

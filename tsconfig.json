@@ -1,14 +1,24 @@
 {
-  "extends": "@agent-teams/engineering-foundation/presets/typescript/node.json",
+  "extends": "stack-toolchain/presets/typescript/node.json",
   "compilerOptions": {
+    "types": [
+      "node"
+    ],
     "jsx": "preserve",
-    "noEmit": true
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": false,
+    "rewriteRelativeImportExtensions": true
   },
   "include": [
     "tooling/architecture-conformance-fixtures/valid/**/*.ts",
     "tooling/architecture-conformance-fixtures/valid/**/*.tsx",
     "tooling/architecture-conformance-fixtures/valid/**/*.mts",
-    "tooling/architecture-conformance-fixtures/valid/**/*.cts"
+    "tooling/architecture-conformance-fixtures/valid/**/*.cts",
+    "scripts/architecture/validate-quality-topology.ts",
+    "tooling/architecture-conformance/scripts/run-advisory-graph.ts",
+    "tooling/architecture-conformance/scripts/run-advisory-graph.test.ts",
+    "tooling/architecture-conformance/scripts/check-conformance.ts"
   ],
   "references": [
     {

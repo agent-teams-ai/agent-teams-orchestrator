@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "profile": "typescript-node",
+  "typecheck": {
+    "projects": [
+      "packages/contexts/agent-context/tsconfig.json",
+      "packages/platform/local-host-control/tsconfig.json"
+    ]
+  },
+  "lint": {
+    "config": ".oxlintrc.type-aware.json",
+    "paths": [
+      "packages/contexts/agent-context/src",
+      "packages/contexts/agent-context/tests",
+      "packages/platform/local-host-control/src",
+      "packages/platform/local-host-control/tests"
+    ]
+  },
+  "format": {
+    "paths": ["packages", "scripts", "tooling"]
+  }
+}

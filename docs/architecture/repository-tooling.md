@@ -84,7 +84,8 @@ is complete.
 
 The implementation state changes only with executable evidence in this
 repository. Documentation must not describe a planned dependency, wrapper, or
-gate as active.
+gate as active. These are configured routes; the compiler blockers and migration
+below prevent treating their historical success as current toolchain qualification.
 
 ## Node.js compatibility qualification
 
@@ -125,48 +126,43 @@ rejected by CI.
 
 ### Source coverage adoption
 
-Engineering Foundation `1.7.2` is the source target for `quality.source-coverage`
-capability through `architecture/foundation/quality-source-coverage.yaml` and
-Foundation configuration schema v2. `quality:coverage:scope` runs the shared
-scope check in `check:fast`; `lint:typed` runs shared selection, compiler context,
-and typed lint once in the full `lint` and `check` chain. The public adapter
-requires Oxlint `1.83.0`, oxlint-tsgolint `7.0.2001`, and TypeScript `7.0.2`.
-The consumer catalog and lockfile now pin Oxlint `1.83.0`, matching that adapter.
-These source pins do not replace a fresh frozen install and native qualification.
+The owner-authorized 27 November tooling candidate selects published Engineering
+Foundation `4.0.2`, Stack Toolchain `0.3.1` and FMS tooling `0.4.3` as exact root
+development dependencies. `quality.source-coverage` uses schema v5 while the
+root Foundation configuration remains v2. `quality:coverage:scope` still runs in
+`check:fast`; `lint:typed` still runs the full shared typed route once through
+`lint` and `check`. Stack owns the technical presets and exact TypeScript
+`7.0.2`, Oxlint `1.83.0` and oxlint-tsgolint `7.0.2001` tool identities.
 
-`architecture/foundation/quality-feature-topology.json` is a checked adapter for
-Foundation 1.7.2's flat FMS v1 reader. ADR-0113 adopts the exact v1.1 authority in
-`architecture/feature-module-standard-profile.json`. Version 1.1 preserves the
-v1 obligations when its new constructs are absent. The adapter therefore keeps
-the historical v1 reader binding without becoming another adoption authority.
-Its validator requires the exact v1.1 primary pin, empty construct inventories,
-and `blocked-until-enforced` activation. It rejects physical nested feature roots
-and conventional composition contract files at feature and Host/package `src`
-roots before permitting this
-compatibility projection. New constructs require a reader and scoped semantic
-checks that understand them; the old view cannot be silently widened.
+`toolchain.config.json` is the sole production compiler-project list for that
+capability. The separate root `tsconfig.json` strictly checks repository tooling
+and the existing architecture fixtures; package reference/typecheck routes remain
+required. Legacy imported JavaScript helpers retain their existing checking
+status; new maintained tooling is ordinary `.ts` in the strict root program.
+Both emitting production projects explicitly retain `allowJs: false`; the root
+tooling accommodation cannot admit unchecked JavaScript into production.
 
-The adapter maps the same production and excluded roots and materialized
-package catalog to
-`packages/contexts/agent-context` and `packages/platform/local-host-control`, their
-`src` trees, and their `tests` trees.
-There are no materialized applications. `validate-quality-topology.mjs` rejects
-projection drift, missing source or test directories, and unreviewed application
-materialization. Foundation independently rejects unclassified workspace packages,
-including packages omitted from the projection or source policy. Catalog
-reservations alone do not create production modules.
+`architecture/foundation/quality-source-topology.json` replaces the old flat v1
+reader projection. `scripts/architecture/validate-quality-topology.ts` derives it
+through the public FMS `projectQualitySourceTopology` mapper from the exact
+accepted v1.1 authority and materialized package catalog. Its `derivedFrom`
+bindings cover that authority, catalog, quality profile and adapter bytes.
+The ordinary Foundation route checks projection freshness; the standalone v5
+check also rejects stale source bindings.
 
-The projection is a reader-format mapping with no reduction in source coverage,
-typed rules, or materialization checks. Consumer tests prove installed Foundation
-acceptance, reject primary and projected pin drift, and reject both declared and
-materialized new constructs. The profile and projection checks do not yet claim
-to parse the full v1.1 visibility, assembly, and dependency graph semantics.
+The projection retains the same broad production census, excluded tooling,
+materialized `agent-context` and `local-host-control` source/test roots. It does
+not activate nested constructs. The existing exact authority, empty-construct,
+`blocked-until-enforced`, physical source and application-materialization guards
+remain. Full v1.1 visibility, assembly and dependency enforcement is still the
+separate T3 task. Foundation independently rejects an unclassified new workspace
+package; a catalog reservation does not create production code.
 
 Shared global categories, plugins, rules, and preset references live in
 `.oxlintrc.base.json`. `.oxlintrc.common.json` extends that base and retains normal
 tooling, test, and fixture overrides; the fast config adds executable boundary
 rules and the existing generated/vendor budget exemption. The typed config
-extends the base and Foundation's protected typed preset without executable
+extends the base and Stack's protected typed preset without executable
 plugins. Its existing override rule payloads map to the accepted module's source
 and test roots, including `ts`, `tsx`, `mts`, and `cts` and the pure core layers.
 Generated/vendor exemptions do not enter the production typed route.
@@ -174,7 +170,7 @@ All 36 stricter TypeScript rules, explicit root suppression options, and the loc
 suppression validator remain required. The architecture, FMS, and immutable
 history gates remain blocking.
 
-Foundation `1.7.2` supports production TypeScript extensions through the shared
+Foundation `4.0.2` supports production TypeScript extensions through the shared
 selection and compiler route. The existing local typed runner remains available
 through `lint:type-aware:files` for explicit file feedback. Full typed execution
 also rejects assertion chains through `unknown` by default. There are no bridge
@@ -187,7 +183,7 @@ Node `24.21.0` retains an explicit compatibility lane. Foundation's public
 remains separate.
 `quality:coverage:test` invokes the installed runner with
 `architecture/foundation/required-quality-tests.json`. Its narrow consumer
-adapter authenticates the reviewed 16-identity contract with an exact SHA-256
+adapter authenticates the reviewed 18-identity contract with an exact SHA-256
 and binds the complete selected file list before execution. Removing a critical
 identity fails admission even when all three protected files remain selected.
 Required source
@@ -211,19 +207,28 @@ Foundation issue
 public Node CLI failure when launched from a Node test parent, was fixed and
 released in `1.7.2` through
 [#365](https://github.com/agent-teams-ai/engineering-foundation/pull/365).
-Release status follows supplied operator evidence. This consumer's final installed
-qualification still requires fresh native and full gates; earlier `1.7.1` source
-checks do not qualify `1.7.2`. Historical rejecting evidence remains retained.
+That historical correction remains in the new published runner. The new tooling
+candidate needs its own installed/native evidence; older successful runs do not
+qualify the new lock or profile. Historical rejecting evidence remains retained.
 
 Managed Docs adoption retains its historical qualification boundary. The old
 `docs-2026-09-15-stable24` receipt authenticates Foundation `1.3.3` and adapter
 `0.2.8`; it does not qualify the current upgrade. The public adapter has now
 migrated the authentic stable24 origin to `docs-2026-10-03-stable31` against
 protected Central revision `9625c6e6a73555d747cc4b0ba99a29549a75f107`, and its
-after-check returned current. The current manifest and regenerated frozen lock
-select Foundation `1.7.2`, Docs `0.6.2` and adapter `0.3.2`; frozen install passes.
-The old receipts remain historical. Final installed/full consumer qualification,
-independent review, delivery and observed admission still require their own proof.
+after-check returned current for the previous Foundation `1.7.2`, Docs `0.6.2`
+and adapter `0.3.2` tuple. The current tooling candidate installs Foundation
+`4.0.2`; it is not a matching stable31 managed consumer. Keep the original
+integration/state/receipts unchanged as the previous admitted tuple and the PR
+unmergeable as a completed managed migration until the eligible central desired
+transition and real successor assets/receipts exist. Registry installation and
+portable semantic checks cannot substitute for that admission.
+
+The compiler correction is authorized and can be implemented and tested now.
+It does not authorize editing old receipt digests, fabricating stable33 canary
+eligibility or changing the central owner's active recovery PR. Complete the
+coupled managed upgrade through its actual owner, including its five-package
+projection, profile/state/caller, runtime and observed default-branch evidence.
 
 ### Advisory quality diagnostics
 
@@ -298,7 +303,256 @@ Mermaid, index policy, relation lifecycle, and content-impact routing.
 
 The pnpm release-age delay is disabled for all dependencies. Exact manifest
 versions, registry integrity, reviewed upgrades, and npm Trusted Publisher remain
-mandatory for first-party packages.
+mandatory for first-party registry releases. The candidate qualification lane
+below does not claim registry adoption or change the current manifests.
+
+## Full foundation tooling adoption
+
+Planning baseline: 2026-11-26. This section owns the tooling part of the
+[full module foundation](composition-and-dependency-injection.md), including
+source candidates that are not published. It does not activate capabilities,
+upgrade dependencies, accept production contracts, or qualify a deployment.
+Engineering Foundation remains development-only; Orchestrator owns its source
+classes, package catalog, allowed edges, business semantics and evidence.
+
+### Source, artifact and consumer state
+
+The inspected inputs are [Engineering Foundation `8432a973`](https://github.com/agent-teams-ai/engineering-foundation/tree/8432a9737486384f894436bfd9242500e422fa5a),
+[Central `89b5d7c5`](https://github.com/agent-teams-ai/.github/tree/89b5d7c512d9c4b5ae63709857a0d71cb2e6d178),
+Orchestrator main `3dccf2c53bf11f3939a19734a58f5e64d96673d0`, and the
+seven-document PR #111 checkpoint `8c908d6303d761e5d51016922d2eaedf1a362ef8`.
+Re-read the actual head and each owner plan before implementation; a source
+snapshot is not permission to overwrite another agent's active work.
+
+| Subject | Observed source or artifact | Orchestrator state and next proof |
+| --- | --- | --- |
+| Foundation / FMS | Main manifests `4.0.2` / `0.4.3`; releases from `da1868240b96113582b508b0c15341c477d6334b` | Candidate pins `4.0.2` / `0.4.3`; installed compiler closure is TS `7.0.2`. FMS v1.1 constructs remain blocked until their separate source enforcement |
+| Stack Toolchain | Main manifest `0.3.1`; published source `fac03920e50ebde038ae415edeb7aa9e3d610ada` | Candidate direct pin `0.3.1`; presets and v5 project authority migrated, ordinary reference builds retained |
+| Portable Docs / managed adapter / MCP | Main manifests `0.6.9` / `0.7.1` / `0.2.12`; releases from `da186824…` | Docs `0.6.2` / adapter `0.3.2` remain installed. Stable31 records are the previous admission, not a matching new Foundation tuple; successor admission is pending |
+| Document Authoring / Repository Mutation | `0.3.9` / `0.5.2`, released from `da186824…` | Portable Docs retains its old transitive pair; Foundation 4 uses the new pair. This candidate is not a completed managed five-package transition; preserve exact-build recovery evidence |
+| CI Input Proof / Release Checks | Main manifests `0.1.3` / `0.1.0` | No O adoption or check-omission/publication authority inferred |
+| Later main implementation | Effect diagnostics and findings-baseline lease correction follow the release source | [Draft #482](https://github.com/agent-teams-ai/engineering-foundation/pull/482) prepares Stack `0.4.0`, Foundation `4.0.3`, FMS `0.4.4`; delivery remains pending |
+
+Current main contains later bytes under unchanged manifest versions. Never
+identify its rebuilt archive as the already published archive of that version.
+The [package manifests](https://github.com/agent-teams-ai/engineering-foundation/tree/8432a9737486384f894436bfd9242500e422fa5a/packages)
+and [release records](https://github.com/agent-teams-ai/engineering-foundation/releases)
+bound these observations; older guide status paragraphs and Central's October
+tool catalog are navigation, not a ceiling on current source evaluation.
+
+Keep source implementation, reviewed archive, installed qualification, immutable
+publication, central Cohort lifecycle and actual consumer adoption separate.
+Central's [inspected registry](https://github.com/agent-teams-ai/.github/blob/89b5d7c512d9c4b5ae63709857a0d71cb2e6d178/governance/docs-qualified-cohorts.json)
+has stable33 generation 3 VERIFIED/QUALIFIED at event 189, while stable31 remains
+RECOMMENDED at event 186. Only the declared Extension Foundation canary may take
+the narrower candidate route; Orchestrator is not that canary.
+
+PR #111's [trusted Docs run](https://github.com/agent-teams-ai/agent-teams-orchestrator/actions/runs/45908886931)
+loads validator `b30455e32cf5d54ade6d8301637701347e4ce57c` and rejects the
+current registry's generation 3 row at `/cohorts/44` before consumer execution.
+This controller/schema incompatibility is an upstream operational blocker, not
+failed IAM or module behavior. Its repair must retain authenticated workflow,
+current controller and managed adoption boundaries; a new package pin alone
+cannot repair it. Central [#434](https://github.com/agent-teams-ai/.github/pull/434)
+selects the Extension Foundation canary; [#441](https://github.com/agent-teams-ai/.github/pull/441)
+handles finite Runtime retirement recovery. Neither implements Orchestrator's
+eligible controller/Cohort transition. The central governance owner must qualify
+that transition and its consumer-specific desired selection; these existing PRs
+and their source qualification do not constitute Orchestrator migration evidence.
+
+### Complete capability disposition
+
+The [current closed root schema](https://github.com/agent-teams-ai/engineering-foundation/blob/8432a9737486384f894436bfd9242500e422fa5a/packages/engineering-foundation/schemas/foundation-config/v3.schema.json)
+and [capability contracts](https://github.com/agent-teams-ai/engineering-foundation/blob/8432a9737486384f894436bfd9242500e422fa5a/docs/architecture/executable-capabilities.md)
+define fourteen executable capabilities. Presence enables one; installation
+does not. Every row has a disposition now; activation follows its actual inputs
+and evidence rather than inventing publishing or domain facts.
+
+| Capability | Current O declaration; planned activation and acceptance |
+| --- | --- |
+| `workspace.dependency-declarations` | Enabled; preserve exact catalog, workspace protocol and root-only managed development dependencies; qualify any manager/schema change |
+| `architecture.source-dependencies` | Enabled v3 with root authority; every materialized source/package has one owner, explicit public entrypoints and runtime/development edges; reject hidden packages, deep imports and both cycle kinds |
+| `quality.source-coverage` | Candidate enabled v5 with Foundation 4, neutral topology and Stack project authority; retain real defect/refusal evidence and the separate pending managed admission |
+| `quality.format-coverage` | Not enabled; evaluate current source, complete physical census, literal formatter negotiation and real alternate validators; no unsupported suffix, ignored input or successful no-op may disappear |
+| `quality.suppression-governance` | Enabled; preserve protected rules, expiring consumer waivers and rejection of blanket exceptions |
+| `quality.executable-specifications` | Enabled; retain consumer schema/model ownership and distinct real property, mutation and model gates; connectivity does not prove their execution |
+| `documentation.local-references` | Enabled; shared reference checks retain O metadata, prose, diagram and reachability semantics |
+| `governance.architecture-decisions` | Enabled; preserve immutable accepted history and reviewed lifecycle/baseline promotion |
+| `repository.agent-workflow` | Enabled; qualify changed-file routes and effective instruction scopes without replacing complete required CI |
+| `quality.gate-runner` | Enabled for advisory diagnostics only; broader blocking use requires a reviewed existing-script DAG, deadlines, cancellation and preserved complete routes |
+| `contract.protobuf-evolution` | Activate with a genuine released Protobuf boundary: exact Buf producer/configuration, descriptor, immutable evidence and breaking-change authority |
+| `contract.json-schema-releases` | Activate for a real supported released family: closed references, positive/negative corpus, immutable release digests and actual consumers |
+| `package.public-api-compatibility` | Activate before a real public package release; qualify every entrypoint and compiler, with release-owned baselines and hostile installed consumers |
+| `repository.security-baseline` | Activate for an applicable publishing profile with genuine package, SBOM, provenance and tarball evidence; no fabricated publishing evidence |
+
+| Separate mechanism or tool | Planned use and boundary |
+| --- | --- |
+| Source graph / ratchet / findings baseline | Reuse neutral observation, cycles and growth mechanisms; preserve consumer classification. A shrink-only baseline cannot admit forbidden production imports or missing source ownership |
+| Docs / Document Authoring / Repository Mutation | Keep canonical Markdown/YAML and inert profiles, disposable projections, explicit authoring intent, exact-preimage mutation and exact-build journal recovery; Foundation `check` does not run authoring |
+| Scaffolding | Retain the qualified library envelope and Plan/Apply/Receipt boundary; feature, Host, service and Nx recipes require their own qualification, not invented kernel support |
+| Stack Toolchain | Qualify exact checker/preset/lint/format/compile/doctor scope; read-only standalone checking does not replace reference-graph builds. Cleanup remains explicit-file only |
+| FMS package | Reuse shared v1.1 kernel/fixtures, optional Node runner and neutral topology projection; preserve O ownership and source-resolution evidence |
+| Nx / CI Input Proof | Derived graph and later bounded selection/reuse only; complete input collection, independent successful evidence and executable FULL fallback remain O-owned; start in shadow |
+| Release Checks | Adopt at a real publishing Host seam with complete independent observations and official release plan; pure comparison supplies no merge/publication authority |
+| Consistency evidence / structural checks / Knip | Plan now; implement shared consistency mechanisms with the first durable mutation, source patterns with the first matching construct and dead-code checks after a real slice |
+| Optional MCP / Effect / Landmines | Evaluate the actual selected profile and installed adverse cases; no mandatory fleet dependency, browser claim or E2E completeness follows from availability |
+
+### Coherent migration and unpublished candidates
+
+The [quality v5 migration](https://github.com/agent-teams-ai/engineering-foundation/blob/8432a9737486384f894436bfd9242500e422fa5a/docs/development/quality-v5-migration.md)
+replaces the old quality runtime in Foundation 4; unchanged exported v1–v4 schema
+bytes do not mean the new major executes those profiles. The migration must:
+
+1. Preserve source policy, suppression rules, unknown-assertion protection,
+   native/assets, test identities and complete ordinary gates.
+2. Put the production compiler-project list in `toolchain.config.json` and add
+   Stack as an exact direct development dependency; keep explicit reference builds.
+3. Replace `featureProfilePath` with neutral topology and a v5 profile, including
+   one measured budget. If derived from FMS, bind all source inputs with
+   `derivedFrom` hashes and run freshness on an existing required route.
+4. Qualify current FMS public entries and strict peers. Its Node runner accepts
+   Foundation `^1.8.0 || ^2.0.0 || ^3.0.0 || ^4.0.0`, including the candidate `4.0.2`;
+   its pure kernel/fixtures can be evaluated independently without forcing peers.
+5. Run static, scope and full installed checks, a real failing/corrected source,
+   complete unclassified-source/package rejection and consumer native gates.
+   Scope-only success does not establish lint or semantic conformance.
+6. Retain the previous exact package/profile pair as a coherent rollback; do
+   not rewrite accepted ADRs, historical receipts or persisted transactions.
+
+Unpublished implementation may be qualified now through exact reviewed source
+archives in disposable consumers. Bind source/tree, build/toolchain, public
+exports, archive digests, installed closure, independent outcomes and refusing
+controls. Use strict peers and frozen resolution; workspace imports and an
+in-place rebuild of an existing version are not installed artifact evidence.
+
+Prepare the actual consumer migration and rollback while qualifying that
+candidate. For current registry/managed adoption, deliver the immutable qualified
+artifact and applicable central lifecycle, then change the coupled pins, lock,
+profiles and observed evidence through their ordinary route. A source-based
+production distribution is also a possible explicit successor profile: it must
+own immutable custody, content identity, complete resolution, installed/native
+qualification and recovery. Define and review that real profile before use;
+do not label `file:`, a local link or rebuilt bytes as a passing registry check.
+Neither path requires an artificial npm-only research wait or a repeated generic
+owner confirmation for work already assigned. It does not waive production
+contract, source authority or managed admission requirements.
+
+### Owned tooling tasks and exits
+
+These tasks are the tooling contribution to foundation task F1. Each names
+Orchestrator-owned work; upstream shared implementation stays with its owner.
+New maintained tooling/tests use ordinary `.ts`, effective strict checking and
+TypeScript/compiler/parser implementations at least `7.0.2`.
+
+**T1 — Artifact and execution inventory.** Engineering/tooling owns the exact
+manifest/lock, `foundation.config.yaml`, `.oxlintrc*.json`, root `tsconfig.json`
+and actual executable closure census. Record candidate and published bytes
+separately, every compiler initialization and supported Node/platform profile.
+Exit: complete reproducible installed inventory and source archive descriptor;
+unknown input or older initialized compiler blocks the affected command.
+Rollback: retain current files and historical evidence; no local store patch.
+
+**T2 — Foundation/Stack migration.** Engineering/tooling owns `package.json`,
+`pnpm-workspace.yaml`, lock, `toolchain.config.json`, quality profile and
+neutral projection under `architecture/foundation/`. Integrate the six migration
+steps above, with no duplicate compiler list. Exit: installed scope/full and
+rejecting/corrected-source evidence on the same candidate, all required native
+routes preserved. Rollback: previous package/profile/lock pair together.
+
+**T3 — FMS v1.1 activation.** Architecture/tooling owns the primary
+`architecture/feature-module-standard-profile.json`, quality projection and
+`scripts/architecture/` adapter. Consume shared kernel/fixtures; qualify actual
+source resolution, parent-only assembly, visibility, republication, type/runtime
+cycles and deepest test ownership with first declared constructs. Exit: real
+nested accepted/refusing cases and no flat-reader escape. Rollback: retain
+`blocked-until-enforced`; never hide physical sources or keep duplicate rules.
+
+**T4 — GM source and required evidence integration.** Architecture/composition
+and engineering/tooling own the existing source policy, materialization/catalog
+validators, `tooling/architecture-conformance`, lint fixtures and
+`architecture/foundation/required-quality-tests.json`. Connect first-scope GM
+containment, one Host graph, public surfaces and independent installed consumers
+to actual required identities. Exit: useful two-profile operations and real
+deep-import/no-op/omission/lifecycle refusal controls. A process/RPC profile also
+needs its separate Dapr role evidence. Rollback: refuse the new scope; no second
+handwritten assembly path or same-process substitute for an adopted service.
+
+**T5 — Managed Docs migration.** Engineering/tooling owns the existing
+`architecture/foundation/docs-*` files, authoring profile, skill and caller with no
+inputs. Coordinate exact desired/observed state with Central; inventory recovery
+artifacts and qualify actual managed plan/apply/after-check/rollback in TEST.
+Exit: admitted lifecycle, coherent installed tuple and genuine required consumer
+run at the same revision. Rollback: admitted old tuple and retained exact-build
+recovery; never copy target versions into an unobserved historical record.
+
+**T6 — Later capability activation.** Engineering/tooling and each actual
+contract/release owner bind the remaining matrix rows to first real contracts,
+publishing, durable mutation or measured execution cost. Extend existing gates
+and inventories; do not create placeholder schemas, fake SBOMs, source evidence
+or competing engines. Exit: each selected row has its own positive/refusing
+artifact and consumer evidence. Rollback: preserve the complete previous gate
+and report the unsupported capability; affected omission falls back to FULL.
+Each future row keeps its real activation trigger; no unused publishing or
+affected-execution claim is required to complete the common foundation. The
+full capability design remains required now.
+
+**Test volume is not an acceptance target.** The 27 November owner instruction
+requires the smallest meaningful regression at the appropriate layer. Reuse
+upstream contracts and the existing 18-identity consumer suite; add tests for new
+joins, authority or credible failure only. The ranges below are early capacity
+estimates for all T1–T6, not instructions to write that many lines. The immediate
+compiler correction is a small subset: expected P 200–450, T 200–500 changed
+adapter/test/setup lines before actual diff accounting, confidence 7/10. Existing
+fixtures are updated, not duplicated; unchanged upstream tests count as zero new
+consumer lines. Report actual final scope instead of filling a numerical quota.
+
+O-only conditional estimate: T1–T6's applicable initial tooling integration is
+1,250–2,800 maintained integration/tooling lines and 2,200–4,900 test lines,
+plus 500–1,100 configuration/declaration lines. The P/T figures are a subset of
+the common foundation P 3–6k / T 6–11k allowance, not an additional budget:
+F1 includes T1/T2/T5, F2 includes T3/T4, and shared growth/source witnesses with
+F7 are counted once. This excludes shared library
+implementations, GM Host/consumer construction counted in the composition plan,
+broad business features, real provider/service deployments, central recovery,
+generated/vendor code and future activations. Missing upstream contracts are
+explicit dependencies, not an instruction to duplicate them in O.
+
+### Current validation limits
+
+The previous closure initialized dependency-cruiser/TS `6.0.3` and Foundation
+`1.7.2` → API Extractor `7.58.12` → TS `5.9.3`. The 27 November candidate removes
+both dependency chains through normal package/lock migration. Published
+Foundation `4.0.2` uses the native TS `7.0.2` SDK and the compiler-free API
+Extractor Model; the installed root and Stack compilers are both `7.0.2`.
+Metadata and CLI checks are permitted on this corrected closure. Never execute
+the historical closure as a regression negative control.
+
+The existing graph command uses Foundation's public source graph, preserving
+useful cycle/unresolved/unsupported diagnostics. It is still advisory for product
+source. Bare imports and aliases may be external observations in that API;
+the blocking source-policy and Oxlint boundary gates retain layer/package
+resolution authority. Existing valid, adverse boundary and cycle fixtures remain
+on the required conformance route. No replacement parser or graph engine exists.
+
+The native Vale executable is cached under the user's
+`.cache/agent-teams-orchestrator/docs-tools`, outside the consumer source tree.
+Its 40 MB binary exceeded v5's 16 MiB per-input witness limit when the old runner
+put it in repository `.cache`. The cache move preserves version/platform and
+archive checksum verification; no source exclusion or quality limit is weakened.
+Run the real Docs path before the final quality check so cache recreation cannot
+hide this regression.
+
+A frozen installation, installed registry assertion and Stack doctor passed on
+the initial compatible Node 24 check; the exact default Node `26.11.1` and pnpm
+`11.18.0` lane now exercises the migrated checks. The final PR evidence must state
+actual results and unresolved failures; this paragraph does not certify every
+native/managed gate or a target's production behavior.
+
+Trusted managed Docs remains blocked by its independent central controller and
+cohort transition. Portable Docs `0.6.2` has no Foundation runtime edge and keeps
+its ordinary semantic route. Preserve that required route and the old managed
+receipts while preparing the actual admitted successor. A green portable check
+or `assert-registry` result is not a managed Cohort qualification receipt.
 
 ## Sources of truth
 
@@ -331,8 +585,9 @@ The baseline consists of:
 - blocking materialized-library typecheck, test, build, declaration-consumer,
   and built-export gates;
 - Oxlint with boundary rules as a blocking source gate;
-- dependency-cruiser in the isolated TypeScript 6 tooling package as an advisory
-  complete-graph gate;
+- the Foundation public source-graph advisory report, with explicit local-edge
+  limits and required valid/cycle/uncertainty controls; blocking source-policy
+  and Oxlint gates retain package and layer authority;
 - fixture-based architecture conformance tests;
 - LikeC4 semantic validation and package-catalog consistency checks;
 - repository-local documentation Skill, template-backed `docs:new` scaffolding,
@@ -342,13 +597,15 @@ The baseline consists of:
 
 Status: active.
 
-Oxlint is the only lint runtime. The repository does not install or invoke ESLint.
+Oxlint is the lint runtime used by the repository commands.
 The JavaScript boundary plugin executes inside Oxlint and is covered by the
 architecture conformance corpus.
 
-The root `.oxlintrc.json` is the single policy for CLI, CI, and editor use.
-Type-aware commands enable that capability on the same config rather than
-maintaining a second rule copy. Nested Oxlint configs are disabled so a package
+The fast CLI/editor route uses root `.oxlintrc.json`. Shared policy lives in
+`.oxlintrc.base.json`; common tooling/fixture overrides and the protected
+production typed configuration extend that base. The Foundation typed gate uses
+`.oxlintrc.type-aware.json` and Stack's technical preset on the declared source
+closure; it does not load the fast boundary plugin into typed execution. Nested Oxlint configs are disabled so a package
 cannot weaken repository policy. Package-specific differences use reviewed root
 overrides or a separate explicit capability gate. The conformance config inherits
 that policy by deriving a temporary root-level config that clears only ignore
@@ -384,12 +641,12 @@ Capability-specific plugins such as React, JSX accessibility, Next.js, Vue, or
 Jest are activated only when a real package needs them. Every promotion requires
 valid and invalid fixtures and a clean baseline review.
 
-The root policy explicitly extends the Foundation Node and production
+The root policy explicitly extends the Stack Node and production
 maintainability presets. Handwritten product and repository-tooling source is
 limited to 500 effective lines per file, 150 per function, complexity 20,
 nesting depth 4, and 5 parameters. Package tests, script `*.test.mjs` and
 `*.test.ts` files, intentional fixtures, architecture-conformance harnesses,
-and the disposable `scripts/research/od035` engine harnesses use the Foundation
+and the disposable `scripts/research/od035` engine harnesses use the Stack
 test profile:
 800, 250, 30, 5, and 6 respectively. Generated and vendored paths disable only
 these five budgets. Agents must split responsibilities before crossing a budget;
@@ -437,8 +694,8 @@ These research pins do not accept a production engine or qualify a PostgreSQL
 distribution for release.
 
 `research:od035:typecheck` compiles every fixture with the primary TypeScript
-compiler and the Foundation Node profile. `research:od035:check` also runs
-`.oxlintrc.research.json`, which inherits the protected Foundation typed preset
+compiler and the Stack Node profile. `research:od035:check` also runs
+`.oxlintrc.research.json`, which inherits the protected Stack typed preset
 and repository common policy, enables type-aware analysis, denies warnings, and
 disables nested configurations. Root `typecheck:root` invokes this explicit gate,
 so both full and fast verification include the research source. The production
@@ -469,17 +726,19 @@ The default pnpm catalog owns the exact primary toolchain and reusable external
 dependency versions. Workspace package manifests refer to those dependencies with
 `catalog:` and refer to internal packages with `workspace:`.
 
-Named catalogs exist only for accepted compatibility islands. The initial
-`tooling-ts6` catalog isolates dependency-cruiser and TypeScript 6 from the primary
-TypeScript 7 toolchain. A second version is not added directly to a package
-manifest.
+Named catalogs record accepted dependency ownership. The tooling migration
+removes the retired `tooling-ts6` catalog and its dependency-cruiser peer exception.
+The graph command uses the already owned Foundation mechanism, while the default
+catalog retains TypeScript `7.0.2`. Exact root development exceptions for
+Foundation, Stack, FMS and Docs are declared in the dependency policy; ordinary
+workspace dependencies keep their existing catalog/workspace rules.
 
 Dependabot is limited to security updates, so TypeScript patch and minor updates
 arrive through manually opened reviewed pull requests, and a major transition
-never comes from the updater. A major compiler transition must update the primary compiler and each
-accepted compatibility island through one reviewed toolchain decision. This also
-prevents the updater from mistaking the `tooling-ts6` catalog for an obsolete
-copy of the primary TypeScript 7 dependency.
+never comes from the updater. A major compiler transition must examine the
+primary compiler and every embedded compiler/parser through one reviewed
+toolchain decision. Inspect each effective embedded compiler before execution
+and preserve the previous gate's guarantees through the reviewed replacement.
 
 Strict catalog mode and `pnpm architecture:dependencies` are blocking. The latter
 checks every workspace manifest, including manual edits, and rejects direct
@@ -492,7 +751,7 @@ the repository quality gates.
 
 Adding a dependency requires:
 
-1. verifying its current stable version and maintenance state;
+1. verifying its exact source/release, supported scope and maintenance state;
 2. adding the exact version to the appropriate catalog;
 3. using `catalog:` from the owning package;
 4. committing the resulting lockfile change;
@@ -569,8 +828,8 @@ Evaluate the matching `@nx/js` version in an isolated compatibility spike. Adopt
 `@nx/js/typescript` only after proving:
 
 - the pinned TypeScript 7 CLI remains the primary type-checker;
-- tools requiring a TypeScript programmatic API stay in the isolated TypeScript 6
-  tooling lane;
+- every initialized compiler/parser, including embedded programmatic APIs,
+  satisfies the `7.0.2` floor; isolation is not an exception;
 - inferred build and typecheck tasks match package scripts;
 - `nx sync:check` detects missing and stale TypeScript Project References;
 - sync never adds dependencies prohibited by the package catalog or dependency
@@ -635,7 +894,7 @@ Nx graph checks supplement, rather than replace:
 
 - package exports and workspace dependency checks;
 - Oxlint boundary rules;
-- complete dependency-cruiser analysis;
+- complete dependency analysis through a qualified compiler-compatible route;
 - architecture conformance fixtures.
 
 ### Stage 5: affected CI promotion
@@ -723,11 +982,13 @@ its mutation contracts, invariant identities, enabled deployment profiles,
 bindings, semantic oracles, and evidence fixtures. The initial gate generates
 agent dossiers and build-time indexes, not a production handler registry.
 
-The normal agent entrypoint is `foundation context --changed`, followed by the
-mutation generator and `foundation consistency:check --changed --explain`.
-Release CI still runs complete write-path discovery so an affected-graph omission
-cannot hide an unregistered mutation. ADR-0078 owns the complete policy and
-staged rollout.
+The accepted design proposes `foundation context --changed`, a mutation
+generator and `foundation consistency:check --changed --explain`; these are
+not shipped commands in the inspected Foundation CLI. Qualify the shared
+implementation and actual consumer route before issuing them as instructions.
+The planned release gate must retain complete write-path discovery so an
+affected-graph omission cannot hide an unregistered mutation. ADR-0078 owns the
+policy; T6 owns activation planning, not a claim of implemented coverage.
 
 ## Structural architecture rules
 
@@ -777,11 +1038,14 @@ fixtures for every intentional dynamic or generated entrypoint.
 Status: accepted, implementation begins before the first publishable package
 release.
 
-API Extractor produces a reviewed API report for every publishable TypeScript
-package. The report is committed and a public type-surface change becomes an
-explicit review item. Its TypeScript 7 compatibility is proven in a spike; if it
-requires a legacy compiler API, it runs in an isolated tooling package over emitted
-declarations rather than changing the primary compiler.
+The accepted target requires a reviewed public API report for every publishable
+TypeScript package, committed for explicit type-surface review. The historical
+API Extractor `7.58.12` / TS `5.9.3` chain has been removed from this candidate.
+Foundation `4.0.2` supplies the native TS 7 report mechanism and compiler-free
+model package. Before the first publishing adoption, qualify its actual public
+entrypoints, baselines, packed consumers and release authority through the owning
+capability. A safe CLI/toolchain closure does not by itself activate or qualify
+public API reports for a product package.
 
 API reports do not define wire compatibility. Buf and schema compatibility gates
 remain authoritative for Protobuf and JSON Schema contracts.
@@ -808,10 +1072,10 @@ published artifact is correct.
 | Project and task impact                          | Nx                                                                 |
 | Structural source import boundaries              | Oxlint with boundary rules                                         |
 | Exact package and feature dependency edges       | Topology validator and conformance fixtures                        |
-| Complete dependency graph and cycles             | dependency-cruiser                                                 |
+| Local source graph and cycles                    | Foundation public source graph; blocking source-policy and Oxlint own package/layer rules |
 | Repository-specific structural patterns          | ast-grep                                                           |
 | Unused code and dependencies                     | Knip                                                               |
-| TypeScript public API review                     | API Extractor                                                      |
+| TypeScript public API review                     | Accepted API report contract; compiler-compatible tooling qualification required |
 | Protobuf compatibility                           | Buf                                                                |
 | Packed npm runtime and type resolution           | publint and Are The Types Wrong                                    |
 | Strategic context relationship topology          | LikeC4 plus repository consistency validator                       |

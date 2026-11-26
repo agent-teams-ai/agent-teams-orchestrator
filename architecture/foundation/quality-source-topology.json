@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "censusRoots": [
+    "apps",
+    "packages"
+  ],
+  "packageRoots": [
+    ".",
+    "packages/contexts/agent-context",
+    "packages/platform/local-host-control"
+  ],
+  "sourceRoots": [
+    "packages/contexts/agent-context/src",
+    "packages/platform/local-host-control/src"
+  ],
+  "testRoots": [
+    "packages/contexts/agent-context/tests",
+    "packages/platform/local-host-control/tests"
+  ],
+  "excludedRoots": [
+    "scripts",
+    "tooling"
+  ],
+  "toolingFiles": [],
+  "derivedFrom": [
+    {
+      "path": "architecture/feature-module-standard-profile.json",
+      "sha256": "e30d9f8ee7597a219cc36dd6911a93d761b4e976a265835b8382e7a668bd15ec"
+    },
+    {
+      "path": "architecture/foundation/quality-source-coverage.yaml",
+      "sha256": "b0a5ce096fa576ce93252490c5c1b49ebd45c7a7d4d139b5284960a6625073fe"
+    },
+    {
+      "path": "architecture/package-catalog.yaml",
+      "sha256": "f89748f47c8f325a52eeacd22d406d558e43f6387159c79068e6df0496c86bef"
+    },
+    {
+      "path": "scripts/architecture/validate-quality-topology.ts",
+      "sha256": "0c4beb4352317924afe9eac7f001a52d6f92e5c972804faa8c365260f0da7328"
+    }
+  ]
+}

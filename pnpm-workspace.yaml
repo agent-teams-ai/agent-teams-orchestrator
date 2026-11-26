@@ -47,16 +47,6 @@ catalog:
   xstate: 5.32.5
   yaml: 2.9.0
 
-catalogs:
-  tooling-ts6:
-    dependency-cruiser: 18.1.0
-    typescript: 6.0.3
-
-packageExtensions:
-  "dependency-cruiser@18.1.0":
-    peerDependencies:
-      "typescript": ">=2.0.0 <7.0.0"
-
 minimumReleaseAge: 0
 
 overrides:
@@ -67,6 +57,8 @@ overrides:
   "postcss@8>nanoid": "3.3.18"
 
 allowBuilds:
+  # Stack's exact optional Bun fallback installs its frozen native binary.
+  bun: true
   "@embedded-postgres/darwin-arm64": true
   "@embedded-postgres/darwin-x64": true
   "@embedded-postgres/linux-arm64": true
@@ -83,4 +75,6 @@ minimumReleaseAgeExclude:
   - "@agent-teams/document-authoring@0.3.2"
   - "@agent-teams/docs-protocol@0.6.2"
   - "@agent-teams/docs-protocol-agent-teams@0.3.2"
-  - "@agent-teams/engineering-foundation@1.7.2"
+  - "@agent-teams/engineering-foundation@4.0.2"
+  - "@agent-teams/feature-module-standard@0.4.3"
+  - "stack-toolchain@0.3.1"
