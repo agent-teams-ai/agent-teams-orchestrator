@@ -64,6 +64,16 @@ sub-features, republication edges, and composition contracts. Their current
 inventories are empty and their materialization is blocked as described below.
 Adoption does not declare an unimplemented semantic checker complete.
 
+The owner's full-foundation direction now requires implementation of these
+enforcement capabilities before broad feature expansion, rather than keeping
+nesting absent indefinitely. The [common foundation cards F1–F3](composition-and-dependency-injection.md#common-foundation-task-cards)
+join the current shared FMS kernel/runner, existing source inventory and Get
+Modular layout/conformance checks. Activate the first real nested constructs in
+the same change as their source-derived rejecting fixtures and required-runner
+identities. Shared FMS rules own visibility, direct-parent assembly and one-level
+republication; a local parallel parser or alternate feature standard is not the
+implementation. Exact tool/artifact migration remains proposed in ADR-0118.
+
 ## Scope mapping
 
 The standard's abstract hierarchy maps to Orchestrator as follows:

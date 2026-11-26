@@ -129,8 +129,15 @@ before a high-cost boundary violation.
   including its stricter authoring budgets and first-scope conformance requirements.
   ADR-0117 requires the same framework for applicable independently assembled
   capabilities in other TypeScript package families; private cohesive helpers
-  stay ordinary code. Complete the bounded module foundation before broad
-  feature expansion; do not create a second handwritten assembly path.
+  stay ordinary code. The owner's 26 November direction requires the
+  [full foundation plan](docs/architecture/composition-and-dependency-injection.md#full-foundation-implementation-plan),
+  including all module and engineering capabilities, before broad feature
+  expansion. Follow its common and target-specific qualification gates, including
+  real nested source enforcement and representative hundreds-of-modules evidence.
+  ADR-0118 proposes the newer artifact transition; do not silently replace the
+  accepted pins or call static success full foundation completion. Source-built
+  unpublished candidates may be qualified through the documented artifact lane.
+  Do not create a second handwritten assembly path.
 - Keep both convenient one-agent operation and enterprise execution within the
   [concurrent execution target](docs/architecture/deployment-profiles.md#concurrent-execution-target).
   Exercise independent Runs including concentrated load within one team and tenant.
@@ -219,6 +226,14 @@ installation and engine strictness enabled.
 `pnpm quality:coverage:test` binds all mandatory quality test files and identities
 to the installed Foundation execution runner. `pnpm lint:typed` includes the
 default unknown-assertion bridge gate; never bypass a reported shared defect.
+
+The [current compiler-closure blocker](docs/architecture/repository-tooling.md#full-foundation-tooling-adoption)
+must be resolved before executing the old Foundation CLI or dependency-cruiser
+route: their installed closures initialize TypeScript 5.9.3 or 6.0.3 despite the
+root TS 7 pin. The current organization floor covers embedded compilers too.
+Use the portable Docs route for this documentation work, report aggregate checks
+as blocked, and complete the coherent tooling migration rather than disabling
+the required checks or treating an isolated old compiler as an exception.
 
 Foundation `architecture.source-dependencies` is schema v3: `rootPackage: true`
 and `packageRoots` for every workspace package. Required CI runs

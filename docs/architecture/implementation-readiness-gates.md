@@ -140,8 +140,8 @@ it does not replace their decisions, create another backlog or change gate statu
 | Next task and owner | Entrance | Exit evidence and limit |
 | --- | --- | --- |
 | Scope and authority fixtures — architecture/security, feature owners and migration/desktop | Existing ADR-0103 sandbox contract. Documentation, deterministic fixtures and isolated probes may proceed now. | Every admitted command, protected read/feed and receipt replay has trusted context, exact scope and rejecting revoke/expiry/foreign-target cases in the existing contract fixtures; no implicit permission on remaining handlers. |
-| Initial composition foundation — architecture/composition | ADR-0113/0117 and actual existing composition seams. Foundation work may proceed while this gate is pending. | The bounded module-foundation evidence below passes for its selected initial envelope. Larger scale, optional plugin placements and live updates do not block that smaller qualified envelope. |
-| Retained sandbox handlers — the six ADR-0103 context owners and server/role composition | Scoped ADR-0103 admission plus the completed initial module envelope; record the selected role placement and owned contracts. | Actual owning transactions, receipts/outbox, MCP handlers and synthetic adapters pass restart, lost-response, authority and Target-generation cases. The first role implementation meets its process/transport and source-check gate before acceptance; runtime/provider and deployment qualification remain separate. |
+| Complete foundation preparation — architecture/composition and engineering/tooling | ADR-0113/0117, the owner's full-capability direction and proposed ADR-0118. Foundation work may proceed while implementation is pending. | Full design and common foundation evidence below pass, including nested enforcement, Resources/Observation/native Effect and representative 500-entry growth. Every dynamic and target-dependent capability has its mandatory owner and exit. |
+| Retained sandbox handlers — the six ADR-0103 context owners and server/role composition | Scoped ADR-0103 admission plus the common foundation gate and complete qualified dependency closure; record the selected role placement and owned contracts. | Actual owning transactions, receipts/outbox, MCP handlers and synthetic adapters pass restart, lost-response, authority and Target-generation cases. The first role implementation meets its process/transport and source-check gate before acceptance; runtime/provider and deployment qualification remain separate. |
 | First real IAM profile — configured authority, identity-binding and consuming-feature owners | An owning scoped decision from the [OD-012 first IAM increments](../open-decisions/OD-012-identity-authorization-tenant-isolation.md#first-iam-implementation-increments) accepts the exact profile and production contracts before dependent code. | Real principal/grant/session and provider-adapter evidence replaces only the declared synthetic boundary; no blanket closure of OD-012, mandatory cloud dependency or second grant ledger. |
 | Subsequent MVP and V1 increments — owning Work, Run, Communication, Runtime and profile owners | Separate admission for capabilities outside ADR-0103 and their applicable gates. | The integrated target and three required V1 profiles have their own actual evidence; assignment/completion/review and native Fully Local remain tracked requirements. |
 
@@ -164,51 +164,65 @@ new or expanded business module assembly. It does not rewrite the five business
 gates or retract ADR-0103's exact sandbox evidence. Existing admission is not
 evidence that the new module foundation has passed.
 
-The current foundation state is **pending**. Foundation work, migration of actual
-composition seams, disposable qualification, and corrections to already admitted
-behavior may proceed. New or expanded business module assembly waits for these
-bounded proofs within an explicitly selected initial adoption envelope. That
-envelope states the supported feature depth, Assembly entry/group counts,
-process profiles, and fixed compile/runtime budgets; it must not rely on an
-unqualified scale claim.
+The current implementation state is **pending**. The owner's 26 November
+clarification requires the [full foundation plan](composition-and-dependency-injection.md#full-foundation-implementation-plan),
+including all module and engineering capabilities, before broad business
+expansion. Foundation work, migration of actual seams, disposable qualification
+and corrections to already admitted behavior may proceed. A small business MVP
+does not reduce foundation design to an isolated static factory example.
 
-| Evidence | Required result | Current state |
-|---|---|---|
-| Scope and artifact reconciliation | ADR-0113 baseline, compatible additional artifacts where needed, supported compiler, and actual composition inventory | Canonical baseline retained; package activation pending |
-| Existing seam migration | Sandbox Manifest and other applicable seams use one Get Modular production path; pure helpers remain classified explicitly | Pending |
-| Nested source conformance | Deepest feature ownership, visibility, direct-parent assembly, republication, composition-only imports, type-level use cycles and load-time cycles | Production activation blocked |
-| Representative consumer | Real nested feature, two meaningful profiles, exact bindings, independent oracle, public packed imports | Pending |
-| Failure and lifecycle | Zero factories on invalid wiring, isolated attempts, cancellation, returned-product custody, drain and cleanup debt | Pending |
-| Initial adoption envelope | Representative consumer at the selected initial scale on the accepted supported compiler, within fixed compile/runtime budgets and with actual source checks | Pending |
-| Growth evidence | Separate 100/500/1,000-entry qualification matrix on the same supported toolchain; each larger scale remains unavailable until its row passes | Pending; does not block a smaller qualified envelope |
+Readiness has four explicit meanings:
 
-The representative consumer uses existing Get Modular conformance APIs and the
-Foundation source classifier. It does not introduce another parser, module
-framework, or generic lifecycle manager. Feature, Assembly entry, package, and
-service counts are measured separately; thousands of agent executions do not
-imply thousands of modules or dependency containers.
+| State | Required evidence | Present state |
+| --- | --- | --- |
+| Full design ready | Complete capability/owner/profile/identity/state/lifetime/authority matrix, owned implementation cards, exact candidate sources and unresolved dependencies; reviewed adoption transition | Full proposal recorded; design acceptance, exact adoption and runtime evidence remain pending |
+| Common foundation qualified | All common evidence rows below pass on the selected installed cohort, actual source rules and supported compiler | Pending |
+| Profile execution ready | The profile's entire dependency closure is qualified, including needed authority, transport, state, target, facade, installation and update mechanisms | Pending except existing separately scoped historical admissions |
+| Full foundation ready | Every required target and capability in the committed foundation programme has actual implementation and independent evidence | Pending; a static or common pass cannot use this label |
 
-The dated research on a different upstream snapshot
-[growth record](https://github.com/agent-teams-ai/get-modular/blob/ddf1e0b0053f546f12ca70190b237b4f7e78d09d/tests/qualification/consumer-fixtures/growth/README.md)
-reports an inherited-map N=500 compile reaching its 180-second limit on
-TypeScript 7.0.2. A private compiler experiment completed N=1,000, but it is not
-a maintained adopted compiler artifact and did not qualify source conformance.
-The foundation must close that supported-toolchain gap before claiming the
-corresponding consumer scale. A smaller envelope may activate after its own
-correctness, nested source, lifecycle, and growth-budget evidence passes; it
-does not have to wait for N=1,000. Expanding beyond that envelope requires the
-corresponding additional evidence first. Do not hide a failed scale with wiring
-casts, weakened source maps, larger timeouts, or a claim that the private result
-already passed.
+Broad business expansion requires full design and common foundation
+qualification, then the exact execution-ready profile for its dependencies.
+A replaceable entry needs the working shared invocation/facade seam before
+dependent production behavior. Browser, Desktop, isolated execution and live
+updates have mandatory implementation tracks, not unexplained deferrals. Product
+V1 still requires Managed, Standalone and Fully Local under ADR-0115.
 
-The dated review also found finite Assembly group depth and aggregate entry/group
-limits. Recheck the exact adopted artifacts; that later snapshot is not current
-consumer qualification or an implicit upgrade. The selected feature tree and diagnostics must agree with the library's
-qualified envelope; unlimited semantic nesting is not a promise of unlimited
-runtime graph depth. Resources release qualification must include the reviewed
-shutdown reentry fix. Observation needs a separate browser lane if a browser
-consumer is introduced. These are scoped readiness requirements, not a request
-to build every possible extension facility before one useful feature.
+| Common evidence | Required result | Current state |
+| --- | --- | --- |
+| Artifact and tool reconciliation | Proposed ADR-0118 cohort, immutable CMS/FMS identities, installed archive/peer/physical identity and complete TS >=7.0.2 closure; coherent tooling migration | Pending; current accepted 0.5.0 pins remain unchanged |
+| Real seam migration | Sandbox Manifest and every applicable materialized seam use one GM path; pure helpers classified explicitly; no Awilix or handwritten fallback graph | Pending |
+| Nested source conformance | Deepest ownership, visibility, direct-parent assembly, one-level republication, composition-only imports, type-use/load cycles and complete descriptor-map parity/conflicts | Construct activation blocked until real rejecting source fixtures pass |
+| Representative installed consumers | Same portable behavior in two independent test Hosts with their own drivers, adapters and lifetime owners; real nesting, meaningful profiles, public packed imports and independent optional/many wiring oracle | Pending |
+| Resources and repeated instances | Invalid wiring starts zero factories; runs isolate state; late setup, cancellation, borrowed inputs, raw work, original close, cleanup debt and retry retain correct ownership | Pending |
+| Observation, commands and hooks | Real latest-state projection and load settlement; owner-defined hook order/failure; durable occurrences and current authorization cannot be lost through coalescing | Pending |
+| Native Effect | Installed native construction, typed failure/defect/interruption, provider sharing, private Layer and borrowed lifetime; dedicated native tests | Pending; Promise smoke/isolation is not native evidence |
+| Representative hundreds of modules | 100- and 500-entry Orchestrator-shaped nested/complete-map source fixtures on the supported compiler, with fixed measured budgets and actual source gates | Pending; 500 is the proposed common-foundation target |
+
+The separate larger-growth target is 1,000 entries, with its own compiler,
+runtime/source envelope and declared limits. Its status is pending. It is outside
+the common acceptance table and does not block that table's 500-entry target;
+support at 1,000 cannot be claimed until its own evidence passes.
+
+The [current source review](../research/orchestrator-full-foundation-review-2026-11-26.md#scale-and-source-enforcement)
+finds new upstream 500-entry team-map and packed 1,000-declaration evidence. It
+does not close the older difficult inherited/nested fixture that timed out at
+500. Re-run that shape with the current complete descriptor-union recipe;
+retain both the original result and the corrected receipt. No private compiler,
+wiring cast, weaker map or silently increased timeout can substitute for proof.
+
+Measure feature, entry, group, package, source depth, graph depth and execution
+counts separately. Reviewed Assembly limits include group depth 16, 4,096 total
+entry/group nodes and 4,096 selected modules plus borrowed inputs. A product
+organization hierarchy is domain data; it does not consume one group level or
+container per department or agent. Runtime throughput and concurrency require
+their own load evidence, independent of compiler fixtures.
+
+The [dependent foundation rows](../open-decisions/OD-043-extension-lifecycle-catalog-and-hot-update.md#full-foundation-integration-handoff)
+retain actual installation/update/Browser/Desktop/isolation exits. EF's
+GHCR/Harbor and two-independent-product floor is not satisfied by LMU's two
+test Hosts. Common conformance uses shared source facts, FMS and GM APIs; it
+does not create another parser, graph or generic lifecycle engine. Missing
+capabilities stay visibly unavailable and refuse before evaluation/effect.
 
 ## Gate 1: Run, Work, and topology semantics
 

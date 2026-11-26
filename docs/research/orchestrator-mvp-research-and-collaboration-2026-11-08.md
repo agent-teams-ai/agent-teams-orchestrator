@@ -113,18 +113,22 @@ its research identity and existing path remain stable for earlier references.
 
 ### Delivery partition and agent handoff — 2026-11-26
 
-The owner now requests the minimum concrete preparation for agents to start
-implementation, using this existing MVP brief and retaining optional growth work
-outside the first increment. This is a documentation and handoff assignment;
-it does not mark pending gates passed or qualify a runtime, provider or profile.
+The owner's later 26 November clarification requires the complete module and
+engineering foundation before broad feature implementation. The business MVP
+remains incremental; the foundation covers all Get Modular mechanisms, shared
+tools, extension/update and target boundaries now. The
+[full foundation plan](../architecture/composition-and-dependency-injection.md#full-foundation-implementation-plan)
+and [source review](orchestrator-full-foundation-review-2026-11-26.md) replace the
+earlier limited-starter interpretation. This documentation and handoff assignment
+does not mark pending gates passed or qualify a runtime, provider or profile.
 The [incremental implementation route](../architecture/implementation-readiness-gates.md#incremental-implementation-route)
 owns task entrance, exit evidence and the point where retained code may start.
 Use the existing feature dossiers and scope contract for details, not a second
 backlog or a general IAM framework.
 
-| Delivery boundary | Minimum retained scope | Admission and evidence |
+| Delivery boundary | Retained scope | Admission and evidence |
 | --- | --- | --- |
-| Initial foundation | Migrate actual composition seams and qualify a bounded Get Modular envelope with meaningful profiles. | Module foundation remains pending; resolve its existing evidence rows before new business assembly. No wait for every future plugin or larger scale row. |
+| Complete foundation preparation | Full capability/owner/profile design, actual seams, nested enforcement, Resources/Observation/native Effect, shared tooling and representative hundreds-of-modules qualification. | Common foundation remains pending; resolve its evidence before broad business assembly. Each required extension/update/Browser/Desktop/isolation profile has separate implementation exits; static success is not full foundation completion. |
 | First server increment | ADR-0103's one test-only Project, seeded principal, canonical Agent, Team version and Run; Task creation/metadata, planned Work and direct human/member messages. | Existing scoped admission, synthetic authority/runtime adapters and actual owner handlers; applicable role placement still required. This is not the complete MVP. |
 | Real IAM and subsequent execution features | One real authority profile and the required Work execution, assignment, completion/review and wider communication progress through separately admitted increments. | OD-012 and the owning Work/Run/Communication decisions provide exact contracts and evidence; synthetic success does not admit production authentication or those extra commands. |
 | Integrated MVP target | Two teams, three or four agents and one Project with updates, review and restart recovery; JetStream and a selected real Runtime path. | Separately admitted increments and actual integration evidence. A fake Runtime proves only its stated contract boundary. |
@@ -344,52 +348,37 @@ that no future refactoring will be necessary.
 
 ### Get Modular from the first retained composition
 
-This is already selected architecture under
-[ADR-0113](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/decisions/0113-canonical-module-and-composition-adoption.md)
-and [ADR-0117](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/decisions/0117-reconcile-mandatory-module-composition.md),
-not a new optional framework choice. Follow the
-[composition profile](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/composition-and-dependency-injection.md):
-the exact Core/Assembly **0.5.0** pair and its pinned
-[Consumer Module Standard](https://github.com/agent-teams-ai/get-modular/blob/a3a079baca2c6af48c9d45bc08992825be1c2bbd/docs/architecture/common-assembly.md#consumer-module-standard).
-Newer upstream source or package versions do not silently replace that baseline.
+Get Modular is mandatory under ADR-0113/0117. Their exact Core/Assembly 0.5.0
+baseline remains the current accepted pin. The owner's 26 November clarification
+requires the [full foundation plan](../architecture/composition-and-dependency-injection.md#full-foundation-implementation-plan)
+and the proposed [ADR-0118 transition](../decisions/0118-full-foundation-capability-adoption.md)
+to reviewed latest contracts and artifacts. Newer source is reviewed and may be
+packed for qualification now, including unpublished mechanisms; this does not
+silently replace the accepted installed/profile tuple.
 
-One selected Host process assembles its meaningful capabilities once through
-typed declarations, entries, and static groups. Business factories receive
-narrow dependencies; Get Modular imports and descriptors remain in composition
-and tests. Private helpers, parsers, and fixed library calls remain ordinary
-typed code. No container per Agent/Task, service locator, parallel handwritten
-production graph, or additional DI abstraction is needed.
+One selected Host process owns its graph. Feature-owned typed declarations,
+entries, static groups and prepared templates supply meaningful composition.
+Business factories receive narrow owned ports; framework types remain at the
+edge. Private helpers, parsers and fixed library calls stay ordinary code.
+Agent, Task and department identities do not create containers or services.
 
-The owner's later foundation phase includes a **bounded module-foundation
-step before business expansion**. Inventory
-the real seams, migrate the existing Sandbox Manifest composition, and choose a
-small explicit envelope of feature depth, entries/groups, profiles, and
-compile/runtime budgets. Qualify compatible artifacts on the supported compiler
-using the required conformance kit and source checks. Cover an actual nested
-feature, two meaningful profiles, direct-parent visibility/republication,
-independent wiring expectations, invalid wiring before factories, failed
-construction, cancellation, and cleanup. Connect those checks to the existing
-runner. This foundation is currently pending; a flat layout check or dependency
-installation does not pass it.
-Module wiring checks do not replace source-boundary or domain-invariant checks.
+The common foundation covers actual seam migration, complete descriptor maps,
+nested source enforcement, Resources, latest-state Observation, module
+Conformance, native Effect and the engineering/tooling migration. The
+[readiness gate](../architecture/implementation-readiness-gates.md#module-foundation-before-business-expansion)
+requires actual consumers and independent refusal/failure/lifetime evidence,
+including the representative 500-entry difficult growth shape. The separate
+1,000-entry profile does not silently become a common entrance condition.
+All required checks join the installed runner; a layout example or dependency
+installation cannot pass the gate.
 
-The [foundation gate](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/implementation-readiness-gates.md#module-foundation-before-business-expansion)
-allows the smaller qualified envelope to proceed without waiting for every
-100/500/1,000-entry research target. Wider composition needs additional evidence.
-Select compatible Resources and conformance artifacts explicitly; equal package
-family names or latest versions do not establish compatibility. Modules that
-acquire resources use the qualified Resources capability; pure or borrow-only
-modules need no resource scope. Preserve Host-owned readiness, admission, drain,
-and cleanup responsibility. If a required behavior cannot be qualified on the
-adopted artifacts, review a bounded upgrade instead of introducing a fallback
-assembly or bypassing the gate.
-
-Static assembly does not require hot replacement, a dynamic lifecycle kernel,
-plugin discovery, or Get Modular Observation. Observation is not a replacement
-for JetStream or durable inbox/outbox history. Existing source-enforcement and
-first-materialization gates still apply; nested constructs activate only with
-their inventory and semantic enforcement. The source currently contains a
-pending foundation, not an already qualified module platform.
+The full extension/update, Browser, Desktop and isolation design is part of this
+foundation now. Its implementation has [owned dependent cards](../open-decisions/OD-043-extension-lifecycle-catalog-and-hot-update.md#full-foundation-integration-handoff)
+and mandatory per-profile exits. A replaceable boundary needs the real shared
+operation facade before dependent code. No static test can claim those targets
+complete, and no absent shared mechanism is replaced with a private module or
+lifecycle framework. Pure/borrow-only modules still need no artificial scope;
+Observation remains separate from JetStream, durable work and revocation.
 
 ### Extension Foundation and the first real extension journey
 
@@ -708,6 +697,14 @@ change. Group delivery must not automatically launch every recipient's LLM.
 
 ### Collaboration and implementation sequence
 
+The six steps below preserve the 8–9 November collaboration agreement and its
+then-current pause. They are historical, not a new instruction to stop the
+owner's 26 November foundation assignment. The current
+[delivery partition](#delivery-partition-and-agent-handoff--2026-11-26) and
+[foundation task cards](../architecture/composition-and-dependency-injection.md#common-foundation-task-cards)
+now provide the detailed preparation route. Personal contribution arrangements
+remain separate from those technical tasks.
+
 1. **Prepare and research now.** The owner finishes the plugin/extension
    groundwork and prepares the detailed phase plan. Main Orchestrator
    implementation, including its initial product foundation, waits. Hassan can
@@ -738,8 +735,8 @@ change. Group delivery must not automatically launch every recipient's LLM.
    review results and improve the next phases; the owner keeps architectural
    coordination without excluding Hassan's design input.
 
-Canonical permission to implement a scoped capability does not override this
-collaboration timing. Broad business admission remains in review;
+The historical collaboration pause is not current foundation admission.
+Broad business admission remains in review;
 ADR-0103 covers a test-only server slice with one Agent/profile, one Team/Run,
 Task metadata, planned placement, direct messages and minimum context/observation.
 It does not qualify real providers or admit assignments, dependency scheduling,
@@ -774,7 +771,7 @@ that all capabilities are currently admitted or implemented.
 | Conversations and cross-team policy | DM and group history survives interruption; only eligible recipients wake. Removed participants cannot receive new restricted messages. Delegation follows configured rules. |
 | Redelivery and late results | Duplicate JetStream delivery, missed wake, and late result after cancellation do not create duplicate product transitions or complete the wrong attempt. |
 | Domain and source boundaries | The same domain/application implementation serves API, workflow, event, and applicable fake/live fixtures. Negative checks reject framework/provider leakage, cross-context repository access, and a competing production assembly. Invalid domain transitions and stale revisions are rejected. |
-| Module composition | The selected small profile passes independent binding and lifecycle checks, including its required nested feature. Fake/live implementations pass the same applicable port contract suite. Additional capabilities remain inside the qualified envelope or qualify its extension first. |
+| Module composition | The complete common foundation passes its independent binding, lifetime, nested-source, observation, native Effect and representative growth checks. Fake/live implementations pass the same applicable port suite; dependent target capabilities qualify their full closure before use. |
 | Extension adoption | The selected contribution exercises its real consumer contract, preserves product authority and reports failed activation/cleanup honestly. Any production adoption of Extension Foundation meets its applicable OD-041 proof or an explicit narrower owning admission. Installed external extensions also exercise their artifact, trust and lifecycle paths; internal composition alone does not qualify them. |
 | Durable evolution | Work started under definition revision A survives a revision-B update and restart using pinned A semantics or a reviewed migration. IDs, pending messages, receipts, artifact references, and unknown outcomes are preserved. No general migration framework is required. |
 | Runtime replacement | Replacing the selected runtime adapter preserves applicable behavior and product progress. Pending operations and cleanup debt receive explicit migration/disposition; unknown effects are not retried through a new backend. Native checkpoint incompatibility is explicit. |
@@ -895,7 +892,7 @@ Additional primary references for the proposed comparisons:
 During research and phase planning, agree:
 
 1. What is the first retained slice and its current admission, and what exact
-   small Get Modular envelope and compatible artifact set must be qualified?
+   complete Get Modular foundation and exact artifact set must be qualified?
 2. Which two process definitions test flexibility, and which editor/definition
    format deserves a small demo?
 3. Which exact current AR/provider/artifact/profile pair can support the first
