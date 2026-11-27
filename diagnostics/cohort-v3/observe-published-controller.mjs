@@ -5,7 +5,6 @@ import { execFile } from "node:child_process";
 import { mkdir, readFile, realpath, lstat, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { createRequire } from "node:module";
 import { promisify } from "node:util";
 
 const exec = promisify(execFile);
@@ -87,8 +86,14 @@ async function main(argv) {
     const kernelRoot = await realpath(join(root, "node_modules/@agent-teams/repository-mutation"));
     const corepack = await realpath(join(root, "node_modules/corepack/dist/corepack.js"));
     assert.equal((await command(node24, [corepack, "--version"])).stdout.trim(), "0.36.0");
-    const installedRequire = createRequire(pathToFileURL(join(root, "package.json")));
-    const { computeInstalledArtifactBuildIdentity } = await import(pathToFileURL(installedRequire.resolve("@agent-teams/repository-mutation")));
+    const kernelManifest = json(await readFile(join(kernelRoot, "package.json")));
+    assert.equal(kernelManifest.name, mutation.name); assert.equal(kernelManifest.version, mutation.version);
+    assert.equal(kernelManifest.type, "module");
+    assert.equal(kernelManifest.exports?.["."]?.import, "./dist/index.js");
+    const kernelEntry = await realpath(join(kernelRoot, kernelManifest.exports["."].import));
+    assert.ok(kernelEntry.startsWith(kernelRoot + "/"), "Declared kernel ESM export escapes its installed package root.");
+    assert.ok((await lstat(kernelEntry)).isFile());
+    const { computeInstalledArtifactBuildIdentity } = await import(pathToFileURL(kernelEntry));
     const controllerBuildIdentity = await computeInstalledArtifactBuildIdentity({ packageRoot: controllerRoot, roots: ["dist", "assets", "schemas"] });
     const kernelBuildIdentity = await computeInstalledArtifactBuildIdentity({ packageRoot: kernelRoot, roots: ["dist", "schemas"] });
     assert.match(controllerBuildIdentity, /^sha256:(?!0{64}$)[0-9a-f]{64}$/u);
