@@ -37,6 +37,16 @@ export function assertRuntime(intent, observed) {
   }, "Producer preparation must run on the exact intended Node/platform/architecture.");
 }
 
+export function eligibleAfterPublication(packages) {
+  assert.ok(Array.isArray(packages) && packages.length > 0, "Eligibility requires actual package publication timestamps.");
+  const times = packages.map(({ published_at }) => Date.parse(published_at));
+  assert.ok(times.every(Number.isFinite), "Eligibility requires valid publication timestamps.");
+  const latest = Math.max(...times);
+  const rounded = Math.ceil(latest / 1000) * 1000;
+  const after = rounded > latest ? rounded : rounded + 1000;
+  return new Date(after).toISOString().replace(".000", "");
+}
+
 export function deriveProvenance(entry, metadata, times, rawAttestations, now) {
   const spec = `${entry.name}@${entry.version}`;
   assert.equal(metadata.name, entry.name, `${spec}: registry package identity changed.`);
@@ -329,7 +339,7 @@ async function main(argv) {
       runtime: { selected_lane: selectedRuntime.selectedLane, node: selectedRuntime.node, pnpm: selectedRuntime.pnpm,
         qualification_runtime: { node_version: selectedRuntime.qualificationRuntime.nodeVersion, pnpm_version: selectedRuntime.qualificationRuntime.pnpmVersion, platform: selectedRuntime.qualificationRuntime.platform, architecture: selectedRuntime.qualificationRuntime.architecture } },
       runtime_closure: closure.authority,
-      eligible_after: new Date(Math.max(...packages.map((pkg) => Date.parse(pkg.published_at))) + 1000).toISOString().replace(".000", ""),
+      eligible_after: eligibleAfterPublication(packages),
       upgrade_from: intent.upgradeFrom, rollback_to: intent.rollbackTo, canary_repositories: intent.canaryRepositories,
       evidence_references: [],
     };
