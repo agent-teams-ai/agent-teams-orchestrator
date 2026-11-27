@@ -1,0 +1,106 @@
+name: Orchestrator prepared Host dependency preflight
+
+on:
+  push:
+    branches: [test/iam-host-dependency-preflight-20261127]
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: orchestrator-prepared-host-dependency-preflight
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Select isolated preflight directories
+        shell: bash
+        run: |
+          printf 'PREFLIGHT_ROOT=%s/iam-host-preflight-%s-%s\n' "$RUNNER_TEMP" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
+          printf 'PREFLIGHT_INPUT=%s/iam-host-preflight-input-%s-%s\n' "$RUNNER_TEMP" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: harness
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: c01efb6813f0c048497caeefbb8235cead480cb2
+          fetch-depth: 0
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67
+          fetch-depth: 0
+          path: source
+          persist-credentials: false
+      - name: Download actual preparation as inert input
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          artifact-ids: 15185391285
+          run-id: 45970170562
+          github-token: ${{ github.token }}
+          repository: agent-teams-ai/agent-teams-orchestrator
+          path: ${{ env.PREFLIGHT_INPUT }}
+          merge-multiple: true
+          digest-mismatch: error
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 26.12.1
+          check-latest: false
+      - name: Retain Node 26
+        shell: bash
+        run: printf 'NODE26=%s\n' "$(readlink -f "$(command -v node)")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.22.3
+          check-latest: false
+      - name: Retain Node 24
+        shell: bash
+        run: printf 'NODE24=%s\n' "$(readlink -f "$(command -v node)")" >> "$GITHUB_ENV"
+      - name: Install and verify the published controller
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_PATH
+          test "$GITHUB_REPOSITORY_ID" = 1310245598
+          mkdir "$PREFLIGHT_ROOT"
+          mkdir "$PREFLIGHT_ROOT/controller" "$PREFLIGHT_ROOT/installation"
+          cd "$PREFLIGHT_ROOT/controller"
+          printf '{"name":"orchestrator-prepared-host-preflight","private":true}\n' > package.json
+          npm install --ignore-scripts --no-audit --no-fund --save-exact \
+            @agent-teams/docs-protocol-agent-teams@0.8.0 @agent-teams/repository-mutation@0.5.2 corepack@0.36.0 \
+            > "$PREFLIGHT_ROOT/installation/npm-install.stdout.txt" 2> "$PREFLIGHT_ROOT/installation/npm-install.stderr.txt"
+          "$NODE24" "$GITHUB_WORKSPACE/harness/.github/scripts/orchestrator-preflight-controller.mjs" \
+            > "$PREFLIGHT_ROOT/installation/controller-observation.json"
+          cp package-lock.json "$PREFLIGHT_ROOT/installation/controller-package-lock.json"
+          printf 'COREPACK_HOME=%s/cache/corepack\n' "$PREFLIGHT_ROOT" >> "$GITHUB_ENV"
+          printf 'pnpm_config_store_dir=%s/cache/pnpm\n' "$PREFLIGHT_ROOT" >> "$GITHUB_ENV"
+          printf 'XDG_DATA_HOME=%s/cache/xdg\n' "$PREFLIGHT_ROOT" >> "$GITHUB_ENV"
+      - name: Check dependency reconciliation from prepared images
+        shell: bash
+        run: |
+          "$NODE26" "$GITHUB_WORKSPACE/harness/.github/scripts/orchestrator-host-dependency-preflight.mjs" \
+            --candidate "$GITHUB_WORKSPACE/candidate" --source "$GITHUB_WORKSPACE/source" \
+            --preparation "$PREFLIGHT_INPUT/proofs/A/completion.json.prepared" \
+            --controller-root "$PREFLIGHT_ROOT/controller" \
+            --controller "$PREFLIGHT_ROOT/controller/node_modules/@agent-teams/docs-protocol-agent-teams/dist/cli.js" \
+            --node24 "$NODE24" --node26 "$NODE26" \
+            --corepack "$PREFLIGHT_ROOT/controller/node_modules/corepack/dist/corepack.js" \
+            --closure "$GITHUB_WORKSPACE/harness/.github/inputs/target-runtime-closure.json" \
+            --export "$PREFLIGHT_ROOT/result"
+      - name: Retain preflight diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: orchestrator-host-preflight-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.PREFLIGHT_ROOT }}/installation
+            ${{ env.PREFLIGHT_ROOT }}/result
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
