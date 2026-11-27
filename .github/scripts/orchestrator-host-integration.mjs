@@ -4,30 +4,124 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { closeSync, openSync } from "node:fs";
-import { chmod, lstat, mkdir, readFile, realpath, writeFile } from "node:fs/promises";
+import { chmod, lstat, mkdir, readFile, readdir, realpath, writeFile } from "node:fs/promises";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
+import { createSelectedLockDraft } from "./orchestrator-selected-lock.mjs";
 
 const BASE = "c01efb6813f0c048497caeefbb8235cead480cb2";
-const SOURCE = "3dccf2c53bf11f3939a19734a58f5e64d96673d0";
-const SOURCE_TREE = "a92524845b6d7915e37b61ef40b72bd71634d193";
-const COHORT = "docs-2026-11-27-orchestrator-v2";
-const RECORD = "sha256:db8d4e1cf8295e4760186a9fcfb31b22b3cf2cb0d876923ba6b382b0ec6b9e7e";
+const SOURCE = "ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67";
+const SOURCE_TREE = "a24da96493edd1c6fe3bd5868d4cf636007bcf04";
+const COHORT = "docs-2026-11-27-orchestrator-v3";
+const RECORD = "sha256:f61e98c96fcc7beab30b6956312dead50a363c403fd67cdce4d0f18e8e69424c";
 const REQUIRED_HASH = "a26ff983529afb2b492706253293664df596705bdaae7882aa6b030c16905f35";
-const EVIDENCE_PATH = "docs/research/evidence/managed-docs-orchestrator-v2-2026-11-27";
+const EVIDENCE_PATH = "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27";
+const INPUT_BINDING = {
+  "sourceRevision": "ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67",
+  "sourceTree": "a24da96493edd1c6fe3bd5868d4cf636007bcf04",
+  "sourceLockSha256": "sha256:0ebee389b33d6ee41beb3f4a3dd28e20f956c177b17a2911d5a812160ea07044",
+  "sourceLockGitBlob": "596614ef81a97d2b825e06d15086ca36dd20656a",
+  "originalMainRevision": "3dccf2c53bf11f3939a19734a58f5e64d96673d0",
+  "sourceAdmission": {
+    "metaSha256": "sha256:94296a4fcdec10ce7e4eb054edb8341a54478a695a4df930d1e138f9bb1dd1a5",
+    "stdoutSha256": "sha256:75d35e87cbc93c3016584bb8a19f73a422488932447e9fb486ad034a2d178977",
+    "preparationSha256": "sha256:b7849c93c324c184c2aaccfc9c86a98e1a2a62c5957e4fabb75b6c09f247cae7",
+    "replayable": false,
+    "finalPhysicalConsumerQualified": false
+  },
+  "authoritySnapshotRevision": "d167b2360524474240a43e3ff70e35eb94e109c7",
+  "target": {
+    "cohortId": "docs-2026-11-27-orchestrator-v3",
+    "recordDigest": "sha256:f61e98c96fcc7beab30b6956312dead50a363c403fd67cdce4d0f18e8e69424c",
+    "qualificationEventDigest": "sha256:4451ea715ef68048c01e182fe4755acc4639d7d2e106e536e2b240834e7084c0",
+    "policy": {
+      "id": "agent-teams.docs-protocol-current-policy",
+      "version": "3.1.0",
+      "digest": "sha256:18db0135d1d6191ef78c1feb243f5dc672aaed9985f52be1a72af4fdd7e9bb4e"
+    },
+    "workflow": {
+      "repository": "agent-teams-ai/.github",
+      "path": ".github/workflows/docs-protocol-check.yml",
+      "revision": "997f24396598f93cf1b03bb26436a5ec7686ddef",
+      "blobSha": "714af12998ef140dd55a2ec3057f67775586cfd7"
+    },
+    "callerDigest": "sha256:2ce33590e2d5d36a14bcdf3f16e6ca5422c4b3ebe300f3ac4d94343cc022e1ac",
+    "closure": {
+      "digest": "sha256:7957b8b2b7e20efc6f940b77ca596670d2a8555a9ccf10dc00926ad270eae475",
+      "path": "governance/docs-runtime-closures/sha256-7957b8b2b7e20efc6f940b77ca596670d2a8555a9ccf10dc00926ad270eae475.json",
+      "packageCount": 88
+    },
+    "packages": {
+      "repositoryMutation": {
+        "name": "@agent-teams/repository-mutation",
+        "version": "0.5.2",
+        "integrity": "sha512-eK/HsE/1qt+TXzrrbggXykZJXloFZfZD0ZlwdGbm2Jc9O6lAlhu7+w9BdSeryX/vCyMYWeRLv38S/7V717RPMg=="
+      },
+      "documentAuthoring": {
+        "name": "@agent-teams/document-authoring",
+        "version": "0.3.9",
+        "integrity": "sha512-a6SOuytNOoKJVW+pp51AUMhrjzTvbYvro6nUuAFqmu0l0G63xkSAnhpwlaPJbHSbSBvoIawm8z+nL8OVMFIY3A=="
+      },
+      "docsProtocol": {
+        "name": "@agent-teams/docs-protocol",
+        "version": "0.6.9",
+        "integrity": "sha512-rZ7Ie43dmN+m8LjCdXt5iqOP5h41M/TWNFg7bwvV05/XuSJrJF4udBLXIReqqVfeqdoYrFNxPbTknKJ30N6aTA=="
+      },
+      "docsProtocolAgentTeams": {
+        "name": "@agent-teams/docs-protocol-agent-teams",
+        "version": "0.8.0",
+        "integrity": "sha512-BixlYEalI0/j4auoSLBSBlKJGUXyZeuKS3WI+5nxdiAPg/yyAtKHjhmxuo059YZPn0+R931M0sdpNHRkpgDUDg=="
+      },
+      "engineeringFoundation": {
+        "name": "@agent-teams/engineering-foundation",
+        "version": "4.0.3",
+        "integrity": "sha512-D/q979O6OOhsS3IpkwKwb1wNDcXcJESKbYATz7Gk8biiXYxC2tIGi5S9er/DQDbghOnzrilipKxvTMJZ1GGolg=="
+      }
+    }
+  },
+  "controller": {
+    "version": "0.8.0",
+    "integrity": "sha512-BixlYEalI0/j4auoSLBSBlKJGUXyZeuKS3WI+5nxdiAPg/yyAtKHjhmxuo059YZPn0+R931M0sdpNHRkpgDUDg==",
+    "buildIdentity": "sha256:5d5563eb771de586b7d43e58aa68d1e62d92a58bff87a362ff5b8b7d582dac80"
+  },
+  "kernel": {
+    "version": "0.5.2",
+    "integrity": "sha512-eK/HsE/1qt+TXzrrbggXykZJXloFZfZD0ZlwdGbm2Jc9O6lAlhu7+w9BdSeryX/vCyMYWeRLv38S/7V717RPMg==",
+    "buildIdentity": "sha256:89c1df01b0fd3ea5d8db6adf51fa65a92f8509aaffde78217cb31a2c9084e8e1"
+  },
+  "runtime": {
+    "node24": "24.22.3",
+    "node26": "26.12.1",
+    "sourcePin": "26.11.1\n",
+    "targetPin": "26.12.1\n",
+    "sourcePnpm": "11.18.0",
+    "targetPnpm": "11.20.0"
+  },
+  "selectedLock": {
+    "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/selected-lock-v3-preparation/actual-7957/selected-target/selected-target-lock.yaml",
+    "bytes": 320228,
+    "sha256": "sha256:a8080107bb13e2170fee5e3f25f30ff5df835cd5e540e66f177a0ef0e57c264b",
+    "gitBlob": "5b452244b3d74dd49432e659abd575efca49c4c2"
+  },
+  "selectedLockReportSha256": "sha256:4e04cf99c102c94f4289922a0bfb9a710ef6a7b6f578b126cbcaa3e26c716cdf"
+};
 const ASSETS = [
   ".github/workflows/docs-protocol.yml",
+  ".node-version",
   "architecture/foundation/docs-consumer-integration.json",
   "architecture/foundation/docs-protocol-managed-state.json",
   "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml",
 ].sort();
-const FULL_ASSETS = ASSETS.slice(0, 3);
+const FULL_ASSETS = [".github/workflows/docs-protocol.yml", ".node-version",
+  "architecture/foundation/docs-consumer-integration.json",
+  "architecture/foundation/docs-protocol-managed-state.json"];
 const TUPLE = {
   "@agent-teams/repository-mutation": "0.5.2",
   "@agent-teams/document-authoring": "0.3.9",
   "@agent-teams/docs-protocol": "0.6.9",
-  "@agent-teams/docs-protocol-agent-teams": "0.7.1",
-  "@agent-teams/engineering-foundation": "4.0.2",
+  "@agent-teams/docs-protocol-agent-teams": "0.8.0",
+  "@agent-teams/engineering-foundation": "4.0.3"
 };
 const DIRECT = Object.keys(TUPLE).slice(2);
 const LABELS = ["A-prepare", "A-fault", "A-resume", "A-restore", "B-prepare",
@@ -66,31 +160,31 @@ const TEXT_EDITS = [
   {
     "path": "scripts/docs/docs-protocol-profile.test.mjs",
     "before": "\"@agent-teams/docs-protocol-agent-teams\": \"0.3.2\"",
-    "after": "\"@agent-teams/docs-protocol-agent-teams\": \"0.7.1\"",
+    "after": "\"@agent-teams/docs-protocol-agent-teams\": \"0.8.0\"",
     "count": 1
   },
   {
     "path": "scripts/architecture/quality-source-coverage.test.mjs",
     "before": "assert.equal(pkg.devDependencies[\"@agent-teams/docs-protocol-agent-teams\"], \"0.3.2\");",
-    "after": "assert.equal(pkg.devDependencies[\"@agent-teams/docs-protocol-agent-teams\"], \"0.7.1\");",
+    "after": "assert.equal(pkg.devDependencies[\"@agent-teams/docs-protocol-agent-teams\"], \"0.8.0\");",
     "count": 1
   },
   {
     "path": "scripts/architecture/quality-source-coverage.test.mjs",
     "before": "assert.equal(managed.cohortId, \"docs-2026-10-03-stable31\");",
-    "after": "assert.equal(managed.cohortId, \"docs-2026-11-27-orchestrator-v2\");",
+    "after": "assert.equal(managed.cohortId, \"docs-2026-11-27-orchestrator-v3\");",
     "count": 1
   },
   {
     "path": "scripts/architecture/quality-source-coverage.test.mjs",
     "before": "assert.equal(managed.packages.engineeringFoundation.version, \"1.7.2\");",
-    "after": "assert.equal(managed.packages.engineeringFoundation.version, \"4.0.2\");",
+    "after": "assert.equal(managed.packages.engineeringFoundation.version, \"4.0.3\");",
     "count": 1
   },
   {
     "path": "scripts/architecture/quality-source-coverage.test.mjs",
     "before": "assert.equal(managed.packages.docsProtocolAgentTeams.version, \"0.3.2\");",
-    "after": "assert.equal(managed.packages.docsProtocolAgentTeams.version, \"0.7.1\");",
+    "after": "assert.equal(managed.packages.docsProtocolAgentTeams.version, \"0.8.0\");",
     "count": 1
   },
   {
@@ -108,31 +202,31 @@ const TEXT_EDITS = [
   {
     "path": "AGENTS.md",
     "before": "The root quality tooling lane defaults to Node `26.11.1` and pnpm `11.18.0`",
-    "after": "The root quality tooling lane defaults to Node `26.11.1` and pnpm `11.20.0`",
+    "after": "The root quality tooling lane defaults to Node `26.12.1` and pnpm `11.20.0`",
     "count": 1
   },
   {
     "path": "AGENTS.md",
     "before": "gates on the corrected candidate. Its previous stable31 managed Docs records do\nnot match the new Foundation tuple: report the central admission dependency and\nkeep the candidate unmergeable as a completed managed upgrade until the actual\nsuccessor transition and receipts qualify. Never rewrite old evidence to fit pins.",
-    "after": "gates on the corrected candidate. The hosted retained controller produced the\norchestrator-v2 managed successor from the authentic stable31 source. Its actual\npreparation, receipt-write refusal, fresh-process resume, source restoration and\ncommitted rollback observations are retained in the\n[managed transition evidence](docs/research/evidence/managed-docs-orchestrator-v2-2026-11-27/manifest.json).\nKeep original receipts as history. Final-head CI, the resulting main observation\nand central observed binding remain separate completion conditions.",
+    "after": "gates on the corrected candidate. The hosted retained controller produced the\norchestrator-v3 managed successor from the reviewed stable31 preparation source. Its actual\npreparation, receipt-write refusal, fresh-process resume, source restoration and\ncommitted rollback observations are retained in the\n[managed transition evidence](docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/manifest.json).\nKeep original receipts as history. Final-head CI, the resulting main observation\nand central observed binding remain separate completion conditions.",
     "count": 1
   },
   {
     "path": "docs/architecture/repository-tooling.md",
     "before": "they do not qualify this integration. Current-main managed profiles, state and\ncaller remain unchanged. Node.js package compatibility does not establish managed Docs execution",
-    "after": "they do not qualify this integration. This candidate carries the actual orchestrator-v2\nmanaged profile, state and caller; resulting-main qualification remains separate.\nNode.js package compatibility does not establish managed Docs execution",
+    "after": "they do not qualify this integration. This candidate carries the actual orchestrator-v3\nmanaged profile, state and caller; resulting-main qualification remains separate.\nNode.js package compatibility does not establish managed Docs execution",
     "count": 1
   },
   {
     "path": "docs/architecture/repository-tooling.md",
     "before": "The default root tooling lane uses Node `26.11.1`; pnpm remains `11.18.0`.",
-    "after": "The default root tooling lane uses Node `26.11.1` and pnpm `11.20.0`.",
+    "after": "The default root tooling lane uses Node `26.12.1` and pnpm `11.20.0`.",
     "count": 1
   },
   {
     "path": "docs/architecture/repository-tooling.md",
     "before": "and adapter `0.3.2` tuple. The current tooling candidate installs Foundation\n`4.0.2`; it is not a matching stable31 managed consumer. Keep the original\nintegration/state/receipts unchanged as the previous admitted tuple and the PR\nunmergeable as a completed managed migration until the eligible central desired\ntransition and real successor assets/receipts exist. Registry installation and\nportable semantic checks cannot substitute for that admission.",
-    "after": "and adapter `0.3.2` tuple. Those receipts retain their original identities.\nThe hosted retained controller subsequently produced the orchestrator-v2 successor\nwith Foundation `4.0.2`, Docs `0.6.9` and adapter `0.7.1`. The\n[actual hosted observations](../research/evidence/managed-docs-orchestrator-v2-2026-11-27/manifest.json)\nrecord the physical source, authority, commands and output digests. This candidate\npreserves those managed assets while reconciling the separately owned Host\nconfiguration. Final-head checks, actual-main qualification and central observed\nadvancement remain required; registry installation alone does not establish them.",
+    "after": "and adapter `0.3.2` tuple. Those receipts retain their original identities.\nThe hosted retained controller subsequently produced the orchestrator-v3 successor\nwith Foundation `4.0.3`, Docs `0.6.9` and adapter `0.8.0`. The\n[actual hosted observations](../research/evidence/managed-docs-orchestrator-v3-2026-11-27/manifest.json)\nrecord the physical source, authority, commands and output digests. This candidate\npreserves those managed assets while reconciling the separately owned Host\nconfiguration. Final-head checks, actual-main qualification and central observed\nadvancement remain required; registry installation alone does not establish them.",
     "count": 1
   },
   {
@@ -144,7 +238,7 @@ const TEXT_EDITS = [
   {
     "path": "docs/architecture/repository-tooling.md",
     "before": "Docs `0.6.2` / adapter `0.3.2` remain installed. Stable31 records are the previous admission, not a matching new Foundation tuple; successor admission is pending",
-    "after": "Candidate Docs `0.6.9` / adapter `0.7.1` come from the actual orchestrator-v2 transition. Stable31 receipts remain historical; resulting-main observation is still required",
+    "after": "Candidate Docs `0.6.9` / adapter `0.8.0` come from the actual orchestrator-v3 transition. Stable31 receipts remain historical; resulting-main observation is still required",
     "count": 1
   },
   {
@@ -156,43 +250,193 @@ const TEXT_EDITS = [
   {
     "path": "docs/architecture/repository-tooling.md",
     "before": "has stable33 generation 3 VERIFIED/QUALIFIED at event 189, while stable31 remains\nRECOMMENDED at event 186. Only the declared Extension Foundation canary may take\nthe narrower candidate route; Orchestrator is not that canary.",
-    "after": "recorded stable33 generation 3 VERIFIED/QUALIFIED at event 189 and stable31\nRECOMMENDED at event 186. That historical Extension Foundation canary selection\ndid not authorize Orchestrator. The later hosted transition used its own\norchestrator-v2 record and consumer selection at\n[the observed protected revision](https://github.com/agent-teams-ai/.github/blob/@@AUTHORITY@@/governance/docs-qualified-cohorts.json).",
+    "after": "recorded stable33 generation 3 VERIFIED/QUALIFIED at event 189 and stable31\nRECOMMENDED at event 186. That historical Extension Foundation canary selection\ndid not authorize Orchestrator. The later hosted transition used its own\norchestrator-v3 record and consumer selection at\n[the observed protected revision](https://github.com/agent-teams-ai/.github/blob/@@AUTHORITY@@/governance/docs-qualified-cohorts.json).",
     "count": 1
   },
   {
     "path": "docs/architecture/repository-tooling.md",
     "before": "PR #111's [trusted Docs run](https://github.com/agent-teams-ai/agent-teams-orchestrator/actions/runs/45908886931)\nloads validator `b30455e32cf5d54ade6d8301637701347e4ce57c` and rejects the\ncurrent registry's generation 3 row at `/cohorts/44` before consumer execution.\nThis controller/schema incompatibility is an upstream operational blocker, not\nfailed IAM or module behavior. Its repair must retain authenticated workflow,\ncurrent controller and managed adoption boundaries; a new package pin alone\ncannot repair it. Central [#434](https://github.com/agent-teams-ai/.github/pull/434)\nselects the Extension Foundation canary; [#441](https://github.com/agent-teams-ai/.github/pull/441)\nhandles finite Runtime retirement recovery. Neither implements Orchestrator's\neligible controller/Cohort transition. The central governance owner must qualify\nthat transition and its consumer-specific desired selection; these existing PRs\nand their source qualification do not constitute Orchestrator migration evidence.",
-    "after": "The earlier [trusted Docs run](https://github.com/agent-teams-ai/agent-teams-orchestrator/actions/runs/45908886931)\nloaded validator `b30455e32cf5d54ade6d8301637701347e4ce57c` and rejected the\nregistry's generation 3 row at `/cohorts/44` before consumer execution. That\nupstream controller/schema refusal remains historical evidence; it was not an\nIAM or module-runtime failure. Central\n[#434](https://github.com/agent-teams-ai/.github/pull/434) selected the Extension\nFoundation canary, while [#441](https://github.com/agent-teams-ai/.github/pull/441)\nprovided finite Runtime retirement recovery. The separate Orchestrator orchestrator-v2\nrecord and desired selection preceded the actual\n[hosted lifecycle run](@@RUN_URL@@). Its retained outputs establish only the\nrecorded physical lifecycle and do not substitute for final-head or main CI.",
+    "after": "The earlier [trusted Docs run](https://github.com/agent-teams-ai/agent-teams-orchestrator/actions/runs/45908886931)\nloaded validator `b30455e32cf5d54ade6d8301637701347e4ce57c` and rejected the\nregistry's generation 3 row at `/cohorts/44` before consumer execution. That\nupstream controller/schema refusal remains historical evidence; it was not an\nIAM or module-runtime failure. Central\n[#434](https://github.com/agent-teams-ai/.github/pull/434) selected the Extension\nFoundation canary, while [#441](https://github.com/agent-teams-ai/.github/pull/441)\nprovided finite Runtime retirement recovery. The separate Orchestrator orchestrator-v3\nrecord and desired selection preceded the actual\n[hosted lifecycle run](@@RUN_URL@@). Its retained outputs establish only the\nrecorded physical lifecycle and do not substitute for final-head or main CI.",
     "count": 1
   },
   {
     "path": "docs/architecture/repository-tooling.md",
     "before": "retain real defect/refusal evidence and the separate pending managed admission",
-    "after": "retain real defect/refusal evidence, the actual orchestrator-v2 managed tuple and the separate resulting-main gate",
+    "after": "retain real defect/refusal evidence, the actual orchestrator-v3 managed tuple and the separate resulting-main gate",
     "count": 1
   },
   {
     "path": "docs/architecture/repository-tooling.md",
     "before": "A frozen installation, installed registry assertion and Stack doctor passed on\nthe initial compatible Node 24 check; the exact default Node `26.11.1` and pnpm\n`11.18.0` lane now exercises the migrated checks. The final PR evidence must state\nactual results and unresolved failures; this paragraph does not certify every\nnative/managed gate or a target's production behavior.",
-    "after": "The earlier frozen installation, installed registry assertion and Stack doctor\npassed on the initial compatible Node 24 check. The orchestrator-v2 candidate selects\nNode `26.11.1` and pnpm `11.20.0`; its Host engine declaration retains Node 24\ncompatibility for the separate required lane. The final PR evidence must state\nactual results and unresolved failures; this paragraph does not certify every\nnative/managed gate or a target's production behavior.",
+    "after": "The earlier frozen installation, installed registry assertion and Stack doctor\npassed on the initial compatible Node 24 check. The orchestrator-v3 candidate selects\nNode `26.12.1` and pnpm `11.20.0`; its Host engine declaration retains Node 24\ncompatibility for the separate required lane. The final PR evidence must state\nactual results and unresolved failures; this paragraph does not certify every\nnative/managed gate or a target's production behavior.",
     "count": 1
   },
   {
     "path": "docs/architecture/repository-tooling.md",
     "before": "Trusted managed Docs remains blocked by its independent central controller and\ncohort transition. Portable Docs `0.6.2` has no Foundation runtime edge and keeps\nits ordinary semantic route. Preserve that required route and the old managed\nreceipts while preparing the actual admitted successor. A green portable check\nor `assert-registry` result is not a managed Cohort qualification receipt.",
-    "after": "The real hosted controller completed retained preparation, an actual receipt\nwrite refusal, a fresh-process resume, source restoration and committed rollback,\nthen produced the final orchestrator-v2 managed target. The\n[inert evidence manifest](../research/evidence/managed-docs-orchestrator-v2-2026-11-27/manifest.json)\nbinds the actual source root, command outputs and generated file digests. It\nclaims no successful execution in the unavailable local environment. The Host\nintegration retains the original controller postimages as evidence and records\nits package/workspace/lock reconciliation separately. Ordinary final-head and\nresulting-main checks and central observed advancement remain separate gates.",
+    "after": "The real hosted controller completed retained preparation, an actual receipt\nwrite refusal, a fresh-process resume, source restoration and committed rollback,\nthen produced the final orchestrator-v3 managed target. The\n[inert evidence manifest](../research/evidence/managed-docs-orchestrator-v3-2026-11-27/manifest.json)\nbinds the actual source root, command outputs and generated file digests. It\nclaims no successful execution in the unavailable local environment. The Host\nintegration retains the original controller postimages as evidence and records\nits package/workspace/lock reconciliation separately. Ordinary final-head and\nresulting-main checks and central observed advancement remain separate gates.",
     "count": 1
   },
   {
     "path": "docs/open-decisions/OD-020-architecture-conformance-tooling.md",
     "before": "The candidate's managed admission is still a separate completion gate.",
-    "after": "The actual orchestrator-v2 managed transition is recorded in the\n[hosted lifecycle evidence](../research/evidence/managed-docs-orchestrator-v2-2026-11-27/manifest.json).\nFinal consumer and resulting-main admission remain separate completion gates.",
+    "after": "The actual orchestrator-v3 managed transition is recorded in the\n[hosted lifecycle evidence](../research/evidence/managed-docs-orchestrator-v3-2026-11-27/manifest.json).\nFinal consumer and resulting-main admission remain separate completion gates.",
     "count": 1
   },
   {
     "path": "docs/research/orchestrator-full-foundation-review-2026-11-26.md",
     "before": "installed checks from the still-required managed Cohort transition. This is an\nimplementation candidate, not a claim that all F0–F9 capabilities are qualified.",
-    "after": "installed checks from the\n[actual hosted managed transition](evidence/managed-docs-orchestrator-v2-2026-11-27/manifest.json)\nand the still-required final-head and resulting-main gates. This is an\nimplementation candidate, not a claim that all F0–F9 capabilities are qualified.",
+    "after": "installed checks from the\n[actual hosted managed transition](evidence/managed-docs-orchestrator-v3-2026-11-27/manifest.json)\nand the still-required final-head and resulting-main gates. This is an\nimplementation candidate, not a claim that all F0–F9 capabilities are qualified.",
+    "count": 1
+  },
+  {
+    "path": ".github/workflows/architecture.yml",
+    "before": "node-version: \"24.21.0\"",
+    "after": "node-version: \"24.22.3\"",
+    "count": 1
+  },
+  {
+    "path": ".github/workflows/od035-native-research.yml",
+    "before": "node-version: \"24.21.0\"",
+    "after": "node-version: \"24.22.3\"",
+    "count": 1
+  },
+  {
+    "path": ".github/workflows/reviewrouter-interaction.yml",
+    "before": "node-version: \"26.11.1\"",
+    "after": "node-version: \"26.12.1\"",
+    "count": 1
+  },
+  {
+    "path": "scripts/architecture/quality-source-coverage.test.mjs",
+    "before": "assert.equal(pkg.devDependencies[\"@agent-teams/engineering-foundation\"], \"4.0.2\");",
+    "after": "assert.equal(pkg.devDependencies[\"@agent-teams/engineering-foundation\"], \"4.0.3\");",
+    "count": 1
+  },
+  {
+    "path": "scripts/docs/docs-protocol-profile.test.mjs",
+    "before": "\"@agent-teams/engineering-foundation\": \"4.0.2\"",
+    "after": "\"@agent-teams/engineering-foundation\": \"4.0.3\"",
+    "count": 1
+  },
+  {
+    "path": "AGENTS.md",
+    "before": "under the product owner's explicit Node default migration. Node `24.21.0`",
+    "after": "under the product owner's explicit Node default migration. Node `24.22.3`",
+    "count": 1
+  },
+  {
+    "path": "AGENTS.md",
+    "before": "selects Foundation `4.0.2`, Stack `0.3.1` and TS `7.0.2`",
+    "after": "selects Foundation `4.0.3`, Stack `0.3.1` and TS `7.0.2`",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/repository-tooling.md",
+    "before": "The product owner's current migration selects Node.js `26.11.1` as the\nroot tooling default. Node.js `24.21.0` remains an explicit compatibility lane.",
+    "after": "The product owner's current migration selects Node.js `26.12.1` as the\nroot tooling default. Node.js `24.22.3` remains an explicit compatibility lane.",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/repository-tooling.md",
+    "before": "repository gate. The package engine ranges remain unchanged.",
+    "after": "repository gate. The root package engine range follows the qualified managed\npolicy: `>=24.22.3 <25 || >=26.12.1 <27`.",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/repository-tooling.md",
+    "before": "Foundation `4.0.2`, Stack Toolchain",
+    "after": "Foundation `4.0.3`, Stack Toolchain",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/repository-tooling.md",
+    "before": "Foundation `4.0.2` supports production",
+    "after": "Foundation `4.0.3` supports production",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/repository-tooling.md",
+    "before": "Node `24.21.0` retains an explicit compatibility lane.",
+    "after": "Node `24.22.3` retains an explicit compatibility lane.",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/repository-tooling.md",
+    "before": "Candidate pins `4.0.2` / `0.4.3`;",
+    "after": "Candidate pins `4.0.3` / `0.4.3`;",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/repository-tooling.md",
+    "before": "including the candidate `4.0.2`;",
+    "after": "including the candidate `4.0.3`;",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/repository-tooling.md",
+    "before": "Foundation `4.0.2` uses the native",
+    "after": "Foundation `4.0.3` uses the native",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/repository-tooling.md",
+    "before": "Its Node.js 26.11.1 runner source keeps",
+    "after": "Its Node.js 26.12.1 runner source keeps",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/repository-tooling.md",
+    "before": "Foundation `4.0.2` supplies the native",
+    "after": "Foundation `4.0.3` supplies the native",
+    "count": 1
+  },
+  {
+    "path": "docs/research/orchestrator-full-foundation-review-2026-11-26.md",
+    "before": "The active candidate uses published Foundation `4.0.2`,",
+    "after": "The active candidate uses published Foundation `4.0.3`,",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/dependency-rules.md",
+    "before": "`@agent-teams/engineering-foundation` `4.0.2` for repository engineering gates,",
+    "after": "`@agent-teams/engineering-foundation` `4.0.3` for repository engineering gates,",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/feature-module-standard.md",
+    "before": "The owner-authorized Foundation `4.0.2` tooling candidate replaces the historical",
+    "after": "The owner-authorized Foundation `4.0.3` tooling candidate replaces the historical",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/security-architecture.md",
+    "before": "immutably. Its Node.js 26.11.1 runner keeps exact-source SHA-256",
+    "after": "immutably. Its Node.js 26.12.1 runner keeps exact-source SHA-256",
+    "count": 1
+  },
+  {
+    "path": "docs/open-decisions/OD-035-local-durable-workflow-engine.md",
+    "before": "user; PostgreSQL does not run as root. Node `24.21.0` is the repository's explicit",
+    "after": "user; PostgreSQL does not run as root. Node `24.22.3` is the repository's explicit",
+    "count": 1
+  },
+  {
+    "path": "scripts/security/validate-reviewrouter-workflow.mjs",
+    "before": "336a904791d2e84164b44b2342aa5acc6d63cff36aac71cbce80a8c6fc8b8843",
+    "after": "0f9aa7afe102feccf23de1ed53fac5fe8a76bad738fc3fda50a79016fa22006f",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/security-architecture.md",
+    "before": "336a904791d2e84164b44b2342aa5acc6d63cff36aac71cbce80a8c6fc8b8843",
+    "after": "0f9aa7afe102feccf23de1ed53fac5fe8a76bad738fc3fda50a79016fa22006f",
+    "count": 1
+  },
+  {
+    "path": "docs/architecture/repository-tooling.md",
+    "before": "336a904791d2e84164b44b2342aa5acc6d63cff36aac71cbce80a8c6fc8b8843",
+    "after": "0f9aa7afe102feccf23de1ed53fac5fe8a76bad738fc3fda50a79016fa22006f",
     "count": 1
   }
 ];
@@ -283,11 +527,12 @@ export function boundedCommandFailure(metadata, stdout, stderr) {
 export function reconcilePackage(host, source, target) {
   assert.equal(target.packageManager, "pnpm@11.20.0");
   assert.equal(target.engines.pnpm, "11.20.0");
-  assert.equal(target.engines.node, ">=26.0.0 <27");
+  assert.equal(target.engines.node, ">=26.12.1 <27");
   assert.equal(host.engines.node, ">=24.21.0 <25 || >=26.0.0 <27");
   const result = structuredClone(host);
   result.packageManager = target.packageManager;
   result.engines.pnpm = target.engines.pnpm;
+  result.engines.node = ">=24.22.3 <25 || >=26.12.1 <27";
   for (const key of DIRECT) {
     assert.equal(target.devDependencies[key], TUPLE[key]);
     result.devDependencies[key] = target.devDependencies[key];
@@ -302,7 +547,7 @@ export function reconcilePackage(host, source, target) {
   assert.equal(result.devDependencies["@agent-teams/feature-module-standard"], "0.4.3");
   assert.equal(result.devDependencies["stack-toolchain"], "0.3.1");
   assert.equal(result.scripts["foundation:check"], host.scripts["foundation:check"]);
-  assert.equal(result.engines.node, host.engines.node);
+  assert.equal(result.engines.node, ">=24.22.3 <25 || >=26.12.1 <27");
   return result;
 }
 export function reconcileWorkspace(host, target) {
@@ -328,7 +573,7 @@ export function reconcileWorkspace(host, target) {
   return host;
 }
 function parseArgs(argv) {
-  const keys = ["candidate", "target", "evidence", "controller", "node24", "node26", "corepack", "export"];
+  const keys = ["candidate", "target", "evidence", "controller", "node24", "node26", "corepack", "closure", "export"];
   const args = {};
   for (let i = 0; i < argv.length; i += 2) {
     const key = argv[i]?.replace(/^--/, "");
@@ -342,7 +587,7 @@ async function main() {
   assert.equal(process.env.GITHUB_ACTIONS, "true", "This helper executes only in its hosted qualification job");
   assert.equal(process.env.GITHUB_REPOSITORY, "agent-teams-ai/agent-teams-orchestrator");
   const args = parseArgs(process.argv.slice(2));
-  for (const key of ["candidate", "target", "evidence", "controller", "node24", "node26", "corepack"]) {
+  for (const key of ["candidate", "target", "evidence", "controller", "node24", "node26", "corepack", "closure"]) {
     args[key] = await realpath(args[key]);
   }
   // The exclusive output does not exist yet; canonicalize its existing parent
@@ -350,7 +595,7 @@ async function main() {
   args.export = join(await realpath(dirname(args.export)), basename(args.export));
   const controllerRoot = await realpath(join(dirname(args.evidence), "controller"));
   assert.ok(within(controllerRoot, args.controller) && within(controllerRoot, args.corepack));
-  for (const key of ["target", "evidence", "controller", "node24", "node26", "corepack", "export"]) {
+  for (const key of ["target", "evidence", "controller", "node24", "node26", "corepack", "closure", "export"]) {
     assertDisjoint(args.candidate, args[key], "Candidate and " + key);
   }
   assertDisjoint(args.candidate, controllerRoot, "Candidate and controller installation");
@@ -396,11 +641,18 @@ async function main() {
   assert.equal(profile.cohort.recordDigest, RECORD);
   assert.equal(state.schemaVersion, 3);
   assert.equal(state.cohortId, COHORT);
+  assert.equal((await readFile(join(args.target, ".node-version"), "utf8")).trim(), INPUT_BINDING.runtime.targetPin.trim());
+  assert.equal(targetAssets.find((x) => x.path === "pnpm-lock.yaml").sha256, INPUT_BINDING.selectedLock.sha256);
   const observations = {};
   const retainedOutputs = [];
   for (const label of LABELS) {
     const meta = await json(join(args.evidence, "commands", label + ".meta.json"));
     assert.equal(meta.label, label);
+    if (label.endsWith("-prepare")) {
+      const targetLockArg = meta.argv.indexOf("--target-lockfile-sha256");
+      assert.ok(targetLockArg >= 0);
+      assert.equal(meta.argv[targetLockArg + 1], INPUT_BINDING.selectedLock.sha256);
+    }
     const ci = meta.argv.indexOf("--consumer");
     assert.ok(ci >= 0 && meta.argv[ci + 1] === args.target);
     assert.ok(Number.isInteger(meta.exitCode));
@@ -440,6 +692,8 @@ async function main() {
     assert.equal(sha(prepBytes), summary.phases[phase].preparationDigest);
     assert.equal(prep.plan.planDigest, summary.phases[phase].planDigest);
     assert.equal(prep.sourceRevision, SOURCE);
+    assert.equal(prep.plan.operations.length, 7);
+    assert.deepEqual(prep.plan.operations.map((x) => x.path).sort(), ASSETS);
     assert.equal(prep.consumer.root, args.target);
     assert.equal(observations[phase + "-prepare"].outcome, "prepared");
     assert.equal(observations[phase + "-prepare"].preparation.digest, sha(prepBytes));
@@ -464,7 +718,7 @@ async function main() {
   const hostPackage = await json(join(args.candidate, "package.json"));
   const sourcePackage = JSON.parse(git(args.target, "show", SOURCE + ":package.json"));
   const targetPackage = await json(join(args.target, "package.json"));
-  const hostEngine = hostPackage.engines.node;
+  const hostEngine = ">=24.22.3 <25 || >=26.12.1 <27";
   await writeOwned(args.candidate, "package.json", JSON.stringify(reconcilePackage(hostPackage, sourcePackage, targetPackage), null, 2) + "\n");
   await writeOwned(args.candidate, "pnpm-workspace.yaml", reconcileWorkspace(
     await readFile(join(args.candidate, "pnpm-workspace.yaml"), "utf8"),
@@ -511,11 +765,104 @@ async function main() {
     return stdoutBytes.toString("utf8");
   }
   const pnpm = (label, argv, timeout) => run(label, args.node26, [args.corepack, "pnpm", ...argv], timeout);
-  assert.equal((await run("node26-version", args.node26, ["--version"])).trim(), "v26.11.1");
-  assert.equal((await run("node24-version", args.node24, ["--version"])).trim(), "v24.21.0");
+  assert.equal((await run("node26-version", args.node26, ["--version"])).trim(), "v26.12.1");
+  assert.equal((await run("node24-version", args.node24, ["--version"])).trim(), "v24.22.3");
   assert.equal((await pnpm("pnpm-version", ["--version"])).trim(), "11.20.0");
   await pnpm("lock-generation", ["install", "--lockfile-only", "--ignore-scripts", "--config.engine-strict=true", "--strict-peer-dependencies"]);
+
+  const closureInput = await regular(dirname(args.closure), basename(args.closure), 2_097_152);
+  assert.equal(sha(closureInput.bytes), INPUT_BINDING.target.closure.digest);
+  const yamlEntry = await realpath(createRequire(args.controller).resolve("yaml"));
+  assert.ok(within(controllerRoot, yamlEntry), "YAML parser must come from the retained controller installation");
+  const yaml = await import(pathToFileURL(yamlEntry).href);
+  const initialHostLock = await regular(args.candidate, "pnpm-lock.yaml");
+  let lockDraft = createSelectedLockDraft({ sourceLockBytes: initialHostLock.bytes,
+    closureBytes: closureInput.bytes, expectedClosureDigest: INPUT_BINDING.target.closure.digest,
+    yaml, mode: "construct" });
+  let foreignDependencyRefresh = null;
+  async function hostForeignInventory() {
+    const paths = [...new Set(git(args.candidate, "ls-files", "--cached", "--others", "--exclude-standard", "-z")
+      .split("\0").filter((path) => path && path !== "pnpm-lock.yaml"))].sort();
+    const rows = [];
+    for (const path of paths) {
+      const file = await regular(args.candidate, path);
+      rows.push({ ...describe(path, file.bytes, file.mode), filesystemMode: file.permissions });
+    }
+    const pending = [args.candidate];
+    let visited = 0;
+    while (pending.length) {
+      const directory = pending.pop();
+      assert.ok(++visited <= 10_000, "Candidate directory inventory exceeded its bound");
+      for (const entry of await readdir(directory, { withFileTypes: true })) {
+        if (entry.name === ".git") continue;
+        assert.notEqual(entry.name, "node_modules", "Lock-only refresh must not materialize a workspace installation");
+        if (entry.isDirectory()) pending.push(join(directory, entry.name));
+      }
+    }
+    return rows;
+  }
+  const refreshedNames = new Set();
+  for (let pass = 1; lockDraft.report.collisions.length && pass <= 2; pass += 1) {
+    const collisions = lockDraft.report.collisions;
+    const names = new Set();
+    const targetClosure = JSON.parse(utf8(closureInput.bytes));
+    for (const collision of collisions) {
+      assert.equal(collision.kind, "snapshot", "Only observed dependency-edge conflicts permit a package-manager refresh");
+      assert.equal(collision.foreignReachable, true);
+      for (const difference of collision.differences) {
+        const match = /^(?:dependencies|optionalDependencies)\.(.+)$/.exec(difference.path);
+        assert.ok(match && typeof difference.before === "string" && typeof difference.after === "string",
+          "Non-dependency snapshot changes require explicit review");
+        const name = match[1];
+        assert.match(name, /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/);
+        const version = difference.after.split("(", 1)[0];
+        assert.match(version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/);
+        assert.ok(Object.hasOwn(targetClosure.pnpmLock.packages, name + "@" + version),
+          "Refresh destination must exist in the actual canonical closure");
+        names.add(name);
+      }
+    }
+    assert.ok(names.size > 0, "Refresh selection must be nonempty");
+    for (const name of names) {
+      assert.ok(!refreshedNames.has(name), "Repeated unresolved refresh selection requires explicit review: " + name);
+      refreshedNames.add(name);
+    }
+    assert.ok(refreshedNames.size <= 8, "Cumulative refresh selection must remain bounded");
+    const protectedDiff = git(args.candidate, "diff", "--binary", "HEAD", "--", ".", ":(exclude)pnpm-lock.yaml");
+    const protectedUntracked = git(args.candidate, "ls-files", "--others", "--exclude-standard", "-z");
+    const protectedInventory = await hostForeignInventory();
+    const beforeRefresh = await regular(args.candidate, "pnpm-lock.yaml");
+    const selectors = [...names].sort();
+    const command = "host-transitive-lock-refresh-" + pass;
+    await writeFile(join(commandsRoot, command + ".before-report.json"), JSON.stringify(lockDraft.report, null, 2) + "\n", { flag: "wx" });
+    await pnpm(command, ["update", "--recursive", "--include-workspace-root", ...selectors, "--depth", "Infinity",
+      "--no-save", "--lockfile-only", "--no-changeset", "--ignore-scripts", "--ignore-pnpmfile",
+      "--engine-strict", "--config.strict-peer-dependencies=true", "--config.frozen-lockfile=false",
+      "--config.prefer-frozen-lockfile=false", "--config.verify-store-integrity=true"]);
+    assert.equal(git(args.candidate, "diff", "--binary", "HEAD", "--", ".", ":(exclude)pnpm-lock.yaml"), protectedDiff);
+    assert.equal(git(args.candidate, "ls-files", "--others", "--exclude-standard", "-z"), protectedUntracked);
+    assert.deepEqual(await hostForeignInventory(), protectedInventory,
+      "Dependency refresh changed non-lock candidate bytes or modes");
+    const refreshed = await regular(args.candidate, "pnpm-lock.yaml");
+    foreignDependencyRefresh ??= { maxPasses: 2, passes: [] };
+    foreignDependencyRefresh.passes.push({ pass, selectors, before: describe("pnpm-lock.yaml", beforeRefresh.bytes),
+      after: describe("pnpm-lock.yaml", refreshed.bytes), command });
+    lockDraft = createSelectedLockDraft({ sourceLockBytes: refreshed.bytes,
+      closureBytes: closureInput.bytes, expectedClosureDigest: INPUT_BINDING.target.closure.digest,
+      yaml, mode: "construct" });
+    await writeFile(join(commandsRoot, command + ".after-report.json"), JSON.stringify(lockDraft.report, null, 2) + "\n", { flag: "wx" });
+  }
+  await writeFile(join(commandsRoot, "host-selected-lock-report.json"), JSON.stringify(lockDraft.report, null, 2) + "\n", { flag: "wx" });
+  if (lockDraft.report.outcome !== "constructed-unadmitted" || lockDraft.report.collisions.length || !lockDraft.bytes) {
+    emitTextFrames("ORCHESTRATOR_HOST_FAILURE", "commands/host-selected-lock-report.json",
+      Buffer.from(JSON.stringify(lockDraft.report, null, 2) + "\n"));
+    throw new Error("Host selected lock construction refused; canonical closure and foreign projection remain enforced");
+  }
+  await writeOwned(args.candidate, "pnpm-lock.yaml", lockDraft.bytes);
+  const selectedHostLock = describe("pnpm-lock.yaml", lockDraft.bytes);
   await pnpm("frozen-install", ["install", "--frozen-lockfile", "--config.engine-strict=true", "--strict-peer-dependencies"]);
+  assert.equal(sha((await regular(args.candidate, "pnpm-lock.yaml")).bytes), selectedHostLock.sha256,
+    "Frozen installation changed the selected Host lock");
   await pnpm("installed-peers", ["peers", "check"]);
   await pnpm("docs-info", ["docs:info"]);
   await pnpm("docs-find", ["docs:find", "--", "--text", "repository tooling"]);
@@ -528,12 +875,16 @@ async function main() {
   const manifest = {
     schemaVersion: 1, evidenceClass: "inert-hosted-managed-lifecycle-observation", authority: false, replayable: false,
     run: { ...summary.run, url: runUrl, workflowCommit: process.env.GITHUB_SHA, workflowRef: process.env.GITHUB_WORKFLOW_REF },
-    source: summary.source, authorityRevision: summary.authorityRevision,
+    source: summary.source, originalMainRevision: INPUT_BINDING.originalMainRevision,
+    selectedTargetLock: summary.selectedTargetLock, harnessInputBindingSha256: summary.harnessInputBindingSha256,
+    sourcePrerequisite: INPUT_BINDING.sourceAdmission ?? null, selectedPhysicalLock: INPUT_BINDING.selectedLock,
+    authorityRevision: summary.authorityRevision,
     controller: summary.controller, kernel: summary.kernel, runtimes: summary.runtimes, phases: summary.phases,
     physicalTargetFiles: targetAssets, retainedOutputs, externalProofDigests: proofDigests,
     hostReconciliation: { baseCommit: BASE, physicalNodeEngine: targetPackage.engines.node, hostNodeEngine: hostEngine,
-      defaultNode: "26.11.1", pnpm: "11.20.0", foundation: "4.0.2", fms: "0.4.3", stack: "0.3.1",
+      defaultNode: "26.12.1", pnpm: "11.20.0", foundation: "4.0.3", fms: "0.4.3", stack: "0.3.1",
       derivedFields: ["package.json", "pnpm-workspace.yaml", "pnpm-lock.yaml"],
+      selectedHostLock, foreignDependencyRefresh, canonicalRuntimeClosureDigest: INPUT_BINDING.target.closure.digest,
       generatedAssetsPreserved: FULL_ASSETS, mandatoryQualityContractSha256: "sha256:" + REQUIRED_HASH },
     remaining: ["final published PR head CI", "resulting main CI", "central observed binding and CANARY"],
     limitations: ["No unavailable-local-environment execution is claimed.", "Archived proof copies are not live authority."]

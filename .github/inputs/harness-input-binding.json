@@ -4,7 +4,13 @@
   "sourceLockSha256": "sha256:0ebee389b33d6ee41beb3f4a3dd28e20f956c177b17a2911d5a812160ea07044",
   "sourceLockGitBlob": "596614ef81a97d2b825e06d15086ca36dd20656a",
   "originalMainRevision": "3dccf2c53bf11f3939a19734a58f5e64d96673d0",
-  "sourceAdmission": null,
+  "sourceAdmission": {
+    "metaSha256": "sha256:94296a4fcdec10ce7e4eb054edb8341a54478a695a4df930d1e138f9bb1dd1a5",
+    "stdoutSha256": "sha256:75d35e87cbc93c3016584bb8a19f73a422488932447e9fb486ad034a2d178977",
+    "preparationSha256": "sha256:b7849c93c324c184c2aaccfc9c86a98e1a2a62c5957e4fabb75b6c09f247cae7",
+    "replayable": false,
+    "finalPhysicalConsumerQualified": false
+  },
   "authoritySnapshotRevision": "d167b2360524474240a43e3ff70e35eb94e109c7",
   "target": {
     "cohortId": "docs-2026-11-27-orchestrator-v3",

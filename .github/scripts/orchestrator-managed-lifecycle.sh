@@ -7,11 +7,20 @@ test "$GITHUB_REPOSITORY" = agent-teams-ai/agent-teams-orchestrator
 test "$GITHUB_REPOSITORY_ID" = 1310245598
 test "$(id -u)" -ne 0
 unset NODE_OPTIONS NODE_PATH
-SOURCE_REV=3dccf2c53bf11f3939a19734a58f5e64d96673d0
-SOURCE_TREE=a92524845b6d7915e37b61ef40b72bd71634d193
+ORIGINAL_MAIN_REV=3dccf2c53bf11f3939a19734a58f5e64d96673d0
+SOURCE_REV=ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67
+SOURCE_TREE=a24da96493edd1c6fe3bd5868d4cf636007bcf04
 FROM=docs-2026-10-03-stable31
-TO=docs-2026-11-27-orchestrator-v2
+TO=docs-2026-11-27-orchestrator-v3
 ROOT="$E2E_ROOT"
+SELECTED_LOCK="$(realpath "$E2E_SELECTED_TARGET_LOCKFILE")"
+test "$SELECTED_LOCK" = "$GITHUB_WORKSPACE/harness/.github/inputs/selected-target-lock.yaml"
+test "$E2E_SELECTED_TARGET_LOCK_SHA256" = "sha256:a8080107bb13e2170fee5e3f25f30ff5df835cd5e540e66f177a0ef0e57c264b"
+test "$(realpath "$E2E_HARNESS_INPUT_BINDING")" = "$GITHUB_WORKSPACE/harness/.github/inputs/harness-input-binding.json"
+test "$(sha256sum "$E2E_HARNESS_INPUT_BINDING" | cut -d' ' -f1)" = "b8e476f1713a623526c3e9560966761c873f7ac601c1753a4d49e6d5a91bcfdb"
+test "$(realpath "$E2E_TARGET_RUNTIME_CLOSURE")" = "$GITHUB_WORKSPACE/harness/.github/inputs/target-runtime-closure.json"
+test "$(sha256sum "$E2E_TARGET_RUNTIME_CLOSURE" | cut -d' ' -f1)" = "7957b8b2b7e20efc6f940b77ca596670d2a8555a9ccf10dc00926ad270eae475"
+export SELECTED_LOCK ORIGINAL_MAIN_REV
 CONSUMER="$(realpath "$E2E_CONSUMER")"
 NODE24="$(realpath "$AGENT_TEAMS_DOCS_UPGRADE_NODE24_EXECUTABLE")"
 NODE26="$(realpath "$AGENT_TEAMS_DOCS_UPGRADE_NODE26_EXECUTABLE")"
@@ -20,10 +29,15 @@ test "$(git -C "$CONSUMER" rev-parse --show-toplevel)" = "$CONSUMER"
 test "$(git -C "$CONSUMER" rev-parse HEAD)" = "$SOURCE_REV"
 test "$(git -C "$CONSUMER" rev-parse 'HEAD^{tree}')" = "$SOURCE_TREE"
 test -z "$(git -C "$CONSUMER" status --porcelain=v1 --untracked-files=all)"
+test "$(sha256sum "$CONSUMER/pnpm-lock.yaml" | cut -d' ' -f1)" = "0ebee389b33d6ee41beb3f4a3dd28e20f956c177b17a2911d5a812160ea07044"
 mkdir "$ROOT" # Exclusive allocation: never reuse another attempt or its live proofs.
 EVID="$ROOT/evidence"
 TOOLING="$ROOT/controller"
 mkdir -p "$EVID/commands" "$EVID/authority" "$TOOLING" "$ROOT/cache" "$ROOT/tmp"
+cp "$E2E_HARNESS_INPUT_BINDING" "$EVID/harness-input-binding.json"
+cp "$E2E_TARGET_RUNTIME_CLOSURE" "$EVID/target-runtime-closure.json"
+cp "$GITHUB_WORKSPACE/harness/.github/inputs/selected-target-lock-report.json" "$EVID/selected-target-lock-report.json"
+test "$(sha256sum "$EVID/selected-target-lock-report.json" | cut -d' ' -f1)" = "4e04cf99c102c94f4289922a0bfb9a710ef6a7b6f578b126cbcaa3e26c716cdf"
 mkdir -m 700 "$EVID/proofs" "$EVID/proofs/A" "$EVID/proofs/B" "$EVID/proofs/C"
 A="$EVID/proofs/A/completion.json"
 B="$EVID/proofs/B/completion.json"
@@ -46,7 +60,7 @@ api() {
     "https://api.github.com/repos/$repository/$1"
 }
 api branches/main agent-teams-ai/agent-teams-orchestrator > "$EVID/authority/consumer-main.json"
-test "$(jq -er .commit.sha "$EVID/authority/consumer-main.json")" = "$SOURCE_REV"
+test "$(jq -er .commit.sha "$EVID/authority/consumer-main.json")" = "$ORIGINAL_MAIN_REV"
 api commits/main > "$EVID/authority/main.json"
 api branches/main > "$EVID/authority/branch.json"
 AUTHORITY="$(jq -er .sha "$EVID/authority/main.json")"
@@ -61,7 +75,7 @@ unset CENTRAL_READ_TOKEN
 jq -e '
   [.repositories[] | select(.repository_id == 1310245598)] as $r |
   ($r|length)==1 and $r[0].cohort_binding_status=="rollout_pending" and
-  $r[0].desired_cohort_id=="docs-2026-11-27-orchestrator-v2" and $r[0].desired_cohort_generation==3 and
+  $r[0].desired_cohort_id=="docs-2026-11-27-orchestrator-v3" and $r[0].desired_cohort_generation==3 and
   $r[0].observed_cohort_id=="docs-2026-10-03-stable31" and $r[0].observed_cohort_generation==2 and
   $r[0].v3_qualification_coordinates.profile_schema_version==4 and
   $r[0].v3_qualification_coordinates.cohort_schema_version==3 and
@@ -70,13 +84,16 @@ jq -e '
   $r[0].v3_qualification_coordinates.execution_envelope_schema_version==1
 ' "$EVID/authority/docs-protocol-policy-v2.json" > /dev/null
 jq -e '
-  [.cohorts[] | select(.cohort_id=="docs-2026-11-27-orchestrator-v2")] as $r |
+  [.cohorts[] | select(.cohort_id=="docs-2026-11-27-orchestrator-v3")] as $r |
   ($r|length)==1 and $r[0].cohort_generation==3 and
-  $r[0].record_digest=="sha256:db8d4e1cf8295e4760186a9fcfb31b22b3cf2cb0d876923ba6b382b0ec6b9e7e" and
+  $r[0].record_digest=="sha256:f61e98c96fcc7beab30b6956312dead50a363c403fd67cdce4d0f18e8e69424c" and
   [$r[0].canary_repositories[].repository_id]==[1310245598] and
   $r[0].upgrade_from==["docs-2026-10-03-stable31"] and
   $r[0].rollback_to==["docs-2026-10-03-stable31"] and
-  $r[0].reusable_workflow.revision=="997f24396598f93cf1b03bb26436a5ec7686ddef"
+  $r[0].reusable_workflow.revision=="997f24396598f93cf1b03bb26436a5ec7686ddef" and
+  $r[0].reusable_workflow.blob_sha=="714af12998ef140dd55a2ec3057f67775586cfd7" and
+  $r[0].policy_identity.version=="3.1.0" and $r[0].policy_identity.digest=="sha256:18db0135d1d6191ef78c1feb243f5dc672aaed9985f52be1a72af4fdd7e9bb4e" and
+  ([.events[] | select(.cohort_id=="docs-2026-11-27-orchestrator-v3")] | last | .state=="QUALIFIED" and .event_digest=="sha256:4451ea715ef68048c01e182fe4755acc4639d7d2e106e536e2b240834e7084c0")
 ' "$EVID/authority/docs-qualified-cohorts.json" > /dev/null
 export AUTHORITY
 
@@ -134,7 +151,7 @@ JS
 printf '{"name":"orchestrator-retained-controller","private":true}\n' > "$TOOLING/package.json"
 cd "$TOOLING"
 run controller-install success npm install --ignore-scripts --no-audit --no-fund --save-exact \
-  @agent-teams/docs-protocol-agent-teams@0.7.1 @agent-teams/repository-mutation@0.5.2 corepack@0.36.0
+  @agent-teams/docs-protocol-agent-teams@0.8.0 @agent-teams/repository-mutation@0.5.2 corepack@0.36.0
 CONTROLLER="$(realpath "$TOOLING/node_modules/@agent-teams/docs-protocol-agent-teams")"
 CLI="$CONTROLLER/dist/cli.js"
 COREPACK="$(realpath "$TOOLING/node_modules/corepack/dist/corepack.js")"
@@ -149,7 +166,7 @@ import {computeInstalledArtifactBuildIdentity} from "@agent-teams/repository-mut
 const sha=b=>"sha256:"+createHash("sha256").update(b).digest("hex"), env=process.env;
 const lock=JSON.parse(await readFile("package-lock.json","utf8"));
 for(const [name,version,integrity] of [
- ["docs-protocol-agent-teams","0.7.1","sha512-Kio0YA5lPu8xxDEoLxzEK+VHcsre6M+5vEhlCpew+lLjs3OXdu5elh/eLksxwYeY3TLOtte74zZn7c7oiBCwLw=="],
+ ["docs-protocol-agent-teams","0.8.0","sha512-BixlYEalI0/j4auoSLBSBlKJGUXyZeuKS3WI+5nxdiAPg/yyAtKHjhmxuo059YZPn0+R931M0sdpNHRkpgDUDg=="],
  ["repository-mutation","0.5.2","sha512-eK/HsE/1qt+TXzrrbggXykZJXloFZfZD0ZlwdGbm2Jc9O6lAlhu7+w9BdSeryX/vCyMYWeRLv38S/7V717RPMg=="]]){
  const entry=lock.packages["node_modules/@agent-teams/"+name];
  assert.equal(entry.version,version);assert.equal(entry.integrity,integrity);
@@ -165,10 +182,10 @@ const consumerIdentity={root:env.CONSUMER,device:String(physicalRoot.dev),inode:
 const controller=await computeInstalledArtifactBuildIdentity({packageRoot:env.CONTROLLER,roots:["dist","assets","schemas"]});
 const kernelRoot=await realpath("node_modules/@agent-teams/repository-mutation");
 const kernel=await computeInstalledArtifactBuildIdentity({packageRoot:kernelRoot,roots:["dist","schemas"]});
-assert.equal(controller,"sha256:afc4bae5ec06d24b03fbfe77373911d981379d6e0e5b3356c8ae82ccb7d38ad3");
+assert.equal(controller,"sha256:5d5563eb771de586b7d43e58aa68d1e62d92a58bff87a362ff5b8b7d582dac80");
 assert.equal(kernel,"sha256:89c1df01b0fd3ea5d8db6adf51fa65a92f8509aaffde78217cb31a2c9084e8e1");
 assert.equal(lock.packages["node_modules/corepack"].version,"0.36.0");
-console.log(JSON.stringify({node24:await observe(env.NODE24,"24.21.0"),node26:await observe(env.NODE26,"26.11.1"),
+console.log(JSON.stringify({node24:await observe(env.NODE24,"24.22.3"),node26:await observe(env.NODE26,"26.12.1"),
  corepack:{version:"0.36.0",entrypoint:env.COREPACK,sha256:sha(await readFile(env.COREPACK)),integrity:lock.packages["node_modules/corepack"].integrity},
  controllerBuildIdentity:controller,kernelBuildIdentity:kernel,consumerIdentity}));
 JS
@@ -202,7 +219,7 @@ import base64,hashlib,json,os,pathlib,shutil,stat,subprocess,sys
 root=pathlib.Path(os.environ["CONSUMER"]); evidence=pathlib.Path(os.environ["EVID"])
 allowed=sorted(["architecture/foundation/docs-consumer-integration.json",
  "architecture/foundation/docs-protocol-managed-state.json",".github/workflows/docs-protocol.yml",
- "package.json","pnpm-workspace.yaml","pnpm-lock.yaml"])
+ "package.json","pnpm-workspace.yaml","pnpm-lock.yaml",".node-version"])
 sha=lambda b:"sha256:"+hashlib.sha256(b).hexdigest()
 read=lambda p:json.loads(pathlib.Path(p).read_bytes())
 write=lambda p,v:pathlib.Path(p).write_text(json.dumps(v,sort_keys=True,separators=(",",":"))+"\n")
@@ -219,9 +236,44 @@ def snapshot():
     return sorted(result,key=lambda x:x["path"])
 def output(label): return read(evidence/"commands"/(label+".stdout.json"))
 def prep(phase): return read(evidence/"proofs"/phase/"completion.json.prepared")
+def selected_lock_check(initial=False):
+    path=pathlib.Path(os.environ["SELECTED_LOCK"])
+    assert path.resolve()==path and path.is_absolute()
+    for other in [root,pathlib.Path(os.environ["ROOT"])]:
+        assert path!=other and other not in path.parents and path not in other.parents
+    before=path.lstat(); data=path.read_bytes(); after=path.lstat()
+    assert stat.S_ISREG(before.st_mode) and before.st_nlink==1 and 0<len(data)<=32*1024*1024
+    assert (before.st_dev,before.st_ino,before.st_size,before.st_mtime_ns,before.st_ctime_ns)==(after.st_dev,after.st_ino,after.st_size,after.st_mtime_ns,after.st_ctime_ns)
+    assert sha(data)==os.environ["E2E_SELECTED_TARGET_LOCK_SHA256"]=="sha256:a8080107bb13e2170fee5e3f25f30ff5df835cd5e540e66f177a0ef0e57c264b"
+    assert len(data)==320228
+    observed=dict(schemaVersion=1,scope="selected-lock-input",qualificationAuthority=False,
+        path=str(path),bytes=len(data),sha256=sha(data),gitBlob=hashlib.sha1(b"blob "+str(len(data)).encode()+b"\0"+data).hexdigest(),
+        device=str(before.st_dev),inode=str(before.st_ino),mode=format(stat.S_IMODE(before.st_mode),"04o"),
+        sourceRevision=os.environ["SOURCE_REV"],sourceTree=os.environ["SOURCE_TREE"],
+        sourceLockSha256="sha256:0ebee389b33d6ee41beb3f4a3dd28e20f956c177b17a2911d5a812160ea07044",closureDigest="sha256:7957b8b2b7e20efc6f940b77ca596670d2a8555a9ccf10dc00926ad270eae475",
+        constructionReportSha256="sha256:4e04cf99c102c94f4289922a0bfb9a710ef6a7b6f578b126cbcaa3e26c716cdf",harnessInputBindingSha256="sha256:b8e476f1713a623526c3e9560966761c873f7ac601c1753a4d49e6d5a91bcfdb")
+    assert observed["gitBlob"]=="5b452244b3d74dd49432e659abd575efca49c4c2"
+    if initial:
+        assert not (evidence/"selected-lock-observation.json").exists()
+        write(evidence/"selected-lock-observation.json",observed)
+        (evidence/"selected-target-lock.yaml").write_bytes(data)
+    else:
+        assert observed==read(evidence/"selected-lock-observation.json")
+        assert (evidence/"selected-target-lock.yaml").read_bytes()==data
+    return data
 def image_check(phase,source):
     selected=prep(phase)
     assert sorted(x["path"] for x in selected["plan"]["operations"])==allowed
+    selected_bytes=selected_lock_check()
+    lock_op=next(x for x in selected["plan"]["operations"] if x["path"]=="pnpm-lock.yaml")
+    assert lock_op["postimage"]["digest"]==sha(selected_bytes)
+    assert base64.b64decode(lock_op["postimage"]["contentBase64"],validate=True)==selected_bytes
+    pin_op=next(x for x in selected["plan"]["operations"] if x["path"]==".node-version")
+    assert len(pin_op["precondition"]["acceptedPreimages"])==1
+    pin_before=pin_op["precondition"]["acceptedPreimages"][0]
+    assert base64.b64decode(pin_before["contentBase64"],validate=True)==b"26.11.1\n"
+    assert base64.b64decode(pin_op["postimage"]["contentBase64"],validate=True)==b"26.12.1\n"
+    assert pin_op["postimage"]["mode"]==pin_before["mode"]
     expected={x["path"]:x for x in read(evidence/"source-inventory.json")}
     for op in selected["plan"]["operations"]:
         assert op["precondition"]["state"]=="known-file" and len(op["precondition"]["acceptedPreimages"])==1
@@ -253,7 +305,9 @@ def completed(phase,label,expected):
     assert completion["receipt"]==receipt and companion==dict(preparationDigest=digest,receipt=receipt)
 action=sys.argv[1]
 if action=="baseline":
+    selected_lock_check(initial=True)
     write(evidence/"source-inventory.json",snapshot()); source_check()
+elif action=="selected": selected_lock_check()
 elif action=="source": source_check()
 elif action=="prepare":
     phase=sys.argv[2]; result=output(phase+"-prepare"); proof=evidence/"proofs"/phase/"completion.json.prepared"
@@ -309,7 +363,9 @@ elif action=="export":
         run=dict(repository=os.environ["GITHUB_REPOSITORY"],runId=os.environ["GITHUB_RUN_ID"],runAttempt=os.environ["GITHUB_RUN_ATTEMPT"]),
         source=dict(revision=os.environ["SOURCE_REV"],tree=os.environ["SOURCE_TREE"],consumer=prep("C")["consumer"]),
         authorityRevision=os.environ["AUTHORITY"],controller=prep("C")["controller"],kernel=prep("C")["kernel"],
-        runtimes=read(evidence/"runtimes.json"),phases=phases,assets=assets)
+        runtimes=read(evidence/"runtimes.json"),phases=phases,assets=assets,
+        originalMainRevision=os.environ["ORIGINAL_MAIN_REV"],selectedTargetLock=read(evidence/"selected-lock-observation.json"),
+        harnessInputBindingSha256=sha((evidence/"harness-input-binding.json").read_bytes()))
     write(evidence/"summary.json",summary)
     proof_records=[]
     proof_paths=[p for p in (evidence/"proofs").rglob("*") if p.is_file()]+[evidence/"source-inventory.json"]
@@ -326,7 +382,8 @@ elif action=="export":
         print("ORCHESTRATOR_E2E_END "+json.dumps(dict(path=item["path"],kind=kind,sha256=item["sha256"]),separators=(",",":")))
     for item in assets: emit(item,(root/item["path"]).read_bytes(),"managed-asset")
     compact=["summary.json","managed-assets-manifest.json","runtimes.json","controller-package-lock.json",
-        "target-B-commit.txt","target-B-tree.txt","target-B-commit.raw","proofs-manifest.json","authority/consumer-main.json"]
+        "target-B-commit.txt","target-B-tree.txt","target-B-commit.raw","proofs-manifest.json","authority/consumer-main.json",
+        "selected-target-lock.yaml","selected-lock-observation.json","selected-target-lock-report.json","harness-input-binding.json","target-runtime-closure.json"]
     for label in ["A-prepare","A-fault","A-resume","A-restore","B-prepare","B-finalize","B-committed-restore","C-prepare","C-finalize"]:
         compact.extend(["commands/"+label+".stdout.json","commands/"+label+".meta.json"])
     compact.append("commands/A-fault.stderr.log")
@@ -345,9 +402,12 @@ barrier() {
   jq -e '.state=="idle"' "$EVID/commands/$1-barrier.stdout.json" > /dev/null
 }
 prepare() {
+  observe selected
   quota "$1-prepare" 6
   run "$1-prepare" success "$NODE24" "$CLI" upgrade --consumer "$CONSUMER" --to "$TO" \
-    --source-generation 2 --target-generation 3 --prepare --restoration-proof "$2" --json
+    --source-generation 2 --target-generation 3 --prepare --restoration-proof "$2" \
+    --target-lockfile "$SELECTED_LOCK" --target-lockfile-sha256 "$E2E_SELECTED_TARGET_LOCK_SHA256" --json
+  observe selected
   observe prepare "$1"
 }
 finalize() {
@@ -383,7 +443,7 @@ observe completed B B-finalize applied
 git -C "$CONSUMER" switch -c qualification/managed-target-B
 git -C "$CONSUMER" add -- architecture/foundation/docs-consumer-integration.json \
   architecture/foundation/docs-protocol-managed-state.json .github/workflows/docs-protocol.yml \
-  package.json pnpm-workspace.yaml pnpm-lock.yaml
+  package.json pnpm-workspace.yaml pnpm-lock.yaml .node-version
 GIT_AUTHOR_NAME=Илия GIT_AUTHOR_EMAIL=iliyazelenkog@gmail.com \
   GIT_COMMITTER_NAME=Илия GIT_COMMITTER_EMAIL=iliyazelenkog@gmail.com \
   git -C "$CONSUMER" -c user.name=Илия -c user.email=iliyazelenkog@gmail.com \
