@@ -1,0 +1,183 @@
+name: Orchestrator archived physical target Host continuation
+
+on:
+  push:
+    branches: [test/iam-host-archive-continuation-20261127]
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: orchestrator-host-archive-continuation
+  cancel-in-progress: false
+
+jobs:
+  host:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Select isolated Host continuation directories
+        shell: bash
+        run: |
+          printf 'HOST_ROOT=%s/iam-host-archive-%s-%s\n' "$RUNNER_TEMP" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: harness
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: c01efb6813f0c048497caeefbb8235cead480cb2
+          fetch-depth: 0
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67
+          fetch-depth: 0
+          path: materialized
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 26.12.1
+          check-latest: false
+      - name: Retain physical Node 26
+        shell: bash
+        run: printf 'NODE26=%s\n' "$(readlink -f "$(command -v node)")" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.22.3
+          check-latest: false
+      - name: Retain physical Node 24
+        shell: bash
+        run: printf 'NODE24=%s\n' "$(readlink -f "$(command -v node)")" >> "$GITHUB_ENV"
+      - name: Download and verify the actual physical artifact
+        shell: bash
+        env:
+          ARCHIVE_READ_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY_ID" = 1310245598
+          mkdir "$HOST_ROOT"
+          mkdir "$HOST_ROOT/installation"
+          curl --fail --silent --show-error --max-time 60 \
+            -H "Authorization: Bearer $ARCHIVE_READ_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/agent-teams-ai/agent-teams-orchestrator/actions/artifacts/15188626286 \
+            > "$HOST_ROOT/artifact-api.json"
+          jq -e '.id==15188626286 and .expired==false and .size_in_bytes==1814712 and
+            .name=="orchestrator-managed-45972172068-1" and
+            .digest=="sha256:c0007a199de47148c1c3ecf4f333a6ab484aa9a0188cc89e9d88c451f2d37704" and
+            .workflow_run.id==45972172068 and .workflow_run.repository_id==1310245598 and
+            .workflow_run.head_sha=="c29a5b3d4dbe4beabfc0e5acc1d026eeedc54a14"' \
+            "$HOST_ROOT/artifact-api.json" > /dev/null
+          curl --fail --location --silent --show-error --max-time 120 \
+            -H "Authorization: Bearer $ARCHIVE_READ_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/agent-teams-ai/agent-teams-orchestrator/actions/artifacts/15188626286/zip \
+            > "$HOST_ROOT/source-artifact.zip"
+          unset ARCHIVE_READ_TOKEN
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,stat,subprocess,zipfile
+          root=pathlib.Path(os.environ["HOST_ROOT"]); archive=root/"source-artifact.zip"
+          data=archive.read_bytes()
+          assert len(data)==1814712
+          assert hashlib.sha256(data).hexdigest()=="c0007a199de47148c1c3ecf4f333a6ab484aa9a0188cc89e9d88c451f2d37704"
+          destination=root/"archive"; destination.mkdir()
+          names=set(); total=0
+          with zipfile.ZipFile(archive) as z:
+              assert len(z.infolist())==153
+              for item in z.infolist():
+                  name=item.filename; parts=pathlib.PurePosixPath(name).parts
+                  assert parts and not name.startswith("/") and name not in names
+                  assert all(part not in ("",".","..") for part in parts)
+                  assert all(ord(ch) not in (0,92) for ch in name)
+                  assert parts[0] in ("evidence","host-export") and not item.is_dir()
+                  assert stat.S_IFMT(item.external_attr>>16) in (0,stat.S_IFREG)
+                  names.add(name); content=z.read(item); total+=len(content)
+                  path=destination.joinpath(*parts); path.parent.mkdir(parents=True,exist_ok=True)
+                  with path.open("xb") as output: output.write(content)
+                  path.chmod(0o644)
+              assert total==6055023
+          consumer=pathlib.Path(os.environ["GITHUB_WORKSPACE"])/"materialized"
+          assert subprocess.check_output(["git","-C",str(consumer),"rev-parse","HEAD"],text=True).strip()=="ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67"
+          assert subprocess.check_output(["git","-C",str(consumer),"status","--porcelain=v1","--untracked-files=all"])==b""
+          images=json.loads((destination/"evidence/managed-assets-manifest.json").read_text())
+          allowed=sorted([".github/workflows/docs-protocol.yml",".node-version",
+            "architecture/foundation/docs-consumer-integration.json",
+            "architecture/foundation/docs-protocol-managed-state.json",
+            "package.json","pnpm-lock.yaml","pnpm-workspace.yaml"])
+          assert [item["path"] for item in images]==allowed
+          for item in images:
+              source=destination/"evidence/managed-assets"/item["path"]; content=source.read_bytes()
+              assert len(content)==item["bytes"] and "sha256:"+hashlib.sha256(content).hexdigest()==item["sha256"]
+              target=consumer/item["path"]; assert target.is_file() and not target.is_symlink()
+              target.write_bytes(content); target.chmod(int(item["mode"][-3:],8))
+          PY
+      - name: Strictly check the archive adapter with the pinned compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_PATH
+          mkdir "$HOST_ROOT/typecheck"
+          cd "$HOST_ROOT/typecheck"
+          printf '{"private":true}\n' > package.json
+          npm install --ignore-scripts --no-audit --no-fund --save-exact typescript@7.0.2 @types/node@26.6.5 \
+            > "$HOST_ROOT/installation/typecheck-install.stdout.txt" 2> "$HOST_ROOT/installation/typecheck-install.stderr.txt"
+          test "$(jq -er .version node_modules/typescript/package.json)" = 7.0.2
+          "$NODE26" node_modules/typescript/bin/tsc \
+            --project "$GITHUB_WORKSPACE/harness/.github/scripts/tsconfig.archive-host.json" \
+            --typeRoots "$HOST_ROOT/typecheck/node_modules/@types" \
+            > "$HOST_ROOT/installation/typecheck.stdout.txt" 2> "$HOST_ROOT/installation/typecheck.stderr.txt"
+      - name: Restore and observe the exact published controller installation
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_PATH
+          mkdir "$HOST_ROOT/archive/controller"
+          cd "$HOST_ROOT/archive/controller"
+          cp "$HOST_ROOT/archive/evidence/controller-package-lock.json" package-lock.json
+          test "$(sha256sum package-lock.json | cut -d' ' -f1)" = 681f225d95dc68de360023b56620fad750490a469bd40f7e55864ffca0c93ffd
+          python3 - <<'PY'
+          import json,pathlib
+          lock=json.loads(pathlib.Path("package-lock.json").read_text())["packages"][""]
+          assert lock=={"name":"orchestrator-retained-controller","dependencies":{
+            "@agent-teams/docs-protocol-agent-teams":"0.8.0",
+            "@agent-teams/repository-mutation":"0.5.2","corepack":"0.36.0"}}
+          pathlib.Path("package.json").write_text(json.dumps({**lock,"private":True})+"\n")
+          PY
+          npm ci --ignore-scripts --no-audit --no-fund \
+            > "$HOST_ROOT/installation/controller-install.stdout.txt" 2> "$HOST_ROOT/installation/controller-install.stderr.txt"
+          test "$(sha256sum package-lock.json | cut -d' ' -f1)" = 681f225d95dc68de360023b56620fad750490a469bd40f7e55864ffca0c93ffd
+          PREFLIGHT_ROOT="$HOST_ROOT/archive" "$NODE24" \
+            "$GITHUB_WORKSPACE/harness/.github/scripts/orchestrator-preflight-controller.mjs" \
+            > "$HOST_ROOT/installation/controller-observation.json"
+          cp package-lock.json "$HOST_ROOT/installation/controller-package-lock.json"
+          printf 'COREPACK_HOME=%s/cache/corepack\npnpm_config_store_dir=%s/cache/pnpm\nXDG_DATA_HOME=%s/cache/xdg\n' \
+            "$HOST_ROOT" "$HOST_ROOT" "$HOST_ROOT" >> "$GITHUB_ENV"
+      - name: Complete Host reconciliation from verified archived target bytes
+        shell: bash
+        run: |
+          "$NODE26" "$GITHUB_WORKSPACE/harness/.github/scripts/orchestrator-host-integration.mjs" \
+            --archive "$HOST_ROOT/source-artifact.zip" \
+            --candidate "$GITHUB_WORKSPACE/candidate" --target "$GITHUB_WORKSPACE/materialized" \
+            --evidence "$HOST_ROOT/archive/evidence" \
+            --controller "$HOST_ROOT/archive/controller/node_modules/@agent-teams/docs-protocol-agent-teams/dist/cli.js" \
+            --closure "$HOST_ROOT/archive/evidence/target-runtime-closure.json" \
+            --node24 "$NODE24" --node26 "$NODE26" \
+            --corepack "$HOST_ROOT/archive/controller/node_modules/corepack/dist/corepack.js" \
+            --export "$HOST_ROOT/host-export"
+      - name: Preserve original evidence and actual Host continuation outputs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: orchestrator-host-continuation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.HOST_ROOT }}/source-artifact.zip
+            ${{ env.HOST_ROOT }}/artifact-api.json
+            ${{ env.HOST_ROOT }}/archive/evidence
+            ${{ env.HOST_ROOT }}/installation
+            ${{ env.HOST_ROOT }}/host-export
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30

@@ -9,6 +9,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "nod
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
 import { createSelectedLockDraft } from "./orchestrator-selected-lock.mjs";
+import { selectArchivedHostArgument, validateArchivedHostInput } from "./orchestrator-host-archive-input.ts";
 
 const BASE = "c01efb6813f0c048497caeefbb8235cead480cb2";
 const SOURCE = "ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67";
@@ -274,7 +275,7 @@ const TEXT_EDITS = [
   {
     "path": "docs/architecture/repository-tooling.md",
     "before": "Trusted managed Docs remains blocked by its independent central controller and\ncohort transition. Portable Docs `0.6.2` has no Foundation runtime edge and keeps\nits ordinary semantic route. Preserve that required route and the old managed\nreceipts while preparing the actual admitted successor. A green portable check\nor `assert-registry` result is not a managed Cohort qualification receipt.",
-    "after": "The real hosted controller completed retained preparation, an actual receipt\nwrite refusal, a fresh-process resume, source restoration and committed rollback,\nthen produced the final orchestrator-v3 managed target. The\n[inert evidence manifest](../research/evidence/managed-docs-orchestrator-v3-2026-11-27/manifest.json)\nbinds the actual source root, command outputs and generated file digests. It\nclaims no successful execution in the unavailable local environment. The Host\nintegration retains the original controller postimages as evidence and records\nits package/workspace/lock reconciliation separately. Ordinary final-head and\nresulting-main checks and central observed advancement remain separate gates.",
+    "after": "The real hosted controller completed retained preparation, an actual receipt\nwrite refusal, a fresh-process resume, source restoration and committed rollback,\nthen produced the final orchestrator-v3 managed target. The\n[inert evidence manifest](../research/evidence/managed-docs-orchestrator-v3-2026-11-27/manifest.json)\nbinds the actual source root, command outputs and generated file digests. It\nclaims no successful execution in the unavailable local environment. The Host\nintegration retains the original controller output files as evidence and records\nits package/workspace/lock reconciliation separately. Ordinary final-head and\nresulting-main checks and central observed advancement remain separate gates.",
     "count": 1
   },
   {
@@ -586,7 +587,8 @@ function parseArgs(argv) {
 async function main() {
   assert.equal(process.env.GITHUB_ACTIONS, "true", "This helper executes only in its hosted qualification job");
   assert.equal(process.env.GITHUB_REPOSITORY, "agent-teams-ai/agent-teams-orchestrator");
-  const args = parseArgs(process.argv.slice(2));
+  const selectedArchive = selectArchivedHostArgument(process.argv.slice(2));
+  const args = parseArgs(selectedArchive.argv);
   for (const key of ["candidate", "target", "evidence", "controller", "node24", "node26", "corepack", "closure"]) {
     args[key] = await realpath(args[key]);
   }
@@ -608,21 +610,25 @@ async function main() {
   await mkdir(args.export, { recursive: false });
   const commandsRoot = join(args.export, "commands");
   await mkdir(commandsRoot);
+  const archive = await validateArchivedHostInput({ archivePath: selectedArchive.path,
+    evidenceRoot: args.evidence, targetRoot: args.target, candidateRoot: args.candidate, outputRoot: args.export });
   const summary = await json(join(args.evidence, "summary.json"));
   assert.equal(summary.schemaVersion, 1);
   assert.equal(summary.scope, "physical-managed-lifecycle");
   assert.equal(summary.outcome, "passed");
   assert.equal(summary.source.revision, SOURCE);
   assert.equal(summary.source.tree, SOURCE_TREE);
-  assert.equal(summary.source.consumer.root, args.target);
-  const rootStat = await lstat(args.target, { bigint: true });
-  assert.equal(summary.source.consumer.device, String(rootStat.dev));
-  assert.equal(summary.source.consumer.inode, String(rootStat.ino));
-  assert.equal(summary.source.consumer.birthtimeNs, String(rootStat.birthtimeNs));
+  if (archive === undefined) {
+    assert.equal(summary.source.consumer.root, args.target);
+    const rootStat = await lstat(args.target, { bigint: true });
+    assert.equal(summary.source.consumer.device, String(rootStat.dev));
+    assert.equal(summary.source.consumer.inode, String(rootStat.ino));
+    assert.equal(summary.source.consumer.birthtimeNs, String(rootStat.birthtimeNs));
+  } else assert.deepEqual(summary.source.consumer, archive.sourceConsumer);
   assert.match(summary.authorityRevision, /^[0-9a-f]{40}$/);
   assert.equal(summary.run.repository, process.env.GITHUB_REPOSITORY);
-  assert.equal(String(summary.run.runId), process.env.GITHUB_RUN_ID);
-  assert.equal(String(summary.run.runAttempt), process.env.GITHUB_RUN_ATTEMPT);
+  assert.equal(String(summary.run.runId), archive?.physicalRun.runId ?? process.env.GITHUB_RUN_ID);
+  assert.equal(String(summary.run.runAttempt), archive?.physicalRun.runAttempt ?? process.env.GITHUB_RUN_ATTEMPT);
   const runUrl = "https://github.com/" + summary.run.repository + "/actions/runs/" +
     summary.run.runId + "/attempts/" + summary.run.runAttempt;
   const targetAssets = await json(join(args.evidence, "managed-assets-manifest.json"));
@@ -654,7 +660,7 @@ async function main() {
       assert.equal(meta.argv[targetLockArg + 1], INPUT_BINDING.selectedLock.sha256);
     }
     const ci = meta.argv.indexOf("--consumer");
-    assert.ok(ci >= 0 && meta.argv[ci + 1] === args.target);
+    assert.ok(ci >= 0 && meta.argv[ci + 1] === (archive?.sourceRoot ?? args.target));
     assert.ok(Number.isInteger(meta.exitCode));
     assert.ok(label === "A-fault" ? meta.exitCode !== 0 : meta.exitCode === 0);
     for (const [suffix, saved] of [["stdout.json", "stdout.json"], ["stderr.log", "stderr.txt"], ["meta.json", "meta.json"]]) {
@@ -694,7 +700,7 @@ async function main() {
     assert.equal(prep.sourceRevision, SOURCE);
     assert.equal(prep.plan.operations.length, 7);
     assert.deepEqual(prep.plan.operations.map((x) => x.path).sort(), ASSETS);
-    assert.equal(prep.consumer.root, args.target);
+    assert.equal(prep.consumer.root, archive?.sourceRoot ?? args.target);
     assert.equal(observations[phase + "-prepare"].outcome, "prepared");
     assert.equal(observations[phase + "-prepare"].preparation.digest, sha(prepBytes));
     proofDigests.push(describeProof(prepPath, prepObservation));
@@ -860,6 +866,8 @@ async function main() {
   }
   await writeOwned(args.candidate, "pnpm-lock.yaml", lockDraft.bytes);
   const selectedHostLock = describe("pnpm-lock.yaml", lockDraft.bytes);
+  if (archive !== undefined) assert.equal(selectedHostLock.sha256,
+    "sha256:4ad19563e9694e5d1cf6d65c2c81141cc38f1661b655b79b765da8c2ee6789ff", "Archived Host lock reproduction changed");
   await pnpm("frozen-install", ["install", "--frozen-lockfile", "--config.engine-strict=true", "--strict-peer-dependencies"]);
   assert.equal(sha((await regular(args.candidate, "pnpm-lock.yaml")).bytes), selectedHostLock.sha256,
     "Frozen installation changed the selected Host lock");
@@ -874,7 +882,9 @@ async function main() {
   await editSelectedDocuments(true);
   const manifest = {
     schemaVersion: 1, evidenceClass: "inert-hosted-managed-lifecycle-observation", authority: false, replayable: false,
-    run: { ...summary.run, url: runUrl, workflowCommit: process.env.GITHUB_SHA, workflowRef: process.env.GITHUB_WORKFLOW_REF },
+    run: archive === undefined
+      ? { ...summary.run, url: runUrl, workflowCommit: process.env.GITHUB_SHA, workflowRef: process.env.GITHUB_WORKFLOW_REF }
+      : { ...summary.run, url: runUrl, workflowCommit: archive.physicalRun.headSha, workflowPath: archive.physicalRun.workflowPath },
     source: summary.source, originalMainRevision: INPUT_BINDING.originalMainRevision,
     selectedTargetLock: summary.selectedTargetLock, harnessInputBindingSha256: summary.harnessInputBindingSha256,
     sourcePrerequisite: INPUT_BINDING.sourceAdmission ?? null, selectedPhysicalLock: INPUT_BINDING.selectedLock,
@@ -882,6 +892,10 @@ async function main() {
     controller: summary.controller, kernel: summary.kernel, runtimes: summary.runtimes, phases: summary.phases,
     physicalTargetFiles: targetAssets, retainedOutputs, externalProofDigests: proofDigests,
     hostReconciliation: { baseCommit: BASE, physicalNodeEngine: targetPackage.engines.node, hostNodeEngine: hostEngine,
+      ...(archive === undefined ? {} : { archiveInput: archive, hostRun: {
+        repository: process.env.GITHUB_REPOSITORY, runId: process.env.GITHUB_RUN_ID,
+        runAttempt: process.env.GITHUB_RUN_ATTEMPT, headSha: process.env.GITHUB_SHA,
+        workflowRef: process.env.GITHUB_WORKFLOW_REF } }),
       defaultNode: "26.12.1", pnpm: "11.20.0", foundation: "4.0.3", fms: "0.4.3", stack: "0.3.1",
       derivedFields: ["package.json", "pnpm-workspace.yaml", "pnpm-lock.yaml"],
       selectedHostLock, foreignDependencyRefresh, canonicalRuntimeClosureDigest: INPUT_BINDING.target.closure.digest,
@@ -923,6 +937,9 @@ async function main() {
   }
   const result = { schemaVersion: 1, scope: "derived-host-integration", outcome: "passed", parentCommit: BASE,
     physicalSourceRevision: SOURCE, physicalTargetFiles: targetAssets, files, commands: ownResults,
+    ...(archive === undefined ? {} : { archivedPhysicalInput: archive, hostRun: {
+      repository: process.env.GITHUB_REPOSITORY, runId: process.env.GITHUB_RUN_ID,
+      runAttempt: process.env.GITHUB_RUN_ATTEMPT, headSha: process.env.GITHUB_SHA } }),
     managedCheck: checked, candidateCommitCreated: false, finalPublishedHeadQualified: false,
     node24CompatibilityQualified: false, productionIAMLifecycleQualified: false };
   const resultBytes = Buffer.from(JSON.stringify(result, null, 2) + "\n", "utf8");
