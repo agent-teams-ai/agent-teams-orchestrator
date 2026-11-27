@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestrator-selected-lock-draft",
+  "mode": "construct",
+  "outcome": "constructed-unadmitted",
+  "qualificationAuthority": false,
+  "publicAdmission": "not-run",
+  "ownerSource": "https://github.com/agent-teams-ai/engineering-foundation/blob/23acc1283caa576d2303a588eaaeb6ddc2911eb0/packages/docs-protocol-agent-teams/src/consumer-integration/adapters/node-consumer-restoration-lock.ts",
+  "sourceLock": {
+    "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/selected-lock-v3-preparation/actual-7957/source-ccc/pnpm-lock.yaml",
+    "sha256": "sha256:0ebee389b33d6ee41beb3f4a3dd28e20f956c177b17a2911d5a812160ea07044",
+    "gitBlob": "596614ef81a97d2b825e06d15086ca36dd20656a",
+    "bytes": 318745,
+    "git": {
+      "repository": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/selected-lock-v3-preparation/actual-7957/source-ccc",
+      "revision": "ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67",
+      "tree": "a24da96493edd1c6fe3bd5868d4cf636007bcf04",
+      "mode": "100644"
+    }
+  },
+  "targetClosure": {
+    "sha256": "sha256:7957b8b2b7e20efc6f940b77ca596670d2a8555a9ccf10dc00926ad270eae475",
+    "gitBlob": "6416dfa28d1d5225828ba15b2804bc6cf93a268f",
+    "bytes": 28744,
+    "adapterVersion": "0.8.0",
+    "packageManager": "pnpm@11.20.0",
+    "packageCount": 88,
+    "coordinates": [
+      {
+        "integrity": "sha512-eK/HsE/1qt+TXzrrbggXykZJXloFZfZD0ZlwdGbm2Jc9O6lAlhu7+w9BdSeryX/vCyMYWeRLv38S/7V717RPMg==",
+        "name": "@agent-teams/repository-mutation",
+        "role": "transitive",
+        "version": "0.5.2"
+      },
+      {
+        "integrity": "sha512-a6SOuytNOoKJVW+pp51AUMhrjzTvbYvro6nUuAFqmu0l0G63xkSAnhpwlaPJbHSbSBvoIawm8z+nL8OVMFIY3A==",
+        "name": "@agent-teams/document-authoring",
+        "role": "transitive",
+        "version": "0.3.9"
+      },
+      {
+        "integrity": "sha512-rZ7Ie43dmN+m8LjCdXt5iqOP5h41M/TWNFg7bwvV05/XuSJrJF4udBLXIReqqVfeqdoYrFNxPbTknKJ30N6aTA==",
+        "name": "@agent-teams/docs-protocol",
+        "role": "direct",
+        "version": "0.6.9"
+      },
+      {
+        "integrity": "sha512-BixlYEalI0/j4auoSLBSBlKJGUXyZeuKS3WI+5nxdiAPg/yyAtKHjhmxuo059YZPn0+R931M0sdpNHRkpgDUDg==",
+        "name": "@agent-teams/docs-protocol-agent-teams",
+        "role": "direct",
+        "version": "0.8.0"
+      },
+      {
+        "integrity": "sha512-D/q979O6OOhsS3IpkwKwb1wNDcXcJESKbYATz7Gk8biiXYxC2tIGi5S9er/DQDbghOnzrilipKxvTMJZ1GGolg==",
+        "name": "@agent-teams/engineering-foundation",
+        "role": "direct",
+        "version": "4.0.3"
+      }
+    ],
+    "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/actual-v3-producer-attempt3/governance/docs-runtime-closures/sha256-7957b8b2b7e20efc6f940b77ca596670d2a8555a9ccf10dc00926ad270eae475.json"
+  },
+  "selectedLock": {
+    "sha256": "sha256:a8080107bb13e2170fee5e3f25f30ff5df835cd5e540e66f177a0ef0e57c264b",
+    "gitBlob": "5b452244b3d74dd49432e659abd575efca49c4c2",
+    "bytes": 320228,
+    "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/selected-lock-v3-preparation/actual-7957/selected-target/selected-target-lock.yaml"
+  },
+  "counts": {
+    "sourceManagedSnapshots": 84,
+    "sourceForeignSnapshots": 1016,
+    "sourcePreservedSnapshots": 1016,
+    "sourcePreservedPackages": 1016,
+    "targetManagedSnapshots": 88,
+    "sourceComments": 0
+  },
+  "collisions": [],
+  "inspection": {
+    "commentsPreserved": true,
+    "nonOwnedProjectionPreserved": true,
+    "managedGraphMatchesSelectedInput": true
+  },
+  "parser": {
+    "path": "/workspace/scratch/e36de90adcfd/foundation-review/orchestrator-managed-stable34/recovered-runtime/controller/node_modules/yaml/dist/index.js",
+    "sha256": "sha256:2d58984e0ae80de4acbd8f009fab332f5ce77d9e1a5f138a3058a0ada6567fb9",
+    "gitBlob": "18c0cb61220c1a945286176b3f178acb31a5d123",
+    "bytes": 1769
+  }
+}

@@ -1,4 +1,4 @@
-name: Orchestrator retained managed lifecycle
+name: Orchestrator source preparation prerequisite
 
 on:
   push:
@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: orchestrator-retained-managed-lifecycle
+  group: orchestrator-source-admission-prerequisite
   cancel-in-progress: false
 
 jobs:
@@ -22,13 +22,17 @@ jobs:
           printf 'E2E_ROOT=%s/iam-managed-%s-%s\n' "$RUNNER_TEMP" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
           printf 'E2E_CONSUMER=%s/consumer\n' "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
           printf 'E2E_CANDIDATE=%s/candidate\n' "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          printf 'E2E_SELECTED_TARGET_LOCKFILE=%s/harness/.github/inputs/selected-target-lock.yaml\n' "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          printf 'E2E_SELECTED_TARGET_LOCK_SHA256=%s\n' 'sha256:a8080107bb13e2170fee5e3f25f30ff5df835cd5e540e66f177a0ef0e57c264b' >> "$GITHUB_ENV"
+          printf 'E2E_HARNESS_INPUT_BINDING=%s/harness/.github/inputs/harness-input-binding.json\n' "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          printf 'E2E_TARGET_RUNTIME_CLOSURE=%s/harness/.github/inputs/target-runtime-closure.json\n' "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           path: harness
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: 3dccf2c53bf11f3939a19734a58f5e64d96673d0
+          ref: ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67
           fetch-depth: 0
           path: consumer
           persist-credentials: false
@@ -40,33 +44,23 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          node-version: 26.11.1
+          node-version: 26.12.1
           check-latest: false
       - name: Retain physical Node 26 path
         shell: bash
         run: printf 'AGENT_TEAMS_DOCS_UPGRADE_NODE26_EXECUTABLE=%s\n' "$(readlink -f "$(command -v node)")" >> "$GITHUB_ENV"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          node-version: 24.21.0
+          node-version: 24.22.3
           check-latest: false
       - name: Retain physical Node 24 path
         shell: bash
         run: printf 'AGENT_TEAMS_DOCS_UPGRADE_NODE24_EXECUTABLE=%s\n' "$(readlink -f "$(command -v node)")" >> "$GITHUB_ENV"
-      - name: Qualify real retained controller lifecycle
+      - name: Observe actual source preparation only
         shell: bash
         env:
           CENTRAL_READ_TOKEN: ${{ github.token }}
-        run: bash harness/.github/scripts/orchestrator-managed-lifecycle.sh
-      - name: Reconcile the separately owned Host candidate
-        shell: bash
-        run: |
-          "$AGENT_TEAMS_DOCS_UPGRADE_NODE26_EXECUTABLE" harness/.github/scripts/orchestrator-host-integration.mjs \
-            --candidate "$E2E_CANDIDATE" --target "$E2E_CONSUMER" \
-            --evidence "$E2E_EVIDENCE" --controller "$E2E_CONTROLLER" \
-            --node24 "$AGENT_TEAMS_DOCS_UPGRADE_NODE24_EXECUTABLE" \
-            --node26 "$AGENT_TEAMS_DOCS_UPGRADE_NODE26_EXECUTABLE" \
-            --corepack "$AGENT_TEAMS_DOCS_UPGRADE_COREPACK_ENTRYPOINT" \
-            --export "$E2E_ROOT/host-export"
+        run: bash harness/.github/scripts/orchestrator-managed-source-admission.sh
       - name: Retain actual evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
@@ -74,7 +68,6 @@ jobs:
           name: orchestrator-managed-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             ${{ env.E2E_ROOT }}/evidence
-            ${{ env.E2E_ROOT }}/host-export
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 30
