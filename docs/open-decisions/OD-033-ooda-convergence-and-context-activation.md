@@ -254,6 +254,41 @@ The [organization ecosystem vision](https://github.com/agent-teams-ai/.github/bl
 
 Cross-link the relevant OD-024, OD-032, persistence and runtime-capacity decisions rather than inventing a second ledger, universal workflow or new broker. Review the alternatives against existing ADR-0114/0115/0117 and selected foundation scope; change accepted decisions only through their owners.
 
+### Causal continuation and placement acceptance, 2026-11-27
+
+The [consolidated research](https://github.com/agent-teams-ai/engineering-research/blob/e2a5f6c47e008f93094dc88ed39ea9618722f28d/docs/lessons/preimplementation-decisions.md)
+adds rejecting traces to this open decision's existing activation and causal
+budget work. Before implementing the dependent continuation, record its durable
+cause, owner-defined wait predicate, progress witness, remaining retry/fanout
+budget and deadline. Delivery replay retains the accepted identity and debit;
+a successor attempt follows the existing reauthorization rules.
+
+Qualify self-authored wake with no new progress, repeated unchanged input,
+an explicit user stop followed by late approval, and an unknown external
+acceptance followed by restore. Neither an observation nor a late approval
+silently reverses the owning Run's stop. Preserve the original wait reason and
+effect receipt; retain uncertainty until the actual owner reconciles it.
+If SQL prefilters eligible work, compare their admitted set with the owning
+domain decision. Exercise bounded parent/child fanout without new quota from
+redelivery or delegation, using the existing workload-classification cases.
+
+The initial placement record uses one logical placement without automatic
+movement of active Runs. [ADR-0079](../decisions/0079-runtime-authority-binding-cutoff-and-disposition.md)
+keeps project-to-runtime binding authority in Orchestration Scope; Run
+Orchestration and AR retain their distinct generations and technical fences.
+Before freezing new routing/storage keys, record stable business identity,
+the selected placement scope and concentrated-tenant workload. A future
+transfer must preserve receipts, deduplication, custody and pending obligations
+through old-writer cutoff, receiver enforcement, restore and lost ACK.
+Its mechanism remains with the existing placement and transfer owners.
+
+Reuse [Runtime C0-C3](https://github.com/agent-teams-ai/agent-runtime/blob/cae4d350c947cd9f74bc04130531527c9a36baeb/docs/architecture/capacity-admission-delivery-plan.md)
+for technical quota/reclaim acceptance and [eventing](../architecture/eventing-and-reliability.md#adapter-reconnect-and-backpressure)
+for bounded delivery. Name actual DB, disk, RPC and provider control reserves
+in the selected composition. Keep the first pool/placement scope; distributed
+quota cases apply only when independently admitted partitions share a limit.
+Existing OD-024/032 and deployment owners decide the remaining mechanisms.
+
 ## Evolution and operator evidence
 
 The design must version independently:
