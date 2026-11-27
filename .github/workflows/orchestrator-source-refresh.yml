@@ -1,0 +1,71 @@
+name: Orchestrator source lock prerequisite
+
+on:
+  push:
+    branches: [test/iam-source-refresh-20261127]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iam-source-refresh-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  source-refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out reviewed operator files
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: harness
+          persist-credentials: false
+      - name: Check out authentic original source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: 3dccf2c53bf11f3939a19734a58f5e64d96673d0
+          path: source
+          persist-credentials: false
+      - name: Select the exact source verifier runtime
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.22.3
+      - name: Prepare isolated operator tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/iam-source-refresh"
+          mkdir "$root"
+          mkdir "$root/tools"
+          printf '%s\n' '{"private":true,"type":"module"}' > "$root/tools/package.json"
+          printf 'SR_ROOT=%s\nSR_TOOLS=%s/tools\n' "$root" "$root" >> "$GITHUB_ENV"
+          npm install --prefix "$root/tools" --ignore-scripts --no-audit --no-fund --save-exact \
+            pnpm@11.18.0 yaml@2.9.0 typescript@7.0.2 @types/node@26.6.5
+      - name: Strictly compile the operator with TypeScript 7
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e 'const fs=require("node:fs");const p=JSON.parse(fs.readFileSync(process.env.SR_TOOLS+"/node_modules/typescript/package.json"));if(p.version!=="7.0.2")throw Error("Unexpected compiler")'
+          node "$SR_TOOLS/node_modules/typescript/bin/tsc" --strict --skipLibCheck --noEmitOnError \
+            --target ES2023 --module NodeNext --moduleResolution NodeNext \
+            --outDir "$SR_ROOT/compiled" \
+            --types node --typeRoots "$SR_TOOLS/node_modules/@types" \
+            "$GITHUB_WORKSPACE/harness/.github/scripts/orchestrator-source-refresh.ts"
+          printf '%s\n' '{"type":"module"}' > "$SR_ROOT/compiled/package.json"
+          cp "$GITHUB_WORKSPACE/harness/.github/scripts/orchestrator-selected-lock.mjs" "$SR_ROOT/compiled/orchestrator-selected-lock.mjs"
+      - name: Resolve only the observed source dependency conflicts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node "$SR_ROOT/compiled/orchestrator-source-refresh.js" \
+            "$GITHUB_WORKSPACE/source" "$SR_TOOLS" "$SR_ROOT/evidence" \
+            "$GITHUB_WORKSPACE/harness/.github/inputs/orchestrator-canonical-7957.json"
+      - name: Retain actual resolver evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: orchestrator-source-refresh-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/iam-source-refresh/evidence
+          if-no-files-found: warn
+          retention-days: 21
