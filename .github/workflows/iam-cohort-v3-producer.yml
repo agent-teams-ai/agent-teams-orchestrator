@@ -1,0 +1,120 @@
+name: IAM Orchestrator v3 actual producer preparation
+
+on:
+  push:
+    branches: [test/iam-cohort-v3-producer-20261127]
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: iam-orchestrator-v3-producer-20261127
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Initialize output paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'COHORT_V3_OUTPUT=%s\n' "$RUNNER_TEMP/orchestrator-v3-initial" >> "$GITHUB_ENV"
+          printf 'COHORT_V3_CONTROLLER=%s\n' "$RUNNER_TEMP/orchestrator-v3-controller" >> "$GITHUB_ENV"
+      - name: Read exact producer preparation revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: preparation-source
+          persist-credentials: false
+      - name: Read exact protected Central source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: agent-teams-ai/.github
+          ref: c58f93aabf78c92308b90ceb6b93e207f2bec5d9
+          path: central-source
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select Central dependency runtime
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 26.11.1
+          check-latest: false
+      - name: Select exact Central package manager
+        id: pnpm-v1
+        uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9
+        with:
+          version: 11.18.0
+          dest: ${{ runner.temp }}/cohort-v3-central-pnpm
+          package_json_file: central-source/package.json
+          run_install: false
+      - name: Install unchanged trusted Central dependencies
+        shell: bash
+        working-directory: central-source
+        env:
+          CENTRAL_PNPM: ${{ steps.pnpm-v1.outputs.bin_dest }}/pnpm
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = v26.11.1
+          test "$("$CENTRAL_PNPM" --version)" = 11.18.0
+          "$CENTRAL_PNPM" install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
+          test -z "$(git status --porcelain --untracked-files=no)"
+      - name: Select exact actual producer runtime
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 26.12.1
+          check-latest: false
+      - name: Retain actual Node 26 executable path
+        shell: bash
+        run: printf 'COHORT_V3_NODE26=%s\n' "$(readlink -f "$(command -v node)")" >> "$GITHUB_ENV"
+      - name: Select exact producer package manager
+        id: pnpm-v2
+        uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9
+        with:
+          version: 11.20.0
+          dest: ${{ runner.temp }}/cohort-v3-producer-pnpm
+          package_json_file: central-source/governance/docs-qualified-cohorts.schema.json
+          run_install: false
+      - name: Collect real publication evidence and isolated producer closure
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRODUCER_PNPM: ${{ steps.pnpm-v2.outputs.bin_dest }}/pnpm
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_PATH
+          test "$(node --version)" = v26.12.1
+          test "$("$PRODUCER_PNPM" --version)" = 11.20.0
+          node "$GITHUB_WORKSPACE/preparation-source/diagnostics/cohort-v3/prepare-orchestrator-v3.mjs" \
+            --central-root "$GITHUB_WORKSPACE/central-source" \
+            --central-revision c58f93aabf78c92308b90ceb6b93e207f2bec5d9 \
+            --workflow-revision 997f24396598f93cf1b03bb26436a5ec7686ddef \
+            --pnpm-bin "$PRODUCER_PNPM" \
+            --output "$COHORT_V3_OUTPUT"
+      - name: Select exact physical controller runtime
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24.22.3
+          check-latest: false
+      - name: Observe genuine installed controller and runtime identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset NODE_OPTIONS NODE_PATH
+          test "$(node --version)" = v24.22.3
+          node "$GITHUB_WORKSPACE/preparation-source/diagnostics/cohort-v3/observe-published-controller.mjs" \
+            --collection "$COHORT_V3_OUTPUT" \
+            --controller-root "$COHORT_V3_CONTROLLER" \
+            --node24 "$(readlink -f "$(command -v node)")" \
+            --node26 "$COHORT_V3_NODE26"
+      - name: Retain exact publication and producer artifacts
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: orchestrator-v3-actual-producer-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.COHORT_V3_OUTPUT }}
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14

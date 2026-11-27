@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "unexecuted-selection-intent",
+  "qualified": false,
+  "cohortId": "docs-2026-11-27-orchestrator-v3",
+  "centralSourceRevision": "c58f93aabf78c92308b90ceb6b93e207f2bec5d9",
+  "reusableWorkflowRevision": "997f24396598f93cf1b03bb26436a5ec7686ddef",
+  "producerVersioningRevision": "23acc1283caa576d2303a588eaaeb6ddc2911eb0",
+  "producerImplementationRevision": "e67bc07f7c208a2537b3a7115388bbf646b6bd66",
+  "policy": {
+    "id": "agent-teams.docs-protocol-current-policy",
+    "version": "3.1.0",
+    "sourceDigest": "sha256:18db0135d1d6191ef78c1feb243f5dc672aaed9985f52be1a72af4fdd7e9bb4e"
+  },
+  "runtime": {
+    "controllerNode": "24.22.3",
+    "qualificationNode": "26.12.1",
+    "pnpm": "11.20.0",
+    "platform": "linux",
+    "architecture": "x64"
+  },
+  "packages": [
+    { "name": "@agent-teams/repository-mutation", "role": "transitive", "version": "0.5.2" },
+    { "name": "@agent-teams/document-authoring", "role": "transitive", "version": "0.3.9" },
+    { "name": "@agent-teams/docs-protocol", "role": "direct", "version": "0.6.9" },
+    { "name": "@agent-teams/docs-protocol-agent-teams", "role": "direct", "version": "0.8.0" },
+    { "name": "@agent-teams/engineering-foundation", "role": "direct", "version": "4.0.3" }
+  ],
+  "foreignPackagesToPreserve": [
+    { "name": "@agent-teams/feature-module-standard", "version": "0.4.3" },
+    { "name": "stack-toolchain", "version": "0.3.1" }
+  ],
+  "upgradeFrom": ["docs-2026-10-03-stable31"],
+  "rollbackTo": ["docs-2026-10-03-stable31"],
+  "canaryRepositories": [
+    { "repository_id": 1310245598, "repository": "agent-teams-ai/agent-teams-orchestrator" }
+  ],
+  "coordinateDecision": "Foundation 4.0.3 is an explicit new direct cohort selection matching the actual merged release source. Adapter 0.8.0 does not depend on Foundation and therefore does not force 4.0.2. There is no automatic fallback or foreign package upgrade. Final manifests, exact dependencies, SRIs, signatures, provenance and closure must be observed from actual publication before creating the initial record."
+}
