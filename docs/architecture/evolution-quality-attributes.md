@@ -92,3 +92,26 @@ Before accepting a design, ask:
 5. How do local and hosted implementations prove equivalent semantics?
 6. Can another context or adapter evolve without importing internals?
 7. Is each abstraction justified today, or is it only speculative symmetry?
+
+## Evolution-readiness application (design guidance)
+
+The organization [evolution-readiness proposal](https://github.com/agent-teams-ai/.github/blob/ea13fbfc7965fce16d9af3c4d7cf8dcca6ff6d29/docs/architecture/evolution-readiness.md)
+is a common authoring and evidence route, not acceptance of additional
+Orchestrator features. Apply it at actual owning boundaries without relaxing
+the accepted composition/admission requirements.
+
+| Boundary | Preserve in the first dependent design | Stronger profile only when selected |
+| --- | --- | --- |
+| Run and Task execution | Stable execution identity, effective behavior/configuration references and original effect receipts | In-flight behavior changes or replay where provider guarantees permit |
+| Agent Context and extensions | Consumer-owned ports, typed assembly, inert declarations, explicit custody | Qualified LMU live replacement, retained streams and current receiver authority |
+| Project/Team/Work | Canonical owner, versioned mutations and transfer/deletion semantics | Offline drafts or merge of explicitly classified non-authoritative user data |
+| External providers and policy | Scoped actor, subject, grant and receiver enforcement | Workload federation, separate rollout cohorts |
+| Task verification and review | Versioned criteria/evidence, observable cost/outcome and bounded test effects | Shadow/canary evaluation without duplicate side effects |
+
+Use existing owners and ADRs (including OD-028/029/043 and Run/evaluation
+owners as applicable); do not create a generic configuration/rollout manager,
+another plugin loader or a universal sync engine. Reuse qualified GM, EF,
+LMU and Foundation evidence; keep domain assertions local. Test the selected
+profile with a deliberate rejecting case (e.g. stale grants, retained old
+work, incompatible state or failed evaluation). The ordinary static first
+slice does not wait for unselected dynamic/offline/federated profiles.
