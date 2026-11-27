@@ -268,7 +268,7 @@ an explicit user stop followed by late approval, and an unknown external
 acceptance followed by restore. Neither an observation nor a late approval
 silently reverses the owning Run's stop. Preserve the original wait reason and
 effect receipt; retain uncertainty until the actual owner reconciles it.
-If SQL prefilters eligible work, compare their admitted set with the owning
+If SQL selects eligible work, compare its admitted set with the owning
 domain decision. Exercise bounded parent/child fanout without new quota from
 redelivery or delegation, using the existing workload-classification cases.
 
