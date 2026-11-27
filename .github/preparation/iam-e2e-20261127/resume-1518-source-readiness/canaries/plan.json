@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "scope": "Reviewed inert publication payloads; no hosted run or authority claim",
+  "source": "6b1ea868f24fe3bf208d2f9a6240cb0f3416c9e4",
+  "sourceTree": "f9a782f868afd88eb0f1beb9a25c5d60af1f9548",
+  "target": {
+    "repository": "agent-teams-ai/.github",
+    "repositoryId": 1316243981,
+    "pullRequest": 467,
+    "pullId": 5524611730,
+    "headRef": "fix/docs-receipt-authorization-order-20261127",
+    "baseSHA": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+    "headSHA": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+    "baseTreeSHA": "b835f11c1433c562d3575e7d351697d4cc44f572",
+    "headTreeSHA": "f20bbd64ec8e35caf614a80fc02e6717dc03bd12",
+    "commits": 2
+  },
+  "caller": {
+    "path": "canaries/common/stage-2/.github/workflows/runtime-admission-source-v10-canary.yml",
+    "bytes": 578,
+    "sha256": "b3659fe024e12bf663c60db8f97b768b936b22376bce4d9e2479096a3de1d932",
+    "gitBlob": "b5e8297107927ebbacfbd890dc572ff4943babb5"
+  },
+  "cases": [
+    {
+      "kind": "positive",
+      "ref": "refs/heads/qualification/runtime-admission-positive-v10",
+      "base": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+      "baseTree": "b835f11c1433c562d3575e7d351697d4cc44f572",
+      "expectedDecision": "noop",
+      "expectedSourceStatus": "success",
+      "stage1": {
+        "treeRequestFile": "canaries/positive/stage-1-tree-request.json",
+        "files": [
+          {
+            "path": "README.md",
+            "before": "cb12d82665fbdd718d98aec333ec570201d9f3f1",
+            "bytes": 8668,
+            "sha256": "bfcf4399c4f2fbfa0f712480dfdabff1a4513ffc5d7445dbd531abcfdb10b61c",
+            "gitBlob": "8a8e0ed893fb57428b77e3b266703c27f06757d3"
+          }
+        ],
+        "commitParent": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+        "next": "Create branch at actual seed commit, then unique same-repository owner Ready PR to main; confirm visible before stage2"
+      },
+      "stage2": {
+        "entriesFile": "canaries/positive/stage-2-tree-entries.json",
+        "files": [
+          {
+            "path": ".github/workflows/runtime-admission-source-v10-canary.yml",
+            "bytes": 578,
+            "sha256": "b3659fe024e12bf663c60db8f97b768b936b22376bce4d9e2479096a3de1d932",
+            "gitBlob": "b5e8297107927ebbacfbd890dc572ff4943babb5",
+            "before": null
+          }
+        ],
+        "baseTree": "Read actual stage1 commit tree from GitHub; no future identity supplied",
+        "commitParent": "Read actual stage1 commit SHA from GitHub",
+        "next": "Ordinary fast-forward the same branch after Ready PR readback; then inspect actual source qualify/source/publish result"
+      },
+      "mustNotMerge": true,
+      "remoteCommit": null,
+      "remotePullRequest": null,
+      "remoteRun": null
+    },
+    {
+      "kind": "wrong-blob",
+      "ref": "refs/heads/qualification/runtime-admission-wrong-blob-v10",
+      "base": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+      "baseTree": "b835f11c1433c562d3575e7d351697d4cc44f572",
+      "expectedDecision": "frozen RuntimeV4 protected input rejection",
+      "expectedSourceStatus": "failure",
+      "stage1": {
+        "treeRequestFile": "canaries/wrong-blob/stage-1-tree-request.json",
+        "files": [
+          {
+            "path": "README.md",
+            "before": "cb12d82665fbdd718d98aec333ec570201d9f3f1",
+            "bytes": 8670,
+            "sha256": "2983051fbf6a95ce3bba67b8d407e52b34243624b247bb60e04828fab61a58c9",
+            "gitBlob": "e70b819077f2c6ac25e299242e20b82097044806"
+          }
+        ],
+        "commitParent": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+        "next": "Create branch at actual seed commit, then unique same-repository owner Ready PR to main; confirm visible before stage2"
+      },
+      "stage2": {
+        "entriesFile": "canaries/wrong-blob/stage-2-tree-entries.json",
+        "files": [
+          {
+            "path": ".github/workflows/runtime-admission-source-v10-canary.yml",
+            "bytes": 578,
+            "sha256": "b3659fe024e12bf663c60db8f97b768b936b22376bce4d9e2479096a3de1d932",
+            "gitBlob": "b5e8297107927ebbacfbd890dc572ff4943babb5",
+            "before": null
+          },
+          {
+            "path": "governance/commit-author-identity.json",
+            "bytes": 1161,
+            "sha256": "7c7ce6ff59c97c371c4faa9817c29c8008e1a5a0f2545935bd025e9a69b09aaa",
+            "gitBlob": "417a65c1e36ea7655d17bed93d21b88228808621",
+            "before": "c7aaacfa24521a9f3e2ecb024d852fefb2b91115"
+          }
+        ],
+        "baseTree": "Read actual stage1 commit tree from GitHub; no future identity supplied",
+        "commitParent": "Read actual stage1 commit SHA from GitHub",
+        "next": "Ordinary fast-forward the same branch after Ready PR readback; then inspect actual source qualify/source/publish result"
+      },
+      "mustNotMerge": true,
+      "remoteCommit": null,
+      "remotePullRequest": null,
+      "remoteRun": null
+    },
+    {
+      "kind": "extra-file",
+      "ref": "refs/heads/qualification/runtime-admission-extra-file-v10",
+      "base": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+      "baseTree": "b835f11c1433c562d3575e7d351697d4cc44f572",
+      "expectedDecision": "V10 source-owned SOURCE_INPUTS preservation rejection after frozen V4 delegation",
+      "expectedSourceStatus": "failure",
+      "stage1": {
+        "treeRequestFile": "canaries/extra-file/stage-1-tree-request.json",
+        "files": [
+          {
+            "path": "README.md",
+            "before": "cb12d82665fbdd718d98aec333ec570201d9f3f1",
+            "bytes": 8670,
+            "sha256": "1fee76cd332578aa40d43ca8f6b3fd705213e164683f422bf7eb8d20d8e4782c",
+            "gitBlob": "243e0765debb619c27da1ecd09111314b1e62099"
+          }
+        ],
+        "commitParent": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+        "next": "Create branch at actual seed commit, then unique same-repository owner Ready PR to main; confirm visible before stage2"
+      },
+      "stage2": {
+        "entriesFile": "canaries/extra-file/stage-2-tree-entries.json",
+        "files": [
+          {
+            "path": ".github/workflows/runtime-admission-source-v10-canary.yml",
+            "bytes": 578,
+            "sha256": "b3659fe024e12bf663c60db8f97b768b936b22376bce4d9e2479096a3de1d932",
+            "gitBlob": "b5e8297107927ebbacfbd890dc572ff4943babb5",
+            "before": null
+          },
+          {
+            "path": "scripts/runtime-admission-source-successor-v10-target.ts",
+            "bytes": 101,
+            "sha256": "a164686f598ad9e50a03ff23f8b987868a66ea77bab83cf05ca6008e7b4314e9",
+            "gitBlob": "0fa2f7e96bfe0d58d89284b9ca1186eb25de9edc",
+            "before": null
+          }
+        ],
+        "baseTree": "Read actual stage1 commit tree from GitHub; no future identity supplied",
+        "commitParent": "Read actual stage1 commit SHA from GitHub",
+        "next": "Ordinary fast-forward the same branch after Ready PR readback; then inspect actual source qualify/source/publish result"
+      },
+      "mustNotMerge": true,
+      "remoteCommit": null,
+      "remotePullRequest": null,
+      "remoteRun": null
+    }
+  ],
+  "sequence": [
+    "Require actual immutable source lock, canonical exact S2 ref and genuine source-push qualification success on currentReadyT before any canary publication",
+    "Freshly reconcile mainQ, PR467ReadyT, sourceS2/lock, frozenV4 source/lock and absence/ownership of exact canary refs",
+    "For each case publish an ordinary seed commit on Q changing only README and create its unique owner Ready open PR to main; seed has no V10 canary workflow so cannot launch a missing-PR V10 run",
+    "After reviewed seed PR is freshly visible, fast-forward its same branch once with generated source-pinned canary workflow and only the intended negative payload if applicable",
+    "Let genuine push event resolve unique actual Ready PR/head/ref and collect source-owned qualify/source/publish evidence; do not supply target inputs, secrets, local checkout or target commands",
+    "Preserve failures honestly; require positive actual success, both intended protected-input failures, then actual Required V10/disabled ordinary merge evidence before finite transition",
+    "Never merge these validation canary PRs; closing and cleanup only after all their running jobs and proof collection have completed"
+  ],
+  "frozenBoundary": [
+    "No changes to main/source lock/settings from this proposal",
+    "Keep existing PR467 repair source and finite tuple intact",
+    "Do not use T tree as ordinary positive canary base; that would carry finite repair files into a different PR and correctly fail frozen V4",
+    "All actual future commit/tree/PR/run identities must be read from official observations"
+  ],
+  "freshPrerequisites": [
+    "Owner-full exact dedicated V10 lock saved; no bypass, no update/deletion/non-fast-forward",
+    "Canonical ref freshly absent before creation and then exactly 6b1ea868f24fe3bf208d2f9a6240cb0f3416c9e4",
+    "Genuine source push at exact S qualifies finite283/be1 tuple and publishes successful V10 status",
+    "Reconcile exact canary branch/PR absence or current ownership before creation",
+    "Do not modify another owner preparation refs or workdir"
+  ]
+}

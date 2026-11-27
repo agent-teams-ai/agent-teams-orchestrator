@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "source": "6b1ea868f24fe3bf208d2f9a6240cb0f3416c9e4",
+  "sourceTree": "f9a782f868afd88eb0f1beb9a25c5d60af1f9548",
+  "main": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+  "mainTree": "b835f11c1433c562d3575e7d351697d4cc44f572",
+  "sourceTreeCapture": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/current-source-tree.json",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "retainedPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-source-v10/AGENTS.md",
+      "mode": "100644",
+      "bytes": 5030,
+      "sha256": "e2c7e3988c002bdbe9dc0b51f1e61d54b7179ca03c9daa19ab6bb9d689935705",
+      "gitBlob": "4065a0c6d1bd5c603d597e963bdb58232ba3194a",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "README.md",
+      "retainedPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-source-v10/README.md",
+      "mode": "100644",
+      "bytes": 8580,
+      "sha256": "4e090f2c5dda2968e637d81e92dedb43735390ce0ce29f92b4aaf2e714af7c59",
+      "gitBlob": "cb12d82665fbdd718d98aec333ec570201d9f3f1",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "GOVERNANCE.md",
+      "retainedPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-source-v10/GOVERNANCE.md",
+      "mode": "100644",
+      "bytes": 25603,
+      "sha256": "d23dbd47b1f00903c2338cfab7e027e1143b25a9d809213fc6334221672b7b2c",
+      "gitBlob": "e5016ae0faa0898cc3ddfca5129221b1e9abf9a1",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "retainedPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-source-v10/CONTRIBUTING.md",
+      "mode": "100644",
+      "bytes": 2701,
+      "sha256": "488d7b09ef076053f60a0307f7cb65383e390b9d6201397fa666fa46df354315",
+      "gitBlob": "41214be92bad2430245600e636a9cce202357d1a",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "docs/engineering-quality-standard.md",
+      "retainedPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-source-v10/docs/engineering-quality-standard.md",
+      "mode": "100644",
+      "bytes": 39976,
+      "sha256": "04fa3f8b487ff386e6f6a8e4570a2646370ed9248c52b7afa4c9cf391e0708ce",
+      "gitBlob": "99a59239fc839598dc4f26ed08a77b60ef5178c6",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "docs/engineering-quality.md",
+      "retainedPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-source-v10/docs/engineering-quality.md",
+      "mode": "100644",
+      "bytes": 40371,
+      "sha256": "b3880dbd42ea7b448e59c0fcf3315a244c3ead9ddff980e1f688e43a49186f9a",
+      "gitBlob": "b99083fb1a1ff660879a97d3dc788c33935272c8",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": true
+    },
+    {
+      "path": "docs/engineering-quality-profile.json",
+      "retainedPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-source-v10/docs/engineering-quality-profile.json",
+      "mode": "100644",
+      "bytes": 4329,
+      "sha256": "c9ffb874baf1eac0f07d6211429267b2e3d1acb6735b9149af0d0e70dde0218a",
+      "gitBlob": "b3c56cd20ff3420321ebc93de7cbd648ab6c6573",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": false
+    },
+    {
+      "path": ".github/workflows/runtime-admission-source-successor-v10.yml",
+      "retainedPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-source-v10/.github/workflows/runtime-admission-source-successor-v10.yml",
+      "mode": "100644",
+      "bytes": 6653,
+      "sha256": "d027403e1badb890e0746c1d7b3460dcbe1a24c02b13ae41473b48ef0f21e8ee",
+      "gitBlob": "1688e1185b5d4c3fe42cf945cf47c96ebd0f1ab3",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": false
+    },
+    {
+      "path": "scripts/runtime-admission-source-successor-v10.ts",
+      "retainedPath": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-refresh-q/canary-actual-s2/scripts/runtime-admission-source-successor-v10.ts",
+      "mode": "100644",
+      "bytes": 81503,
+      "sha256": "021fd46f568d5d78d0555385011ba5b7289b3e1b4d3f89302fed763acae3f621",
+      "gitBlob": "ef374d3711303674d862f8e66bf5e3eb93572dc6",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": false
+    },
+    {
+      "path": "scripts/runtime-admission-source-successor-v10.test.ts",
+      "retainedPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-source-v10/scripts/runtime-admission-source-successor-v10.test.ts",
+      "mode": "100644",
+      "bytes": 109252,
+      "sha256": "47f84f01b7edd7c94986da003444cccc24543fbc80ef759a0a9eb6799543bd40",
+      "gitBlob": "6e1041efd3172c82e79ae54e09ef50b94d408664",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": false
+    },
+    {
+      "path": "scripts/runtime-admission-source-successor-v10-target.ts",
+      "retainedPath": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-refresh-q/canary-actual-s2/scripts/runtime-admission-source-successor-v10-target.ts",
+      "mode": "100644",
+      "bytes": 6327,
+      "sha256": "4269b663306eedc264cc50348368f22dd72c56e94ad74e0d81e7d0e010764780",
+      "gitBlob": "832bcae323736d742164050f52816bff0221b7b4",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": false
+    },
+    {
+      "path": "tsconfig.runtime-admission-source-successor-v10.json",
+      "retainedPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-source-v10/tsconfig.runtime-admission-source-successor-v10.json",
+      "mode": "100644",
+      "bytes": 245,
+      "sha256": "7c89e1be7110b4a3aef0edc682e40db4b068ba10993afe8d32073060f01b506f",
+      "gitBlob": "f64550841b84124fb1a2273d980207bb9a83b6e1",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": false
+    },
+    {
+      "path": "tsconfig.tooling.json",
+      "retainedPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-source-v10/tsconfig.tooling.json",
+      "mode": "100644",
+      "bytes": 2394,
+      "sha256": "238318b7809561d40a2ae4c14a5656ed70bf63298a9d9335a0f7194342182015",
+      "gitBlob": "c265f205a1722093acecdb9cb597cada739e29e7",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": false
+    },
+    {
+      "path": "toolchain.config.json",
+      "retainedPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-source-v10/toolchain.config.json",
+      "mode": "100644",
+      "bytes": 9991,
+      "sha256": "30c43471f6ecacbc7afd59c8dccf126a45b7ca364a0b519cce328b6c6f327dc5",
+      "gitBlob": "98598c040b65a5b4f6a5d8b8cf28607abe4b9376",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": false
+    },
+    {
+      "path": "scripts/compiler-floor.ts",
+      "retainedPath": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-refresh-q/canary-actual-s2/scripts/compiler-floor.ts",
+      "mode": "100644",
+      "bytes": 6595,
+      "sha256": "26f5f4c27a7666c756cf714bb195cae2864805fce86e8de5a723b6bb87d73bd6",
+      "gitBlob": "ad1ea2749bf2f2b86f61ba9cbecd2e26249ba3cd",
+      "matchesCurrentSource": true,
+      "matchesCurrentMain": true
+    }
+  ],
+  "nestedAGENTS": [],
+  "runtimesExecuted": [],
+  "testsRerun": false
+}

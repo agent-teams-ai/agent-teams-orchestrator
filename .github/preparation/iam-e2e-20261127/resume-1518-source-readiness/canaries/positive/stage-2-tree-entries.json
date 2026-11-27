@@ -1,0 +1,8 @@
+[
+  {
+    "path": ".github/workflows/runtime-admission-source-v10-canary.yml",
+    "mode": "100644",
+    "type": "blob",
+    "content": "name: Runtime and Admission Source Canary V10\non:\n  push:\n    branches:\n      - qualification/runtime-admission-positive-v10\n      - qualification/runtime-admission-wrong-blob-v10\n      - qualification/runtime-admission-extra-file-v10\npermissions:\n  actions: read\n  contents: read\n  pull-requests: read\n  statuses: write\njobs:\n  source:\n    uses: agent-teams-ai/.github/.github/workflows/runtime-admission-source-successor-v10.yml@6b1ea868f24fe3bf208d2f9a6240cb0f3416c9e4\n    permissions:\n      actions: read\n      contents: read\n      pull-requests: read\n      statuses: write\n"
+  }
+]

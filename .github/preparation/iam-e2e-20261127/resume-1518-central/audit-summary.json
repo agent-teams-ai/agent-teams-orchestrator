@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "scope": "Independent current Central read-only inspection",
+  "observedAt": "2026-11-27 15:19:16 UTC",
+  "remoteMutations": false,
+  "target": {
+    "repository": "agent-teams-ai/.github",
+    "repositoryId": 1316243981,
+    "pullRequest": 467,
+    "pullId": 5524611730,
+    "headRef": "fix/docs-receipt-authorization-order-20261127",
+    "baseSHA": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+    "headSHA": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+    "baseTreeSHA": "b835f11c1433c562d3575e7d351697d4cc44f572",
+    "headTreeSHA": "f20bbd64ec8e35caf614a80fc02e6717dc03bd12",
+    "commits": 2
+  },
+  "targetCommits": [
+    "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+    "be1c81ec749aa62ddf524424ccd19284c5043a0e"
+  ],
+  "targetFiles": [
+    {
+      "filename": "scripts/verify-docs-cohort-v2-receipt.mjs",
+      "status": "modified",
+      "sha": "15090b6ce1ca77f3591f3337137d564b4c82dc87"
+    },
+    {
+      "filename": "scripts/verify-docs-consumer-gate.test.mjs",
+      "status": "modified",
+      "sha": "1720cb51da26b4ddfc1f14b855f81cfdfceb8f90"
+    }
+  ],
+  "sourceCommit": "6b1ea868f24fe3bf208d2f9a6240cb0f3416c9e4",
+  "sourceTree": "f9a782f868afd88eb0f1beb9a25c5d60af1f9548",
+  "materializedSource": [
+    {
+      "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-refresh-q/canary-actual-s2/scripts/runtime-admission-source-successor-v10.ts",
+      "bytes": 81503,
+      "sha256": "021fd46f568d5d78d0555385011ba5b7289b3e1b4d3f89302fed763acae3f621",
+      "gitBlob": "ef374d3711303674d862f8e66bf5e3eb93572dc6",
+      "matchesCurrentRemoteSource": true
+    },
+    {
+      "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-refresh-q/canary-actual-s2/scripts/runtime-admission-source-successor-v10-target.ts",
+      "bytes": 6327,
+      "sha256": "4269b663306eedc264cc50348368f22dd72c56e94ad74e0d81e7d0e010764780",
+      "gitBlob": "832bcae323736d742164050f52816bff0221b7b4",
+      "matchesCurrentRemoteSource": true
+    }
+  ],
+  "targetBindingExactlyCurrent": true,
+  "canonicalSourceRefExists": false,
+  "canonicalSourceLockExists": false,
+  "validationPR": {
+    "number": 468,
+    "draft": true,
+    "mustNotMerge": true
+  },
+  "completeCheckRunCensus": 237,
+  "latestRequired": {
+    "trusted-validation": {
+      "id": 140517708915,
+      "name": "trusted-validation",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+      "started_at": "2026-11-27T12:54:44Z",
+      "completed_at": "2026-11-27T12:54:50Z",
+      "details_url": "https://github.com/agent-teams-ai/.github/actions/runs/46002581676/job/140517708915",
+      "app": 15368
+    },
+    "trusted-admission-authority-evolution-v1": {
+      "id": 140517705954,
+      "name": "trusted-admission-authority-evolution-v1",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+      "started_at": "2026-11-27T12:54:44Z",
+      "completed_at": "2026-11-27T12:54:52Z",
+      "details_url": "https://github.com/agent-teams-ai/.github/actions/runs/46002581798/job/140517705954",
+      "app": 15368
+    },
+    "trusted-admission-evidence": {
+      "id": 140517701938,
+      "name": "trusted-admission-evidence",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+      "started_at": "2026-11-27T12:54:42Z",
+      "completed_at": "2026-11-27T12:54:45Z",
+      "details_url": "https://github.com/agent-teams-ai/.github/actions/runs/46002580338/job/140517701938",
+      "app": 15368
+    },
+    "check": {
+      "id": 140509758749,
+      "name": "check",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+      "started_at": "2026-11-27T12:38:02Z",
+      "completed_at": "2026-11-27T12:42:03Z",
+      "details_url": "https://github.com/agent-teams-ai/.github/actions/runs/46000249593/job/140509758749",
+      "app": 15368
+    },
+    "runtime-admission-source-successor-v4": {
+      "id": 60048579919,
+      "context": "runtime-admission-source-successor-v4",
+      "state": "failure",
+      "created_at": "2026-11-27T12:58:26Z",
+      "target_url": "https://github.com/agent-teams-ai/.github/actions/runs/46002581052/attempts/1",
+      "description": "Protected runtime/admission successor v4: failure"
+    },
+    "commit-author-identity": {
+      "id": 60048355893,
+      "context": "commit-author-identity",
+      "state": "success",
+      "created_at": "2026-11-27T12:54:55Z",
+      "target_url": null,
+      "description": "Trusted commit author identity: success"
+    }
+  },
+  "unresolvedThreads": [
+    "PRRT_kwDOTnRKDc68yeSx"
+  ],
+  "rulesComparison": {
+    "rules-main": {
+      "oldPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-target-evidence/rules-main.json",
+      "completeParsedEqual": true,
+      "oldType": "dict"
+    },
+    "rules-identity": {
+      "oldPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-target-evidence/rules-identity.json",
+      "completeParsedEqual": true,
+      "oldType": "dict"
+    }
+  },
+  "sourceRunObservationCaveat": "Attempt-specific CI API returned stale in_progress; canonical current run endpoint, current check-run and same-attempt job all terminal success. Both observations retained."
+}

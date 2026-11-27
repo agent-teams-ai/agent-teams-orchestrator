@@ -1,0 +1,50 @@
+{
+  "id": 24363205,
+  "name": "Commit author identity",
+  "target": "branch",
+  "source_type": "Repository",
+  "source": "agent-teams-ai/.github",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "exclude": [],
+      "include": [
+        "~DEFAULT_BRANCH"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "do_not_enforce_on_create": false,
+        "required_status_checks": [
+          {
+            "context": "commit-author-identity",
+            "integration_id": 15368
+          }
+        ]
+      }
+    }
+  ],
+  "node_id": "RRS_lACqUmVwb3NpdG9yec5OdEoNzgFzwMU",
+  "created_at": "2026-10-02T15:23:08.317+03:00",
+  "updated_at": "2026-11-26T17:12:56.738+02:00",
+  "bypass_actors": [
+    {
+      "actor_id": 13103045,
+      "actor_type": "User",
+      "bypass_mode": "pull_request"
+    }
+  ],
+  "current_user_can_bypass": "pull_requests_only",
+  "_links": {
+    "self": {
+      "href": "https://api.github.com/repos/agent-teams-ai/.github/rulesets/24363205"
+    },
+    "html": {
+      "href": "https://github.com/agent-teams-ai/.github/rules/24363205"
+    }
+  }
+}

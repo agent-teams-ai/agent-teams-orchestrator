@@ -1,0 +1,123 @@
+{
+  "reviewer": "/root/central_resume",
+  "scope": "Independent static diff and custody review only; no builder invocation or optional tests",
+  "verdict": "ACCEPT_LOCAL_REPAIR_EXPECTATION_REFRESH",
+  "blockingFindings": [],
+  "facts": {
+    "actualBase": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+    "actualHead": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+    "actualTargetTree": "f20bbd64ec8e35caf614a80fc02e6717dc03bd12",
+    "completeSourceCensus": [
+      {
+        "sha": "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+        "tree": "31561be538b5dc4b4aa02e53278047d79ff4dbaa",
+        "parents": [
+          "d167b2360524474240a43e3ff70e35eb94e109c7"
+        ]
+      },
+      {
+        "sha": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+        "tree": "f20bbd64ec8e35caf614a80fc02e6717dc03bd12",
+        "parents": [
+          "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+          "283c9b8d79580b48be5b1b8d6a94a09b9543185b"
+        ]
+      }
+    ],
+    "futureMergedM": null,
+    "sourcePreparationIsNotM": "6b1ea868f24fe3bf208d2f9a6240cb0f3416c9e4"
+  },
+  "files": [
+    {
+      "original": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/cohort-v4-preparation/prepare-orchestrator-v4.mjs",
+      "prepared": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-consumer/prepared/prepare-orchestrator-v4.mjs",
+      "originalHashVerified": true,
+      "preparedHashVerified": true
+    },
+    {
+      "original": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/harness-v4-preparation/prepare-forward-inputs.mjs",
+      "prepared": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-consumer/prepared/prepare-forward-inputs.mjs",
+      "originalHashVerified": true,
+      "preparedHashVerified": true
+    },
+    {
+      "original": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/post-consumer-v4-preparation/prepare-orchestrator-post-consumer-v4.mjs",
+      "prepared": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-consumer/prepared/prepare-orchestrator-post-consumer-v4.mjs",
+      "originalHashVerified": true,
+      "preparedHashVerified": true
+    }
+  ],
+  "diff": {
+    "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-consumer/prepared/repair-expectations-refresh.diff",
+    "bytes": 7626,
+    "sha256": "fb80e057fe8f71c6e7d0ec0858fce763b05f2ee161819d7f521032fdbc1dee87",
+    "gitBlob": "ee11e352046b2b3b0b9309b0acf1b84a4c32b219"
+  },
+  "unchangedRegions": [
+    {
+      "region": "cohort native main CI validation",
+      "unchanged": true,
+      "bytes": 2421,
+      "sha256": "ceb685d1124732c49227cae036b6bbcd4f5b452a40e55878ba8e338f3e8b7fd5"
+    },
+    {
+      "region": "cohort local actual-M checkout and all later future gates",
+      "unchanged": true,
+      "bytes": 10684,
+      "sha256": "36e588574d66ec367fa59e19bec7ca3688e69d945901e21ebcc4866033b8ef0c"
+    },
+    {
+      "region": "forward complete source/lock/admission reader",
+      "unchanged": true,
+      "bytes": 17458,
+      "sha256": "0a1f58b694b84960f543fb16896dc6f34ef1d70b8503b48cecac80b554e587c6"
+    },
+    {
+      "region": "forward signature and physical harness/capture remainder",
+      "unchanged": true,
+      "bytes": 2667,
+      "sha256": "e7720753bd6c9350017cb3249e1380b364e2cc65f4782c9e385b2a1f54b46bb3"
+    },
+    {
+      "region": "postconsumer actual-M bind, main ancestry, native CI and all remaining receipt/observed/CANARY gates",
+      "unchanged": true,
+      "bytes": 31033,
+      "sha256": "8dafb05a773de9d95b139a9b85a11bb9697e7cff1a3befd7d684a4c3415cc0e2"
+    }
+  ],
+  "reasoning": [
+    "Only factual expected repair identities changed; additional commit-census and identity/merge-signature checks narrow acceptance.",
+    "Two source commits are independently enumerated with exact trees, parent order, raw author/committer and linked owner account; missing, duplicate, extra, reordered or foreign census fails.",
+    "Actual future M remains closed/merged PR467.merge_commit_sha with reviewed target tree and exact sole parent283. The synchronized PR headbe1 and qualification source6b1 cannot satisfy the ordinary squash commit shape.",
+    "Cohort builder still requires current protected main exactlyM, a clean local checkout atM, exact target blobs and full same-attempt successful push/main Node26 and Node24 job/check/run/decisive-step evidence.",
+    "Later postconsumer review still bindsM to closed PR467, one-commit exact two-file squash compare, currentCentralmain ancestry and both successful native main runs.",
+    "The retained compareRepair ahead_by and total_commits of1 describe the eventual squash comparison and correctly do not change to2.",
+    "Forward builder still verifies sourceCCC2, exact package/closure/policy/selected-lock/controller/kernel and retained original public admission boundaries; it records prepared-unexecuted and no qualification.",
+    "All subsequent full live qualification, append-only record/events, desired, fresh generation2-to3 lifecycle, receipt/artifact integrity, Host and separate observed/CANARY gates remain unchanged."
+  ],
+  "inputContractChanges": [
+    {
+      "builder": "prepare-orchestrator-v4.mjs",
+      "requiredDescriptor": "input.files.repairCommits",
+      "payload": "Complete actual GitHub REST PR467 commits array, exactly [611cd2a7…, be1c81ec…], with matching trees, parent lists, canonical author/committer names and linked owner account."
+    },
+    {
+      "builder": "prepare-orchestrator-post-consumer-v4.mjs",
+      "requiredDescriptor": "input.successor.repairCommits",
+      "payload": "Same complete actual GitHub REST PR467 commits array; descriptor is hashed and regular-file checked by existing readJson/readDescriptor path."
+    }
+  ],
+  "limits": [
+    "Not permission to execute future preparation before real repair merge and own main CI.",
+    "No future merge SHA, currentmain success, new cohort qualification, canary or consumer lifecycle evidence manufactured.",
+    "Existing broader limitations of unchanged builders were not newly relaxed by this delta.",
+    "Review is static and no syntax or native tests were repeated."
+  ],
+  "mutations": {
+    "remote": false,
+    "preparedFiles": false,
+    "originalFiles": false,
+    "ciDispatch": false,
+    "generatorInvocation": false
+  }
+}

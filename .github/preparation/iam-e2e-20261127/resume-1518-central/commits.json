@@ -1,0 +1,171 @@
+[
+  {
+    "sha": "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+    "node_id": "C_kwDOTnRKDdoAKDYxMWNkMmE3OGQxZjkxMDRkYmY0NmJhYjY5YzNmZjBlMzBhYzZkOGY",
+    "commit": {
+      "author": {
+        "name": "Илия",
+        "email": "iliyazelenkog@gmail.com",
+        "date": "2026-11-27T09:52:18Z"
+      },
+      "committer": {
+        "name": "Илия",
+        "email": "iliyazelenkog@gmail.com",
+        "date": "2026-11-27T09:52:18Z"
+      },
+      "message": "fix(docs): match canonical consumer authorization in receipt verification\n\nUse the authorizer's ordinal JSON key order only for its authorization digest. Preserve historical cohort, event, receipt and execution-envelope digest domains. Exercise the actual arm/arm64 closure ordering through the existing full consumer receipt fixture and reject the former locale digest.",
+      "tree": {
+        "sha": "31561be538b5dc4b4aa02e53278047d79ff4dbaa",
+        "url": "https://api.github.com/repos/agent-teams-ai/.github/git/trees/31561be538b5dc4b4aa02e53278047d79ff4dbaa"
+      },
+      "url": "https://api.github.com/repos/agent-teams-ai/.github/git/commits/611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/agent-teams-ai/.github/commits/611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+    "html_url": "https://github.com/agent-teams-ai/.github/commit/611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+    "comments_url": "https://api.github.com/repos/agent-teams-ai/.github/commits/611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f/comments",
+    "author": {
+      "login": "777genius",
+      "id": 13103045,
+      "node_id": "MDQ6VXNlcjEzMTAzMDQ1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13103045?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/777genius",
+      "html_url": "https://github.com/777genius",
+      "followers_url": "https://api.github.com/users/777genius/followers",
+      "following_url": "https://api.github.com/users/777genius/following{/other_user}",
+      "gists_url": "https://api.github.com/users/777genius/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/777genius/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/777genius/subscriptions",
+      "organizations_url": "https://api.github.com/users/777genius/orgs",
+      "repos_url": "https://api.github.com/users/777genius/repos",
+      "events_url": "https://api.github.com/users/777genius/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/777genius/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "777genius",
+      "id": 13103045,
+      "node_id": "MDQ6VXNlcjEzMTAzMDQ1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13103045?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/777genius",
+      "html_url": "https://github.com/777genius",
+      "followers_url": "https://api.github.com/users/777genius/followers",
+      "following_url": "https://api.github.com/users/777genius/following{/other_user}",
+      "gists_url": "https://api.github.com/users/777genius/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/777genius/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/777genius/subscriptions",
+      "organizations_url": "https://api.github.com/users/777genius/orgs",
+      "repos_url": "https://api.github.com/users/777genius/repos",
+      "events_url": "https://api.github.com/users/777genius/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/777genius/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "d167b2360524474240a43e3ff70e35eb94e109c7",
+        "url": "https://api.github.com/repos/agent-teams-ai/.github/commits/d167b2360524474240a43e3ff70e35eb94e109c7",
+        "html_url": "https://github.com/agent-teams-ai/.github/commit/d167b2360524474240a43e3ff70e35eb94e109c7"
+      }
+    ]
+  },
+  {
+    "sha": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+    "node_id": "C_kwDOTnRKDdoAKGJlMWM4MWVjNzQ5YWE2MmRkZjUyNDQyNGNjZDE5Mjg0YzUwNDNhMGU",
+    "commit": {
+      "author": {
+        "name": "Илия",
+        "email": "iliyazelenkog@gmail.com",
+        "date": "2026-11-27T12:20:53Z"
+      },
+      "committer": {
+        "name": "Илия",
+        "email": "iliyazelenkog@gmail.com",
+        "date": "2026-11-27T12:20:53Z"
+      },
+      "message": "chore(docs): synchronize receipt repair with qualified Central main\n\nPreserve the two reviewed authorization serialization repair blobs while retaining the actual qualified C35 main data. This synchronization does not extend the finite repair scope or change immutable source protections.\n\nRefs #467, #464, agent-teams-ai/extension-foundation#70.",
+      "tree": {
+        "sha": "f20bbd64ec8e35caf614a80fc02e6717dc03bd12",
+        "url": "https://api.github.com/repos/agent-teams-ai/.github/git/trees/f20bbd64ec8e35caf614a80fc02e6717dc03bd12"
+      },
+      "url": "https://api.github.com/repos/agent-teams-ai/.github/git/commits/be1c81ec749aa62ddf524424ccd19284c5043a0e",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/agent-teams-ai/.github/commits/be1c81ec749aa62ddf524424ccd19284c5043a0e",
+    "html_url": "https://github.com/agent-teams-ai/.github/commit/be1c81ec749aa62ddf524424ccd19284c5043a0e",
+    "comments_url": "https://api.github.com/repos/agent-teams-ai/.github/commits/be1c81ec749aa62ddf524424ccd19284c5043a0e/comments",
+    "author": {
+      "login": "777genius",
+      "id": 13103045,
+      "node_id": "MDQ6VXNlcjEzMTAzMDQ1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13103045?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/777genius",
+      "html_url": "https://github.com/777genius",
+      "followers_url": "https://api.github.com/users/777genius/followers",
+      "following_url": "https://api.github.com/users/777genius/following{/other_user}",
+      "gists_url": "https://api.github.com/users/777genius/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/777genius/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/777genius/subscriptions",
+      "organizations_url": "https://api.github.com/users/777genius/orgs",
+      "repos_url": "https://api.github.com/users/777genius/repos",
+      "events_url": "https://api.github.com/users/777genius/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/777genius/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "777genius",
+      "id": 13103045,
+      "node_id": "MDQ6VXNlcjEzMTAzMDQ1",
+      "avatar_url": "https://avatars.githubusercontent.com/u/13103045?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/777genius",
+      "html_url": "https://github.com/777genius",
+      "followers_url": "https://api.github.com/users/777genius/followers",
+      "following_url": "https://api.github.com/users/777genius/following{/other_user}",
+      "gists_url": "https://api.github.com/users/777genius/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/777genius/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/777genius/subscriptions",
+      "organizations_url": "https://api.github.com/users/777genius/orgs",
+      "repos_url": "https://api.github.com/users/777genius/repos",
+      "events_url": "https://api.github.com/users/777genius/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/777genius/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+        "url": "https://api.github.com/repos/agent-teams-ai/.github/commits/611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+        "html_url": "https://github.com/agent-teams-ai/.github/commit/611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f"
+      },
+      {
+        "sha": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+        "url": "https://api.github.com/repos/agent-teams-ai/.github/commits/283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+        "html_url": "https://github.com/agent-teams-ai/.github/commit/283c9b8d79580b48be5b1b8d6a94a09b9543185b"
+      }
+    ]
+  }
+]

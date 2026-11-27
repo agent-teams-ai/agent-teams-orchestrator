@@ -1,0 +1,46 @@
+{
+  "observedAt": "2026-11-27 15:22:42 UTC",
+  "scope": "read-only resume; no remote mutations, no repeated tests, no workflow dispatch",
+  "main": "3dccf2c53bf11f3939a19734a58f5e64d96673d0",
+  "pull": {
+    "number": 111,
+    "head": "c01efb6813f0c048497caeefbb8235cead480cb2",
+    "base": "3dccf2c53bf11f3939a19734a58f5e64d96673d0",
+    "draft": true,
+    "mergeable": true,
+    "mergeableState": "blocked",
+    "changedFiles": 53,
+    "commits": 8,
+    "reviewThreads": 0,
+    "reviews": 0,
+    "inlineReviewComments": 0
+  },
+  "sourceLockBranch": "ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67",
+  "durableBranch": {
+    "name": "work/iam-managed-e2e-continuation-20261127",
+    "sha": "1bf17feaa14816c6246cb8ea29fde4814a4d6790"
+  },
+  "currentRequiredChecks": {
+    "architecture": "success",
+    "Review dependency changes": "success",
+    "commit-author-identity": "success",
+    "docs-protocol / docs-protocol-check": "failure"
+  },
+  "docsFailure": {
+    "run": 45911456395,
+    "attempt": 1,
+    "authorizationJob": 140220562872,
+    "qualificationJob": 140220739256,
+    "semanticJob": 140220784306,
+    "authorizationCause": "Old pinned b30455 workflow schema rejects Qualified Docs Cohort registry before consumer validation.",
+    "qualificationCause": "Explicit exit 1 after failed authorization.",
+    "structural": "skipped"
+  },
+  "pendingChecks": 0,
+  "openPullRequests": 10,
+  "overlappingNewMigrationPullRequests": 0,
+  "worktree": "original Orchestrator checkout clean",
+  "preparation": "All five v4 helper hashes match durable checkpoint; actual successful historical Host integration-run bfbc176e… intact; new v4 helpers remain uninvoked.",
+  "nextAction": "After verified actual Central PR467 merge M and native main CI: qualify new source-bound v4 cohort and desired selection, run fresh native 2→3 CCC prepare/finalize/check, execute approved Host v4 successor producing final 60-file export, then update PR111 and collect fresh exact-head required CI before ordinary squash and real main CI. Preserve old physical v3 and separate successful Host evidence as historical observations.",
+  "preservationRisk": "Do not treat current 53-file c01 checks or old v3 A/B/C as future v4 candidate/main qualification; never substitute temporary V10 for actual merged source M or claim overall run45972172068 success."
+}

@@ -1,0 +1,25 @@
+{
+  "name": "Immutable runtime admission source successor v10",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "exclude": [],
+      "include": [
+        "refs/heads/governance/runtime-admission-source-successor-v10"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "type": "update"
+    }
+  ],
+  "bypass_actors": []
+}

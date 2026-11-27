@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual root resume after recovered newer EF preparation; IAM managed Docs/tooling E2E remains incomplete",
+  "actor": {
+    "login": "777genius",
+    "id": 13103045
+  },
+  "originalWorkdir": "/workspace/scratch/e36de90adcfd",
+  "newerSharedSourceWorkdir": "/workspace/scratch/7e5625beb0a0",
+  "central": {
+    "main": {
+      "ref": "refs/heads/main",
+      "node_id": "REF_kwDOTnRKDa9yZWZzL2hlYWRzL21haW4",
+      "url": "https://api.github.com/repos/agent-teams-ai/.github/git/refs/heads/main",
+      "object": {
+        "sha": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+        "type": "commit",
+        "url": "https://api.github.com/repos/agent-teams-ai/.github/git/commits/283c9b8d79580b48be5b1b8d6a94a09b9543185b"
+      }
+    },
+    "target": {
+      "number": 467,
+      "head": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+      "base": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+      "headTree": "f20bbd64ec8e35caf614a80fc02e6717dc03bd12",
+      "state": "open",
+      "merged": false,
+      "draft": false
+    },
+    "source": {
+      "sha": "6b1ea868f24fe3bf208d2f9a6240cb0f3416c9e4",
+      "tree": "f9a782f868afd88eb0f1beb9a25c5d60af1f9548",
+      "preparationBranch": "work/ef70-authorization-source-v10-20261127",
+      "validationPR": 468,
+      "validationPRMustNotMerge": true
+    },
+    "canonicalRefObservation": {
+      "error": "GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/git/refs#get-a-reference\",\"status\":\"404\"}",
+      "error_code": "NOT_FOUND",
+      "error_data": {
+        "message": "Not Found",
+        "documentation_url": "https://docs.github.com/rest/git/refs#get-a-reference",
+        "status": "404"
+      }
+    },
+    "sourceLockInstalled": false,
+    "rulesetCount": 16,
+    "sourceLockRuleName": "Immutable runtime admission source successor v10",
+    "mainAndIdentityProtectionUnchanged": true,
+    "temporaryTransitionApplied": false,
+    "threadResolution": {
+      "id": "PRRT_kwDOTnRKDc68yeSx",
+      "resolved": true,
+      "resolvedBy": "777genius",
+      "headReviewed": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+      "disposition": "Reviewed non-blocking fixture-helper suggestion; real production readers exercise the covered ordering boundary. No code change required.",
+      "assessment": "../resume-1518-central/review-disposition/assessment.json"
+    }
+  },
+  "browser": {
+    "tabId": "1102718187",
+    "url": "https://github.com/agent-teams-ai/.github/settings/rules/new?target=branch&enforcement=disabled",
+    "state": "GitHub Confirm access, Verify present; exact V10 form prepared, Create submitted but authentication required",
+    "verificationCodeRead": false,
+    "targetPatternInUi": "governance/runtime-admission-source-successor-v10",
+    "effectiveRefVerifiedFromVisibleDeleteButton": "refs/heads/governance/runtime-admission-source-successor-v10",
+    "formatCorrection": "GitHub UI adds refs/heads/ itself; unsaved double-prefix entry removed before final Create submission."
+  },
+  "consumer": {
+    "main": "3dccf2c53bf11f3939a19734a58f5e64d96673d0",
+    "pull": 111,
+    "head": "c01efb6813f0c048497caeefbb8235cead480cb2",
+    "draft": true,
+    "changed": false
+  },
+  "backupBase": {
+    "ref": "refs/heads/work/iam-managed-e2e-continuation-20261127",
+    "node_id": "REF_kwDOThjC3toANXJlZnMvaGVhZHMvd29yay9pYW0tbWFuYWdlZC1lMmUtY29udGludWF0aW9uLTIwMjYxMTI3",
+    "url": "https://api.github.com/repos/agent-teams-ai/agent-teams-orchestrator/git/refs/heads/work/iam-managed-e2e-continuation-20261127",
+    "object": {
+      "sha": "1bf17feaa14816c6246cb8ea29fde4814a4d6790",
+      "type": "commit",
+      "url": "https://api.github.com/repos/agent-teams-ai/agent-teams-orchestrator/git/commits/1bf17feaa14816c6246cb8ea29fde4814a4d6790"
+    }
+  },
+  "qualificationClaims": {
+    "managedE2ECompleted": false,
+    "canonicalSourceQualified": false,
+    "hostedCanariesExecuted": false,
+    "mainMerged": false,
+    "v4PhysicalForwardExecuted": false,
+    "productF9Qualified": false
+  },
+  "next": [
+    "User completes existing GitHub Confirm access in marked handoff tab; code stays on GitHub.",
+    "Freshly reconcile current main/target/source/rules and recently active EF preparation before effects; never publish obsolete925 source.",
+    "Read actual saved no-bypass V10 source lock exact ref with current_user_can_bypass=never; publish exact6b1 canonical ref only if absent and still bound.",
+    "Genuine protected source qualification, positive and negative hosted canaries, add V10 then prove negatives required and blocked; retire V4 only after evidence.",
+    "Ordinary expected-head squash PR467, verify actual merge author/committer/tree/parent and main CI, restore V4 then retire V10.",
+    "Use refreshed three builders with actual repairCommits census; qualify/select v4, fresh CCC forward and 60-file Host export, PR111 native CI and ordinary merge, main CI, observed then CANARY."
+  ],
+  "observedAt": "2026-11-27T15:33:10.925901+00:00",
+  "preparedConsumerBuilders": {
+    "root": "../resume-1518-consumer/prepared",
+    "hashes": {
+      "prepare-orchestrator-v4.mjs": "1917c299a6d41b8d5a2c38b4311eee5a3a0d45f2ed99d0954ec06b6565538ab5",
+      "prepare-forward-inputs.mjs": "277fe521a1f30b83ea2ddd42cf1d36e75adc0e680060b711f7437f0c07a9830d",
+      "prepare-orchestrator-post-consumer-v4.mjs": "875a69a49d9dc2c092aacc95e94a54b0b9b4eafc391413e31ff959f783191dd9"
+    },
+    "newRequiredInputs": [
+      "input.files.repairCommits",
+      "input.successor.repairCommits"
+    ],
+    "repairCommitsCapture": "../resume-1518-central/commits.json",
+    "independentReview": "../resume-1518-central/consumer-refresh-independent-review.json",
+    "invoked": false
+  },
+  "historicalEvidence": {
+    "physicalV3Run": 45972172068,
+    "physicalStepPassed": true,
+    "physicalRunOverall": "failure-later-host-cspell",
+    "hostContinuationRun": 45981324003,
+    "hostContinuationResult": "success",
+    "hostExportFiles": 50,
+    "hostIntegrationRunSha256": "bfbc176eb76ddd124fa1b28270b877bd210ff056d587470dc3a88cb2e810cddb",
+    "repeatedThisResume": false
+  }
+}

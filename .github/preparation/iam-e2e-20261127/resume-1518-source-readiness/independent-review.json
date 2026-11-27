@@ -1,0 +1,464 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/recover_newer_work",
+  "reviewedAt": "2026-11-27T15:29:09.171202+00:00",
+  "scope": "Independent source-readiness and inert publication payload review for existing finite PR467; no remote changes and no new tests",
+  "verdict": "ACCEPT_SOURCE_AND_PREPARATION_FOR_ORDERED_LOCK_PUBLICATION_QUALIFICATION",
+  "blockingCodeFindings": [],
+  "source": {
+    "commit": "6b1ea868f24fe3bf208d2f9a6240cb0f3416c9e4",
+    "tree": "f9a782f868afd88eb0f1beb9a25c5d60af1f9548",
+    "preparationBranch": "work/ef70-authorization-source-v10-20261127",
+    "validationPR": 468,
+    "validationPRMustNotMerge": true
+  },
+  "target": {
+    "repository": "agent-teams-ai/.github",
+    "repositoryId": 1316243981,
+    "pullRequest": 467,
+    "pullId": 5524611730,
+    "headRef": "fix/docs-receipt-authorization-order-20261127",
+    "baseSHA": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+    "headSHA": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+    "baseTreeSHA": "b835f11c1433c562d3575e7d351697d4cc44f572",
+    "headTreeSHA": "f20bbd64ec8e35caf614a80fc02e6717dc03bd12",
+    "commits": 2
+  },
+  "completeTargetCommitCensus": [
+    "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+    "be1c81ec749aa62ddf524424ccd19284c5043a0e"
+  ],
+  "targetFiles": [
+    {
+      "filename": "scripts/verify-docs-cohort-v2-receipt.mjs",
+      "status": "modified",
+      "sha": "15090b6ce1ca77f3591f3337137d564b4c82dc87"
+    },
+    {
+      "filename": "scripts/verify-docs-consumer-gate.test.mjs",
+      "status": "modified",
+      "sha": "1720cb51da26b4ddfc1f14b855f81cfdfceb8f90"
+    }
+  ],
+  "reviewMethod": "Read actual retained source and applicable AGENTS/standard; byte-match15source inputs to fresh current-source tree; independently inspect workflow,target,source-lock,transition,canary,finite-route and publisher invariants; reuse unchanged-input independent broad reviews and completed native logs. No source/test/runtime/compiler execution in this review.",
+  "applicableInstructions": {
+    "onlyAGENTS": "AGENTS.md",
+    "AGENTSBlob": "4065a0c6d1bd5c603d597e963bdb58232ba3194a",
+    "qualityStandard": "docs/engineering-quality-standard.md",
+    "qualityStandardBlob": "99a59239fc839598dc4f26ed08a77b60ef5178c6",
+    "bothEqualCurrentMainAndSource": true,
+    "sourceCopies": "source-inputs",
+    "boundaries": [
+      "Current task defines scope; no unrelated EF/Orchestrator edits",
+      "Reuse unchanged-input evidence; no optional full CI rerun",
+      "Preserve immutable standards/source locks, accepted policy and honest qualification distinctions",
+      "Ordinary merge requires fresh owner identity, actual exact target and resolved blocking review findings"
+    ]
+  },
+  "invariants": [
+    {
+      "area": "Exact finite target",
+      "finding": "Source-bound PR467/pullId5524611730 binds current283/be1, exact trees, two complete owner commit SHAs and only repaired receipt/test blobs. No runtime input selects a different exception; module import rejects unbound state."
+    },
+    {
+      "area": "Frozen owners",
+      "finding": "All19literal frozen source images match the actual6b1tree as regular100644blobs. V4immutable source SHA72fa7a8 and lock28123607 remain mandatory."
+    },
+    {
+      "area": "Source lock",
+      "finding": "Exactly one repository-owned active dedicated exact-ref lock is required; update,deletion,non_fast_forward only. Owner-full must show empty bypass actors and current_user_can_bypass=never. No creation restriction is included; canonical creation follows saved readback."
+    },
+    {
+      "area": "Workflow custody",
+      "finding": "All three jobs checkout job.workflow_repository/job.workflow_sha with fullhistory and no persisted credentials. Calledsource never executes PRhead. Qualify/source are read-only; publisher alone gets statuses:write. Exact pinned runtime/actions and pre-package-manager source/hook preflight retained."
+    },
+    {
+      "area": "Source-push proof",
+      "finding": "Canonical real push must match exact source ref/SHA/workflow/path/owner/run/attempt, unchanged locked branch, source tree, currentReadyPR467/base/head and complete two-file/commit census."
+    },
+    {
+      "area": "Canary custody",
+      "finding": "Inputless578Bcaller pins6b1. Genuinepush binds caller/event head/ref, owner and exactly one same-repository openReadyPR; source verifies referenced_workflows. Stage1READMEseed thenReadyPR thenstage2samebranchfast-forward prevents missing-PR race."
+    },
+    {
+      "area": "Positive scope",
+      "finding": "Positive canary changes only README plus canonicalcaller on283base and should reach frozenV4noop. This is delegated compatibility proof; it cannot replace finite-target canonicalsourcepush proof."
+    },
+    {
+      "area": "Rejecting scope",
+      "finding": "wrong-blob changes protected identity JSON only by one extraLF, retaining parsedpolicy; frozenchecker must reject protectedblob drift. extra-file adds101Bcomment-only absentV10target source path; frozenV4noop thenV10preservation must reject. Both existing focused cases are present in unchanged tests; negatives must fail actual source semantics, not bootstrap/provenance."
+    },
+    {
+      "area": "Publisher",
+      "finding": "Only ownV10context is written. Pending first; exactcurrentattempt successfulqualify/source plus decisive steps required; liveauthority rereads beforeandafter success; failures attempt failurestatus and retain error custody."
+    },
+    {
+      "area": "Protection sequence",
+      "finding": "Fresh fullrules are byte-parsed equal to priorproposals. addV10 before retireV4; restoreV4 before retireV10. All other requiredcontexts/App15368, strict/create/PR/linearhistory controls, exactownerPR-onlygrant and separateidentity rule remain. Full roundtrip equals freshbaseline."
+    }
+  ],
+  "frozenImages": [
+    {
+      "path": ".github/workflows/docs-admission-authority-evolution-v1.yml",
+      "gitBlob": "8437f647e1ea0ea2f4778427cb09446b837c8af7",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": ".github/workflows/docs-source-successor-v1.yml",
+      "gitBlob": "6805fa96bc0401ca18a3a4f2c8f4d1d77a9ee672",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": ".github/workflows/runtime-admission-source-successor-v2.yml",
+      "gitBlob": "b2654f77458cd1d0cbeb308baed6a4bb2aae4898",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": ".github/workflows/runtime-admission-source-successor-v4.yml",
+      "gitBlob": "d14ab3a29080212bb1fd8ef74b5ae02407e30250",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "scripts/check-docs-source-successor-v1.mts",
+      "gitBlob": "36cb752a50b8a0d7f83c813ed17cec775cdd79bb",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "scripts/check-docs-source-successor-v1.test.mts",
+      "gitBlob": "281032ebb0afecd5bb425f7f4018c99b20ee6635",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "scripts/check-docs-verifier-authority.mts",
+      "gitBlob": "55c462acdc808bff8b032dce9819de48a02e5e3b",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "scripts/check-docs-verifier-authority.test.mts",
+      "gitBlob": "c34697abc079e0a161fb3872a8a9acb07e951ded",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "scripts/docs-admission-authority-evolution-v1.test.mjs",
+      "gitBlob": "3ba881a3c1fbaf10c798f7870e06c84e3ce1d326",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "scripts/docs-quality-source-successor-v2.ts",
+      "gitBlob": "767e4c4b530fdfad8356e299709be08f3237fdb0",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "scripts/docs-quality-source-successor-v3-target.ts",
+      "gitBlob": "f0b15b0ec460171a7b9a7b39d005cd897888634e",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "scripts/docs-quality-source-successor-v3.ts",
+      "gitBlob": "bd0072b49306a78069be10bbe34bacff5ac457cc",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "scripts/runtime-admission-source-successor-v2.test.ts",
+      "gitBlob": "f01ef4c5e88b5213637a1c2cf835f3c99ecac73d",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "scripts/runtime-admission-source-successor-v2.ts",
+      "gitBlob": "989db73819975b12d672fe9da994748dcba6c8be",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "scripts/runtime-admission-source-successor-v4.test.ts",
+      "gitBlob": "41947395c12cffa9282fe24e36928cd491f48f90",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "scripts/runtime-admission-source-successor-v4.ts",
+      "gitBlob": "ef337dd70d45e6ca645050d5a5a31b12f1fa3658",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "tsconfig.docs-source-successor.json",
+      "gitBlob": "ecf8d54bde8cd0bc1e5bb030963cf2bd8fde0602",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "tsconfig.runtime-admission-source-successor-v2.json",
+      "gitBlob": "43a64e9d461a5b260dd42f38ebc6d961c6d526bc",
+      "matchesCurrentSource": true
+    },
+    {
+      "path": "tsconfig.runtime-admission-source-successor-v4.json",
+      "gitBlob": "8e065e35afb67c3001a67c60b18c1fd055bbdf37",
+      "matchesCurrentSource": true
+    }
+  ],
+  "retainedNativeEvidence": {
+    "source": [
+      {
+        "runId": 45999079758,
+        "attempt": 1,
+        "jobId": 140505833918,
+        "runtime": "v26.11.1",
+        "runConclusion": "success",
+        "jobConclusion": "success",
+        "jobCompletedAt": "2026-11-27T12:32:57Z",
+        "runUpdatedAt": "2026-11-27T12:32:57Z",
+        "checkSuiteId": 124443779990,
+        "log": {
+          "path": "logs/pr468-sdoubleprime-ci-140505833918.log",
+          "bytes": 3220481,
+          "sha256": "1cbd5588deda5c36739f9aebe73dc77f54f0f79330cf58e05814ee3f043763da"
+        },
+        "tests": {
+          "current": 6201,
+          "frozen": 9,
+          "total": 6210,
+          "pass": 6210,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "v10LiteralCasesObservedPassing": 80
+        }
+      },
+      {
+        "runId": 45999079899,
+        "attempt": 1,
+        "jobId": 140505834658,
+        "runtime": "v24.21.0",
+        "runConclusion": "success",
+        "jobConclusion": "success",
+        "jobCompletedAt": "2026-11-27T12:33:44Z",
+        "runUpdatedAt": "2026-11-27T12:33:45Z",
+        "checkSuiteId": 124443780405,
+        "log": {
+          "path": "logs/pr468-sdoubleprime-node24-140505834658.log",
+          "bytes": 3221279,
+          "sha256": "b9e7121031473b101d59619e2cb6487ca776840c466bbac6ae99486023a14abb"
+        },
+        "tests": {
+          "current": 6201,
+          "frozen": 9,
+          "total": 6210,
+          "pass": 6210,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0,
+          "v10LiteralCasesObservedPassing": 80
+        }
+      }
+    ],
+    "sourceCheckout": {
+      "sha": "448a69a10eeff06f99884afc4ea5548283eb6818",
+      "tree": "f9a782f868afd88eb0f1beb9a25c5d60af1f9548",
+      "parents": [
+        "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+        "6b1ea868f24fe3bf208d2f9a6240cb0f3416c9e4"
+      ],
+      "rawCommitPath": "raw/pr468-sdoubleprime-merge.json"
+    },
+    "completeLogsByteVerified": [
+      {
+        "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-refresh-q/remote-verification-20261127/logs/pr468-sdoubleprime-ci-140505833918.log",
+        "bytes": 3220481,
+        "sha256": "1cbd5588deda5c36739f9aebe73dc77f54f0f79330cf58e05814ee3f043763da",
+        "run": 45999079758,
+        "attempt": 1,
+        "job": 140505833918,
+        "retainedCompleteLogBytesVerified": true
+      },
+      {
+        "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-refresh-q/remote-verification-20261127/logs/pr468-sdoubleprime-node24-140505834658.log",
+        "bytes": 3221279,
+        "sha256": "b9e7121031473b101d59619e2cb6487ca776840c466bbac6ae99486023a14abb",
+        "run": 45999079899,
+        "attempt": 1,
+        "job": 140505834658,
+        "retainedCompleteLogBytesVerified": true
+      }
+    ],
+    "currentApiReads": [
+      {
+        "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/source-native-node26-current.json",
+        "bytes": 14980,
+        "sha256": "757262a344cf176833bcc1f2505f20e4a55f2a17761e36f24ece799002e15600"
+      },
+      {
+        "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/source-native-node24.json",
+        "bytes": 15041,
+        "sha256": "40a2a1716738ad2ff29bde913628fdf6a6e0d39270f3f0947b3e8376e2b36e98"
+      }
+    ],
+    "target": {
+      "ci": {
+        "runId": 46000249593,
+        "attempt": 1,
+        "jobId": 140509758749,
+        "conclusion": "success",
+        "physicalNode": "26.11.1",
+        "currentTests": 5908,
+        "frozenTests": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "log": {
+          "path": "ci-jobs.json",
+          "sha256": "1cf7c3e381147c58bc65846192960d9ddf9e876ed1e0d748ad54240ae747c398",
+          "bytes": 3238
+        }
+      },
+      "node24": {
+        "runId": 46000249580,
+        "attempt": 1,
+        "jobId": 140509758803,
+        "conclusion": "success",
+        "physicalNode": "24.21.0",
+        "currentTests": 5908,
+        "frozenTests": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "log": {
+          "path": "node24-jobs.json",
+          "sha256": "c5a1cb209aa34ebfd0a9bf2020e8c9b9ffdd8aae40a6d6abaf1a6c05366c6d24",
+          "bytes": 3452
+        }
+      },
+      "actualCheckout": "0f39546459cbdb74b301ad6f5f9aa1ec6e251a0d",
+      "actualCheckoutParents": [
+        "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+        "be1c81ec749aa62ddf524424ccd19284c5043a0e"
+      ],
+      "actualCheckoutTree": "f20bbd64ec8e35caf614a80fc02e6717dc03bd12"
+    },
+    "targetCurrentReadback": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/audit-summary.json",
+    "testsRerun": false
+  },
+  "priorEvidence": [
+    {
+      "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central-v10-workflow-review-6b1ea868.json",
+      "bytes": 9870,
+      "sha256": "054525e3082a269db0eada7efcbfe90494ed5a4e4cae194b384ddc112ef32d5f"
+    },
+    {
+      "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/source-v10-broad-review-controller-preparation-s2-20261127/review-reuse-s2.json",
+      "bytes": 17225,
+      "sha256": "409b5553f754e5d92c6df95c15a8b4fb2215cbea66c7a0f5a5a520cd7c987383"
+    },
+    {
+      "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-target-be1-final-independent.json",
+      "bytes": 21338,
+      "sha256": "f758e4d71c8e0d8ffa47369c71f14965913719577c9c879ff774dd1336244fdd"
+    },
+    {
+      "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-refresh-q/remote-verification-20261127/source-native-final-pass.json",
+      "bytes": 4483,
+      "sha256": "3e9611ddfd4a812d87b6ef4ed96bf3efd91d7a9da4a2353875e26cfb2a80f3da"
+    },
+    {
+      "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-refresh-q/remote-verification-20261127/canary-proposal-reviewed.json",
+      "bytes": 37212,
+      "sha256": "2edc5cdfd994b00fb9f4c1c52afadc83be6a7a3fc3257c515fb3f43ccbcf469b"
+    },
+    {
+      "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-refresh-q/canary-actual-s2/delivery-packet.json",
+      "bytes": 11168,
+      "sha256": "8af7dd172a1435ddfbce5e0b24d0f87bd27c13be396010d43399bdd86cfacbc9"
+    },
+    {
+      "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-refresh-q/canary-actual-s2/independent-custody-review.json",
+      "bytes": 4529,
+      "sha256": "57c6c73e7ddfde5f27e6a9db6d07e26cf9081031f0ca9dfb4666ee47d5806c31"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/audit-summary.json",
+      "bytes": 5419,
+      "sha256": "7825ccbb5457a8ae4741f1e9fb5d518ea2031d639e885e75b9b4fd73d5706dbe"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/current-source-commit.json",
+      "bytes": 1606,
+      "sha256": "4a77b3ed23657d3c3a9c26675eefd56bfcc7e1d1e289af2a68150ec1794ce5d7"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/current-source-preparation.json",
+      "bytes": 514,
+      "sha256": "4de69993e77fad4b3685014a0f44ae98f163bb6e82e855457e5cfc621e725f2c"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/current-source-tree.json",
+      "bytes": 176490,
+      "sha256": "1499f89c858e85d68b74c109aa86d6dedc5951be24803b8644a71f46c690fccf"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/main-tree.json",
+      "bytes": 169673,
+      "sha256": "4ff70bf4aad93bc4a5638581e517f2bf76ed063fdb2e009b92eb54612c194db8"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/rules-main.json",
+      "bytes": 2355,
+      "sha256": "39048c3f600c092675ae1dd55e9c24874f96283ac70ee270a32692d609686623"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/rules-identity.json",
+      "bytes": 1198,
+      "sha256": "8cca4dc8f9a6367fc70e43dce370b182e96667b8aa878c8126c5b26c5421abc0"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/v4-lock.json",
+      "bytes": 932,
+      "sha256": "2635d5c2f5778b5cc405feee2cfb48f2ae53b13f114b3908e717f3cd562e38fe"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/v9-lock.json",
+      "bytes": 932,
+      "sha256": "2f333a96a9a3590f9f6ed4964b5e451fd2a604f8769af4a22cbe6e01600351a6"
+    }
+  ],
+  "preparedPayloads": {
+    "directory": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-source-readiness",
+    "sourceLock": "protection/source-lock-create.json",
+    "sourceRef": "protection/source-ref-create.json",
+    "orderedMainRequests": [
+      "protection/add-v10-request.json",
+      "protection/retire-v4-request.json",
+      "protection/restore-v4-request.json",
+      "protection/retire-v10-request.json"
+    ],
+    "identity": "protection/identity-unchanged.json",
+    "canaries": "canaries/plan.json",
+    "stage2TreeCoordinates": "Supply actual observed seed tree and parent after the unique owner ReadyPR exists; no future identities fabricated"
+  },
+  "staleArtifactsDoNotPublish": [
+    "Original92530 source and d167/611canarymanifest are historical preparation; current6b1/283/be1 replaces their identity binding",
+    "Old497Bcaller pins92530 and serializes repeated permissions with YAML aliases; its branch filters match, but the immutable source pin is stale. Use actual validated578B6b1caller with expanded permissions.",
+    "Oldwrong-blob/extra-file payloads test different protectedsource rejection; currentreviewedcanaryplan specifies LFidentity and absentV10target negatives"
+  ],
+  "publicationPrerequisitesPending": [
+    "Coordinate recently active EFowner work: source-observations.json captured15:21:15 under7e5625; retain separate originalIAM and updatedEF source preparation refs.",
+    "Root must save and freshly reread exact owner-full V10immutablelock before canonical ref creation; no lock or ref publication is claimed here.",
+    "Refresh main283, ReadyPR467be1, source6b1anditsentiretree, oldV4source/lock, fullmain+identity rules and exactcanaryref/PRownership before effects.",
+    "Canonical protected push must produce genuine successfulqualify/source/publisher for finite target; priorDraftPR468nativepass is not that authority.",
+    "Run heldoutpositive andbothnegativecanaries with actualreadyPRandpushprovenance; prove requiredV10failure blocks ordinarymerge under additivebridge before retiringV4.",
+    "Review threadPRRT_kwDOTnRKDc68yeSx is unresolved at15:19read; ordinarytargetmerge requires resolving outstandingblocking/conversation obligations without silentlychangingboundtarget.",
+    "After finite ordinarymerge verify actualmain/nativechecks and restoreV4before retiringV10; source staysimmutable andcanariesnevermerge."
+  ],
+  "remoteMutations": [],
+  "sourceMutations": [],
+  "filesWrittenOnlyUnder": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-source-readiness",
+  "qualificationClaims": {
+    "immutableLockInstalled": false,
+    "canonicalRefPublished": false,
+    "protectedSourceQualified": false,
+    "hostedCanariesExecuted": false,
+    "requiredNegativeMergeRefusalObserved": false,
+    "PR467Merged": false,
+    "managedE2ECompleted": false
+  }
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "path": ".github/workflows/runtime-admission-source-v10-canary.yml",
+    "mode": "100644",
+    "type": "blob",
+    "content": "name: Runtime and Admission Source Canary V10\non:\n  push:\n    branches:\n      - qualification/runtime-admission-positive-v10\n      - qualification/runtime-admission-wrong-blob-v10\n      - qualification/runtime-admission-extra-file-v10\npermissions:\n  actions: read\n  contents: read\n  pull-requests: read\n  statuses: write\njobs:\n  source:\n    uses: agent-teams-ai/.github/.github/workflows/runtime-admission-source-successor-v10.yml@6b1ea868f24fe3bf208d2f9a6240cb0f3416c9e4\n    permissions:\n      actions: read\n      contents: read\n      pull-requests: read\n      statuses: write\n"
+  },
+  {
+    "path": "governance/commit-author-identity.json",
+    "mode": "100644",
+    "type": "blob",
+    "content": "{\n  \"schema_version\": 1,\n  \"owner\": {\n    \"login\": \"777genius\",\n    \"name\": \"iliya\",\n    \"name_aliases\": [\"Илия\"],\n    \"email\": \"iliyazelenkog@gmail.com\"\n  },\n  \"actions_workflow_permissions\": { \"can_approve_pull_request_reviews\": false },\n  \"owner_pr_bypass\": {\n    \"repositories\": [\n      \"agent-teams-ai/.github\",\n      \"agent-teams-ai/engineering-foundation\",\n      \"agent-teams-ai/extension-foundation\",\n      \"agent-teams-ai/agent-runtime\",\n      \"agent-teams-ai/agent-teams-platform\",\n      \"agent-teams-ai/agent-teams-orchestrator\"\n    ],\n    \"actor\": { \"actor_id\": 13103045, \"actor_type\": \"User\", \"bypass_mode\": \"pull_request\" }\n  },\n  \"ruleset\": {\n    \"name\": \"Commit author identity\",\n    \"target\": \"branch\",\n    \"enforcement\": \"active\",\n    \"bypass_actors\": [],\n    \"conditions\": { \"ref_name\": { \"include\": [\"~DEFAULT_BRANCH\"], \"exclude\": [] } },\n    \"rules\": [{\n      \"type\": \"required_status_checks\",\n      \"parameters\": {\n        \"strict_required_status_checks_policy\": true,\n        \"do_not_enforce_on_create\": false,\n        \"required_status_checks\": [{ \"context\": \"commit-author-identity\", \"integration_id\": 15368 }]\n      }\n    }]\n  }\n}\n\n"
+  }
+]

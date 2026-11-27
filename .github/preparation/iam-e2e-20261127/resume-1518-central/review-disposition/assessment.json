@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-27 15:24:26 UTC",
+  "scope": "Read-only review-thread disposition and current Central readiness; no source edits or remote mutations",
+  "target": {
+    "pull": 467,
+    "head": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+    "base": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+    "ready": true,
+    "merged": false
+  },
+  "source": {
+    "pull": 468,
+    "head": "6b1ea868f24fe3bf208d2f9a6240cb0f3416c9e4",
+    "tree": "f9a782f868afd88eb0f1beb9a25c5d60af1f9548",
+    "draft": true,
+    "mustNotMerge": true
+  },
+  "thread": {
+    "id": "PRRT_kwDOTnRKDc68yeSx",
+    "commentId": "PRRC_kwDOTnRKDc8AAAABGU-miA",
+    "author": "review-router-ai",
+    "status": "unresolved",
+    "disposition": "No required code change for the covered authorization-order regression; optional broader malformed-number coverage",
+    "observationAcknowledged": "The fixture serializer indeed does not implement the production safe-integer input validator.",
+    "reasoning": [
+      "authorizationCanonical is private to the closed synthetic receipt CLI test, not a production or reusable canonical-JSON validator.",
+      "The positive authorization comes from authorizeConsumerGate(input). For the arm/arm64 ordering regression, the exact serialized envelope is accepted by the real verify-docs-consumer-gate.mjs verify-checkout subprocess and then the independent verify-docs-cohort-v2-receipt.mjs subprocess. Both must exit successfully, so helper serialization cannot conceal production rejection of the covered positive fixture.",
+      "The real authorizer reader recomputes its digest using canonicalJson, whose number branch requires Number.isSafeInteger. The receipt reader independently recomputes authorizationDigest through its own canonicalAuthorization with the same safe-integer guard.",
+      "Every alternate authorization passed to writeAuthorization in this test is enumerated: cohort_generation becomes integer 2 with recomputed record digest; packages is deleted; asset package changes to a string. No alternate write introduces a fractional or non-finite number.",
+      "The key-order negative writes the former locale digest consistently into authorization and install evidence and asserts that the actual receipt CLI rejects it. It cannot pass solely because a fixture helper returned a digest.",
+      "The test does not claim arbitrary malformed-number canonicalizer conformance. Duplicating safe-integer checks in a fixture builder would validate fixture construction, not independently prove the production rejection boundary. A future malformed-input regression should exercise a real reader with malformed evidence."
+    ],
+    "codeEvidence": [
+      {
+        "path": "scripts/verify-docs-consumer-gate.test.mjs",
+        "gitBlob": "1720cb51da26b4ddfc1f14b855f81cfdfceb8f90",
+        "locations": [
+          "1368: policy-3.0/3.1 closed synthetic CLI tests",
+          "1420: authorizeConsumerGate(input)",
+          "1448: private fixture serialization helper",
+          "1470: writeAuthorization",
+          "1552: default authorization and real receipt runner",
+          "1575: real authorizer verify-checkout subprocess",
+          "1593: real receipt CLI success",
+          "1601: old locale digest rejected",
+          "1643: wrong-generation integer mutation",
+          "1657: packages deletion",
+          "1665: asset-package string mutation"
+        ]
+      },
+      {
+        "path": "scripts/verify-docs-cohort-v2-receipt.mjs",
+        "gitBlob": "15090b6ce1ca77f3591f3337137d564b4c82dc87",
+        "locations": [
+          "495: production authorizationDigest",
+          "502: production number validation"
+        ]
+      },
+      {
+        "path": "scripts/verify-docs-consumer-gate.mjs",
+        "locations": [
+          "191: production canonicalJson safe-integer guard",
+          "1772: readAuthorization recomputes production digest"
+        ]
+      }
+    ],
+    "proposedReply": "Reviewed against be1c81ec749aa62ddf524424ccd19284c5043a0e. The helper is a fixture serializer for this closed receipt regression; it is not the production canonical-JSON validator. The policy-3.1 fixture is produced by authorizeConsumerGate and its exact envelope must pass the real verify-checkout subprocess, followed by the separate real receipt CLI. Both readers recompute the authorization digest with the production safe-integer guard. The alternate authorization writes in this case only change an integer generation, remove packages, or change a package-name string. The locale-order negative is also submitted to the real receipt CLI and must be rejected. Therefore the missing guard in the fixture helper does not mask production rejection on any covered success path. This test does not claim malformed-number conformance; copying that guard into the builder would not establish it. No code change is required for this ordering fix.",
+    "remoteReplySubmitted": false,
+    "remoteThreadResolved": false
+  },
+  "reviews": {
+    "targetHostedReviews": [
+      {
+        "id": "PRR_kwDOTnRKDc8AAAABauR12w",
+        "state": "COMMENTED",
+        "author": "777genius",
+        "submittedAt": "2026-11-27T12:44:24Z"
+      },
+      {
+        "id": "PRR_kwDOTnRKDc8AAAABauYf6g",
+        "state": "COMMENTED",
+        "author": "review-router-ai",
+        "submittedAt": "2026-11-27T12:53:57Z"
+      }
+    ],
+    "sourceHostedReviewCount": 0,
+    "sourceLocalEvidence": [
+      {
+        "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central-v10-workflow-review-6b1ea868.json",
+        "sha256": "054525e3082a269db0eada7efcbfe90494ed5a4e4cae194b384ddc112ef32d5f",
+        "decision": "ACCEPT workflow/config/source/canary wiring with explicit reviewReuse to 6b1 source"
+      },
+      {
+        "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/source-v10-broad-review-controller-preparation-s2-20261127/broad-review-s1.json",
+        "sha256": "a1a6e9abb2ece97dc576e9aac282243c70966ef9698bd65516c4d69a57611fb5",
+        "decision": "Broad core/test review with no blocking findings on 895 source"
+      },
+      {
+        "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/source-v10-broad-review-controller-preparation-s2-20261127/review-reuse-s2.json",
+        "sha256": "409b5553f754e5d92c6df95c15a8b4fb2215cbea66c7a0f5a5a520cd7c987383",
+        "decision": "ACCEPT exact 6b1 format-only delta; core/test review reused"
+      },
+      {
+        "path": "/workspace/scratch/7e5625beb0a0/ef-managed-campaign/central467-refresh-q/remote-verification-20261127/format-independent-review.json",
+        "sha256": "9e1e040990a1730de5b4959b3e408ddea888e9428732cbb6059b488564e0d55a",
+        "decision": "Independent actual Git object / two-SHA census formatting delta ACCEPT"
+      }
+    ],
+    "approvalBoundary": "Existing local source reviews and owner COMMENT target review are technical evidence, not hosted GitHub approvals or authorization to bypass a required status."
+  },
+  "readiness": [
+    {
+      "id": "target_binding",
+      "state": "READY",
+      "evidence": "Current Ready PR467 be1/base283, target tree f20b and exact two blobs; complete two-commit census retained."
+    },
+    {
+      "id": "target_native",
+      "state": "READY",
+      "evidence": "Observed terminal CI46000249593/1 and Node2446000249580/1 on actual be1; no CI repeated."
+    },
+    {
+      "id": "source_preparation",
+      "state": "READY",
+      "evidence": "Actual6b1/treef9a source binding and materialized Git blobs checked; native CI45999079758/1 and Node2445999079899/1 terminal success."
+    },
+    {
+      "id": "source_review",
+      "state": "READY",
+      "evidence": "Separate retained core/test and workflow reviews explicitly reuse on actual6b1; draftPR468 remains validation-only."
+    },
+    {
+      "id": "source_caller",
+      "state": "READY_LOCAL_ONLY",
+      "evidence": "Actual generated+asserted inputless SHA-pinned canary caller and custody review exist; no hosted canary claim."
+    },
+    {
+      "id": "existing_protections",
+      "state": "READY",
+      "evidence": "Fresh main19979783 and identity24363205 full parsed JSON identical to previous capture; existing owner grants preserved, not used;16 rules and noV10 lock."
+    },
+    {
+      "id": "review_thread",
+      "state": "BLOCKED_PENDING_DISPOSITION",
+      "evidence": "One unresolved thread; technical disposition proposed but not sent/resolved."
+    },
+    {
+      "id": "immutable_v10_lock",
+      "state": "BLOCKED_NOT_CREATED",
+      "evidence": "Fresh ruleset census has noV10 source lock."
+    },
+    {
+      "id": "canonical_source_qualification",
+      "state": "BLOCKED_NOT_PUBLISHED",
+      "evidence": "Canonical V10 ref current404; actual immutable-source push and qualify/source/publish success missing."
+    },
+    {
+      "id": "hosted_canaries",
+      "state": "BLOCKED_NOT_EXECUTED",
+      "evidence": "Positive/frozen-delegation and wrong-blob/extra-file rejecting runs plus Required refusal under protected configuration remain."
+    },
+    {
+      "id": "ordered_context_exchange",
+      "state": "BLOCKED_PREREQUISITES",
+      "evidence": "Existing V4 still required and failing; addV10 before temporary V4 retirement only after real protected-source/negative evidence."
+    },
+    {
+      "id": "ordinary_merge",
+      "state": "BLOCKED",
+      "evidence": "PR467 open, unmerged; all unrelated required contexts observed success; V4 failure and unresolved review thread remain."
+    },
+    {
+      "id": "resulting_main_validation",
+      "state": "NOT_YET_APPLICABLE",
+      "evidence": "Main283 remains prerepair; new actual merge commit plus CI/Node24 proof required."
+    },
+    {
+      "id": "restore_predecessor",
+      "state": "NOT_YET_APPLICABLE",
+      "evidence": "After ordinary merge and actual-main success, restoreV4 alongsideV10 before retiringV10, preserving every other condition/grant."
+    }
+  ],
+  "mutations": {
+    "sourceFiles": false,
+    "refs": false,
+    "settings": false,
+    "main": false,
+    "comments": false,
+    "reviews": false,
+    "threadResolution": false,
+    "ciDispatch": false
+  },
+  "verification": {
+    "currentCodeBlobs": [
+      {
+        "path": "scripts/verify-docs-consumer-gate.test.mjs",
+        "gitBlob": "1720cb51da26b4ddfc1f14b855f81cfdfceb8f90",
+        "sha256": "5da6abf581bdd81a6560c4b67f3c5c0c2095f2cbf22602f80c8c25479a9a81b4",
+        "bytes": 126034
+      },
+      {
+        "path": "scripts/verify-docs-cohort-v2-receipt.mjs",
+        "gitBlob": "15090b6ce1ca77f3591f3337137d564b4c82dc87",
+        "sha256": "e64a63e02801a8259892eca3424149885b8a4779dc6ad3ea44d7fbd8e08748fd",
+        "bytes": 29597
+      },
+      {
+        "path": "scripts/verify-docs-consumer-gate.mjs",
+        "gitBlob": "efcc1ae738d2fa603aea6ca06ffd32f2e3000717",
+        "sha256": "757a0e0ad0c01e47f4767e8a60a01c52a8a7b1352c4531010b1372805de59447",
+        "bytes": 91379
+      }
+    ],
+    "localReviewReportHashesMatch": true,
+    "workflowReviewCurrent6b1BindingMatches": true,
+    "all19FrozenImagesMatchCurrentSource": true,
+    "reviewedCoreAndTestBlobsMatchCurrentSource": true,
+    "exactS2ReviewReuseMatchesCurrentSource": true,
+    "newTestExecution": false,
+    "externalPnpmActionSource": "Historical review retained; external action Git blob is not a Central source-tree entry and was not revalidated in this thread review."
+  }
+}

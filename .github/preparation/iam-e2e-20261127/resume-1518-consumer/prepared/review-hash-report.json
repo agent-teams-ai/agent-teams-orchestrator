@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-27T15:26:37.852157+00:00",
+  "scope": "Uninvoked local preparation copies for factual PR467 repair expectations only",
+  "remoteMutations": false,
+  "generatorInvocations": 0,
+  "nativeTestsRepeated": false,
+  "status": "syntax passed and bounded diff self-reviewed; available for independent review",
+  "actualRepair": {
+    "repository": "agent-teams-ai/.github",
+    "repositoryId": 1316243981,
+    "pullRequest": 467,
+    "pullId": 5524611730,
+    "headRef": "fix/docs-receipt-authorization-order-20261127",
+    "baseSHA": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+    "headSHA": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+    "baseTreeSHA": "b835f11c1433c562d3575e7d351697d4cc44f572",
+    "headTreeSHA": "f20bbd64ec8e35caf614a80fc02e6717dc03bd12",
+    "commits": 2
+  },
+  "actualSourceQualificationCommit": "6b1ea868f24fe3bf208d2f9a6240cb0f3416c9e4",
+  "sourceIsNotFutureMergedWorkflowM": true,
+  "actualCommitCensus": [
+    {
+      "sha": "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+      "tree": "31561be538b5dc4b4aa02e53278047d79ff4dbaa",
+      "parents": [
+        "d167b2360524474240a43e3ff70e35eb94e109c7"
+      ]
+    },
+    {
+      "sha": "be1c81ec749aa62ddf524424ccd19284c5043a0e",
+      "tree": "f20bbd64ec8e35caf614a80fc02e6717dc03bd12",
+      "parents": [
+        "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+        "283c9b8d79580b48be5b1b8d6a94a09b9543185b"
+      ]
+    }
+  ],
+  "futureMerge": {
+    "revision": null,
+    "expectedTree": "f20bbd64ec8e35caf614a80fc02e6717dc03bd12",
+    "soleParent": "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
+    "author": {
+      "name": "Илия",
+      "email": "iliyazelenkog@gmail.com"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com"
+    },
+    "verifiedSignatureRequired": true,
+    "nativeMainRunsAssigned": false
+  },
+  "files": [
+    {
+      "original": {
+        "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/cohort-v4-preparation/prepare-orchestrator-v4.mjs",
+        "bytes": 18538,
+        "sha256": "32013b8eb1c5ec036640b9553d433693681741f85397520f6dd2e5936e2e7573",
+        "gitBlob": "8b3118aaf6434862e81b06499984923922fb056b"
+      },
+      "prepared": {
+        "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-consumer/prepared/prepare-orchestrator-v4.mjs",
+        "bytes": 19948,
+        "sha256": "1917c299a6d41b8d5a2c38b4311eee5a3a0d45f2ed99d0954ec06b6565538ab5",
+        "gitBlob": "a3e21abc7862fdf068090b70b549db6658d5160a"
+      },
+      "originalUnchanged": true,
+      "addedLines": 37,
+      "removedLines": 3
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/harness-v4-preparation/prepare-forward-inputs.mjs",
+        "bytes": 22858,
+        "sha256": "9b651456fafd9f6f0f2ba12e0f9131dd809260acedf19f8ca9fb5a2c6235bd4a",
+        "gitBlob": "a01595212fabcd83520c8fde20586de297211671"
+      },
+      "prepared": {
+        "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-consumer/prepared/prepare-forward-inputs.mjs",
+        "bytes": 22935,
+        "sha256": "277fe521a1f30b83ea2ddd42cf1d36e75adc0e680060b711f7437f0c07a9830d",
+        "gitBlob": "0e84447e99d15d04881dd768327a0d16107fd633"
+      },
+      "originalUnchanged": true,
+      "addedLines": 3,
+      "removedLines": 2
+    },
+    {
+      "original": {
+        "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/post-consumer-v4-preparation/prepare-orchestrator-post-consumer-v4.mjs",
+        "bytes": 46075,
+        "sha256": "a1a48ab03713b9d051d146876f279c21c273ce9334fcf447aa46ad65e1ba297f",
+        "gitBlob": "2065b77f721ae557af067e69270978bb99ff6d88"
+      },
+      "prepared": {
+        "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-consumer/prepared/prepare-orchestrator-post-consumer-v4.mjs",
+        "bytes": 47238,
+        "sha256": "875a69a49d9dc2c092aacc95e94a54b0b9b4eafc391413e31ff959f783191dd9",
+        "gitBlob": "a05de42ae8d25f28706986bd581fbddea22f3380"
+      },
+      "originalUnchanged": true,
+      "addedLines": 31,
+      "removedLines": 5
+    }
+  ],
+  "reviewDiff": {
+    "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-consumer/prepared/repair-expectations-refresh.diff",
+    "bytes": 7626,
+    "sha256": "fb80e057fe8f71c6e7d0ec0858fce763b05f2ee161819d7f521032fdbc1dee87",
+    "gitBlob": "ee11e352046b2b3b0b9309b0acf1b84a4c32b219"
+  },
+  "syntaxChecks": {
+    "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-consumer/prepared/syntax-checks.json",
+    "bytes": 648,
+    "sha256": "a8da7c19e78f00e2e2a9a127da3c3dc2ecc28b238371d449ee679535ff764a88",
+    "gitBlob": "ed5697c07af25426955870c89b1d9dccb0b49898"
+  },
+  "evidence": [
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/audit-summary.json",
+      "bytes": 5419,
+      "sha256": "7825ccbb5457a8ae4741f1e9fb5d518ea2031d639e885e75b9b4fd73d5706dbe",
+      "gitBlob": "c473971b5a9407740cbef2a86574843242806a0e"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/commits.json",
+      "bytes": 8872,
+      "sha256": "b7882846e036a5ce6259f46251c7c6b3d0b21557a4c31643f6eec8666c73f883",
+      "gitBlob": "a37a4c0c8f56ee027e499933d93c82a7f68daf20"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/main-commit.json",
+      "bytes": 4016,
+      "sha256": "2d1d775fc4e13936977f6ae539fcdf75128a5c198566dee859be003d343ab94d",
+      "gitBlob": "e6b7d9ff79ac565106fbf55764ffafd53ea43f62"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/head-commit.json",
+      "bytes": 1923,
+      "sha256": "1b4c119215499be11b521e0512b0129876074644affcd103ecdac91a5fb00b23",
+      "gitBlob": "a296decee2ebce6ad4919040ece110aba4c7ced5"
+    }
+  ],
+  "inputContractChanges": [
+    {
+      "builder": "prepare-orchestrator-v4.mjs",
+      "requiredDescriptor": "input.files.repairCommits",
+      "payload": "Complete actual GitHub REST PR467 commits array, exactly [611cd2a7…, be1c81ec…], with matching trees, parent lists, canonical author/committer names and linked owner account."
+    },
+    {
+      "builder": "prepare-orchestrator-post-consumer-v4.mjs",
+      "requiredDescriptor": "input.successor.repairCommits",
+      "payload": "Same complete actual GitHub REST PR467 commits array; descriptor is hashed and regular-file checked by existing readJson/readDescriptor path."
+    }
+  ],
+  "reviewFindings": [
+    "Only factual repair merge expectations and additive source-census/identity assertions changed.",
+    "Old d167/31561/611 identities remain solely in the exact historical first source commit census; forward retains the old source-head exclusion and adds be1.",
+    "123235 and 92530 anchors are absent from all three original builders. No replacement or new acceptance for those identities was added.",
+    "Base tree b835 is observed and recorded; immutable base commit283 is the merge-parent identity. It is not substituted for the repaired final tree f20b.",
+    "Actual source6b1 is recorded as current finite-admission preparation; no builder substitutes it for actual future merged source M.",
+    "The compareRepair ahead_by/total_commits=1 gates remain unchanged because they describe the eventual one-commit squash comparison, not the two-commit source PR.",
+    "No package, workflow body, validator digest, closure, selected lock, retained record, authority, runtime, native CI, receipt, recovery, observed/CANARY, artifact integrity, or Host gates were relaxed.",
+    "No generated cohort/proposal, future M, run, receipt, or success result was fabricated."
+  ]
+}

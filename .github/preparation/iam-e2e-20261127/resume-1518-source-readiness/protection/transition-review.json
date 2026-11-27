@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "capturedInputs": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central",
+  "fullCurrentMainEqualsPrevious": true,
+  "fullCurrentIdentityEqualsPrevious": true,
+  "identityRuleNeverMutated": true,
+  "sourceLockDerivedFrom": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/resume-1518-central/v9-lock.json",
+  "sourceLockDifferences": [
+    "name suffix v9 -> v10",
+    "exact ref suffix v9 -> v10"
+  ],
+  "sourceLockWritableFieldsOnly": true,
+  "sourceLockHasNoCreationRestriction": true,
+  "sourceRefPublicationMustFollowOwnerFullLockReadback": true,
+  "phases": [
+    {
+      "phase": "add",
+      "name": "add-v10",
+      "originalProposal": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-protection-proposals/add.json",
+      "priorContexts": [
+        "check",
+        "trusted-admission-evidence",
+        "trusted-validation",
+        "trusted-admission-authority-evolution-v1",
+        "runtime-admission-source-successor-v4"
+      ],
+      "nextContexts": [
+        "check",
+        "trusted-admission-evidence",
+        "trusted-validation",
+        "trusted-admission-authority-evolution-v1",
+        "runtime-admission-source-successor-v4",
+        "runtime-admission-source-successor-v10"
+      ]
+    },
+    {
+      "phase": "retire",
+      "name": "retire-v4",
+      "originalProposal": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-protection-proposals/retire.json",
+      "priorContexts": [
+        "check",
+        "trusted-admission-evidence",
+        "trusted-validation",
+        "trusted-admission-authority-evolution-v1",
+        "runtime-admission-source-successor-v4",
+        "runtime-admission-source-successor-v10"
+      ],
+      "nextContexts": [
+        "check",
+        "trusted-admission-evidence",
+        "trusted-validation",
+        "trusted-admission-authority-evolution-v1",
+        "runtime-admission-source-successor-v10"
+      ]
+    },
+    {
+      "phase": "restore",
+      "name": "restore-v4",
+      "originalProposal": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-protection-proposals/restore.json",
+      "priorContexts": [
+        "check",
+        "trusted-admission-evidence",
+        "trusted-validation",
+        "trusted-admission-authority-evolution-v1",
+        "runtime-admission-source-successor-v10"
+      ],
+      "nextContexts": [
+        "check",
+        "trusted-admission-evidence",
+        "trusted-validation",
+        "trusted-admission-authority-evolution-v1",
+        "runtime-admission-source-successor-v10",
+        "runtime-admission-source-successor-v4"
+      ]
+    },
+    {
+      "phase": "install",
+      "name": "retire-v10",
+      "originalProposal": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-protection-proposals/install.json",
+      "priorContexts": [
+        "check",
+        "trusted-admission-evidence",
+        "trusted-validation",
+        "trusted-admission-authority-evolution-v1",
+        "runtime-admission-source-successor-v10",
+        "runtime-admission-source-successor-v4"
+      ],
+      "nextContexts": [
+        "check",
+        "trusted-admission-evidence",
+        "trusted-validation",
+        "trusted-admission-authority-evolution-v1",
+        "runtime-admission-source-successor-v4"
+      ]
+    }
+  ],
+  "roundTripMainExactlyRestored": true,
+  "readOnlyResponseFieldsInExpectedRules": "updated_at/node_id/current_user_can_bypass are reference observations; actual post-write response must be recaptured, not asserted unchanged timestamps"
+}

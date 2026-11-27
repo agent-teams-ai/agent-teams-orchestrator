@@ -1,0 +1,147 @@
+--- cohort-v4-preparation/prepare-orchestrator-v4.mjs
++++ resume-1518-consumer/prepared/prepare-orchestrator-v4.mjs
+@@ -13,9 +13,20 @@
+ const REPOSITORY_ID = 1316243981;
+ const TARGET = "docs-2026-11-27-orchestrator-v4";
+ const RETAINED = "docs-2026-11-27-orchestrator-v3";
+-const BASE = "d167b2360524474240a43e3ff70e35eb94e109c7";
+-const HEAD = "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f";
+-const TREE = "31561be538b5dc4b4aa02e53278047d79ff4dbaa";
++const BASE = "283c9b8d79580b48be5b1b8d6a94a09b9543185b";
++const HEAD = "be1c81ec749aa62ddf524424ccd19284c5043a0e";
++const TREE = "f20bbd64ec8e35caf614a80fc02e6717dc03bd12";
++const REPAIR_COMMITS = [
++  {
++    sha: "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
++    tree: "31561be538b5dc4b4aa02e53278047d79ff4dbaa",
++    parents: ["d167b2360524474240a43e3ff70e35eb94e109c7"],
++  },
++  {
++    sha: HEAD, tree: TREE,
++    parents: ["611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f", BASE],
++  },
++];
+ const REGISTRY_PATH = "governance/docs-qualified-cohorts.json";
+ const WORKFLOW_PATH = ".github/workflows/docs-protocol-check.yml";
+ const EVIDENCE_PATH = `governance/evidence/docs-cohorts/${TARGET}`;
+@@ -147,6 +158,7 @@
+     "workflow",
+     "receiptImplementation",
+     "mergedPull",
++    "repairCommits",
+     "mainBranch",
+     "mergeCommit",
+     "mergeTree",
+@@ -174,8 +186,24 @@
+   assert.equal(merge.state, "closed");
+   assert.equal(merge.head?.sha, HEAD);
+   assert.equal(merge.base?.ref, "main");
++  assert.equal(merge.base?.sha, BASE);
+   assert.equal(merge.base?.repo?.id, REPOSITORY_ID);
+   assert.equal(merge.base?.repo?.full_name, REPOSITORY);
++  assert.equal(merge.changed_files, 2);
++  assert.equal(merge.commits, REPAIR_COMMITS.length);
++  assert.ok(Array.isArray(raw.repairCommits), "The complete PR467 commit census is required.");
++  assert.deepEqual(raw.repairCommits.map((source) => ({
++    sha: source.sha, tree: source.commit.tree.sha,
++    parents: source.parents.map((parent) => parent.sha),
++  })), REPAIR_COMMITS);
++  for (const source of raw.repairCommits) {
++    for (const role of ["author", "committer"]) {
++      assert.equal(source.commit[role].name, "Илия");
++      assert.equal(source.commit[role].email, "iliyazelenkog@gmail.com");
++      assert.equal(source[role]?.id, 13103045);
++      assert.equal(source[role]?.login, "777genius");
++    }
++  }
+   const revision = merge.merge_commit_sha;
+   assert.match(revision, SHA);
+   assert.notEqual(revision, HEAD);
+@@ -189,6 +217,12 @@
+     commit.parents.map((parent) => parent.sha),
+     [BASE],
+   );
++  assert.equal(commit.author.name, "Илия");
++  assert.equal(commit.author.email, "iliyazelenkog@gmail.com");
++  assert.equal(commit.committer.name, "GitHub");
++  assert.equal(commit.committer.email, "noreply@github.com");
++  assert.equal(commit.verification?.verified, true);
++  assert.equal(commit.verification?.reason, "valid");
+   assert.equal(branch.name, "main");
+   assert.equal(branch.protected, true);
+   assert.equal(branch.commit?.sha, revision);
+--- harness-v4-preparation/prepare-forward-inputs.mjs
++++ resume-1518-consumer/prepared/prepare-forward-inputs.mjs
+@@ -241,9 +241,10 @@
+   const repairedFile = await checkedFile(input.repairedWorkflowCommit, "actual repaired workflow commit");
+   const repaired = readJson(repairedFile);
+   assert.equal(repaired.sha, b.target.workflow.revision);
+-  assert.equal(repaired.tree.sha, "31561be538b5dc4b4aa02e53278047d79ff4dbaa");
+-  assert.deepEqual(repaired.parents.map(p => p.sha), ["d167b2360524474240a43e3ff70e35eb94e109c7"]);
++  assert.equal(repaired.tree.sha, "f20bbd64ec8e35caf614a80fc02e6717dc03bd12");
++  assert.deepEqual(repaired.parents.map(p => p.sha), ["283c9b8d79580b48be5b1b8d6a94a09b9543185b"]);
+   assert.notEqual(repaired.sha, "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f");
++  assert.notEqual(repaired.sha, "be1c81ec749aa62ddf524424ccd19284c5043a0e");
+   assert.deepEqual(subset(repaired.author, ["name", "email"]), OWNER);
+   assert.deepEqual(subset(repaired.committer, ["name", "email"]), { name: "GitHub", email: "noreply@github.com" });
+   assert.equal(repaired.verification?.verified, true, "The actual ordinary squash must retain GitHub's verified signature");
+--- post-consumer-v4-preparation/prepare-orchestrator-post-consumer-v4.mjs
++++ resume-1518-consumer/prepared/prepare-orchestrator-post-consumer-v4.mjs
+@@ -19,9 +19,21 @@
+ const RETAINED_RECORD = "sha256:f61e98c96fcc7beab30b6956312dead50a363c403fd67cdce4d0f18e8e69424c";
+ const REPAIR = {
+   pullRequest: 467, pullRequestId: 5524611730,
+-  base: "d167b2360524474240a43e3ff70e35eb94e109c7",
+-  head: "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+-  tree: "31561be538b5dc4b4aa02e53278047d79ff4dbaa",
++  base: "283c9b8d79580b48be5b1b8d6a94a09b9543185b",
++  head: "be1c81ec749aa62ddf524424ccd19284c5043a0e",
++  tree: "f20bbd64ec8e35caf614a80fc02e6717dc03bd12",
++  commits: [
++    {
++      sha: "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
++      tree: "31561be538b5dc4b4aa02e53278047d79ff4dbaa",
++      parents: ["d167b2360524474240a43e3ff70e35eb94e109c7"],
++    },
++    {
++      sha: "be1c81ec749aa62ddf524424ccd19284c5043a0e",
++      tree: "f20bbd64ec8e35caf614a80fc02e6717dc03bd12",
++      parents: ["611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f", "283c9b8d79580b48be5b1b8d6a94a09b9543185b"],
++    },
++  ],
+   headRef: "fix/docs-receipt-authorization-order-20261127",
+   files: {
+     "scripts/verify-docs-cohort-v2-receipt.mjs": "15090b6ce1ca77f3591f3337137d564b4c82dc87",
+@@ -229,8 +241,9 @@
+   // actual merged PR467, its exact repaired tree, successful native main runs,
+   // and ancestry of the current protected Central snapshot.
+   const s = input.successor;
+-  keys(s, ["repairPull", "mergeCommit", "mergeTree", "compareRepair", "compareCurrent", "workflow", "receipt", "nativeNode26", "nativeNode24"], "Successor source inputs");
++  keys(s, ["repairPull", "repairCommits", "mergeCommit", "mergeTree", "compareRepair", "compareCurrent", "workflow", "receipt", "nativeNode26", "nativeNode24"], "Successor source inputs");
+   const repairPull = await readJson(s.repairPull, "successor.repairPull");
++  const repairCommits = await readJson(s.repairCommits, "successor.repairCommits");
+   const mergeCommit = await readJson(s.mergeCommit, "successor.mergeCommit");
+   const mergeTree = treeEntries(await readJson(s.mergeTree, "successor.mergeTree"), mergeCommit);
+   const compareRepair = await readJson(s.compareRepair, "successor.compareRepair");
+@@ -243,7 +256,20 @@
+   }
+   assert.equal(repairPull.base.ref, "main"); assert.equal(repairPull.base.sha, REPAIR.base);
+   assert.equal(repairPull.head.ref, REPAIR.headRef); assert.equal(repairPull.head.sha, REPAIR.head);
+-  assert.equal(repairPull.changed_files, 2); assert.equal(repairPull.commits, 1);
++  assert.equal(repairPull.changed_files, 2); assert.equal(repairPull.commits, REPAIR.commits.length);
++  assert.ok(Array.isArray(repairCommits), "The complete PR467 commit census is required.");
++  assert.deepEqual(repairCommits.map((source) => ({
++    sha: source.sha, tree: source.commit.tree.sha,
++    parents: source.parents.map((parent) => parent.sha),
++  })), REPAIR.commits);
++  for (const source of repairCommits) {
++    for (const role of ["author", "committer"]) {
++      assert.equal(source.commit[role].name, "Илия");
++      assert.equal(source.commit[role].email, "iliyazelenkog@gmail.com");
++      assert.equal(source[role]?.id, 13103045);
++      assert.equal(source[role]?.login, "777genius");
++    }
++  }
+   const WORKFLOW_SHA = mergeCommit.sha;
+   immutableSha(WORKFLOW_SHA, "Actual merged repair source M is missing.");
+   assert.equal(repairPull.merge_commit_sha, WORKFLOW_SHA);
