@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "status": "uninvoked-draft",
+  "qualificationAuthority": false,
+  "original": {
+    "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/cohort-v3-preparation/prepare-orchestrator-post-consumer-v3.mjs",
+    "sha256": "5d95b1f95be9e379e726c010c5be7b04144296cca62591fbf7aa774cc04d0d18"
+  },
+  "draft": {
+    "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/post-consumer-v4-preparation/prepare-orchestrator-post-consumer-v4.mjs",
+    "bytes": 46075,
+    "sha256": "a1a48ab03713b9d051d146876f279c21c273ce9334fcf447aa46ad65e1ba297f",
+    "gitBlob": "2065b77f721ae557af067e69270978bb99ff6d88"
+  },
+  "actualFutureInputs": {
+    "mergedSourceM": null,
+    "v4RecordDigest": null,
+    "v4QualifiedEventDigest": null,
+    "orchestratorMain": null,
+    "orchestratorMainWorkflowRun": null,
+    "receipts": null
+  },
+  "boundaries": {
+    "remoteMutations": false,
+    "builderInvoked": false,
+    "originalChanged": false,
+    "physicalV3SummaryAcceptedAsV4Evidence": false,
+    "globalRecoveryCompleted": false
+  },
+  "verification": {
+    "syntax": "node --check passed",
+    "builderInvoked": false,
+    "futureEvidenceClaims": false,
+    "priorIndependentReview": {
+      "revision": "acab58313b9f30ef78c2637cecacdc52431672be8393a8b55d2294ca35b1440c",
+      "reviewer": "merge_gate_review",
+      "verdict": "APPROVE draft only"
+    },
+    "lastDelta": "Root requested exact one-parent squash M, one-commit comparison and actual GitHub-signed canonical merge identity. No invocation.",
+    "independentReview": {
+      "revision": "a1a48ab03713b9d051d146876f279c21c273ce9334fcf447aa46ad65e1ba297f",
+      "reviewer": "merge_gate_review",
+      "verdict": "APPROVE uninvoked draft; final identity-only diff reviewed"
+    }
+  }
+}

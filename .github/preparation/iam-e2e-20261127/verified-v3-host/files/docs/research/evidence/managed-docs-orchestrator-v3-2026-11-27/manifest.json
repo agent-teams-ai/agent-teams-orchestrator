@@ -1,0 +1,831 @@
+{
+  "schemaVersion": 1,
+  "evidenceClass": "inert-hosted-managed-lifecycle-observation",
+  "authority": false,
+  "replayable": false,
+  "run": {
+    "repository": "agent-teams-ai/agent-teams-orchestrator",
+    "runAttempt": "1",
+    "runId": "45972172068",
+    "url": "https://github.com/agent-teams-ai/agent-teams-orchestrator/actions/runs/45972172068/attempts/1",
+    "workflowCommit": "c29a5b3d4dbe4beabfc0e5acc1d026eeedc54a14",
+    "workflowPath": ".github/workflows/orchestrator-managed-lifecycle.yml"
+  },
+  "source": {
+    "consumer": {
+      "birthtimeNs": "1795770934242720746",
+      "device": "64512",
+      "inode": "4006689",
+      "repository": {
+        "id": "1310245598",
+        "nameWithOwner": "agent-teams-ai/agent-teams-orchestrator",
+        "provider": "github"
+      },
+      "root": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/consumer"
+    },
+    "revision": "ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67",
+    "tree": "a24da96493edd1c6fe3bd5868d4cf636007bcf04"
+  },
+  "originalMainRevision": "3dccf2c53bf11f3939a19734a58f5e64d96673d0",
+  "selectedTargetLock": {
+    "bytes": 320228,
+    "closureDigest": "sha256:7957b8b2b7e20efc6f940b77ca596670d2a8555a9ccf10dc00926ad270eae475",
+    "constructionReportSha256": "sha256:4e04cf99c102c94f4289922a0bfb9a710ef6a7b6f578b126cbcaa3e26c716cdf",
+    "device": "64512",
+    "gitBlob": "5b452244b3d74dd49432e659abd575efca49c4c2",
+    "harnessInputBindingSha256": "sha256:b8e476f1713a623526c3e9560966761c873f7ac601c1753a4d49e6d5a91bcfdb",
+    "inode": "4005718",
+    "mode": "0644",
+    "path": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/harness/.github/inputs/selected-target-lock.yaml",
+    "qualificationAuthority": false,
+    "schemaVersion": 1,
+    "scope": "selected-lock-input",
+    "sha256": "sha256:a8080107bb13e2170fee5e3f25f30ff5df835cd5e540e66f177a0ef0e57c264b",
+    "sourceLockSha256": "sha256:0ebee389b33d6ee41beb3f4a3dd28e20f956c177b17a2911d5a812160ea07044",
+    "sourceRevision": "ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67",
+    "sourceTree": "a24da96493edd1c6fe3bd5868d4cf636007bcf04"
+  },
+  "harnessInputBindingSha256": "sha256:b8e476f1713a623526c3e9560966761c873f7ac601c1753a4d49e6d5a91bcfdb",
+  "sourcePrerequisite": {
+    "metaSha256": "sha256:94296a4fcdec10ce7e4eb054edb8341a54478a695a4df930d1e138f9bb1dd1a5",
+    "stdoutSha256": "sha256:75d35e87cbc93c3016584bb8a19f73a422488932447e9fb486ad034a2d178977",
+    "preparationSha256": "sha256:b7849c93c324c184c2aaccfc9c86a98e1a2a62c5957e4fabb75b6c09f247cae7",
+    "replayable": false,
+    "finalPhysicalConsumerQualified": false
+  },
+  "selectedPhysicalLock": {
+    "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/selected-lock-v3-preparation/actual-7957/selected-target/selected-target-lock.yaml",
+    "bytes": 320228,
+    "sha256": "sha256:a8080107bb13e2170fee5e3f25f30ff5df835cd5e540e66f177a0ef0e57c264b",
+    "gitBlob": "5b452244b3d74dd49432e659abd575efca49c4c2"
+  },
+  "authorityRevision": "d167b2360524474240a43e3ff70e35eb94e109c7",
+  "controller": {
+    "buildIdentity": "sha256:5d5563eb771de586b7d43e58aa68d1e62d92a58bff87a362ff5b8b7d582dac80",
+    "name": "@agent-teams/docs-protocol-agent-teams",
+    "version": "0.8.0"
+  },
+  "kernel": {
+    "buildIdentity": "sha256:89c1df01b0fd3ea5d8db6adf51fa65a92f8509aaffde78217cb31a2c9084e8e1",
+    "name": "@agent-teams/repository-mutation",
+    "version": "0.5.2"
+  },
+  "runtimes": {
+    "consumerIdentity": {
+      "birthtimeNs": "1795770934242720746",
+      "device": "64512",
+      "inode": "4006689",
+      "root": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/consumer"
+    },
+    "controllerBuildIdentity": "sha256:5d5563eb771de586b7d43e58aa68d1e62d92a58bff87a362ff5b8b7d582dac80",
+    "corepack": {
+      "entrypoint": "/home/runner/work/_temp/iam-managed-45972172068-1/controller/node_modules/corepack/dist/corepack.js",
+      "integrity": "sha512-SiiJsBhZqdBiPHTEl6OT3sASrRrKIcYTQMsVGXx6EE/gM8WFMwYjeIX8Tt8RiU4Iv2J6LbT8KpGfCOsBpRWB/w==",
+      "sha256": "sha256:3655bc798f300951f2070fee411b337d626b0c3ae80c2d24c46ccac4595d4bf9",
+      "version": "0.36.0"
+    },
+    "kernelBuildIdentity": "sha256:89c1df01b0fd3ea5d8db6adf51fa65a92f8509aaffde78217cb31a2c9084e8e1",
+    "node24": {
+      "architecture": "x64",
+      "node": "24.22.3",
+      "path": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
+      "platform": "linux",
+      "sha256": "sha256:a7ec1b37e6ff9d187e4198c5b6df9a4eb1c74dd31804fb3bac55cc4ceca1ac01"
+    },
+    "node26": {
+      "architecture": "x64",
+      "node": "26.12.1",
+      "path": "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+      "platform": "linux",
+      "sha256": "sha256:08f12d42fb304468e8ee86247fe686aae5b225836ea65e9d6566c11ae6ba2e8e"
+    }
+  },
+  "phases": {
+    "A": {
+      "faultExitCode": 3,
+      "inventoryRestored": true,
+      "planDigest": "sha256:2dbab21b68f63310e8edf481a78d1f3557d331bb0ed547badff7ca45f0c9ab79",
+      "preparationDigest": "sha256:115ae6c33f2ca0ee5c308b65c409a126fdd2beb6c0587c1ac7f44ea5ed099113",
+      "restore": {
+        "command": "consumer.restore",
+        "inversePlanDigest": "sha256:5934800ad742fc93804a769b71671d5242eddec8462b8efef5f7f7d9ab0087b1",
+        "issues": [],
+        "outcome": "restored",
+        "proofDigest": "sha256:115ae6c33f2ca0ee5c308b65c409a126fdd2beb6c0587c1ac7f44ea5ed099113",
+        "receipt": {
+          "operations": [
+            {
+              "outcome": "replaced",
+              "path": ".github/workflows/docs-protocol.yml",
+              "resultDigest": "sha256:27d2ec2d28219b5d0a3aeaf2bf45480694ea317003799e9e43c04f8d3b73d8b7"
+            },
+            {
+              "outcome": "replaced",
+              "path": ".node-version",
+              "resultDigest": "sha256:45507e6d96329a845faa642c0f485313bcb2ca1e08b043589cde4ddd15969cd6"
+            },
+            {
+              "outcome": "replaced",
+              "path": "architecture/foundation/docs-consumer-integration.json",
+              "resultDigest": "sha256:d9c9c92cae27d4e542e200fc34b850d8c7c3a59ffe7751e1d1be8cdba2cfc722"
+            },
+            {
+              "outcome": "replaced",
+              "path": "architecture/foundation/docs-protocol-managed-state.json",
+              "resultDigest": "sha256:13d3b8804951dbe8c4b09b764e915e584cce923c6767d6518aa5adc53c13de05"
+            },
+            {
+              "outcome": "replaced",
+              "path": "package.json",
+              "resultDigest": "sha256:963e94932e30912d0f1096682ffd7492aca588e3c0ac29ae8874bfe8c833f97b"
+            },
+            {
+              "outcome": "replaced",
+              "path": "pnpm-lock.yaml",
+              "resultDigest": "sha256:0ebee389b33d6ee41beb3f4a3dd28e20f956c177b17a2911d5a812160ea07044"
+            },
+            {
+              "outcome": "replaced",
+              "path": "pnpm-workspace.yaml",
+              "resultDigest": "sha256:fecf519f8e8554783176c1263e58f8d2f1a892279f712e69188fe9f73cedfc32"
+            }
+          ],
+          "outcome": "applied",
+          "planDigest": "sha256:5934800ad742fc93804a769b71671d5242eddec8462b8efef5f7f7d9ab0087b1",
+          "protocol": "agent-teams.repository-mutation.known-file/v1",
+          "receiptDigest": "sha256:91d39d2e57fce27271d5b565cde1d7572298ab55c7c941efbff2d506dbbf553a",
+          "schemaVersion": 1
+        },
+        "schemaVersion": 1
+      },
+      "resume": {
+        "command": "consumer.finalize",
+        "issues": [],
+        "outcome": "upgraded",
+        "receipt": {
+          "operations": [
+            {
+              "outcome": "already-satisfied",
+              "path": ".github/workflows/docs-protocol.yml",
+              "resultDigest": "sha256:2ce33590e2d5d36a14bcdf3f16e6ca5422c4b3ebe300f3ac4d94343cc022e1ac"
+            },
+            {
+              "outcome": "already-satisfied",
+              "path": ".node-version",
+              "resultDigest": "sha256:2a4a3fac7ea8694f168266bd3a930b3fc5faa6e503d577d99c024f74582e4cb5"
+            },
+            {
+              "outcome": "already-satisfied",
+              "path": "architecture/foundation/docs-consumer-integration.json",
+              "resultDigest": "sha256:e1ce483d58e1550591ec8c863f5b121978fa57f92061b7ff9ac84ba1f7204f9c"
+            },
+            {
+              "outcome": "already-satisfied",
+              "path": "architecture/foundation/docs-protocol-managed-state.json",
+              "resultDigest": "sha256:557e97b03b4105b2b1367eabc5e4ac74aed57bc3cb32278b84266f1aad2aeff9"
+            },
+            {
+              "outcome": "already-satisfied",
+              "path": "package.json",
+              "resultDigest": "sha256:669e0c57dddee8a66d0dc85263bb8b1be8f637f4ed020a5bb1818195c1da0579"
+            },
+            {
+              "outcome": "already-satisfied",
+              "path": "pnpm-lock.yaml",
+              "resultDigest": "sha256:a8080107bb13e2170fee5e3f25f30ff5df835cd5e540e66f177a0ef0e57c264b"
+            },
+            {
+              "outcome": "already-satisfied",
+              "path": "pnpm-workspace.yaml",
+              "resultDigest": "sha256:e4da6baacbef4830e257bd994193783891d97be660d46fe7c1e1bce7964f8f63"
+            }
+          ],
+          "outcome": "already-satisfied",
+          "planDigest": "sha256:2dbab21b68f63310e8edf481a78d1f3557d331bb0ed547badff7ca45f0c9ab79",
+          "protocol": "agent-teams.repository-mutation.known-file/v1",
+          "receiptDigest": "sha256:7f24e78784a19f2494ccbcf15ae3a38a8aeea8458c9c1eba75b4c184c7ad5f29",
+          "schemaVersion": 1
+        },
+        "restoration": {
+          "digest": "sha256:fceb46fc7c6812e07b2b73a217948ce45513454326fb93f4827a0f6be1b96d7a",
+          "path": "/home/runner/work/_temp/iam-managed-45972172068-1/evidence/proofs/A/completion.json"
+        },
+        "schemaVersion": 1
+      }
+    },
+    "B": {
+      "committedRestore": {
+        "command": "consumer.restore",
+        "inversePlanDigest": "sha256:5934800ad742fc93804a769b71671d5242eddec8462b8efef5f7f7d9ab0087b1",
+        "issues": [],
+        "outcome": "restored",
+        "proofDigest": "sha256:d669d738d123bf79aea3afa614d34eea5b9692eadd13be8ff765a61684bcc326",
+        "receipt": {
+          "operations": [
+            {
+              "outcome": "replaced",
+              "path": ".github/workflows/docs-protocol.yml",
+              "resultDigest": "sha256:27d2ec2d28219b5d0a3aeaf2bf45480694ea317003799e9e43c04f8d3b73d8b7"
+            },
+            {
+              "outcome": "replaced",
+              "path": ".node-version",
+              "resultDigest": "sha256:45507e6d96329a845faa642c0f485313bcb2ca1e08b043589cde4ddd15969cd6"
+            },
+            {
+              "outcome": "replaced",
+              "path": "architecture/foundation/docs-consumer-integration.json",
+              "resultDigest": "sha256:d9c9c92cae27d4e542e200fc34b850d8c7c3a59ffe7751e1d1be8cdba2cfc722"
+            },
+            {
+              "outcome": "replaced",
+              "path": "architecture/foundation/docs-protocol-managed-state.json",
+              "resultDigest": "sha256:13d3b8804951dbe8c4b09b764e915e584cce923c6767d6518aa5adc53c13de05"
+            },
+            {
+              "outcome": "replaced",
+              "path": "package.json",
+              "resultDigest": "sha256:963e94932e30912d0f1096682ffd7492aca588e3c0ac29ae8874bfe8c833f97b"
+            },
+            {
+              "outcome": "replaced",
+              "path": "pnpm-lock.yaml",
+              "resultDigest": "sha256:0ebee389b33d6ee41beb3f4a3dd28e20f956c177b17a2911d5a812160ea07044"
+            },
+            {
+              "outcome": "replaced",
+              "path": "pnpm-workspace.yaml",
+              "resultDigest": "sha256:fecf519f8e8554783176c1263e58f8d2f1a892279f712e69188fe9f73cedfc32"
+            }
+          ],
+          "outcome": "applied",
+          "planDigest": "sha256:5934800ad742fc93804a769b71671d5242eddec8462b8efef5f7f7d9ab0087b1",
+          "protocol": "agent-teams.repository-mutation.known-file/v1",
+          "receiptDigest": "sha256:91d39d2e57fce27271d5b565cde1d7572298ab55c7c941efbff2d506dbbf553a",
+          "schemaVersion": 1
+        },
+        "schemaVersion": 1
+      },
+      "finalize": {
+        "command": "consumer.finalize",
+        "issues": [],
+        "outcome": "upgraded",
+        "receipt": {
+          "operations": [
+            {
+              "outcome": "replaced",
+              "path": ".github/workflows/docs-protocol.yml",
+              "resultDigest": "sha256:2ce33590e2d5d36a14bcdf3f16e6ca5422c4b3ebe300f3ac4d94343cc022e1ac"
+            },
+            {
+              "outcome": "replaced",
+              "path": ".node-version",
+              "resultDigest": "sha256:2a4a3fac7ea8694f168266bd3a930b3fc5faa6e503d577d99c024f74582e4cb5"
+            },
+            {
+              "outcome": "replaced",
+              "path": "architecture/foundation/docs-consumer-integration.json",
+              "resultDigest": "sha256:e1ce483d58e1550591ec8c863f5b121978fa57f92061b7ff9ac84ba1f7204f9c"
+            },
+            {
+              "outcome": "replaced",
+              "path": "architecture/foundation/docs-protocol-managed-state.json",
+              "resultDigest": "sha256:557e97b03b4105b2b1367eabc5e4ac74aed57bc3cb32278b84266f1aad2aeff9"
+            },
+            {
+              "outcome": "replaced",
+              "path": "package.json",
+              "resultDigest": "sha256:669e0c57dddee8a66d0dc85263bb8b1be8f637f4ed020a5bb1818195c1da0579"
+            },
+            {
+              "outcome": "replaced",
+              "path": "pnpm-lock.yaml",
+              "resultDigest": "sha256:a8080107bb13e2170fee5e3f25f30ff5df835cd5e540e66f177a0ef0e57c264b"
+            },
+            {
+              "outcome": "replaced",
+              "path": "pnpm-workspace.yaml",
+              "resultDigest": "sha256:e4da6baacbef4830e257bd994193783891d97be660d46fe7c1e1bce7964f8f63"
+            }
+          ],
+          "outcome": "applied",
+          "planDigest": "sha256:2dbab21b68f63310e8edf481a78d1f3557d331bb0ed547badff7ca45f0c9ab79",
+          "protocol": "agent-teams.repository-mutation.known-file/v1",
+          "receiptDigest": "sha256:14dc31f84feb70096fe8ac1d46d50c99e7458ad81d60961b02a72596324f0474",
+          "schemaVersion": 1
+        },
+        "restoration": {
+          "digest": "sha256:26b0961d54fcab82b96aa713c6fcd16ce9e0ebdd75136a7dc8401f2cebb480ec",
+          "path": "/home/runner/work/_temp/iam-managed-45972172068-1/evidence/proofs/B/completion.json"
+        },
+        "schemaVersion": 1
+      },
+      "inventoryRestored": true,
+      "planDigest": "sha256:2dbab21b68f63310e8edf481a78d1f3557d331bb0ed547badff7ca45f0c9ab79",
+      "preparationDigest": "sha256:f5e027220ebc90fc483fdd31e21094d22eec1944b29e2ce43a8c857a461c123f",
+      "selectionDigest": "sha256:d669d738d123bf79aea3afa614d34eea5b9692eadd13be8ff765a61684bcc326",
+      "targetCommit": "118a6ce46a3558f8f1abefac3de64d1dfa4ce39c",
+      "targetTree": "7bcda091be317b3b3594918bd8dd277308b9c40e"
+    },
+    "C": {
+      "finalize": {
+        "command": "consumer.finalize",
+        "issues": [],
+        "outcome": "upgraded",
+        "receipt": {
+          "operations": [
+            {
+              "outcome": "replaced",
+              "path": ".github/workflows/docs-protocol.yml",
+              "resultDigest": "sha256:2ce33590e2d5d36a14bcdf3f16e6ca5422c4b3ebe300f3ac4d94343cc022e1ac"
+            },
+            {
+              "outcome": "replaced",
+              "path": ".node-version",
+              "resultDigest": "sha256:2a4a3fac7ea8694f168266bd3a930b3fc5faa6e503d577d99c024f74582e4cb5"
+            },
+            {
+              "outcome": "replaced",
+              "path": "architecture/foundation/docs-consumer-integration.json",
+              "resultDigest": "sha256:e1ce483d58e1550591ec8c863f5b121978fa57f92061b7ff9ac84ba1f7204f9c"
+            },
+            {
+              "outcome": "replaced",
+              "path": "architecture/foundation/docs-protocol-managed-state.json",
+              "resultDigest": "sha256:557e97b03b4105b2b1367eabc5e4ac74aed57bc3cb32278b84266f1aad2aeff9"
+            },
+            {
+              "outcome": "replaced",
+              "path": "package.json",
+              "resultDigest": "sha256:669e0c57dddee8a66d0dc85263bb8b1be8f637f4ed020a5bb1818195c1da0579"
+            },
+            {
+              "outcome": "replaced",
+              "path": "pnpm-lock.yaml",
+              "resultDigest": "sha256:a8080107bb13e2170fee5e3f25f30ff5df835cd5e540e66f177a0ef0e57c264b"
+            },
+            {
+              "outcome": "replaced",
+              "path": "pnpm-workspace.yaml",
+              "resultDigest": "sha256:e4da6baacbef4830e257bd994193783891d97be660d46fe7c1e1bce7964f8f63"
+            }
+          ],
+          "outcome": "applied",
+          "planDigest": "sha256:2dbab21b68f63310e8edf481a78d1f3557d331bb0ed547badff7ca45f0c9ab79",
+          "protocol": "agent-teams.repository-mutation.known-file/v1",
+          "receiptDigest": "sha256:14dc31f84feb70096fe8ac1d46d50c99e7458ad81d60961b02a72596324f0474",
+          "schemaVersion": 1
+        },
+        "restoration": {
+          "digest": "sha256:14f3313787cc66ac835127731c292db1e510a80dee32d8e1e0742f4f0fb5fb62",
+          "path": "/home/runner/work/_temp/iam-managed-45972172068-1/evidence/proofs/C/completion.json"
+        },
+        "schemaVersion": 1
+      },
+      "planDigest": "sha256:2dbab21b68f63310e8edf481a78d1f3557d331bb0ed547badff7ca45f0c9ab79",
+      "preparationDigest": "sha256:7d450d344b79d320a09289a54bca03a63efc12bb0032bc94f04176fbbb0ab940"
+    }
+  },
+  "physicalTargetFiles": [
+    {
+      "bytes": 262,
+      "gitBlob": "eab5f9fcfb0244aea94c5a2a6101e611fc7372b4",
+      "mode": "100644",
+      "path": ".github/workflows/docs-protocol.yml",
+      "sha256": "sha256:2ce33590e2d5d36a14bcdf3f16e6ca5422c4b3ebe300f3ac4d94343cc022e1ac"
+    },
+    {
+      "bytes": 8,
+      "gitBlob": "63f87c20ef9fd0ace28f8d0a3b74b5ef2e24feff",
+      "mode": "100644",
+      "path": ".node-version",
+      "sha256": "sha256:2a4a3fac7ea8694f168266bd3a930b3fc5faa6e503d577d99c024f74582e4cb5"
+    },
+    {
+      "bytes": 3728,
+      "gitBlob": "8ee905628a86adac4c08a4ca9b614ed47359bca3",
+      "mode": "100644",
+      "path": "architecture/foundation/docs-consumer-integration.json",
+      "sha256": "sha256:e1ce483d58e1550591ec8c863f5b121978fa57f92061b7ff9ac84ba1f7204f9c"
+    },
+    {
+      "bytes": 3132,
+      "gitBlob": "ecd55e686e7e034e4582dd3c1a18ce8a74a5c469",
+      "mode": "100644",
+      "path": "architecture/foundation/docs-protocol-managed-state.json",
+      "sha256": "sha256:557e97b03b4105b2b1367eabc5e4ac74aed57bc3cb32278b84266f1aad2aeff9"
+    },
+    {
+      "bytes": 10487,
+      "gitBlob": "ff8248213bb6814250e83b36b094a77e278654a6",
+      "mode": "100644",
+      "path": "package.json",
+      "sha256": "sha256:669e0c57dddee8a66d0dc85263bb8b1be8f637f4ed020a5bb1818195c1da0579"
+    },
+    {
+      "bytes": 320228,
+      "gitBlob": "5b452244b3d74dd49432e659abd575efca49c4c2",
+      "mode": "100644",
+      "path": "pnpm-lock.yaml",
+      "sha256": "sha256:a8080107bb13e2170fee5e3f25f30ff5df835cd5e540e66f177a0ef0e57c264b"
+    },
+    {
+      "bytes": 2086,
+      "gitBlob": "65cdd744128118053b7cb7132c4cdd525bf8f56a",
+      "mode": "100644",
+      "path": "pnpm-workspace.yaml",
+      "sha256": "sha256:e4da6baacbef4830e257bd994193783891d97be660d46fe7c1e1bce7964f8f63"
+    }
+  ],
+  "retainedOutputs": [
+    {
+      "path": "commands/A-prepare.stdout.json",
+      "bytes": 283,
+      "sha256": "sha256:e03489b165d36ec258f136ced699ff8ae75b9a0ca646f157e49f415f6d564dd4",
+      "gitBlob": "427af024c31e954d64345921b62f5c9133fa794e",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/A-prepare.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/A-prepare.meta.json",
+      "bytes": 979,
+      "sha256": "sha256:e498621ab6bafb93be8fc20baf4641e0a85df5a0e15eceeca2bc83c85996f7f0",
+      "gitBlob": "3c569220e7f84d36fbcaaa2b9fd1aca94efb5ba0",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/A-fault.stdout.json",
+      "bytes": 223,
+      "sha256": "sha256:e59cbe2338f139e21ddc64c43dfda3b3738448fddc4bc22ff63310a9dcc41657",
+      "gitBlob": "21efdd3f65ebea68c73041cec8e8b78fee2abc4b",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/A-fault.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/A-fault.meta.json",
+      "bytes": 947,
+      "sha256": "sha256:212e2d66a748c54cb841ee203d9adbd9daedc7c55495eea8dd935b1975edd0e2",
+      "gitBlob": "a180135cd71012aadc85f01065025597fec4def0",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/A-resume.stdout.json",
+      "bytes": 1706,
+      "sha256": "sha256:bf84708aa5445271ceea1e62787ae36633c43eac495e89d4c6e55b223c872294",
+      "gitBlob": "4d49a06c3b2848e041e4c07bbebd979f6f2870fe",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/A-resume.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/A-resume.meta.json",
+      "bytes": 948,
+      "sha256": "sha256:5d63eaceafe984f4c7a8d2daf33a4e3968c84410211915f1d80ebac2b4269c5c",
+      "gitBlob": "9759da1412fc377f4cc256ba7bb0527d3b80c35b",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/A-restore.stdout.json",
+      "bytes": 1622,
+      "sha256": "sha256:90d192856c77c56d2a78873822e84803b24591dc34ce51960810a5e2880398c4",
+      "gitBlob": "2feea1b70cb8834a8c88f3f158c276110dcaf72c",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/A-restore.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/A-restore.meta.json",
+      "bytes": 850,
+      "sha256": "sha256:60517019a785109768c4b80f86d3fa9ec3c50c83263b0b3bd018d07730f3fbeb",
+      "gitBlob": "17cb23ece496d6c3ef858e242cb4c00625a79ead",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/B-prepare.stdout.json",
+      "bytes": 283,
+      "sha256": "sha256:203f731d90ce9eb7461dffec4930ba625fe43ade2a003651a6487c9cbf33ffc9",
+      "gitBlob": "bbdcc6a70572421dddb1225596a9cdc7440830ff",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/B-prepare.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/B-prepare.meta.json",
+      "bytes": 979,
+      "sha256": "sha256:f372bfc7f4da57cf0bf1d566ac43a1365ead30d51735060d311d4797c21d4c42",
+      "gitBlob": "dc8907f8b547a1d27f350c52cc4d10d1e43486ba",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/B-finalize.stdout.json",
+      "bytes": 1633,
+      "sha256": "sha256:e82fe9c9c7ff6360d1dc1c80dfeb096d44aefd297f8b9810ad4220e1b0f18451",
+      "gitBlob": "f0257d55867a90c4f013569d877ed1aba0e4536c",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/B-finalize.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/B-finalize.meta.json",
+      "bytes": 950,
+      "sha256": "sha256:79c8d4f68a2820710edbf7c8ab924d99ff7574337424b38e43b3707b55a17049",
+      "gitBlob": "8390d2b7613c42964bd79c48cde8cb4a1862ef46",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/B-committed-restore.stdout.json",
+      "bytes": 1622,
+      "sha256": "sha256:79e46d131248ac782544e821df4e7ab06bcc912e0036b17b01ae70d98acf80aa",
+      "gitBlob": "f829888bace97d0100454324f837be4cd7a715b9",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/B-committed-restore.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/B-committed-restore.meta.json",
+      "bytes": 1097,
+      "sha256": "sha256:2276083fa393055229712e9bd44a765f7a42affb946dd2b4bfcb46ada8de564a",
+      "gitBlob": "fa6b18a064afb53d9bd06512b90f1e2843a80292",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/C-prepare.stdout.json",
+      "bytes": 283,
+      "sha256": "sha256:464e0b2f66b636d33c259db7902ccc5b4d3ea076417dd77a6a376f9361b4a766",
+      "gitBlob": "1a98166235dc15ff1cb343d411dc783ecbdbd1ee",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/C-prepare.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/C-prepare.meta.json",
+      "bytes": 979,
+      "sha256": "sha256:1b3697582293d6acfa69bdbf9a27665fd25a34942cd32d30dd0a7a4a3f0fb5c1",
+      "gitBlob": "3e8fcf54846ec3c1fefdfe30c5ddb4ceba4e7127",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/C-finalize.stdout.json",
+      "bytes": 1633,
+      "sha256": "sha256:da32a940ba1942152fced1fd547b8685f8b7f4019304d51166b2000e7d6a5033",
+      "gitBlob": "f6c581ac3b76aca4773b4ed94016815bd57841fb",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/C-finalize.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "commands/C-finalize.meta.json",
+      "bytes": 950,
+      "sha256": "sha256:60d78d9a29554e55cad6078d2904f836f61567a25413a1073fd88ee1f5cab1e5",
+      "gitBlob": "63c3a07dc7afffbb41c3a0b1f253b275a1435c66",
+      "mode": "100644"
+    }
+  ],
+  "externalProofDigests": [
+    {
+      "path": "proofs/A/completion.json.prepared",
+      "bytes": 911495,
+      "sha256": "sha256:115ae6c33f2ca0ee5c308b65c409a126fdd2beb6c0587c1ac7f44ea5ed099113",
+      "filesystemMode": "0644"
+    },
+    {
+      "path": "proofs/A/completion.json",
+      "bytes": 1639,
+      "sha256": "sha256:fceb46fc7c6812e07b2b73a217948ce45513454326fb93f4827a0f6be1b96d7a",
+      "filesystemMode": "0644"
+    },
+    {
+      "path": "proofs/A/completion.json.receipt",
+      "bytes": 1527,
+      "sha256": "sha256:0f0aabf021f0f2f3e9d22e0dad48c693384664515841034942cec12a95105162",
+      "filesystemMode": "0644"
+    },
+    {
+      "path": "proofs/B/completion.json.prepared",
+      "bytes": 911495,
+      "sha256": "sha256:f5e027220ebc90fc483fdd31e21094d22eec1944b29e2ce43a8c857a461c123f",
+      "filesystemMode": "0644"
+    },
+    {
+      "path": "proofs/B/completion.json",
+      "bytes": 1566,
+      "sha256": "sha256:26b0961d54fcab82b96aa713c6fcd16ce9e0ebdd75136a7dc8401f2cebb480ec",
+      "filesystemMode": "0644"
+    },
+    {
+      "path": "proofs/B/completion.json.receipt",
+      "bytes": 1454,
+      "sha256": "sha256:b820450bed93ed966ef8882b30c324eda5fdef0c3f9e208a55b907c9609ca3b3",
+      "filesystemMode": "0644"
+    },
+    {
+      "path": "proofs/C/completion.json.prepared",
+      "bytes": 911495,
+      "sha256": "sha256:7d450d344b79d320a09289a54bca03a63efc12bb0032bc94f04176fbbb0ab940",
+      "filesystemMode": "0644"
+    },
+    {
+      "path": "proofs/C/completion.json",
+      "bytes": 1566,
+      "sha256": "sha256:14f3313787cc66ac835127731c292db1e510a80dee32d8e1e0742f4f0fb5fb62",
+      "filesystemMode": "0644"
+    },
+    {
+      "path": "proofs/C/completion.json.receipt",
+      "bytes": 1454,
+      "sha256": "sha256:7670bd8de63360bf63dd5dbf169284d18389fe0fc7fbe692f044b5a11e372641",
+      "filesystemMode": "0644"
+    },
+    {
+      "path": "proofs/B/current-selection.json",
+      "bytes": 906902,
+      "sha256": "sha256:d669d738d123bf79aea3afa614d34eea5b9692eadd13be8ff765a61684bcc326",
+      "filesystemMode": "0644"
+    }
+  ],
+  "hostReconciliation": {
+    "baseCommit": "c01efb6813f0c048497caeefbb8235cead480cb2",
+    "physicalNodeEngine": ">=26.12.1 <27",
+    "hostNodeEngine": ">=24.22.3 <25 || >=26.12.1 <27",
+    "archiveInput": {
+      "evidenceClass": "verified-archived-physical-target",
+      "qualificationAuthority": false,
+      "replayable": false,
+      "sourceRoot": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/consumer",
+      "sourceConsumer": {
+        "birthtimeNs": "1795770934242720746",
+        "device": "64512",
+        "inode": "4006689",
+        "repository": {
+          "id": "1310245598",
+          "nameWithOwner": "agent-teams-ai/agent-teams-orchestrator",
+          "provider": "github"
+        },
+        "root": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/consumer"
+      },
+      "materializedInputRoot": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/materialized",
+      "archiveSha256": "sha256:c0007a199de47148c1c3ecf4f333a6ab484aa9a0188cc89e9d88c451f2d37704",
+      "physicalRun": {
+        "repository": "agent-teams-ai/agent-teams-orchestrator",
+        "runId": "45972172068",
+        "runAttempt": "1",
+        "headSha": "c29a5b3d4dbe4beabfc0e5acc1d026eeedc54a14",
+        "workflowPath": ".github/workflows/orchestrator-managed-lifecycle.yml"
+      },
+      "artifact": {
+        "id": "15188626286",
+        "bytes": 1814712,
+        "sha256": "sha256:c0007a199de47148c1c3ecf4f333a6ab484aa9a0188cc89e9d88c451f2d37704"
+      },
+      "originalJob": {
+        "id": "140414983610",
+        "conclusion": "failure",
+        "physicalStepConclusion": "success",
+        "failedHostCheck": "docs-protocol-check: CSpell postimages"
+      },
+      "limitations": [
+        "No archived proof is invoked or rebound to this checkout.",
+        "The original physical run is distinct from this Host execution.",
+        "External proof copy permissions describe downloaded archive files."
+      ]
+    },
+    "hostRun": {
+      "repository": "agent-teams-ai/agent-teams-orchestrator",
+      "runId": "45981324003",
+      "runAttempt": "1",
+      "headSha": "39974166661c06c824994ad4abf219a36825510e",
+      "workflowRef": "agent-teams-ai/agent-teams-orchestrator/.github/workflows/orchestrator-host-archive-continuation.yml@refs/heads/test/iam-host-archive-continuation-20261127"
+    },
+    "defaultNode": "26.12.1",
+    "pnpm": "11.20.0",
+    "foundation": "4.0.3",
+    "fms": "0.4.3",
+    "stack": "0.3.1",
+    "derivedFields": [
+      "package.json",
+      "pnpm-workspace.yaml",
+      "pnpm-lock.yaml"
+    ],
+    "selectedHostLock": {
+      "path": "pnpm-lock.yaml",
+      "bytes": 340843,
+      "sha256": "sha256:4ad19563e9694e5d1cf6d65c2c81141cc38f1661b655b79b765da8c2ee6789ff",
+      "gitBlob": "b8d1391b34032027cd118d5af071525e870e53d6",
+      "mode": "100644"
+    },
+    "foreignDependencyRefresh": {
+      "maxPasses": 2,
+      "passes": [
+        {
+          "pass": 1,
+          "selectors": [
+            "@napi-rs/wasm-runtime",
+            "fast-uri",
+            "graceful-fs",
+            "tslib"
+          ],
+          "before": {
+            "path": "pnpm-lock.yaml",
+            "bytes": 334349,
+            "sha256": "sha256:aa33372377791a75961a60adbd1d68ecf0da6d8a4e19c0895bf0a89912c2730c",
+            "gitBlob": "53e4738d11003d1a264cae870fb745e385028c0a",
+            "mode": "100644"
+          },
+          "after": {
+            "path": "pnpm-lock.yaml",
+            "bytes": 334591,
+            "sha256": "sha256:c6b9c4590c6f27586de8e65d9c0ab6f60a2b74829530398b754dc90c16242843",
+            "gitBlob": "6f8f50cd938cafcef59f9430a39b9a6eef177f28",
+            "mode": "100644"
+          },
+          "command": "host-transitive-lock-refresh-1"
+        },
+        {
+          "pass": 2,
+          "selectors": [
+            "@tybys/wasm-util"
+          ],
+          "before": {
+            "path": "pnpm-lock.yaml",
+            "bytes": 334591,
+            "sha256": "sha256:c6b9c4590c6f27586de8e65d9c0ab6f60a2b74829530398b754dc90c16242843",
+            "gitBlob": "6f8f50cd938cafcef59f9430a39b9a6eef177f28",
+            "mode": "100644"
+          },
+          "after": {
+            "path": "pnpm-lock.yaml",
+            "bytes": 334085,
+            "sha256": "sha256:9c70fc53e1e66ef0ea682234a3603543fb945b14737a434d948a9ba725ab6308",
+            "gitBlob": "fd5a2f257a62259474af59aeec486313d220c7f3",
+            "mode": "100644"
+          },
+          "command": "host-transitive-lock-refresh-2"
+        }
+      ]
+    },
+    "canonicalRuntimeClosureDigest": "sha256:7957b8b2b7e20efc6f940b77ca596670d2a8555a9ccf10dc00926ad270eae475",
+    "generatedAssetsPreserved": [
+      ".github/workflows/docs-protocol.yml",
+      ".node-version",
+      "architecture/foundation/docs-consumer-integration.json",
+      "architecture/foundation/docs-protocol-managed-state.json"
+    ],
+    "mandatoryQualityContractSha256": "sha256:a26ff983529afb2b492706253293664df596705bdaae7882aa6b030c16905f35"
+  },
+  "remaining": [
+    "final published PR head CI",
+    "resulting main CI",
+    "central observed binding and CANARY"
+  ],
+  "limitations": [
+    "No unavailable-local-environment execution is claimed.",
+    "Archived proof copies are not live authority."
+  ]
+}

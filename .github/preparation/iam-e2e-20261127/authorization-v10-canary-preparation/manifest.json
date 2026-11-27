@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "purpose": "local-canary-payload-preparation",
+  "qualificationAuthority": false,
+  "source": {
+    "revision": "92530dc46b7f5fc0c89760bdaff5e28b6563a603",
+    "tree": "20c3cd43b1d5be84a4b8a4c9986f16f91d748ed5",
+    "ref": "refs/heads/governance/runtime-admission-source-successor-v10",
+    "context": "runtime-admission-source-successor-v10",
+    "publication": "non-authoritative-preparation-branch",
+    "sourceBranchObservedPublished": false,
+    "stagingLockObservedSaved": false,
+    "hostedQualification": null,
+    "preparationRef": "refs/heads/work/iam-authorization-source-v10-20261127",
+    "preparationBranchProtected": false
+  },
+  "boundPositiveTarget": {
+    "pullRequest": 467,
+    "head": "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+    "base": "d167b2360524474240a43e3ff70e35eb94e109c7",
+    "route": "protected source push only",
+    "expectedDecision": "bounded-docs-authorization-digest-repair",
+    "actualRun": null
+  },
+  "canaries": [
+    {
+      "name": "positive",
+      "ref": "refs/heads/qualification/runtime-admission-positive-v10",
+      "base": "d167b2360524474240a43e3ff70e35eb94e109c7",
+      "baseTree": "12323593a924522f4c053278c8cf036290e29919",
+      "expectedDecision": "noop",
+      "expectedReason": "Ordinary README edit and exact inputless caller remain admissible through frozen V4. This is not the PR467 finite exception.",
+      "stage1": [
+        {
+          "path": "README.md",
+          "before": "cb12d82665fbdd718d98aec333ec570201d9f3f1",
+          "localPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-canary-preparation/stage-1-positive/README.md",
+          "bytes": 8670,
+          "sha256": "sha256:6cbcee8432ca29c0929fcdcc5318b1648cd9ca06e3a73b0ee6c7f7bbcd0c1ffb",
+          "gitBlob": "cac9f722c36dadd2333db61feb153b6c3816b972",
+          "mode": "100644"
+        }
+      ],
+      "stage2": [
+        {
+          "path": ".github/workflows/runtime-admission-source-v10-canary.yml",
+          "before": null,
+          "localPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-canary-preparation/stage-2-caller/.github/workflows/runtime-admission-source-v10-canary.yml",
+          "bytes": 497,
+          "sha256": "sha256:d268cd3e1b538e585d1d605e5cf5d9dae2693565cc4d3f97c5f409e738973aa1",
+          "gitBlob": "e8b3efef90a25a5cb9f573ebf1c0477769815513",
+          "mode": "100644"
+        }
+      ],
+      "future": {
+        "pullRequest": null,
+        "head": null,
+        "run": null,
+        "outcome": null
+      }
+    },
+    {
+      "name": "wrong-blob",
+      "ref": "refs/heads/qualification/runtime-admission-wrong-blob-v10",
+      "base": "d167b2360524474240a43e3ff70e35eb94e109c7",
+      "baseTree": "12323593a924522f4c053278c8cf036290e29919",
+      "expectedDecision": "rejected",
+      "expectedReason": "Protected receipt lookalike: exact repaired test plus a receipt blob that differs from PR467. Separate PR/head cannot select the finite exception; frozen V4 rejects the protected source change.",
+      "stage1": [
+        {
+          "path": "scripts/verify-docs-cohort-v2-receipt.mjs",
+          "before": "3c529582c28073caa6bb2eb0d471be8f3004f1fe",
+          "localPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-canary-preparation/stage-1-wrong-blob/scripts/verify-docs-cohort-v2-receipt.mjs",
+          "bytes": 29674,
+          "sha256": "sha256:8cfefc3e568432cc71fcfc8c03dee31538d24547c610b508bb8fd1a8886c4b02",
+          "gitBlob": "6e7c3c05f34c8ce709e488d463bb09465036a252",
+          "mode": "100644"
+        },
+        {
+          "path": "scripts/verify-docs-consumer-gate.test.mjs",
+          "before": "5f890bf76b0577be6f35f6ab478ecc225c5b3516",
+          "localPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-canary-preparation/stage-1-wrong-blob/scripts/verify-docs-consumer-gate.test.mjs",
+          "bytes": 126034,
+          "sha256": "sha256:5da6abf581bdd81a6560c4b67f3c5c0c2095f2cbf22602f80c8c25479a9a81b4",
+          "gitBlob": "1720cb51da26b4ddfc1f14b855f81cfdfceb8f90",
+          "mode": "100644"
+        }
+      ],
+      "stage2": [
+        {
+          "path": ".github/workflows/runtime-admission-source-v10-canary.yml",
+          "before": null,
+          "localPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-canary-preparation/stage-2-caller/.github/workflows/runtime-admission-source-v10-canary.yml",
+          "bytes": 497,
+          "sha256": "sha256:d268cd3e1b538e585d1d605e5cf5d9dae2693565cc4d3f97c5f409e738973aa1",
+          "gitBlob": "e8b3efef90a25a5cb9f573ebf1c0477769815513",
+          "mode": "100644"
+        }
+      ],
+      "future": {
+        "pullRequest": null,
+        "head": null,
+        "run": null,
+        "outcome": null
+      }
+    },
+    {
+      "name": "extra-file",
+      "ref": "refs/heads/qualification/runtime-admission-extra-file-v10",
+      "base": "d167b2360524474240a43e3ff70e35eb94e109c7",
+      "baseTree": "12323593a924522f4c053278c8cf036290e29919",
+      "expectedDecision": "rejected",
+      "expectedReason": "Exact PR467 repaired blobs plus one extra protected admission source change. Separate PR/head cannot select the finite exception; frozen V4 rejects the protected source changes. The tuple predicate independently rejects an extra declared file.",
+      "stage1": [
+        {
+          "path": "scripts/verify-docs-cohort-v2-receipt.mjs",
+          "before": "3c529582c28073caa6bb2eb0d471be8f3004f1fe",
+          "localPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-canary-preparation/stage-1-extra-file/scripts/verify-docs-cohort-v2-receipt.mjs",
+          "bytes": 29597,
+          "sha256": "sha256:e64a63e02801a8259892eca3424149885b8a4779dc6ad3ea44d7fbd8e08748fd",
+          "gitBlob": "15090b6ce1ca77f3591f3337137d564b4c82dc87",
+          "mode": "100644"
+        },
+        {
+          "path": "scripts/verify-docs-consumer-gate.test.mjs",
+          "before": "5f890bf76b0577be6f35f6ab478ecc225c5b3516",
+          "localPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-canary-preparation/stage-1-extra-file/scripts/verify-docs-consumer-gate.test.mjs",
+          "bytes": 126034,
+          "sha256": "sha256:5da6abf581bdd81a6560c4b67f3c5c0c2095f2cbf22602f80c8c25479a9a81b4",
+          "gitBlob": "1720cb51da26b4ddfc1f14b855f81cfdfceb8f90",
+          "mode": "100644"
+        },
+        {
+          "path": "scripts/verify-docs-admission-change.mjs",
+          "before": "109ca56d41ceba6c24fd056fee68cc518abd43e7",
+          "localPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-canary-preparation/stage-1-extra-file/scripts/verify-docs-admission-change.mjs",
+          "bytes": 17477,
+          "sha256": "sha256:9346b00e41f49087f822002a8eb4f01d0503e9926342a1403f0cc5cb6fda2043",
+          "gitBlob": "1255efe8a960f510d6ada2dede8c76824d0b6d12",
+          "mode": "100644"
+        }
+      ],
+      "stage2": [
+        {
+          "path": ".github/workflows/runtime-admission-source-v10-canary.yml",
+          "before": null,
+          "localPath": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-v10-canary-preparation/stage-2-caller/.github/workflows/runtime-admission-source-v10-canary.yml",
+          "bytes": 497,
+          "sha256": "sha256:d268cd3e1b538e585d1d605e5cf5d9dae2693565cc4d3f97c5f409e738973aa1",
+          "gitBlob": "e8b3efef90a25a5cb9f573ebf1c0477769815513",
+          "mode": "100644"
+        }
+      ],
+      "future": {
+        "pullRequest": null,
+        "head": null,
+        "run": null,
+        "outcome": null
+      }
+    }
+  ],
+  "localContractChecks": {
+    "canonicalInputlessCaller": "passed",
+    "actualPR467Tuple": "passed",
+    "wrongBlobMetadata": "rejected: Changed-file blob drift",
+    "extraFileMetadata": "rejected: Incomplete quality source file count",
+    "scope": "pure local checks only; no live GitHub execution or admission claimed"
+  },
+  "publicationOrder": [
+    "First protect and publish source ref, then verify real source qualification.",
+    "For each canary create stage1 commit from exact current d167 main, create its branch and Ready same-repository PR with canonical identity.",
+    "Only then append the stage2 caller to that branch; this triggers a push with a discoverable open PR.",
+    "Read actual source/qualify/publisher jobs and final App15368 status at exact canary head. Fill future coordinates only from live observations.",
+    "Recheck required rules and normal merge refusal for both negative canaries before any protected transition."
+  ],
+  "limitations": [
+    "No source branch, lock, refs, PRs, runs, or settings changed by this preparation.",
+    "Negative canary PRs use the frozen ordinary rejection route, not the exact bound PR467 positive route.",
+    "Do not merge the negative canaries or promote their payloads into main.",
+    "If Central main or actual PR467 moves, stop and reassess instead of silently rebasing finite bindings."
+  ]
+}

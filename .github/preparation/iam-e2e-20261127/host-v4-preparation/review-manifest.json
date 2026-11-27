@@ -1,0 +1,57 @@
+{
+  "scope": "static-typecheck-only",
+  "invokedSuccessorHelper": false,
+  "startedAt": "2026-11-27T10:30:13.102657+00:00",
+  "completedAt": "2026-11-27T10:30:13.749890+00:00",
+  "argv": [
+    "/workspace/scratch/8f752a8bf341/ef-patched-runtimes/node-v26.12.1-linux-x64/bin/node",
+    "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-digest-repair/node_modules/.pnpm/typescript@7.0.2/node_modules/typescript/bin/tsc",
+    "--project",
+    "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/host-v4-preparation/tsconfig.successor-host.json",
+    "--typeRoots",
+    "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/authorization-digest-repair/node_modules/@types"
+  ],
+  "exitCode": 0,
+  "compilerVersion": "Version 7.0.2",
+  "files": [
+    {
+      "path": "orchestrator-host-successor.ts",
+      "bytes": 56966,
+      "lines": 771,
+      "sha256": "63509e8c236be8216e72e205241f078710af55fba34cd381c6bec62ac6e916b1",
+      "gitBlob": "653eb61e7e74e713cd00b88fab72af2f78893788"
+    },
+    {
+      "path": "tsconfig.successor-host.json",
+      "bytes": 391,
+      "lines": 16,
+      "sha256": "716296643bec87596326d415b5d37381e2f331b5a33b1225c700a22e7ae01022",
+      "gitBlob": "24c22b301fc04db650194fa8e553507631791d76"
+    },
+    {
+      "path": "input-contract.md",
+      "bytes": 6223,
+      "lines": 123,
+      "sha256": "ded4333732be4a9f59cde8573108b926ab29b02c2bc9e08702584acb0ec753b6",
+      "gitBlob": "ce1428752196d921ddbead5a3521554215d0ad08"
+    }
+  ],
+  "literalPreimageValidation": {
+    "path": "actual-host-document-preimages.json",
+    "bytes": 2933,
+    "sha256": "e9e634a4b57d370821cdc543d1c6e3660ae661605eef2eaa93f6cd7dbf32a250",
+    "gitBlob": "e82a4f280fd1e271196833bb630200b130872335"
+  },
+  "actualLegacyArtifacts": {
+    "path": "actual-legacy-artifacts.json",
+    "bytes": 16240,
+    "sha256": "b8248ad9f9335b96d051b02aaa82ff9842497f68aeb82a2c548e3966eac79248",
+    "gitBlob": "beab4c3855eb8386710ecf79076151f790030375"
+  },
+  "independentReview": {
+    "reviewer": "recover_transition",
+    "verdict": "APPROVE",
+    "helperSha256": "63509e8c236be8216e72e205241f078710af55fba34cd381c6bec62ac6e916b1",
+    "qualificationAuthority": false
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "scope": "prepared-continuation-not-main-delivery",
+  "observedAt": "2026-11-27T10:30:32.092356+00:00",
+  "workdir": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127",
+  "currentBlocker": {
+    "provider": "GitHub",
+    "action": "Create immutable V10 source ruleset",
+    "observedUI": "Confirm access requests one-time verification code",
+    "sourceRuleSaved": false,
+    "mainRulesChanged": false,
+    "sourceRefPublished": false,
+    "reviewedSourceCommit": "92530dc46b7f5fc0c89760bdaff5e28b6563a603",
+    "reviewedSourceTree": "20c3cd43b1d5be84a4b8a4c9986f16f91d748ed5",
+    "preparationBranch": "work/iam-authorization-source-v10-20261127",
+    "canonicalSourceRef": "refs/heads/governance/runtime-admission-source-successor-v10"
+  },
+  "central": {
+    "repository": "agent-teams-ai/.github",
+    "main": "d167b2360524474240a43e3ff70e35eb94e109c7",
+    "repairPR": 467,
+    "repairHead": "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
+    "repairTree": "31561be538b5dc4b4aa02e53278047d79ff4dbaa",
+    "repairMerged": false,
+    "mainRule": 19979783,
+    "identityRule": 24363205,
+    "restoredRequirement": "runtime-admission-source-successor-v4",
+    "temporaryRequirement": "runtime-admission-source-successor-v10",
+    "requiredAppId": 15368
+  },
+  "orchestrator": {
+    "repository": "agent-teams-ai/agent-teams-orchestrator",
+    "main": "3dccf2c53bf11f3939a19734a58f5e64d96673d0",
+    "draftPR": 111,
+    "draftHead": "c01efb6813f0c048497caeefbb8235cead480cb2",
+    "sourceCCC": "ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67",
+    "finalCandidatePublished": false
+  },
+  "physicalV3": {
+    "runId": 45972172068,
+    "attempt": 1,
+    "jobId": 140414983610,
+    "head": "c29a5b3d4dbe4beabfc0e5acc1d026eeedc54a14",
+    "overallConclusion": "failure",
+    "physicalLifecycleConclusion": "success",
+    "laterHostFailure": "CSpell postimages",
+    "artifactId": 15188626286,
+    "artifactBytes": 1814712,
+    "artifactSha256": "c0007a199de47148c1c3ecf4f333a6ab484aa9a0188cc89e9d88c451f2d37704",
+    "filesRestored": 587,
+    "managedAssets": 7,
+    "historicalOnly": true
+  },
+  "hostV3Continuation": {
+    "runId": 45981324003,
+    "attempt": 1,
+    "jobId": 140445658864,
+    "head": "39974166661c06c824994ad4abf219a36825510e",
+    "conclusion": "success",
+    "artifactId": 15189536852,
+    "artifactBytes": 3863848,
+    "artifactSha256": "ff7b7ea0bbe849c71e72ae7d8dc210bb928ffb0333bdaca49955654bf525d14d",
+    "artifactExpiresAt": "2026-12-27T10:23:14Z",
+    "files": 50,
+    "commandsPassed": 14,
+    "integrationRunSha256": "bfbc176eb76ddd124fa1b28270b877bd210ff056d587470dc3a88cb2e810cddb",
+    "lockSha256": "4ad19563e9694e5d1cf6d65c2c81141cc38f1661b655b79b765da8c2ee6789ff",
+    "originalLifecycleReplayed": false,
+    "independentReview": "APPROVE historical v3 Host candidate only"
+  },
+  "futureV4": {
+    "id": "docs-2026-11-27-orchestrator-v4",
+    "cohortGeneration": 3,
+    "recordDigest": null,
+    "qualifiedEventDigest": null,
+    "workflowRevision": null,
+    "actualForwardRun": null,
+    "rule": "All future fields are populated from real observations only; actual merged467 M must retain tree31561 and parentd167. Fresh public CCC generation2-to3 prepare/finalize is required."
+  },
+  "nextActions": [
+    "User completes the open GitHub Confirm access challenge; do not ask for the code in chat.",
+    "Re-read full owner rules; create exact no-bypass immutable source lock before publishing canonical V10 ref at92530.",
+    "Observe genuine protected source qualification and finite PR467 success; publish reviewed positive and two negative canaries; verify exact-head jobs/status and required normal-merge refusal.",
+    "Add V10 alongside V4, re-read; retire only V4 temporarily; fresh expected-head ordinary squash467; verify actual merge and both main CI; restore V4 before retiring V10.",
+    "Use actual repaired M to prepare new immutable v4 candidate; genuine sourceA full validation then reviewed VERIFIED/QUALIFIED append, ordinary merge/main CI and separate desired selection.",
+    "Run fresh CCC2-to3 forward with unchanged controller; combine with verified historical v3 Host export and separate v4 evidence; no old proof replay or relabeling.",
+    "Publish final reviewed PR111 candidate, verify all required and agreed lanes, ordinary merge, actual main CI; then separate observed and CANARY proposals/merges."
+  ],
+  "boundaries": [
+    "No bypass or source unlock.",
+    "No F9/production module lifecycle completion is claimed.",
+    "No new package release or runtime/closure change is required for the receipt serialization fix.",
+    "Old v3 record and historical evidence remain immutable.",
+    "Other owners Central PRs and their workdirs are out of scope."
+  ]
+}

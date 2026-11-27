@@ -1,0 +1,65 @@
+{
+  "scope": "static-document-preimage-inspection",
+  "invokedHelper": false,
+  "helperSha256": "63509e8c236be8216e72e205241f078710af55fba34cd381c6bec62ac6e916b1",
+  "hostArtifactId": "15189536852",
+  "hostArtifactSha256": "sha256:ff7b7ea0bbe849c71e72ae7d8dc210bb928ffb0333bdaca49955654bf525d14d",
+  "observations": [
+    {
+      "path": "AGENTS.md",
+      "sourceSha256": "906d16149ab98284a1da90127e7800015a629b97c860666d1c39a945244a42e5",
+      "beforeSha256": "c81f4d57a87be44f9fc1a21b59a10422b8ffec95cc166c03819d4d9e2e12c532",
+      "occurrences": 1
+    },
+    {
+      "path": "docs/architecture/repository-tooling.md",
+      "sourceSha256": "0116deb67eabc6c9893f258210754905ebc454e487351f3ea9685d9bfc09b4e6",
+      "beforeSha256": "710ba9b74a7d1a85c58b388bba6af766c3d215bb46ef21b359450df44e979c18",
+      "occurrences": 1
+    },
+    {
+      "path": "docs/architecture/repository-tooling.md",
+      "sourceSha256": "0116deb67eabc6c9893f258210754905ebc454e487351f3ea9685d9bfc09b4e6",
+      "beforeSha256": "4db7c18cd62776548842e498e1a9e4a5707386a70478d2bdb596e9f7c14107d0",
+      "occurrences": 1
+    },
+    {
+      "path": "docs/architecture/repository-tooling.md",
+      "sourceSha256": "0116deb67eabc6c9893f258210754905ebc454e487351f3ea9685d9bfc09b4e6",
+      "beforeSha256": "99fc8d6910afac93e24e34daae36fa6bb7ff2145e9aeb56ea949fd25df3f2b4a",
+      "occurrences": 1
+    },
+    {
+      "path": "docs/architecture/repository-tooling.md",
+      "sourceSha256": "0116deb67eabc6c9893f258210754905ebc454e487351f3ea9685d9bfc09b4e6",
+      "beforeSha256": "a696d91c8045659c0ccf216296ee78e08a4b3f0f6e4129f03617750b465dd1d9",
+      "occurrences": 1
+    },
+    {
+      "path": "docs/architecture/repository-tooling.md",
+      "sourceSha256": "0116deb67eabc6c9893f258210754905ebc454e487351f3ea9685d9bfc09b4e6",
+      "beforeSha256": "2b8f9686ae9155592ce0cfe433b5ae71580a528e8512f941453cc12d5233ede3",
+      "occurrences": 1
+    },
+    {
+      "path": "docs/architecture/repository-tooling.md",
+      "sourceSha256": "0116deb67eabc6c9893f258210754905ebc454e487351f3ea9685d9bfc09b4e6",
+      "beforeSha256": "13d43f01248c196a0ffd037096816d9f8e24ec3d61f38531f6d102093bc5ec09",
+      "occurrences": 1
+    },
+    {
+      "path": "docs/open-decisions/OD-020-architecture-conformance-tooling.md",
+      "sourceSha256": "39ceb4fdffdb3a73f134ada4c83fd9f1cf24589bc16a167f12d9b979d0f13e39",
+      "beforeSha256": "9f04c1d3a51f899feaf85edbd3bf5815355f09230c00e8a6235cb3e6651bd1bf",
+      "occurrences": 1
+    },
+    {
+      "path": "docs/research/orchestrator-full-foundation-review-2026-11-26.md",
+      "sourceSha256": "0e691e952fd9ec27e6ed48db78717de287fb870a4b3f605146fbb046424c337c",
+      "beforeSha256": "82d3e91817a89d1b634bcaed2bd889fcac631bb6a9992f18132445034c09ee95",
+      "occurrences": 1
+    }
+  ],
+  "priorReviewedHelperSha256": "011f725593bf36878639f194964ee2c70da196d4be5354581a66e0483a28d985",
+  "literalPreimagesUnchanged": true
+}

@@ -1,0 +1,230 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import test from "node:test";
+
+import YAML from "yaml";
+
+const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
+const repositoryRoot = path.resolve(scriptDirectory, "../..");
+
+async function readYaml(repositoryPath) {
+  return YAML.parse(await readFile(path.join(repositoryRoot, repositoryPath), "utf8"));
+}
+
+async function readJson(repositoryPath) {
+  return JSON.parse(await readFile(path.join(repositoryRoot, repositoryPath), "utf8"));
+}
+
+test("retains the adopted v2 qualification contract while release pins advance", async () => {
+  const [integration, qualification] = await Promise.all([
+    readJson("architecture/foundation/docs-consumer-integration.json"),
+    readJson("architecture/foundation/docs-protocol-qualification.json"),
+  ]);
+
+  assert.equal(integration.schemaVersion, 4);
+  assert.deepEqual(integration.qualification, {
+    contractPath: "architecture/foundation/docs-protocol-qualification.json",
+    gateCommand: "pnpm docs:protocol:check",
+  });
+  assert.equal(qualification.schemaVersion, 2);
+  assert.equal(qualification.scenarios.length, 6);
+});
+
+test("retains the historical portable profile separately for old-artifact parity", async () => {
+  const historical = await readYaml(
+    "scripts/docs/fixtures/profile-migration/docs-protocol-v2.yaml",
+  );
+  const candidate = await readYaml("architecture/foundation/docs-protocol.yaml");
+
+  assert.equal(historical.schemaVersion, 2);
+  assert.equal(historical.agentWorkflow.adoption, undefined);
+  assert.deepEqual(candidate, {
+    ...historical,
+    schemaVersion: 3,
+    agentWorkflow: { ...historical.agentWorkflow, adoption: "portable-v1" },
+  });
+});
+
+test("keeps the portable v3 profile thin and routes one Authoring v3 authority", async () => {
+  const profile = await readYaml("architecture/foundation/docs-protocol.yaml");
+
+  assert.deepEqual(Object.keys(profile).toSorted(), [
+    "agentWorkflow",
+    "foundationProfile",
+    "protocol",
+    "schemaVersion",
+    "semanticValidatorIds",
+  ]);
+  assert.equal(profile.schemaVersion, 3);
+  assert.deepEqual(profile.protocol, {
+    id: "agent-teams.docs-protocol",
+    version: 1,
+  });
+  assert.deepEqual(profile.foundationProfile, {
+    path: "architecture/foundation/document-authoring.yaml",
+    schemaVersion: 3,
+    metadataSidecarPolicy: "foundation-profile-v3-strict-merge",
+  });
+  assert.deepEqual(profile.agentWorkflow, {
+    adoption: "portable-v1",
+    skillPath: ".agents/skills/docs-authoring/SKILL.md",
+  });
+  assert.deepEqual(profile.semanticValidatorIds, [
+    "orchestrator.architecture.likec4",
+    "orchestrator.docs.code-impact",
+    "orchestrator.docs.local-links",
+    "orchestrator.docs.mermaid",
+    "orchestrator.docs.metadata-schema",
+    "orchestrator.docs.prose",
+    "orchestrator.docs.reachability",
+    "orchestrator.docs.relations",
+  ]);
+});
+
+test("declares explicit reachability for every Orchestrator authoring type", async () => {
+  const profile = await readYaml("architecture/foundation/document-authoring.yaml");
+  const artifacts = Object.fromEntries(
+    profile.authoring.artifactTypes.map((artifact) => [artifact.type, artifact]),
+  );
+  const owners = Object.keys((await readYaml("docs/owners.yaml")).owners).toSorted((left, right) =>
+    Buffer.compare(Buffer.from(left), Buffer.from(right)),
+  );
+
+  assert.equal(profile.schemaVersion, 3);
+  assert.equal(profile.authoring.ownerSets.schemaVersion, 1);
+  assert.deepEqual(
+    profile.authoring.ownerSets.sets["registered-owners"].toSorted((left, right) =>
+      Buffer.compare(Buffer.from(left), Buffer.from(right)),
+    ),
+    owners,
+  );
+  assert.deepEqual(Object.keys(artifacts).toSorted(), [
+    "adr",
+    "bounded-context",
+    "contract",
+    "feature",
+    "index",
+    "open-decision",
+    "research",
+    "runbook",
+  ]);
+  for (const artifact of Object.values(artifacts)) {
+    assert.equal(artifact.ownerSetId, "registered-owners");
+    assert.equal(artifact.allowedOwnerIds, undefined);
+  }
+  assert.equal(
+    profile.authoring.artifactTypes.filter(
+      (artifact) => artifact.ownerSetId === "registered-owners",
+    ).length,
+    8,
+    "all eight types must preserve the registered-owner authoring boundary",
+  );
+  assert.deepEqual(artifacts.index.placement, {
+    kind: "qualified-leaf-index",
+    root: "packages",
+    requiredBasename: "README.md",
+  });
+  assert.deepEqual(artifacts.index.identity.grammar, {
+    prefixSegments: ["package"],
+    minSuffixSegments: 1,
+    maxSuffixSegments: 4,
+  });
+  assert.deepEqual(artifacts.index.reachability, {
+    kind: "manual-fixed-index",
+    indexPath: "docs/README.md",
+  });
+  assert.deepEqual(artifacts.adr.reachability, {
+    kind: "manual-fixed-index",
+    indexPath: "docs/decisions/README.md",
+  });
+  assert.deepEqual(artifacts["open-decision"].reachability, {
+    kind: "manual-fixed-index",
+    indexPath: "docs/open-decisions/README.md",
+  });
+  assert.deepEqual(artifacts["bounded-context"].reachability, {
+    kind: "manual-fixed-index",
+    indexPath: "docs/domain/contexts/README.md",
+  });
+  assert.deepEqual(artifacts.contract.reachability, {
+    kind: "manual-fixed-index",
+    indexPath: "docs/README.md",
+  });
+  assert.deepEqual(artifacts.feature.reachability, {
+    kind: "manual-colocated-index",
+    pathPrefix: "before-required-segments",
+    indexBasename: "README.md",
+  });
+  assert.deepEqual(artifacts.runbook.reachability, {
+    kind: "manual-fixed-index",
+    indexPath: "docs/README.md",
+  });
+  assert.equal(artifacts.research.initialStatus, "active");
+  assert.deepEqual(artifacts.research.identity.grammar, {
+    prefixSegments: ["research"], minSuffixSegments: 1, maxSuffixSegments: 1,
+  });
+  assert.deepEqual(artifacts.research.placement, {
+    kind: "collection", directory: "docs/research", filename: "slug",
+  });
+  assert.deepEqual(artifacts.research.template, {
+    kind: "fenced-markdown-body", path: "docs/templates/research.md",
+  });
+  assert.deepEqual(artifacts.research.reachability, {
+    kind: "manual-fixed-index", indexPath: "docs/research/README.md",
+  });
+});
+
+test("routes the canonical protocol commands without weakening repository documentation gates", async () => {
+  const { scripts } = await readJson("package.json");
+
+  assert.equal(scripts["docs:repository:check"], "pnpm run docs:protocol:check");
+  assert.deepEqual(scripts["docs:protocol:check"].split(" && "), [
+    "pnpm run docs:check",
+    "pnpm run docs:validate",
+    "pnpm run docs:test",
+    "pnpm run skills:check",
+    "pnpm run architecture:model:check",
+    "pnpm run docs:lint",
+    "pnpm run docs:prose",
+    "pnpm run docs:impact",
+  ]);
+  assert.match(scripts["docs:prose"], /docs:vale.*docs:spell/u);
+  assert.match(scripts["docs:test"], /docs-protocol-parity\.test\.mjs/u);
+  for (const command of ["check", "context", "doctor", "find", "info", "new", "recover"]) {
+    assert.equal(
+      scripts[`docs:${command}`],
+      `agent-teams-docs ${command} --consumer . --profile architecture/foundation/docs-protocol.yaml`,
+    );
+  }
+  for (const removed of [
+    "docs:foundation:doctor",
+    "docs:foundation:find",
+    "docs:foundation:new",
+    "docs:foundation:recover",
+    "docs:protocol:parity",
+    "docs:query",
+    "docs:query:shadow",
+  ]) {
+    assert.equal(scripts[removed], undefined);
+  }
+});
+
+test("pins current direct roots while package release-age waiting stays disabled", async () => {
+  const { devDependencies } = await readJson("package.json");
+  const workspace = await readYaml("pnpm-workspace.yaml");
+  const roots = {
+    "@agent-teams/docs-protocol": "0.6.9",
+    "@agent-teams/docs-protocol-agent-teams": "0.8.0",
+    "@agent-teams/engineering-foundation": "4.0.3",
+    "@agent-teams/feature-module-standard": "0.4.3",
+  };
+  assert.deepEqual(
+    Object.fromEntries(
+      Object.entries(devDependencies).filter(([name]) => name.startsWith("@agent-teams/")),
+    ),
+    roots,
+  );
+  assert.equal(workspace.minimumReleaseAge, 0);
+  assert.equal(workspace.minimumReleaseAgeStrict, undefined);
+});

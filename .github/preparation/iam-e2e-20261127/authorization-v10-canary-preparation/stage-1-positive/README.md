@@ -1,0 +1,139 @@
+# Agent Teams Organization Defaults
+
+This public repository contains organization-wide community defaults, versioned
+architecture baselines, and the canonical Renovate preset for repositories under
+`agent-teams-ai`.
+
+GitHub applies supported community files to organization repositories that do
+not provide a repository-specific override. Shared architecture standards still
+require explicit repository adoption. Product domain models, local development
+commands, bounded-context policy, accepted decisions, adoption profiles, and
+release procedures remain in the owning repository.
+
+## New product scope and legacy references
+
+Owner clarification, 2026-11-23: the new Agent Teams product architecture is
+greenfield, developed in the owning repositories under the `agent-teams-ai`
+organization. Start from each target repository's current accepted architecture,
+domain contracts, and admission profile; do not infer the target design from
+the old application.
+
+[777genius/agent-teams-ai](https://github.com/777genius/agent-teams-ai) is the
+legacy desktop application for this initiative. Inspect it for product behavior,
+UX, compatibility requirements, historical failure evidence, and lessons only.
+It is **not** the implementation baseline or default integration target for new
+architecture or shared-library research. Do not start a legacy refactor,
+migration, dependency adoption, or pull request there unless the owner explicitly
+assigns that separate work. A previously approved, scoped compatibility/migration
+route remains governed by its owning decision; this navigation clarification
+does not revoke it or authorize its execution.
+
+The organization has existing implementations as well as new products; this
+direction does not imply that all repositories are empty or that every current
+component should be rewritten. Existing product and foundation decisions,
+immutable standards, repository classification, adoption and release gates
+remain authoritative. Select the shared capability's actual owner and the
+intended consumer seams before qualifying its claimed profile on realistic
+fixtures and, for portability claims, independent test Hosts. Dependent product
+implementation need not exist first; its later adoption still owns product-specific
+integration and
+accepted gates. Follow the [fixture qualification sequence](docs/engineering-quality-standard.md#library-first-design-and-deliberate-evolution).
+A historical legacy reference is not an adopted greenfield consumer or evidence
+of its current conformance.
+
+## Shared Files
+
+- [Engineering Quality Standard](docs/engineering-quality-standard.md) - common
+  Clean Architecture, SOLID, DDD and DRY practices, including
+  [TypeScript for JavaScript runtimes](docs/engineering-quality-standard.md#typescript-for-javascript-runtimes).
+  Repository agent files link here explicitly.
+- [Native and AOT readiness](docs/engineering-quality-standard.md#native-and-aot-readiness) - scoped practices for low-cost portability;
+  [delivery plan](docs/architecture/native-readiness-plan.md), optional qualification and no mandatory compiler/runtime migration.
+- [Node runtime compatibility](docs/node-runtime-compatibility.md) - the Node 26 tooling default and independent full Node 24 compatibility checks.
+- [Development tools catalog](docs/development-tools.md) - tool purpose, when to use it, canonical guides and actual availability, including planned tooling.
+- [CI/CD practices](docs/ci-cd-practices.md) - reducing repeated PR/merge jobs safely, with fail-closed evidence and concrete antipatterns.
+- [Backend stack reference](docs/backend-stack.md) - shared backend technology responsibilities, explicit local adoption and unresolved selections; frontend choices remain separate.
+
+- `AGENTS.md` - agent navigation for immutable standards and local adoption.
+- `CONTRIBUTING.md` - baseline contribution workflow.
+- `SECURITY.md` - private vulnerability reporting policy.
+- `GOVERNANCE.md` - ownership and decision boundaries.
+- `docs/architecture/` - immutable organization architecture standards and their
+  repository-local adoption contracts.
+- `governance/feature-module-standard.json` - append-only Feature Module Standard
+  version and digest registry.
+- `tools/feature-module-standard/` - standalone registry, digest, and immutable
+  history verifier for maintainers and agents.
+- `governance/` - machine-readable qualification and security-policy records.
+- `governance/docs-protocol-policy.json` - byte-locked stable3 compatibility snapshot.
+- `governance/docs-protocol-policy-v2.json` - current qualification-v2 documentation policy
+  inventory, admission status, evidence, and exceptions.
+- `governance/docs-qualified-cohorts.json` - immutable package, workflow,
+  schema, and asset Cohorts with append-only lifecycle evidence.
+  Historical v1 entries remain byte-immutable; future v2 entries require an
+  explicit generation discriminator and exactly five qualified coordinates.
+- `governance/docs-protocol-exceptions.json` - owned, scoped, reviewed, and
+  expiring temporary exceptions.
+- `pnpm governance:cohorts:verify -- --cohort <id>` - live npm, provenance, and
+  reusable-workflow evidence verification before lifecycle promotion.
+- `pnpm governance:inventory:observe` - read-only, paginated, two-pass org
+  inventory observation without policy mutation.
+- `docs/decisions/` - accepted organization governance decisions.
+- `docs/organization-security-baseline.md` - live-default snapshot, transfer
+  handling, and plan-tier exceptions.
+- [Repository admission](docs/repository-admission.md) - reviewed onboarding for new owned
+  repositories, starting with [new repository bootstrap](docs/repository-admission.md#new-repository-bootstrap)
+  and the [central commit identity route](docs/repository-admission.md#commit-identity-onboarding).
+- `SUPPORT.md` - support routing.
+- `CODE_OF_CONDUCT.md` - community conduct policy.
+- `.github/ISSUE_TEMPLATE/` - default issue forms.
+- `.github/PULL_REQUEST_TEMPLATE.md` - default pull request evidence.
+- `renovate-config.json` - organization Renovate preset.
+- `.github/workflows/reviewrouter-*.yml` - pinned ReviewRouter review and
+  interaction workflows.
+- [npm trusted publication](docs/npm-trusted-publishing.md) - shared archive admission,
+  candidate readback and promotion through the pinned reusable workflow.
+- `.github/workflows/docs-protocol-check.yml` - fixed reusable documentation
+  protocol gate with required exact Cohort assertions and no secrets.
+
+Repositories consume the Renovate policy explicitly:
+
+```json
+{
+  "extends": ["local>agent-teams-ai/.github:renovate-config"]
+}
+```
+
+The repository-local file is intentionally tiny. It can add project-specific
+package rules but must not copy the organization preset.
+
+The executable-specification ledger scopes observed organization repositories
+as active, non-archived records or named archived exclusions. Repository scope,
+maturity, and qualification values live only in the JSON ledger; the
+human governance document intentionally does not duplicate its matrix.
+
+## Product vision and shared research
+
+Start with the [Foundation-first ecosystem vision and delivery plan](docs/architecture/ecosystem-vision.md).
+It records the owner direction, shared-library consumers and ownership map,
+then routes to the existing product and foundation authorities.
+
+Agent Teams product deployment and execution-scale vision is owned by the
+[Orchestrator deployment profiles](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/main/docs/architecture/deployment-profiles.md#concurrent-execution-target).
+Platform and Agent Runtime adopt their responsibilities in their own documents.
+The [engineering-research repository](https://github.com/agent-teams-ai/engineering-research)
+holds shared industry evidence and comparisons; product decisions and release
+qualification remain with their owners. These navigation links do not adopt a
+different architecture for a consumer or establish measured capacity.
+
+## ReviewRouter
+
+This repository pins the externally owned ReviewRouter reusable workflow and
+runtime to immutable commit SHAs. Product repositories own their reviewed caller
+configuration. `reviewrouter-interaction.yml` is a thin caller of the upstream
+interaction workflow and pins both `uses` and `runtime_ref` to the same immutable
+release commit. It preserves organization event filters, discussion variables,
+and secret mappings without copying checkout, setup, or runtime steps.
+Organization-wide community health, repository policy, and dependency automation configuration.
+
+Runtime admission V10 positive canary: ordinary documentation changes remain admissible.

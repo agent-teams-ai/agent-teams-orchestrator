@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "observedAt": null,
+  "proofRoot": null,
+  "validatorRoot": null,
+  "successor": {
+    "repairPull": {
+      "path": null,
+      "sha256": null
+    },
+    "mergeCommit": {
+      "path": null,
+      "sha256": null
+    },
+    "mergeTree": {
+      "path": null,
+      "sha256": null
+    },
+    "compareRepair": {
+      "path": null,
+      "sha256": null
+    },
+    "compareCurrent": {
+      "path": null,
+      "sha256": null
+    },
+    "workflow": {
+      "path": null,
+      "sha256": null
+    },
+    "receipt": {
+      "path": null,
+      "sha256": null
+    },
+    "nativeNode26": {
+      "path": null,
+      "sha256": null
+    },
+    "nativeNode24": {
+      "path": null,
+      "sha256": null
+    }
+  },
+  "central": {
+    "repository": {
+      "path": null,
+      "sha256": null
+    },
+    "branch": {
+      "path": null,
+      "sha256": null
+    },
+    "commit": {
+      "path": null,
+      "sha256": null
+    },
+    "tree": {
+      "path": null,
+      "sha256": null
+    },
+    "files": {
+      "governance/docs-protocol-policy-v2.json": {
+        "path": null,
+        "sha256": null
+      },
+      "governance/docs-qualified-cohorts.json": {
+        "path": null,
+        "sha256": null
+      },
+      "governance/docs-protocol-exceptions.json": {
+        "path": null,
+        "sha256": null
+      },
+      "governance/code-security-defaults.json": {
+        "path": null,
+        "sha256": null
+      }
+    }
+  },
+  "consumer": {
+    "repository": {
+      "path": null,
+      "sha256": null
+    },
+    "branchBefore": {
+      "path": null,
+      "sha256": null
+    },
+    "branchAfter": {
+      "path": null,
+      "sha256": null
+    },
+    "commit": {
+      "path": null,
+      "sha256": null
+    },
+    "tree": {
+      "path": null,
+      "sha256": null
+    },
+    "run": {
+      "path": null,
+      "sha256": null
+    },
+    "jobs": {
+      "path": null,
+      "sha256": null
+    },
+    "checks": {
+      "path": null,
+      "sha256": null
+    },
+    "comparePrior": {
+      "path": null,
+      "sha256": null
+    },
+    "artifacts": {
+      "path": null,
+      "sha256": null
+    },
+    "authorizationZip": {
+      "path": null,
+      "sha256": null
+    },
+    "qualificationZip": {
+      "path": null,
+      "sha256": null
+    },
+    "authorization": {
+      "path": null,
+      "sha256": null
+    },
+    "receipt": {
+      "path": null,
+      "sha256": null
+    },
+    "installEvidence": {
+      "path": null,
+      "sha256": null
+    },
+    "files": {}
+  }
+}

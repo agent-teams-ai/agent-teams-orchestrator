@@ -1,0 +1,388 @@
+---
+id: architecture.dependency-rules
+type: architecture
+status: accepted
+owner: architecture
+summary: Enforceable source dependency and package boundary rules.
+related:
+  - ADR-0117
+  - ADR-0005
+  - ADR-0079
+  - ADR-0012
+  - ADR-0037
+  - ADR-0038
+  - ADR-0075
+  - ADR-0090
+  - ADR-0113
+  - ADR-0114
+  - architecture.composition
+  - architecture.deployment-profiles
+code_anchors:
+  - pattern: architecture/foundation/dependency-declarations.yaml
+    enforcement: required
+  - pattern: scripts/architecture/validate-dependency-specifiers.mjs
+    enforcement: required
+  - pattern: scripts/architecture/source-imports.mjs
+    enforcement: required
+  - pattern: scripts/architecture/validate-package-topology.mjs
+    enforcement: required
+  - pattern: architecture/source-dependency-policy.yaml
+    enforcement: required
+  - pattern: architecture/source-dependency-policy.schema.json
+    enforcement: required
+  - pattern: architecture/package-materialization-policy.yaml
+    enforcement: required
+  - pattern: architecture/package-materialization-policy.schema.json
+    enforcement: required
+  - pattern: scripts/architecture/package-materialization-validation.mjs
+    enforcement: required
+  - pattern: scripts/architecture/scaffold-package.mjs
+    enforcement: required
+  - pattern: tooling/architecture-conformance/scripts/check-dependency-specifiers.mjs
+    enforcement: required
+---
+
+# Dependency Rules
+
+## Dependency direction
+
+```mermaid
+flowchart LR
+    Inbound["Inbound Adapters"] --> Application["Application"]
+    Inbound --> Contracts["Public Contracts"]
+    Application --> Domain["Domain"]
+    Outbound["Outbound Adapters"] --> Application
+    Outbound --> Contracts
+    Composition["Composition Root"] --> Inbound
+    Composition --> Outbound
+    Composition --> Application
+    SDK["SDK"] --> Contracts
+```
+
+Dependencies point inward. Runtime calls may flow outward through interfaces, but
+source-code dependencies do not.
+
+The words `inbound` and `outbound` are always relative to the application core:
+
+- inbound adapters call application inbound ports and initiate use cases;
+- outbound adapters implement application outbound ports and are called by use
+  cases;
+- network direction and payload flow do not classify an adapter.
+
+A streaming HTTP response remains part of an inbound HTTP adapter because the
+external client initiated the use case. A JetStream publisher is outbound, while a
+JetStream consumer that initiates a use case is inbound. Integrations that perform
+both roles expose separate modules and ports for each role.
+
+## Allowed dependency matrix
+
+| From              | May depend on                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| Domain            | Owning context domain modules and explicitly exposed context-internal domain types       |
+| Application       | Owning context domain, application models, internal APIs, and consumer-owned ports       |
+| Contracts         | Narrow Protobuf or JSON Schema primitives allowed by the owning external surface         |
+| Inbound adapters  | Feature contracts and application input ports                                            |
+| Outbound adapters | Application output ports, public event contracts when publishing, and external libraries |
+| Composition       | All layers in its own package and public APIs of dependencies                            |
+| SDK               | Published contracts and transport libraries                                              |
+
+Get Modular is mandatory at applicable independently assembled TypeScript
+composition seams under ADR-0117, using ADR-0113's exact baseline. Its imports
+and descriptors belong in composition and tests; domain, application, external
+contracts, and adapters use ordinary APIs and consumer-owned ports. SDK clients
+must not expose framework types. A raw container, cradle, resolver, service
+locator, Awilix graph, or competing handwritten production assembly is forbidden.
+Fixed private helpers remain static dependencies.
+
+Nested visibility, direct-parent assembly, republication, and both cycle rules
+follow the [v1.1 feature profile](feature-module-standard.md). Activation remains
+blocked until the required semantic enforcement exists; the neutral quality
+topology projection does not prove nested conformance.
+
+Wire models and generated service types remain in their owning contract surfaces
+and permitted transport adapters or SDKs. GraphQL resolver contexts and
+selection-set structures remain in inbound adapters; neither enters domain or
+application models.
+Adapters map to the owner's application input port and narrow invocation profile;
+application models do not grow framework fields to accommodate another API style.
+
+Get Modular imports, declarations, plans, assembly, and factory bindings belong
+only in `composition/**` and tests under the accepted composition profile. A file
+named `declaration.ts` or `module.ts` outside that boundary is not an exception.
+Feature business factories expose typed dependencies and APIs without importing
+Get Modular or exposing its lifecycle and module types.
+
+The private invocation profile selected by
+[ADR-0114](../decisions/0114-canonical-backend-stack-and-distributed-role-adoption.md)
+keeps standard gRPC and Dapr clients, servers, and transport mapping at the edge.
+Each Host role owns one Get Modular graph and its application resources. Thin
+inbound and outbound adapters map calls to declared ports; domain and application
+code never receive sidecar clients, generated messages, or framework contexts.
+Local Supervisor or the hosted platform owns process availability. An adapter or
+private DI container must not independently reconstruct or stop the same resource.
+
+## Forbidden dependencies
+
+Domain and application layers must not import:
+
+- public SDK, HTTP, gRPC, JSON-RPC, or integration-event schemas;
+- Electron, React, browser globals, or frontend stores;
+- NATS, Temporal, HTTP servers, gRPC servers, or broker clients;
+- Get Modular, Dapr, or Moleculer APIs, contexts, or lifecycle types;
+- `ar` implementation modules;
+- OpenCode, Claude, Codex, or other provider SDKs;
+- Node filesystem, child-process, or network implementations;
+- concrete database clients;
+- another bounded context's internal modules.
+
+Domain and application models also cannot expose JavaScript `Date`, ECMAScript
+Temporal objects, Decimal/Dinero instances, ORM records, or driver values. A pure
+arithmetic library may be private to a context-owned value-object implementation
+only when its type and mutable configuration cannot escape. Timezone/calendar
+engines belong behind application-owned calculation ports.
+
+## Cross-context dependencies
+
+For synchronous collaboration, the consuming context declares a narrow outbound
+port. An adapter implements that port against the provider context's published
+contract. Asynchronous collaboration uses integration-event contracts.
+
+The same rule applies to GraphQL composition: the consuming query owns its narrow
+outbound query port and ACL. The provider owns its published batch-query API and
+projections; a composed projection has an explicitly declared query owner and
+consistency contract. Resolver nesting does not permit cross-context repositories
+or a shared transaction over several owners.
+
+Cycles between bounded-context packages are prohibited. When two contexts need
+bidirectional collaboration, prefer events, a process manager, or move the
+genuinely shared concept to the context that owns its lifecycle. Do not solve a
+cycle by importing both public application facades.
+
+A direct in-process adapter is permitted within one declared role and in tests.
+It cannot replace a selected production process boundary. The
+[service role map](deployment-profiles.md#service-role-map) owns placement under
+ADR-0114; real private RPC boundaries use feature-owned Protobuf and standard gRPC
+through Dapr from their first production materialization. Control Host to Team
+Topology S3 is the first such boundary, not a same-process router deployment.
+
+The private RPC contract cannot rely on shared mutable objects, closures,
+process-local identity, framework exceptions, or a database transaction crossing
+the boundary.
+A separately running capability keeps its own state and transaction owner.
+Network serialization and a new implementation language change its adapter and
+implementation, not the consuming application's domain model. The private wire
+profile does not require serializing ordinary collaboration within a role or
+creating a service per feature. Durable JetStream handlers invoke their owner's
+application ports directly; no extra RPC hop is implied by process placement.
+
+Inside one bounded context, features may use only the provider feature's curated
+`domain/internal-api.ts` or `application/internal-api.ts` and an exact directed
+feature dependency edge. Domain may consume only a domain internal API;
+application may consume either surface. Adapters collaborate through their owning
+application core and composition. Features do not need Published Language or ACL
+ceremony for every collaboration, but still cannot mutate another feature's
+aggregate through its repository or internals.
+
+## Contract surfaces
+
+The following surfaces are distinct:
+
+- application input/output models, private to use cases;
+- context-internal module APIs, private to one bounded context;
+- context Published Language, versioned for downstream contexts;
+- integration events, versioned asynchronous facts;
+- public control API contracts, versioned for SDK clients;
+- external dependency contracts such as `ar`.
+
+Sharing similar fields is not sufficient reason to reuse one surface as another.
+Mappings protect ownership, compatibility, authorization, and disclosure rules.
+
+Each surface starts with one explicit `v1` family. Parallel speculative major
+versions are prohibited. A later major requires the migration decision and support
+horizon defined by ADR-0037.
+
+## Enforcement
+
+CI architecture gates test today:
+
+- production source outside approved feature or package-assembly roots;
+- arbitrary hidden source, while excluding only Foundation-owned terminal
+  cleanup evidence under the exact `.foundation-retired-evidence-` directory;
+- packages without an explicit architectural role;
+- production packages absent from `architecture/package-catalog.yaml`;
+- packages whose owner document remains proposed;
+- packages marked `state: deferred` by
+  `architecture/package-materialization-policy.yaml`, or packages whose
+  declared materialization gate still has an unresolved status;
+- package manifests whose name, role, or owner differs from the catalog;
+- package export boundaries and cross-context deep imports that bypass package
+  exports;
+- forbidden imports by layer, including public contract imports in domain and
+  application code, external imports, and ambient side effects in domain,
+  application, and contract code;
+- dependency cycles and feature dependency cycles inside a bounded context;
+- inbound adapters importing outbound adapters, and outbound adapters importing
+  inbound adapters;
+- materialized libraries without built ESM and declaration exports under
+  `dist/**`, without `dist` in their packed files, or without blocking `build`,
+  `check`, `test`, and `typecheck` scripts;
+- root TypeScript project references that omit, duplicate, or retain a stale
+  materialized package entry.
+
+The following rules are normative but not yet automated. Reviewers check them
+manually until a validator with negative fixtures exists, and this list is
+expected to shrink as validators are added:
+
+- empty ceremonial DDD layers;
+- adapters classified from network direction instead of application-core
+  direction, and one broad adapter module combining inbound and outbound
+  responsibilities;
+- provider-specific symbols in domain/application;
+- transport-specific symbols in contracts;
+- unversioned integration events;
+- one public control contract represented by both hand-authored Protobuf and JSON
+  Schema sources;
+- public Protobuf outside the accepted cross-language profile;
+- context packages importing consumer-owned ports from an integration adapter;
+- broad `spi` and package-root barrel exports.
+
+The first materialization of a selected service boundary must add rejecting
+source fixtures and process/RPC conformance to the required quality runner in
+the same PR. Those checks must cover bypass imports, transport leakage, duplicate
+construction, and an in-process production replacement of the declared boundary.
+Until that implementation exists, this is a materialization obligation; the
+current import graph and documentation checks do not prove process isolation or
+Dapr conformance.
+
+TypeScript path aliases are conveniences, not boundaries. `package.json` exports,
+workspace dependencies, lint rules, and architecture tests enforce boundaries.
+The package catalog reserves approved topology; it does not replace import-graph
+enforcement inside materialized packages.
+A root-level `.gitkeep` may preserve an approved workspace family such as `apps/`;
+the topology validator ignores that sentinel, and it neither materializes a
+package nor authorizes any other production file outside a cataloged package.
+
+Package materialization is fail closed. The package catalog remains the topology
+Published Language consumed by Engineering Foundation. Orchestrator-specific
+deferment belongs to `architecture/package-materialization-policy.yaml`, where a
+deferred entry names at least one unresolved decision in `blocked_by`. The
+validator and scaffolder reject filesystem creation while that gate is
+unresolved. Changing or removing one side cannot bypass the gate: every policy
+entry must reference a catalog package, required Fully Local reservations must
+remain present, and `decision` must name the accepted ADR that resolves the
+explicit implementation-start gate before `state` becomes `allowed`. This
+authorizes package creation, not deployment qualification; final profile
+qualification requires its independent evidence.
+
+The scaffolding adapter may depend on Foundation's public transaction inspection
+and scoped recovery APIs. It must not depend on Foundation's journal location,
+schema, or bytes. Consumer topology remains inward data; Foundation owns the
+lease-protected mutation and validates the supplied immutable scope against the
+stored transaction before recovery.
+
+Every materialized package appears exactly once in the root TypeScript project
+references. Removing or adding a package updates the catalog, filesystem, manifest,
+and root reference in the same change. Directory references with a trailing slash
+and references ending in `/tsconfig.json` are canonicalized to the same package
+path, including for duplicate detection. A materialized library is consumed
+through its built `dist/**` exports; source-only exports and packed artifacts
+without declarations are prohibited.
+
+Every non-app library declares `"type": "module"`. Each non-null exported subpath
+provides a normalized `./dist/**` declaration target through `types` and a
+normalized `./dist/**` ESM target through `import`. Declaration targets end in
+`.d.ts`, `.d.mts`, or `.d.cts`; ESM targets end in `.js` or `.mjs`. Topology
+validation checks the target shape and suffix before build output exists; package
+build and packed-artifact tests separately prove that generated targets exist and
+are consumable.
+
+The package-role gate prevents platform packages from depending on business
+contexts, integrations from depending on contexts or SDKs, and SDKs from depending
+on contexts, integrations, or platform implementation packages. Internal workspace
+dependencies must be cataloged and use the `workspace:` protocol. Dev-only testing
+packages are the explicit exception to runtime role direction.
+
+The `exactRegistryDevelopmentOnlyPackages` list in
+`architecture/foundation/dependency-declarations.yaml` is the single authority
+for external engineering tooling allowed as root-only exact registry development
+dependencies instead of catalog declarations, including exceptions to the
+reserved `@agent-teams/` scope. The current compiler/tooling candidate uses
+`@agent-teams/engineering-foundation` `4.0.3` for repository engineering gates,
+`@agent-teams/feature-module-standard` `0.4.3` for the shared neutral quality
+topology mapper, and `stack-toolchain` `0.3.1` for technical compiler,
+lint, and format tooling and presets. Stack is an explicit unscoped tooling
+exception; it does not become a production dependency or a catalog entry.
+The list also retains `@agent-teams/docs-protocol` for portable documentation
+tooling and `@agent-teams/docs-protocol-agent-teams` for managed documentation
+integration. The [tooling adoption record](repository-tooling.md#source-coverage-adoption)
+owns the candidate's validation and separate pending managed admission;
+`@agent-teams/document-authoring` and `@agent-teams/repository-mutation` remain
+transitive tooling dependencies. Nested workspace packages must not redeclare
+them: they load the root install. Catalog entries for reusable externals must
+be exact registry versions, not `npm:` aliases.
+Installing the managed integration alone does not establish managed admission.
+Each listed package must use an exact registry version in
+`devDependencies` of the repository root; runtime, optional, and peer
+declarations are prohibited.
+Production source under `apps/**/src` and `packages/**/src` cannot import any
+package from this list. The repository-local validator reads the policy instead
+of maintaining a second allowlist, and architecture fixtures prove valid
+dev-only declarations plus invalid declaration and import cases.
+
+The current exact Foundation release provides reusable declaration and source
+dependency checks through `workspace.dependency-declarations` and
+`architecture.source-dependencies`. Both are blocking. The source policy governs
+the materialized Local Host Control production source with explicit public API,
+application, model, and port boundaries. Colocated `*.test.ts` unit tests retain
+their source layer's dependency rules but are excluded from production builds.
+Feature integration and contract tests live under `tests/features/<feature>/`, and
+package black-box and packed-consumer tests live under `tests/package/`, so a
+self-package public import is not mistaken for a production dependency. A
+generic `tests/unit/` tree is rejected because it erases feature ownership.
+
+The repository-local dependency validator remains a blocking donor oracle for
+Orchestrator-specific package roles, catalog completeness, and production import
+placement. A newly materialized package must add its existing `src` root and
+boundary entrypoints to the Foundation policy in the same change. Donor rules are
+removed only after a consumer mutation proves semantic parity; the two tools must
+not become independent authorities for the same rule.
+
+Cross-package source imports must name a declared manifest dependency and use a
+subpath exposed by the target package `exports`. Imports through another package's
+`src/**` are always prohibited. These checks enforce package encapsulation only;
+the exact `architecture/source-dependency-policy.yaml` edge and package-role
+matrix decide whether a source dependency is allowed. LikeC4 remains the
+authority for semantic relationships and never grants source imports by itself.
+
+The source dependency policy is default-deny. Every edge names one consumer, one
+provider, and exact provider export subpaths. Cross-package relative imports,
+package-root and wildcard imports, `file:` or absolute imports, and package-local
+aliases that target another package are prohibited. Type-only, dynamic,
+re-exported, test, generated, and composition imports follow the same policy.
+Production source also cannot self-import its own package public export because
+that would hide sibling-feature dependencies; black-box public API tests live
+outside `src`.
+
+The same file owns exact package-local `feature_edges`. Each feature edge names the
+package, consumer feature, provider feature, and allowed `domain` or `application`
+internal surface. CI rejects deep sibling imports, layer violations, undeclared or
+unused surfaces, duplicate edges, and cycles. Oxlint provides the fast structural
+check; the topology validator applies the exact allowlist.
+
+## Dependency inversion examples
+
+The consuming application declares a narrow capability:
+
+```ts
+interface RuntimeSessionLifecyclePort {
+  readonly startSession: (command: StartRuntimeSessionCommand) => Promise<StartRuntimeSessionResult>;
+}
+```
+
+An adapter implements it using `ar`. The application never imports the `ar`
+client.
+
+The application creates publication intent; a context-owned persistence adapter
+stores a complete outbox record in the same local transaction as business state,
+and a JetStream relay publishes it later. Replacing JetStream must not change
+domain or application code.

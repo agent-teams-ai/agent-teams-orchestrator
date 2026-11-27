@@ -1,0 +1,987 @@
+{
+  "schemaVersion": 1,
+  "scope": "derived-host-integration",
+  "outcome": "passed",
+  "parentCommit": "c01efb6813f0c048497caeefbb8235cead480cb2",
+  "physicalSourceRevision": "ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67",
+  "physicalTargetFiles": [
+    {
+      "bytes": 262,
+      "gitBlob": "eab5f9fcfb0244aea94c5a2a6101e611fc7372b4",
+      "mode": "100644",
+      "path": ".github/workflows/docs-protocol.yml",
+      "sha256": "sha256:2ce33590e2d5d36a14bcdf3f16e6ca5422c4b3ebe300f3ac4d94343cc022e1ac"
+    },
+    {
+      "bytes": 8,
+      "gitBlob": "63f87c20ef9fd0ace28f8d0a3b74b5ef2e24feff",
+      "mode": "100644",
+      "path": ".node-version",
+      "sha256": "sha256:2a4a3fac7ea8694f168266bd3a930b3fc5faa6e503d577d99c024f74582e4cb5"
+    },
+    {
+      "bytes": 3728,
+      "gitBlob": "8ee905628a86adac4c08a4ca9b614ed47359bca3",
+      "mode": "100644",
+      "path": "architecture/foundation/docs-consumer-integration.json",
+      "sha256": "sha256:e1ce483d58e1550591ec8c863f5b121978fa57f92061b7ff9ac84ba1f7204f9c"
+    },
+    {
+      "bytes": 3132,
+      "gitBlob": "ecd55e686e7e034e4582dd3c1a18ce8a74a5c469",
+      "mode": "100644",
+      "path": "architecture/foundation/docs-protocol-managed-state.json",
+      "sha256": "sha256:557e97b03b4105b2b1367eabc5e4ac74aed57bc3cb32278b84266f1aad2aeff9"
+    },
+    {
+      "bytes": 10487,
+      "gitBlob": "ff8248213bb6814250e83b36b094a77e278654a6",
+      "mode": "100644",
+      "path": "package.json",
+      "sha256": "sha256:669e0c57dddee8a66d0dc85263bb8b1be8f637f4ed020a5bb1818195c1da0579"
+    },
+    {
+      "bytes": 320228,
+      "gitBlob": "5b452244b3d74dd49432e659abd575efca49c4c2",
+      "mode": "100644",
+      "path": "pnpm-lock.yaml",
+      "sha256": "sha256:a8080107bb13e2170fee5e3f25f30ff5df835cd5e540e66f177a0ef0e57c264b"
+    },
+    {
+      "bytes": 2086,
+      "gitBlob": "65cdd744128118053b7cb7132c4cdd525bf8f56a",
+      "mode": "100644",
+      "path": "pnpm-workspace.yaml",
+      "sha256": "sha256:e4da6baacbef4830e257bd994193783891d97be660d46fe7c1e1bce7964f8f63"
+    }
+  ],
+  "files": [
+    {
+      "path": ".github/workflows/architecture.yml",
+      "bytes": 3840,
+      "sha256": "sha256:4ac9b2417971b17b10749f19c9e62ff5898641a0d844007ed2b6385aafd06db1",
+      "gitBlob": "45d59fcb5b2f124ca29386292b6dea347cf68ef8",
+      "mode": "100644"
+    },
+    {
+      "path": ".github/workflows/docs-protocol.yml",
+      "bytes": 262,
+      "sha256": "sha256:2ce33590e2d5d36a14bcdf3f16e6ca5422c4b3ebe300f3ac4d94343cc022e1ac",
+      "gitBlob": "eab5f9fcfb0244aea94c5a2a6101e611fc7372b4",
+      "mode": "100644"
+    },
+    {
+      "path": ".github/workflows/docs.yml",
+      "bytes": 2497,
+      "sha256": "sha256:7ffb1856e37498d54f0370e8a8d1ac65b069fc5e577558d003bf9861e927b566",
+      "gitBlob": "00fff88903ebb454cca4cbafa5584f1bd584bc99",
+      "mode": "100644"
+    },
+    {
+      "path": ".github/workflows/od035-native-research.yml",
+      "bytes": 2025,
+      "sha256": "sha256:a2d4639b09317b9d41999cfff585e4c6e47ac7dde5f3f997938505aaed4a3faf",
+      "gitBlob": "fa4b2f00bb30936fcb4392170c58f4c37bdace19",
+      "mode": "100644"
+    },
+    {
+      "path": ".github/workflows/reviewrouter-interaction.yml",
+      "bytes": 4070,
+      "sha256": "sha256:0f9aa7afe102feccf23de1ed53fac5fe8a76bad738fc3fda50a79016fa22006f",
+      "gitBlob": "dc35a080ac265accae8c26f499a04f76b737ca61",
+      "mode": "100644"
+    },
+    {
+      "path": ".node-version",
+      "bytes": 8,
+      "sha256": "sha256:2a4a3fac7ea8694f168266bd3a930b3fc5faa6e503d577d99c024f74582e4cb5",
+      "gitBlob": "63f87c20ef9fd0ace28f8d0a3b74b5ef2e24feff",
+      "mode": "100644"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 20750,
+      "sha256": "sha256:906d16149ab98284a1da90127e7800015a629b97c860666d1c39a945244a42e5",
+      "gitBlob": "ef9d1860d34ef01f4cdd63b28ecf692d26d32af4",
+      "mode": "100644"
+    },
+    {
+      "path": "architecture/foundation/docs-consumer-integration.json",
+      "bytes": 3728,
+      "sha256": "sha256:e1ce483d58e1550591ec8c863f5b121978fa57f92061b7ff9ac84ba1f7204f9c",
+      "gitBlob": "8ee905628a86adac4c08a4ca9b614ed47359bca3",
+      "mode": "100644"
+    },
+    {
+      "path": "architecture/foundation/docs-protocol-managed-state.json",
+      "bytes": 3132,
+      "sha256": "sha256:557e97b03b4105b2b1367eabc5e4ac74aed57bc3cb32278b84266f1aad2aeff9",
+      "gitBlob": "ecd55e686e7e034e4582dd3c1a18ce8a74a5c469",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/architecture/dependency-rules.md",
+      "bytes": 21043,
+      "sha256": "sha256:8c7f7617e72d76092aaea641d1a7fb7056ca27cb9ba9c524f2b18dafc9ae8fd2",
+      "gitBlob": "cb247a5a24065f07cfe439762bc3ac55bd3ccbe9",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/architecture/feature-module-standard.md",
+      "bytes": 28363,
+      "sha256": "sha256:d7d482928a844103144cc2cdd320a9f4324bf0f2667a18afb71248eaac2ce7fa",
+      "gitBlob": "2a0fbe19c4cc89e5fcb32b6973c823bd4aab292e",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/architecture/repository-tooling.md",
+      "bytes": 69775,
+      "sha256": "sha256:0116deb67eabc6c9893f258210754905ebc454e487351f3ea9685d9bfc09b4e6",
+      "gitBlob": "fb04942c9d8b30ef5b6b7563c94f522310189bb7",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/architecture/security-architecture.md",
+      "bytes": 21107,
+      "sha256": "sha256:b4a77c03d7d0443e030e6379627105912ee0b7225238f1afa879099dc174cc7b",
+      "gitBlob": "a16dabb1d293cbea6dc408605b0094eb2e6c9e45",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/open-decisions/OD-020-architecture-conformance-tooling.md",
+      "bytes": 3731,
+      "sha256": "sha256:39ceb4fdffdb3a73f134ada4c83fd9f1cf24589bc16a167f12d9b979d0f13e39",
+      "gitBlob": "e1c7c6200f47a03214a22471006148368b4b8bff",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/open-decisions/OD-035-local-durable-workflow-engine.md",
+      "bytes": 28813,
+      "sha256": "sha256:0c3a89a5c693f328d6d566b0a5a2fa171694e7df2217417a1eda0b42403e6da6",
+      "gitBlob": "2ad2eba381693514e5cbcb2acbdec4d2a123b5ce",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/A-fault.meta.json",
+      "bytes": 947,
+      "sha256": "sha256:212e2d66a748c54cb841ee203d9adbd9daedc7c55495eea8dd935b1975edd0e2",
+      "gitBlob": "a180135cd71012aadc85f01065025597fec4def0",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/A-fault.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/A-fault.stdout.json",
+      "bytes": 223,
+      "sha256": "sha256:e59cbe2338f139e21ddc64c43dfda3b3738448fddc4bc22ff63310a9dcc41657",
+      "gitBlob": "21efdd3f65ebea68c73041cec8e8b78fee2abc4b",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/A-prepare.meta.json",
+      "bytes": 979,
+      "sha256": "sha256:e498621ab6bafb93be8fc20baf4641e0a85df5a0e15eceeca2bc83c85996f7f0",
+      "gitBlob": "3c569220e7f84d36fbcaaa2b9fd1aca94efb5ba0",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/A-prepare.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/A-prepare.stdout.json",
+      "bytes": 283,
+      "sha256": "sha256:e03489b165d36ec258f136ced699ff8ae75b9a0ca646f157e49f415f6d564dd4",
+      "gitBlob": "427af024c31e954d64345921b62f5c9133fa794e",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/A-restore.meta.json",
+      "bytes": 850,
+      "sha256": "sha256:60517019a785109768c4b80f86d3fa9ec3c50c83263b0b3bd018d07730f3fbeb",
+      "gitBlob": "17cb23ece496d6c3ef858e242cb4c00625a79ead",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/A-restore.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/A-restore.stdout.json",
+      "bytes": 1622,
+      "sha256": "sha256:90d192856c77c56d2a78873822e84803b24591dc34ce51960810a5e2880398c4",
+      "gitBlob": "2feea1b70cb8834a8c88f3f158c276110dcaf72c",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/A-resume.meta.json",
+      "bytes": 948,
+      "sha256": "sha256:5d63eaceafe984f4c7a8d2daf33a4e3968c84410211915f1d80ebac2b4269c5c",
+      "gitBlob": "9759da1412fc377f4cc256ba7bb0527d3b80c35b",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/A-resume.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/A-resume.stdout.json",
+      "bytes": 1706,
+      "sha256": "sha256:bf84708aa5445271ceea1e62787ae36633c43eac495e89d4c6e55b223c872294",
+      "gitBlob": "4d49a06c3b2848e041e4c07bbebd979f6f2870fe",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/B-committed-restore.meta.json",
+      "bytes": 1097,
+      "sha256": "sha256:2276083fa393055229712e9bd44a765f7a42affb946dd2b4bfcb46ada8de564a",
+      "gitBlob": "fa6b18a064afb53d9bd06512b90f1e2843a80292",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/B-committed-restore.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/B-committed-restore.stdout.json",
+      "bytes": 1622,
+      "sha256": "sha256:79e46d131248ac782544e821df4e7ab06bcc912e0036b17b01ae70d98acf80aa",
+      "gitBlob": "f829888bace97d0100454324f837be4cd7a715b9",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/B-finalize.meta.json",
+      "bytes": 950,
+      "sha256": "sha256:79c8d4f68a2820710edbf7c8ab924d99ff7574337424b38e43b3707b55a17049",
+      "gitBlob": "8390d2b7613c42964bd79c48cde8cb4a1862ef46",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/B-finalize.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/B-finalize.stdout.json",
+      "bytes": 1633,
+      "sha256": "sha256:e82fe9c9c7ff6360d1dc1c80dfeb096d44aefd297f8b9810ad4220e1b0f18451",
+      "gitBlob": "f0257d55867a90c4f013569d877ed1aba0e4536c",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/B-prepare.meta.json",
+      "bytes": 979,
+      "sha256": "sha256:f372bfc7f4da57cf0bf1d566ac43a1365ead30d51735060d311d4797c21d4c42",
+      "gitBlob": "dc8907f8b547a1d27f350c52cc4d10d1e43486ba",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/B-prepare.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/B-prepare.stdout.json",
+      "bytes": 283,
+      "sha256": "sha256:203f731d90ce9eb7461dffec4930ba625fe43ade2a003651a6487c9cbf33ffc9",
+      "gitBlob": "bbdcc6a70572421dddb1225596a9cdc7440830ff",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/C-finalize.meta.json",
+      "bytes": 950,
+      "sha256": "sha256:60d78d9a29554e55cad6078d2904f836f61567a25413a1073fd88ee1f5cab1e5",
+      "gitBlob": "63c3a07dc7afffbb41c3a0b1f253b275a1435c66",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/C-finalize.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/C-finalize.stdout.json",
+      "bytes": 1633,
+      "sha256": "sha256:da32a940ba1942152fced1fd547b8685f8b7f4019304d51166b2000e7d6a5033",
+      "gitBlob": "f6c581ac3b76aca4773b4ed94016815bd57841fb",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/C-prepare.meta.json",
+      "bytes": 979,
+      "sha256": "sha256:1b3697582293d6acfa69bdbf9a27665fd25a34942cd32d30dd0a7a4a3f0fb5c1",
+      "gitBlob": "3e8fcf54846ec3c1fefdfe30c5ddb4ceba4e7127",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/C-prepare.stderr.txt",
+      "bytes": 0,
+      "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/commands/C-prepare.stdout.json",
+      "bytes": 283,
+      "sha256": "sha256:464e0b2f66b636d33c259db7902ccc5b4d3ea076417dd77a6a376f9361b4a766",
+      "gitBlob": "1a98166235dc15ff1cb343d411dc783ecbdbd1ee",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/evidence/managed-docs-orchestrator-v3-2026-11-27/manifest.json",
+      "bytes": 33652,
+      "sha256": "sha256:d47578e555018789d5afd25040306b75cf6e0cd7ba34c2438fc33ec82e13a85c",
+      "gitBlob": "9287f1c4228101d5f7cab703f7ccf97f468ff3dc",
+      "mode": "100644"
+    },
+    {
+      "path": "docs/research/orchestrator-full-foundation-review-2026-11-26.md",
+      "bytes": 42617,
+      "sha256": "sha256:0e691e952fd9ec27e6ed48db78717de287fb870a4b3f605146fbb046424c337c",
+      "gitBlob": "d05bb654d1f44f75aeab5cc150e34c05e89ca8b3",
+      "mode": "100644"
+    },
+    {
+      "path": "package.json",
+      "bytes": 10588,
+      "sha256": "sha256:f5eb13762ff0689fef168ad010edcb2dffec722c04648edadc7cc7b3d56af33b",
+      "gitBlob": "89d869a339630de419ab54ac670d9d2664753483",
+      "mode": "100644"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 340843,
+      "sha256": "sha256:4ad19563e9694e5d1cf6d65c2c81141cc38f1661b655b79b765da8c2ee6789ff",
+      "gitBlob": "b8d1391b34032027cd118d5af071525e870e53d6",
+      "mode": "100644"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "bytes": 2061,
+      "sha256": "sha256:5262d6b0c4a2343e3537c059b7be94d86acefdd6cfcb9ee36cdc9537d7c5fd36",
+      "gitBlob": "86f8200b22a77871233f96e888cece5b302909ea",
+      "mode": "100644"
+    },
+    {
+      "path": "scripts/architecture/quality-source-coverage.test.mjs",
+      "bytes": 22188,
+      "sha256": "sha256:7bc4d640ff20c282c626940a6e665631ccf4c7d1ca91c1a4493ccf8d08b6fdc5",
+      "gitBlob": "8437c8526f99809c4e762bbddb4365237e3db258",
+      "mode": "100644"
+    },
+    {
+      "path": "scripts/docs/docs-protocol-profile.test.mjs",
+      "bytes": 8136,
+      "sha256": "sha256:c6ad552a0f491de839bbd1987a7d7fafc3199c4b58df7f04ad8d6d13d1aac740",
+      "gitBlob": "619121bf5e4fee17b657d2b50ff8bbc4ceef9c79",
+      "mode": "100644"
+    },
+    {
+      "path": "scripts/security/validate-reviewrouter-workflow.mjs",
+      "bytes": 4684,
+      "sha256": "sha256:1775b6d255cccc4687420be36a66c249769d685a4d7ffd7ae71912463f9f002a",
+      "gitBlob": "2cd91c9a5d9859560674ecf682ea16285d4d9887",
+      "mode": "100644"
+    }
+  ],
+  "commands": [
+    {
+      "label": "node26-version",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "--version"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:21:22.702Z",
+      "completedAt": "2026-11-27T10:21:22.707Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "node26-version.stdout.txt",
+        "bytes": 9,
+        "sha256": "sha256:b26441604894a1a4e4cac96bfb464737575d9b6a2e8b9d3e996283005bd67b37",
+        "gitBlob": "7dfae3df1d0e7b7ca3eb629426e921142c9cad29",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "node26-version.stderr.txt",
+        "bytes": 0,
+        "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "node24-version",
+      "argv": [
+        "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
+        "--version"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:21:22.707Z",
+      "completedAt": "2026-11-27T10:21:22.711Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "node24-version.stdout.txt",
+        "bytes": 9,
+        "sha256": "sha256:4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+        "gitBlob": "22fbfc060a4e628c604aabc07ac2f2a5fdc51fb6",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "node24-version.stderr.txt",
+        "bytes": 0,
+        "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "pnpm-version",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "/home/runner/work/_temp/iam-host-archive-45981324003-1/archive/controller/node_modules/corepack/dist/corepack.js",
+        "pnpm",
+        "--version"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:21:22.711Z",
+      "completedAt": "2026-11-27T10:21:23.684Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "pnpm-version.stdout.txt",
+        "bytes": 8,
+        "sha256": "sha256:6784d6c924df1c8341f9f841f5b5b20c37255de3d34f923baebc0a557d5d5201",
+        "gitBlob": "383e991f5489ff6e8ba1a564117df33aa6d80a6c",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "pnpm-version.stderr.txt",
+        "bytes": 0,
+        "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "lock-generation",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "/home/runner/work/_temp/iam-host-archive-45981324003-1/archive/controller/node_modules/corepack/dist/corepack.js",
+        "pnpm",
+        "install",
+        "--lockfile-only",
+        "--ignore-scripts",
+        "--config.engine-strict=true",
+        "--strict-peer-dependencies"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:21:23.684Z",
+      "completedAt": "2026-11-27T10:21:29.097Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "lock-generation.stdout.txt",
+        "bytes": 542,
+        "sha256": "sha256:a4bc80d82199de9ff412fd594370263f98ff884b52ae05f55406182a73142066",
+        "gitBlob": "c13fe4c3423e32f131e3dfbbcd52360720e876a0",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "lock-generation.stderr.txt",
+        "bytes": 0,
+        "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "host-transitive-lock-refresh-1",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "/home/runner/work/_temp/iam-host-archive-45981324003-1/archive/controller/node_modules/corepack/dist/corepack.js",
+        "pnpm",
+        "update",
+        "--recursive",
+        "--include-workspace-root",
+        "@napi-rs/wasm-runtime",
+        "fast-uri",
+        "graceful-fs",
+        "tslib",
+        "--depth",
+        "Infinity",
+        "--no-save",
+        "--lockfile-only",
+        "--no-changeset",
+        "--ignore-scripts",
+        "--ignore-pnpmfile",
+        "--engine-strict",
+        "--config.strict-peer-dependencies=true",
+        "--config.frozen-lockfile=false",
+        "--config.prefer-frozen-lockfile=false",
+        "--config.verify-store-integrity=true"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:21:29.373Z",
+      "completedAt": "2026-11-27T10:21:32.389Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "host-transitive-lock-refresh-1.stdout.txt",
+        "bytes": 358,
+        "sha256": "sha256:e07a48665246e8403912aaca633cb9b0074641ad685e6bdc22950ad95e16a737",
+        "gitBlob": "c206a419c258bafea720be5456d960b1e2af30bc",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "host-transitive-lock-refresh-1.stderr.txt",
+        "bytes": 0,
+        "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "host-transitive-lock-refresh-2",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "/home/runner/work/_temp/iam-host-archive-45981324003-1/archive/controller/node_modules/corepack/dist/corepack.js",
+        "pnpm",
+        "update",
+        "--recursive",
+        "--include-workspace-root",
+        "@tybys/wasm-util",
+        "--depth",
+        "Infinity",
+        "--no-save",
+        "--lockfile-only",
+        "--no-changeset",
+        "--ignore-scripts",
+        "--ignore-pnpmfile",
+        "--engine-strict",
+        "--config.strict-peer-dependencies=true",
+        "--config.frozen-lockfile=false",
+        "--config.prefer-frozen-lockfile=false",
+        "--config.verify-store-integrity=true"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:21:32.685Z",
+      "completedAt": "2026-11-27T10:21:35.660Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "host-transitive-lock-refresh-2.stdout.txt",
+        "bytes": 358,
+        "sha256": "sha256:f12abb6226a269bf38e8c733e3337e2d9ebc55c47fb9d7280ed41c137b9ecf45",
+        "gitBlob": "7f75e5cf6343e0971aa6a5aced7cd1648f781c70",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "host-transitive-lock-refresh-2.stderr.txt",
+        "bytes": 0,
+        "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "frozen-install",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "/home/runner/work/_temp/iam-host-archive-45981324003-1/archive/controller/node_modules/corepack/dist/corepack.js",
+        "pnpm",
+        "install",
+        "--frozen-lockfile",
+        "--config.engine-strict=true",
+        "--strict-peer-dependencies"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:21:36.132Z",
+      "completedAt": "2026-11-27T10:21:44.083Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "frozen-install.stdout.txt",
+        "bytes": 2659,
+        "sha256": "sha256:668eaf1d172b4dafc7c3c606679e4329c1cee353008795981ce2635a702db4e4",
+        "gitBlob": "363f42c83dc654d2c286bade14cf9107edb18567",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "frozen-install.stderr.txt",
+        "bytes": 0,
+        "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "installed-peers",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "/home/runner/work/_temp/iam-host-archive-45981324003-1/archive/controller/node_modules/corepack/dist/corepack.js",
+        "pnpm",
+        "peers",
+        "check"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:21:44.084Z",
+      "completedAt": "2026-11-27T10:21:44.465Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "installed-peers.stdout.txt",
+        "bytes": 32,
+        "sha256": "sha256:5ecf82a3fc1f9007eeea79ce3bf0d9c587150219ef245bb5a5a23609cdb562fb",
+        "gitBlob": "59cae0ec9d46e5911c621496f64ebe99ad4bdd2c",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "installed-peers.stderr.txt",
+        "bytes": 0,
+        "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "docs-info",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "/home/runner/work/_temp/iam-host-archive-45981324003-1/archive/controller/node_modules/corepack/dist/corepack.js",
+        "pnpm",
+        "docs:info"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:21:44.465Z",
+      "completedAt": "2026-11-27T10:21:45.062Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "docs-info.stdout.txt",
+        "bytes": 11531,
+        "sha256": "sha256:5ba73eddf57b4760959f3fb87d3b71b6e8b6f40e62331bb6ced256a24b9ceb69",
+        "gitBlob": "2983254268ca9824e3989f527fe07b2fc7b99041",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "docs-info.stderr.txt",
+        "bytes": 90,
+        "sha256": "sha256:ea30c7bf572d07dad67bb96d9c9684773c8eb15934c65a28b65ac6bbdff3105e",
+        "gitBlob": "b4114462cc2ea7601af4a050f91b2c5b88cdb6c6",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "docs-find",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "/home/runner/work/_temp/iam-host-archive-45981324003-1/archive/controller/node_modules/corepack/dist/corepack.js",
+        "pnpm",
+        "docs:find",
+        "--",
+        "--text",
+        "repository tooling"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:21:45.062Z",
+      "completedAt": "2026-11-27T10:21:49.117Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "docs-find.stdout.txt",
+        "bytes": 1510,
+        "sha256": "sha256:efd82a1bff2944cd92c081ead90fdd094c2b7259627b750087154cbe0049288d",
+        "gitBlob": "587631c65f472622e25e95c1c7bd57e51d5b2523",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "docs-find.stderr.txt",
+        "bytes": 121,
+        "sha256": "sha256:9cc5ac6165227e6affbbe66ea16297f9dd6f32bbc4c483909e4b6de0831c7fe7",
+        "gitBlob": "9ccbd8351376231af6c17bff002f9d3a1b714be0",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "docs-context",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "/home/runner/work/_temp/iam-host-archive-45981324003-1/archive/controller/node_modules/corepack/dist/corepack.js",
+        "pnpm",
+        "exec",
+        "docs-protocol",
+        "context",
+        "--consumer",
+        ".",
+        "--profile",
+        "architecture/foundation/docs-protocol.yaml",
+        "--max-documents",
+        "8",
+        "--max-bytes",
+        "32768"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:21:49.118Z",
+      "completedAt": "2026-11-27T10:21:59.542Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "docs-context.stdout.txt",
+        "bytes": 2466,
+        "sha256": "sha256:f93be9a80a900671613f2c36834527e72ade867090958f0d9fd687ec2694e976",
+        "gitBlob": "d275c4cc20bb315c6016d8efcf548e8e134e7bc5",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "docs-context.stderr.txt",
+        "bytes": 0,
+        "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "managed-check",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "/home/runner/work/_temp/iam-host-archive-45981324003-1/archive/controller/node_modules/@agent-teams/docs-protocol-agent-teams/dist/cli.js",
+        "check",
+        "--consumer",
+        "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+        "--json"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:21:59.547Z",
+      "completedAt": "2026-11-27T10:22:00.099Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "managed-check.stdout.txt",
+        "bytes": 1940,
+        "sha256": "sha256:1a168c402274390ba1f842311af29fc2eaf3a454cf5287cf918d6b7dbb66f7ec",
+        "gitBlob": "b0bc7b40936413fdb04fca121574499e8b2b3619",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "managed-check.stderr.txt",
+        "bytes": 0,
+        "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "docs-check",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "/home/runner/work/_temp/iam-host-archive-45981324003-1/archive/controller/node_modules/corepack/dist/corepack.js",
+        "pnpm",
+        "docs:check"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:22:00.099Z",
+      "completedAt": "2026-11-27T10:22:04.266Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "docs-check.stdout.txt",
+        "bytes": 104,
+        "sha256": "sha256:19b233f58bb65e920bbb676a1da7f6c1b5cd2db0372d426ff7e890b624e21e7f",
+        "gitBlob": "192c9961d33124eec80483a953cb1cb4c0672c9e",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "docs-check.stderr.txt",
+        "bytes": 91,
+        "sha256": "sha256:63e1710a06ebab7ed2e5d2d851adc5ff1a1dae3a6125123dbf545f09fd391de0",
+        "gitBlob": "126045896a95695b36b646a6bc0b17eca9390c87",
+        "mode": "100644"
+      }
+    },
+    {
+      "label": "docs-protocol-check",
+      "argv": [
+        "/opt/hostedtoolcache/node/26.12.1/x64/bin/node",
+        "/home/runner/work/_temp/iam-host-archive-45981324003-1/archive/controller/node_modules/corepack/dist/corepack.js",
+        "pnpm",
+        "docs:protocol:check"
+      ],
+      "cwd": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/candidate",
+      "startedAt": "2026-11-27T10:22:04.266Z",
+      "completedAt": "2026-11-27T10:23:01.259Z",
+      "exitCode": 0,
+      "signal": null,
+      "executionError": null,
+      "stdout": {
+        "path": "docs-protocol-check.stdout.txt",
+        "bytes": 5214,
+        "sha256": "sha256:51d8a38bb53fbc892152d340cb93f7e27f5ed89be786f746209088767ea6003b",
+        "gitBlob": "94c98c00feb67a55a6a7465627d8adae69fa0e54",
+        "mode": "100644"
+      },
+      "stderr": {
+        "path": "docs-protocol-check.stderr.txt",
+        "bytes": 1075,
+        "sha256": "sha256:9d24c8a0888939a46219ba6843ef0b29e836d1535fe2e042d64e1e4fde581f3f",
+        "gitBlob": "ae2133753d4d0cd4388c35ca10ea1fa74ec022d2",
+        "mode": "100644"
+      }
+    }
+  ],
+  "archivedPhysicalInput": {
+    "evidenceClass": "verified-archived-physical-target",
+    "qualificationAuthority": false,
+    "replayable": false,
+    "sourceRoot": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/consumer",
+    "sourceConsumer": {
+      "birthtimeNs": "1795770934242720746",
+      "device": "64512",
+      "inode": "4006689",
+      "repository": {
+        "id": "1310245598",
+        "nameWithOwner": "agent-teams-ai/agent-teams-orchestrator",
+        "provider": "github"
+      },
+      "root": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/consumer"
+    },
+    "materializedInputRoot": "/home/runner/work/agent-teams-orchestrator/agent-teams-orchestrator/materialized",
+    "archiveSha256": "sha256:c0007a199de47148c1c3ecf4f333a6ab484aa9a0188cc89e9d88c451f2d37704",
+    "physicalRun": {
+      "repository": "agent-teams-ai/agent-teams-orchestrator",
+      "runId": "45972172068",
+      "runAttempt": "1",
+      "headSha": "c29a5b3d4dbe4beabfc0e5acc1d026eeedc54a14",
+      "workflowPath": ".github/workflows/orchestrator-managed-lifecycle.yml"
+    },
+    "artifact": {
+      "id": "15188626286",
+      "bytes": 1814712,
+      "sha256": "sha256:c0007a199de47148c1c3ecf4f333a6ab484aa9a0188cc89e9d88c451f2d37704"
+    },
+    "originalJob": {
+      "id": "140414983610",
+      "conclusion": "failure",
+      "physicalStepConclusion": "success",
+      "failedHostCheck": "docs-protocol-check: CSpell postimages"
+    },
+    "limitations": [
+      "No archived proof is invoked or rebound to this checkout.",
+      "The original physical run is distinct from this Host execution.",
+      "External proof copy permissions describe downloaded archive files."
+    ]
+  },
+  "hostRun": {
+    "repository": "agent-teams-ai/agent-teams-orchestrator",
+    "runId": "45981324003",
+    "runAttempt": "1",
+    "headSha": "39974166661c06c824994ad4abf219a36825510e"
+  },
+  "managedCheck": {
+    "schemaVersion": 1,
+    "command": "consumer.check",
+    "outcome": "current",
+    "issues": [],
+    "plan": {
+      "schemaVersion": 1,
+      "cohortId": "docs-2026-11-27-orchestrator-v3",
+      "repository": {
+        "provider": "github",
+        "id": "1310245598",
+        "nameWithOwner": "agent-teams-ai/agent-teams-orchestrator"
+      },
+      "planDigest": "sha256:eaeb7b1555070d569544b4a849668753253082a4316dfcec097ee002e5d104b3",
+      "outcome": "current",
+      "assets": [
+        {
+          "id": "skill",
+          "path": ".agents/skills/docs-authoring/SKILL.md",
+          "ownership": "full-bytes",
+          "state": "exact-current",
+          "currentDigest": "sha256:a86d8c9b990124f11b50b1c6703e1aeb5e3b981d51f7e8f5c163c4f5b987d7c5",
+          "expectedDigest": "sha256:a86d8c9b990124f11b50b1c6703e1aeb5e3b981d51f7e8f5c163c4f5b987d7c5",
+          "action": "none"
+        },
+        {
+          "id": "caller-workflow",
+          "path": ".github/workflows/docs-protocol.yml",
+          "ownership": "full-bytes",
+          "state": "exact-current",
+          "currentDigest": "sha256:2ce33590e2d5d36a14bcdf3f16e6ca5422c4b3ebe300f3ac4d94343cc022e1ac",
+          "expectedDigest": "sha256:2ce33590e2d5d36a14bcdf3f16e6ca5422c4b3ebe300f3ac4d94343cc022e1ac",
+          "action": "none"
+        },
+        {
+          "id": "agents-route",
+          "path": "AGENTS.md",
+          "ownership": "managed-block",
+          "state": "exact-current",
+          "currentDigest": "sha256:906d16149ab98284a1da90127e7800015a629b97c860666d1c39a945244a42e5",
+          "expectedDigest": "sha256:906d16149ab98284a1da90127e7800015a629b97c860666d1c39a945244a42e5",
+          "action": "none"
+        },
+        {
+          "id": "managed-state",
+          "path": "architecture/foundation/docs-protocol-managed-state.json",
+          "ownership": "full-bytes",
+          "state": "exact-current",
+          "currentDigest": "sha256:557e97b03b4105b2b1367eabc5e4ac74aed57bc3cb32278b84266f1aad2aeff9",
+          "expectedDigest": "sha256:557e97b03b4105b2b1367eabc5e4ac74aed57bc3cb32278b84266f1aad2aeff9",
+          "action": "none"
+        },
+        {
+          "id": "package-manifest",
+          "path": "package.json",
+          "ownership": "partial-fields",
+          "state": "exact-current",
+          "currentDigest": "sha256:f5eb13762ff0689fef168ad010edcb2dffec722c04648edadc7cc7b3d56af33b",
+          "expectedDigest": "sha256:f5eb13762ff0689fef168ad010edcb2dffec722c04648edadc7cc7b3d56af33b",
+          "action": "none"
+        }
+      ],
+      "issues": []
+    }
+  },
+  "candidateCommitCreated": false,
+  "finalPublishedHeadQualified": false,
+  "node24CompatibilityQualified": false,
+  "productionIAMLifecycleQualified": false
+}

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "status": "unexecuted-prerequisite-gated-draft",
+  "files": [
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/cohort-v4-preparation/prepare-orchestrator-v4.mjs",
+      "bytes": 18538,
+      "sha256": "32013b8eb1c5ec036640b9553d433693681741f85397520f6dd2e5936e2e7573",
+      "gitBlob": "8b3118aaf6434862e81b06499984923922fb056b"
+    },
+    {
+      "path": "/workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/cohort-v4-preparation/input-contract.md",
+      "bytes": 5596,
+      "sha256": "0260603564aaf90e3600b56e7d2d6e6851b3ec8ec2b7a2aaef15446d2ecf9db6",
+      "gitBlob": "5c0ec3aa6f30c1bb5b8b71f08049db681ca8432a"
+    }
+  ],
+  "syntaxCheck": "Node26.11.1 --check PASS",
+  "generatorInvoked": false,
+  "syntheticEvidenceUsed": false,
+  "remoteMutations": false,
+  "pending": "Independent code review; actual PR467 merge M and terminal main CI captures do not exist yet.",
+  "additionalPreconditions": [
+    "Actual local Git tree and exact sole parent match the approved repair",
+    "Supplied observedAt is no earlier than actual merge/native-run updates/job completion"
+  ]
+}

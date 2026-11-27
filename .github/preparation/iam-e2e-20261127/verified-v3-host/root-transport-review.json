@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "scope": "artifact-and-log-byte-comparison",
+  "matchedHostFiles": 50,
+  "matchedFrames": 51,
+  "retainedPhysicalEvidenceFiles": 104,
+  "originalArchiveUnchanged": true,
+  "selectedHostLockMatched": true,
+  "qualificationAuthority": false,
+  "realHostRun": {
+    "repository": "agent-teams-ai/agent-teams-orchestrator",
+    "runId": "45981324003",
+    "runAttempt": "1",
+    "headSha": "39974166661c06c824994ad4abf219a36825510e"
+  }
+}

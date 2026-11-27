@@ -1,0 +1,1 @@
+{"schemaVersion":1,"command":"consumer.finalize","outcome":"blocked","issues":[{"code":"DOCS_CONSUMER_EXECUTION_FAILURE","severity":"error","subject":"finalize","message":"EACCES: permission denied, open '<local-path>'"}]}

@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "scope": "independent-retained-physical-evidence-review",
+  "qualificationAuthority": false,
+  "run": {
+    "id": 45972172068,
+    "attempt": 1,
+    "head": "c29a5b3d4dbe4beabfc0e5acc1d026eeedc54a14",
+    "job": 140414983610,
+    "conclusion": "failure"
+  },
+  "physicalStep": {
+    "number": 10,
+    "conclusion": "success",
+    "review": "passed"
+  },
+  "hostStep": {
+    "number": 11,
+    "conclusion": "failure",
+    "failingCommand": "docs-protocol-check",
+    "candidateExportComplete": false
+  },
+  "source": {
+    "revision": "ccc73331a2ca4f498a51fb6ee0f50b5d0cecff67",
+    "tree": "a24da96493edd1c6fe3bd5868d4cf636007bcf04",
+    "files": 587,
+    "inventoryDigest": "sha256:7316f402787ca3c1315a70697081c7d86a1328d8604f6d5fb94307873513673a"
+  },
+  "target": {
+    "cohortId": "docs-2026-11-27-orchestrator-v3",
+    "recordDigest": "sha256:f61e98c96fcc7beab30b6956312dead50a363c403fd67cdce4d0f18e8e69424c",
+    "qualificationEventDigest": "sha256:4451ea715ef68048c01e182fe4755acc4639d7d2e106e536e2b240834e7084c0",
+    "tree": "7bcda091be317b3b3594918bd8dd277308b9c40e",
+    "commitB": "118a6ce46a3558f8f1abefac3de64d1dfa4ce39c",
+    "assetCount": 7
+  },
+  "transport": {
+    "verifiedFiles": 46,
+    "incomplete": 0,
+    "errors": 0,
+    "allMatchArtifactBytes": true
+  },
+  "physicalChecks": [
+    "all eleven proof/inventory manifest hashes",
+    "all seven asset hashes and Git blobs",
+    "all 587 source files and exact Git modes",
+    "all preparation domains and image hashes",
+    "three distinct fresh preparations",
+    "authentic selected lock bound in each prepare argv",
+    "public failed EACCES finalize and fresh resume already-satisfied",
+    "A original restoration receipts and source inventory",
+    "B canonical commit and reconstructed seven-change target tree",
+    "B current-selection inverse plan and committed restoration",
+    "C applied finalization and exact exported bytes",
+    "all five idle barriers",
+    "all actual raw outputs equal summary fields",
+    "public plan and receipt domain hashes"
+  ],
+  "limitations": [
+    "overall hosted job failed on Host check",
+    "no successful Host result or complete candidate export",
+    "startup authorityRevision is not a claim that every command observed the same live Central revision",
+    "physical archives are inert evidence and must not be replayed as live consumer authority",
+    "no production main activation or CANARY completion inferred"
+  ],
+  "digests": {
+    "archive": "sha256:c0007a199de47148c1c3ecf4f333a6ab484aa9a0188cc89e9d88c451f2d37704",
+    "decodedJobLog": "sha256:18cc2d09fcb14f97d8858d7d3e672c187e524e9f54764a19c09453ef073f65cb",
+    "summary": "sha256:adedb402e9e45de8bab17b5fdc4b94622f21c083ae518974282fc585f1282c8e",
+    "proofManifest": "sha256:fc42ba11e4c919f86348061281ecab94dfcab73859ac06bd592b6a25029b18b7",
+    "assetManifest": "sha256:42571f799b4da1417079131b4f22a13693f8ba4ed49733e983772f649f256481",
+    "transportManifest": "sha256:36ca2ef85a852383831242f5b59c2091df62b2bb286dc279770b1ced900e8409"
+  }
+}

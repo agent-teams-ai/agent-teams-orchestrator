@@ -1,0 +1,186 @@
+--- /workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/cohort-v3-preparation/prepare-orchestrator-post-consumer-v3.mjs
++++ /workspace/scratch/e36de90adcfd/iam-e2e-resume-20261127/post-consumer-v4-preparation/prepare-orchestrator-post-consumer-v4.mjs
+@@ -12,15 +12,25 @@
+ 
+ const CENTRAL = { name: "agent-teams-ai/.github", id: 1316243981 };
+ const CONSUMER = { name: "agent-teams-ai/agent-teams-orchestrator", id: 1310245598 };
+-const TARGET = "docs-2026-11-27-orchestrator-v3";
+-const RECORD = "sha256:f61e98c96fcc7beab30b6956312dead50a363c403fd67cdce4d0f18e8e69424c";
+-const QUALIFIED = "sha256:4451ea715ef68048c01e182fe4755acc4639d7d2e106e536e2b240834e7084c0";
+-const CANDIDATE = "sha256:235e0dbecb12f8af83ea2524a3ebe706385c866637ca49ccbcbf07a540b53110";
+-const WORKFLOW_SHA = "997f24396598f93cf1b03bb26436a5ec7686ddef";
+-const WORKFLOW_BLOB = "714af12998ef140dd55a2ec3057f67775586cfd7";
++// Planned identifier only. Future record, QUALIFIED event and merged source SHA
++// must come from authenticated actual inputs; no prospective values are accepted.
++const TARGET = "docs-2026-11-27-orchestrator-v4";
++const RETAINED_TARGET = "docs-2026-11-27-orchestrator-v3";
++const RETAINED_RECORD = "sha256:f61e98c96fcc7beab30b6956312dead50a363c403fd67cdce4d0f18e8e69424c";
++const REPAIR = {
++  pullRequest: 467, pullRequestId: 5524611730,
++  base: "d167b2360524474240a43e3ff70e35eb94e109c7",
++  head: "611cd2a78d1f9104dbf46bab69c3ff0e30ac6d8f",
++  tree: "31561be538b5dc4b4aa02e53278047d79ff4dbaa",
++  headRef: "fix/docs-receipt-authorization-order-20261127",
++  files: {
++    "scripts/verify-docs-cohort-v2-receipt.mjs": "15090b6ce1ca77f3591f3337137d564b4c82dc87",
++    "scripts/verify-docs-consumer-gate.test.mjs": "1720cb51da26b4ddfc1f14b855f81cfdfceb8f90",
++  },
++};
++const EXPECTED_WORKFLOW_BLOB = "714af12998ef140dd55a2ec3057f67775586cfd7";
+ const WORKFLOW_PATH = ".github/workflows/docs-protocol-check.yml";
+ const CALLER_PATH = ".github/workflows/docs-protocol.yml";
+-const CALLER_DIGEST = "sha256:2ce33590e2d5d36a14bcdf3f16e6ca5422c4b3ebe300f3ac4d94343cc022e1ac";
+ const CONTEXT = "docs-protocol / docs-protocol-check";
+ const POLICY_PATH = "governance/docs-protocol-policy-v2.json";
+ const REGISTRY_PATH = "governance/docs-qualified-cohorts.json";
+@@ -43,7 +53,7 @@
+ const PINNED_VALIDATORS = {
+   "scripts/docs-cohort-policy.mjs": "7f56855e23cb6a1a2e956b6f770b9498dd210abe752e083aee46f31863497f5a",
+   "scripts/docs-managed-runtime-policy.ts": "87a6a3f8f1a1afd5154c1438c64d48f7cace2d8a23b2091398e0934ed7d50dd6",
+-  "scripts/verify-docs-cohort-v2-receipt.mjs": "a45a57b902091e6d3e275a6bf1d615e908ab494141c6ab521e4644d98a0ed1cc",
++  "scripts/verify-docs-cohort-v2-receipt.mjs": "e64a63e02801a8259892eca3424149885b8a4779dc6ad3ea44d7fbd8e08748fd",
+   "governance/docs-qualified-cohorts.schema.json": "de8fa946051ecc45fba5305dfddc41f03bf7584eb9806f71686c396b652080f1",
+   "governance/docs-protocol-policy-v2.schema.json": "126ca5860db1b2e8d43b4d8582ba40f60d6499b96ce38c2d1f350ee9110c46ef",
+ };
+@@ -173,7 +183,7 @@
+   const inputPath = options["--input"], output = options["--output"];
+   const inputBytes = await bytesAt(inputPath, 256 * 1024);
+   const input = JSON.parse(sourceText(inputBytes));
+-  keys(input, ["schemaVersion", "observedAt", "proofRoot", "validatorRoot", "central", "consumer"], "Input manifest fields differ.");
++  keys(input, ["schemaVersion", "observedAt", "proofRoot", "validatorRoot", "successor", "central", "consumer"], "Input manifest fields differ.");
+   assert.equal(input.schemaVersion, 1);
+   const observedMs = timestamp(input.observedAt, "Observation timestamp");
+   assert.ok(observedMs <= Date.now(), "A future observation is refused.");
+@@ -214,6 +224,68 @@
+   for (const path of centralPaths) {
+     const bytes = await readDescriptor(c.files[path], "central.file:" + path);
+     bindFile(centralTree, path, bytes); base[path] = { bytes, value: JSON.parse(sourceText(bytes)) };
++  }
++  // A source commit merely existing on a prep branch is insufficient. Bind M to
++  // actual merged PR467, its exact repaired tree, successful native main runs,
++  // and ancestry of the current protected Central snapshot.
++  const s = input.successor;
++  keys(s, ["repairPull", "mergeCommit", "mergeTree", "compareRepair", "compareCurrent", "workflow", "receipt", "nativeNode26", "nativeNode24"], "Successor source inputs");
++  const repairPull = await readJson(s.repairPull, "successor.repairPull");
++  const mergeCommit = await readJson(s.mergeCommit, "successor.mergeCommit");
++  const mergeTree = treeEntries(await readJson(s.mergeTree, "successor.mergeTree"), mergeCommit);
++  const compareRepair = await readJson(s.compareRepair, "successor.compareRepair");
++  const compareCurrent = await readJson(s.compareCurrent, "successor.compareCurrent");
++  assert.equal(repairPull.number, REPAIR.pullRequest); assert.equal(repairPull.id, REPAIR.pullRequestId);
++  assert.equal(repairPull.state, "closed"); assert.equal(repairPull.merged, true); assert.equal(repairPull.draft, false);
++  assert.equal(repairPull.user.id, 13103045); assert.equal(repairPull.user.login, "777genius");
++  for (const side of ["base", "head"]) {
++    assert.equal(repairPull[side].repo.id, CENTRAL.id); assert.equal(repairPull[side].repo.full_name, CENTRAL.name);
++  }
++  assert.equal(repairPull.base.ref, "main"); assert.equal(repairPull.base.sha, REPAIR.base);
++  assert.equal(repairPull.head.ref, REPAIR.headRef); assert.equal(repairPull.head.sha, REPAIR.head);
++  assert.equal(repairPull.changed_files, 2); assert.equal(repairPull.commits, 1);
++  const WORKFLOW_SHA = mergeCommit.sha;
++  immutableSha(WORKFLOW_SHA, "Actual merged repair source M is missing.");
++  assert.equal(repairPull.merge_commit_sha, WORKFLOW_SHA);
++  assert.equal(mergeCommit.tree.sha, REPAIR.tree);
++  assert.deepEqual(mergeCommit.parents.map((parent) => parent.sha), [REPAIR.base], "Require the ordinary one-parent squash merge.");
++  assert.equal(mergeCommit.author.name, "Илия"); assert.equal(mergeCommit.author.email, "iliyazelenkog@gmail.com");
++  assert.equal(mergeCommit.committer.name, "GitHub"); assert.equal(mergeCommit.committer.email, "noreply@github.com");
++  assert.equal(mergeCommit.verification?.verified, true); assert.equal(mergeCommit.verification?.reason, "valid");
++  assert.ok(timestamp(repairPull.merged_at, "Repair merged_at") <= observedMs);
++  assert.ok(timestamp(mergeCommit.committer.date, "Merged repair commit time") <= observedMs);
++  assert.equal(compareRepair.base_commit.sha, REPAIR.base); assert.equal(compareRepair.merge_base_commit.sha, REPAIR.base);
++  assert.equal(compareRepair.status, "ahead"); assert.equal(compareRepair.behind_by, 0);
++  assert.equal(compareRepair.ahead_by, 1); assert.equal(compareRepair.total_commits, 1);
++  assert.deepEqual(compareRepair.commits.map((commit) => commit.sha), [WORKFLOW_SHA]);
++  assert.equal(compareRepair.html_url, "https://github.com/" + CENTRAL.name + "/compare/" + REPAIR.base + "..." + WORKFLOW_SHA);
++  assert.deepEqual(compareRepair.files.map((file) => file.filename).sort(), Object.keys(REPAIR.files).sort());
++  for (const file of compareRepair.files) {
++    assert.equal(file.status, "modified"); assert.equal(file.previous_filename, undefined);
++    assert.equal(file.sha, REPAIR.files[file.filename]);
++    const entry = mergeTree.get(file.filename);
++    assert.equal(entry?.type, "blob"); assert.equal(entry?.mode, "100644"); assert.equal(entry?.sha, file.sha);
++  }
++  assert.equal(compareCurrent.base_commit.sha, WORKFLOW_SHA); assert.equal(compareCurrent.merge_base_commit.sha, WORKFLOW_SHA);
++  assert.ok(["ahead", "identical"].includes(compareCurrent.status)); assert.equal(compareCurrent.behind_by, 0);
++  assert.equal(compareCurrent.html_url, "https://github.com/" + CENTRAL.name + "/compare/" + WORKFLOW_SHA + "..." + centralCommit.sha);
++  if (compareCurrent.status === "identical") assert.equal(centralCommit.sha, WORKFLOW_SHA);
++  else assert.equal(compareCurrent.commits.at(-1).sha, centralCommit.sha);
++  const workflowBytes = await readDescriptor(s.workflow, "successor.workflow");
++  const repairedReceiptBytes = await readDescriptor(s.receipt, "successor.receipt");
++  bindFile(mergeTree, WORKFLOW_PATH, workflowBytes);
++  bindFile(mergeTree, "scripts/verify-docs-cohort-v2-receipt.mjs", repairedReceiptBytes);
++  const WORKFLOW_BLOB = blob(workflowBytes);
++  assert.equal(WORKFLOW_BLOB, EXPECTED_WORKFLOW_BLOB, "Only the reviewed unchanged four-role workflow body is supported.");
++  assert.equal(blob(repairedReceiptBytes), REPAIR.files["scripts/verify-docs-cohort-v2-receipt.mjs"]);
++  assert.equal(sha256(repairedReceiptBytes), "sha256:" + PINNED_VALIDATORS["scripts/verify-docs-cohort-v2-receipt.mjs"]);
++  for (const [key, path] of [["nativeNode26", ".github/workflows/ci.yml"], ["nativeNode24", ".github/workflows/node24-compatibility.yml"]]) {
++    const native = await readJson(s[key], "successor." + key);
++    positive(native.id); positive(native.run_attempt);
++    assert.equal(native.repository.id, CENTRAL.id); assert.equal(native.repository.full_name, CENTRAL.name);
++    assert.equal(native.head_sha, WORKFLOW_SHA); assert.equal(native.head_branch, "main"); assert.equal(native.event, "push");
++    assert.equal(native.path, path); assert.equal(native.status, "completed"); assert.equal(native.conclusion, "success");
++    assert.ok(timestamp(native.updated_at, "Native M run update") <= observedMs);
+   }
+   // Execute only these already-reviewed local validator bytes; bind them to actual base tree.
+   for (const [path, digest] of Object.entries(PINNED_VALIDATORS)) {
+@@ -247,13 +319,28 @@
+   assert.equal(prior.desired_cohort_id, TARGET); assert.equal(prior.desired_cohort_generation, 3);
+   assert.equal(prior.admission_status, "admitted"); assert.equal(prior.qualification.status, "qualified");
+   assert.deepEqual(prior.qualification.evidence_paths, REQUIRED_PATHS, "Preserve all six exact existing evidence paths.");
+-  const record = registry.cohorts.find((item) => item.cohort_id === TARGET);
+-  assert.ok(record); assert.equal(record.record_digest, RECORD); assert.equal(cohort.cohortRecordDigest(record), RECORD);
+-  assert.equal(record.candidate_digest, CANDIDATE); assert.equal(record.cohort_generation, 3);
+-  const qualified = registry.events.find((item) => item.cohort_id === TARGET && item.state === "QUALIFIED");
+-  assert.equal(qualified?.sequence, 198); assert.equal(qualified?.event_digest, QUALIFIED);
++  const records = registry.cohorts.filter((item) => item.cohort_id === TARGET);
++  assert.equal(records.length, 1, "A genuine merged v4 record is required.");
++  const record = records[0], RECORD = record.record_digest, CANDIDATE = record.candidate_digest;
++  assert.equal(cohort.cohortRecordDigest(record), RECORD); assert.equal(record.cohort_generation, 3);
++  const retainedRecords = registry.cohorts.filter((item) => item.cohort_id === RETAINED_TARGET);
++  assert.equal(retainedRecords.length, 1);
++  const retainedRecord = retainedRecords[0];
++  assert.equal(retainedRecord.record_digest, RETAINED_RECORD); assert.equal(cohort.cohortRecordDigest(retainedRecord), RETAINED_RECORD);
++  assert.notEqual(RECORD, retainedRecord.record_digest); assert.notEqual(CANDIDATE, retainedRecord.candidate_digest);
++  const targetEvents = registry.events.filter((item) => item.cohort_id === TARGET);
++  assert.deepEqual(targetEvents.map((item) => item.state), ["PUBLISHED_UNQUALIFIED", "VERIFIED", "QUALIFIED"], "Require a fresh real A-to-B qualification before consumer observation.");
++  const qualified = targetEvents.at(-1), QUALIFIED = qualified.event_digest;
++  positive(qualified.sequence, "Actual QUALIFIED sequence");
+   assert.equal(cohort.cohortEventDigest(qualified), QUALIFIED);
+-  assert.equal(registry.events.filter((item) => item.cohort_id === TARGET).at(-1).state, "QUALIFIED");
++  const CALLER_DIGEST = record.assets.caller_workflow.rendered_digest;
++  const expectedRecord = structuredClone(retainedRecord);
++  expectedRecord.cohort_id = TARGET;
++  expectedRecord.reusable_workflow.revision = WORKFLOW_SHA;
++  expectedRecord.assets.caller_workflow.rendered_digest = CALLER_DIGEST;
++  expectedRecord.evidence_references = retainedRecord.evidence_references.map((ref) => ref.startsWith("https://") ? ref : ref.replace("/" + RETAINED_TARGET + "/", "/" + TARGET + "/"));
++  expectedRecord.candidate_digest = CANDIDATE; expectedRecord.record_digest = RECORD;
++  assert.deepEqual(record, expectedRecord, "V4 must retain all immutable v3 package, publication, policy, closure and rollout boundaries.");
+   assert.deepEqual(record.canary_repositories, [{ repository_id: CONSUMER.id, repository: CONSUMER.name }]);
+   assert.deepEqual(record.packages.map((item) => item.name), COORDINATE_NAMES);
+   assert.deepEqual(record.packages.map((item) => item.version), Object.values(COORDINATES));
+@@ -408,6 +495,7 @@
+     check_run_id: check.id, check_run_url: check.html_url, workflow_run_id: run.id, workflow_id: run.workflow_id,
+     caller_workflow_path: CALLER_PATH, caller_workflow_digest: CALLER_DIGEST, observed_at: input.observedAt,
+   };
++  keys(observed, ["default_branch", "revision", "required_context", "integration_id", "conclusion", "check_run_id", "check_run_url", "workflow_run_id", "workflow_id", "caller_workflow_path", "caller_workflow_digest", "observed_at"], "Closed twelve-field observed proof");
+   const payload = [];
+   let event;
+   if (mode === "observed") {
+@@ -475,6 +563,7 @@
+       }],
+       previous_event_digest: registry.events.at(-1).event_digest,
+     };
++    keys(event.canary_evidence[0], ["repository_id", "repository", "merge_revision", "observed_cohort_id", "observed_record_digest", "observed_event_digest", "required_context", "integration_id", "conclusion", "check_run_id", "check_run_url", "workflow_run_id", "workflow_id", "caller_workflow_path", "caller_workflow_digest"], "Closed fifteen-field CANARY proof");
+     event.event_digest = cohort.cohortEventDigest(event); nextRegistry.events.push(event);
+     cohort.validateDocsQualifiedCohorts(nextRegistry, registrySchema, { asOf: input.observedAt });
+     cohort.assertDocsCohortAppendOnly(registry, nextRegistry);
+@@ -486,10 +575,11 @@
+     centralBase: centralCommit.sha, centralTree: centralCommit.tree.sha, consumerMain: revision,
+     runId: run.id, runAttempt: run.run_attempt, semanticCheckRunId: check.id,
+     recordDigest: RECORD, qualificationEventDigest: QUALIFIED, ...(event ? { appendedEvent: event } : {}),
++    repairedWorkflowSource: { revision: WORKFLOW_SHA, blob: WORKFLOW_BLOB, pullRequest: REPAIR.pullRequest, mergedRepairTree: mergeCommit.tree.sha },
+     inputManifest: { path: inputPath, sha256: sha256(inputBytes), bytes: inputBytes.length },
+     inputs: retained, validators: PINNED_VALIDATORS, artifacts: artifactEvidence,
+     files: payload.map(({ path, content }) => { const bytes = Buffer.from(content); return { path, mode: "100644", bytes: bytes.length, sha256: sha256(bytes), gitBlob: blob(bytes) }; }),
+-    boundaries: { remoteMutations: false, liveNetworkRevalidationRequired: true, executionEnvelopeArtifactProvided: false, centralMergeClaimed: false },
++    boundaries: { remoteMutations: false, liveNetworkRevalidationRequired: true, executionEnvelopeArtifactProvided: false, centralMergeClaimed: false, globalRecoveryCompleted: false, globalRecoveryAuthorityChanged: false, physicalLifecycleQualifiedByThisBuilder: false },
+   };
+   // No output exists before every prerequisite, artifact binding and native validation passed.
+   await mkdir(output, { recursive: false, mode: 0o700 });
