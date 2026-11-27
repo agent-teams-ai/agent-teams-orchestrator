@@ -56,6 +56,51 @@ built-in, first-party private, community, and custom extensions?
 - CLI and UI workflows that hide raw OCI, ORAS, and Cosign mechanics;
 - conformance requirements for publishing the first stable public SPI.
 
+## Required product lifecycle target, 2026-11-27
+
+The owner requires the complete journey: verify/install, activate and obtain a
+useful authorized result, update while admitted old work remains coherent,
+disable/remove, then restart and reconcile without resurrection or loss of
+owner data. A qualified restart fallback retains its explicit scope; it does
+not complete the required live old/new-generation journey.
+
+The [Orchestrator handoff in PR #111](https://github.com/agent-teams-ai/agent-teams-orchestrator/blob/c01efb6813f0c048497caeefbb8235cead480cb2/docs/open-decisions/OD-043-extension-lifecycle-catalog-and-hot-update.md#first-orchestrator-adoption-journey)
+reserves the read-only Agent Context inspection candidate and product-owned
+integration cards. It remains a proposal at that source, not an
+accepted public SPI or implemented contribution. Refresh the current handoff
+before implementation. [EF #70](https://github.com/agent-teams-ai/extension-foundation/pull/70)
+and [LMU delivery plan](https://github.com/agent-teams-ai/live-module-updates/blob/77a3ecc4ace12509961bd3ff43e80703b0303c40/docs/plans/first-operation-implementation-plan.md)
+own their shared mechanisms and qualification; product adapters join the actual
+verified artifact and operation through the feature-owned invocation port.
+
+Apply the [consolidated research](https://github.com/agent-teams-ai/engineering-research/blob/e2a5f6c47e008f93094dc88ed39ea9618722f28d/docs/lessons/preimplementation-decisions.md)
+within this decision's existing profile selection:
+
+- Observe useful successor work through the actual product port while held old
+  work remains coherent. Retain the original attempt/receipt across lost
+  acknowledgement, restart and uncertain publication; reject stale effects at
+  the real receiver and prevent a late disposer from removing successor resources.
+- State owners record the compatibility horizon for retained readers/writers,
+  pending effects, cleanup and replay. Returning to old code uses fresh authority
+  against current state and grants; unknown effects remain reconciliation work.
+- Select finite pin/drain, explicit safe-boundary handover, exclusive-resource
+  transfer or a recyclable realm per capability. Streams and callbacks require
+  their actual consumption/finalization lifetime. A separately owned executor
+  handles self-update; the caller cannot wait for its own retirement.
+  Bound cumulative evaluations and retained artifacts; logical
+  retirement alone does not unload Node ESM.
+- For selective replacement, LMU consumes GM's old/new graph and binding facts
+  plus resource ownership and compatibility. Include all affected consumers
+  outside the selected root; retain unchanged shared owners while retained
+  consumers still need them, and preserve unaffected siblings.
+- The chosen trust profile names actual containment and current capability
+  enforcement. A signature, successful import or Worker is not hostile-code
+  isolation. Preserve the existing independent-integration and public SPI gates.
+
+Use existing GM Resources/Observation and the EF/LMU owner contracts. These
+acceptance details introduce no second loader, scheduler, lifecycle engine or
+automatic state migration; the unresolved protocol choices below remain open.
+
 ## Research and next qualification target
 
 The [reviewed research reference](https://github.com/agent-teams-ai/extension-foundation/blob/10deea1a11748df1fcbfc2766033c462fce3acd0/docs/research/plugin-system-research-reference.md)
